@@ -1,5 +1,9 @@
-
 ## set prefix for installation
+#   will install in:
+#   ${prefix}/bin
+#   ${prefix}/share/doc/xschem
+#   ${prefix}/share/xschem
+
 #prefix=/usr/local
 prefix=$(HOME)
 library_prefix=$(HOME)/xschem_library

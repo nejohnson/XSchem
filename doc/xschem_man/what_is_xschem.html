@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>XSCHEM TUTORIAL</title>
+<link rel="stylesheet" type="text/css" href="xschem_man.css" />
+<style type="text/css">
+/* Local styling goes here */
+li{padding-top:2px;}
+p{line-height:1.4;padding: 20px  20px 0;text-align: justify;}
+</style>
+
+</head>
+<body>
+
+<!-- start of slide -->
+<div class="content">   
+<!-- navigation buttons -->
+<a href="xschem_man.html" class="prev">PREV</a>
+<a href="xschem_man.html" class="home">UP</a>
+<a href="compiling_xschem.html" class="next">NEXT</a>
+ <!-- slide title -->
+ <h1> WHAT IS XSCHEM </h1><br>
+
+ <p>
+  Electronic systems today tend to be generally very complex and a lot of work has to be done from 
+  circuit conception to the validation of the final product. One of the milestones of this process 
+  is the creation of the circuit schematic of the electronic system. 
+ </p><p>
+  The circuit diagram has to be drawn using an interactive computer program called 
+  <em>schematic editor </em>, this is usually a very first step in the design cycle of the product.
+   Once the schematic has been drawn on the computer, the circuit connectivity and device list 
+  <em>(netlist)</em> can be generated and sent to a circuit simulator (spice, hspice, eldo , 
+  just to mention some) for performing circuit simulation.
+ </p><p> 
+  So, as you probably guessed, <b>XSCHEM</b> is a schematic capture program that allows to interactively
+  enter an electronic circuit using a graphical and easy to use interface. When the schematic 
+  has been created a circuit netlist can be generated for simulation. Currently XSCHEM supports three 
+  netlist formats:
+ </p>
+ <ul>
+   <li> SPICE netlist
+   <li> VHDL netlist
+   <li> VERILOG netlist
+ </ul><p>
+  XSCHEM is NOT a tool for creating printed circuit boards (PCB) and it is not targeted (although useable for that task) 
+  to board level electronic system design.
+  XSCHEM is primarily designed for Integrated Circuit (IC) design and to generate netlists for digital, 
+  analog or mixed mode simulations.<br>
+  It is also worth to point out that XSCHEM has nothing to do with GSCHEM, the name similarity is just coincidence.
+  <a href='http://wiki.geda-project.org/geda:gaf'>GSCHEM</a> is another powerful Schematic 
+  Capture program, primarily focused on board level (PCB) system design. See 
+  <a href='http://geda-project.org/'>gEDA</a> for more information.
+ <!-- end of slide -->
+ <div class="filler"></div>
+</div>
+
+<!-- frame footer -->
+<iframe seamless src="xschem_footer.html"  class="footer_iframe" >
+</body>
+</html>
+

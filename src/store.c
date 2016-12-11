@@ -1,0 +1,212 @@
+/* File: store.c
+ * 
+ * This file is part of XSCHEM,
+ * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
+ * simulation.
+ * Copyright (C) 1998-2016 Stefan Frederik Schippers
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+#include "xschem.h"
+
+
+void check_wire_storage(void)
+{
+ if(lastwire >= max_wires)
+ {
+  max_wires=(1+lastwire / CADMAXWIRES)*CADMAXWIRES;
+  my_realloc(&wire, sizeof(Wire)*max_wires);
+ }
+}
+
+void check_selected_storage(void)
+{
+ if(lastselected >= max_selected)
+ {
+  max_selected=(1+lastselected / MAXGROUP) * MAXGROUP;
+  my_realloc(&selectedgroup, sizeof(Selected)*max_selected);
+ }
+}
+
+void check_text_storage(void)
+{
+ if(lasttext >= max_texts)
+ {
+  max_texts=(1 + lasttext / CADMAXTEXT) * CADMAXTEXT;
+  my_realloc(&textelement, sizeof(Text)*max_texts);
+ }
+}
+
+void check_symbol_storage(void)
+{
+ int i;
+ if(lastinstdef >= max_symbols)
+ {
+  if(debug_var>=1) fprintf(errfp, "check_symbol_storage(): more than max_symbols, %s\n",
+	schematic[currentsch] );
+  max_symbols=(1 + lastinstdef / ELEMDEF) * ELEMDEF;
+  my_realloc(&instdef, sizeof(Instdef)*max_symbols);
+  for(i=lastinstdef;i<max_symbols;i++) {
+    instdef[i].lineptr=my_calloc(cadlayers, sizeof(Line *));
+    if(instdef[i].lineptr==NULL){
+       fprintf(errfp, "check_symbol_storage(): calloc error\n");Tcl_Eval(interp, "exit");
+    }
+  
+    instdef[i].boxptr=my_calloc(cadlayers, sizeof(Line *));
+    if(instdef[i].boxptr==NULL){
+      fprintf(errfp, "check_symbol_storage(): calloc error\n");Tcl_Eval(interp, "exit");
+    }
+   
+    instdef[i].lines=my_calloc(cadlayers, sizeof(int));
+    if(instdef[i].lines==NULL){
+      fprintf(errfp, "check_symbol_storage(): calloc error\n");Tcl_Eval(interp, "exit");
+    }
+   
+    instdef[i].rects=my_calloc(cadlayers, sizeof(int));
+    if(instdef[i].rects==NULL){
+      fprintf(errfp, "check_symbol_storage(): calloc error\n");Tcl_Eval(interp, "exit");
+    }
+  }
+ }
+
+}
+
+void check_inst_storage(void)
+{
+ if(lastinst >= max_instances)
+ {
+  max_instances=(1 + lastinst / ELEMINST) * ELEMINST;
+  my_realloc(&inst_ptr, sizeof(Instance)*max_instances);
+ }
+}
+
+void check_box_storage(int c)
+{
+ if(lastrect[c] >= max_boxes[c])
+ {
+  max_boxes[c]=(1 + lastrect[c] / CADMAXOBJECTS) * CADMAXOBJECTS;
+  my_realloc(&rect[c], sizeof(Box)*max_boxes[c]);
+ }
+}
+
+void check_line_storage(int c)
+{
+ if(lastline[c] >= max_lines[c])
+ {
+  max_lines[c]=(1 + lastline[c] / CADMAXOBJECTS) * CADMAXOBJECTS;
+  my_realloc(&line[c], sizeof(Line)*max_lines[c]);
+ }
+}
+
+
+
+
+
+
+void storeobject(int pos, double x1,double y1,double x2,double y2,
+                 unsigned short type, unsigned int rectcolor,
+		 unsigned short sel, char *prop_ptr)
+{
+ int n, j;
+    if(type == LINE)
+    {
+     check_line_storage(rectcolor);
+
+     if(pos==-1) n=lastline[rectcolor];
+     else
+     {
+      for(j=lastline[rectcolor];j>pos;j--)
+      {
+       line[rectcolor][j]=line[rectcolor][j-1];
+      }
+      n=pos;
+     }
+     if(debug_var>=2) fprintf(errfp, "storeobject(): storing LINE %d\n",n);
+     line[rectcolor][n].x1=x1;
+     line[rectcolor][n].x2=x2;
+     line[rectcolor][n].y1=y1;
+     line[rectcolor][n].y2=y2;
+     line[rectcolor][n].prop_ptr=NULL;
+     my_strdup(&line[rectcolor][n].prop_ptr, prop_ptr);
+     line[rectcolor][n].sel=sel;
+     lastline[rectcolor]++;
+     modified=1;
+    }
+    if(type == RECT)
+    {
+     check_box_storage(rectcolor);
+     if(pos==-1) n=lastrect[rectcolor];
+     else
+     {
+      for(j=lastrect[rectcolor];j>pos;j--)
+      {
+       rect[rectcolor][j]=rect[rectcolor][j-1];
+      }
+      n=pos;
+     }
+     if(debug_var>=2) fprintf(errfp, "storeobject(): storing LINE %d\n",n);
+     rect[rectcolor][n].x1=x1;
+     rect[rectcolor][n].x2=x2;
+     rect[rectcolor][n].y1=y1;
+     rect[rectcolor][n].y2=y2;
+     rect[rectcolor][n].prop_ptr=NULL;
+     my_strdup(&rect[rectcolor][n].prop_ptr, prop_ptr);
+     rect[rectcolor][n].sel=sel;
+     lastrect[rectcolor]++;
+     modified=1;
+    }
+    if(type == WIRE)
+    {
+     check_wire_storage();
+     if(pos==-1) n=lastwire;
+     else
+     {
+      for(j=lastwire;j>pos;j--)
+      {
+       wire[j]=wire[j-1];
+      }
+      n=pos;
+     }
+     if(debug_var>=2) fprintf(errfp, "storeobject(): storing WIRE %d\n",n);
+     wire[n].x1=x1;
+     wire[n].y1=y1;
+     wire[n].x2=x2;
+     wire[n].y2=y2;
+     wire[n].prop_ptr=NULL;
+     wire[n].node=NULL;
+     wire[n].end1=0;
+     wire[n].end2=0;
+     my_strdup(&wire[n].prop_ptr, prop_ptr);
+     wire[n].sel=sel;
+     lastwire++;
+     modified=1;
+    }
+}
+
+void freenet_nocheck(int i)
+{
+ int j;
+  my_strdup(&wire[i].prop_ptr, NULL);
+  my_strdup(&wire[i].node, NULL);
+  for(j=i+1;j<lastwire;j++)
+  {
+    wire[j-1] = wire[j];
+    wire[j].prop_ptr=NULL;
+    wire[j].node=NULL;
+  } //end for j
+  lastwire--;
+}
+

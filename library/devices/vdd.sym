@@ -1,0 +1,9 @@
+G {type=label
+global=1
+format="*.alias @lab"
+template="name=l1 lab=VDD"} 
+V {} 
+L 4 0 -20 0 0 {} 
+L 4 -10 -20 10 -20 {} 
+B 5 -2.5 -2.5 2.5 2.5 {name=p dir=inout verilog_type=wire}
+T {@lab} -12.5 -35 0 0 0.2 0.2 {} 

@@ -1,0 +1,11 @@
+G {type=use
+template="
+    library ieee;
+    use ieee.std_logic_1164.all;
+    use ieee.std_logic_arith.all;
+    use ieee.std_logic_unsigned.all;
+
+"} 
+L 4 -0 -10 355 -10 {} 
+T {VHDL USE} 5 -25 0 0 0.3 0.3 {} 
+T {@prop_ptr} 45 5 0 0 0.2 0.2 {} 

@@ -1,0 +1,27 @@
+G {type=netlist_commands
+vhdl_ignore=true
+verilog_ignore=true
+template="name=s1 only_toplevel=false value=blabla"
+format="
+@value
+"} 
+V {} 
+S {} 
+L 3 20 30 60 30 {} 
+L 3 20 40 40 40 {} 
+L 3 20 50 60 50 {} 
+L 3 20 60 50 60 {} 
+L 3 20 70 50 70 {} 
+L 3 20 80 90 80 {} 
+L 3 20 90 40 90 {} 
+L 3 20 20 70 20 {} 
+L 3 20 10 40 10 {} 
+L 5 100 10 110 10 {} 
+L 5 110 10 110 110 {} 
+L 5 20 110 110 110 {} 
+L 5 20 100 20 110 {} 
+L 5 100 0 100 100 {} 
+L 5 10 100 100 100 {} 
+L 5 10 0 10 100 {} 
+L 5 10 0 100 0 {} 
+T {@name} 15 -25 0 0 0.3 0.3 {} 

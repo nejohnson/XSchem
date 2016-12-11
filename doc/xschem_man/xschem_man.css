@@ -1,0 +1,229 @@
+/* stefan 20121120 */
+
+*{
+ max-height: 999999px;  /* get rid of mobile browser font boosting */
+ margin-top:0;
+ margin-bottom:0;
+ border: none;
+ /*
+ padding-top: 0;
+ padding-bottom: 0;
+ */
+}
+
+html, body{ 
+  min-height: 100%;
+  height: 100%;
+  margin:0 auto 0;
+  font-size: 1.0em;
+}
+
+.indexdiv{
+  background-color: #cccccc;
+}
+
+tt{
+  color: #993333;
+}
+
+li{
+  margin-left: 20px;
+  margin-right: 60px;
+}
+
+img{
+  box-shadow: 10px 10px 9px #48b;
+  margin-top: 20px;
+  margin-bottom: 30px;
+  margin-left: 30px;
+}
+
+.content{ 
+  font-family: arial;
+  height: auto !important;
+  height: 100%;
+  min-height: 100%;
+  padding-bottom: 0;
+  padding-top: 0;
+  background:#ccddff;
+  margin-bottom: -35px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top:0;
+  overflow: hidden;
+}
+p{
+  text-align: justify;
+}
+
+.filler{ 
+  min-height: 35px;
+  height: 35px;
+  margin:0;
+  padding:0;
+  border:none;
+}
+
+
+.footer{
+  font-family: arial;
+  margin:0;
+  width: 100%;
+  border: none;
+  padding:0;
+  height: 35px;
+  background: #223388; /* background in footer as IE8 does not set background in iframe */
+  overflow: hidden;
+}
+
+.footer_iframe{
+  height: 35px;
+  margin:0;
+  margin-bottom:-5px;  /* to avoid vertical scrollbars on firefox*/
+  width: 100%;
+  border: none;
+  padding:0;
+  background: #223388;
+}
+
+.prev {
+  width: 12%;
+  background-color: #888888; 
+  box-shadow: 10px 10px 10px #48b;
+  text-align: center;
+  font-size: 120%;
+  position: fixed ; 
+  left: 0px;
+}
+.home {
+  width: 12%;
+  background-color: #888888; 
+  box-shadow: 10px 10px 10px #48b;
+  text-align: center;
+  font-size: 120%;
+  position: fixed ; 
+  left:14%
+}
+.next {
+  width: 12%;
+  background-color: #888888; 
+  box-shadow: 10px 10px 10px #48b;
+  text-align: center;
+  font-size: 120%;
+  position: fixed ; 
+  left:28%
+}
+
+a{
+  text-decoration:none;
+}
+
+a:hover{
+  background-color: red;
+  color: white;
+  text-shadow: 14px 14px 19px #48b
+}
+
+span{
+  white-space: nowrap;
+}
+
+ol{
+  font-size:180%;
+  margin-left: 20px;
+  margin-right: 20px;
+}  
+h1{
+  margin-top: 40px;
+  font-size:220%;
+  text-align:center;
+  text-shadow: 10px 10px 9px #48b;
+}
+h2{
+  margin-top: 30px;
+  margin-left: 30px;
+}
+
+h3{
+  margin-top: 30px;
+  margin-left: 30px;
+}
+
+.idx{ 
+  background-color:#ddeeff;
+  overflow:hidden;width:80%; 
+  margin-left: auto; 
+  margin-right:auto;
+  margin-bottom:30px;
+  border: groove 3px;
+  box-shadow: 14px 14px 9px #48b;
+}
+
+.important{
+  box-shadow: 10px 10px 9px #48b;
+  background:#eeee77;
+  border:groove;
+  margin: auto;
+  width: 80%;
+}
+
+.code{
+  box-shadow: 10px 10px 9px #48b;
+  background: white;
+  font-size:100%;
+  overflow: auto;
+  width: 90%;
+  margin: auto;
+  border: groove;
+}
+
+/* mobile rendering  */
+@media all and (-webkit-min-device-pixel-ratio: 2) and (min-resolution: 192dpi)  and (orientation : portrait){ 
+  html, body{
+    font-size: 1.5em;
+  }
+  h1{
+    margin-top: 60px;
+  }
+  img{
+    margin-left: 2%;
+    width: 96%;
+  }
+  ol{
+    margin-left:45px;
+  }
+}
+@media all and (-webkit-min-device-pixel-ratio: 2) and (min-resolution: 192dpi)  and (orientation : landscape){ 
+  html, body{
+    font-size: 1.3em;
+  }
+  h1{
+    margin-top: 44px;
+  }
+  img{
+    margin-left: 3%;
+    width: 94%;
+  }
+  ol{
+    margin-left:30px;
+  }
+  .prev {
+    width: 8%;
+    font-size: 100%;
+    position: fixed ;
+    left: 0px;
+  }
+  .home {
+    width: 8%;
+    font-size: 100%;
+    position: fixed ;
+    left:10%
+  }
+  .next {
+    width: 8%;
+    font-size: 100%;
+    position: fixed ;
+    left:20%
+  }
+}
+

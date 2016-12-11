@@ -1,0 +1,16 @@
+#!/bin/sh 
+# wrapper that executes the TCL-TK frontend to the (IN)UTILE program
+#				Stefan Schippers
+
+
+# removing existing TK_LIBRARY variable avoids some clobbering 
+# with existing old libraries seen on Solaris systems
+
+MY_PREFIX=${XSCHEM_HOME_DIR}
+UTILE3_PATH=${MY_PREFIX}/utile
+PATH=${UTILE3_PATH}:$PATH
+export MY_PREFIX
+export UTILE3_PATH
+export PATH
+export LD_LIBRARY_PATH
+utile.tcl $@

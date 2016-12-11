@@ -1,0 +1,19 @@
+G {type=delay
+verilog_format="assign #@delay @@d =  @@s ;"
+vhdl_format=" @@d <=  @@s after @delay ;"
+format="@name @pinlist 0"
+template="name=v1 delay=1"
+} 
+V {} 
+S {} 
+L 4 -30 0 30 0 {} 
+L 4 -10 -5 10 0 {type=subcircuit
+verilog_format="assign
+#@delay @@d =@@s ;"
+format="@name .connect @pinlist"
+template="name=x1 delay=1"
+} 
+L 4 -10 5 10 0 {} 
+B 5 27.5 -2.5 32.5 2.5 {name=d dir=out verilog_type=wire} 
+B 5 -32.5 -2.5 -27.5 2.5 {name=s dir=in verilog_type=wire} 
+T {@name @delay} -25 -10 0 0 0.1 0.1 {} 

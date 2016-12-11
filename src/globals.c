@@ -1,0 +1,200 @@
+/* File: globals.c
+ * 
+ * This file is part of XSCHEM,
+ * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
+ * simulation.
+ * Copyright (C) 1998-2016 Stefan Frederik Schippers
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+#include "xschem.h"
+
+int help=0; // help option set to global scope, printing help is deferred
+            // when configuration ~/.schem has been read 20140406
+int fullscreen=0;
+int semaphore=0;
+int a3page=-1;
+int has_x=1;
+int sym_txt=1;
+int rainbow_colors=0;
+FILE *errfp; 
+char *filename=NULL; // filename given on cmdline
+int quit=0;  // set from process_options (ex netlist from cmdline and quit)
+int debug_var=-10;  // will be set to 0 in xinit.c
+int do_print=0;
+int x_initialized=0;
+int no_readline=0;
+Colormap colormap;
+int lw=0; // line width
+double lw_double=0.0; // line width
+int fill=1; // filled rectangles
+int draw_pixmap=1; // use pixmap for double buffer
+int draw_grid=1;
+int current_type=SCHEMATIC;
+int change_lw=0; // allow change linewidth
+int incr_hilight=1;
+int auto_hilight=0;
+unsigned int color_index[256]; // layer color lookup table
+unsigned int rectcolor ; // this is the currently used layer
+unsigned int rubber = 0; // this signals that we are doing a net place,panning etc.
+			  // used to prevent nesting of some commands
+
+char *undo_dirname = NULL; // 20150327
+int cur_undo_ptr=0;
+int tail_undo_ptr=0;
+int head_undo_ptr=0;
+int max_undo=80;
+int draw_dots=0; //20150331
+int draw_single_layer=-1; // 20151117
+
+unsigned short enable_stretch=0;
+int cadlayers=0;
+int need_rebuild_selected_array=1;
+double xxtmp; // temporary for variable swaps;
+Window window; // window is the drawing area, topwindow is the root win
+Window parent_of_topwindow;
+int depth;
+unsigned char **pixdata;
+unsigned char pixdata_init[22][32]={	// fill patterns... indexed by laynumb.
+{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+{
+   0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00,
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+},
+{0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, 0xff,
+ 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff},
+{
+   0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x10, 0x00, 0x00,
+   0x00, 0x00, 0x00, 0x00, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x10, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+},
+{
+   0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00,
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02
+},
+{
+   0x11, 0x11, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x11, 0x11, 0x00, 0x00,
+   0x00, 0x00, 0x00, 0x00, 0x11, 0x11, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x11, 0x11, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+},
+{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+/*{
+   0x04, 0x41, 0x00, 0x00, 0x10, 0x04, 0x00, 0x00, 0x41, 0x10, 0x00, 0x00,
+   0x04, 0x41, 0x00, 0x00, 0x10, 0x04, 0x00, 0x00, 0x41, 0x10, 0x00, 0x00,
+   0x04, 0x41, 0x00, 0x00, 0x10, 0x04, 0x00, 0x00
+},*/
+{0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, 0xff,
+ 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff},
+{
+   0x11, 0x11, 0x00, 0x00, 0x44, 0x44, 0x00, 0x00, 0x11, 0x11, 0x00, 0x00,
+   0x44, 0x44, 0x00, 0x00, 0x11, 0x11, 0x00, 0x00, 0x44, 0x44, 0x00, 0x00,
+   0x11, 0x11, 0x00, 0x00, 0x44, 0x44, 0x00, 0x00
+},
+{
+   0x04, 0x04, 0x02, 0x02, 0x01, 0x01, 0x80, 0x80, 0x40, 0x40, 0x20, 0x20,
+   0x10, 0x10, 0x08, 0x08, 0x04, 0x04, 0x02, 0x02, 0x01, 0x01, 0x80, 0x80,
+   0x40, 0x40, 0x20, 0x20, 0x10, 0x10, 0x08, 0x08
+},
+{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+//{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+{  0x11, 0x11, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x22, 0x22, 0x00, 0x00,
+   0x00, 0x00, 0x00, 0x00, 0x44, 0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x88, 0x88, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+},
+{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+{0x55,0x55,0xaa,0xaa,0x55,0x55,0xaa,0xaa,0x55,0x55,0xaa,0xaa,0x55,0x55,0xaa,0xaa,
+ 0x55,0x55,0xaa,0xaa,0x55,0x55,0xaa,0xaa,0x55,0x55,0xaa,0xaa,0x55,0x55,0xaa,0xaa},
+{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
+{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+};
+
+char **color_array;
+
+Pixmap cad_icon_pixmap=0, *pixmap,save_pixmap;	// save_pixmap used to restore window
+int areax1,areay1,areax2,areay2,areaw,areah; // window corners / size
+GC *gcstipple,*gc, gctiled;
+Display *display;
+XRectangle xrect[1];
+double mousex,mousey; // mouse coord.
+double mousex_snap,mousey_snap; // mouse coord. snapped to grid
+//double xorigin=-CADWIDTH/2.0,yorigin=-CADHEIGHT/2.0;
+double cadsnap = CADSNAP;
+
+double zoom=CADINITIALZOOM;
+double mooz=1/CADINITIALZOOM;
+double xorigin=CADINITIALX;
+double yorigin=CADINITIALY;
+double *character[256];
+ int lastselected = 0;
+Selected *selectedgroup;     //  array of selected objects to be
+			     //  drawn while moving if < MAXGROUP selected
+XPoint *gridpoint;	     // pointer to array of gridpoints, used in draw()
+Tcl_Interp *interp;
+ int max_texts;
+ int max_wires;
+ int max_instances;
+ int max_symbols;
+ int max_selected;
+ int *max_boxes;
+ int *max_lines;     
+
+int do_netlist=0;  // set by process_options if user wants netllist from cmdline
+int netlist_count=0; // netlist counter incremented at any cell being netlisted
+int netlist_show=0;
+int flat_netlist=0;
+int netlist_type=-1;
+int prepared_netlist_structs=0;
+//
+// following data is relative to the current schematic
+//
+Wire *wire;
+ int lastwire = 0;
+Instance *inst_ptr; 	     // Pointer to element INSTANCE
+ int lastinst = 0;
+Instdef *instdef;	     // Pointer to element definition
+ int lastinstdef = 0;
+Box  **rect;
+ int *lastrect;
+Line **line;
+ int *lastline;
+Text *textelement;
+ int lasttext=0;
+char schematic[CADMAXHIER][256];
+int currentsch = 0;
+char *schprop=NULL;  // spice
+char *schvhdlprop=NULL; // vhdl and symbol property string
+char *schverilogprop=NULL;// verilog
+int show_erc=1;
+int hilight_nets=0;
+char *sch_prefix[CADMAXHIER];
+ int previous_instance[CADMAXHIER]; // to remember the instance we came from when going up the hier.
+int modified=0;
+int color_ps=-1;
+int only_probes=0; // 20110112
+int hilight_color=0;
+Zoom zoom_array[CADMAXHIER];
+int pending_fullzoom=0;
+int split_files=0; // split netlist files 20081202
+int hspice_netlist=0; // hspice veriants 20081209
+char *netlist_dir=NULL; // 20081210

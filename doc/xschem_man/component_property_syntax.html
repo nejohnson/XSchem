@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>COMPONENT PROPERTY SYNTAX</title>
+<link rel="stylesheet" type="text/css" href="xschem_man.css" />
+<style type="text/css">
+/* Local styling goes here */
+p{padding: 15px  30px 10px;}
+
+</style>
+
+</head>
+<body>
+
+<!-- start of slide -->
+<div class="content">   
+<!-- navigation buttons -->
+<a href="symbol_property_syntax.html" class="prev">PREV</a>
+<a href="xschem_man.html" class="home">UP</a>
+<a href="component_property_syntax.html" class="next">NEXT</a>
+ <!-- slide title -->
+ <h1>COMPONENT PROPERTY SYNTAX</h1><br>
+ <p>
+  Component property strings can be set in the usual way with the <tt>'q'</tt> on a selected
+  component instance or by menu <tt>Properties&nbsp;--&gt;&nbsp;Edit</tt>
+ </p> 
+ <img src="component_properties.png">
+ <p>
+  The dialog box allows to change the property string as well as the symbol reference. The property string
+  is essentially a list of <tt>attribute=value</tt> items. As with symbol properties if a <tt>value</tt>
+  has white space it should be double-quoted.
+  The following property definitions are identical:
+ </p>
+ <pre class=code>
+name=mchanged_name model=nmos w=20u l=3u m=10
+ </pre><br>
+ <pre class=code>
+name="mchanged_name" model="nmos" w="20u" l="3u" m="10"
+ </pre><br>
+ <p> 
+  Given the role of the <tt>"</tt> character, if quoted values are needed escapes must be used, like in 
+  the following example where the model name will be with quotes in netlist:
+ </p>
+ <pre class=code>
+name="mchanged_name" model="\"nmos\"" w="20u" l="3u" m="10"
+ </pre>
+ <p>or</p>
+ <pre class=code>
+name="mchanged_name" model=\"nmos\" w="20u" l="3u" m="10"
+ </pre>
+ <p>
+  the resulting SPICE netlist will be:<br>
+  <tt>mchanged_name DRAIN GATE SOURCE BODY "nmos" w=20u l=3u m=10</tt>
+ </p>
+ <p> 
+  There is no limit on the number of <tt>attribute=value</tt> items, each attribute should have a corresponding 
+  <tt>@attribute</tt> in the symbol definition format, but this is not a requirement. There are a number
+  of special attributes as we will see later.
+ </p>
+ <p class="important"> 
+  Important: a <tt>name=&lt;inst_name&gt;</tt> item is mandatory and must be placed before any other attributes 
+  in component property string. The <tt>name</tt> attribute is used by XSCHEM -among other things- for
+  fast indexing the component. If <tt>&lt;inst_name&gt;</tt> is already used in another component XSCHEM will
+  auto-rename it to a unique name preserving the first letter (which ts a device type indicator
+  for SPICE like netlists).
+ </p>
+ <h3>SPECIAL COMPONENT ATTRIBUTES</h3>
+  --todo--
+ <!-- end of slide -->
+ <div class="filler"></div>
+</div>
+
+<!-- frame footer -->
+<iframe seamless src="xschem_footer.html"  class="footer_iframe" >
+</body>
+</html>
+

@@ -1,0 +1,658 @@
+/* File: xschem.h
+ * 
+ * This file is part of XSCHEM,
+ * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
+ * simulation.
+ * Copyright (C) 1998-2016 Stefan Frederik Schippers
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+#ifndef CADGLOBALS
+#define CADGLOBALS
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <string.h>
+#include <ctype.h>
+
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <regex.h>
+
+#include <fcntl.h>
+#include <time.h>
+#include <signal.h>
+
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#include <X11/keysymdef.h>
+#include <X11/keysym.h>
+#include <X11/Xatom.h>
+#include <X11/xpm.h>
+
+#include <tcl.h>
+#include <tk.h>
+// #include "memwatch.h"
+
+#define CADHEIGHT 400			// initial window size
+#define CADWIDTH 600
+
+#define BACKLAYER 0
+#define WIRELAYER 1
+#define GRIDLAYER 2
+#define SELLAYER 2
+#define PROPERTYLAYER 1
+#define TEXTLAYER 3
+#define TEXTWIRELAYER 6 // color for wire name labels / pins
+#define PINLAYER 5
+#define GENERICLAYER 3
+
+#define CADSNAP 10.0
+#define CADGRID 20.0
+#define CADGRIDTHRESHOLD 10.0
+#define CADGRIDMULTIPLY 2.0
+#define CADINITIALZOOM 1
+#define CADINITIALX 10
+#define CADINITIALY -870
+#define CADZOOMSTEP 1.5
+#define CADMOVESTEP 200
+#define CADMAXZOOM 10000.0
+#define CADMINZOOM 0.0001
+#define CADHALFDOTSIZE 2.5
+#define CADNULLNODE -1	    // no valid node number
+#define CADWIREMINDIST 30.0
+#define CADMAXWIRES 100
+#define CADMAXTEXT 100
+#define CADMAXOBJECTS 100    // max # of lines, rects (for each layer!!)
+#define MAXGROUP 300	    // max # of objects that can be drawn while moving
+#define ELEMINST 200        // max # of placed elements,   was 600 20102004
+#define ELEMDEF 120         // max # of defined elements
+#define CADMAXGRIDPOINTS 1000
+#define CADMAXHIER 40
+#define CADCHUNKALLOC 64 // was 256  20102004
+#define CADDRAWBUFFERSIZE 512
+
+#define SCHEMATIC 1
+#define SYMBOL 2
+#define CAD_SPICE_NETLIST 1
+#define CAD_VHDL_NETLIST 2
+#define CAD_VERILOG_NETLIST 3
+
+#define STARTWIRE 1	    // possible states, encoded in global 'rubber'
+#define STARTPAN  2
+#define STARTRECT 4
+#define STARTLINE 8
+#define SELECTION  16	    // signals that some objects are selected.
+#define STARTSELECT 32      // used for drawing a selection rectangle
+#define STARTMOVE 64        // used for move/copy  operations
+#define STARTCOPY 128       // used for move/copy  operations
+#define STARTZOOM 256       // used for move/copy  operations
+#define STARTMERGE 512       // used fpr merge schematic/symbol
+#define MENUSTARTWIRE 1024   // start wire invoked from menu
+#define MENUSTARTLINE 2048   // start line invoked from menu
+#define MENUSTARTRECT 4096   // start rect invoked from menu
+#define MENUSTARTZOOM 8192   // start zoom box invoked from menu
+#define STARTPAN2     16384  // new pan method with mouse button3 20121123
+#define MENUSTARTTEXT 32768  // 20161201 click to place text if action starts from menu
+
+#define SELECTED 1          // used in the .sel field for selected objs.
+#define SELECTED1 2	    // first point selected...
+#define SELECTED2 4         // second point selected...
+#define SELECTED3 8
+#define SELECTED4 16
+
+
+#define WIRE 1		    // types of defined objects
+#define RECT  2
+#define LINE 4
+#define ELEMENT 8
+#define TEXT 16
+
+
+//   some useful primes
+//   109, 163, 251, 367, 557, 823, 1237, 1861, 2777, 4177, 6247, 9371, 14057
+//   21089, 31627, 47431, 71143, 106721, 160073, 240101, 360163, 540217, 810343
+//   1215497, 1823231, 2734867, 4102283, 6153409, 9230113, 13845163
+
+#define HASHSIZE 31627
+
+		 // parameters passed to action functions, see actions.c
+#define END 1	 // endop
+#define BEGIN 2  // begin placing something
+#define PLACE 4  // place something
+#define ADD 4    // same as above
+#define RUBBER 8 // used for drawing rubber objects while placing them
+#define NOW 8    // used for immediate (unbuffered) graphic operations
+#define ROTATE 16
+#define FLIP 32
+#define SET 64  // currently used in bbox() function (sets clip rect)
+#define ABORT 128  // used in move/copy_objects for aborting without unselecting
+#define THICK 256  // used to draw thick lines (buses)
+
+#define FONTWIDTH 20
+#define FONTOFFSET 40
+#define FONTHEIGHT 40
+#define FONTDESCENT 15
+#define FONTWHITESPACE 10
+
+#define S(a) (sizeof(a)/sizeof(char))
+#define BUS_WIDTH ( lw_double>5 ? (int)lw_double:5 )
+#define POINTINSIDE(xa,ya,x1,y1,x2,y2)  \
+ (xa>=x1 && xa<=x2 && ya>=y1 && ya<=y2 )
+
+#define RECTINSIDE(xa,ya,xb,yb,x1,y1,x2,y2)  \
+ (xa>=x1 && xa<=x2 && xb>=x1 && xb<=x2 && ya>=y1 && ya<=y2 && yb>=y1 && yb<=y2 )
+
+#define ROTATION(x0, y0, x, y, rx, ry) \
+xxtmp = (flip ? 2 * x0 -x : x); \
+if(rot==0)      {rx = xxtmp;  ry = y;} \
+else if(rot==1) {rx = x0 - y + y0; ry = y0 + xxtmp - x0;} \
+else if(rot==2) {rx = 2 * x0 - xxtmp; ry = 2 * y0 - y;} \
+else            {rx = x0 + y - y0; ry = y0 - xxtmp + x0;}
+
+#define ORDER(x1,y1,x2,y2) \
+if(x2 < x1) {xxtmp=x1;x1=x2;x2=xxtmp;xxtmp=y1;y1=y2;y2=xxtmp;} \
+else if(x2 == x1 && y2 < y1) {xxtmp=y1;y1=y2;y2=xxtmp;}
+#define RECTORDER(x1,y1,x2,y2) \
+if(x2 < x1) { xxtmp=x1;x1=x2;x2=xxtmp;} \
+if(y2 < y1) { xxtmp=y1;y1=y2;y2=xxtmp;}
+
+#define OUTSIDE(xa,ya,xb,yb,x1,y1,x2,y2) \
+ (xa>=x2 || xb<=x1 ||  ya>=y2 || yb<=y1 )
+
+#define CLIP(x,a,b) (x<a?a:x>b?b:x)
+
+#define MINOR(a,b) ( (a) <= (b) ? (a) : (b) )
+
+typedef struct
+{
+   unsigned short type;
+   int n;
+   unsigned short col;
+} Selected;
+
+typedef struct 
+{
+   double x1;
+   double x2;
+   double y1;
+   double y2;
+   unsigned short  end1;
+   unsigned short  end2;
+   unsigned short sel;
+   char  *node;
+   char *prop_ptr;
+} Wire;
+
+typedef struct
+{
+   double x1;
+   double x2;
+   double y1;
+   double y2;
+   unsigned short sel;
+   char *prop_ptr;
+} Line;
+
+typedef struct
+{
+   double x1;
+   double x2;
+   double y1;
+   double y2;
+   unsigned short sel;
+   char *prop_ptr;
+} Box;
+
+typedef struct
+{
+  char *txt_ptr;
+  double x0,y0;
+  int rot;
+  int flip;
+  int sel;
+  double xscale;
+  double yscale;
+  char *prop_ptr;
+} Text;
+
+typedef struct
+{
+   char *name;
+   double minx;
+   double maxx;
+   double miny;
+   double maxy;
+   Line **lineptr;  // array of [cadlayers] pointers to Line
+   Box  **boxptr;
+   Text  *txtptr;
+   int *lines;     // array of [cadlayers] integers
+   int *rects;
+   int texts;
+   char *prop_ptr;
+   char *type; // 20150409
+   char *templ; // 20150409
+} Instdef;
+
+typedef struct
+{
+   char *name;// symbol name (ex: devices/lab_pin) 
+   int ptr;  // was a pointer formerly...
+   double x0;
+   double y0;
+   double x1;
+   double y1;
+   double x2;
+   double y2;
+   double xx1;
+   double yy1;
+   double xx2;
+   double yy2;
+   int rot;
+   int flip;
+   int sel;
+   int flags; // bit 0: skip field, bit 1: flag for different textlayer for pin/labels
+	      // bit 2 : hilight flag
+   char *prop_ptr;
+   char **node;
+   char *instname; // 20150409 instance name (example: I23) 
+} Instance;
+
+typedef struct 
+{
+  double x;
+  double y;
+  double zoom;
+} Zoom;
+
+struct drivers {
+                int in;
+                int out;
+                int inout;
+                int port;
+               };
+       
+
+
+
+struct node_hashentry {
+                  struct node_hashentry *next;
+                  unsigned int hash;
+                  char *token;
+                  char *sig_type;
+                  char *verilog_type;
+                  char *value;
+                  char *class;
+                  char *orig_tok;
+                  struct drivers d;
+                 };
+
+
+struct hilight_hashentry {
+                  struct hilight_hashentry *next;
+                  unsigned int hash;
+                  char *token;
+                  char *path;
+                  int value;
+                 };
+
+extern int help; //20140406
+extern char *cad_icon[];
+extern int semaphore;
+extern int a3page;
+extern int cadlayers;
+extern  int hilight_color;
+extern int do_print;
+extern int prepared_netlist_structs;
+extern int x_initialized;
+extern int has_x; 
+extern int sym_txt;
+extern int rainbow_colors; 
+extern FILE *errfp;
+extern int no_readline;
+extern char *filename;
+extern int debug_var; 
+extern char **color_array;
+extern Colormap colormap;
+extern int current_type;
+extern unsigned int color_index[];
+extern int lw; // line width
+extern double lw_double; // line width
+extern int change_lw; // allow change line width
+extern int thin_text;
+extern int incr_hilight;
+extern int auto_hilight;
+extern int fill; // fill rectangles
+extern int draw_grid;
+extern int draw_pixmap; // pixmap used as 2nd buffer
+extern int need_rebuild_selected_array;
+extern unsigned int rectcolor;
+extern XEvent xev;
+extern KeySym key;
+extern double xxtmp;
+extern unsigned short enable_stretch;
+extern unsigned int button;
+extern unsigned int state; // status of shift,ctrl etc..
+extern Wire *wire;
+extern Box  **rect;
+extern Line **line;
+extern XPoint *gridpoint;
+extern XRectangle *rectangle;
+extern Selected *selectedgroup; // array of selected objs to draw while moving
+extern int lastwire;
+extern int lastselected;
+extern int *lastrect;
+extern int *lastline;
+extern int lastinst ;
+extern int lastinstdef ;
+extern int lasttext;              
+extern Instance *inst_ptr;      // Pointer to element INSTANCE
+extern Instdef *instdef;	// Pointer to element definition
+extern Text *textelement; 
+extern char schematic[CADMAXHIER][256];
+extern int currentsch;
+extern char *schprop; 
+extern char *schvhdlprop; 
+extern char *schverilogprop; 
+extern int max_texts;
+extern int max_wires;
+extern int max_instances;
+extern int max_symbols;
+extern int max_selected;
+extern int *max_boxes;
+extern int *max_lines;
+extern int previous_instance[];
+extern int split_files;
+extern int hspice_netlist;
+extern char *netlist_dir;
+
+extern unsigned int rubber ; // this signals that we are doing a net place,
+			      // panning etc...
+
+extern char *undo_dirname; // 20150327
+extern int cur_undo_ptr;
+extern int tail_undo_ptr;
+extern int head_undo_ptr;
+extern int max_undo;
+extern int draw_dots;
+extern int draw_single_layer; // 20151117
+
+extern Window window;
+extern Window parent_of_topwindow;
+extern Pixmap cad_icon_pixmap, *pixmap,save_pixmap;
+extern int depth;
+extern unsigned char **pixdata;
+extern unsigned char pixdata_init[22][32];;
+extern int  areax1,areay1,areax2,areay2,areaw,areah;
+extern GC *gc, *gcstipple, gctiled;
+extern Display *display;
+extern Tcl_Interp *interp;
+extern XRectangle xrect[];
+extern double xorigin,yorigin;
+extern double zoom;
+extern double mooz;
+extern double mousex,mousey; // mouse coord.
+extern double mousex_snap,mousey_snap; // mouse coord. snapped to grid
+extern double cadsnap;
+
+extern double *character[256];
+extern int netlist_show;
+extern int flat_netlist;
+extern int netlist_type;
+extern int do_netlist;
+extern int netlist_count;
+extern int quit;
+extern int show_erc;
+extern int hilight_nets;
+extern char *sch_prefix[];
+extern int modified;
+extern int color_ps;
+extern int only_probes; // 20110112
+extern Zoom zoom_array[];
+extern int pending_fullzoom;
+extern int fullscreen;
+// functions
+extern int set_netlist_dir(int force);
+extern int  check_lib(char * s);
+extern void global_spice_netlist(int global);
+extern void hilight_all(void);
+extern void change_linewidth(double w);
+extern void set_fill(int n);
+extern void edit_in_new_window(void);
+extern void symbol_in_new_window(void);
+extern void new_window(char *cell, int symbol);
+extern void ask_new_file(void);
+extern void saveas(void);
+extern int save(void);
+extern struct hilight_hashentry *bus_hilight_lookup(char *token, int value, int remove) ;
+extern int  name_strcmp(char *s, char *d) ;
+extern void search_inst(char *tok, char *val, int sub, int sel, int what);
+extern void process_options(int argc, char **argv);
+extern void calc_drawing_bbox(Box *boundbox);
+extern void ps_draw(void);
+extern void svg_draw(void);
+extern void print_image();
+extern char *skip_dir(char *str);
+extern void make_symbol(void);
+extern char *get_sym_template(char *s, char *extra);
+extern void zoom_full(int draw);
+extern void updatebbox(int count,Box *boundbox,Box *tmp);
+extern void del_wire_table(void);
+extern void set_linewidth();
+extern void draw_selection(GC g, int interruptable);
+extern void delete(void);
+extern void delete_only_rect_and_line(void);
+extern void bbox(int what,double x1,double y1, double x2, double y2);
+extern void text_bbox(char * str,double xscale, double yscale,
+            int rot, int flip, double x1,double y1, double *rx1, double *ry1,
+            double *rx2, double *ry2);
+extern unsigned short select_object(double mx,double my, unsigned short sel_mode); // return type 20160503
+extern void unselect_all(void);
+extern void hilight_inside(double x1,double y1, double x2, double y2, int sel);
+extern void xwin_exit(void);
+extern int Tcl_AppInit(Tcl_Interp *interp); 
+extern int callback(int event, int mx, int my, KeySym key,
+                        int button, int aux, int state);
+extern void resetwin(void);
+extern void find_closest_net(double mx,double my);
+extern void find_closest_box(double mx,double my);
+extern void find_closest_element(double mx,double my);
+extern void find_closest_line(double mx,double my);
+extern void find_closest_text(double mx,double my);
+extern Selected find_closest_obj(double mx,double my);
+
+extern void drawline(GC gc, int what, double x1,double y1,double x2,double y2);
+extern void drawtempline(GC gc, int what, double x1,double y1,double x2,double y2);
+extern void drawgrid(void);
+extern void filledrect(GC gc, int what, double rectx1,double recty1,
+            double rectx2,double recty2);
+extern void drawrect(GC gc, int what, double rectx1,double recty1,
+            double rectx2,double recty2);
+extern void drawtemprect(GC gc, int what, double rectx1,double recty1,
+            double rectx2,double recty2);
+extern void draw_symbol_outline(int what, GC, GC, int n,int layer,
+            int tmp_flip, int tmp_rot, double xoffset, double yoffset);
+extern void draw_temp_symbol_outline(int what, GC gc, int n,int layer,
+            int tmp_flip, int tmp_rot, double xoffset, double yoffset);
+extern void draw_temp_string(GC gc,int what, char *str, int flip, int rot, 
+       double x1, double y1, double xscale, double yscale);
+extern void draw_string(GC gc,int what, char *str, int flip, int rot, 
+       double x1, double y1, double xscale, double yscale);
+
+
+extern void draw(void);
+extern int clip(int,int,int,int,
+           double*,double*,double*,double*);
+extern int textclip(int x1,int y1,int x2,int y2,
+           double xa,double ya,double xb,double yb);
+extern double dist_from_rect(double mx, 
+              double my, double x1, double y1, double x2, double y2);
+extern double dist(double x1,double y1,double x2,double y2,double xa,double ya);
+extern double rectdist(double x1,double y1,double x2,double y2,double xa,double ya);
+extern int touch(double,double,double,double,double,double);
+extern int rectclip(int,int,int,int,
+           double*,double*,double*,double*);
+extern void check(void);
+extern void storeobject(int pos, double x1,double y1,double x2,double y2,
+                        unsigned short type,unsigned int rectcolor,
+		        unsigned short sel, char *prop_ptr);
+extern void freenet_nocheck(int i);
+extern void spice_netlist(FILE *fd, int spice_stop);
+extern void global_spice_netlist(int global);
+extern void vhdl_netlist(FILE *fd, int vhdl_stop);
+extern void global_vhdl_netlist(int global);
+extern void verilog_netlist(FILE *fd, int verilog_stop);
+extern void global_verilog_netlist(int global);
+extern void vhdl_block_netlist(FILE *fd, int i);
+extern void verilog_block_netlist(FILE *fd, int i);
+extern void spice_block_netlist(FILE *fd, int i);
+extern void save_symbol(char *);
+extern void remove_symbols(void);
+extern void remove_symbol(void);
+extern void clear_drawing(void);
+extern int load_symbol_definition(char name[]);
+extern void load_symbol(char *abs_name);
+extern void edit_symbol(void);
+extern void place_symbol(int pos, char *symbol_name, double x, double y, int rot, int flip, 
+                         char *inst_props, int draw_sym);
+extern int match_symbol(char name[]);
+extern void save_file(char *);
+extern void push_undo(void);
+extern void pop_undo(int redo);
+extern void delete_undo(void);
+extern void clear_undo(void);
+extern void load_file(int load_symbol, char *abs_name, int reset_undo);
+extern void load_syms(void);
+extern void load_ascii_string(char **ptr, FILE *fd);
+extern void load_text(FILE *fd);
+extern void load_wire(FILE *fd);
+extern void load_inst(FILE *fd);
+extern void load_box(FILE *fd);
+extern void load_line(FILE *fd);
+extern void descend(void);
+extern void go_back(void);
+extern void view_unzoom(double z);
+extern void view_zoom(double z);
+extern void draw_stuff(void);
+extern void new_wire(int what);
+extern void new_line(int what);
+extern void move_objects(int what,int merge, double dx, double dy);
+extern void copy_objects(int what);
+extern void pan(int what);
+extern void pan2(int what, int mx, int my);
+extern void zoom_box(int what);
+extern void select_rect(int what, int select);
+extern void new_rect(int what);
+extern void compile_font(void);
+extern void rebuild_selected_array(void);
+
+extern void edit_property(int x);
+extern int xschem(ClientData clientdata, Tcl_Interp *interp, 
+           int argc, char * argv[]);
+extern void tkeval(char str[]);
+extern void statusmsg(char str[],int n);
+extern void place_text(int draw_text, double mx, double my);
+extern void hash_proplist(char *s,int remove);
+extern struct hashentry *hash_lookup(char *token,char *name,char *value,int remove);
+extern void free_hash(void);
+extern char *translate(int inst, char* s);
+extern void print_spice_element(FILE *fd, int inst);
+extern void print_vhdl_element(FILE *fd, int inst);
+extern void print_verilog_element(FILE *fd, int inst);
+extern void print_verilog_primitive(FILE *fd, int inst);
+extern void print_vhdl_primitive(FILE *fd, int inst);
+extern char *get_tok_value(char *s,char *tok,int with_quotes);
+extern int  my_snprintf(char *str, int size, const char *fmt, ...);
+extern void my_strdup(char **dest, const char *src);
+extern void my_strdup2(char **dest, const char *src);
+extern void my_strncpy(char *d, char *s, int n);
+extern char *subst_token(char *s,char *tok, char *new_val);
+extern void new_prop_string(char **new_prop,char *old_prop,int fast);
+extern void symbol_bbox(int i, double *x1,double *y1, double *x2, double *y2);
+extern void set_inst_prop(int i);
+extern void *my_malloc(size_t size);
+extern void my_realloc(void *ptr,size_t size);
+extern void *my_calloc(size_t nmemb, size_t size);
+extern void my_free(void *ptr);
+extern void unselect_wire(int i);
+extern void check_wire_storage(void);
+extern void check_text_storage(void);
+extern void check_inst_storage(void);
+extern void check_symbol_storage(void);
+extern void check_selected_storage(void);
+extern void check_box_storage(int c);
+extern void check_line_storage(int c);
+extern char *expandlabel(char *s, int *m);
+extern void merge_inst(int k, FILE *fd);
+extern void merge_file(int selection_load, char ext[]);
+extern void select_wire(int i, unsigned short select_mode);
+extern void select_element(int i, unsigned short select_mode, int fast);
+extern void select_text(int i, unsigned short select_mode);
+extern void select_box(int c, int i, unsigned short select_mode, int fast);
+extern void select_line(int c, int i, unsigned short select_mode, int fast);
+extern char *pin_node(int i, int j, int *mult);
+extern void record_global_node(int what, FILE *fp, char *node);
+extern int count_labels(char *s);
+extern void my_strcat(char **, char *);
+extern int get_unnamed_node(int what, int mult, int node);
+extern void free_node_hash(void);
+extern struct node_hashentry 
+		*node_hash_lookup(char *token, char *dir,int remove, int port, char *sig_type, 
+                char *verilog_type, char *value, char *class, char *orig_tok);
+extern void traverse_node_hash();
+extern struct node_hashentry 
+		*bus_hash_lookup(char *token, char *dir,int remove, int port, char *sig_type, 
+                char *verilog_type, char *value, char *class);
+//extern void insert_missing_pin();
+extern void round_schematic_to_grid(double cadsnap);
+extern void save_selection(int what);
+extern void print_vhdl_signals(FILE *fd);
+extern void print_verilog_signals(FILE *fd);
+extern void print_generic(FILE *fd, char *ent_or_comp, int symbol);
+extern void print_verilog_param(FILE *fd, int symbol);
+extern void hilight_net();
+extern void unhilight_net();
+extern void draw_hilight_net();
+extern void undraw_hilight_net(void); // 20160413
+extern void prepare_netlist_structs(void);
+extern void delete_netlist_structs(void);
+extern void delete_inst_node(int i);
+extern void delete_hilight_net(void);
+extern void hilight_child_pins(int n);
+extern void hilight_parent_pins(void);
+extern struct node_hashentry **get_node_table_ptr(void);
+extern void change_elem_order(void);
+extern int set_different_token(char **s,char *new, char *old);
+extern void print_hilight_net(int show);
+extern void change_layer();
+extern void launcher(); // 20161102
+extern void windowid();
+extern int window_state (Display *disp, Window win, char *arg);
+extern void toggle_fullscreen();
+extern void toggle_only_probes(); // 20110112
+extern void fill_symbol_editprop_form(int x);
+extern void update_symbol(char *result, int x);
+extern void tclexit(ClientData s);
+#endif
+
+

@@ -1,0 +1,43 @@
+XSCHEM : schematic capture and netlisting EDA tool
+
+Xschem is a schematic capture program, it allows creation of hierarchical representation
+of circuits with a top down approach . By focusing on interfaces, hierarchy and instance
+properties a complex system can be described in terms of simpler building blocks. A VHDL
+or Verilog or Spice netlist can be generated from the drawn schematic, allowing the 
+simulation of the circuit. Key feature of the program is its drawing engine written in C
+and using directly the Xlib drawing primitives; this gives very good speed performance,
+even on very big circuits. The user interface is built with the Tcl-Tk toolkit, tcl is
+also the extension language used.
+
+INSTALLATION AND MANUAL
+
+http://stefanschippers.host-ed.me/stefan/xschem.html
+
+BUILDING
+
+go to the 'src' directory, edit the Makefile, in particular the 'prefix' and the
+'library_prefix' variables, also check that the TCLVER variable matches the tcl version 
+installed on the system.
+
+In order to build xschem you need
+- gcc
+- tcl-tk and development header files (tcl8.x, tcl8.x-dev, tk8.x, tk8.x-dev)
+- bison grammar parser
+- flex lexycal analyzer
+- an awk implementation (gawk or mawk are OK)
+- X11 and development header files
+- libxpm and development files (libxpm, libxpm-dev)
+
+If all dependencies are met 'make' will build the program
+
+INSTALL
+
+If destination paths are correctly set in the Makefile: 'make install'
+
+AUTHOR
+
+Stefan Frederik Schippers
+stefan.schippers@gmail.com
+
+
+

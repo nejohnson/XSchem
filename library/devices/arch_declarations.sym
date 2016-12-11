@@ -1,0 +1,11 @@
+G {type=arch_declarations
+template="
+
+signal AAA: std_logic;
+
+"} 
+V {} 
+S {} 
+L 4 -0 -10 355 -10 {} 
+T {ARCHITECTURE DECLARATIONS} 5 -25 0 0 0.3 0.3 {} 
+T {HIDDEN} 45 5 0 0 0.2 0.2 {} 

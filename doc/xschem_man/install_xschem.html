@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>XSCHEM TUTORIAL</title>
+<link rel="stylesheet" type="text/css" href="xschem_man.css" />
+<style type="text/css">
+/* Local styling goes here */
+p{padding: 15px  30px 10px;}
+
+</style>
+
+</head>
+<body>
+
+<!-- start of slide -->
+<div class="content">   
+<!-- navigation buttons -->
+<a href="compiling_xschem.html" class="prev">PREV</a>
+<a href="xschem_man.html" class="home">UP</a>
+<a href="run_xschem.html" class="next">NEXT</a>
+
+ <!-- slide title -->
+ <h1> INSTALL XSCHEM </h1><br>
+ <p>
+ in order to install the program run the following command (execute as root if you plan to do a system-wide
+ installation, for example in /usr/local): 
+ </p>
+ <pre class="code">
+  user:~$ make install
+ </pre>
+ <p>
+  This will install all the runtime needed files into the locations defined in the <tt>Makefile</tt>.
+  Before being able to run xschem you must setup a configuration file, <tt><b>.xschem</b></tt>, into your 
+  home directory. This file will tell XSCHEM where to look for schematic and component libraries.
+  XSCHEM will look for this file in the current directory or in the user's <tt>${HOME}</tt> directory.
+
+ </p>
+ <pre class="code" style="height: 300px;">
+## .xschem configuration file, to be placed in user HOME directory ##
+## or in the directory where xschem is launched                    ##
+
+## xschem installation dir
+# set XSCHEM_HOME_DIR $env(HOME)/share/xschem
+set XSCHEM_HOME_DIR /usr/local/share/xschem
+
+## xschem design libraries root dir
+set XSCHEM_DESIGN_DIR $env(HOME)/xschem_library
+
+## directory where simulations, netlist and simulator outputs are placed
+set netlist_dir $env(HOME)/xschem_library/simulations
+
+## Window to open on startup
+set XSCHEM_START_WINDOW {mylib/0_top}
+# set XSCHEM_NEW_WINDOW {}
+
+## some default behavior
+set netlist_type spice
+set hspice_netlist 1
+#set line_width 2
+set change_lw 1
+set color_ps 1
+set initial_geometry {800x600}
+
+set terminal {xterm -geometry 100x35 -fn 9x15 -bg black -fg white -cr white -ms white }
+# set terminal lxterminal
+
+# editor must not detach from launching shell (-f mandatory for gvim)
+set editor {gvim -f -geometry 90x28}
+
+set verilog_2001 1
+
+## alternatives to hspice and icarus verilog
+set hspicerf_simulator 0
+set modelsim_simulator 0
+
+## command to translate xpm to png (assumes command takes source 
+## and dest file as arguments, example: gm convert plot.xpm plot.png)
+set to_png {gm convert}
+
+## icarus verilog
+set iverilog_path $env(HOME)/verilog/bin/iverilog
+set vvp_path $env(HOME)/verilog/bin/vvp
+set iverilog_opts {-g2012}
+
+## default analog wiewer (cosmoscope, waveview) 
+set analog_viewer waveview
+
+## waveview
+# set waveview_path $env(HOME)/waveview/bin/wv
+set waveview_path $env(HOME)/waveview_2013/bin/wv
+
+## utile
+set utile_gui_path ${XSCHEM_HOME_DIR}/utile/utile3
+set utile_cmd_path ${XSCHEM_HOME_DIR}/utile/utile
+
+## gtkwave
+set gtkwave_path $env(HOME)/gtkwave/bin/gtkwave
+
+## computer farm redirector
+## RTDA NC
+# set computerfarm {nc run -Il}
+## LSF BSUB
+# set computerfarm {bsub -Is}
+
+## hspice  and modelsim license files (sample syntax)
+set env(LM_LICENSE_FILE) $env(HOME)/modelsim/license.dat:$env(HOME)/hspice_2008/license.dat:$env(HOME)/hspice_2013/lic.dat
+
+## modelsim
+set modelsim_path $env(HOME)/modelsim/modeltech/bin
+
+## set hspice multithread and multiprocessor capabilities
+set hspice_mp 0  ;# multi process montecarlo, sweeps and .alter runs
+set hspice_mt 0  ;# multi thread simulations
+
+set hspice_path "$env(HOME)/hspice_2013/bin/hspice64 -mt 8"
+set hspicerf_path $env(HOME)/hspice_2013/bin/hspicerf64
+set cscope_path $env(HOME)/cosmoscope/amd64/ai_bin/cscope
+</pre>
+ <p>
+  It is mandatory to setup a design root directory ( indicated by TCL variable <tt>XSCHEM_DESIGN_DIR</tt>) 
+  containing all the design libraries 
+  (components, schematics).  A Sample design root library is provided and installed in the path 
+  specified by the <tt>Makefile</tt>'s variable <tt>xschem_library</tt>, you can use it 
+  as a starting point.<br>
+  to complete the setup of <tt>xschem</tt> create a .xschem file in your <tt>$HOME</tt> directory; 
+  a sample .xschem file is provided in the distribution sources. Change it to fit your needs.
+ </p> 
+ <pre class="code">
+  user:xschem-&lt;version&gt;$ cp .xschem ~/
+ </pre>
+
+ <!-- end of slide -->
+ <div class="filler"></div>
+</div>
+
+<!-- frame footer -->
+<iframe seamless src="xschem_footer.html"  class="footer_iframe" >
+</body>
+</html>
+

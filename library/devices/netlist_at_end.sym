@@ -1,0 +1,12 @@
+G {type=netlist_commands
+place=end
+template="name=s1 value=blabla"
+format="
+@value
+"} 
+V {} 
+S {} 
+L 4 0 -10 70 -10 {} 
+L 4 0 -10 0 10 {} 
+T {NETLIST AT END} 5 -25 0 0 0.3 0.3 {} 
+T {@value} 15 -5 0 0 0.3 0.3 {} 

@@ -1839,15 +1839,16 @@ char *translate(int inst, char* s)
    } else if(strcmp(token,"@time_last_modified")==0) {
      my_snprintf(file_name, S(file_name), "%s/%s.sch",Tcl_GetVar(interp,"XSCHEM_DESIGN_DIR", TCL_GLOBAL_ONLY),
        schematic[currentsch]);
-    stat(file_name , &time_buf);
-    tm=localtime(&(time_buf.st_mtime) );
-    tmp=strlen( asctime(tm));
-    if(result_pos + tmp>=size) {
-     size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
-     my_realloc(&result,size);
+    if(!stat(file_name , &time_buf)) {  // 20161211
+      tm=localtime(&(time_buf.st_mtime) );
+      tmp=strlen( asctime(tm));
+      if(result_pos + tmp>=size) {
+       size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
+       my_realloc(&result,size);
+      }
+      strcpy(result+result_pos,asctime(tm));
+      result_pos+=tmp;
     }
-    strcpy(result+result_pos,asctime(tm));
-    result_pos+=tmp;
    } else if(strcmp(token,"@schname")==0) {
      tmp=strlen(schematic[currentsch]);
      if(result_pos + tmp>=size) {

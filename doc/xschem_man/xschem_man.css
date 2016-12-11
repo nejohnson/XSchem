@@ -23,6 +23,7 @@ html, body{
 }
 
 tt{
+  white-space: nowrap;
   color: #993333;
 }
 

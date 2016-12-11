@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SYMBOL PROPERTY SYNTAX</title>
+<link rel="stylesheet" type="text/css" href="xschem_man.css" />
+<style type="text/css">
+/* Local styling goes here */
+p{padding: 15px  30px 10px;}
+
+</style>
+
+</head>
+<body>
+
+<!-- start of slide -->
+<div class="content">   
+<!-- navigation buttons -->
+<a href="component_instantiation.html" class="prev">PREV</a>
+<a href="xschem_man.html" class="home">UP</a>
+<a href="component_property_syntax.html" class="next">NEXT</a>
+ <!-- slide title -->
+ <h1>SYMBOL PROPERTY SYNTAX</h1><br>
+
+<h3>GENERAL RULES</h3>
+ <p>
+  For symbols a global property string (to show it press <tt>'q'</tt> when nothing
+  is selected). defines at least 3 attributes:
+ </p>
+ <ul>
+ <li><tt>type</tt> defines the the type of symbol. Normally the type attribute describes the symbol 
+   and ignored by XSCHEM, but there are some special types:</li>
+   <ul>
+    <li><tt>subcircuit</tt>: the symbol has an underlining schematic representation,
+     when producing the netlist XSCHEM has to descend into the corresponding schematic.
+     This will be covered in the subcircuits chapter. </li>
+    <li><tt>primitive</tt>: the symbol has a schematic representation but the SPICE netlister 
+     will not use it. This is very useful if you want to netlist a symbol using only
+     the <tt>format</tt> attribute or use the underlying schematic. By setting the
+     attribute back to <tt>subcircuit</tt> you can quickly change the behavior.</li>
+    <li><tt>label</tt>: the symbol is used to label a net. These type of symbols must have
+     one and only one pin, and the template string must define a <tt>lab</tt> attribute
+     that is passed from component instantiation</li>
+   </ul><br>
+   <p class="important"> 
+    Only symbols of type <tt>subcircuit</tt> or <tt>primitive</tt> may be descended into
+    with the <tt>'e'</tt> bindkey if they have a schematic view.
+   </p><br>
+ <li><tt>format</tt>:The format attribute defines the syntax for the SPICE netlist. the <tt>@</tt>
+     character is a 'substitution character', it means that the token that follows is a parameter
+     that will be substituted with the value passed at component instantiation. If no 
+     value is given there a value will be picked from the attribute declared in the <tt>template</tt>
+     string.<br>
+     The <tt>@pinlist</tt> is a special token that will be substituted with the name of the wires that 
+     connect to symbol pins, in the order they are created in the symbol. See the
+     <a href="xschem_properties.html">pin ordering</a> section in the xschem properties slide.</li>
+ <li><tt>template</tt>: Specifies default values for symbol parameters</li>
+ </ul>
+<img src="general_rules.png">
+ <p>
+  The order these attributes appear in the property string is not important, 
+  they can be on the same line or on different lines:
+ </p>
+ <pre class="code">
+type=nmos format="@name @pinlist @model w=@w l=@l m=@m" template="name=m1 model=nmos w=5u l=0.18u m=1"
+ </pre><br>
+ <pre class="code">
+format="@name @pinlist @model w=@w l=@l m=@m"
+template="name=m1 model=nmos w=5u l=0.18u m=1"
+type=nmos
+ </pre>
+ <p>
+  As you see double quotes are used when attribute values have spaces.
+  For this reason if double quotes are needed in an attribute value they must be escaped
+  with backslash <tt>\"</tt> 
+ </p>
+ <p class="important">
+  since the symbol global property string is formatted as a space separated list of
+  <tt>attribute=value</tt> items, if a <tt>value</tt> has spaces in
+  it it must be enclosed in double quotes, see for example
+  the symbol template attribute: <tt>template="name=m1 model=nmos w=5u l=0.18u m=1"</tt> or the 
+  the format attribute: <tt>format="@name @pinlist @model w=@w l=@l m=@m"</tt>. As a direct consequence 
+  a literal double quote  in property strings must be escaped (<tt>\"</tt>)
+ </p>
+<h3>ATTRIBUTE SUBSTITUTION</h3>
+ <p>
+  XSCHEM uses a method for attribute substitution that is very similar to shell variable expansion 
+  done with the <tt>$</tt> character (for example 
+  <span><tt>$HOME --&gt; /home/user</tt></span>) The only
+  difference is that XSCHEM uses the <tt>'@'</tt> character. The choice of '@' vs '$' is simply because
+  in some simulation netlists shell variables are passed to the simulator for expansion, so to avoid the 
+  need to escape the '$' in property strings a different and less used character was chosen.<br>
+  A literal @ must be escaped to prevent it to be interpreted as the start of a token to be
+  substituted (<tt>\@</tt>). 
+  Attribute substitution takes place in symbol format attribute and in every text, as shown in below picture.
+ </p>
+ <img src="attribute_substitution.png">
+ <h3>SPECIAL SYMBOL ATTRIBUTES</h3>
+-todo--
+ <!-- end of slide -->
+ <div class="filler"></div>
+</div>
+
+<!-- frame footer -->
+<iframe seamless src="xschem_footer.html"  class="footer_iframe" >
+</body>
+</html>
+

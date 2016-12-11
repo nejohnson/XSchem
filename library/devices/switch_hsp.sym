@@ -1,0 +1,22 @@
+G {type=switch
+format="@name @@p @@m VCR @@cp @@cm @v_to_r max=@max min=@min m=@m"
+template="name=G1 v_to_r=1G max=1G min=1 m=1"} 
+V {} 
+S {} 
+L 4 2.5 -22.5 7.5 -22.5 {} 
+L 4 5 -25 5 -20 {} 
+L 4 -0 -30 0 -10 {} 
+L 4 -10 -10 -0 10 {} 
+L 4 -0 10 -0 30 {} 
+L 4 -40 0 -5 0 {} 
+L 4 -35 -5 -30 -5 {} 
+L 4 -32.5 -7.5 -32.5 -2.5 {} 
+B 5 -2.5 -32.5 2.5 -27.5 {name=p dir=inout} 
+B 5 -2.5 27.5 2.5 32.5 {name=m dir=inout} 
+B 5 -42.5 -2.5 -37.5 2.5 {name=cp dir=in} 
+B 5 37.5 -2.5 42.5 2.5 {name=cm dir=in} 
+T {@name} 10 -17.5 0 0 0.2 0.2 {} 
+T {GAIN=@v_to_r
+MAX=@max
+MIN=@min} 10 12.5 0 0 0.2 0.2 {} 
+T {VCR} -20 10 0 0 0.2 0.2 {} 

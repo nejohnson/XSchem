@@ -1,0 +1,8 @@
+G {type=label
+format=".alias @lab"
+template="name=l1 lab=xxx"} 
+V {} 
+L 1 10 -10 20 -0 {} 
+L 1 0 -0 10 -10 {} 
+B 5 8.75 -11.25 11.25 -8.75 {name=p dir=inout}
+T {@lab} 13.75 -21.25 0 0 0.2 0.2 {} 

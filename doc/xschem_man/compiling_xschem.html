@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>XSCHEM TUTORIAL</title>
+<link rel="stylesheet" type="text/css" href="xschem_man.css" />
+<style type="text/css">
+/* Local styling goes here */
+p{padding: 15px  30px 10px;}
+</style>
+
+</head>
+<body>
+
+<!-- start of slide -->
+<div class="content">   
+<!-- navigation buttons -->
+<a href="what_is_xschem.html" class="prev">PREV</a>
+<a href="xschem_man.html" class="home">UP</a>
+<a href="install_xschem.html" class="next">NEXT</a>
+
+ <!-- slide title -->
+ <h1> COMPILING XSCHEM </h1>
+ <p>
+ After getting the source package <em>(xschem-&lt;version&gt;.tar.gz)</em> 
+ you should first untar the archive and enter the 'src' directory;
+ </p>
+ <pre class="code">
+ user:~$ tar zxvf xschem-&lt;version&gt;.tar.gz 
+ user:~$ cd xschem-&lt;version&gt;
+ user:~/xschem-&lt;version&gt;$ cd src
+ user:~/xschem-&lt;version&gt;/src$
+ </pre>
+ <p>
+ In order to be able to build the program you need the following packages installed on the system: 
+</p>
+ <ul>
+  <li> gawk or mawk pattern scanning language
+  <li> bison grammar parser
+  <li> flex lexical analyzer
+  <li> Tcl-Tk and -dev header files
+ </ul>
+ <p>
+ for Debian and Ubuntu systems these are the packages you should check to be installed.
+ Tck/Tk versions may vary on different systems, 8.4, 8.5, 8.6 versions are all good.
+</p>
+ <pre class="code">
+  tcl8.6                libx11-dev
+  tk8.6                 libxpm-dev
+  tcl8.6-dev            bison
+  tk8.6-dev             flex
+  gawk or mawk   
+ </pre>
+ <p>
+
+ edit the <tt>prefix</tt> and <tt>library_prefix</tt> variables in the <tt>Makefile</tt>; 
+ <tt>prefix</tt> specifies the root directory where 
+ the xschem binary will be installed (<tt>${prefix}/bin</tt>) and its support files 
+ (<tt>${prefix}/share/xschem</tt>, <tt>${prefix}/share/doc/xschem</tt>). 
+ The <tt>library_prefix</tt> variable specifies where xschem 
+ design libraries and example files are stored. 
+ This is usually placed somewhere in the HOME user directory 
+ (<tt>${HOME}/xschem_library</tt>, just to give an example).
+ Next, edit the rest of the <tt>Makefile</tt> and check if paths for libraries 
+ match with your system. In particular you should set the TCLVER 
+ variable to the correct TCL-TK version installed on the system. 
+ </p>
+ <pre class="code">
+ ## set prefix for installation
+ prefix=/usr/local
+ library_prefix=$(HOME)/xschem_library
+ ...
+ ## Set the TCL-TK version on the system
+ TCLVER=8.6
+ ...
+ </pre>
+ <p>
+ now you are ready to compile the program: 
+ </p>
+ <pre class="code">
+ user:~/xschem$ make
+ </pre>
+ <p>
+ If the compile process ends without errors, the <tt>xschem</tt> binary should be built 
+ and ready for installation 
+ </p>
+ <!-- end of slide -->
+ <div class="filler"></div>
+</div>
+
+<!-- frame footer -->
+<iframe seamless src="xschem_footer.html"  class="footer_iframe" >
+</body>
+</html>
+

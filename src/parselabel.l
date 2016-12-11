@@ -1,0 +1,156 @@
+/* File: parselabel.l
+ * 
+ * This file is part of XSCHEM,
+ * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
+ * simulation.
+ * Copyright (C) 1998-2016 Stefan Frederik Schippers
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+%{
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+extern int debug_var;
+extern FILE *errfp;
+extern void my_strdup(char **dest, char *src);
+extern void my_free(void *ptr);
+typedef struct          // used in expandlabel.y
+{
+ char *str;             // label name
+ int m;                 // label multiplicity, number of wires
+} Stringptr;
+
+#define YYPARSE_PARAM
+#include "expandlabel.h" /* Bison header file */
+
+Stringptr dest_string={NULL,0};  //19102004;
+
+static int bracket=0;
+extern int yyparse(void) ;
+
+char *expandlabel(char *s, int *m)
+{
+ YY_BUFFER_STATE buf;
+
+ my_free(dest_string.str); 	// 30102004  delete 'memory' of previous execution
+ dest_string.str=NULL; 		// 30102004
+
+ if(debug_var >=3) fprintf(errfp, "expandlabel(): entering\n");
+ buf=yy_scan_string(s);
+ //dest_string.str=NULL; //19102004
+ bracket=0;
+ yyparse();  // 20140108
+ yy_delete_buffer(buf);
+ if(debug_var >=3) fprintf(errfp, "expandlabel(): returning %s  from %s mult=%d\n",dest_string.str, s, dest_string.m);
+ if(dest_string.str)
+    *m = dest_string.m;
+ else
+    *m=-1;
+ if(dest_string.str)
+  return dest_string.str;
+ else
+  return s;
+}
+
+
+%}
+/*
+   Lexical analyzer
+*/
+
+%x label
+%x next_to_alias
+%x rest
+
+%%
+^(alias|ipin|opin)[+ \n]+[^+\n ]+/[\n +]+ { 
+			 /* the third field is a label, what is before
+			     is returned as a single LINE token. */
+			 // yylval.ptr.str=strdup(yytext); //19102004
+			 yylval.ptr.str=NULL; //19102004
+                         my_strdup(&yylval.ptr.str, yytext); //19102004
+ 			 BEGIN(next_to_alias);
+			 return B_LINE;
+			}
+<next_to_alias>[\n +]+	{	// get all white space and return a single separator
+			 BEGIN(label);
+			 yylval.val=yytext[0];
+			 return B_CAR;
+			}
+^[^*]			{
+			 if(debug_var>=3) fprintf(errfp, "yylex(): matched: ^[^*] |%s|\n",yytext);
+
+			 yyless(0);    // push back to input
+			 BEGIN(label); // we know that a label follows.
+				       // so go and process it.
+			}
+^\*.*			{              // a comment, return as LINE token
+			 //yylval.ptr.str=strdup(yytext);
+                         yylval.ptr.str=NULL; //19102004
+                         my_strdup(&yylval.ptr.str, yytext); //19102004
+			 return B_LINE;
+			}
+<label>{
+
+[ \n]+			{       // this ends the <label> start condition
+			 if(debug_var>=3) fprintf(errfp, "yylex(): matched: |%s|\n",yytext);
+			 BEGIN(rest);
+			 yylval.val=yytext[0];
+			 return B_CAR;
+			}
+[0-9]+			{
+			 sscanf(yytext, "%d",&yylval.val);
+			 if(bracket) return B_IDXNUM;
+			 else return B_NUM;
+			}
+[\n.=_a-zA-Z][.=_a-zA-Z0-9]*	{
+			 //yylval.ptr.str=strdup(yytext);
+                         yylval.ptr.str=NULL; //19102004
+                         my_strdup(&yylval.ptr.str, yytext); //19102004
+                         if(debug_var>=3) fprintf(errfp, "parselabel(): B_NAME (%lu) \n", (unsigned long)yylval.ptr.str);
+			 return B_NAME;
+			}
+\[			{
+			 bracket++;
+			 return yytext[0];
+			}
+\]			{
+			 bracket--;
+			 return yytext[0];
+			}
+[^ ]			{
+			 return yytext[0];
+			}
+} /* end <label> */
+
+<rest>{			/* treat rest of line as a single LINE token */
+(.|\n)*			{
+			 if(debug_var>=3) fprintf(errfp, "yylex(): doing the rest\n");
+			 //yylval.ptr.str=strdup(yytext);
+                         yylval.ptr.str=NULL; //19102004
+                         my_strdup(&yylval.ptr.str, yytext); //19102004
+			 BEGIN(INITIAL);
+			 return B_LINE;
+			}
+
+} /* end rest */
+<*><<EOF>>		{
+			 BEGIN(INITIAL);
+			 return 0;
+			}
+%%
+

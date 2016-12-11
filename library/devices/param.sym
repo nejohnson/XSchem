@@ -1,0 +1,5 @@
+G {type=spice_parameters
+template="name=s1 value=\\"w=10u\\""
+format=".param @value"} 
+L 4 0 -10 90 -10 {} 
+T {PARAMETER   @value} 5 -25 0 0 0.3 0.3 {} 

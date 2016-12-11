@@ -1,0 +1,39 @@
+usage: xschem [options] [library/cell]
+Options:
+  -h               print this help
+  -n               do a netlist of the given schematic cell
+  -v               set netlist type to VHDL
+  -w               set netlist type to verilog
+  -3               set page size for printing to A3
+  -x               dont use X (only command mode)
+  -z               use a raibow-looking layer color table
+  -s               set netlist type to SPICE
+  -f               set flat netlist (for spice format only)
+  -r               start without the tclreadline package ( this is necessary if
+                   stdin and stdout are to be redirected for example 
+                   to /dev/null).
+  -c               set color postscript
+  -p               print schematic
+  -q               quit after doing things (no interactive mode)
+  -l <file>        set a log file
+  -d <n>           set debug level:  1,  2,  3,..  C program debug
+                                    -1, -2, -3...  TCL frontend debug
+
+xschem: interactive schematic capture program
+
+if started without a cell name an interactive session begins with an empty 
+schematic window.
+if a library/cell is given then that cell will be loaded from library on
+startup;
+Example:   xschem my_lib/counter  
+the cell `counter' will be loaded from library my_lib, rooted at
+XSCHEM_DESIGN_DIR
+          
+Please note that [library/cell] does not necessarily point to a
+schematic path in the filesystem, but references a schematic cell in a
+library, the real pathname is resolved by the program by prepending
+the XSCHEM_DESIGN_DIR environment variable to library/cell 
+
+xschem uses the following environment variables:
+XSCHEM_HOME_DIR    : xschem installation root dir
+XSCHEM_DESIGN_DIR  : user design library root directory

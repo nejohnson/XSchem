@@ -1,0 +1,85 @@
+                        XSCHEM KEY BINDINGS
+----------------------------------------------------------------------
+-       BackSpace       back to parent schematic
+-       Delete          delete selected objects
+-       Insert          Insert element from library
+-       Down            move down
+-       Escape          abort, redraw, unselect
+-       Left            move right
+-       Right           move left
+-       Up              move up
+-         ' '           pan schematic
+-         '5'           view only probes
+-         'a'           make symbol from pin list of current schematic
+ctrl      'a'           select all
+shift     'A'           toggle show netlist
+-         'b'           merge file
+ctrl      'b'           toggle show text in symbol
+-         'c'           copy selected obj. 
+ctrl      'c'           save to clipboard
+ctrl      'd'           exit
+ctrl      'e'           back to parent schematic
+-         'e'           descend to schematic
+Alt       'e'           edit selected schematic in a new window
+shift     'F'           Flip
+ctrl      'f'           find/select by substring or regexp
+-         'f'           full zoom
+shift     'G'           double snap factor
+-         'g'           half snap factor
+shift     'H'           follow http link (if symbol has 'url' property
+-         'h'           attach net labels to selected instance
+-         'i'           descend to  symbol
+Alt       'i'           edit selected symbol in a new window
+alt       'j'           create labels with 'i' prefix from highlighted nets/pins
+alt+Shift 'j'           create labels without 'i' prefix from highlighted nets/pins
+ctrl      'j'           create ports from highlight nets
+shift     'j'           create symbol from pin list
+-         'j'           print list of highlighted nets/pins
+-         'k'           hilight selected nets
+shift     'K'           unhilight all nets
+ctrl      'k'           unhilight selected nets
+-         'l'           start line
+shift     'L'           load schematic
+-         'm'           move selected obj.
+shift     'N'           hierarchical netlist
+-         'n'           netlist
+-         'o'           zoom out
+-         'p'           pan
+shift     'P'           pan, other way to.
+alt       'q'           edit schematic file (dangerous!)
+-         'q'           edit prop
+shift     'Q'           edit prop with vim
+ctrl      'q'           view prop
+shift     'R'           Rotate
+-         'r'           start rect
+ctrl      's'           change element order
+ctr+shift 'S'           save  as symbol
+shift     'S'           save schematic
+Alt       's'           reload current schematic from disk
+-         's'           save-as schematic
+-         't'           place text
+alt       'u'           align to current grid selected objects
+shift     'U'           redo
+-         'u'           undo
+ctrl      'v'           load from clipboard
+shift     'V'           toggle spice/vhdl/verilog netlist 
+shift     'W'           highlight discrepancies between object ports and attached nets
+-         'w'           place wire
+ctrl      'x'           cut into clipboard
+-         'x'           new cad session
+-         'y'           toggle stretching wires
+-         'z'           zoom box
+shift     'Z'           zoom in
+ctrl      'z'           zoom out
+-         '?'           help
+-         '&'           check wire connectivity
+shift     '*'           postscript/pdf print
+ctr+shift '*'           xpm/png print
+alt+shift '*'           svg print
+-         '-'           test mode: change line width
+-         '+'           test mode: change line width
+-         '_'           toggle change line width
+-         '%'           toggle draw grid
+-         '='           toggle fill rectangles
+-         '$'           toggle pixmap  saving
+-         ':'           toggle flat netlist

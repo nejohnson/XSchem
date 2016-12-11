@@ -1,0 +1,12 @@
+#!/bin/sh 
+# wrapper routine for the (IN)UTILE awk programs
+# 10/01/2000 - all architecture-dependent paths ar set here after!
+#				Schippers Stefan
+
+MY_PREFIX=${XSCHEM_HOME_DIR}
+UTILE3_PATH=${MY_PREFIX}/utile
+PATH=${UTILE3_PATH}:$PATH
+
+export PATH
+export UTILE3_PATH
+preprocess.awk $@ | expand_alias.awk | param.awk | clock.awk | stimuli.awk

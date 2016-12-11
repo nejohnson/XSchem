@@ -1,0 +1,19 @@
+G {type=launcher
+format="** @descr : @url"
+verilog_ignore=true
+vhdl_ignore=true
+template="name=h1
+program=\\"\\"
+descr=google 
+url=www.google.com"} 
+V {} 
+S {} 
+L 4 -60 -12.5 -30 -12.5 {} 
+L 4 -30 -22.5 -30 -12.5 {} 
+L 4 -30 -22.5 -0 -2.5 {} 
+L 4 -30 17.5 -0 -2.5 {} 
+L 4 -30 7.5 -30 17.5 {} 
+L 4 -60 7.5 -30 7.5 {} 
+L 4 -60 7.5 -50 -2.5 {} 
+L 4 -60 -12.5 -50 -2.5 {} 
+T {@descr} 10 -10 0 0 0.4 0.4 {} 

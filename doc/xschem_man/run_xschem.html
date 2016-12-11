@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>XSCHEM TUTORIAL</title>
+<link rel="stylesheet" type="text/css" href="xschem_man.css" />
+<style type="text/css">
+/* Local styling goes here */
+p{padding: 10px  30px 10px;}
+
+</style>
+
+</head>
+<body>
+
+<!-- start of slide -->
+<div class="content">   
+<!-- navigation buttons -->
+<a href="install_xschem.html" class="prev">PREV</a>
+<a href="xschem_man.html" class="home">UP</a>
+<a href="xschem_elements.html" class="next">NEXT</a>
+
+ <!-- slide title -->
+ <h1>RUN XSCHEM</h1><br>
+ <p> Assuming <tt>xschem</tt> is installed in one of the <tt>${PATH}</tt> search paths just execute:</p>
+
+ <pre class="code">
+user:~$ xschem
+% </pre>
+ <p> the xschem window should appear. If <tt>xschem</tt> is not in the search path then specify 
+     its full pathname.
+ </p>
+ <img src="xschem_home.png"> 
+ <h3> CREATING A NEW SCHEMATIC</H3>
+ <p>
+  To create a new schematic one possible approach is to delete the whole drawing window and save with a 
+  different name (Save As). If you hit <tt>&lt;ctrl&gt;a</tt> all elements will be selected (select All
+  function).
+ </p>
+ <img src="xschem_all_selected.png"> 
+ <p> 
+  Use the <tt>Delete</tt> key to delete all selected objects.
+  Now press the <tt>'s'</tt> key or use the menu <tt>'Save As'</tt> function, 
+  use the TCL fileselector to go to a XSCHEM library
+  (we will cover libraries more in detail later, XSCHEM libraries are just directories where 
+  schematic files (.sch) or symbol files (.sym) are stored).
+  in XSCHEM all design libraries are placed under the <tt>XSCHEM_DESIGN_DIR</tt> defined in the 
+  <tt>.schem</tt> file. Choose for example <tt> ~/xschem_library/mylib</tt> and write <tt>test.sch</tt>
+  as the schematic name.
+ </p>
+ <img src="xschem_saveas.png"> 
+ <p>
+  Now a new empty schematic file is created. You can use this <tt>test.sch</tt> for testing while
+  reading the manual.
+  After exiting XSCHEM you can load directly this schematic with the following commands, they are
+  all equivalent.
+ <pre class="code">
+# xschem defaults its search to the 
+# XSCHEM_DESIGN_DIR root path
+# .sch may be omitted, it is added by default ...
+xschem mylib/test
+# or ...
+xschem mylib/test.sch
+# full paths are OK
+xschem ${HOME}/xschem_library/mylib/test.sch
+ </pre>
+ </p>
+ <p>
+ you can load <tt>test.sch</tt> when xschem is running by using the load command <tt>'L'</tt> key or 
+ by menu <tt>Open</tt> command. Use the file selector dialog to locate the schematic and load it in.
+ When loading a new file XSCHEM asks to save the currently loaded schematic if it has ben modified.
+ </p>
+ <!-- end of slide -->
+ <div class="filler"></div>
+</div>
+
+<!-- frame footer -->
+<iframe seamless src="xschem_footer.html"  class="footer_iframe" >
+</body>
+</html>
+

@@ -1,0 +1,81 @@
+## .xschem configuration file, to be placed in user HOME directory ##
+## or in the directory where xschem is launched                    ##
+
+
+## xschem installation dir
+set XSCHEM_HOME_DIR $env(HOME)/share/xschem
+# set XSCHEM_HOME_DIR /usr/local/share/xschem
+
+## xschem design libraries root dir
+set XSCHEM_DESIGN_DIR $env(HOME)/xschem_library
+
+## directory where simulations, netlist and simulator outputs are placed
+set netlist_dir $env(HOME)/xschem_library/simulations
+
+## Window to open on startup
+# set XSCHEM_NEW_WINDOW {bonelli/0_top}
+set XSCHEM_START_WINDOW {mylib/0_top}
+# set XSCHEM_NEW_WINDOW {}
+
+## some default behavior
+set netlist_type spice
+set hspice_netlist 1
+#set line_width 2
+set change_lw 1
+set color_ps 1
+set initial_geometry {800x600}
+
+set terminal {xterm -geometry 100x35 -fn 9x15 -bg black -fg white -cr white -ms white }
+#set terminal lxterminal
+
+# editor must not detach from launching shell (-f mandatory for gvim)
+set editor {gvim -f -geometry 90x28}
+
+set verilog_2001 1
+
+## alternatives to hspice and icarus verilog
+set hspicerf_simulator 0
+set modelsim_simulator 0
+
+## command to translate xpm to png (assumes command takes source 
+## and dest file as arguments, example: gm convert plot.xpm plot.png)
+set to_png {gm convert}
+
+## icarus verilog
+set iverilog_path $env(HOME)/verilog/bin/iverilog
+set vvp_path $env(HOME)/verilog/bin/vvp
+set iverilog_opts {-g2012}
+
+## default analog wiewer (cosmoscope, waveview) 
+set analog_viewer waveview
+
+## waveview
+# set waveview_path $env(HOME)/waveview/bin/wv
+set waveview_path $env(HOME)/waveview_2013/bin/wv
+
+## utile
+set utile_gui_path ${XSCHEM_HOME_DIR}/utile/utile3
+set utile_cmd_path ${XSCHEM_HOME_DIR}/utile/utile
+
+## gtkwave
+set gtkwave_path $env(HOME)/gtkwave/bin/gtkwave
+
+## computer farm redirector
+## RTDA NC
+# set computerfarm {nc run -Il}
+## LSF BSUB
+# set computerfarm {bsub -Is}
+
+## hspice  and modelsim license files (sample syntax)
+set env(LM_LICENSE_FILE) $env(HOME)/modelsim/license.dat:$env(HOME)/hspice_2008/license.dat:$env(HOME)/hspice_2013/lic.dat
+
+## modelsim
+set modelsim_path $env(HOME)/modelsim/modeltech/bin
+
+## set hspice multithread and multiprocessor capabilities
+set hspice_mp 0  ;# multi process montecarlo, sweeps and .alter runs
+set hspice_mt 0  ;# multi thread simulations
+
+set hspice_path "$env(HOME)/hspice_2013/bin/hspice64 -mt 8"
+set hspicerf_path $env(HOME)/hspice_2013/bin/hspicerf64
+set cscope_path $env(HOME)/cosmoscope/amd64/ai_bin/cscope

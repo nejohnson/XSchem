@@ -1,0 +1,12 @@
+G {type=vsource
+format="@name @pinlist 0
+.probe i( @name )"
+template="name=vmeasure"} 
+V {} 
+S {} 
+L 4 -10 -0 -0 10 {} 
+L 4 -0 10 10 0 {} 
+L 13 0 -30 0 30 {} 
+B 5 -2.5 -32.5 2.5 -27.5 {name=p dir=inout} 
+B 5 -2.5 27.5 2.5 32.5 {name=m dir=inout} 
+T {@name} 10 -17.5 0 0 0.2 0.2 {} 

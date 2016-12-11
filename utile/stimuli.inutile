@@ -1,0 +1,19 @@
+unit n
+voltage 1.8
+slope 10
+param vx 5.5
+param del 6
+format eldo_simple
+
+buswidth add 8
+
+beginfile stimuli.cir
+
+set add ff vhi=vx
+s 100
+set add 0x vlo=vx-4.5 slope=del*2
+s 100
+
+endfile
+
+

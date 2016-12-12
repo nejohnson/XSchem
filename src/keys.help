@@ -26,6 +26,7 @@ ctrl      'f'           find/select by substring or regexp
 -         'f'           full zoom
 shift     'G'           double snap factor
 -         'g'           half snap factor
+ctrl      'g'           set snap factor
 shift     'H'           follow http link (if symbol has 'url' property
 -         'h'           attach net labels to selected instance
 -         'i'           descend to  symbol

@@ -805,22 +805,22 @@ int callback(int event, int mx, int my, KeySym key,
     // draw();
     break;
    }
-   if(key=='g')                         // half snap factor
+   if(key=='g' && state==0)                         // half snap factor
    {
-    cadsnap /= 2.0;
-    my_snprintf(str, S(str), "alert_ {half snap:  %g ", cadsnap);
-    if(cadsnap == CADSNAP) strcat(str, " : default} {}"); // overflow safe
-    else strcat(str, "} {}"); // overflow safe
-    tkeval(str);
+    set_snap(cadsnap / 2.0);
     break;
    }
-   if(key=='G')                         // double snap factor
+   if(key=='g' && state==ControlMask)              // set snap factor 20161212
    {
-    cadsnap *= 2.0;
-    my_snprintf(str, S(str), "alert_ {double snap:  %g ", cadsnap);
-    if(cadsnap == CADSNAP) strcat(str, " : default} {}"); // overflow safe
-    else strcat(str, "} {}"); // overflow safe
-    tkeval(str);
+    my_snprintf(str, S(str),
+     "input_number \"Enter snap value (default: %g current: %g)\" \"xschem set cadsnap_noalert\"", 
+     cadsnap, CADSNAP);
+    Tcl_Eval(interp, str);
+    break;
+   }
+   if(key=='G')                                    // double snap factor
+   {
+    set_snap(cadsnap * 2.0);
     break;
    }
    if(key=='*' && state==(Mod1Mask|ShiftMask) )		// svg print , 20121108

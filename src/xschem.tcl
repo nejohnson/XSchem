@@ -1892,20 +1892,20 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
         if { $incr_hilight == 1} { xschem set incr_hilight 1} else { xschem set incr_hilight 0}
       }
    
-   .menubar.option.menu add radiobutton -label "vhdl" -variable netlist_type -value vhdl \
+   .menubar.option.menu add radiobutton -label "Vhdl" -variable netlist_type -value vhdl \
 	-accelerator {V-toggle} \
 	-command "xschem netlist_type vhdl"
-   .menubar.option.menu add radiobutton -label "verilog" -variable netlist_type -value verilog \
+   .menubar.option.menu add radiobutton -label "Verilog" -variable netlist_type -value verilog \
 	-accelerator {V-toggle} \
 	-command "xschem netlist_type verilog"
-   .menubar.option.menu add radiobutton -label "spice" -variable netlist_type -value spice \
+   .menubar.option.menu add radiobutton -label "Spice" -variable netlist_type -value spice \
         -accelerator {V-toggle} \
 	-command "xschem netlist_type spice"
-   .menubar.option.menu add command -label "set line width" \
+   .menubar.option.menu add command -label "Set line width" \
 	-command {
           input_number "Enter linewidth (float):" "xschem line_width"
 	}
-   .menubar.option.menu add command -label "set symbol width" \
+   .menubar.option.menu add command -label "Set symbol width" \
 	-command {
           input_number "Enter Symbol width ($symbol_width)" "set symbol_width"
 	}
@@ -1976,7 +1976,17 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    .menubar.zoom.menu add command -label "In" -command "xschem zoom_in" -accelerator Z
    .menubar.zoom.menu add command -label "Out" -command "xschem zoom_out" -accelerator o
    .menubar.zoom.menu add command -label "Zoom box" -command "xschem zoom_box" -accelerator z
-
+   .menubar.zoom.menu add command -label "Half Snap Threshold" -accelerator g -command {
+     xschem set cadsnap [expr [xschem get cadsnap] / 2.0 ]
+   }
+   .menubar.zoom.menu add command -label "Double Snap Threshold" -accelerator G -command {
+     xschem set cadsnap [expr [xschem get cadsnap] * 2.0 ]
+   }
+   .menubar.zoom.menu add command -label "Set snap value" \
+      -command {
+       input_number "Enter snap value ( default: [xschem get cadsnap_default] current: [xschem get cadsnap])" \
+         "xschem set cadsnap_noalert"
+	}
 # 20110112
    .menubar.zoom.menu add checkbutton -label "View only Probes" -variable only_probes \
       -accelerator {5} \

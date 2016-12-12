@@ -22,6 +22,13 @@
 
 #include "xschem.h"
 
+void set_snap(double newsnap) // 20161212 set new snap factor and just notify new value
+{
+    char str[256];
+    cadsnap = newsnap;
+    my_snprintf(str, S(str), "alert_ {snap: %g, default: %g} {}", cadsnap, CADSNAP);
+    tkeval(str);
+}
 
 int set_netlist_dir(int force) // 20081210
 {

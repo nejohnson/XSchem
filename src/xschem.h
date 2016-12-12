@@ -415,6 +415,7 @@ extern double mousex,mousey; // mouse coord.
 extern double mousex_snap,mousey_snap; // mouse coord. snapped to grid
 extern double cadsnap;
 
+extern void set_snap(double); // 20161212
 extern double *character[256];
 extern int netlist_show;
 extern int flat_netlist;

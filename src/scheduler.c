@@ -387,6 +387,16 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
   else if(!strcmp(argv[2],"schpath"))  {
         Tcl_AppendResult(interp, schematic[currentsch],NULL);
   }
+  else if(!strcmp(argv[2],"cadsnap_default"))  { // 20161212
+        char s[30]; // overflow safe 20161212
+        my_snprintf(s, S(s), "%.9g",CADSNAP);
+        Tcl_AppendResult(interp, s,NULL);
+  }
+  else if(!strcmp(argv[2],"cadsnap"))  { // 20161212
+        char s[30]; // overflow safe 20161212
+        my_snprintf(s, S(s), "%.9g",cadsnap);
+        Tcl_AppendResult(interp, s,NULL);
+  }
   else if(!strcmp(argv[2],"rectcolor"))  {
         char s[30]; // overflow safe 20161122
         my_snprintf(s, S(s), "%d",rectcolor);
@@ -452,6 +462,12 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
   }
   else if(!strcmp(argv[2],"semaphore"))  {
         semaphore=atoi(argv[3]);
+  }
+  else if(!strcmp(argv[2],"cadsnap"))  { // 20161212
+        set_snap( atof(argv[3]) );
+  }
+  else if(!strcmp(argv[2],"cadsnap_noalert"))  { // 20161212
+        cadsnap = atof( argv[3] );
   }
   else if(!strcmp(argv[2],"flat_netlist"))  {
         flat_netlist=atoi(argv[3]);

@@ -1,4 +1,4 @@
-G {type=primitive
+G {type=and2
 vhdl_stop=true
 format="@name @@Z @@VSS  and(2) @@A @@VSS @@B @@VSS @TABLE"
 template="name=E1 TABLE=\\"1.4 0.0 1.6 3.0\\""} 

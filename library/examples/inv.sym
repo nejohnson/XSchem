@@ -1,4 +1,4 @@
-G {type=primitive
+G {type=inv
 vhdl_stop=true
 format="@name @@Z @@VSS  pwl(1) @@A @@VSS  @TABLE"
 template="name=E1 TABLE=\\"1.4 3.0 1.6 0.0\\""} 

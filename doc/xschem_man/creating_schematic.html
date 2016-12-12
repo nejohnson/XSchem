@@ -79,6 +79,115 @@ p{padding: 15px  30px 10px;}
   to make image sizes smaller).
  </p>
  <img src="creating_schematic8.png"> 
+ <p>
+  Normally a cmos gate like the one used in this example is used as a building block (among many others)
+  for bigger circuits, therefore we need to enclose the schematic view above in a symbol representation.
+ </p>
+ <h3>Automatic symbol creation?</h3>
+ <p>
+  XSCHEM has the ability to automatically generate a symbol view given the schematic view. Just press
+  the <tt>'A'</tt> bindkey in the drawing area of the nand2 gate.
+ </p>
+ <img src="creating_schematic9.png"> 
+ <p>
+  After pressing 'OK' a <tt>mylib/nand2.sym</tt> file is generated. try opening it 
+  (<tt>File-&gt;Open</tt>):
+ </p>
+ <img src="creating_schematic10.png"> 
+ <p>
+  As you can see a symbolic view of the gate has been automatically created using the information
+  in the schematic view (specifically, the input/output pins). Now, this graphic is not really 
+  looking like a nand gate, so we may wish to edit it to make it look better. Delete (by selecting 
+  and pressing the <tt>Delete</tt> key) all the green lines, keep the red pins, the pin labels and the 
+  @symname and @name texts, then draw a nand shape like in the following picture. 
+  To allow you to draw small 
+  segments you may need to reduce the snap factor (menu <tt>View-&gt;Half snap thresholf</tt>)
+  remember to reset the snap factor to its default setting when done.
+ </p>
+ <img src="creating_schematic11.png"> 
+ <p>
+  This completes the nand2 component. It is now ready to be placed in a schematic. Open a test schematic 
+  (for example <tt>mylib/test.sch</tt> (remember to save the nand2.sym you have just created),
+  press the <tt>Insert</tt> key and locate the <tt>mylib/nand2.sym</tt> symbol.
+  Then insert <tt>devices/lab_pin.sym</tt> components and place wires to connect some nodes to the 
+  newly instantiated nand2 component: 
+ </p>
+ <img src="creating_schematic12.png"> 
+ <p> 
+  This is now a valid circuit. Let's test it by extracting the SPICE netlist. Enable the showing
+  of netlist window (<tt>Options -&gt; Show netlist win</tt>, or <tt>'A'</tt> key).
+  Now extract the netlist (<tt>Netlist</tt> button on the right side of the menu bar, or <tt>'N'</tt>
+  key). the SPICE netlist will be shown.
+ </p>
+ <pre class="code">
+**.subckt test
+x1 OUTPUT_Z INPUT_A INPUT_B nand2
+**** begin user architecture code
+**** end user architecture code
+**.ends
+
+* expanding symbol: mylib/nand2 # of pins=3
+.subckt nand2 Z A B
+*.ipin A
+*.opin Z
+*.ipin B
+m1 Z A net1 VSS nmos w=5u l=0.18u m=1
+m2 Z B VCC VCC pmos w=8u l=0.18u m=1
+m3 Z A VCC VCC pmos w=8u l=0.18u m=1
+m4 net1 B VSS VSS nmos w=5u l=0.18u m=1
+**** begin user architecture code
+**** end user architecture code
+.ends
+
+.GLOBAL VCC
+.GLOBAL VSS
+.end
+ </pre><br>
+ <p>
+  This is an example of a hierarchical circuit. The nand2 is a symbol view of another lower level
+  schematic. We may place multiple times the nand2 symbol to create more complex circuits.
+ </p>
+ <img src="creating_schematic13.png"> 
+ <p>
+  By selecting one of the nand2 gates and pressing the <tt>'e'</tt> key or menu 
+  <tt>Edit -&gt; Push schematic</tt> we can 'descend' into it and navigate through the various 
+  hierarchies. Pressing <tt>&lt;ctrl&gt;e</tt> returns back to the upper level.
+ </p>
+ <img src="creating_schematic14.png"> 
+ <p> 
+  This is the corresponding netlist: 
+ </p>
+ <pre class="code">
+**.subckt test
+x1 Q SET_BAR QBAR nand2
+x2 QBAR CLEAR_BAR Q nand2
+**** begin user architecture code
+**** end user architecture code
+**.ends
+
+* expanding symbol: mylib/nand2 # of pins=3
+.subckt nand2 Z A B
+*.ipin A
+*.opin Z
+*.ipin B
+m1 Z A net1 VSS nmos w=5u l=0.18u m=1
+m2 Z B VCC VCC pmos w=8u l=0.18u m=1
+m3 Z A VCC VCC pmos w=8u l=0.18u m=1
+m4 net1 B VSS VSS nmos w=5u l=0.18u m=1
+**** begin user architecture code
+**** end user architecture code
+.ends
+
+.GLOBAL VCC
+.GLOBAL VSS
+.end
+ </pre><br>
+ <p> 
+  The advantage of using hierarchy in circuits is the same as using functions in programming
+  languages; avoid drawing many repetitive blocks. Also the netlist file will be much smaller.
+ </p>
+
+
  <!-- end of slide -->
  <div class="filler"></div>
 </div>

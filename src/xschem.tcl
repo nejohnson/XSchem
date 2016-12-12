@@ -1528,8 +1528,8 @@ proc input_number {txt cmd} {
 
 ## 20161102
 proc launcher {} {
-  global launcher_var launcher_browser launcher_program XSCHEM_HOME_DIR XSCHEM_DESIGN_DIR
-  puts $launcher_var
+  global launcher_var launcher_browser launcher_program XSCHEM_HOME_DIR XSCHEM_DESIGN_DIR env
+  # puts "$launcher_var $env(HOME)"
   if { ![string compare $launcher_program {}] } {
     set launcher_program $launcher_browser
   }

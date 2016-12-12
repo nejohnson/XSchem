@@ -1,9 +1,5 @@
-## set prefix for installation
-#   will install in:
-#   ${prefix}/bin
-#   ${prefix}/share/doc/xschem
-#   ${prefix}/share/xschem
 
+## set prefix for installation
 #prefix=/usr/local
 prefix=$(HOME)
 library_prefix=$(HOME)/xschem_library
@@ -18,7 +14,8 @@ CC=gcc
 TCLVER=8.6
 
 ## enable one of the PROFILEFLAGS below if debugging stuff is needed
-PROFILEFLAGS=-g  -pg 
+## -g -pg
+PROFILEFLAGS=-g 
 
 CFLAGS = -Wall  $(PROFILEFLAGS)  -I/usr/include/tcl${TCLVER} 
 LDFLAGS = -L/usr/X11R6/lib -lX11 -lm -lXpm -ltcl${TCLVER} -ltk${TCLVER}  -lfl  \

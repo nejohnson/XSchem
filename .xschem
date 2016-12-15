@@ -13,7 +13,6 @@ set XSCHEM_DESIGN_DIR $env(HOME)/xschem_library
 set netlist_dir $env(HOME)/xschem_library/simulations
 
 ## Window to open on startup
-# set XSCHEM_NEW_WINDOW {bonelli/0_top}
 set XSCHEM_START_WINDOW {mylib/0_top}
 # set XSCHEM_NEW_WINDOW {}
 

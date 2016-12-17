@@ -740,7 +740,7 @@ void print_hilight_net(int show)
    my_strcat(&cmd, filetmp2);
    my_strcat(&cmd, " ]");
    tkeval(cmd);
-   tkeval("viewdata");
+   tkeval("viewdata $::entry1");
  }
  if(show==3) {
    system(cmd3);
@@ -748,7 +748,7 @@ void print_hilight_net(int show)
    my_strcat(&cmd, filetmp1);
    my_strcat(&cmd, " ]");
    tkeval(cmd);
-   tkeval("viewdata");
+   tkeval("viewdata $::entry1");
  }
  if(show==0)  {
    tkeval(a);

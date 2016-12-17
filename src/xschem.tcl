@@ -138,6 +138,19 @@ proc netlist {source_file show netlist_file} {
  return {}
 }
 
+# 20161216 execute task in other work dir
+proc task { cmd {dir .}  {background fg}} {
+  global task_output task_error
+  if {$background eq {bg}} {
+    set task_error [catch {exec sh -c "cd $dir; exec $cmd" &} task_output]
+  } elseif {$background eq {fg}} {
+    set task_error [catch {exec sh -c "cd $dir; exec $cmd"} task_output]
+  } elseif {$background eq {tk_exec}} {
+    set task_error [catch {tk_exec sh -c "cd $dir; exec $cmd"} task_output]
+  }
+}
+
+
 # 20161121
 proc convert_to_pdf {filename} {
   global a3page
@@ -168,6 +181,7 @@ proc edit_file {filename} {
 
 proc simulate {filename} {
  global XSCHEM_HOME_DIR entry1 XSCHEM_DESIGN_DIR env netlist_dir netlist_type
+ global task_output task_error
  global iverilog_path vvp_path hspice_path hspicerf_path hspicerf_simulator modelsim_path modelsim_simulator
  global utile_cmd_path terminal
  global iverilog_opts ;# 20161118
@@ -177,57 +191,46 @@ proc simulate {filename} {
    if { $netlist_type=="verilog" } {
      # 20150916 added modelsim
      if { $modelsim_simulator == 0 } { ;# icarus verilog
-       set old $env(PWD)
-       cd $netlist_dir
-       if { [catch {exec $iverilog_path $iverilog_opts -o \
-          .verilog_object $filename} entry1] } {
-         viewdata
-         return {}
-       }
-       set entry1  [tk_exec  $vvp_path $netlist_dir/.verilog_object]
-       write_data $entry1 $netlist_dir/.sim_output.txt
-       eval exec $terminal  -e less $netlist_dir/.sim_output.txt 2>/dev/null & ;# 20161119
-       cd $old
+
+       task "$iverilog_path $iverilog_opts -o .verilog_object $filename" $netlist_dir fg
+       if {$task_error} {viewdata $task_output; return}
+
+       task  "$vvp_path $netlist_dir/.verilog_object" $netlist_dir fg
+       if {$task_error} {viewdata $task_output; return}
+       write_data $task_output $netlist_dir/.sim_output.txt
+       task "$terminal  -e less $netlist_dir/.sim_output.txt" $netlist_dir bg
      } else { ;# modelsim
-       set old $env(PWD)
-       cd $netlist_dir
        #puts {start compile}
-       if { [catch {exec ${modelsim_path}/vlog +acc $filename} entry1] } {
-         viewdata
-         return {}
-       }
+       task "${modelsim_path}/vlog +acc $filename" $netlist_dir fg
+       if {$task_error} {viewdata $task_output; return}
+  
        #puts {start simulation}
-       set entry1  [tk_exec  ${modelsim_path}/vsim -c -do "run -all" [file rootname $filename]]
+       task "${modelsim_path}/vsim -c -do \"run -all\" [file rootname $filename]" $netlist_dir fg
+       if {$task_error} {viewdata $task_output; return}
        #puts {end simulation}
-       write_data $entry1 $netlist_dir/.sim_output.txt
+       write_data $task_output $netlist_dir/.sim_output.txt
        #puts {end log file}
-       eval exec $terminal  -e less $netlist_dir/.sim_output.txt 2>/dev/null &
-       cd $old
+       task "$terminal  -e less $netlist_dir/.sim_output.txt" $netlist_dir bg
 
      } 
    } elseif { $netlist_type=="spice" } { 
 
-     set old $env(PWD)
-     cd $netlist_dir
-
+     ## run utile before firing simulator if any UTILE stimuli file found
      set schname [ file tail [ file rootname $filename] ]
      if { [file exists stimuli.$schname ] } {
-       exec $utile_cmd_path stimuli.$schname &
+       task "$utile_cmd_path stimuli.$schname" $netlist_dir fg
      }
 
      if { $hspicerf_simulator == 1 } {
        # added computerfarm
        ## 20161119 $terminal does not fit here, hspice wants only xterm !
-       eval exec xterm -e {"$computerfarm $hspicerf_path $filename ; bash"} &
+       task "xterm -e \"$computerfarm $hspicerf_path $filename ; bash\"" $netlist_dir bg
      } else {
-       eval exec xterm -e {"$computerfarm $hspice_path -i $filename | tee hspice.out ; bash"} &
+       task "xterm -e \"$computerfarm $hspice_path -i $filename | tee hspice.out ; bash\""  $netlist_dir bg
      }
-     cd $old
    } elseif { $netlist_type=="vhdl" } { 
      set old $env(PWD)
-     cd $netlist_dir
-     exec ${modelsim_path}/vsim -i &
-     cd $old
+     task "${modelsim_path}/vsim -i" $netlist_dir bg
    } else { 
      alert_ "ERROR: netlist_type: $netlist_type , filename: $filename"
    }
@@ -238,66 +241,44 @@ proc simulate {filename} {
 proc modelsim {schname} {
   global XSCHEM_HOME_DIR entry1 XSCHEM_DESIGN_DIR env netlist_dir netlist_type
   global iverilog_path vvp_path hspice_path hspicerf_path hspicerf_simulator modelsim_path
-  set old $env(PWD)
-  cd $netlist_dir
-  exec ${modelsim_path}/vsim -i &
-  cd $old
+  task "${modelsim_path}/vsim -i" $netlist_dir bg
 }
 
 proc utile_translate {schname} { 
   global XSCHEM_HOME_DIR entry1 XSCHEM_DESIGN_DIR env netlist_dir netlist_type tcl_debug
   global utile_gui_path utile_cmd_path
-  set old $env(PWD)
-  cd $netlist_dir
-  exec $utile_cmd_path stimuli.$schname &
-  cd $old
+  task "$utile_cmd_path stimuli.$schname" $netlist_dir fg
 }
 
 proc utile_gui {schname} { 
   global XSCHEM_HOME_DIR entry1 XSCHEM_DESIGN_DIR env netlist_dir netlist_type tcl_debug
   global utile_gui_path utile_cmd_path
-  set old $env(PWD)
-  cd $netlist_dir
-  exec $utile_gui_path stimuli.$schname &
-  cd $old
+  task "$utile_gui_path stimuli.$schname" $netlist_dir bg
 }
 
 proc utile_edit {schname} { 
   global XSCHEM_HOME_DIR entry1 XSCHEM_DESIGN_DIR env netlist_dir netlist_type tcl_debug editor
   global utile_gui_path utile_cmd_path 
-  set old $env(PWD)
-  cd $netlist_dir
-  exec sh -c "$editor stimuli.$schname ; $utile_cmd_path stimuli.$schname" & 
-
-  cd $old
+  task "sh -c \"$editor stimuli.$schname ; $utile_cmd_path stimuli.$schname\"" $netlist_dir bg 
 }
 
 proc waveview {schname} {
   global XSCHEM_HOME_DIR entry1 XSCHEM_DESIGN_DIR env netlist_dir netlist_type tcl_debug
   global waveview_path
-  set old $env(PWD)
-  cd $netlist_dir
-  eval tk_exec $waveview_path -k -x $schname.sx
-  cd $old
+  task "$waveview_path -k -x $schname.sx" $netlist_dir tk_exec
 }
 
 proc cosmoscope { schname } {
   global XSCHEM_HOME_DIR entry1 XSCHEM_DESIGN_DIR env netlist_dir netlist_type tcl_debug
   global cscope_path
-  set old $env(PWD)
-  cd $netlist_dir
-  exec $cscope_path &
-  cd $old
+  task "$cscope_path" $netlist_dir bg
 }
 
 
 proc gtkwave {schname} {
   global XSCHEM_HOME_DIR entry1 XSCHEM_DESIGN_DIR env netlist_dir netlist_type tcl_debug
   global gtkwave_path
-  set old $env(PWD)
-  cd $netlist_dir
-  exec $gtkwave_path 2>/dev/null &
-  cd $old
+  task "$gtkwave_path 2>/dev/null" $netlist_dir bg
 }
 
 proc waves {schname} {
@@ -307,26 +288,17 @@ proc waves {schname} {
 
  if { [xschem set_netlist_dir 0] ne "" } {
    if { $netlist_type=="verilog" } {
-     if {$tcl_debug<=-1} {puts "waves: schname=$schname"}
-     set old $env(PWD)
-     cd $netlist_dir
-     if { [catch {exec $gtkwave_path dumpfile.vcd $schname.sav 2>/dev/null & } entry1] } {
-       viewdata
-     }
+     task "$gtkwave_path dumpfile.vcd $schname.sav 2>/dev/null" $netlist_dir bg
 
-     cd $old
    } elseif { $netlist_type=="spice" } {
-     set old $env(PWD)
-     cd $netlist_dir
 
      if { $analog_viewer == "cosmoscope" } { 
-       catch {exec $cscope_path & } entry1
+       task $cscope_path $netlist_dir bg
      } elseif { $analog_viewer == "waveview" } { 
-       eval tk_exec $waveview_path -k -x $schname.sx
+       task "$waveview_path -k -x $schname.sx" $netlist_dir tk_exec
      } else {
        alert_ { Unsupported default wiever... } 
      }
-     cd $old
    }
 
  }
@@ -337,11 +309,9 @@ proc get_shell { curpath } {
  global XSCHEM_HOME_DIR entry1 XSCHEM_DESIGN_DIR env netlist_dir netlist_type tcl_debug
  global cscope_path gtkwave_path analog_viewer waveview_path terminal
 
- set old $env(PWD)
- cd $curpath
- eval exec $terminal & ;# 20161119
- cd $old
+ task "$terminal" $netlist_dir bg
 }
+
 proc edit_netlist {schname } {
  global XSCHEM_HOME_DIR entry1 XSCHEM_DESIGN_DIR env netlist_dir netlist_type tcl_debug
  global cscope_path gtkwave_path analog_viewer waveview_path editor terminal
@@ -350,27 +320,14 @@ proc edit_netlist {schname } {
  if { [xschem set_netlist_dir 0] ne "" } {
    if { $netlist_type=="verilog" } {
      if {$tcl_debug<=-1} {puts "waves: schname=$schname"}
-     set old $env(PWD)
-     cd $netlist_dir
-     eval exec $editor $ftype  ${schname}.v & ;# 20161119
-     cd $old
+     task "$editor $ftype  ${schname}.v" $netlist_dir bg
    } elseif { $netlist_type=="spice" } {
-     set old $env(PWD)
-     cd $netlist_dir
-     eval exec $editor $ftype ${schname}.spice & ;# 20161119
-     
-     cd $old
+     task "$editor $ftype ${schname}.spice" $netlist_dir bg
    } elseif { $netlist_type=="vhdl" } { 
-     set old $env(PWD)
-     cd $netlist_dir
-     eval exec $editor $ftype ${schname}.vhdl & ;# 20161119
-     cd $old
+     task "$editor $ftype ${schname}.vhdl" $netlist_dir bg
    }
-
  }
  return {}
-
-
 }
 
 proc check_valid_filename { s} { 
@@ -483,7 +440,7 @@ proc create_pins {} {
   regsub -all {>} $entry1 {]} entry1 
   set lines [split $entry1 \n]
 
-  # viewdata
+  # viewdata $entry1
   set pcnt 0
   set y 0
   set fd [open $env(PWD)/.clipboard.sch "w"]
@@ -503,7 +460,7 @@ proc add_lab_no_prefix {} {
   regsub -all {<} $entry1 {[} entry1
   regsub -all {>} $entry1 {]} entry1
   set lines [split $entry1 \n]
-  # viewdata
+  # viewdata $entry1
   set pcnt 0
   set y 0
   set fd [open $env(PWD)/.clipboard.sch "w"]
@@ -523,7 +480,7 @@ proc add_lab_prefix {} {
   regsub -all {<} $entry1 {[} entry1
   regsub -all {>} $entry1 {]} entry1
   set lines [split $entry1 \n]
-  # viewdata
+  # viewdata $entry1
   set pcnt 0
   set y 0
   set fd [open $env(PWD)/.clipboard.sch "w"]
@@ -1237,8 +1194,8 @@ proc textwindow {filename} {
 }
 
 
-proc viewdata {} {
-   global wcounter entry1 rcode
+proc viewdata {data} {
+   global wcounter  rcode
    global w
    set wcounter [expr $wcounter+1]
    set rcode {}
@@ -1268,7 +1225,7 @@ proc viewdata {} {
    pack $w.yscroll -side right -fill y
    pack $w.text -expand yes -fill both
    pack $w.xscroll -side bottom -fill x
-   $w.text insert 0.0 $entry1
+   $w.text insert 0.0 $data
    return $rcode
 }
 

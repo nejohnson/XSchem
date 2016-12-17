@@ -1147,7 +1147,7 @@ int callback(int event, int mx, int my, KeySym key,
   case -3:  // double click  : edit prop
    if(semaphore==2) break;
    if(debug_var>=1) fprintf(errfp, "callback(): DoubleClick  rubber=%d state=%d\n",rubber,state);
-   if(button==Button2 && !(state & ShiftMask)) {
+   if(button==Button1 && !(state & ShiftMask)) {
      unselect_all();
      select_object(mousex,mousey,SELECTED);
      edit_property(0);

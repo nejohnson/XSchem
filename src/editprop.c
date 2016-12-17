@@ -212,7 +212,7 @@ void edit_text_property(int x)
    my_snprintf(property, S(property), "%g",textelement[sel].xscale); 
    Tcl_SetVar(interp,"hsize",property,TCL_GLOBAL_ONLY);
    if(x==0) tkeval("enter_text {text:}");
-   else if(x==2) tkeval("viewdata");
+   else if(x==2) tkeval("viewdata $::entry1");
    else if(x==1) tkeval("edit_vi_prop {Text:}");
    else {
      fprintf(errfp, "edit_text_property() : unknown parameter x=%d\n",x); exit(EXIT_FAILURE);
@@ -342,7 +342,7 @@ void edit_symbol_property(int x)
    else {
      if(netlist_commands && x==1)    tkeval("edit_vi_netlist_prop {Input property:}");
      else if(x==1)    tkeval("edit_vi_prop {Input property:}");
-     else if(x==2)    tkeval("viewdata");
+     else if(x==2)    tkeval("viewdata $::entry1");
      my_strdup(&result, Tcl_GetStringResult(interp));
    }
    if(debug_var>=1) fprintf(errfp, "edit_symbol_property(): before update_symbol, modified=%d\n", modified);
@@ -639,7 +639,7 @@ void edit_property(int x)
       if(debug_var>=1) fprintf(errfp, "edit_property(): executing edit_vi_prop\n");
       tkeval("edit_vi_prop {Global schematic property:}");
    }
-   else if(x==2)    tkeval("viewdata");
+   else if(x==2)    tkeval("viewdata $::entry1");
    if(debug_var>=1) fprintf(errfp, "edit_property(): done executing edit_vi_prop, result=%s\n",Tcl_GetStringResult(interp));
    if(debug_var>=1) fprintf(errfp, "edit_property(): rcode=%s\n",Tcl_GetVar(interp, "rcode", TCL_GLOBAL_ONLY) );
    if(strcmp(Tcl_GetVar(interp, "rcode", TCL_GLOBAL_ONLY),"") )

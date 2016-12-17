@@ -1,4 +1,4 @@
-G {type=primitive
+G {type=switch
 format="@name @@P @@M vcr pwl(1) @@CP @@CM @TABLE"
 template="name=G1 TABLE=\\"1.0 1G 2.0 10\\""
 } 

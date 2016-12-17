@@ -514,7 +514,7 @@ void tclexit(ClientData s)
 int Tcl_AppInit(Tcl_Interp *inter)
 {
  static char *name=NULL; // overflow safe 20161122
- char tmp[30]; // 20161122 overflow safe
+ char tmp[1024]; // 20161122 overflow safe
  int i;
  struct stat buf;
 
@@ -549,10 +549,16 @@ int Tcl_AppInit(Tcl_Interp *inter)
 
  if(!stat(name, &buf) ) {  // file exists 20121110
    if(Tcl_EvalFile(interp, name)==TCL_ERROR) { // source ~/.xschem 20121110
-     fprintf(errfp, "Tcl_AppInit() err 1: can not execute ~/.xschem, please fix\n");
+     fprintf(errfp, "Tcl_AppInit() err 1: can not execute .xschem, please fix:\n");
+     fprintf(errfp, Tcl_GetStringResult(interp));
+     fprintf(errfp, "\n");
+     my_snprintf(tmp, S(tmp), "tk_messageBox -icon error -type ok -message \
+        {Tcl_AppInit() err 1: can not execute .xschem, please fix:\n %s}",
+        Tcl_GetStringResult(interp));
      if(has_x) {
-       Tcl_Eval(interp,
-         "tk_messageBox -icon error -type ok -message \"Tcl_AppInit() err 1: can not execute ~/.xschem, probably due to syntax errors, pls fix\"");
+       Tcl_Eval(interp, "wm withdraw ."); // 20161217
+       Tcl_Eval(interp, tmp); // 20161217
+       Tcl_Eval(interp, "exit");
      }
      return TCL_ERROR;
    }
@@ -571,7 +577,8 @@ int Tcl_AppInit(Tcl_Interp *inter)
    fprintf(errfp, "Tcl_AppInit() err 3: cannot execute xschem.tcl\n");
    if(has_x) {
      Tcl_Eval(interp,
-       "tk_messageBox -icon error -type ok -message \"Tcl_AppInit() err 3: xschem.tcl not found, you are probably missing XSCHEM_HOME_DIR\"");
+       "tk_messageBox -icon error -type ok -message \"Tcl_AppInit() err 3: xschem.tcl not found, \
+         you are probably missing XSCHEM_HOME_DIR\"");
    }
    Tcl_ResetResult(interp);
    Tcl_AppendResult(interp, "Tcl_AppInit() err 3: xschem.tcl not found, you are probably missing XSCHEM_HOME_DIR",NULL);

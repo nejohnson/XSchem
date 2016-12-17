@@ -21,10 +21,10 @@ N 440 -380 500 -380 {}
 C {devices/ipin} 160 -310 0 0 {name=p1 lab=A} 
 C {devices/opin} 500 -380 0 0 {name=p2 lab=Z} 
 C {devices/ipin} 160 -190 0 0 {name=p3 lab=B} 
-C {devices/nmos4} 270 -310 0 0 {name=m1 model=nmos w=5u l=0.18u m=1} 
-C {devices/pmos4} 270 -440 0 0 {name=m2 model=pmos w=8u l=0.18u m=1} 
-C {devices/pmos4} 420 -440 0 0 {name=m3 model=pmos w=8u l=0.18u m=1} 
-C {devices/nmos4} 270 -190 0 0 {name=m4 model=nmos w=5u l=0.18u m=1} 
+C {devices/nmos4} 270 -310 0 0 {name=m1 model=nmos w=WN l=LN m=1} 
+C {devices/pmos4} 270 -440 0 0 {name=m2 model=pmos w=WP l=LP m=1} 
+C {devices/pmos4} 420 -440 0 0 {name=m3 model=pmos w=WP l=LP m=1} 
+C {devices/nmos4} 270 -190 0 0 {name=m4 model=nmos w=WN l=LN m=1} 
 C {devices/vdd} 290 -500 0 0 {name=l1 lab=VCC} 
 C {devices/gnd} 290 -130 0 0 {name=l2 lab=VSS} 
 C {devices/lab_pin} 290 -310 0 1 {name=l3 sig_type=std_logic lab=VSS} 

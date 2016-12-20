@@ -94,8 +94,50 @@ type=nmos
   Attribute substitution takes place in symbol format attribute and in every text, as shown in below picture.
  </p>
  <img src="attribute_substitution.png">
- <h3>SPECIAL SYMBOL ATTRIBUTES</h3>
--todo--
+ <h3>PREDEFINED SYMBOL ATTRIBUTES</h3>
+ <ul>
+  <li><tt>type</tt></li>
+  <li><tt>template</tt></li>
+  <li><tt>vhdl_ignore</tt></li>
+  <li><tt>spice_ignore</tt></li>
+  <li><tt>verilog_ignore</tt></li>
+  <li><tt>vhdl_stop</tt></li>
+  <li><tt>spice_stop</tt></li>
+  <li><tt>verilog_stop</tt></li>
+  <li><tt>place</tt></li>
+  <li><tt>generic_type</tt></li>
+  <li><tt>extra</tt></li>
+  <li><tt>dir</tt></li>
+  <li><tt>global</tt></li>
+  <li><tt>spice_netlist</tt></li>
+  <li><tt>verilog_netlist</tt></li>
+  <li><tt>vhdl_netlist</tt></li>
+  <li><tt>format</tt></li>
+  <li><tt>verilog_format</tt></li>
+  <li><tt>vhdl_format</tt></li>
+ </ul>
+ <h3>PREDEFINED SYMBOL VALUES</h3>
+ <ul>
+  <li><tt>@symname</tt></li>
+  <li><tt>@sch_last_modified</tt></li>
+  <li><tt>@sym_last_modified</tt></li>
+  <li><tt>@time_last_modified</tt></li>
+  <p>
+   this indicates the last modification time of the schematic <b>containing</b> the symbol.
+  </p>
+  <li><tt>@schname</tt></li>
+  <li><tt>@prop_ptr</tt></li>
+  <p>
+   this expandes to the <b>entire</b> property string passed to the component.
+  </p>
+  <li><tt>@schprop</tt></li>
+  <p>
+   this expandes to the <b>spice</b> global property string of the schematic containing the symbol
+  </p>
+  <li><tt>@schvhdlprop</tt></li>
+  <li><tt>@schverilogprop</tt></li>
+ </ul><br>
+
  <!-- end of slide -->
  <div class="filler"></div>
 </div>

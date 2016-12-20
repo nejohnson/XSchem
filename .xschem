@@ -17,7 +17,7 @@ set XSCHEM_START_WINDOW {mylib/0_top}
 # set XSCHEM_NEW_WINDOW {}
 
 ## some default behavior
-set netlist_type spice
+set netlist_type spice ;# allowed : spice, verilog, vhdl
 set hspice_netlist 1
 #set line_width 2
 set change_lw 1

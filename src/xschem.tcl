@@ -316,10 +316,10 @@ proc edit_netlist {schname } {
  global XSCHEM_HOME_DIR entry1 XSCHEM_DESIGN_DIR env netlist_dir netlist_type tcl_debug
  global cscope_path gtkwave_path analog_viewer waveview_path editor terminal
 
- if { [regexp vim $editor] } { set ftype "\{-c :set filetype=$netlist_type\}" } else { set ftype {} }
+ if { [regexp vim $editor] } { set ftype "-c \":set filetype=$netlist_type\"" } else { set ftype {} }
  if { [xschem set_netlist_dir 0] ne "" } {
+   # puts "edit_netlist: \"$editor $ftype  ${schname}.v\" $netlist_dir bg"
    if { $netlist_type=="verilog" } {
-     if {$tcl_debug<=-1} {puts "waves: schname=$schname"}
      task "$editor $ftype  ${schname}.v" $netlist_dir bg
    } elseif { $netlist_type=="spice" } {
      task "$editor $ftype ${schname}.spice" $netlist_dir bg
@@ -2069,7 +2069,7 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
     wm withdraw .infotext
     set show_infowindow 0
    }
-   bind .drw  "?" "textwindow xschem.help"
+   bind .drw  "?" { textwindow ${XSCHEM_HOME_DIR}/xschem.help }
 
 
    frame .statusbar  

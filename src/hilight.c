@@ -23,14 +23,24 @@
 #include "xschem.h"
 
 static struct hilight_hashentry *table[HASHSIZE];
+static int nelements=0; // 20161221
 
 static unsigned int hash(char *tok)
 {
  register unsigned int h=0;
  register char *str;
  str=sch_prefix[currentsch];
- while(*tok) h=(h<<1)+*tok++;
- while(*str) h=(h<<1)+*str++;
+ // while(*tok) h=(h<<1)+*tok++;
+ // while(*str) h=(h<<1)+*str++;
+ while(*str) { // 20161221
+   h^=*str++; // xor
+   h=(h>>5) | (h<<(8*sizeof(unsigned int)-5)); // 20161221 rotate
+
+ }
+ while(*tok) { // 20161221
+   h^=*tok++; // xor
+   h=(h>>5) | (h<<(8*sizeof(unsigned int)-5)); // 20161221 rotate
+ }
  return h;
 }
 
@@ -55,6 +65,8 @@ void free_hilight_hash(void) // remove the whole hash table
  {
   table[i] = free_hilight_entry( table[i] );
  }
+ if(debug_var>=2) fprintf(errfp, "free_hilight_hash(): : nelements=%d\n", nelements);
+ nelements=0; // 20161221
 }
 
 
@@ -72,12 +84,14 @@ struct hilight_hashentry *hilight_lookup(char *token, int value, int remove)
  struct hilight_hashentry *entry, *saveptr, **preventry;
  char *ptr;
  int s ;
+ int depth=0; // 20161221
 
  if(token==NULL) return NULL;
  hashcode=hash(token);
  index=hashcode % HASHSIZE;
  entry=table[index];
  preventry=&table[index];
+ depth=0; // 20161221
  while(1)
  {
   if( !entry )                  // empty slot
@@ -96,6 +110,7 @@ struct hilight_hashentry *hilight_lookup(char *token, int value, int remove)
     entry->hash=hashcode;
     *preventry=entry;
     hilight_nets=1; // some nets should be hilighted ....  07122002
+    nelements++; // 20161221
    }
    return NULL; // whether inserted or not return NULL since it was not in
   }
@@ -118,6 +133,11 @@ struct hilight_hashentry *hilight_lookup(char *token, int value, int remove)
   }
   preventry=&entry->next; // descend into the list.
   entry = entry->next;
+  depth++; // 20161221
+  if(debug_var>=2) 
+    if(depth>200) 
+      fprintf(errfp, "hilight_lookup(): deep into the list: %d, index=%d, token=%s, hashcode=%d\n", 
+              depth, index, token, hashcode);
  }
 }
 
@@ -146,7 +166,10 @@ struct hilight_hashentry *bus_hilight_lookup(char *token, int value, int remove)
     // insert one bus element at a time in hash table
     if(debug_var>=2) fprintf(errfp, "bus_hilight_lookup: inserting: %s, value:%d\n", start,value);
     ptr1=hilight_lookup(start, value, remove);
-    if(ptr1 && !ptr2) ptr2=ptr1; //return first non null entry
+    if(ptr1 && !ptr2) {
+      ptr2=ptr1; //return first non null entry
+      if(remove==2) break; // 20161221 no need to go any further if only looking up element
+    }
     *string_ptr=c;     // ....restore original char
     start=string_ptr+1;
   }

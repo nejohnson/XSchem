@@ -2,8 +2,6 @@
 ## set prefix for installation
 ## XSCHEM will install in ${prefix}/bin, ${prefix}/share/xschem and ${prefix}/share/doc/xschem
 #prefix=/usr/local
-
-#prefix=/usr/local
 prefix=$(HOME)
 library_prefix=$(HOME)/xschem_library
 
@@ -18,7 +16,7 @@ TCLVER=8.6
 
 ## enable one of the PROFILEFLAGS below if debugging stuff is needed
 ## -g -pg
-PROFILEFLAGS=-g 
+PROFILEFLAGS=-g
 
 CFLAGS = -Wall  $(PROFILEFLAGS)  -I/usr/include/tcl${TCLVER} 
 LDFLAGS = -L/usr/X11R6/lib -lX11 -lm -lXpm -ltcl${TCLVER} -ltk${TCLVER}  -lfl  \
@@ -28,7 +26,7 @@ xschem: 	$(OBJ)
 	$(CC) -o $@   $^ $(LDFLAGS)
 
 parselabel.c: parselabel.l expandlabel.h
-	flex -o $@  $<
+	flex -o$@  $<
 
 expandlabel.c expandlabel.h: expandlabel.y
 	bison -d -o expandlabel.c  $<

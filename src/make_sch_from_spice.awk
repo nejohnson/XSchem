@@ -603,7 +603,7 @@ function print_sym(sym, template, dir, pin,
    printf "B 5 " (-x-size) " " (y+ooo*space-size) " " (-x+size) " " (y+ooo*space+size) \
          " {name=" pin[i] " dir=inout " >sym
    printf "}\n" >sym
-   print "L 4 " (-x),(y+ooo*space),(-x-lwidth), (y+ooo*space),"{}" >sym
+   print "L 7 " (-x),(y+ooo*space),(-x-lwidth), (y+ooo*space),"{}" >sym
    print "T {" pin[i] "}",-x-lwidth-textdist,y+ooo*space-lab_voffset,0,1,labsize, labsize, "{}" >sym
    ooo++
   }

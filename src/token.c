@@ -44,8 +44,14 @@ static struct hashentry *table[HASHSIZE];
 static unsigned int hash(char *tok, char *name)
 {
  register unsigned int h=0;
- while(*tok) h=(h<<5)-h+*tok++;
- while(*name!='\0' && *name!='[') h=(h<<5)-h+*name++;
+ while(*tok) {
+  h^=*tok++; // 20161221 xor
+  h=(h>>5) | (h<<(8*sizeof(unsigned int)-5)); // 20161221 rotate
+ }
+ while(*name!='\0' && *name!='[') {
+  h^=*name++; // 20161221 xor
+  h=(h>>5) | (h<<(8*sizeof(unsigned int)-5)); // 20161221 rotate
+}
  if(debug_var>=2) fprintf(errfp, "hash(): %d name=%s, tok=%s\n",h%HASHSIZE, name, tok);
  return h;
 }

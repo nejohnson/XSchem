@@ -272,7 +272,7 @@ function endfile(f) {
          " {name=" label_pin[i] vhdt vert " dir=inout " >sym
    if(value !="") printf "value=" value "}\n" >sym
    else printf "}\n" >sym
-   print "L 4 " (-x),(y+num_o*space),(-x-lwidth), (y+num_o*space),"{}" >sym
+   print "L 7 " (-x),(y+num_o*space),(-x-lwidth), (y+num_o*space),"{}" >sym
    print "T {" label_pin[i] "}",-x-lwidth-textdist,y+num_o*space-lab_voffset,0,1,labsize, labsize, "{}" >sym
    num_o++ # 20140519
   }

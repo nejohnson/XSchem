@@ -30,7 +30,11 @@ static struct node_hashentry *table[HASHSIZE];
 static unsigned int hash(char *tok)
 {
  register unsigned int h=0;
- while(*tok) h=(h<<5)-h+*tok++;
+ while(*tok) {
+   h^=*tok++; // 20161221 xor
+   h=(h>>5) | (h<<(8*sizeof(unsigned int)-5)); // 20161221 rotate
+ }
+
  return h;
 }
 

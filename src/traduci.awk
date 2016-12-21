@@ -14,31 +14,31 @@ END  { endfile(_filename_) }
 
 ###### begin user code ########################
 
-/\<snprintf\>/{
+/^L 6 .*\{\} *$/{
   found=1
-  gsub(/\<snprintf\>/,"my_snprintf")
+  sub(/^L 6/,"L 7") 
 }
 
 ###### end  user code  ########################
 
 
 {
- a[lines++] = $0 
+ __a[__lines++] = $0 
 }
 
 function beginfile(f)
 {
- lines=0
+ __lines=0
  found=0
 }
 
-function endfile(f)
+function endfile(f,   i)
 {
  if(found)  {
    print "patching: " f >"/dev/stderr"
-   for(i=0;i<lines;i++)
+   for(i=0;i<__lines;i++)
    {
-    print a[i] > f
+    print __a[i] > f
    }
    close(f)
  }

@@ -555,5 +555,6 @@ void vhdl_netlist(FILE *fd , int vhdl_stop)
  }
  if(debug_var>=1) fprintf(errfp, "vhdl_netlist():       end\n");
  if(!netlist_count) draw_hilight_net();
- delete_netlist_structs();
+ //delete_netlist_structs(); // 20161222 done in prepare_netlist_structs() when needed
+
 }

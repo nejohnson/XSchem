@@ -462,6 +462,8 @@ void prepare_netlist_structs(void)
  int inst_mult, pin_mult;
 
  if(prepared_netlist_structs && !modified) return; // 20160413
+ else delete_netlist_structs(); // 20161222
+
  free_node_hash();
  my_strdup(&nn, "-----------");
  my_strcat(&nn, schematic[currentsch]);

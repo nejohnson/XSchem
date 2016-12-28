@@ -48,7 +48,7 @@ static unsigned int hash(char *tok, char *name)
   h^=*tok++; // 20161221 xor
   h=(h>>5) | (h<<(8*sizeof(unsigned int)-5)); // 20161221 rotate
  }
- while(*name!='\0' && *name!='[') {
+ while(*name!='\0'  && *name!='[') {  
   h^=*name++; // 20161221 xor
   h=(h>>5) | (h<<(8*sizeof(unsigned int)-5)); // 20161221 rotate
 }
@@ -131,7 +131,8 @@ if(name==NULL || token==NULL) return NULL;
   }
   if( entry -> hash==hashcode && 
       strcmp(token,entry->token)==0 &&
-      name_strcmp(name,entry->name)==0 )
+      strcmp(name,entry->name)==0 )
+//      name_strcmp(name,entry->name)==0 ) // 20161226 compare whole instname, including [..]
 			// found a matching token
   {
    if(remove) 		// remove token from the hash table ...
@@ -255,8 +256,8 @@ void hash_proplist(char *s,int remove)
    else if(token_number==1) return; // if first token is not "name" exit, put nothing into hash 18112002
    if(name!=NULL && name[0] != '\0') 
    {
-    //struct hashentry *a;
-    if(debug_var>=1) fprintf(errfp, "hash_proplist(): putting %s=%s in hash tbl\n",token,value);
+    //struct hashentry *a; 20161226
+    if(debug_var>=2) fprintf(errfp, "hash_proplist(): putting %s=%s in hash tbl\n",token,value);
     hash_lookup(token,name,value,remove);
    }
    state=XBEGIN;
@@ -1791,6 +1792,9 @@ char *translate(int inst, char* s)
    token[token_pos]='\0'; 
    token_pos=0;
    ptr=hash_lookup(token+1, inst_ptr[inst].instname, NULL, 0);
+   // 20161226
+   if(debug_var>=2) fprintf(errfp, "translate(): hash_lookup token=%s, instname=%s hash=%d ptr=%lx --> %s\n", 
+           token, inst_ptr[inst].instname, ptr? ptr->hash: 0, (unsigned long) ptr, ptr? ptr->value: "NULL");
 
    // 20100401
    if(ptr!=NULL)

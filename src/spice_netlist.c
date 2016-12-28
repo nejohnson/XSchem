@@ -302,7 +302,8 @@ void spice_netlist(FILE *fd, int spice_stop )
    }
  }
  if(!netlist_count) draw_hilight_net();
- delete_netlist_structs();
+ //delete_netlist_structs(); // 20161222 done in prepare_netlist_structs() when needed
+
 }
 
 

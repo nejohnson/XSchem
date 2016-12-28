@@ -145,8 +145,6 @@ function hsort(array,n,    rarray,l,j,ir,i,rra)
 
 function comp(a,b)
 {
- base = lab_name(a)
- idx = lab_index(a)
  if( lab_name(a) == lab_name(b) ) return lab_index(a) > lab_index(b)
  else return lab_name(a) > lab_name(b)
 }

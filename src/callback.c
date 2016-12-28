@@ -477,7 +477,8 @@ int callback(int event, int mx, int my, KeySym key,
 
      } 
      draw_hilight_net();
-     delete_netlist_structs();
+     //delete_netlist_structs(); // 20161222 done in prepare_netlist_structs() when needed
+
      // /20130628
      break;
    }

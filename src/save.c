@@ -320,6 +320,7 @@ void save_symbol(char *schname)
    symbol = match_symbol(inst_ptr[i].name);
    inst_ptr[i].ptr = symbol;
   } 
+  delete_netlist_structs(); // 20161222
   modified=0;
 }
 
@@ -386,6 +387,7 @@ void save_file(char *schname)
     save_wire(fd);
     save_inst(fd);
     fclose(fd);
+    delete_netlist_structs(); // 20161222
     modified=0;
 }
 
@@ -551,6 +553,7 @@ void load_file(int load_symbols, char *abs_name, int reset_undo) // 20150327 add
 
     if(debug_var>=2) fprintf(errfp, "load_file(): loaded file:wire=%d inst=%d\n",lastwire , lastinst);
     if(load_symbols) load_syms();
+    delete_netlist_structs(); // 20161222
     modified=0;
 
   }  // end if(fd=fopen(name,"r"))!= NULL)
@@ -988,6 +991,7 @@ void edit_symbol(void)
    return ;      //20121122
   }
   modified=0;
+  delete_netlist_structs(); // 20161222
   while(!endfile)
   {
    if(fscanf(fd,"%1023s",name)==EOF) break;
@@ -1056,6 +1060,7 @@ void load_symbol(char *abs_name)
   if( (fd=fopen(name,"r"))!= NULL)
   {
     modified=0;
+    delete_netlist_structs(); // 20161222
     while(!endfile)
     {
      if(fscanf(fd,"%s",name)==EOF) break;

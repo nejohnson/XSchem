@@ -280,6 +280,7 @@ function endfile(f) {
  close(sym)
 }
 
+## sort array[0...n-1] based on keys ra[0...n-1]
 function hsort_key(array, ra, n,      i, j, c, root, temp)
 {
     for (i = 1; i < n; i++)

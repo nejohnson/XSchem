@@ -2,7 +2,6 @@
 gawk '
 
 BEGIN{
- 
 #  ar["a", 1] = "A[3]"
 #  ar["a", 2] = "A[3]"
 #  ar["a", 3] = "A[3]"
@@ -21,6 +20,10 @@ BEGIN{
 #
 #  print compact_label("a",ar, 1,15)
 #  exit
+
+  ## 20161225
+  avoid_brakets=0 ## set to 1 if you want to avoid [] in inst names: x12[3] --> x12_3_
+                  ## this is needed for VHDl since [] are not allowed in inst names
 
   error_missing=0 ## flag to terminate or continue in case of missing subckt definitions in netlist
                   ## 20161118
@@ -139,7 +142,7 @@ function process_subckts(         i,name)
    print "\n\n\n process_subckt() : " curr_subckt "--> " 
    for(i=1; i<= pin_ar[curr_subckt,"n"]; i++) printf "%s ", pin_ar[curr_subckt,i]; printf "\n"
  }
- else if(toupper($1) ~ /^\*\.PININFO/) {
+ else if($1 ~ /^\*\.PININFO/) {
    for(i=2;i<=NF;i++) {
      name=$i; sub(/:.*/,"",name)
      if($i ~ /:I$/ ) pin_ar[curr_subckt, "dir", name] = "I"
@@ -218,8 +221,13 @@ function process(         i,name,param)
    # inst=substr($1,2)
    inst = $1
    ## /20111009
-   sub(/\[/,"_",inst)
-   sub(/\]/,"_",inst)
+
+   ## 20161225
+   if(avoid_brakets) {
+     sub(/\[/,"_",inst)
+     sub(/\]/,"_",inst)
+   }
+
    param=0
    for(i=2;i<=NF;i++) {
      sub(/!$/,"",$i)   # remove ! on global nodes
@@ -242,20 +250,21 @@ function process(         i,name,param)
        break
      }
      net_ar[inst,i-1] = $i
+     #print "i-1=" i-1 " net_ar[inst,i-1]=" net_ar[inst,i-1]
    }
    net_ar[inst,"n"] = i-2
-   print "  net_ar[inst,n]= "  net_ar[inst,"n"]
+   #print "  net_ar[inst,n]= "  net_ar[inst,"n"]
    compact_pinlist(inst,inst_sub)
-   print inst " - " inst_sub  " --> "
+   #print inst " - " inst_sub  " --> "
    for(i=1;i<= dir_ret["n"] ; i++) {
-     print "  dir_ret " i " ------> " dir_ret[i] "   " pin_ret[i] " <-- " net_ret[i]
+     #print "  dir_ret " i " ------> " dir_ret[i] "   " pin_ret[i] " <-- " net_ret[i]
    }
-   print "\n\n"
+   #print "\n\n"
    param = get_param(param) 
    print_signals( inst, inst_sub, param, pin_ret, dir_ret, net_ret )
  }
  else { # other components, M, R, C, D, .... 20111009
-  if($0 !~ /(\.PININFO)|(^\.)/ ) {
+  if($1 !~ /(\.PININFO)|(^\.)/ ) {
     subckt_netlist = subckt_netlist $0 "\n"
   }
  }
@@ -270,40 +279,95 @@ function get_param(i,               param,j)
   return param
 }
 
-function compact_pinlist(inst,inst_sub                  ,i,ii,base,curr,curr_n,np)
+function compact_pinlist(inst,inst_sub                  , prevgroup, group,i,ii,base,curr,curr_n,np)
 {
  delete pin_ret
  delete net_ret
  delete dir_ret
  
  np=pin_ar[inst_sub,"n"]
- print " compact_pinlist: np= " np
+ # print " compact_pinlist: inst=" inst " np= " np " inst_sub=" inst_sub
  if(np) {
    ii=1
    for(i=1;i<=np;i++) {
-     base =lab_name( pin_ar[inst_sub,i] )
-     if(i==1) {curr=base; curr_n=i}
-     else { 
-       if(base != curr) {
-         pin_ret[ii] = compact_label(inst_sub,pin_ar,curr_n,i-1)
-         if(inst) net_ret[ii] = compact_label(inst,net_ar,curr_n,i-1)
+     group=0
+     # print "compact_pinlist: i=" i " inst_sub=" inst_sub " pin_ar[inst_sub,i]=" pin_ar[inst_sub,i]
+     # print "compact_pinlist: net_ar[inst,i]=" net_ar[inst,i]
+     if(net_ar[inst,i] ~/,/) group=1
 
-
-
-         dir_ret[ii] = pin_ar[inst_sub,"dir",pin_ar[inst_sub,i-1] ]
-         print " compact_pinlist: dir_ret[" ii "]= " dir_ret[ii]
-         ii++
-         curr=base;curr_n=i
+       base =lab_name( pin_ar[inst_sub,i] )
+       if(i==1) {prevgroup=group; curr=base; curr_n=i}
+       else { 
+         if(prevgroup || base != curr) {
+           if(prevgroup) pin_ret[ii] = pin_ar[inst_sub,i-1]
+           else pin_ret[ii] = compact_label(inst_sub,pin_ar,curr_n,i-1)
+           if(inst) {
+             if(prevgroup) net_ret[ii] = compact_label_str(net_ar[inst,i-1])
+             else net_ret[ii] = compact_label(inst,net_ar,curr_n,i-1)
+           }
+           dir_ret[ii] = pin_ar[inst_sub,"dir",pin_ar[inst_sub,i-1] ]
+           ii++
+           curr=base;curr_n=i
+           prevgroup=group
+         }
        }
      }
    }
    pin_ret[ii] = compact_label(inst_sub, pin_ar,curr_n,np)
-   if(inst) net_ret[ii] = compact_label(inst, net_ar,curr_n,np)
+   if(inst) {
+     if(group) net_ret[ii] = compact_label_str(net_ar[inst, np])
+     else      net_ret[ii] = compact_label(inst, net_ar,curr_n,np)
+   }
+
    dir_ret[ii] = pin_ar[inst_sub,"dir",pin_ar[inst_sub,np] ]
-   print " compact_pinlist: dir_ret[" ii "]= " dir_ret[ii]
    pin_ret["n"] =  dir_ret["n"] = ii
    if(inst) net_ret["n"] = ii
- }
+}
+# 1  2    3    4    5 6 7     8    9    10   11   12
+# PP A[3] A[2] A[1] B C K[10] K[9] K[5] K[4] K[3] K[1]
+function compact_label_str(str,        a, b, ar, ret,start,i)
+{
+  a=1
+  b=split(str, ar,",")
+  ret=""
+  for(i=a;i<=b;i++) {
+    if(i==a) {start=a}
+    else {
+      if(ar[i-1] !~ /\[/)  {
+        if(ar[i-1] != ar[i]) {
+          if(start < i-1) { ret = ret (i-start) "*" ar[i-1] ","; start=i }
+          else {ret = ret ar[i-1] ","; start=i }
+        }
+      }
+      else if(lab_name(ar[i])!=lab_name(ar[i-1]) ||                     # lab basename changed
+
+          ( lab_index(ar[start])!=lab_index(ar[i]) &&           # range count != element count
+            abs(start-i)!=abs(lab_index(ar[start])-lab_index(ar[i]))) ||
+
+          ( lab_index(ar[i]) != lab_index(ar[i-1])-1 &&                 # index not equal, +1,-1
+            lab_index(ar[i]) != lab_index(ar[i-1])+1 &&               # to previous
+            lab_index(ar[i]) != lab_index(ar[start])   ) ) {
+        if(start<i-1 && lab_index(ar[start]) == lab_index(ar[i-1]) )
+          ret = ret (i-start) "*" ar[i-1] ",";
+        else if(start<i-1)
+          ret = ret lab_name(ar[start]) "[" lab_index(ar[start]) ":" lab_index(ar[i-1]) "],"
+        else
+          ret = ret lab_name(ar[start]) "[" lab_index(ar[start]) "],"
+        start=i
+      }
+    }
+  }
+  if(ar[b] !~ /\[/)  {
+    if(start < b)  ret = ret (b-start+1) "*" ar[b]
+    else ret = ret ar[b]
+  }
+  else if(start<b && lab_index(ar[start]) == lab_index(ar[b]))
+    ret = ret (b-start+1) "*" ar[b]
+  else if(start<b)
+    ret = ret lab_name(ar[start]) "[" lab_index(ar[start]) ":" lab_index(ar[b]) "]"
+  else
+    ret = ret lab_name(ar[b]) "[" lab_index(ar[b]) "]"
+  return ret
 }
 
 # 1  2    3    4    5 6 7     8    9    10   11   12
@@ -362,7 +426,8 @@ function lab_index(lab)
 {
  sub(/.*\[/,"",lab)
  sub(/\].*/,"",lab)
- return lab+0
+ if( (lab ~/:/) || (lab ~/,/) ) return lab # 20161225
+ else return lab+0
 }
 
 function print_sch(schname, dir, pin,
@@ -458,13 +523,13 @@ function print_signals( inst_name, component_name, param, pin,dir,net,
    idx=(component_name SUBSEP pin[i])
    if( idx in pin_x)
    {
-     print "print_signals() : " idx " found in library" 
+     #print "print_signals() : " idx " found in library" 
      xpin=xoffset+pin_x[idx]
      ypin=yoffset+pin_y[idx]
    }
    else
    {
-     print "print_signals() : " idx " NOT found in library" 
+     #print "print_signals() : " idx " NOT found in library" 
      if(curr_dir=="O" || curr_dir=="B") {
        xpin=-x+xoffset
        ypin=y+onum*space+yoffset

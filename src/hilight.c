@@ -156,6 +156,7 @@ struct hilight_hashentry *bus_hilight_lookup(char *token, int value, int remove)
  else {
    my_strdup(&string, expandlabel(token,&mult));
  }
+
  if(string==NULL) return NULL;
  string_ptr = start = string;
  while(1) {
@@ -225,7 +226,8 @@ void hilight_parent_pins(void)
  }
 
  currentsch=save_currentsch;
- delete_netlist_structs();
+ //delete_netlist_structs(); // 20161222 done in prepare_netlist_structs() when needed
+
 }
 
 void hilight_child_pins(int i)
@@ -255,7 +257,7 @@ void hilight_child_pins(int i)
   }
  }
  currentsch=save_currentsch;
- delete_netlist_structs();
+ //delete_netlist_structs(); // 20161222 done in prepare_netlist_structs() when needed
 }
 
 
@@ -357,7 +359,7 @@ void search_inst(char *tok, char *val, int sub, int sel, int what)
         if(debug_var>=2) fprintf(errfp, "search_inst():  not found wire=%d, tok=%s, val=%s search=%s\n", i,tok, str,val);
       }
     }
-    delete_netlist_structs();
+    // delete_netlist_structs(); // 20161222
  }
  if(sel) {
    if(x_initialized) drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
@@ -424,7 +426,7 @@ void hilight_net(void)
      break;
    }
   }
-  delete_netlist_structs();
+  // delete_netlist_structs(); // 20161222 done in prepare_netlist_structs() when needed
   // unselect_all(); // 20160413
 }
 
@@ -477,7 +479,7 @@ void unhilight_net(void)
    }
   }
   unselect_all();
-  delete_netlist_structs();  // 20111201 moved to end
+  // delete_netlist_structs();  // 20111201 moved to end // 20161222 done in prepare_netlist_structs() when needed
 }
 
 
@@ -778,7 +780,8 @@ void print_hilight_net(int show)
  }
  unlink(filetmp2);
  unlink(filetmp1);
- delete_netlist_structs();
+ //delete_netlist_structs(); // 20161222 done in prepare_netlist_structs() when needed
+
 
 }
 

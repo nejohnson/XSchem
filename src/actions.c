@@ -87,17 +87,23 @@ void resetwin(void)
 
 void toggle_only_probes()
 {
+
+   static double save_lw;
+
+   if(!only_probes) {
+     save_lw = lw_double;
+     lw_double=3.0;
+   } else {
+     lw_double= save_lw;
+   }
    only_probes =!only_probes;
    if(only_probes) {
        Tcl_SetVar(interp,"only_probes","1",TCL_GLOBAL_ONLY);
-       draw();
    }
    else {
        Tcl_SetVar(interp,"only_probes","0",TCL_GLOBAL_ONLY);
-       draw();
    }
-
-
+   change_linewidth(lw_double);
 }
 
 
@@ -624,7 +630,8 @@ void descend(void)
   if(hilight_nets) 
   {
     prepare_netlist_structs();
-    delete_netlist_structs();
+    //delete_netlist_structs(); // 20161222 done in load_file() and in prepare_netlist_structs() when needed
+ 
   }
   zoom_full(1);
  }
@@ -648,8 +655,6 @@ void go_back(void)
   }
   else
   {
-   prepare_netlist_structs();  // 20150407 when going back from symbol
-   delete_netlist_structs();   // delete mode hash tables before loading new schematic (faster)
    if(modified)
    {
      tkeval("ask_save");
@@ -659,7 +664,7 @@ void go_back(void)
   }
   strcpy(schematic[currentsch] , "");
   currentsch--;
-  remove_symbols(); //<<<<<<<<<<
+  remove_symbols();
   load_file(1,NULL,1);
   unselect_all();
 

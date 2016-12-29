@@ -40,6 +40,10 @@ p{padding: 15px  30px 10px;}
     <li><tt>label</tt>: the symbol is used to label a net. These type of symbols must have
      one and only one pin, and the template string must define a <tt>lab</tt> attribute
      that is passed from component instantiation</li>
+    <li><tt>netlist_commands</tt>: the symbol is used to place SPICE commands into a spice netlist.
+     It should also have a <tt>value</tt> attribute that may contain arbitrary text that is 
+     copied verbatim into the netlist. More on this in the <a href="...">netlist</a> slide.</li>
+     <img src="netlist_commands.png">
    </ul><br>
    <p class="important"> 
     Only symbols of type <tt>subcircuit</tt> or <tt>primitive</tt> may be descended into
@@ -52,7 +56,16 @@ p{padding: 15px  30px 10px;}
      string.<br>
      The <tt>@pinlist</tt> is a special token that will be substituted with the name of the wires that 
      connect to symbol pins, in the order they are created in the symbol. See the
-     <a href="xschem_properties.html">pin ordering</a> section in the xschem properties slide.</li>
+     <a href="xschem_properties.html">pin ordering</a> section in the xschem properties slide.
+     if the order of pins for a NMOS symbol is for example, d,g,s,b, then @pinlist will be expanded
+     when producing a netlist to the list of nets that connect to the symbol drain, gate, source, body
+     respectively. There is also a special way to define single pins: <tt>@@d</tt> for example will
+     be replaced by XSCHEM with the net that connects to the <tt>d</tt> pin of the symbol. so for example
+     <tt>@pinlist</tt> is equivalent to <tt>@@d @@g @@s @@b</tt>. However using <tt>@pinlist</tt> and setting
+     the correct pin ordering in the symbol pins will make netlist generation faster. This is important
+     for very big components with lot of pins, and <tt>@pinlist</tt> is the default when symbol is generated
+     automatically (<tt>Symbol -&gt;Make symbol</tt> menu of <tt>&lt;Shift&gt;A</tt> key).
+     </li>
  <li><tt>template</tt>: Specifies default values for symbol parameters</li>
  </ul>
 <img src="general_rules.png">
@@ -94,18 +107,57 @@ type=nmos
   Attribute substitution takes place in symbol format attribute and in every text, as shown in below picture.
  </p>
  <img src="attribute_substitution.png">
- <h3>PREDEFINED SYMBOL ATTRIBUTES</h3>
+ <h3>OTHER PREDEFINED SYMBOL ATTRIBUTES</h3>
  <ul>
-  <li><tt>type</tt></li>
-  <li><tt>template</tt></li>
   <li><tt>vhdl_ignore</tt></li>
   <li><tt>spice_ignore</tt></li>
   <li><tt>verilog_ignore</tt></li>
+  <p>These 3 attributes tell XSCHEM to ignore completely the symbol in the respective netlist formats.</p>
   <li><tt>vhdl_stop</tt></li>
   <li><tt>spice_stop</tt></li>
   <li><tt>verilog_stop</tt></li>
+  <p> These 3 attributes will avoid XSCHEM to descend into the schematic representation of the symbol
+    (if there is one) when building the respective netlist format. For example, if an analog block
+    has a schematic (.sch) file describing the circuit that is meaningless when doing a VHDL netlist,
+    we can use a <tt>vhdl_stop=true</tt> attribute to avoid descending into the schematic.
+    Only the global property of the schematic will be netlisted. This allows to insert some 
+    behavioral VHDL code in the global schematic property that describes the block in a way
+    the VHDL simulator can understand.</p>
   <li><tt>place</tt></li>
+  <p> this attribute is only useable in <tt>netlist_commands</tt> type symbols and tells XSCHEM that 
+    the component instance of that symbol must be netlisted at the end, after all the other elements.
+    This is sometimes needed for SPICE commands that must ge given at the end of the netlist.
+    This will be explained more in detil in the <a href="...">netlisting</a> slide.</p>
   <li><tt>generic_type</tt></li>
+  <p><tt>generic_type</tt> defines the type of parameters passed to VHDL components. Consider the following
+    MOS symbol definition; the <tt>model</tt> attribute is declared as <tt>string</tt> and it will be
+    quoted in VHDL netlists.
+  </p>
+  <img src="symbol_properties1.png">
+  <p>the resulting netlist is shown here, note that without the <tt>generic_type</tt>
+     attribute the <tt>irf5305</tt> string would not be quoted.</p>
+  <pre class="code">
+entity test2 is
+end test2 ;
+
+architecture arch_test2 of test2 is
+signal d : std_logic ;
+signal s : std_logic ;
+signal g : std_logic ;
+begin
+x3 : pmos3
+generic map (
+   model =&gt; "irf5305"
+)
+port map (
+   d =&gt; d ,
+   g =&gt; g ,
+   s =&gt; s
+);
+
+end arch_test2 ;
+</pre><br>
+
   <li><tt>extra</tt></li>
   <li><tt>dir</tt></li>
   <li><tt>global</tt></li>
@@ -119,13 +171,33 @@ type=nmos
  <h3>PREDEFINED SYMBOL VALUES</h3>
  <ul>
   <li><tt>@symname</tt></li>
+  <p> This expands to the name of the symbol</p>
+  <li><tt>@pinlist</tt></li>
+  <p> This expands to the list of nets that connect to symbol pins in
+   the order they are set in the symbol</p>
+  <li><tt>@@pin</tt></li>
+  <p> This expands to the net that connect to symbol pin named <tt>pin</tt>. This substitution
+   takes place only when producing a netlist (Spice, Verilog, VHDL) so it is allowed to use this
+   value only in <tt>format</tt>,<tt>vhdl_format</tt> or <tt>verilog_format</tt>
+   attributes (see <a href="netlisting.html">Netlisting slide)</a></p>
   <li><tt>@sch_last_modified</tt></li>
+  <p>
+   this indicates the last modification time of the <tt>.sch</tt> file of the symbol.
+  </p>
   <li><tt>@sym_last_modified</tt></li>
+  <p>
+   this indicates the last modification time of the <tt>.sym</tt> file of the symbol.
+  </p>
   <li><tt>@time_last_modified</tt></li>
   <p>
-   this indicates the last modification time of the schematic <b>containing</b> the symbol.
+   this indicates the last modification time of the schematic (.sch)  <b>containing</b>
+   the symbol instance.
   </p>
   <li><tt>@schname</tt></li>
+  <p>
+   this expands to the name of the schematic (.sch)  <b>containing</b>
+   the symbol instance.
+  </p>
   <li><tt>@prop_ptr</tt></li>
   <p>
    this expandes to the <b>entire</b> property string passed to the component.
@@ -135,7 +207,13 @@ type=nmos
    this expandes to the <b>spice</b> global property string of the schematic containing the symbol
   </p>
   <li><tt>@schvhdlprop</tt></li>
+  <p>
+   this expandes to the <b>VHDL</b> global property string of the schematic containing the symbol
+  </p>
   <li><tt>@schverilogprop</tt></li>
+  <p>
+   this expandes to the <b>Verilog</b> global property string of the schematic containing the symbol
+  </p>
  </ul><br>
 
  <!-- end of slide -->

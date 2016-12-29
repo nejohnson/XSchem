@@ -117,13 +117,21 @@ set hspicerf_path $env(HOME)/hspice_2013/bin/hspicerf64
 set cscope_path $env(HOME)/cosmoscope/amd64/ai_bin/cscope
 </pre>
  <p>
-  It is mandatory to setup a design root directory ( indicated by TCL variable <tt>XSCHEM_DESIGN_DIR</tt>) 
-  containing all the design libraries 
+  The <tt>XSCHEM_HOME_DIR</tt> tells XSCHEM where the runtime support 
+  files and scripts are located; given the <tt>prefix</tt> variable
+  set in the Makefile, <tt>XSCHWEM_HOME_DIR</tt> should be 
+  <tt>${prefix}/share/xschem</tt>. So, if installation directory specified with <tt>prefix</tt> was
+  the user's home directory you should put '<tt>set XSCHEM_HOME_DIR=$env(HOME)/share/xschem</tt>' in .xschem.
+  Note that <tt>.xschem</tt> is a TCL file, so use the TCL syntax for setting
+  variables and accessing environment variables.
+  It is also mandatory to setup a design root directory (indicated by TCL variable
+  <tt>XSCHEM_DESIGN_DIR</tt>) containing all the design libraries 
   (components, schematics).  A Sample design root library is provided and installed in the path 
-  specified by the <tt>Makefile</tt>'s variable <tt>xschem_library</tt>, you can use it 
+  specified by the <tt>Makefile</tt>'s variable <tt>library_prefix</tt>, you can use it 
   as a starting point.<br>
-  to complete the setup of XSCHEM create a <tt>.xschem</tt> file in your <tt>$HOME</tt> directory; 
-  a sample <tt>.xschem</tt> file is provided in the distribution sources. Change it to fit your needs.
+  To complete the setup of XSCHEM create a <tt>.xschem</tt> file in your <tt>$HOME</tt> directory using
+  a sample <tt>.xschem</tt> file that is provided in the distribution sources.
+  Change it to fit your needs.
  </p> 
  <pre class="code">
   user:xschem-&lt;version&gt;$ cp .xschem ~/

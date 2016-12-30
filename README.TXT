@@ -34,6 +34,11 @@ INSTALL
 
 If destination paths are correctly set in the Makefile: 'make install'
 
+CHANGELOG
+
+2.1.7: Fixes some wrong references to symbols in the provided example schematics
+       Small documentation updates.
+
 AUTHOR
 
 Stefan Frederik Schippers

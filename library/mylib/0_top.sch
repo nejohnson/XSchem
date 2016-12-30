@@ -37,3 +37,4 @@ C {devices/launcher} 750 -210 0 0 {name=h2
 descr="LOCAL DOCUMENTATION" 
 url="$env(HOME)/share/doc/xschem/xschem.html"
 } 
+C {examples/greycnt} 150 -420 0 0 {name=x8} 

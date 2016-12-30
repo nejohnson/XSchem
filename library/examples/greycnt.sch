@@ -87,11 +87,11 @@ N 620 -450 620 -410 {lab=A[4]}
 N 620 -370 620 -330 {lab=A[3]} 
 N 620 -290 620 -250 {lab=A[2]} 
 N 620 -210 620 -170 {lab=A[1]} 
-C {library_t9/micron} 170 0 0 0 {name=l3 author="Stefan Schippers"} 
+C {devices/title} 160 -30 0 0 {name=l3 author="Stefan Schippers"} 
 C {devices/verilog_timescale} 30 -110 0 0 {name=s1 timestep="1ps" precision="1ps" } 
-C {verilog_gates/xnor} 660 -470 0 0 {name=x2 risedel=1 falldel=1} 
-C {verilog_gates/xnor} 660 -550 0 0 {name=x3 risedel=1 falldel=1} 
-C {verilog_gates/xnor} 660 -630 0 0 {name=x0 risedel=1 falldel=1} 
+C {examples/xnor} 660 -470 0 0 {name=x2 risedel=1 falldel=1} 
+C {examples/xnor} 660 -550 0 0 {name=x3 risedel=1 falldel=1} 
+C {examples/xnor} 660 -630 0 0 {name=x14 risedel=1 falldel=1} 
 C {devices/lab_pin} 570 -690 0 0 {name=p9 lab=A[7] } 
 C {devices/lab_pin} 570 -610 0 0 {name=p1 lab=A[6] } 
 C {devices/lab_pin} 570 -530 0 0 {name=p2 lab=A[5] } 
@@ -101,28 +101,28 @@ C {devices/lab_pin} 830 -630 0 1 {name=p0 lab=B[6]}
 C {devices/lab_pin} 830 -550 0 1 {name=p5 lab=B[5]} 
 C {devices/lab_pin} 830 -470 0 1 {name=p6 lab=B[4]} 
 C {devices/assign} 660 -690 0 0 {name=v1 delay=1} 
-C {verilog_gates/xnor} 660 -230 0 0 {name=x1 risedel=1 falldel=1} 
-C {verilog_gates/xnor} 660 -310 0 0 {name=x4 risedel=1 falldel=1} 
-C {verilog_gates/xnor} 660 -390 0 0 {name=x5 risedel=1 falldel=1} 
+C {examples/xnor} 660 -230 0 0 {name=x1 risedel=1 falldel=1} 
+C {examples/xnor} 660 -310 0 0 {name=x4 risedel=1 falldel=1} 
+C {examples/xnor} 660 -390 0 0 {name=x5 risedel=1 falldel=1} 
 C {devices/lab_pin} 570 -370 0 0 {name=p7 lab=A[3] } 
 C {devices/lab_pin} 570 -290 0 0 {name=p8 lab=A[2] } 
 C {devices/lab_pin} 570 -210 0 0 {name=p10 lab=A[1]} 
 C {devices/lab_pin} 830 -390 0 1 {name=p11 lab=B[3]} 
 C {devices/lab_pin} 830 -310 0 1 {name=p12 lab=B[2]} 
 C {devices/lab_pin} 830 -230 0 1 {name=p13 lab=B[1]} 
-C {verilog_gates/xnor} 660 -150 0 0 {name=x6 risedel=1 falldel=1} 
+C {examples/xnor} 660 -150 0 0 {name=x6 risedel=1 falldel=1} 
 C {devices/lab_pin} 570 -130 0 0 {name=p14 lab=A[0]} 
 C {devices/lab_pin} 830 -150 0 1 {name=p15 lab=B[0]} 
 C {devices/opin} 150 -220 0 0 { name=p16 lab=B[7:0] } 
 C {devices/lab_pin} 90 -200 0 0 { name=l17 lab=A[7:0]  verilog_type=reg} 
-C {verilog_gates/xnor} 1060 -470 0 0 {name=x7 risedel=1 falldel=1} 
-C {verilog_gates/xnor} 1060 -550 0 0 {name=x8 risedel=1 falldel=1} 
-C {verilog_gates/xnor} 1060 -630 0 0 {name=x9 risedel=1 falldel=1} 
+C {examples/xnor} 1060 -470 0 0 {name=x7 risedel=1 falldel=1} 
+C {examples/xnor} 1060 -550 0 0 {name=x8 risedel=1 falldel=1} 
+C {examples/xnor} 1060 -630 0 0 {name=x9 risedel=1 falldel=1} 
 C {devices/assign} 1060 -690 0 0 {name=v0 delay=1} 
-C {verilog_gates/xnor} 1060 -230 0 0 {name=x10 risedel=1 falldel=1} 
-C {verilog_gates/xnor} 1060 -310 0 0 {name=x11 risedel=1 falldel=1} 
-C {verilog_gates/xnor} 1060 -390 0 0 {name=x12 risedel=1 falldel=1} 
-C {verilog_gates/xnor} 1060 -150 0 0 {name=x13 risedel=1 falldel=1} 
+C {examples/xnor} 1060 -230 0 0 {name=x10 risedel=1 falldel=1} 
+C {examples/xnor} 1060 -310 0 0 {name=x11 risedel=1 falldel=1} 
+C {examples/xnor} 1060 -390 0 0 {name=x12 risedel=1 falldel=1} 
+C {examples/xnor} 1060 -150 0 0 {name=x13 risedel=1 falldel=1} 
 C {devices/lab_pin} 1230 -710 0 1 {name=p18 lab=C[7]} 
 C {devices/lab_pin} 1230 -630 0 1 {name=p19 lab=C[6]} 
 C {devices/lab_pin} 1230 -550 0 1 {name=p20 lab=C[5]} 

@@ -20,6 +20,23 @@ p{padding: 15px  30px 10px;}
 <a href="simulation.html" class="next">NEXT</a>
  <!-- slide title -->
  <h1>SIMULATION</h1><br>
+ <p>
+  One of the design goals of XSCHEM is the ability to launch a simulation without additional manual file editing. 
+  For this purpose XSCHEM stores in a schematic not only the circuit but also the simulator
+  settings and the additional files that are needed.
+  For example there is a <tt>devices/netlist.sym</tt> and <tt>devices/netlist_not_shown.sym</tt> symbol that
+  can be placed in a schematic acting as a container of text files for all the needed SPICE models and any
+  additional information to make the schematic ready for simulation.
+ </p>
+ <img src="simulation10.png">
+ <p>
+  The <tt>devices/netlist_not_shown</tt> symbol shown in the picture (with name MODELS) for example contains
+  all the spice models of the components used in the schematic, this makes
+  the schematic self contained, no additional files are needed to run a simulation.
+  After generating the netlist (for example poweramp.spice) the resulting SPICE netlist can be sent directly for
+  simulation (for example <tt>hspice -i poweramp.spice</tt> for the  Hspice(TM) simulator). 
+ </p>
+
  <h3> VERILOG SIMULATION</h3>
  <p> This is a tutorial showing how to run a simulation with XSCHEM. The first important thing to
   note is that XSCHEM is just a schematic editor, so we need to setup valid bindings to
@@ -51,9 +68,9 @@ user:~$ xschem examples/greycnt
  </pre>
  <img src="simulation1.png">
  <p>
-  This testbench has a 8 bit input vector A[7:0] and two output vectors, B[7:0] and C[7:0]
-  the B[7:0] is a grey coded vector, this mean that if A[] is incremented as a binary number
-  B will increment by changing only one bit at a time. The C[7:0] vector is the reverse transformation
+  This testbench has a 8 bit input vector A[7:0] and two output vectors, B[7:0] and C[7:0].
+  B[7:0] is a grey coded vector, this mean that if A[7:0] is incremented as a binary number
+  B[7:0] will increment by changing only one bit at a time. The C[7:0] vector is the reverse transformation
   from grey-code to binary, so at the end if simulation goes well C[7:0] == A[7:0].
   In this schematic there are some components, the first one is the <tt>xnor</tt> gate, the second one is
   the <tt>assign</tt> element. The 'xnor' performs the logical 'Not-Xor' of its inputs, while 'assign'

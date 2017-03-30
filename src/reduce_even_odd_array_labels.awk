@@ -82,7 +82,7 @@ function translate()
     }
     if(evenbus) {
       idxlow = idx
-      idxhi=idxlow+2*nn
+      idxhi=idxlow+2*(nn-1)
       newlab = basename "[" idxhi ":" idxlow ":" 2 "]"
     }
   }

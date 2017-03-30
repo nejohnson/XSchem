@@ -192,6 +192,7 @@ BEGIN{
 /^[ \t]*create_eldo_bus/{ create_eldo_bus=1}
 /^[ \t]*slope[ \t]+/{ slope=$2}
 /^[ \t]*roff[ \t]+/{ roff=$2} # 20160412
+/^[ \t]*ron[ \t]+/{ ron=$2} # 20170227
 /^[ \t]*halfvoltage[ \t]+/{ halfvoltage=$2; halfvoltageset=1} # 20160412
 /^[ \t]*unit[ \t]+/{ unit=$2}
 /^[ \t]*ground_node[ \t]+/{ gndnode=$2}

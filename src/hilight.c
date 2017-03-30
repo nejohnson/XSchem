@@ -780,7 +780,10 @@ void print_hilight_net(int show)
  }
  unlink(filetmp2);
  unlink(filetmp1);
- //delete_netlist_structs(); // 20161222 done in prepare_netlist_structs() when needed
+
+ // 20170323 this delete_netlist_structs is necessary, without it segfaults when going back (ctrl-e) 
+ // from a schematic after placing pins (ctrl-j) and changing some pin direction (ipin -->iopin)
+ delete_netlist_structs();
 
 
 }

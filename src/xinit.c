@@ -516,6 +516,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
  static char *name=NULL; // overflow safe 20161122
  char tmp[1024]; // 20161122 overflow safe
  int i;
+ int initfile_found; // 20170330
  struct stat buf;
 
  if(!getenv("DISPLAY")) has_x=0;
@@ -525,6 +526,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
 
  XSetErrorHandler(err);
 
+ initfile_found=0; // 20170330
  interp=inter;
  Tcl_Init(interp);
  if(has_x) Tk_Init(interp);
@@ -535,19 +537,22 @@ int Tcl_AppInit(Tcl_Interp *inter)
  if( getenv("PWD") ) { // 20161204
    my_strdup(&name, getenv("PWD") );
    my_strcat(&name, "/.xschem");
- } else if( getenv("HOME") ) {
-   my_strdup(&name, getenv("HOME") );
-   my_strcat(&name, "/.xschem");
- } else {
+   if(!stat(name, &buf)) initfile_found=1; // 20170330
+ }
+ if(!getenv("HOME")) {
    fprintf(errfp, "Tcl_AppInit() err 2: HOME env var not set\n");
    if(has_x) {
      Tcl_Eval(interp,
        "tk_messageBox -icon error -type ok -message \"Tcl_AppInit() err 2: HOME env variable not set, please fix it\"");
    }
    return TCL_ERROR;
+ } else if( !initfile_found ) {
+   my_strdup(&name, getenv("HOME") );
+   my_strcat(&name, "/.xschem");
+   if(!stat(name, &buf)) initfile_found=1; // 20170330
  }
 
- if(!stat(name, &buf) ) {  // file exists 20121110
+ if(initfile_found) {  // file exists 20121110 // used initfile_found, 20170330
    if(Tcl_EvalFile(interp, name)==TCL_ERROR) { // source ~/.xschem 20121110
      fprintf(errfp, "Tcl_AppInit() err 1: can not execute .xschem, please fix:\n");
      fprintf(errfp, Tcl_GetStringResult(interp));

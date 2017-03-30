@@ -473,7 +473,8 @@ void select_element(int i,unsigned short select_mode, int fast)
    statusmsg(str,2);
    for(j=0;j< (inst_ptr[i].ptr+instdef)->rects[PINLAYER] ;j++) 
    {
-    if(inst_ptr[i].node && inst_ptr[i].node[j])
+    //                                         --------20170323 check prop_ptr----------------------------
+    if(inst_ptr[i].node && inst_ptr[i].node[j] && (inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][j].prop_ptr)
     {
      snprintf(str, S(str), "pin:%s -> %s", 
        get_tok_value(

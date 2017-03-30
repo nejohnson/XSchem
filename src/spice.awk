@@ -97,26 +97,26 @@ function process(        i, iprefix)
 
    if($0 ~/^[gG]/) {
      IGNORECASE=1
-     sub(/value=/,"cur=")
+     sub(/ value=/," cur=")
      IGNORECASE=0
    }
    if($0 ~/^[eE]/) {
      IGNORECASE=1
-     sub(/value=/,"vol=")
+     sub(/ value=/," vol=")
      IGNORECASE=0
    }
    if($0 ~/^[rR]/) {
      IGNORECASE=1
-     sub(/value=/,"r=")
+     sub(/ value=/," r=")
      IGNORECASE=0
    }
    if($0 ~/^[cC]/) {
      IGNORECASE=1
-     sub(/value=/,"c=")
+     sub(/ value=/," c=")
      IGNORECASE=0
    }
-   gsub(/value=/,"")
-   gsub(/VALUE=/,"")
+   gsub(/ value=/," ")
+   gsub(/ VALUE=/," ")
    if($0 ~ /^D/ ) sub(/PERI[ \t]*=/,"PJ=")
  }
 

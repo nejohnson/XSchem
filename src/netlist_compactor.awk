@@ -85,7 +85,8 @@ function compact(        i,j,num_inst,f1,nf,nfp,curr_line, prev_line)
     for(i=1;i<=num_inst;i++) {
       nf = split(arr[dest[i]], curr_line_arr)
       if(i>1) {
-        if( lab_name(curr_line_arr[1]) == lab_name(prev_line_arr[1]) ) {
+        ##  ---------20170308----------
+        if( (curr_line_arr[1] ~/^X/) && lab_name(curr_line_arr[1]) == lab_name(prev_line_arr[1]) ) {
           for(j=1;j<=nf;j++) {
             if( j<nf && (prev_line_arr[j+1] !~ /=/) ) {
               prev_line_arr[j] = prev_line_arr[j] "," curr_line_arr[j]

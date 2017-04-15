@@ -209,14 +209,23 @@ BEGIN{
 }
 /^[ \t]*ground[ \t]+/{
   ground=$2
-  if(!halfvoltageset) halfvoltage=(voltage+ground) / 2 
+  if(!halfvoltageset) {   # 20170405
+    if(is_number(voltage) && is_number(ground)) {
+      halfvoltage=(voltage+ground) / 2 
+    } else {
+      halfvoltage = "'(" voltage "+" ground ")/2)'"
+    }
+  }
 }
 /^[ \t]*voltage[ \t]+/{
-  if( $2+0 == 0 ) 
-    if(!halfvoltageset) halfvoltage=(voltage+ground) / 2 
-  else
-    if(!halfvoltageset) halfvoltage = ($2+ground) / 2
   voltage = $2
+  if(!halfvoltageset) {  # 20170405
+    if(is_number(voltage) && is_number(ground)) {
+      halfvoltage=(voltage+ground) / 2 
+    } else {
+      halfvoltage = "'(" voltage "+" ground ")/2'"
+    }
+  }
 }
    
 /^[ \t]*reset_sim[ \t]*/{if(format=="ncsim") print "reset" >file}    # usefull in ncsim
@@ -293,8 +302,13 @@ BEGIN{
  }
  $0 = $0  # 20150918
 
- if(!halfvoltageset) halfvoltage= (vhi+vlo)/2
- # /20100301
+ if(!halfvoltageset) { # 20170405
+   if(is_number(vhi) && is_number(vlo)) {
+     halfvoltage=(vhi+vlo) / 2
+   } else {
+     halfvoltage = "'(" vhi "+" vlo ")/2'"
+   }
+ }
      
  if($2 in buswidth)
  {
@@ -557,7 +571,17 @@ function end_file(){
 # 20100301 added vhi, vlo
 function write_pwl_pair( name, value,res, vhi, vlo,slope,   timex, namex,vv,vv1,vv2,tt2,tt1,halfvoltageloc,i,v,n,pwlres,pwltmpres,pwltmp2 )
 {
-  halfvoltageloc = halfvoltageset? halfvoltage: (vhi+vlo)/2 # 20160412
+ if(!halfvoltageset) { # 20170405
+   if(is_number(vhi) && is_number(vlo)) {
+     halfvoltageloc=(vhi+vlo) / 2
+   } else {
+     halfvoltageloc = "'(" vhi "+" vlo ")/2'"
+   }
+ } else {
+   halfvoltageloc = halfvoltage
+ }
+
+
   if(value ~ /^[10]$/) {v= ( value==1 ? vhi : vlo )  ; pwlres=res}
   else if(value ~ /^[zZ]$/) {v=halfvoltageloc; pwlres=roff}
   else {v = value; pwlres=res}
@@ -855,6 +879,10 @@ function break_lines(filename,    quote, j, lines, line, l, i, count, style )
  }
 }
 
+function is_number(i) # 20170405
+{
+  return i+0==i
+}
 
 function s_i(s)
 {

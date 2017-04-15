@@ -32,9 +32,12 @@ set editor {gvim -f -geometry 90x28}
 
 set verilog_2001 1
 
-## alternatives to hspice and icarus verilog
-set hspicerf_simulator 0
-set modelsim_simulator 0
+## alternatives: hspice, hspicerf, finesim
+set spice_simulator hspice
+set finesim_opts {}
+
+## alternatives: iverilog, modelsim
+set verilog_simulator iverilog
 
 ## command to translate xpm to png (assumes command takes source 
 ## and dest file as arguments, example: gm convert plot.xpm plot.png)

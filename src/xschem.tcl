@@ -182,7 +182,8 @@ proc edit_file {filename} {
 proc simulate {filename} {
  global XSCHEM_HOME_DIR entry1 XSCHEM_DESIGN_DIR env netlist_dir netlist_type
  global task_output task_error
- global iverilog_path vvp_path hspice_path hspicerf_path hspicerf_simulator modelsim_path modelsim_simulator
+ global iverilog_path vvp_path hspice_path hspicerf_path spice_simulator modelsim_path verilog_simulator
+ global finesim_path finesim_opts
  global utile_cmd_path terminal
  global iverilog_opts ;# 20161118
  global computerfarm ;# 20151007
@@ -190,7 +191,7 @@ proc simulate {filename} {
  if { [xschem set_netlist_dir 0] ne "" } {
    if { $netlist_type=="verilog" } {
      # 20150916 added modelsim
-     if { $modelsim_simulator == 0 } { ;# icarus verilog
+     if { $verilog_simulator == "iverilog" } { ;# icarus verilog
 
        task "$iverilog_path $iverilog_opts -o .verilog_object $filename" $netlist_dir fg
        if {$task_error} {viewdata $task_output; return}
@@ -221,12 +222,17 @@ proc simulate {filename} {
        task "$utile_cmd_path stimuli.$schname" $netlist_dir fg
      }
 
-     if { $hspicerf_simulator == 1 } {
+     if { $spice_simulator == "hspicerf" } {
        # added computerfarm
        ## 20161119 $terminal does not fit here, hspice wants only xterm !
        task "xterm -e \"$computerfarm $hspicerf_path $filename ; bash\"" $netlist_dir bg
-     } else {
+     } elseif { $spice_simulator == "hspice"} {
        task "xterm -e \"$computerfarm $hspice_path -i $filename | tee hspice.out ; bash\""  $netlist_dir bg
+     } elseif {$spice_simulator == "finesim"} {
+       task "xterm -e \"$computerfarm $finesim_path $finesim_opts $filename ; bash \""  $netlist_dir bg
+       # 20170410
+     } else {
+       alert_ "ERROR: undefined SPICE simulator "
      }
    } elseif { $netlist_type=="vhdl" } { 
      set old $env(PWD)
@@ -240,7 +246,7 @@ proc simulate {filename} {
 
 proc modelsim {schname} {
   global XSCHEM_HOME_DIR entry1 XSCHEM_DESIGN_DIR env netlist_dir netlist_type
-  global iverilog_path vvp_path hspice_path hspicerf_path hspicerf_simulator modelsim_path
+  global iverilog_path vvp_path hspice_path modelsim_path
   task "${modelsim_path}/vsim -i" $netlist_dir bg
 }
 
@@ -295,7 +301,7 @@ proc waves {schname} {
      if { $analog_viewer == "cosmoscope" } { 
        task $cscope_path $netlist_dir bg
      } elseif { $analog_viewer == "waveview" } { 
-       task "$waveview_path -k -x $schname.sx" $netlist_dir tk_exec
+       task "$waveview_path -k -x $schname.sx" $netlist_dir bg ; # 20170415 bg instead of tk_init exec mode
      } else {
        alert_ { Unsupported default wiever... } 
      }
@@ -309,7 +315,7 @@ proc get_shell { curpath } {
  global XSCHEM_HOME_DIR entry1 XSCHEM_DESIGN_DIR env netlist_dir netlist_type tcl_debug
  global cscope_path gtkwave_path analog_viewer waveview_path terminal
 
- task "$terminal" $netlist_dir bg
+ task "$terminal" $curpath bg
 }
 
 proc edit_netlist {schname } {
@@ -1485,15 +1491,17 @@ proc input_number {txt cmd} {
 
 ## 20161102
 proc launcher {} {
-  global launcher_var launcher_browser launcher_program XSCHEM_HOME_DIR XSCHEM_DESIGN_DIR env
-  # puts "$launcher_var $env(HOME)"
-  if { ![string compare $launcher_program {}] } {
-    set launcher_program $launcher_browser
-  }
-  eval exec $launcher_program $launcher_var &
+  global launcher_var launcher_default_program launcher_program 
+  global XSCHEM_HOME_DIR XSCHEM_DESIGN_DIR env
+  
+  ## puts ">>> $launcher_program $launcher_var &"
+  # 20170413
+  if { $launcher_program eq {} } { set launcher_program $launcher_default_program}
+
+  eval exec  $launcher_program $launcher_var &
 }
 
-###
+### 
 ###   MAIN PROGRAM
 ###
 
@@ -1552,8 +1560,9 @@ set wm_fix 0
 set_ne netlist_dir {}
 set_ne hspice_netlist 0
 set_ne verilog_2001 1
-set_ne hspicerf_simulator 1
-set_ne modelsim_simulator 0
+set_ne spice_simulator hspice
+set_ne finesim_opts {}
+set_ne verilog_simulator iverilog
 set_ne split_files 0
 set_ne flat_netlist 0
 set_ne netlist_type vhdl
@@ -1577,8 +1586,8 @@ set_ne rainbow_colors 0
 set_ne initial_geometry {700x448+10+10}
 #20161102
 set_ne launcher_var {}
+set_ne launcher_default_program {xdg-open}
 set_ne launcher_program {}
-set_ne launcher_browser x-www-browser
 #20160413
 set_ne auto_hilight 0
 ## 20161121 xpm to png conversion
@@ -1849,15 +1858,6 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
         if { $incr_hilight == 1} { xschem set incr_hilight 1} else { xschem set incr_hilight 0}
       }
    
-   .menubar.option.menu add radiobutton -label "Vhdl" -variable netlist_type -value vhdl \
-	-accelerator {V-toggle} \
-	-command "xschem netlist_type vhdl"
-   .menubar.option.menu add radiobutton -label "Verilog" -variable netlist_type -value verilog \
-	-accelerator {V-toggle} \
-	-command "xschem netlist_type verilog"
-   .menubar.option.menu add radiobutton -label "Spice" -variable netlist_type -value spice \
-        -accelerator {V-toggle} \
-	-command "xschem netlist_type spice"
    .menubar.option.menu add command -label "Set line width" \
 	-command {
           input_number "Enter linewidth (float):" "xschem line_width"
@@ -1867,6 +1867,16 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
           input_number "Enter Symbol width ($symbol_width)" "set symbol_width"
 	}
 
+   .menubar.option.menu add separator
+   .menubar.option.menu add radiobutton -label "Vhdl netlist" -variable netlist_type -value vhdl \
+	-accelerator {V-toggle} \
+	-command "xschem netlist_type vhdl"
+   .menubar.option.menu add radiobutton -label "Verilog netlist" -variable netlist_type -value verilog \
+	-accelerator {V-toggle} \
+	-command "xschem netlist_type verilog"
+   .menubar.option.menu add radiobutton -label "Spice netlist" -variable netlist_type -value spice \
+        -accelerator {V-toggle} \
+	-command "xschem netlist_type spice"
    menubutton .menubar.edit -text "Edit" -menu .menubar.edit.menu
    menu .menubar.edit.menu -tearoff 0
    .menubar.edit.menu add command -label "Undo" -state disabled -accelerator u
@@ -2014,10 +2024,17 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
          }
        }
    .menubar.simulation.menu add command -label {Edit Netlist} -command {edit_netlist [xschem get schname]}
-   .menubar.simulation.menu add radiobutton -label "CosmosScope default viewer" -variable analog_viewer -value cosmoscope
-   .menubar.simulation.menu add radiobutton -label "WaveView default viewer" -variable analog_viewer -value waveview
-   .menubar.simulation.menu add checkbutton -label "hspicerf simulator" -variable hspicerf_simulator
-   .menubar.simulation.menu add checkbutton -label "modelsim simulator" -variable modelsim_simulator
+   .menubar.simulation.menu add separator
+   .menubar.simulation.menu add radiobutton -label "CosmoScope viewer" -variable analog_viewer -value cosmoscope
+   .menubar.simulation.menu add radiobutton -label "WaveView viewer" -variable analog_viewer -value waveview
+   .menubar.simulation.menu add separator
+   .menubar.simulation.menu add radiobutton -label "Modelsim Verilog simulator" -variable verilog_simulator -value modelsim
+   .menubar.simulation.menu add radiobutton -label "Icarus Verilog simulator" -variable verilog_simulator -value iverilog
+   #20170410
+   .menubar.simulation.menu add separator
+   .menubar.simulation.menu add radiobutton -label "Hspicerf Spice simulator" -variable spice_simulator -value hspicerf
+   .menubar.simulation.menu add radiobutton -label "Hspice Spice simulator" -variable spice_simulator -value hspice
+   .menubar.simulation.menu add radiobutton -label "Finesim Spice simulator" -variable spice_simulator -value finesim
 
    pack .menubar.file -side left
    pack .menubar.edit -side left

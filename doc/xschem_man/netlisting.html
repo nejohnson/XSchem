@@ -45,14 +45,14 @@ p{padding: 15px  30px 10px;}
   (<tt>examples/poweramp.sch</tt>).</p>
  <img src="netlisting1.png">
  <p>
- This schematic is made of some <tt>primitive</tt> components and some 
+ This schematic is made of some <tt>leaf</tt> components and some 
  <tt>subcircuit</tt> components:
  </p>
  <ul>
- <li><tt>primitive</tt>: these componens are leaf cells that are 'known' to the simulator, 
+ <li><tt>leaf</tt>: these componens are 'known' to the simulator, 
   netlist of these blocks is done by specifying a 'format' attribute in the symbol 
-  property string. Examples of primitives in the schematic above are voltage sources,
-  resistors, capacitors, dependent sources. The following are examples of primitive
+  property string. Examples of leaf components in the schematic above are voltage sources,
+  resistors, capacitors, dependent sources. The following are examples of leaf component
   instantiations in a SPICE netlist:<br><br>
  <pre class="code">
 c3 VSS VNN 100u m=1

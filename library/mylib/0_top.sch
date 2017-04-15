@@ -26,7 +26,7 @@ C {examples/tesla2} 150 -140 0 0 {name=x7}
 C {devices/title} 160 -30 0 0 {name=l1 author="Stefan Schippers"} 
 C {devices/launcher} 750 -260 0 0 {name=h8 
 descr="XSCHEM WEBSITE" 
-url="stefanschippers.host-ed.me/stefan/xschem.html"
+url="http://stefanschippers.host-ed.me/stefan/xschem.html"
 } 
 C {devices/launcher} 750 -150 0 0 {name=h1 
 descr="XSCHEM ON SOURCEFORGE" 

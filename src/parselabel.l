@@ -34,7 +34,8 @@ typedef struct          // used in expandlabel.y
  int m;                 // label multiplicity, number of wires
 } Stringptr;
 
-#define YYPARSE_PARAM
+// commented 20170412, fixes problems with older bison/flex versions
+// #define YYPARSE_PARAM
 #include "expandlabel.h" /* Bison header file */
 
 Stringptr dest_string={NULL,0};  //19102004;

@@ -293,17 +293,20 @@ void search_inst(char *tok, char *val, int sub, int sel, int what)
     prepare_netlist_structs();
     bus=bus_search(val);
     for(i=0;i<lastinst;i++) {
-      if(!strcmp(tok,"cell__name"))  str = inst_ptr[i].name;
-      // 20111024 key 'celltype' to search for instances of symbols with given 'type' property
-      else if(!strncmp(tok,"cell__", 6)) {
+      if(!strcmp(tok,"cell__name")) {
+        str = inst_ptr[i].name;
+      } else if(!strncmp(tok,"cell__", 6)) {
         my_strdup(&tmpname,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,tok+6,0)); // flexible cell__ search 20140408
         if(tmpname) {
           str = tmpname;
         } else {
           str = empty_string;
         }
+      } else if(!strcmp(tok,"propstring")) { // 20170408
+        str = inst_ptr[i].prop_ptr;
+      } else {
+        str = get_tok_value(inst_ptr[i].prop_ptr, tok,0);
       }
-      else str = get_tok_value(inst_ptr[i].prop_ptr, tok,0);
       if(debug_var>=1) fprintf(errfp, "search_inst(): inst=%d, tok=%s, val=%s \n", i,tok, str);
      
       if(bus && sub) {

@@ -220,6 +220,10 @@ roff <value>
   sets the default impedance (default=1G Ohm) for nodes set in 'z'
   state
 
+********************* ron ********************************* 
+ron <value>
+  sets the default impedance for driven (not 'z') nodes (default: 0.1 Ohm)
+
 ******************* halfvoltage *************************** 
 halfvoltage <value>
   sets the equilibrium voltage (default=voltage/2) for nodes in the 

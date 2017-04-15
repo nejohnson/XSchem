@@ -547,13 +547,21 @@ void launcher(void) // 20161102
   if(lastselected ==1 && selectedgroup[0].type==ELEMENT) 
   {
     n=selectedgroup[0].n;
-    my_strdup(&program, get_tok_value(inst_ptr[n].prop_ptr,"program",0));
-    str = get_tok_value(inst_ptr[n].prop_ptr,"url",0);
+    my_strdup(&program, get_tok_value(inst_ptr[n].prop_ptr,"program",2)); // 20170414 handle backslashes
+    str = get_tok_value(inst_ptr[n].prop_ptr,"url",2); // 20170414 handle backslashes
     if(str[0] || (program && program[0])) {
       Tcl_SetVar(interp,"launcher_var", str, TCL_GLOBAL_ONLY);
-      str = get_tok_value(inst_ptr[n].prop_ptr,"program",0);
-      Tcl_SetVar(interp,"launcher_program", str, TCL_GLOBAL_ONLY);
+      if(program && program[0]) { // 20170413 leave launcher_program empty if unspecified
+        Tcl_SetVar(interp,"launcher_program", program, TCL_GLOBAL_ONLY);
+      } else {
+        Tcl_SetVar(interp,"launcher_program", "", TCL_GLOBAL_ONLY);
+      }
       Tcl_Eval(interp, "launcher");
+    } else {
+      my_strdup(&program, get_tok_value(inst_ptr[n].prop_ptr,"tclcommand",2)); // 20170415
+      if(program && program[0]) { // 20170415 execute tcl command
+        Tcl_Eval(interp, program);
+      }
     }
   } 
 }

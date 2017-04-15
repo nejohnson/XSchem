@@ -425,6 +425,7 @@ char *get_tok_value(char *s,char *tok, int with_quotes)
         if((with_quotes & 1) || escape)  result[value_pos++]=c;
       }
       else if( !((c=='\\') && (with_quotes & 2)) ) result[value_pos++]=c; // 20150411 fixed logical expression
+      else if( (c=='\\') && escape ) result[value_pos++]=c; // 20170414 add escaped backslashes
       escape = (c=='\\' && !escape);
     }
     else if(state==XEND) {

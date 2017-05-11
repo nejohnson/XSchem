@@ -67,17 +67,70 @@ name="mchanged_name" model=\"nmos\" w="20u" l="3u" m="10"
  <h3>PREDEFINED COMPONENT ATTRIBUTES</h3>
  <ul>
   <li><tt>name</tt></li>
+  <p> This defines the name of the instance. Must be the first <tt>attribute=value</tt> in the 
+    component property string. Names are unique, so if for example multiple MOS components are
+    placed in the design one should be named <tt>m1</tt> and the second <tt>m2</tt> or anything 
+    else, provided the names are different. XSCHEM enforces this, if a name is given that already
+    exist in the current schematic it will be renamed. Normally the template string defines a default
+    name for a given component, and expecially for SPICE compatibility, the first character must NOT 
+    be changed. For example, the default name for a MOS transistor is <tt>m1</tt>, it can be renamed
+    for example to <tt>mcurr_source</tt> but not for example to <tt>dcurr_source</tt>. XSCHEM 
+    does not enforce that the first character is preserved, it's up to the designer to keep it 
+    consistent with the component type.</p>
   <li><tt>url</tt></li>
+  <p> This attribute defines a location (web page, file) that can be viewed when hitting the
+    <tt>&lt;shift&gt;H</tt> key on a selected component. This is very useful to link a datasheet to a
+    component, for example. The default program used to open the url is <tt>x-www-browser</tt>. 
+    this can be changed in the <tt>~/.xschem</tt> configuration file.
+    <tt>url</tt> can be an http link or a local file.</p>
   <li><tt>program</tt></li>
+  <p> this attribute can be used to specify an application to be used to open the <tt>url</tt> link.
+      for example <tt>program=evince</tt> may be given to specify an application for a pdf file
+      specified with <tt>url</tt></p>
   <li><tt>only_toplevel</tt></li>
+  <p>this attribute is valid only on <tt>netlist_commands</tt> type symbols and specifies that the 
+    symbol should be netlisted only if it is instantiated in the top-most hierarchy. This is very usefull
+    for spice commands. Spice commands are placed in a special <tt>netlist</tt> component as we will see
+    and are meaningfull only when simulating the block, but should be skipped if the component
+    is simulated as part of a bigger system which has its own (at higher hierarchy level)
+    <tt>netlist</tt>component for Spice commands.</p>
+  <img src="component_properties0.png">
   <li><tt>place</tt></li>
+  <p> This attribute is also valid only for <tt>netlist_commands</tt> type symbols, and tells
+    XSCHEM that this component must be netlisted last. This is necessary for some spice commands 
+    that need to be placed <b>after</b> the rest of the netlist.</p>
   <li><tt>spice_ignore</tt></li>
+  <p> This tells XSCHEM that for SPICE netlist this component will be <b>completely</b> ignored.</p>
   <li><tt>verilog_ignore</tt></li>
+  <p> This tells XSCHEM that for Verilog netlist this component will be <b>completely</b> ignored.</p>
   <li><tt>vhdl_ignore</tt></li>
+  <p> This tells XSCHEM that for VHDL netlist this component will be <b>completely</b> ignored.</p>
   <li><tt>sig_type</tt></li>
+  <p> For verilog type netlist, this tells that the current label names a signal (or constant) of
+    type <tt>sig_type</tt>. For example a label can be placed with name <tt>TEST</tt> and 
+    <tt>sig_type=BIT</tt>. The default type for VHDL if this property is missing  is <tt>std_logic</tt>.
+    The following picture shows the usage of <tt>sig_type</tt> and the resulting VHDL netlist.
+    This property is applicable only to <tt>label</tt> type components: <tt>ipin.sym</tt>, 
+    <tt>iopin.sym</tt>, <tt>opin.sym</tt>, <tt>lab_pin.sym</tt>, <tt>lab_wire.sym</tt>.
+  </p>
+  <img src="component_properties1.png">
   <li><tt>verilog_type</tt></li>
+  <p>This is the same as sig_type but for verilog netlisting: can be used to declare a <tt>wire</tt>
+     or a <tt>reg</tt> or any other datatype supported by the verilog language.
+  </p>
   <li><tt>generic_type</tt></li>
+  <p><tt>generic_type</tt> defines the type of parameters passed to VHDL components.
+    Consider the following examples of placement of <tt>generic_pin</tt> components in a 
+    VHDL design: 
+  </p>
+  <img src="component_properties2.png">
+  <p> As you will see in the <a href="parameters.html">parameters</a> slide, generics (they are just
+    parameters passed to components) can be passed also via property strings in addition to using 
+    <tt>generic_pin</tt> components.</p>
+   
   <li><tt>class</tt></li>
+  <p>The <tt>class</tt> attribute is used to declare the class of a VHDL signal, most used classes are
+    <tt>signal</tt> and <tt>constant</tt>. Default if missing is <tt>signal</tt>.</p>
  </ul><br>
  <!-- end of slide -->
  <div class="filler"></div>

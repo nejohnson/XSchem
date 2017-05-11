@@ -33,6 +33,8 @@ int callback(int event, int mx, int my, KeySym key,
  FILE *fp;
  unsigned short sel;
 
+
+ state &=~Mod2Mask; // 20170511 filter out NumLock status
  if(semaphore)
  {
    if(debug_var>=1) 
@@ -1108,6 +1110,9 @@ int callback(int event, int mx, int my, KeySym key,
       }
       sel = select_object(mousex,mousey,SELECTED);
 
+      if(sel && state ==Mod1Mask) { // 20170416
+        launcher();
+      }
       if( !(state & ShiftMask) )  {
         if(auto_hilight && hilight_nets && sel == 0 ) { // 20160413 20160503
           delete_hilight_net();

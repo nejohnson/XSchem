@@ -813,14 +813,12 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
     {
       char s[1024]; // overflow safe 20161122
       if(debug_var>=1) fprintf(errfp, "xschem(): saving: current schematic\n");
-      if(argc==3) {
-         my_snprintf(s, S(s), "get_cell {%s}", argv[2]);
-         tkeval(s); 
-         my_snprintf(s, S(s), "%s", Tcl_GetStringResult(interp));
-         save_file(s);
+
+      if(!strcmp(schematic[currentsch],"")) {   // 20170622 check if unnamed schematic, use saveas in this case...
+        saveas();
+      } else {
+        save();
       }
-      else
-       save_file(NULL);
     }
  }
 

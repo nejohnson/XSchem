@@ -619,7 +619,11 @@ int callback(int event, int mx, int my, KeySym key,
    if(key=='S' && (state == ShiftMask) )	// save 20121201
    {
      if(semaphore==2) break;
-     save();
+     if(!strcmp(schematic[currentsch],"")) {   // 20170622 check if unnamed schematic, use saveas in this case...
+       saveas();
+     } else {
+       save();
+     }
      break;
    }
    if(key=='S' && state == (ShiftMask | ControlMask)) // save as symbol 20121201

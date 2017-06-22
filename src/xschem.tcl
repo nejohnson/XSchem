@@ -372,7 +372,9 @@ proc filesave { msg {initialfile {}} {confirm 0}  } {
     set entry1 [ file extension $r] 
     set a [ get_cell $r]$entry1
     if { ![string compare $r {} ] } { break } 
-    if { [regexp "$XSCHEM_DESIGN_DIR/.+" $dir] } { break } 
+    # 20170622 check for dirname after $XSCHEM_DESIGN_DIR and filename before .sch or .sym
+    #                               /dirname/filename
+    if { [regexp "$XSCHEM_DESIGN_DIR/\[^.\]+/\[^.\]+\." $r] } { break } 
   }
   return $a
   

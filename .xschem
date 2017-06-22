@@ -74,10 +74,6 @@ set env(LM_LICENSE_FILE) $env(HOME)/modelsim/license.dat:$env(HOME)/hspice_2008/
 ## modelsim
 set modelsim_path $env(HOME)/modelsim/modeltech/bin
 
-## set hspice multithread and multiprocessor capabilities
-set hspice_mp 0  ;# multi process montecarlo, sweeps and .alter runs
-set hspice_mt 0  ;# multi thread simulations
-
 set hspice_path "$env(HOME)/hspice_2013/bin/hspice64 -mt 8"
 set hspicerf_path $env(HOME)/hspice_2013/bin/hspicerf64
 set cscope_path $env(HOME)/cosmoscope/amd64/ai_bin/cscope

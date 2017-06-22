@@ -1001,3 +1001,6 @@ C {devices/vsource} 830 -1070 0 0 {name=v4 value=0 xvalue="pwl 0 .1 1m .1 1.01m 
 C {devices/lab_pin} 300 -240 0 0 {name=p19 lab=FB} 
 C {devices/lab_pin} 300 -700 0 0 {name=p25 lab=FBN} 
 C {devices/title} 160 -30 0 0 {name=l1 author="Stefan Schippers"} 
+C {devices/launcher} 1070 -950 0 0 {name=h3 
+descr="GENERATE NETLIST" 
+tclcommand="xschem netlist"} 

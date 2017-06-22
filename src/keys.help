@@ -6,6 +6,10 @@ LeftButton              Clear selection and select a graphic object
 
 Shift+LeftButton        Select without clearing previous selection
 
+Alt+LeftButton          if an 'url' or 'tclcommand' property is defined on 
+                        selected instance open the url or execute the 
+                        tclcommand
+
 LeftButton drag         Select objects by area, clearing previous selection
 
 Shift+LeftButton drag   Select objects by area, without clearing 

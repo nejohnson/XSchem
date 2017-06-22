@@ -340,10 +340,7 @@ void save_file(char *schname)
     my_snprintf(name, S(name), "check_valid_filename %s", schematic[currentsch]); // 20121111
     Tcl_Eval(interp, name); 
     if( strcmp(Tcl_GetStringResult(interp), "ok") ) { 
-      Tcl_Eval(interp,"fileselect {Save File} {} 1");
-      if(Tcl_GetStringResult(interp) && Tcl_GetStringResult(interp)[0] ) {
-        strcpy(schematic[currentsch], Tcl_GetStringResult(interp));
-      }
+         return; // 20170622
     }
 
     if(!strcmp(schematic[currentsch],"")) {

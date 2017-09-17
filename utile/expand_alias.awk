@@ -95,7 +95,8 @@ function replace(name, s,       pre, par, post)
     sub(/^[^}]*}/,"",post)
     sub(/^[^{]*{/, "", par)
     sub(/}.*/,"",par)
-    if(name SUBSEP "p" par  in alias) par = param[alias[name , "p" par]]
+    # 20170828  param[] indexed with name to avoid clashes in case of multiple alias levels
+    if(name SUBSEP "p" par  in alias) par = param[name, alias[name , "p" par]]
     else par = SUBSEP "%"   par "%" SUBSEP
     s = pre par post
   }
@@ -119,8 +120,9 @@ function analyze_params_in_expressions(name, s,       ss, s_arr, i, o, o_arr, n)
       invert=1
     }
     if(name SUBSEP "p" s_arr[i]  in alias) {
-      #print ";    --> " s_arr[i]  " -->|" alias[name , "p" s_arr[i]] "|--> " param[alias[name , "p" s_arr[i]]]
-      s_arr[i]=param[alias[name , "p" s_arr[i]]]
+      # 20170828 all param[] calls indexed with alias name to avoid clashes
+      # print ";    --> " s_arr[i]  " -->|" alias[name , "p" s_arr[i]] "|--> " param[name, alias[name , "p" s_arr[i]]] > "/dev/stderr"
+      s_arr[i]=param[name, alias[name , "p" s_arr[i]]]
     }
     if(invert) s_arr[i] = "~" s_arr[i] # 20140527
     ss = ss o_arr[i] s_arr[i]
@@ -133,9 +135,11 @@ function expand_alias(line,     numb,name,i,mm,j,tmp,zz)
 {
   numb=split(line,tmp)
   name=tmp[1]
+  #print "; expand: " name >"/dev/stderr"
   for(i=2;i<=numb;i++) {
-    param[i-1]=tmp[i]
-    #print "; param[" i-1 "]= " param[i-1]
+    # 20170828 all param[] calls indexed with alias name to avoid clashes
+    param[name, i-1]=tmp[i]
+    #print "; param[" i-1 "]= " param[name, i-1] > "/dev/stderr"
   }
   for(i=1;i<alias[name , "lines"];i++)
   {
@@ -143,7 +147,8 @@ function expand_alias(line,     numb,name,i,mm,j,tmp,zz)
    zz=""
    for(j=1;j<=mm;j++)
    {
-    if(name SUBSEP "p" tmp[j]  in alias) tmp[j]=param[alias[name , "p" tmp[j]]]
+    # 20170828 all param[] calls indexed with alias name to avoid clashes
+    if(name SUBSEP "p" tmp[j]  in alias) tmp[j]=param[name, alias[name , "p" tmp[j]]]
     tmp[j] = analyze_params_in_expressions(name, tmp[j])
     zz=zz  " " tmp[j]
    }

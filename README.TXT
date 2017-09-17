@@ -11,7 +11,7 @@ also the extension language used.
 
 INSTALLATION AND MANUAL
 
-http://stefanschippers.host-ed.me/stefan/xschem.html
+https://xschem.sourceforge.io/stefan/xschem.html
 
 BUILDING
 
@@ -35,6 +35,11 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.1.12:
+- fixed a bug causing incorrect VHDL netlist when bussed nets or bus slices are
+  connected to primitive VHDL symbols with behaviour described with vhdl_format.
+  Thanks to Svenn Are Bjerkem for reporting the problem.
+
 2.1.11:
 - When saving a newly created schematic (a schematic never saved before) using 
   the 'File->Save' function, revert to a 'Save As' operation asking for a correct filename

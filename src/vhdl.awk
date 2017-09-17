@@ -75,10 +75,12 @@
             printf ") "
          }
 
-        }
-        else
+        } else {
 
-        printf "%s ", prim_field_array[j]
+          # printf "%s ", prim_field_array[1]
+          ## 20170917
+          printf "%s ", to_round_brackets(prim_field_array[1+(j-1)%pport_mult])
+        }
       }
       else if($i ~ /^----name\(.*\)/) {
         sub(/----name\(/,"",prim_field)
@@ -683,7 +685,7 @@ function compact_pinlist(pin, dir                 ,i,ii,base,curr,curr_n,np)
  if(np) {
    ii=1
    for(i=1;i<=np;i++) {
-     base =lab_name( pin[i] )
+     base =s_b( pin[i] )
      if(i==1) {curr=base; curr_n=i}
      else { 
        if(base != curr) {
@@ -714,13 +716,13 @@ function compact_label(ar,a,b,        ret,start,i)
           else {ret = ret ar[i-1] ","; start=i }
         }
       }
-      else if(lab_name(ar[i])!=lab_name(ar[i-1]) || 
+      else if(s_b(ar[i])!=s_b(ar[i-1]) || 
               ( lab_index(ar[i]) != lab_index(ar[i-1])-1 && 
               lab_index(ar[i]) != lab_index(ar[i-1])+1) ) {
         if(start<i-1) 
-          ret = ret lab_name(ar[start]) "[" lab_index(ar[start]) ":" lab_index(ar[i-1]) "],"
+          ret = ret s_b(ar[start]) "[" lab_index(ar[start]) ":" lab_index(ar[i-1]) "],"
         else
-          ret = ret lab_name(ar[start]) "[" lab_index(ar[start]) "],"
+          ret = ret s_b(ar[start]) "[" lab_index(ar[start]) "],"
         start=i
       }
     }
@@ -730,17 +732,12 @@ function compact_label(ar,a,b,        ret,start,i)
     else ret = ret ar[b]
   }
   else if(start<b)   
-    ret = ret lab_name(ar[start]) "[" lab_index(ar[start]) ":" lab_index(ar[b]) "]"
+    ret = ret s_b(ar[start]) "[" lab_index(ar[start]) ":" lab_index(ar[b]) "]"
   else
-    ret = ret lab_name(ar[b]) "[" lab_index(ar[b]) "]"
+    ret = ret s_b(ar[b]) "[" lab_index(ar[b]) "]"
   return ret
 }
 
-function lab_name(lab)
-{
- sub(/\[.*/,"",lab)
- return lab
-}
 
 
 function lab_index(lab)

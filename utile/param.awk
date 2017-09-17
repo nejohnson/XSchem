@@ -1,8 +1,13 @@
 #!/usr/bin/awk -f
 # 20200212 added simle expression parsing
 
+# 20170830 
+{
+  gsub (/[ \t]*=[ \t]*/, "=")
+}
+  
 
-/^\.*param/{
+/^\.param/{
  param[$2]=arith($3)
  next
 }

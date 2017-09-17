@@ -185,7 +185,9 @@ BEGIN{
 }
   
 /^[ \t]*(eldo|spice)[ \t]+/{$1="";$0=substr($0,2);dump[++dumpline]=$0;next}
-/^[ \t]*dump[ \t]+/{$1="";$0=substr($0,2);print $0 >file     ;next}
+
+# 20170419 added {time} to be replaced with actual time value in dump string
+/^[ \t]*dump[ \t]+/{$1="";gsub(/{time}/,time); $0=substr($0,2);print $0 >file     ;next}
 /^[ \t]*origin[ \t]+/{ origin=$2; time=-origin}
 /^[ \t]*time[ \t]+/{ time=$2-origin}
 /^[ \t]*release[ \t]*/{ if(NF==1) powmill_statement=1}
@@ -596,7 +598,9 @@ function write_pwl_pair( name, value,res, vhi, vlo,slope,   timex, namex,vv,vv1,
    signal[name,"time",1]= timex
    signal[name,"value",1]= v
    signal[name,"n"]= 1
-   signalres[name]="VR" namex " VR" namex " " gndnode " PWL " 
+   #                                         20170810 0 instead of gndnode
+   #                                          |
+   signalres[name]="VR" namex " VR" namex " " 0 " PWL " 
    signalres[name,"value",1]= pwlres
   }
   if(signal[name,"value", signal[name,"n"] ]!=v || signalres[name,"value", signal[name,"n"] ]!=pwlres)

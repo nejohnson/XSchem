@@ -26,7 +26,7 @@ C {examples/tesla2} 150 -140 0 0 {name=x7}
 C {devices/title} 160 -30 0 0 {name=l1 author="Stefan Schippers"} 
 C {devices/launcher} 750 -260 0 0 {name=h8 
 descr="XSCHEM WEBSITE" 
-url="http://stefanschippers.host-ed.me/stefan/xschem.html"
+url="https://xschem.sourceforge.io/stefan/xschem.html"
 } 
 C {devices/launcher} 750 -150 0 0 {name=h1 
 descr="XSCHEM ON SOURCEFORGE" 
@@ -38,3 +38,4 @@ descr="LOCAL DOCUMENTATION"
 url="$env(HOME)/share/doc/xschem/xschem.html"
 } 
 C {examples/greycnt} 150 -420 0 0 {name=x8} 
+C {examples/loading} 150 -460 0 0 {name=x9} 

@@ -79,14 +79,23 @@ name="mchanged_name" model=\"nmos\" w="20u" l="3u" m="10"
     consistent with the component type.</p>
   <li><tt>url</tt></li>
   <p> This attribute defines a location (web page, file) that can be viewed when hitting the
-    <tt>&lt;shift&gt;H</tt> key on a selected component. This is very useful to link a datasheet to a
-    component, for example. The default program used to open the url is <tt>x-www-browser</tt>. 
-    this can be changed in the <tt>~/.xschem</tt> configuration file.
-    <tt>url</tt> can be an http link or a local file.</p>
+    <tt>&lt;shift&gt;H</tt> key (or <tt>&lt;Alt&gt; left mouse buttoni</tt>) on a selected component. 
+    This is very useful to link a datasheet to a
+    component, for example. The default program used to open the url is <tt>xdg-open</tt>. 
+    this can be changed in the <tt>~/.xschem</tt> configuration file with the <tt>launcher_default_program</tt>
+    variable.
+    <tt>url</tt> can be an http link or a local file that has a default association known to xdg-open.</p>
   <li><tt>program</tt></li>
-  <p> this attribute can be used to specify an application to be used to open the <tt>url</tt> link.
+  <p> this attribute can be used to specify an application to be used to open the <tt>url</tt> link,
+      if the default application has to be changed or the file type is unknown.
       for example <tt>program=evince</tt> may be given to specify an application for a pdf file
       specified with <tt>url</tt></p>
+  <li><tt>tclcommand</tt></li>
+  <p> this can be any tcl statement (or group of statements separated by semicolons) including all xschem-specific
+      commands, the statement will be executed when pressing the <tt>&lt;shift&gt;H</tt> key 
+      (or <tt>&lt;Alt&gt; left mouse button</tt>) on the selected instance.
+      <br>The <tt>tclcommand</tt> and <tt>url</tt> properties are mutually exclusive.</p>
+  <img src="component_properties3.png">
   <li><tt>only_toplevel</tt></li>
   <p>this attribute is valid only on <tt>netlist_commands</tt> type symbols and specifies that the 
     symbol should be netlisted only if it is instantiated in the top-most hierarchy. This is very usefull

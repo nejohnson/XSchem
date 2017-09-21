@@ -35,6 +35,13 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+
+2.1.13:
+- Added binding for the 'ghdl' free VHDL simulator, update your ~/.xschem file to
+  set pathnames and defaults.
+- added a VHDL testbench ('loading') in the examples library to test ghdl
+- small fixes in the 'vhdl.awk' netlist post processor
+
 2.1.12:
 - fixed a bug causing incorrect VHDL netlist when bussed nets or bus slices are
   connected to primitive VHDL symbols with behaviour described with vhdl_format.

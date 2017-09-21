@@ -19,6 +19,7 @@ set XSCHEM_START_WINDOW {mylib/0_top}
 ## some default behavior
 set netlist_type spice ;# allowed : spice, verilog, vhdl
 set hspice_netlist 1
+set verilog_2001 1
 #set line_width 2
 set change_lw 1
 set color_ps 1
@@ -30,8 +31,6 @@ set terminal {xterm -geometry 100x35 -fn 9x15 -bg black -fg white -cr white -ms 
 # editor must not detach from launching shell (-f mandatory for gvim)
 set editor {gvim -f -geometry 90x28}
 
-set verilog_2001 1
-
 ## alternatives: hspice, hspicerf, finesim
 set spice_simulator hspice
 set finesim_opts {}
@@ -39,9 +38,18 @@ set finesim_opts {}
 ## alternatives: iverilog, modelsim
 set verilog_simulator iverilog
 
+## alternatives: ghdl, modelsim
+set vhdl_simulator ghdl
+
 ## command to translate xpm to png (assumes command takes source 
 ## and dest file as arguments, example: gm convert plot.xpm plot.png)
 set to_png {gm convert}
+
+## computer farm redirector
+## RTDA NC
+# set computerfarm {nc run -Il}
+## LSF BSUB
+# set computerfarm {bsub -Is}
 
 ## icarus verilog
 set iverilog_path $env(HOME)/verilog/bin/iverilog
@@ -62,17 +70,17 @@ set utile_cmd_path ${XSCHEM_HOME_DIR}/utile/utile
 ## gtkwave
 set gtkwave_path $env(HOME)/gtkwave/bin/gtkwave
 
-## computer farm redirector
-## RTDA NC
-# set computerfarm {nc run -Il}
-## LSF BSUB
-# set computerfarm {bsub -Is}
+## modelsim
+set modelsim_path $env(HOME)/modelsim/modeltech/bin
+
+## ghdl
+set ghdl_path $env(HOME)/ghdl/bin/ghdl
+set ghdl_elaborate_opts {--ieee=synopsys}
+set ghdl_run_opts {}
+
 
 ## hspice  and modelsim license files (sample syntax)
 set env(LM_LICENSE_FILE) $env(HOME)/modelsim/license.dat:$env(HOME)/hspice_2008/license.dat:$env(HOME)/hspice_2013/lic.dat
-
-## modelsim
-set modelsim_path $env(HOME)/modelsim/modeltech/bin
 
 set hspice_path "$env(HOME)/hspice_2013/bin/hspice64 -mt 8"
 set hspicerf_path $env(HOME)/hspice_2013/bin/hspicerf64

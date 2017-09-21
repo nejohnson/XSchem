@@ -426,6 +426,12 @@ primitive==1{primitive_line=primitive_line " " $0; next  } # 20071217
         if( (parametrized_formal_range || (inst_formal_port_mult[j]>1)) && actual_port_mult==1) {
 								 # patch for single bit actual port 
 								 # assigned on vector formal port 23112002
+
+          # 20170920
+          if( parametrized_formal_range && inst_actual_port[j] ~/\[.*:.*\]/) {
+            printf "%s","   " inst_formal_port[j] " => " get_number(actual_port) 
+          } else 
+          # /20170920
  	  for(num=inst_formal_low[j]; ; num+=sign(inst_formal_up[j] - inst_formal_low[j])) {
                if(num !=inst_formal_low[j]) printf " ,\n"
                printf "%s","   " inst_formal_port[j] "(" num ") => " get_number(actual_port)

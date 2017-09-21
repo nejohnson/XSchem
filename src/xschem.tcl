@@ -182,29 +182,29 @@ proc edit_file {filename} {
 proc simulate {filename} {
  global XSCHEM_HOME_DIR entry1 XSCHEM_DESIGN_DIR env netlist_dir netlist_type
  global task_output task_error
- global iverilog_path vvp_path hspice_path hspicerf_path spice_simulator modelsim_path verilog_simulator
+ global iverilog_path vvp_path hspice_path hspicerf_path spice_simulator 
+ global modelsim_path verilog_simulator
+ global vhdl_simulator ghdl_path ghdl_elaborate_opts ghdl_run_opts
  global finesim_path finesim_opts
  global utile_cmd_path terminal
  global iverilog_opts ;# 20161118
  global computerfarm ;# 20151007
 
  if { [xschem set_netlist_dir 0] ne "" } {
+
    if { $netlist_type=="verilog" } {
      # 20150916 added modelsim
      if { $verilog_simulator == "iverilog" } { ;# icarus verilog
-
        task "$iverilog_path $iverilog_opts -o .verilog_object $filename" $netlist_dir fg
        if {$task_error} {viewdata $task_output; return}
-
        task  "$vvp_path $netlist_dir/.verilog_object" $netlist_dir fg
        if {$task_error} {viewdata $task_output; return}
        write_data $task_output $netlist_dir/.sim_output.txt
        task "$terminal  -e less $netlist_dir/.sim_output.txt" $netlist_dir bg
-     } else { ;# modelsim
+     } elseif { $verilog_simulator =="modelsim" } { ;# modelsim
        #puts {start compile}
        task "${modelsim_path}/vlog +acc $filename" $netlist_dir fg
        if {$task_error} {viewdata $task_output; return}
-  
        #puts {start simulation}
        task "${modelsim_path}/vsim -c -do \"run -all\" [file rootname $filename]" $netlist_dir fg
        if {$task_error} {viewdata $task_output; return}
@@ -212,16 +212,16 @@ proc simulate {filename} {
        write_data $task_output $netlist_dir/.sim_output.txt
        #puts {end log file}
        task "$terminal  -e less $netlist_dir/.sim_output.txt" $netlist_dir bg
+     } else {
+       alert_ "ERROR: undefined verilog simulator: $verilog_simulator"
+     }
 
-     } 
    } elseif { $netlist_type=="spice" } { 
-
      ## run utile before firing simulator if any UTILE stimuli file found
      set schname [ file tail [ file rootname $filename] ]
      if { [file exists stimuli.$schname ] } {
        task "$utile_cmd_path stimuli.$schname" $netlist_dir fg
      }
-
      if { $spice_simulator == "hspicerf" } {
        # added computerfarm
        ## 20161119 $terminal does not fit here, hspice wants only xterm !
@@ -232,11 +232,20 @@ proc simulate {filename} {
        task "xterm -e \"$computerfarm $finesim_path $finesim_opts $filename ; bash \""  $netlist_dir bg
        # 20170410
      } else {
-       alert_ "ERROR: undefined SPICE simulator "
+       alert_ "ERROR: undefined SPICE simulator: $spice_simulator"
      }
    } elseif { $netlist_type=="vhdl" } { 
-     set old $env(PWD)
-     task "${modelsim_path}/vsim -i" $netlist_dir bg
+     set schname [ file tail [ file rootname $filename] ]
+     if { $vhdl_simulator == "modelsim" } { 
+       set old $env(PWD)
+       task "${modelsim_path}/vsim -i" $netlist_dir bg
+     #20170921 added ghdl
+     } elseif { $vhdl_simulator == "ghdl" } { 
+       task  "$ghdl_path -c $ghdl_elaborate_opts $filename -r $ghdl_run_opts $schname --wave=${schname}.ghw" $netlist_dir fg
+       if {$task_error} {viewdata $task_output; return}
+       write_data $task_output $netlist_dir/.sim_output.txt
+       task "$terminal  -e less $netlist_dir/.sim_output.txt" $netlist_dir bg
+     } 
    } else { 
      alert_ "ERROR: netlist_type: $netlist_type , filename: $filename"
    }
@@ -305,6 +314,8 @@ proc waves {schname} {
      } else {
        alert_ { Unsupported default wiever... } 
      }
+   } elseif { $netlist_type=="vhdl" } { 
+     task "$gtkwave_path ${schname}.ghw $schname.sav 2>/dev/null" $netlist_dir bg
    }
 
  }
@@ -352,7 +363,12 @@ proc fileload { msg {initialfile {}} {confirm 0}  } {
     set entry1 [ file extension $r]
     set a [ get_cell $r]$entry1
     if { ![string compare $r {} ] } { break }
-    if { [regexp "$XSCHEM_DESIGN_DIR/.+" $dir] } { break }
+    # 20170921 resolve symlinks
+    set designdir $XSCHEM_DESIGN_DIR
+    if { [ file type $XSCHEM_DESIGN_DIR ] == "link" } { 
+      set designdir [ file readlink $XSCHEM_DESIGN_DIR ] 
+    }
+    if { [regexp "${designdir}/.+" $dir] } { break }
   }
   return $a
 
@@ -1565,6 +1581,7 @@ set_ne verilog_2001 1
 set_ne spice_simulator hspice
 set_ne finesim_opts {}
 set_ne verilog_simulator iverilog
+set_ne vhdl_simulator ghdl ;# 20170921
 set_ne split_files 0
 set_ne flat_netlist 0
 set_ne netlist_type vhdl
@@ -1606,6 +1623,10 @@ set_ne computerfarm {} ;# 20151007
 set_ne iverilog_path $env(HOME)/verilog/bin/iverilog
 set_ne vvp_path $env(HOME)/verilog/bin/vvp
 set_ne iverilog_opts {} ;# 20161118 allows to add -g2012 for example 
+## ghdl 20170921
+set_ne ghdl_path $env(HOME)/ghdl/bin/ghdl
+set_ne ghdl_elaborate_opts {}
+set_ne ghdl_run_opts {}
 ## gtkwave
 set_ne gtkwave_path $env(HOME)/gtkwave/bin/gtkwave
 
@@ -2032,6 +2053,10 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    .menubar.simulation.menu add separator
    .menubar.simulation.menu add radiobutton -label "Modelsim Verilog simulator" -variable verilog_simulator -value modelsim
    .menubar.simulation.menu add radiobutton -label "Icarus Verilog simulator" -variable verilog_simulator -value iverilog
+   #20170921
+   .menubar.simulation.menu add separator
+   .menubar.simulation.menu add radiobutton -label "Modelsim VHDL simulator" -variable vhdl_simulator -value modelsim
+   .menubar.simulation.menu add radiobutton -label "GHDL VHDL simulator" -variable vhdl_simulator -value ghdl
    #20170410
    .menubar.simulation.menu add separator
    .menubar.simulation.menu add radiobutton -label "Hspicerf Spice simulator" -variable spice_simulator -value hspicerf

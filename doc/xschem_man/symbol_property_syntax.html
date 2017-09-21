@@ -33,9 +33,10 @@ p{padding: 15px  30px 10px;}
     <li><tt>subcircuit</tt>: the symbol has an underlining schematic representation,
      when producing the netlist XSCHEM has to descend into the corresponding schematic.
      This will be covered in the subcircuits chapter. </li>
-    <li><tt>primitive</tt>: the symbol has a schematic representation but the SPICE netlister 
+    <li><tt>primitive</tt>: the symbol has a schematic representation but the netlister 
      will not use it. This is very useful if you want to netlist a symbol using only
-     the <tt>format</tt> attribute or use the underlying schematic. By setting the
+     the <tt>format</tt> (or <tt>vhdl_format</tt> or <tt>verilog_format</tt> depending 
+     on the netlist type) attribute or use the underlying schematic. By setting the
      attribute back to <tt>subcircuit</tt> you can quickly change the behavior.</li>
     <li><tt>label</tt>: the symbol is used to label a net. These type of symbols must have
      one and only one pin, and the template string must define a <tt>lab</tt> attribute

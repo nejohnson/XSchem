@@ -564,6 +564,10 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
       merge_file(0,argv[2]);
     }
  }
+ else if(!strcmp(argv[1],"make_sch")) // make schematic from selected symbol 20171004
+ {
+   create_sch_from_sym();
+ }
 
  else if(!strcmp(argv[1],"make_symbol"))
  {
@@ -811,7 +815,6 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
     }
     else
     {
-      char s[1024]; // overflow safe 20161122
       if(debug_var>=1) fprintf(errfp, "xschem(): saving: current schematic\n");
 
       if(!strcmp(schematic[currentsch],"")) {   // 20170622 check if unnamed schematic, use saveas in this case...

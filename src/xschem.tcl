@@ -546,6 +546,7 @@ proc enter_text {textlabel} {
    global txt rcode
    set rcode {}
    toplevel .t -class Dialog
+   wm title .t {Enter text}
 
    ## not honored by fvwm ... 20110322
    # wm attributes .t -topmost 1
@@ -658,6 +659,7 @@ proc property_search {} {
   global custom_token
 
   toplevel .lw -class Dialog
+  wm title .lw {Search}
   ## not honored by fvwm ... 20110322
   # wm attributes .lw -topmost 1
   ## ... use alternate method instead 20110322
@@ -714,6 +716,7 @@ proc property_search {} {
 proc ask_save { {ask {save file?}} } {
    global rcode
    toplevel .ent2 -class Dialog
+   wm title .ent2 {Ask Save}
 
    ## not honored by fvwm ... 20110322
    # wm attributes .ent2 -topmost 1
@@ -840,6 +843,7 @@ proc edit_prop {txtlabel} {
    set editprop_semaphore 1
    if $tcl_debug<=-1 then {puts " edit_prop{}: entry1=$entry1"}
    toplevel .ent2  -class Dialog 
+   wm title .ent2 {Edit Properties}
    set X [expr [winfo pointerx .ent2] - 60]
    set Y [expr [winfo pointery .ent2] - 35]
 
@@ -997,6 +1001,7 @@ proc text_line {txtlabel clear} {
    if $tcl_debug<=-1 then {puts " text_line{}: clear=$clear"}
    if $tcl_debug<=-1 then {puts " text_line{}: entry1=$entry1"}
    toplevel .ent2  -class Dialog
+   wm title .ent2 {Text input}
    set X [expr [winfo pointerx .ent2] - 60]
    set Y [expr [winfo pointery .ent2] - 35]
 
@@ -1077,7 +1082,7 @@ proc text_line {txtlabel clear} {
 proc entry_line {txtlabel} {
    global entry1
    toplevel .ent2 -class Dialog
-
+   wm title .ent2 {Text line}
    ## not honored by fvwm ... 20110322
    # wm attributes .ent2 -topmost 1
    ## ... use alternate method instead 20110322
@@ -1117,6 +1122,7 @@ proc entry_line {txtlabel} {
 
 proc alert_ {txtlabel {position +200+300}} {
    toplevel .ent3 -class Dialog
+   wm title .ent3 {Alert}
    set X [expr [winfo pointerx .ent3] - 60]
    set Y [expr [winfo pointery .ent3] - 60]
 
@@ -1226,6 +1232,7 @@ proc viewdata {data} {
    set w .win$wcounter
    catch [destroy $w]
    toplevel $w
+   wm title $w {Wiew data}
    frame $w.buttons
    pack $w.buttons -side bottom -fill x -pady 2m
 
@@ -1276,6 +1283,7 @@ proc gensch {cell {selected {}} } {
   set gensch_body {}
   set gensch_res {}
   toplevel .gensch -class Dialog 
+  wm title .gensch {Symbol creation tool}
 
   ## not honored by fvwm ... 20110322
   # wm attributes .gensch -topmost 1
@@ -1311,7 +1319,7 @@ proc gensch {cell {selected {}} } {
   }
   button .gensch.but.load -text LOAD -command load_sym
   button .gensch.but.canc -text Cancel -command { set gensch_res {}; destroy .gensch; }
-  checkbutton .gensch.but.aggr -text Aggressive -variable gensch_aggressive
+  checkbutton .gensch.but.aggr -text {Do not clone schematic}  -variable gensch_aggressive
   pack .gensch.name
 
   pack .gensch.ipin.ipin -side right -fill x -expand y
@@ -1477,6 +1485,7 @@ proc create_sym {} {
 proc input_number {txt cmd} {
           global xx
           toplevel .lw -class Dialog
+          wm title .lw {Input number}
           set X [expr [winfo pointerx .lw] - 60]
           set Y [expr [winfo pointery .lw] - 35]
           # 20100203
@@ -1994,7 +2003,8 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
 
    menubutton .menubar.sym -text "Symbol" -menu .menubar.sym.menu
    menu .menubar.sym.menu -tearoff 0
-   .menubar.sym.menu add command -label "make symbol " -command "xschem make_symbol" -accelerator a
+   .menubar.sym.menu add command -label "Make symbol " -command "xschem make_symbol" -accelerator a
+   .menubar.sym.menu add command -label "Make schematic from symbol " -command "xschem make_sch" -accelerator C-l
 
    menubutton .menubar.tools -text "Tools" -menu .menubar.tools.menu
    menu .menubar.tools.menu -tearoff 0

@@ -912,6 +912,95 @@ int load_symbol_definition(char *name)
   return 1;
 }
 
+// 20171004
+void create_sch_from_sym(void)
+{
+  Instdef *ptr;
+  int i, j, npin, ypos;
+  double x;
+  int p=0;
+  Box *rect;
+  FILE *fd;
+  char *pindir[3] = {"in", "out", "inout"};
+  char *pinname[3] = {"devices/ipin", "devices/opin", "devices/iopin"};
+  static char *dir = NULL;
+  static char *prop = NULL;
+  char schname[4096];
+  static char *savecmd=NULL;
+  char *sub_prop;
+  static char *sub2_prop=NULL;
+  static char *str=NULL;
+
+  rebuild_selected_array();
+  if(lastselected > 1)  return;
+  if(lastselected==1 && selectedgroup[0].type==ELEMENT)
+  {
+    my_snprintf(schname, S(schname), "%s/%s.sch", 
+                Tcl_GetVar(interp, "XSCHEM_DESIGN_DIR", TCL_GLOBAL_ONLY), 
+                inst_ptr[selectedgroup[0].n].name);
+    my_strdup(&savecmd, "ask_save \" create schematic file: ");
+    my_strcat(&savecmd, schname);
+    my_strcat(&savecmd, " ?\nWARNING: this will overwrite any existing schematic file!\"");
+    tkeval(savecmd);
+    if(strcmp(Tcl_GetStringResult(interp), "yes") ) return;
+    if(!(fd=fopen(schname,"w")))
+    {
+      if(debug_var>=1) fprintf(errfp, "create_sch_from_sym(): problems opening file %s \n",schname);
+      return;
+    }
+    fprintf(fd, "G {}");
+    fputc('\n', fd);
+    fprintf(fd, "V {}");
+    fputc('\n', fd);
+    fprintf(fd, "S {}");
+    fputc('\n', fd);
+    ptr = inst_ptr[selectedgroup[0].n].ptr+instdef;
+    npin = ptr->rects[GENERICLAYER];
+    rect = ptr->boxptr[GENERICLAYER];
+    ypos=0;
+    for(i=0;i<npin;i++) {
+      my_strdup(&prop, rect[i].prop_ptr);
+      if(!prop) continue;
+      sub_prop=strstr(prop,"name=")+5;
+      if(!sub_prop) continue;
+      x=-120.0;
+      my_realloc(&str, 100+strlen(sub_prop));
+      sprintf(str, "name=g%d lab=%s", p++, sub_prop);
+      fprintf(fd, "C {devices/generic_pin} %g %g %g %g ", x, 20.0*(ypos++), 0.0, 0.0 );
+      save_ascii_string(str, fd);
+      fputc('\n' ,fd);
+    } // for(i)
+    npin = ptr->rects[PINLAYER];
+    rect = ptr->boxptr[PINLAYER];
+    for(j=0;j<3;j++) {
+      if(j==1) ypos=0;
+      for(i=0;i<npin;i++) {
+        my_strdup(&prop, rect[i].prop_ptr);
+        if(!prop) continue;
+        sub_prop=strstr(prop,"name=")+5;
+        if(!sub_prop) continue;
+        // remove dir=... from prop string 20171004
+        if( strstr(sub_prop, " dir=")) {
+          my_strndup(&sub2_prop, sub_prop, strstr(sub_prop, " dir=")-sub_prop);
+          my_strcat(&sub2_prop, strstr(strstr(sub_prop, "dir=")," "));
+        }
+
+        my_strdup(&dir, get_tok_value(rect[i].prop_ptr,"dir",0));
+        if(!dir) continue;
+        if(j==0) x=-120.0; else x=120.0;
+        if(!strcmp(dir, pindir[j])) { 
+          my_realloc(&str, 100+strlen(sub2_prop));
+          sprintf(str, "name=g%d lab=%s", p++, sub2_prop);
+          fprintf(fd, "C {%s} %g %g %g %g ", pinname[j], x, 20.0*(ypos++), 0.0, 0.0);
+          save_ascii_string(str, fd);
+          fputc('\n' ,fd);
+        } // if()
+      } // for(i)
+    }  // for(j)
+    fclose(fd);
+  } // if(lastselected...)
+}
+
 void edit_symbol(void)
 {
   static char *str=NULL;

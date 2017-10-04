@@ -79,6 +79,7 @@ alt+ctrl    'j'         Print list of highlighted nets/pins with label expansion
 shift       'K'         Unhilight all nets
 ctrl        'k'         Unhilight selected nets
 -           'l'         Start line
+ctrl        'l'         Make schematic view from selected symbol
 shift       'L'         Load schematic
 -           'm'         Move selected obj.
 shift       'N'         Hierarchical netlist

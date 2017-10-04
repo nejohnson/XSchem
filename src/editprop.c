@@ -38,6 +38,21 @@ void my_strdup(char **dest, const char *src) // empty source string --> dest=NUL
  }
 }
 
+// 20171004 copy at most n chars, adding a null char at end
+void my_strndup(char **dest, const char *src, int n) // empty source string --> dest=NULL
+
+{
+ if(*dest!=NULL) {
+   if(debug_var>=3) fprintf(errfp,"  my_strdup:  calling my_free\n");
+   my_free(*dest); *dest=NULL;
+ }
+ if(src!=NULL && src[0]!='\0')
+ {
+  *dest=strndup(src, n);
+  if(debug_var>=3) fprintf(errfp,"my_strndup(): duplicated %lu string %s\n",(unsigned long)*dest, src);
+ }
+}
+
 
 int my_snprintf(char *str, int size, const char *fmt, ...) // 20161124
 {

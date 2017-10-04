@@ -877,13 +877,9 @@ int callback(int event, int mx, int my, KeySym key,
     draw();
     break;
    }
-   if(key=='l' && state == ControlMask) {		// test mode
+   if(key=='l' && state == ControlMask) {		// create schematic from selected symbol 20171004
      
-     char *a=NULL;
-     my_strdup(&a, "name=xaa model=phv w=3 l=4");
-     set_different_token( &a, "name=xbb model=phv w=3 l=4", "name=xaa model=phv w=3 l=4");
-     printf("%s\n", a);
-     
+     create_sch_from_sym();
      break;
    }
    if(key=='l' && state == 0)				// start line

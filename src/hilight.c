@@ -736,8 +736,9 @@ void print_hilight_net(int show)
      // 20111116
      node_entry = bus_hash_lookup(entry->token, "",2, 0, "", "", "", "");
 
- 
-     if(!strcmp(sch_prefix[currentsch], entry->path)) {
+     // 20170926 test for not null node_entry, this may happen if a hilighted net name has been changed
+     // before invoking this function, in this case --> skip
+     if(node_entry && !strcmp(sch_prefix[currentsch], entry->path)) {
        if(show==3) {
          fprintf(fd, "%s%s\n",  entry->path, entry->token); // 20111106
 

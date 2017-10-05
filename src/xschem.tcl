@@ -615,6 +615,8 @@ proc enter_text {textlabel} {
    pack .t.buttons.b3  -side left -fill x -expand yes
    pack .t.buttons.b4  -side left -fill x -expand yes
    pack .t.buttons -side bottom -fill x
+   bind .t <Escape> {.t.buttons.cancel invoke}
+   bind .t <Control-Return> {.t.buttons.ok invoke}
    #grab set .t
    tkwait window .t
    return $txt
@@ -707,9 +709,61 @@ proc property_search {} {
   pack .lw.but -expand yes -fill x
 
   focus  .lw
+  bind .lw <Escape> {.lw.but.cancel invoke}
   bind .lw <Return> {.lw.but.ok invoke}
+  bind .lw <Control-Return> {.lw.but.ok invoke}
   grab set .lw
   tkwait window .lw
+  return {}
+}
+
+
+#20171005
+proc attach_labels_to_inst {} {
+  global use_lab_wire use_label_prefix custom_label_prefix rcode
+
+  toplevel .label -class Dialog
+  wm title .label {Add labels to instances}
+  bind .label <Visibility> { if { [regexp Obscured %s] } {raise .label; if { $tcl_version > 8.4 } {wm attributes  .label -topmost 1} } }
+
+
+  # 20100408
+  set X [expr [winfo pointerx .label] - 60]
+  set Y [expr [winfo pointery .label] - 35]
+  wm geometry .label "+$X+$Y"
+
+  frame .label.custom 
+  label .label.custom.l -text "Prefix"
+  entry .label.custom.e -width 32
+  .label.custom.e insert 0 $custom_label_prefix
+  pack .label.custom.e .label.custom.l -side right
+
+
+  frame .label.but
+  button .label.but.ok -text OK -command {
+        set custom_label_prefix [.label.custom.e get]
+	set token $custom_token
+        #### put command here
+        set rcode yes
+        destroy .label 
+  }
+  button .label.but.cancel -text Cancel -command { set rcode {}; destroy .label }
+  checkbutton .label.but.wire -text {use wire labels} -variable use_lab_wire
+  checkbutton .label.but.prefix -text {use prefix} -variable use_label_prefix
+  pack .label.but.ok  -anchor w -side left
+  pack .label.but.prefix  -side left
+  pack .label.but.wire  -side left
+  pack .label.but.cancel -anchor e
+
+  pack .label.custom  -anchor e
+  pack .label.but -expand yes -fill x
+
+  focus  .label
+  bind .label <Escape> {.label.but.cancel invoke}
+  bind .label <Return> {.label.but.ok invoke}
+  bind .label <Control-Return> {.label.but.ok invoke}
+  grab set .label
+  tkwait window .label
   return {}
 }
 
@@ -750,6 +804,7 @@ proc ask_save { {ask {save file?}} } {
    }
    pack .ent2.l1 .ent2.f1 -side top -fill x
    pack .ent2.f1.b1 .ent2.f1.b2 .ent2.f1.b3 -side left -fill x -expand yes
+   bind .ent2 <Escape> {.ent2.f1.b2 invoke}
    # needed, otherwise problems when descending with double clixk 23012004
    tkwait visibility .ent2
    grab set .ent2
@@ -930,6 +985,8 @@ proc edit_prop {txtlabel} {
    pack .ent2.yscroll -side right -fill y 
    pack .ent2.xscroll -side bottom -fill x
    pack .ent2.e1  -fill both -expand yes
+   bind .ent2 <Control-Return> {.ent2.f1.b1 invoke}
+   bind .ent2 <Escape> {.ent2.f1.b2 invoke}
    #tkwait visibility .ent2
    #grab set .ent2
    #focus .ent2.e1
@@ -1068,6 +1125,8 @@ proc text_line {txtlabel clear} {
    pack .ent2.yscroll -side right -fill y 
    pack .ent2.xscroll -side bottom -fill x
    pack .ent2.e1   -expand yes -fill both
+   bind .ent2 <Escape> {.ent2.f1.b2 invoke}
+   bind .ent2 <Control-Return> {.ent2.f1.b1 invoke}
    #tkwait visibility .ent2
    #grab set .ent2
    #focus .ent2.e1
@@ -1077,47 +1136,6 @@ proc text_line {txtlabel clear} {
 
    tkwait window .ent2
    return $rcode
-}
-
-proc entry_line {txtlabel} {
-   global entry1
-   toplevel .ent2 -class Dialog
-   wm title .ent2 {Text line}
-   ## not honored by fvwm ... 20110322
-   # wm attributes .ent2 -topmost 1
-   ## ... use alternate method instead 20110322
-   bind .ent2 <Visibility> { if { [regexp Obscured %s] } {raise .ent2; if { $tcl_version > 8.4 } {wm attributes  .ent2 -topmost 1} } }
-   ## 
-
-
-
-   set X [expr [winfo pointerx .ent2] - 60]
-   set Y [expr [winfo pointery .ent2] - 35]
-
-   # 20100203
-   if { $::wm_fix } { tkwait visibility .ent2 }
-
-   wm geometry .ent2 "+$X+$Y"
-   label .ent2.l1  -text $txtlabel
-   entry .ent2.e1   -width 40 
-     .ent2.e1 delete 0 end
-     .ent2.e1 insert 0 $entry1
-   button .ent2.b1 -text "OK" -command  \
-   {
-     set entry1 [.ent2.e1 get ] 
-     destroy .ent2
-   }                                          
-   bind .ent2 <Return> {
-     set entry1 [.ent2.e1 get ] 
-     destroy .ent2
-   }                                          
-   pack .ent2.l1 -side top -fill x 
-   pack .ent2.e1  -side top -fill both -expand yes
-   pack .ent2.b1 -side top -fill x 
-   grab set .ent2
-   focus .ent2.e1
-   tkwait window .ent2
-   return $entry1
 }
 
 proc alert_ {txtlabel {position +200+300}} {
@@ -1144,7 +1162,8 @@ proc alert_ {txtlabel {position +200+300}} {
    pack .ent3.b1 -side top -fill x
    grab set .ent3
    focus .ent3.b1
-   bind .ent3.b1 <Return> { destroy .ent3 }
+   bind .ent3 <Return> { destroy .ent3 }
+   bind .ent3 <Escape> { destroy .ent3 }
 
    tkwait window .ent3  
    return {}
@@ -1181,6 +1200,7 @@ proc infowindow {infotxt} {
 #  $z.text insert 1.0 $infotxt
   $z.text insert end $infotxt
   $z.text see end
+  bind $z <Escape> {wm withdraw .infotext; set show_infowindow 0}
   return {}
 }
 proc textwindow {filename} {
@@ -1217,6 +1237,7 @@ proc textwindow {filename} {
    pack $w.yscroll -side right -fill y
    pack $w.text -expand yes -fill both
    pack $w.xscroll -side bottom -fill x
+   bind $w <Escape> "$w.buttons.dismiss invoke"
    set fileid [open $filename "r"]
    $w.text insert 0.0 [read $fileid]
    close $fileid
@@ -1332,6 +1353,7 @@ proc gensch {cell {selected {}} } {
 
   pack .gensch.but.create .gensch.but.canc .gensch.but.load .gensch.but.aggr -side right 
   pack .gensch.but 
+  bind .gensch <Escape> {.gensch.but.canc  invoke}
   tkwait window .gensch
   return $gensch_res
 
@@ -1511,6 +1533,7 @@ proc input_number {txt cmd} {
           pack .lw.f2.cancel -anchor e
           pack .lw.f1
           pack .lw.f2 -expand yes -fill x
+          bind .lw <Escape> {.lw.f2.cancel invoke}
           grab set .lw
           focus .lw
           tkwait window .lw
@@ -1769,6 +1792,10 @@ set custom_token {lab}
 set search_value {}
 set search_substring 0
 
+
+# 20171005
+set custom_label_prefix {}
+
 # 20121111
 xschem set netlist_dir $netlist_dir
 
@@ -2005,6 +2032,7 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    menu .menubar.sym.menu -tearoff 0
    .menubar.sym.menu add command -label "Make symbol " -command "xschem make_symbol" -accelerator a
    .menubar.sym.menu add command -label "Make schematic from symbol " -command "xschem make_sch" -accelerator C-l
+   .menubar.sym.menu add command -label "Attach pins to component instance" -command "xschem attach_pins" -accelerator h
 
    menubutton .menubar.tools -text "Tools" -menu .menubar.tools.menu
    menu .menubar.tools.menu -tearoff 0

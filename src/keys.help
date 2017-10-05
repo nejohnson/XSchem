@@ -42,6 +42,7 @@ RightButton DoubleClick If component selected Descend into it else return  to
 -          Delete       Delete selected objects
 -          Insert       Insert element from library
 -          Down         Move down
+ctrl       Enter        Confirm closing dialog boxes
 -          Escape       Abort, redraw, unselect
 -          Left         Move right
 -          Right        Move left

@@ -536,6 +536,7 @@ extern void load_symbol(char *abs_name);
 extern void edit_symbol(void);
 extern void place_symbol(int pos, char *symbol_name, double x, double y, int rot, int flip, 
                          char *inst_props, int draw_sym);
+extern void attach_labels_to_inst(void);
 extern int match_symbol(char name[]);
 extern void save_file(char *);
 extern void push_undo(void);

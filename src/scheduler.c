@@ -564,11 +564,14 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
       merge_file(0,argv[2]);
     }
  }
+ else if(!strcmp(argv[1],"attach_pins")) // attach pins to selected component 20171005
+ {
+   attach_labels_to_inst();
+ }
  else if(!strcmp(argv[1],"make_sch")) // make schematic from selected symbol 20171004
  {
    create_sch_from_sym();
  }
-
  else if(!strcmp(argv[1],"make_symbol"))
  {
    tkeval("tk_messageBox -type okcancel -message {do you want to make symbol view ?}");

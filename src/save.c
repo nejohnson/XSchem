@@ -1014,7 +1014,7 @@ void edit_symbol(void)
   if(lastselected==1 && selectedgroup[0].type==ELEMENT)
   {
    if(modified) { // 20161209
-     if(save()) return;
+     if(save(1)) return;
    }
    my_strdup( &str,
        get_tok_value(inst_ptr[selectedgroup[0].n].prop_ptr,"name",0)  // moved before ask_save 20121129
@@ -1036,7 +1036,7 @@ void edit_symbol(void)
            // so code below is commented out.
    /* 
    if(modified) { // 20161209
-     if(save()) return;
+     if(save(1)) return;
    }
    my_strdup( &str, "nopath" );		 // set some fictious path if entering an unplaced symbol 20121201
    tkeval("loadfile .sym");

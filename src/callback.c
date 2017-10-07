@@ -509,7 +509,7 @@ int callback(int event, int mx, int my, KeySym key,
      if(!strcmp(schematic[currentsch],"")) {   // 20170622 check if unnamed schematic, use saveas in this case...
        saveas();
      } else {
-       save();
+       save(1);
      }
      break;
    }
@@ -544,7 +544,7 @@ int callback(int event, int mx, int my, KeySym key,
    if( (key=='e' && state == ControlMask) || (key==XK_BackSpace))  // back
    {
     if(semaphore==2) break;
-    go_back();break;
+    go_back(1);break;
    }
 
    if(key=='a' && state == 0) 	// make symbol
@@ -1049,9 +1049,7 @@ int callback(int event, int mx, int my, KeySym key,
      //select_object(mousex,mousey,SELECTED);
       rebuild_selected_array();
       if(lastselected ==1 &&  selectedgroup[0].type==ELEMENT) descend();
-      else  go_back();
-//   } else if(button==Button3 && state==ShiftMask) {
-//     go_back();
+      else  go_back(1);
    }
    break;
     

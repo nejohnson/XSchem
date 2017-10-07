@@ -382,7 +382,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
         Tcl_AppendResult(interp, "0",NULL);
   }
   else if(!strcmp(argv[2],"schname"))  {
-        Tcl_AppendResult(interp, skip_dir(schematic[currentsch]),NULL);
+        Tcl_AppendResult(interp, schematic[currentsch], NULL);
   }
   else if(!strcmp(argv[2],"schpath"))  {
         Tcl_AppendResult(interp, schematic[currentsch],NULL);
@@ -595,7 +595,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
 
  else if(!strcmp(argv[1],"go_back"))
  {
-    go_back();
+    go_back(1);
  }
 
  else if(!strcmp(argv[1],"zoom_full"))
@@ -681,7 +681,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
   int cancel, modif;
 
   modif=modified;
-  cancel=save();
+  cancel=save(1);
   if(!modif || !cancel){  // 20161209
      currentsch = 0;
      strcpy(schematic[currentsch], "");
@@ -722,7 +722,17 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
 
   if(!strcmp(argv[2],"instance") && argc==4) {
     int n=atol(argv[3]);
-    if(n<lastinst) select_element(n, SELECTED,0);
+    int i,found=0;
+     
+    // 20171006 find by instance name
+    for(i=0;i<lastinst;i++) {
+      if(!strcmp(inst_ptr[i].instname, argv[3])) {
+        select_element(i, SELECTED,0);
+        found=1;
+        break;
+      }
+    }
+    if(!found && n<lastinst) select_element(n, SELECTED,0);
   }
   else if(!strcmp(argv[2],"wire") && argc==4) {
     int n=atol(argv[3]);
@@ -823,7 +833,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
       if(!strcmp(schematic[currentsch],"")) {   // 20170622 check if unnamed schematic, use saveas in this case...
         saveas();
       } else {
-        save();
+        save(0);
       }
     }
  }

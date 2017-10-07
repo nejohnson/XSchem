@@ -188,7 +188,7 @@ void new_window(char *cell, int symbol)
       }
      }
 }
-int save() //20121201
+int save(int confirm) //20171006 add confirm
 {
      int cancel;
 
@@ -197,18 +197,26 @@ int save() //20121201
      {
        if(modified)
        {
-         tkeval("ask_save");
-         if(!strcmp(Tcl_GetStringResult(interp), "") ) cancel=1;
-         if(!strcmp(Tcl_GetStringResult(interp), "yes") ) save_file(NULL);
+         if(confirm) {
+           tkeval("ask_save");
+           if(!strcmp(Tcl_GetStringResult(interp), "") ) cancel=1;
+           if(!strcmp(Tcl_GetStringResult(interp), "yes") ) save_file(NULL);
+         } else {
+           save_file(NULL);
+         }
        }
      }
      else
      {
        if(modified)
        {
-         tkeval("ask_save");
-         if(!strcmp(Tcl_GetStringResult(interp), "") ) cancel=1;
-         if(!strcmp(Tcl_GetStringResult(interp), "yes") ) save_symbol(NULL);
+         if(confirm) {
+           tkeval("ask_save");
+           if(!strcmp(Tcl_GetStringResult(interp), "") ) cancel=1;
+           if(!strcmp(Tcl_GetStringResult(interp), "yes") ) save_symbol(NULL);
+         } else {
+           save_symbol(NULL);
+         }
        }
      }
      return cancel;
@@ -258,7 +266,7 @@ void ask_new_file(void)
     if(!has_x) return;
 
     if(modified) { // 20161209
-      if(save()) return;
+      if(save(1)) return;
     }
 
     tkeval("loadfile .sch");
@@ -695,7 +703,7 @@ void launcher(void) // 20161102
     } else {
       my_strdup(&program, get_tok_value(inst_ptr[n].prop_ptr,"tclcommand",2)); // 20170415
       if(program && program[0]) { // 20170415 execute tcl command
-        Tcl_Eval(interp, program);
+        Tcl_EvalEx(interp, program, -1, TCL_EVAL_GLOBAL);
       }
     }
   } 
@@ -747,7 +755,7 @@ void descend(void)
 
   if(modified)
   {
-    if(save()) return; // 20161209
+    if(save(1)) return; // 20161209
   }
   current_type=SCHEMATIC;
 
@@ -780,7 +788,7 @@ void descend(void)
  }
 }
 
-void go_back(void)
+void go_back(int confirm) // 20171006 add confirm
 {
  int prev_curr_type=0;
 
@@ -791,18 +799,26 @@ void go_back(void)
   {
    if(modified)
    {
-     tkeval("ask_save");
-     if(!strcmp(Tcl_GetStringResult(interp), "yes") ) save_file(NULL);
-     else if(!strcmp(Tcl_GetStringResult(interp), "") ) return;
+     if(confirm) {
+       tkeval("ask_save");
+       if(!strcmp(Tcl_GetStringResult(interp), "yes") ) save_file(NULL);
+       else if(!strcmp(Tcl_GetStringResult(interp), "") ) return;
+     } else {
+       save_file(NULL);
+     }
    }
   }
   else
   {
    if(modified)
    {
-     tkeval("ask_save");
-     if(!strcmp(Tcl_GetStringResult(interp), "yes") ) save_symbol(NULL);
-     else if(!strcmp(Tcl_GetStringResult(interp), "") ) return;
+     if(confirm) {
+       tkeval("ask_save");
+       if(!strcmp(Tcl_GetStringResult(interp), "yes") ) save_symbol(NULL);
+       else if(!strcmp(Tcl_GetStringResult(interp), "") ) return;
+     } else {
+       save_symbol(NULL);
+     }
    }
   }
   strcpy(schematic[currentsch] , "");

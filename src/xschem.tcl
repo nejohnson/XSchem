@@ -1967,7 +1967,7 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
       }
    button .menubar.waves -text "Waves"  -bd 0 -activebackground red  -takefocus 0\
      -command {
-       waves [xschem get schname]
+       waves [file tail [xschem get schname]]
       }
    menubutton .menubar.layers -text "Layers" -menu .menubar.layers.menu \
     -background [lindex $colors 4]
@@ -2069,13 +2069,13 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
            # xschem clear_netlist_dir
            xschem set_netlist_dir 1
      }
-   .menubar.simulation.menu add command -label {CosmoScope} -command {cosmoscope [xschem get schname]}
-   .menubar.simulation.menu add command -label {WaveView} -command {waveview [xschem get schname]}
-   .menubar.simulation.menu add command -label {Gtkwave} -command {gtkwave [xschem get schname]}
-   .menubar.simulation.menu add command -label {Utile Stimuli Editor (GUI)} -command {utile_gui [xschem get schname]}
-   .menubar.simulation.menu add command -label {Utile Stimuli Editor (Vim)} -command {utile_edit [xschem get schname]}
-   .menubar.simulation.menu add command -label {Utile Stimuli Translate)} -command {utile_translate [xschem get schname]}
-   .menubar.simulation.menu add command -label {Modelsim} -command {modelsim [xschem get schname]}
+   .menubar.simulation.menu add command -label {CosmoScope} -command {cosmoscope [file tail [xschem get schname]]}
+   .menubar.simulation.menu add command -label {WaveView} -command {waveview [file tail [xschem get schname]]}
+   .menubar.simulation.menu add command -label {Gtkwave} -command {gtkwave [file tail [xschem get schname]]}
+   .menubar.simulation.menu add command -label {Utile Stimuli Editor (GUI)} -command {utile_gui [file tail [xschem get schname]]}
+   .menubar.simulation.menu add command -label {Utile Stimuli Editor (Vim)} -command {utile_edit [file tail [xschem get schname]]}
+   .menubar.simulation.menu add command -label {Utile Stimuli Translate)} -command {utile_translate [file tail [xschem get schname]]}
+   .menubar.simulation.menu add command -label {Modelsim} -command {modelsim [file tail [xschem get schname]]}
    .menubar.simulation.menu add command -label {Shell [current schematic library path]} \
       -command {get_shell [file dirname $XSCHEM_DESIGN_DIR/[xschem get schpath]]}
    .menubar.simulation.menu add command -label {Shell [simulation path]} \
@@ -2084,7 +2084,7 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
            get_shell $netlist_dir
          }
        }
-   .menubar.simulation.menu add command -label {Edit Netlist} -command {edit_netlist [xschem get schname]}
+   .menubar.simulation.menu add command -label {Edit Netlist} -command {edit_netlist [file tail [xschem get schname]]}
    .menubar.simulation.menu add separator
    .menubar.simulation.menu add radiobutton -label "CosmoScope viewer" -variable analog_viewer -value cosmoscope
    .menubar.simulation.menu add radiobutton -label "WaveView viewer" -variable analog_viewer -value waveview

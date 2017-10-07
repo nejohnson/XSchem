@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#define __USE_GNU
 #include <string.h>
 #include <ctype.h>
 
@@ -421,6 +422,8 @@ extern int netlist_show;
 extern int flat_netlist;
 extern int netlist_type;
 extern int do_netlist;
+extern int do_simulation;
+extern int do_waves;
 extern int netlist_count;
 extern int quit;
 extern int show_erc;
@@ -444,7 +447,7 @@ extern void symbol_in_new_window(void);
 extern void new_window(char *cell, int symbol);
 extern void ask_new_file(void);
 extern void saveas(void);
-extern int save(void);
+extern int save(int confirm);
 extern struct hilight_hashentry *bus_hilight_lookup(char *token, int value, int remove) ;
 extern int  name_strcmp(char *s, char *d) ;
 extern void search_inst(char *tok, char *val, int sub, int sel, int what);
@@ -553,7 +556,7 @@ extern void load_box(FILE *fd);
 extern void load_line(FILE *fd);
 extern void create_sch_from_sym(void);
 extern void descend(void);
-extern void go_back(void);
+extern void go_back(int confirm);
 extern void view_unzoom(double z);
 extern void view_zoom(double z);
 extern void draw_stuff(void);

@@ -26,11 +26,21 @@ void
      int c;
      
      while (1) {
-         c = getopt (argc, argv, "3cpxzl:d:nfhrsvwq");
+         c = getopt (argc, argv, "S3cpxzl:d:nfhrsvwWq");
          if (c == -1)
              break;
  
          switch (c) {
+ 
+         case 'S':
+             if(debug_var>=1) fprintf(errfp, "process_options(): will do simulation\n");
+             do_simulation=1;
+             break;
+ 
+         case 'W':
+             if(debug_var>=1) fprintf(errfp, "process_options(): will show waves\n");
+             do_waves=1;
+             break;
  
          case 'n':
              if(debug_var>=1) fprintf(errfp, "process_options(): will do netlist\n");

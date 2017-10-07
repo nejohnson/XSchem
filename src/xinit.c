@@ -803,10 +803,26 @@ int Tcl_AppInit(Tcl_Interp *inter)
  }
  if(do_print) {
    if(!filename) {
-     fprintf(errfp, "xschem: cant do a print without a filename\n");
+     fprintf(errfp, "xschem: can't do a print without a filename\n");
      Tcl_Eval(interp, "exit");
    }
    ps_draw();
+ }
+
+ if(do_simulation) {
+   if(!filename) {
+     fprintf(errfp, "xschem: can't do a simulation without a filename\n");
+     Tcl_Eval(interp, "exit");
+   }
+   Tcl_Eval(interp, "xschem simulate");
+ }
+
+ if(do_waves) {
+   if(!filename) {
+     fprintf(errfp, "xschem: can't show simulation waves without a filename\n");
+     Tcl_Eval(interp, "exit");
+   }
+   Tcl_Eval(interp, "waves [file tail [xschem get schname]]");
  }
 
  if(quit) {

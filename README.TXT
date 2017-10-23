@@ -35,6 +35,58 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.2.0:
+- Added description option -no-pie in Makefile.
+  if a profiled executable is needed '-no-pie -pg' must be given.
+  Position Independent Executable is now the default on Gcc, but gprof will not work 
+  with this default.
+- xschem will not descend or go up from a schematic hierarchy level if it has been modified, the 
+  user wants to save changes but the file can not be saved, due for example to permission problems.
+  In this case the user either needs to save to a different place or say 'no' when promped for save.
+- bindkey 'W' 'show discrepancies of nets vs pin names on selected instance' changed to 'X'
+- added the 'snap wire' function (uppercase) 'W' bindkey, the wire starts/ends from/to closest instance
+  pin or net endpoint.
+- fixes in the undo buffer, some actions were not undoable.
+- bindkey 'H' for 'execute tclcommand or open file or http link (tclcomand or url properties) changed
+  to 'ctrl-h'
+- bindkey 'h' for 'attach nets to instance pin' changed to 'H'
+- added constrained horizontal ('h' key) or vertical ('v' key) movement for wire, line, object copy/move.
+- added menu entries for png/pdf/svg print, h/v constrained move, collapse wires, snap wire creation.
+- '-z' xschem option now works again, this will start xschem wuth a rich rainbow colored layer set
+- Documentation updates.
+
+2.1.14:
+- Documentation updated (component pin auto labeling)
+- added option '-S' to launch a simulation in batch command mode:
+    'xschem -q -n -s -S examples/poweramp'
+  will do a spice (-s) netlist (-n) and launch simulation (-S), then quits (-q) 
+- added option '-W' to launch waveform viewer
+    'xschem -q -s -W examples poweramp'
+  will bring up the default spice wave viewer and quits.
+- do not open a confitmation dialog asking to save if TCL 'xschem save' is given
+  This will allow to build tcl scripts without needing user confirmation.
+- tcl command 'xschem select' now allows to select an instance by specifying its instance name
+  (instead of its numeric position into the inst_ptr array, still allowed)
+    'xschem select xampli'
+  will select instance 'xampli' if found in current schematic
+- Added #define __USE_GNU to allow usage of 'strndup' function (POSIX 2008) in older systems
+- improvements on the 'create pins to selected instance' command ('h' key) 
+  a dialog box asks if pins need to be prefixed with a string, also allow
+  to choose lab_pin or lab_wire net labels.
+- Control-return and Escape bindkeys added to most toplevel dialog boxes
+  to allow quickly closing unwanted dialog boxes.
+- devices/lab_wire library symbol flipped horizontally to align orientation with lab_pin
+- documentation about automatic symbol generation
+- added a 'Make schematic from symbol' (Ctrl-l) menu entry.
+  if one symbol is selected and this function is invoked (ctrl-l)
+  a schematic view (.sch) will be automatically created from the
+  symbol view. The schematic will only contain the interface
+  pins / generics (if any). This will overwrite the symbol schematic
+  view if it exist. A warning is issued requesting user confirmation.
+- some cosmetic additions (dialog titles) in xschem.tcl
+- fixed a crashing bug  when the 'create pins from highlight nets'
+  (ctrl-j) is invoked after hilighting some nets and deleting a
+  subset of those.
 
 2.1.13:
 - Added binding for the 'ghdl' free VHDL simulator, update your ~/.xschem file to

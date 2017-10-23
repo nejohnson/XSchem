@@ -33,7 +33,6 @@ int callback(int event, int mx, int my, KeySym key,
  FILE *fp;
  unsigned short sel;
 
-
  state &=~Mod2Mask; // 20170511 filter out NumLock status
  if(semaphore)
  {
@@ -101,10 +100,26 @@ int callback(int event, int mx, int my, KeySym key,
    if(rubber & STARTPAN2)   pan2(RUBBER, mx, my); //20121123
    if(rubber & STARTZOOM)   zoom_box(RUBBER);
    if(rubber & STARTSELECT) select_rect(RUBBER,-1);
-   if(rubber & STARTWIRE)   new_wire(RUBBER);
-   if(rubber & STARTLINE)   new_line(RUBBER);
-   if(rubber & STARTMOVE)   move_objects(RUBBER,0,0,0);
-   if(rubber & STARTCOPY)   copy_objects(RUBBER);
+   if(rubber & STARTWIRE) {
+     if(horizontal_move) mousey_snap = my_double_save; // 20171023
+     if(vertical_move) mousex_snap = mx_double_save;
+     new_wire(RUBBER, mousex_snap, mousey_snap);
+   }
+   if(rubber & STARTLINE) {
+     if(horizontal_move) mousey_snap = my_double_save; // 20171023
+     if(vertical_move) mousex_snap = mx_double_save;
+     new_line(RUBBER);
+   }
+   if(rubber & STARTMOVE) {
+     if(horizontal_move) mousey_snap = my_double_save; // 20171023
+     if(vertical_move) mousex_snap = mx_double_save;
+     move_objects(RUBBER,0,0,0);
+   }
+   if(rubber & STARTCOPY) {
+     if(horizontal_move) mousey_snap = my_double_save; // 20171023
+     if(vertical_move) mousex_snap = mx_double_save;
+     copy_objects(RUBBER);
+   }
    if(rubber & STARTRECT)   new_rect(RUBBER);
    if((state&Button1Mask) && !(state & ShiftMask))  // start of a mouse area selection
    { 
@@ -224,19 +239,39 @@ int callback(int event, int mx, int my, KeySym key,
      print_hilight_net(2);
      break;
    }
-   if(key == 'H'  && state==ShiftMask )	// 20161102 go to http link
+   if(key == 'h'  && state==ControlMask )	// 20161102 go to http link
    {
      launcher();
+     break;
+   }
+   if(key == 'h') {
+     // horizontally constrained drag 20171023
+     if ( horizontal_move ) {
+       Tcl_EvalEx(interp,"set horizontal_move 0" , -1, TCL_EVAL_GLOBAL);
+     } else {
+       Tcl_EvalEx(interp,"set horizontal_move 1" , -1, TCL_EVAL_GLOBAL);
+       tkeval("xschem set horizontal_move");
+     }
+     break;
+   }
+   if(key=='H' && state==ShiftMask) {		// attach labels to selected instances
+    attach_labels_to_inst();
+    break;
+   }
+   if(key == 'v') {
+     // vertically constrained drag 20171023
+     if ( vertical_move ) {
+       Tcl_EvalEx(interp,"set vertical_move 0" , -1, TCL_EVAL_GLOBAL);
+     } else {
+       Tcl_EvalEx(interp,"set vertical_move 1" , -1, TCL_EVAL_GLOBAL);
+       tkeval("xschem set vertical_move");
+     }
      break;
    }
    if(key == 'j'  && state == (ControlMask | Mod1Mask) )  // print list of highlight net with label expansion
    {
      print_hilight_net(3);
      break;
-   }
-   if(key=='h') {		// attach labels to selected instances
-    attach_labels_to_inst();
-    break;
    }
    if(key == 'J' && state==ShiftMask)		// create cell and symbol from pin list
    {
@@ -326,7 +361,7 @@ int callback(int event, int mx, int my, KeySym key,
     change_linewidth(lw_double);
     break;
    }
-   if(key == 'W') 			// highlight discrepanciens between selected instance pin and net names
+   if(key == 'X') 			// highlight discrepanciens between selected instance pin and net names
    {
      // 20130628
 
@@ -371,17 +406,40 @@ int callback(int event, int mx, int my, KeySym key,
      // /20130628
      break;
    }
+   if(key== 'W') {			// 20171022 create wire snapping to closest instance pin
+     double x, y;
+     int xx, yy;
+     if(!(rubber & STARTWIRE)){
+       find_closest_net_or_symbol_pin(mousex, mousey, &x, &y);
+       xx = (x-xorigin)*mooz;
+       yy = (y-yorigin)*mooz;
+       mx_save = xx; my_save = yy; // 20070323
+       mx_double_save=rint(( xx*zoom + xorigin)/cadsnap)*cadsnap;
+       my_double_save=rint(( yy*zoom + yorigin)/cadsnap)*cadsnap;
+       new_wire(PLACE, x, y);
+     }
+     else {
+       find_closest_net_or_symbol_pin(mousex, mousey, &x, &y);
+       new_wire(RUBBER, x, y);
+       new_wire(PLACE|END, x, y);
+     }
+   }
+
    if(key == 'w') 			// place wire
    {
-    
-    mx_save = mx; my_save = my;	// 20070323
-    mx_double_save=rint(( mx*zoom + xorigin)/cadsnap)*cadsnap;
-    my_double_save=rint(( my*zoom + yorigin)/cadsnap)*cadsnap;
-    new_wire(PLACE); 
+     mx_save = mx; my_save = my;	// 20070323
+     mx_double_save=rint(( mx*zoom + xorigin)/cadsnap)*cadsnap;
+     my_double_save=rint(( my*zoom + yorigin)/cadsnap)*cadsnap;
+     if(horizontal_move) mousey_snap = my_double_save; // 20171023
+     if(vertical_move) mousex_snap = mx_double_save;
+     new_wire(PLACE,mousex_snap, mousey_snap); 
     break;
    }
    if(key == XK_Escape)			// abort & redraw
    {
+    Tcl_EvalEx(interp,"set vertical_move 0; set horizontal_move 0" , -1, TCL_EVAL_GLOBAL);
+
+    horizontal_move = vertical_move = 0; // 20171023
     if(debug_var>=1) fprintf(errfp, "callback(): Escape: rubber=%d\n", rubber);
     if(rubber & STARTMOVE)
     {
@@ -760,7 +818,7 @@ int callback(int event, int mx, int my, KeySym key,
    if(key=='&')				// check wire connectivity
    {
     push_undo(); // 20150327
-    check();
+    collapse_wires();
     draw();
     break;
    }
@@ -774,6 +832,8 @@ int callback(int event, int mx, int my, KeySym key,
     mx_save = mx; my_save = my;	// 20070323
     mx_double_save=rint(( mx*zoom + xorigin)/cadsnap)*cadsnap;
     my_double_save=rint(( my*zoom + yorigin)/cadsnap)*cadsnap;
+    if(horizontal_move) mousey_snap = my_double_save; // 20171023
+    if(vertical_move) mousex_snap = mx_double_save;
     new_line(PLACE); break;
    }
    if(key=='F')				// Flip
@@ -806,6 +866,9 @@ int callback(int event, int mx, int my, KeySym key,
    if(key=='c' && state==0 &&		// copy selected obj. 
      !(rubber & (STARTMOVE | STARTCOPY)))
    {
+    mx_save = mx; my_save = my;	// 20070323
+    mx_double_save=rint(( mx*zoom + xorigin)/cadsnap)*cadsnap;
+    my_double_save=rint(( my*zoom + yorigin)/cadsnap)*cadsnap;
     copy_objects(BEGIN);
     break;
    }
@@ -973,46 +1036,108 @@ int callback(int event, int mx, int my, KeySym key,
    }
    else if(button==Button1)
    {
-    if(rubber & MENUSTARTTEXT) {
-      place_text(1, mousex_snap, mousey_snap); // 20161201
-      rubber &=~MENUSTARTTEXT;break; // 20161201
-    }
-    if(rubber & MENUSTARTWIRE) {new_wire(PLACE); rubber &=~MENUSTARTWIRE;break;}
-    if(rubber & MENUSTARTLINE) {new_line(PLACE); rubber &=~MENUSTARTLINE;break;}
-    if(rubber & MENUSTARTRECT) {new_rect(PLACE); rubber &=~MENUSTARTRECT;break;}
-    if(rubber & MENUSTARTZOOM) {zoom_box(BEGIN); rubber &=~MENUSTARTZOOM;break;}
-    if(rubber & STARTPAN)    {pan(END);break;}
-    if(rubber & STARTZOOM)   {zoom_box(END);break;}
-    if(rubber & STARTWIRE)   {push_undo();new_wire(PLACE|END);break;} // 20150327 push_undo
-    if(rubber & STARTLINE)   {push_undo();new_line(PLACE|END);break;} // 20150327 push_undo
-    if(rubber & STARTRECT)   {push_undo();new_rect(PLACE|END);break;} // 20150327 push_undo
-    if(rubber & STARTMOVE)   {move_objects(END,0,0,0);break;}
-    if(rubber & STARTCOPY)   {copy_objects(END);break;}
-    if( !(rubber & STARTSELECT) ) {
-      mx_save = mx; my_save = my;
-      mx_double_save=rint(( mx*zoom + xorigin)/cadsnap)*cadsnap; // 20070322
-      my_double_save=rint(( my*zoom + yorigin)/cadsnap)*cadsnap; // 20070322
-      if( !(state & ShiftMask) ) {
-        unselect_all();
-      }
-      sel = select_object(mousex,mousey,SELECTED);
-
-      if(sel && state ==Mod1Mask) { // 20170416
-        launcher();
-      }
-      if( !(state & ShiftMask) )  {
-        if(auto_hilight && hilight_nets && sel == 0 ) { // 20160413 20160503
-          delete_hilight_net();
-          undraw_hilight_net();
-        }
-      }
-
-      if(auto_hilight) { // 20160413
-        hilight_net();
-        if(lastselected) draw_hilight_net();
-      }
-
-    }
+     horizontal_move = vertical_move=0; // 20171023
+     Tcl_EvalEx(interp,"set vertical_move 0; set horizontal_move 0" , -1, TCL_EVAL_GLOBAL);
+     if(rubber & MENUSTARTTEXT) {
+       place_text(1, mousex_snap, mousey_snap); // 20161201
+       rubber &=~MENUSTARTTEXT;
+       break; // 20161201
+     }
+     if(rubber & MENUSTARTWIRE) {
+       mx_save = mx; my_save = my;	// 20070323
+       mx_double_save=rint(( mx*zoom + xorigin)/cadsnap)*cadsnap;
+       my_double_save=rint(( my*zoom + yorigin)/cadsnap)*cadsnap;
+       new_wire(PLACE, mousex_snap, mousey_snap); 
+       rubber &=~MENUSTARTWIRE;
+       break;
+     }
+     if(rubber & MENUSTARTSNAPWIRE) { // 20171022
+       double x, y;
+       int xx, yy;
+       
+       find_closest_net_or_symbol_pin(mousex, mousey, &x, &y);
+       xx = (x-xorigin)*mooz;
+       yy = (y-yorigin)*mooz;
+       mx_save = xx; my_save = yy; // 20070323
+       mx_double_save=rint(( xx*zoom + xorigin)/cadsnap)*cadsnap;
+       my_double_save=rint(( yy*zoom + yorigin)/cadsnap)*cadsnap;
+       new_wire(PLACE, x, y);
+       rubber &=~MENUSTARTSNAPWIRE;
+       break;
+     }
+     if(rubber & MENUSTARTLINE) {
+       mx_save = mx; my_save = my;	// 20070323
+       mx_double_save=rint(( mx*zoom + xorigin)/cadsnap)*cadsnap;
+       my_double_save=rint(( my*zoom + yorigin)/cadsnap)*cadsnap;
+       new_line(PLACE);
+       rubber &=~MENUSTARTLINE;
+       break;
+     }
+     if(rubber & MENUSTARTRECT) {
+       mx_save = mx; my_save = my;	// 20070323
+       mx_double_save=rint(( mx*zoom + xorigin)/cadsnap)*cadsnap;
+       my_double_save=rint(( my*zoom + yorigin)/cadsnap)*cadsnap;
+       new_rect(PLACE);
+       rubber &=~MENUSTARTRECT;
+       break;
+     }
+     if(rubber & MENUSTARTZOOM) {
+       zoom_box(BEGIN);
+       rubber &=~MENUSTARTZOOM;
+       break;
+     }
+     if(rubber & STARTPAN) {
+       pan(END);
+       break;
+     }
+     if(rubber & STARTZOOM) {
+       zoom_box(END);
+       break;
+     }
+     if(rubber & STARTWIRE) {
+       new_wire(PLACE|END, mousex_snap, mousey_snap);
+       break;
+     }
+     if(rubber & STARTLINE) {
+       new_line(PLACE|END);
+       break;
+     }
+     if(rubber & STARTRECT) {
+       new_rect(PLACE|END);
+       break;
+     }
+     if(rubber & STARTMOVE) {
+       move_objects(END,0,0,0);
+       break;
+     }
+     if(rubber & STARTCOPY) {
+       copy_objects(END);
+       break;
+     }
+     if( !(rubber & STARTSELECT) ) {
+       mx_save = mx; my_save = my;
+       mx_double_save=rint(( mx*zoom + xorigin)/cadsnap)*cadsnap; // 20070322
+       my_double_save=rint(( my*zoom + yorigin)/cadsnap)*cadsnap; // 20070322
+       if( !(state & ShiftMask) ) {
+         unselect_all();
+       }
+       sel = select_object(mousex,mousey,SELECTED);
+ 
+       if(sel && state ==Mod1Mask) { // 20170416
+         launcher();
+       }
+       if( !(state & ShiftMask) )  {
+         if(auto_hilight && hilight_nets && sel == 0 ) { // 20160413 20160503
+           delete_hilight_net();
+           undraw_hilight_net();
+         }
+       }
+       if(auto_hilight) { // 20160413
+         hilight_net();
+         if(lastselected) draw_hilight_net();
+       }
+       break;
+     }
    }
    else if(button==Button2 && !(state & ShiftMask))
    {

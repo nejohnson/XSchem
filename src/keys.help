@@ -66,8 +66,9 @@ ctrl        'f'         Find/select by substring or regexp
 shift       'G'         Double snap factor
 -           'g'         Half snap factor
 ctrl        'g'         Set snap factor
-shift       'H'         Follow http link (if symbol has 'url' property
--           'h'         Attach net labels to selected instance
+-           'h'         Constrained horizontal move/copy of objects
+ctrl        'h'         Follow http link or execute command (url, tclcommand properties)
+shift       'H'         Attach net labels to selected instance
 -           'i'         Descend to  symbol
 Alt         'i'         Edit selected symbol in a new window
 shift       'J'         Create symbol from pin list
@@ -103,18 +104,20 @@ Alt         's'         Reload current schematic from disk
 alt         'u'         Align to current grid selected objects
 shift       'U'         Redo
 -           'u'         Undo
+-           'v'         Constrained vertical move/copy of objects
 ctrl        'v'         Paste from clipboard
 shift       'V'         Toggle spice/vhdl/verilog netlist 
-shift       'W'         Highlight discrepancies between object ports and attached nets
 -           'w'         Place wire
+Shift       'W'         Place wire, automatically snapping to closest pin or net endpoint
 ctrl        'x'         Cut into clipboard
 -           'x'         New cad session
+shift       'X'         Highlight discrepancies between object ports and attached nets
 -           'y'         Toggle stretching wires
 -           'z'         Zoom box
 shift       'Z'         Zoom in
 ctrl        'z'         Zoom out
 -           '?'         Help
--           '&'         Check wire connectivity
+-           '&'         Join / break / collapse wires
 shift       '*'         Postscript/pdf print
 ctr+shift   '*'         Xpm/png print
 alt+shift   '*'         Svg print

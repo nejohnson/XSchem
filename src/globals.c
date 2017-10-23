@@ -200,3 +200,5 @@ int pending_fullzoom=0;
 int split_files=0; // split netlist files 20081202
 int hspice_netlist=0; // hspice veriants 20081209
 char *netlist_dir=NULL; // 20081210
+int horizontal_move=0; // 20171023
+int vertical_move=0; // 20171023

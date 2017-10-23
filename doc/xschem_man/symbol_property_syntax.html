@@ -160,14 +160,122 @@ end arch_test2 ;
 </pre><br>
 
   <li><tt>extra</tt></li>
+  <p>
+   This property specifies that some parameters defined in the <tt>format</tt> string are to be considered as additional 
+   pins. This allows to realize inherited connections, a kind of hidden pins with connections passed as parameters.
+   Example of a symbol definition for the following cmos gate: 
+  </p>
+  <img src="symbol_property_syntax1.png">
+  <p> 
+   the symbol property list defines 2 extra pins , VCCPIN and VSSPIN that can be assigned to at 
+   component instantiation. The <tt>extra</tt> property tells XSCHEM that these 2 parameters are connection pins and not parameters
+   and thus must not be declared as parameters in the .subckt line in a spice netlist:
+  </p>
+  <pre class="code">
+type=subcircuit
+vhdl_stop=true
+format="@name @pinlist @VCCPIN @VSSPIN @symname wn=@wn ln=@ln wp=@wp lp=@lp m=@m"
+template="name=x1 m=1 
++ wn=30u ln=2.4u wp=20u lp=2.4u
++ VCCPIN=VCC VSSPIN=VSS"
+extra="VCCPIN VSSPIN"
+generic_type="m=integer wn=real ln=real wp=real lp=real VCCPIN=string VSSPIN=string"
+verilog_stop=true
+  </pre>
+  <p> 
+   with these definitions the above schematic will be netlisted as:
+  </p>
+  <pre class="code">
+**.subckt prova1
+x2 G_y G_a G_b G_c VCC VSS lvnand3 wn=1.8u ln=0.18u wp=1u lp=0.18u m=1
+**.ends
+* expanding symbol: customlogicLib/lvnand3 # of pins=4
+.subckt lvnand3 y a b c VCCPIN VSSPIN
+wn=30u ln=2.4u wp=20u lp=2.4u
+*.opin y
+*.ipin a
+*.ipin b
+*.ipin c
+m1 net2 a VSSPIN VSSPIN nlv w=wn l=ln geomod=0 m=1
+m2 y a VCCPIN VCCPIN plv w=wp l=lp geomod=0 m=1
+dxm2 0 VCCPIN dnwell area='(wp + 57u)*(lp + 31u)' pj='2*(wp +57u)+2*(lp +31u)' 
+m3 y b VCCPIN VCCPIN plv w=wp l=lp geomod=0 m=1
+dxm3 0 VCCPIN dnwell area='(wp + 57u)*(lp + 31u)' pj='2*(wp +57u)+2*(lp +31u)' 
+m6 y c net1 VSSPIN nlv w=wn l=ln geomod=0 m=1
+m4 y c VCCPIN VCCPIN plv w=wp l=lp geomod=0 m=1
+dxm4 0 VCCPIN dnwell area='(wp + 57u)*(lp + 31u)' pj='2*(wp +57u)+2*(lp +31u)' 
+m5 net1 b net2 VSSPIN nlv w=wn l=ln geomod=0 m=1
+.ends
+  </pre>
+  <p>
+   Without the <tt>extra</tt> property in the cmos gate symbol the following incorrect netlist will be produced:
+  </p>
+  <pre class="code">
+**.subckt prova1
+x2 G_y G_a G_b G_c VCC VSS lvnand3 wn=1.8u ln=0.18u wp=1u lp=0.18u m=1
+**** begin user architecture code
+**** end user architecture code
+**.ends
+
+
+* expanding symbol: customlogicLib/lvnand3 # of pins=4
+
+
+.subckt lvnand3 y a b c
+wn=30u ln=2.4u wp=20u lp=2.4u
+VCCPIN=VCC VSSPIN=VSS
+*.opin y
+*.ipin a
+*.ipin b
+*.ipin c
+m1 net2 a VSSPIN VSSPIN nlv w=wn l=ln geomod=0 m=1
+m2 y a VCCPIN VCCPIN plv w=wp l=lp geomod=0 m=1
+dxm2 0 VCCPIN dnwell area='(wp + 57u)*(lp + 31u)' pj='2*(wp +57u)+2*(lp +31u)' 
+m3 y b VCCPIN VCCPIN plv w=wp l=lp geomod=0 m=1
+dxm3 0 VCCPIN dnwell area='(wp + 57u)*(lp + 31u)' pj='2*(wp +57u)+2*(lp +31u)' 
+m6 y c net1 VSSPIN nlv w=wn l=ln geomod=0 m=1
+m4 y c VCCPIN VCCPIN plv w=wp l=lp geomod=0 m=1
+dxm4 0 VCCPIN dnwell area='(wp + 57u)*(lp + 31u)' pj='2*(wp +57u)+2*(lp +31u)' 
+m5 net1 b net2 VSSPIN nlv w=wn l=ln geomod=0 m=1
+**** begin user architecture code
+**** end user architecture code
+.ends
+  </pre>
+  <p>
+  as you can see the VSSPIN and VCCPIN are listed as parameters and not as pins in the netlist. 
+  </p>
   <li><tt>dir</tt></li>
+  <p> 
+   Defines the direction of a symbol pin. Allowed values are <tt>in</tt>, <tt>out</tt>, <tt>inout</tt>.
+  </p>
+   <img src="symbol_property_syntax2.png">
   <li><tt>global</tt></li>
+  <p>
+  a <tt>global=1</tt> property in a <tt>label</tt> type symbol will declare the corresponding net as 'global'.
+  Global nets in spice netlists are like global variables in a C program, these nets are accessible at any
+  hierarchical level without the need of passing them through pin connections.
+  </p>
+   <img src="symbol_property_syntax3.png">
   <li><tt>spice_netlist</tt></li>
   <li><tt>verilog_netlist</tt></li>
   <li><tt>vhdl_netlist</tt></li>
-  <li><tt>format</tt></li>
+  <p>
+   If any of these 3 properties if set to <tt>true</tt> the symbol will be netlisted in the specified format.
+   This is only valid if the split file netlisting mode is active (<tt>Options -&gt; Split netlist</tt>).
+   This is very rarely used but is required in mixed mode simulations, where part of the system will be
+   handled by an analog simulator (spice) and another part of the system by a digital Verilog / VHDL simulator.
   <li><tt>verilog_format</tt></li>
+  <p>
+   This is the Verilog equivalent of the <tt>format</tt> property for Spice primitives. This is a 
+   valid definition for a 2 input inverted XOR gate:
+  </p>
+  <pre class="code">
+verilog_format="xnor #(@risedel , @falldel ) @name ( @@Z , @@A , @@B );"
+  </pre><br>
   <li><tt>vhdl_format</tt></li>
+  <p>
+   same as above for VHDL primitives.
+  </p>
  </ul>
  <h3>PREDEFINED SYMBOL VALUES</h3>
  <ul>

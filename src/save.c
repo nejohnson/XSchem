@@ -281,7 +281,7 @@ void make_symbol(void)
 }
 
 
-void save_symbol(char *schname)
+int save_symbol(char *schname) // 20171020 aded return value
 {
   FILE *fd;
   int i;
@@ -290,14 +290,17 @@ void save_symbol(char *schname)
   if(schname!=NULL) 
   {
    if(strcmp(schname,"") ) strcpy(schematic[currentsch], schname);
-   else return;
+   else return -1;
   }
-  if(!strcmp(schematic[currentsch],"")) return;
+  if(!strcmp(schematic[currentsch],"")) return -1;
   my_snprintf(name, S(name), "%s/%s.sym",Tcl_GetVar(interp,"XSCHEM_DESIGN_DIR", TCL_GLOBAL_ONLY),
    schematic[currentsch]);
    if(debug_var>=2) fprintf(errfp, "save_symbol(): currentsch=%d name=%s\n",currentsch, 
           schematic[currentsch]);
-  if(!(fd=fopen(name,"w")) ) return;
+  if(!(fd=fopen(name,"w")) ) {
+     tkeval("alert_ {file opening for write failed!} {}"); // 20171020
+     return -1;
+  }
   unselect_all();
   fprintf(fd, "G ");
   save_ascii_string(schvhdlprop,fd);
@@ -322,25 +325,26 @@ void save_symbol(char *schname)
   } 
   delete_netlist_structs(); // 20161222
   modified=0;
+  return 0;
 }
 
 
 
-void save_file(char *schname)
+int save_file(char *schname) // 20171020 added return value
 {
     FILE *fd;
     char name[4096]; // overflow safe 20161122
     if(schname!=NULL)
     {
       if( strcmp(schname,"") ) strcpy(schematic[currentsch], schname);
-      else return;
+      else return -1;
     }
 
     // if no correct filename given enforce a correct one or Cancel the save
     my_snprintf(name, S(name), "check_valid_filename %s", schematic[currentsch]); // 20121111
     Tcl_Eval(interp, name); 
     if( strcmp(Tcl_GetStringResult(interp), "ok") ) { 
-         return; // 20170622
+         return -1 ; // 20170622
     }
 
     if(!strcmp(schematic[currentsch],"")) {
@@ -352,7 +356,7 @@ void save_file(char *schname)
           "tk_messageBox -icon error -type ok -message \"save_file(): no name specified , cant save\"");
       }
 
-      return;
+      return -1;
     }
     if(schname !=NULL)
     if(debug_var>=1) fprintf(errfp, "save_file(): currentsch=%d name=%s\n",currentsch, schname);
@@ -366,7 +370,8 @@ void save_file(char *schname)
     if(!(fd=fopen(name,"w")))
     {
       if(debug_var>=1) fprintf(errfp, "save_file(): problems opening file %s \n",name);
-      return;   // <<<<<<<<
+      tkeval("alert_ {file opening for write failed!} {}"); // 20171020
+      return -1;   // <<<<<<<<
     }
     unselect_all();
     fprintf(fd, "G ");
@@ -386,6 +391,7 @@ void save_file(char *schname)
     fclose(fd);
     delete_netlist_structs(); // 20161222
     modified=0;
+    return 0;
 }
 
 char *get_sym_type(char *name)
@@ -946,6 +952,7 @@ void create_sch_from_sym(void)
     if(!(fd=fopen(schname,"w")))
     {
       if(debug_var>=1) fprintf(errfp, "create_sch_from_sym(): problems opening file %s \n",schname);
+      tkeval("alert_ {file opening for write failed!} {}"); // 20171020
       return;
     }
     fprintf(fd, "G {}");
@@ -1261,6 +1268,7 @@ void save_selection(int what)
  if(!(fd=fopen(name,"w")))
  {
     if(debug_var>=1) fprintf(errfp, "save_selection(): problems opening file  \n");
+    tkeval("alert_ {file opening for write failed!} {}"); // 20171020
     return;   // <<<<<<<<
  }
  fprintf(fd, "G { %g %g }\n", mousex_snap, mousey_snap);

@@ -14,9 +14,11 @@ CC=gcc
 ## set the TCL-TK version on the system
 TCLVER=8.6
 
-## enable one of the PROFILEFLAGS below if debugging stuff is needed
-## -g -pg
-PROFILEFLAGS=-g
+## enable the PROFILEFLAGS below if debugging stuff is needed
+## -g -pg -no-pie
+## recent gcc generates Position Independent Executable (pie), this breaks
+## gprof, so use -no-pie together with -pg when profiling code.
+PROFILEFLAGS= -g
 
 CFLAGS = -Wall  $(PROFILEFLAGS)  -I/usr/include/tcl${TCLVER} 
 LDFLAGS = -L/usr/X11R6/lib -lX11 -lm -lXpm -ltcl${TCLVER} -ltk${TCLVER}  -lfl  \

@@ -31,7 +31,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#define __USE_GNU
+#define __USE_GNU // strndup, for pre-POSIX 2008 
 #include <string.h>
 #include <ctype.h>
 
@@ -64,7 +64,7 @@
 #define SELLAYER 2
 #define PROPERTYLAYER 1
 #define TEXTLAYER 3
-#define TEXTWIRELAYER 6 // color for wire name labels / pins
+#define TEXTWIRELAYER 1 // color for wire name labels / pins
 #define PINLAYER 5
 #define GENERICLAYER 3
 
@@ -115,6 +115,7 @@
 #define MENUSTARTZOOM 8192   // start zoom box invoked from menu
 #define STARTPAN2     16384  // new pan method with mouse button3 20121123
 #define MENUSTARTTEXT 32768  // 20161201 click to place text if action starts from menu
+#define MENUSTARTSNAPWIRE 65536   // start wire invoked from menu, snap to pin variant 20171022
 
 #define SELECTED 1          // used in the .sel field for selected objs.
 #define SELECTED1 2	    // first point selected...
@@ -415,6 +416,8 @@ extern double mooz;
 extern double mousex,mousey; // mouse coord.
 extern double mousex_snap,mousey_snap; // mouse coord. snapped to grid
 extern double cadsnap;
+extern int horizontal_move; // 20171023
+extern int vertical_move; // 20171023
 
 extern void set_snap(double); // 20161212
 extern double *character[256];
@@ -484,6 +487,7 @@ extern void find_closest_element(double mx,double my);
 extern void find_closest_line(double mx,double my);
 extern void find_closest_text(double mx,double my);
 extern Selected find_closest_obj(double mx,double my);
+extern void find_closest_net_or_symbol_pin(double mx,double my, double *x, double *y);
 
 extern void drawline(GC gc, int what, double x1,double y1,double x2,double y2);
 extern void drawtempline(GC gc, int what, double x1,double y1,double x2,double y2);
@@ -516,7 +520,7 @@ extern double rectdist(double x1,double y1,double x2,double y2,double xa,double 
 extern int touch(double,double,double,double,double,double);
 extern int rectclip(int,int,int,int,
            double*,double*,double*,double*);
-extern void check(void);
+extern void collapse_wires(void);
 extern void storeobject(int pos, double x1,double y1,double x2,double y2,
                         unsigned short type,unsigned int rectcolor,
 		        unsigned short sel, char *prop_ptr);
@@ -530,7 +534,7 @@ extern void global_verilog_netlist(int global);
 extern void vhdl_block_netlist(FILE *fd, int i);
 extern void verilog_block_netlist(FILE *fd, int i);
 extern void spice_block_netlist(FILE *fd, int i);
-extern void save_symbol(char *);
+extern int save_symbol(char *);
 extern void remove_symbols(void);
 extern void remove_symbol(void);
 extern void clear_drawing(void);
@@ -541,7 +545,7 @@ extern void place_symbol(int pos, char *symbol_name, double x, double y, int rot
                          char *inst_props, int draw_sym);
 extern void attach_labels_to_inst(void);
 extern int match_symbol(char name[]);
-extern void save_file(char *);
+extern int save_file(char *); // 20171020 added return value
 extern void push_undo(void);
 extern void pop_undo(int redo);
 extern void delete_undo(void);
@@ -560,7 +564,7 @@ extern void go_back(int confirm);
 extern void view_unzoom(double z);
 extern void view_zoom(double z);
 extern void draw_stuff(void);
-extern void new_wire(int what);
+extern void new_wire(int what, double mx_snap, double my_snap);
 extern void new_line(int what);
 extern void move_objects(int what,int merge, double dx, double dy);
 extern void copy_objects(int what);

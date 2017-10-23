@@ -322,7 +322,7 @@ void svg_draw(void)
 
  modified_save=modified;
  push_undo(); // 20161121
- check ();    // 20161121 add connection boxes on wires but undo at end
+ collapse_wires();    // 20161121 add connection boxes on wires but undo at end
  
   
  fd=fopen("plot.svg", "w");

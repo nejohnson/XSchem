@@ -46,7 +46,7 @@ void print_image()
 
   modified_save=modified; // 20161121 save state
   push_undo(); // 20161121
-  check ();    // 20161121 add connection boxes on wires but undo at end
+  collapse_wires();    // 20161121 add connection boxes on wires but undo at end
 
   XUnmapWindow(display, window);
 

@@ -105,7 +105,8 @@ name="mchanged_name" model=\"nmos\" w="20u" l="3u" m="10"
     <tt>netlist</tt>component for Spice commands.</p>
   <img src="component_properties0.png">
   <li><tt>place</tt></li>
-  <p> This attribute is also valid only for <tt>netlist_commands</tt> type symbols, and tells
+  <p> This 
+    <tt>place=end</tt> attribute is only valid only for <tt>netlist_commands</tt> type symbols, and tells
     XSCHEM that this component must be netlisted last. This is necessary for some spice commands 
     that need to be placed <b>after</b> the rest of the netlist.</p>
   <li><tt>spice_ignore</tt></li>
@@ -115,7 +116,7 @@ name="mchanged_name" model=\"nmos\" w="20u" l="3u" m="10"
   <li><tt>vhdl_ignore</tt></li>
   <p> This tells XSCHEM that for VHDL netlist this component will be <b>completely</b> ignored.</p>
   <li><tt>sig_type</tt></li>
-  <p> For verilog type netlist, this tells that the current label names a signal (or constant) of
+  <p> For VHDL type netlist, this tells that the current label names a signal (or constant) of
     type <tt>sig_type</tt>. For example a label can be placed with name <tt>TEST</tt> and 
     <tt>sig_type=BIT</tt>. The default type for VHDL if this property is missing  is <tt>std_logic</tt>.
     The following picture shows the usage of <tt>sig_type</tt> and the resulting VHDL netlist.

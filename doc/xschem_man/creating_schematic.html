@@ -187,7 +187,24 @@ m4 net1 B VSS VSS nmos w=5u l=0.18u m=1
   languages; avoid drawing many repetitive blocks. Also the netlist file will be much smaller.
  </p>
 
-
+ <h3>Automatic Component Wiring</h3>
+ <p>
+  When a new symbol is placed there is a function to connect its pins to auto-named nets:
+  select the symbol, then
+  Press the <tt>'H'</tt> key or the <tt>Symbol-&gt;Attach pins to component instance</tt> menu entry.
+ </p>
+ <img src="auto_wiring1.png"> 
+  <p>
+  The <tt>use prefix</tt> will prepend the shown prefix to the wire names to be attached to the component.
+  The default value for the prefix is the instance name followed by an underscore.<br>
+  The <tt>use wire labels</tt> will use wire labels instead of pin labels. Wire labels have the text name field
+  offset vertically to allow a wire to pass through without crossing the wire name. in the picture below,
+  the first component is wired with <tt>use prefix</tt> selected and <tt>use wire labels</tt> not selected,
+  the second example with <tt>use prefix</tt> not selected and <tt>use wire labels</tt> selected. As you
+  can see in the second example you may draw wires without overstriking the labels.
+ </p>
+ <img src="auto_wiring2.png"> 
+  
  <!-- end of slide -->
  <div class="filler"></div>
 </div>

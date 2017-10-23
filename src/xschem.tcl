@@ -624,20 +624,24 @@ proc enter_text {textlabel} {
 
 # evaluate a tcl command from GUI
 proc tclcmd {} {
+  global tclcmd_txt
+  catch [destroy .tclcmd]
   toplevel .tclcmd -class dialog
   label .tclcmd.txtlab -text {Enter TCL expression:}
   label .tclcmd.result -text {Result:}
   text .tclcmd.t -width 100 -height 8
   text .tclcmd.r -width 100 -height 6 -yscrollcommand ".tclcmd.yscroll set" 
   scrollbar .tclcmd.yscroll -command  ".tclcmd.r yview"
+  .tclcmd.t insert 1.0 $tclcmd_txt
 
   frame .tclcmd.b
   button .tclcmd.b.close -text Close -command {
+    set tclcmd_txt [.tclcmd.t get 1.0 end]
     destroy .tclcmd
   }
   button .tclcmd.b.ok -text Evaluate -command {
-    set txt [.tclcmd.t get 1.0 end]
-    set res [eval $txt]
+    set tclcmd_txt [.tclcmd.t get 1.0 end]
+    set res [eval $tclcmd_txt]
     .tclcmd.r delete 1.0 end
     .tclcmd.r insert 1.0 $res
   }
@@ -1603,6 +1607,8 @@ set symbol ""
 # 20100204 flag to enable fix for dialog box positioning,  issues with some wm
 set wm_fix 0 
 
+# 20171010
+set tclcmd_txt {}
 
 ###
 ### user preferences: set default values
@@ -1626,6 +1632,8 @@ set_ne change_lw 0
 set_ne line_width 0
 set_ne incr_hilight 1
 set_ne enable_stretch 0
+set_ne horizontal_move 0 ; # 20171023
+set_ne vertical_move 0 ; # 20171023
 set_ne draw_grid 1
 set_ne sym_txt 1
 set_ne show_infowindow 0 
@@ -1843,7 +1851,10 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
          }
      }
    .menubar.file.menu add command -label "Save as" -command "xschem saveas" -accelerator s
-   .menubar.file.menu add command -label "Print" -command "xschem print" -accelerator {*}
+   # added svg, png 20171022
+   .menubar.file.menu add command -label "PDF Print" -command "xschem print pdf" -accelerator {*}
+   .menubar.file.menu add command -label "PNG Print" -command "xschem print png" -accelerator {C-*}
+   .menubar.file.menu add command -label "SVG Print" -command "xschem print svg" -accelerator {A-*}
    .menubar.file.menu add separator
    .menubar.file.menu add command -label "Exit" -command {exit} -accelerator C-d
    
@@ -1886,12 +1897,12 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
          if { $flat_netlist==1 } {xschem set flat_netlist 1} else { xschem set flat_netlist 0} 
       }
    .menubar.option.menu add checkbutton -label "split netlist" -variable split_files \
-      -accelerator : \
+      -accelerator {} \
       -command {
          if { $split_files==1 } {xschem set split_files 1} else { xschem set split_files 0} 
       }
    .menubar.option.menu add checkbutton -label "hspice netlist" -variable hspice_netlist \
-      -accelerator : \
+      -accelerator {} \
       -command {
          if { $hspice_netlist==1 } {xschem set hspice_netlist 1} else { xschem set hspice_netlist 0} 
       }
@@ -1947,8 +1958,15 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    .menubar.edit.menu add command -label "Select all" -command "xschem select_all" -accelerator C-a
    .menubar.edit.menu add command -label "edit selected element" -command "xschem edit_in_new_window" -accelerator A-e
    .menubar.edit.menu add command -label "edit selected symbol" -command "xschem symbol_in_new_window" -accelerator A-i
-   .menubar.edit.menu add command -label "Duplicate" -command "xschem copy_objects" -accelerator c
-   .menubar.edit.menu add command -label "Move" -command "xschem move_objects" -accelerator m
+   .menubar.edit.menu add command -label "Duplicate objects" -command "xschem copy_objects" -accelerator c
+   .menubar.edit.menu add command -label "Move objects" -command "xschem move_objects" -accelerator m
+   .menubar.edit.menu add checkbutton -label "Constrained Horizontal move" -variable horizontal_move \
+      -command "xschem set horizontal_move" -accelerator h
+   .menubar.edit.menu add checkbutton -label "Constrained Vertical move" -variable vertical_move \
+      -command "xschem set vertical_move" -accelerator v
+   # added collapse/join/break wires menu command  (& key) 20171022
+   .menubar.edit.menu add command -label "Join/Break/Collapse wires" \
+      -command "xschem collapse_wires" -accelerator {&}
    .menubar.edit.menu add command -label "Push schematic" -command "xschem descend" -accelerator e
    .menubar.edit.menu add command -label "Push symbol" -command "xschem edit_symbol" -accelerator i
    .menubar.edit.menu add command -label "Pop" -command "xschem go_back" -accelerator C-e
@@ -2030,15 +2048,16 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
 
    menubutton .menubar.sym -text "Symbol" -menu .menubar.sym.menu
    menu .menubar.sym.menu -tearoff 0
-   .menubar.sym.menu add command -label "Make symbol " -command "xschem make_symbol" -accelerator a
-   .menubar.sym.menu add command -label "Make schematic from symbol " -command "xschem make_sch" -accelerator C-l
-   .menubar.sym.menu add command -label "Attach pins to component instance" -command "xschem attach_pins" -accelerator h
+   .menubar.sym.menu add command -label "Make symbol from schematic" -command "xschem make_symbol" -accelerator a
+   .menubar.sym.menu add command -label "Make schematic from symbol" -command "xschem make_sch" -accelerator C-l
+   .menubar.sym.menu add command -label "Attach pins to component instance" -command "xschem attach_pins" -accelerator H
 
    menubutton .menubar.tools -text "Tools" -menu .menubar.tools.menu
    menu .menubar.tools.menu -tearoff 0
    .menubar.tools.menu add command -label "Insert symbol" -command "xschem place_symbol" -accelerator Ins
    .menubar.tools.menu add command -label "Insert text" -command "xschem place_text" -accelerator t
    .menubar.tools.menu add command -label "Insert wire" -command "xschem wire" -accelerator w
+   .menubar.tools.menu add command -label "Insert snap wire" -command "xschem snap_wire" -accelerator W
    .menubar.tools.menu add command -label "Insert line" -command "xschem line" -accelerator l
    .menubar.tools.menu add command -label "Insert rect" -command "xschem rect" -accelerator r
    .menubar.tools.menu add command -label "Search" -accelerator C-f -command  property_search

@@ -252,6 +252,16 @@ int callback(int event, int mx, int my, KeySym key,
        Tcl_EvalEx(interp,"set horizontal_move 1" , -1, TCL_EVAL_GLOBAL);
        tkeval("xschem set horizontal_move");
      }
+     if(rubber & STARTWIRE) {
+       if(horizontal_move) mousey_snap = my_double_save; // 20171023
+       if(vertical_move) mousex_snap = mx_double_save;
+       new_wire(RUBBER, mousex_snap, mousey_snap);
+     }
+     if(rubber & STARTLINE) {
+       if(horizontal_move) mousey_snap = my_double_save; // 20171023
+       if(vertical_move) mousex_snap = mx_double_save;
+       new_line(RUBBER);
+     }
      break;
    }
    if(key=='H' && state==ShiftMask) {		// attach labels to selected instances
@@ -265,6 +275,16 @@ int callback(int event, int mx, int my, KeySym key,
      } else {
        Tcl_EvalEx(interp,"set vertical_move 1" , -1, TCL_EVAL_GLOBAL);
        tkeval("xschem set vertical_move");
+     }
+     if(rubber & STARTWIRE) {
+       if(horizontal_move) mousey_snap = my_double_save; // 20171023
+       if(vertical_move) mousex_snap = mx_double_save;
+       new_wire(RUBBER, mousex_snap, mousey_snap);
+     }
+     if(rubber & STARTLINE) {
+       if(horizontal_move) mousey_snap = my_double_save; // 20171023
+       if(vertical_move) mousex_snap = mx_double_save;
+       new_line(RUBBER);
      }
      break;
    }
@@ -427,9 +447,14 @@ int callback(int event, int mx, int my, KeySym key,
 
    if(key == 'w') 			// place wire
    {
-     mx_save = mx; my_save = my;	// 20070323
-     mx_double_save=rint(( mx*zoom + xorigin)/cadsnap)*cadsnap;
-     my_double_save=rint(( my*zoom + yorigin)/cadsnap)*cadsnap;
+     if(!vertical_move) {
+       mx_save = mx; 
+       mx_double_save=rint(( mx*zoom + xorigin)/cadsnap)*cadsnap;
+     }
+     if(!horizontal_move) {
+       my_save = my;	// 20070323
+       my_double_save=rint(( my*zoom + yorigin)/cadsnap)*cadsnap;
+     }
      if(horizontal_move) mousey_snap = my_double_save; // 20171023
      if(vertical_move) mousex_snap = mx_double_save;
      new_wire(PLACE,mousex_snap, mousey_snap); 
@@ -829,9 +854,14 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='l' && state == 0)				// start line
    {
-    mx_save = mx; my_save = my;	// 20070323
-    mx_double_save=rint(( mx*zoom + xorigin)/cadsnap)*cadsnap;
-    my_double_save=rint(( my*zoom + yorigin)/cadsnap)*cadsnap;
+    if(!vertical_move) {
+      mx_save = mx; 
+      mx_double_save=rint(( mx*zoom + xorigin)/cadsnap)*cadsnap;
+    }
+    if(!horizontal_move) {
+      my_save = my;	// 20070323
+      my_double_save=rint(( my*zoom + yorigin)/cadsnap)*cadsnap;
+    }
     if(horizontal_move) mousey_snap = my_double_save; // 20171023
     if(vertical_move) mousex_snap = mx_double_save;
     new_line(PLACE); break;

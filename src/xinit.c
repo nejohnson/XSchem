@@ -334,7 +334,6 @@ void init_color_array()
 {
  char s[256]; // overflow safe 20161122
  int i;
-
  for(i=0;i<cadlayers;i++) {
    my_snprintf(s, S(s), "lindex $colors %d",i);
    Tcl_Eval(interp, s);
@@ -569,6 +568,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
    }
  }
 
+ if(rainbow_colors) Tcl_SetVar(interp, "rainbow_colors", "1", TCL_GLOBAL_ONLY); // 20171013
  
 
  if(Tcl_GetVar(interp, "XSCHEM_HOME_DIR",TCL_GLOBAL_ONLY)) {
@@ -765,6 +765,11 @@ int Tcl_AppInit(Tcl_Interp *inter)
 //  ************ END X INITIALIZATION *******************
 
 // we look here at user options, and act accordingly before going to interactive mode
+
+ init_done=1;  // 20171008 moved before option processing, otherwise xwin_exit will not be invoked
+               // leaving undo buffer and other garbage around.
+
+
  if(filename) {
     char str[1024];  // 20161122 overflow safe
     my_snprintf(str, S(str), "get_cell {%s}", filename);
@@ -831,7 +836,6 @@ int Tcl_AppInit(Tcl_Interp *inter)
 
 // end processing user options
 
- init_done=1;
  if(!no_readline) {
    Tcl_Eval(interp, " package require tclreadline ; ::tclreadline::Loop " ) ;
  }

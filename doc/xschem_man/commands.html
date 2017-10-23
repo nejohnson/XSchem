@@ -83,6 +83,7 @@ RightButton DoubleClick If component selected Descend into it else return  to
 -          Delete       Delete selected objects
 -          Insert       Insert element from library
 -          Down         Move down
+ctrl       Enter        Confirm closing dialog boxes
 -          Escape       Abort, redraw, unselect
 -          Left         Move right
 -          Right        Move left
@@ -106,8 +107,9 @@ ctrl        'f'         Find/select by substring or regexp
 shift       'G'         Double snap factor
 -           'g'         Half snap factor
 ctrl        'g'         Set snap factor
-shift       'H'         Follow http link (if symbol has 'url' property
--           'h'         Attach net labels to selected instance
+-           'h'         Constrained horizontal move/copy of objects
+ctrl        'h'         Follow http link or execute command (url, tclcommand properties)
+shift       'H'         Attach net labels to selected instance
 -           'i'         Descend to  symbol
 Alt         'i'         Edit selected symbol in a new window
 shift       'J'         Create symbol from pin list
@@ -120,6 +122,7 @@ alt+ctrl    'j'         Print list of highlighted nets/pins with label expansion
 shift       'K'         Unhilight all nets
 ctrl        'k'         Unhilight selected nets
 -           'l'         Start line
+ctrl        'l'         Make schematic view from selected symbol
 shift       'L'         Load schematic
 -           'm'         Move selected obj.
 shift       'N'         Hierarchical netlist
@@ -142,18 +145,20 @@ Alt         's'         Reload current schematic from disk
 alt         'u'         Align to current grid selected objects
 shift       'U'         Redo
 -           'u'         Undo
+-           'v'         Constrained vertical move/copy of objects
 ctrl        'v'         Paste from clipboard
 shift       'V'         Toggle spice/vhdl/verilog netlist 
-shift       'W'         Highlight discrepancies between object ports and attached nets
 -           'w'         Place wire
+Shift       'W'         Place wire, automatically snapping to closest pin or net endpoint
 ctrl        'x'         Cut into clipboard
 -           'x'         New cad session
+shift       'X'         Highlight discrepancies between object ports and attached nets
 -           'y'         Toggle stretching wires
 -           'z'         Zoom box
 shift       'Z'         Zoom in
 ctrl        'z'         Zoom out
 -           '?'         Help
--           '&amp;'         Check wire connectivity
+-           '&amp;'         Join / break / collapse wires
 shift       '*'         Postscript/pdf print
 ctr+shift   '*'         Xpm/png print
 alt+shift   '*'         Svg print
@@ -165,9 +170,6 @@ alt+shift   '*'         Svg print
 -           '$'         Toggle pixmap  saving
 -           ':'         Toggle flat netlist
  </pre><br>
-
-
-
 
  <h3>STRETCH OPERATIONS</h3><br>
  <p>
@@ -190,6 +192,25 @@ alt+shift   '*'         Svg print
  </p>
  <img src="commands3.png">
 
+ <h3>PLACE WIRES SNAPPING TO CLOSEST PIN OT NET ENDPOINT</h3>
+ <p>
+  The (uppercase) <tt>'W'</tt> bindkey allows to place a wire putting start (and end point, later) to the 
+  closest pin or wire endpoint, this will make it easier to connect precisely without the need to zoom in all times.
+ </p><br>
+ <h3>CONSTRAINED MOVE</h3>
+ <p>
+  while creating wires, lines, and moving, stretching, copying objects, pressing the <tt>'h'</tt> or <tt>'v'</tt> keys 
+  will constrain the movement to a horizontal or vertical direction, respectively.
+ </p> 
+ <img src="commands4.png" style="margin-bottom: 0px;" >
+ <p style="padding-top:0px;"> <i>
+  Constrained horizontal move: regardless of the mouse pointer Y position movement 
+  occurs on the X direction only.
+ </i></p>
+ <img src="commands5.png" style="margin-bottom: 0px;">
+ <p style="padding-top:0px;"> <i>
+  Unconstrained move: objects follow the mouse pointer in X and Y direction.
+ </i></p>
  <!-- end of slide -->
  <div class="filler"></div>
 </div>

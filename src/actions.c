@@ -191,7 +191,9 @@ void new_window(char *cell, int symbol)
 int save(int confirm) //20171006 add confirm
 {
      int cancel;
+     int save_ok; // 20171020
 
+     save_ok=0;
      cancel=0;
      if(current_type==SCHEMATIC)
      {
@@ -200,9 +202,9 @@ int save(int confirm) //20171006 add confirm
          if(confirm) {
            tkeval("ask_save");
            if(!strcmp(Tcl_GetStringResult(interp), "") ) cancel=1;
-           if(!strcmp(Tcl_GetStringResult(interp), "yes") ) save_file(NULL);
+           if(!strcmp(Tcl_GetStringResult(interp), "yes") ) save_ok = save_file(NULL);
          } else {
-           save_file(NULL);
+           save_ok = save_file(NULL);
          }
        }
      }
@@ -213,12 +215,13 @@ int save(int confirm) //20171006 add confirm
          if(confirm) {
            tkeval("ask_save");
            if(!strcmp(Tcl_GetStringResult(interp), "") ) cancel=1;
-           if(!strcmp(Tcl_GetStringResult(interp), "yes") ) save_symbol(NULL);
+           if(!strcmp(Tcl_GetStringResult(interp), "yes") ) save_ok = save_symbol(NULL);
          } else {
-           save_symbol(NULL);
+           save_ok = save_symbol(NULL);
          }
        }
      }
+     if(save_ok==-1) return 1;
      return cancel;
 }
 void saveas(void) // changed name from ask_save_file to saveas 20121201
@@ -713,6 +716,9 @@ void descend(void)
 {
  char *str;
  static char *name=NULL; // overflow safe 20161122
+ int save_ok; // 20171020
+
+ save_ok=0;
 
  rebuild_selected_array();
  if(lastselected !=1 || selectedgroup[0].type!=ELEMENT) 
@@ -732,12 +738,13 @@ void descend(void)
     tkeval(name);
     strcpy(schematic[currentsch], Tcl_GetStringResult(interp));
     if(!strcmp(schematic[currentsch],"")) return;
-    save_file(schematic[currentsch]);
+    save_ok = save_file(schematic[currentsch]);
 
 //    Tcl_SetVar(interp,"entry1",schematic[currentsch],TCL_GLOBAL_ONLY);
 //    tkeval("entry_line {Save file:}");
 //    strcpy(schematic[currentsch], Tcl_GetStringResult(interp));
 //    if(!strcmp(schematic[currentsch],"")) return;
+    if(save_ok==-1) return; // 20171020
   }
 
   if(			// do not descend if not subcircuit
@@ -791,7 +798,9 @@ void descend(void)
 void go_back(int confirm) // 20171006 add confirm
 {
  int prev_curr_type=0;
+ int save_ok;  // 20171020
 
+ save_ok=0;
  if(currentsch>0)
  {
   //clear_drawing();
@@ -801,10 +810,10 @@ void go_back(int confirm) // 20171006 add confirm
    {
      if(confirm) {
        tkeval("ask_save");
-       if(!strcmp(Tcl_GetStringResult(interp), "yes") ) save_file(NULL);
+       if(!strcmp(Tcl_GetStringResult(interp), "yes") ) save_ok = save_file(NULL);
        else if(!strcmp(Tcl_GetStringResult(interp), "") ) return;
      } else {
-       save_file(NULL);
+       save_ok = save_file(NULL);
      }
    }
   }
@@ -814,13 +823,14 @@ void go_back(int confirm) // 20171006 add confirm
    {
      if(confirm) {
        tkeval("ask_save");
-       if(!strcmp(Tcl_GetStringResult(interp), "yes") ) save_symbol(NULL);
+       if(!strcmp(Tcl_GetStringResult(interp), "yes") ) save_ok = save_symbol(NULL);
        else if(!strcmp(Tcl_GetStringResult(interp), "") ) return;
      } else {
-       save_symbol(NULL);
+       save_ok = save_symbol(NULL);
      }
    }
   }
+  if(save_ok==-1) return; // 20171020
   strcpy(schematic[currentsch] , "");
   currentsch--;
   remove_symbols();
@@ -1039,39 +1049,48 @@ void draw_stuff(void)
     }
 }
 
-void new_wire(int what)
+void new_wire(int what, double mx_snap, double my_snap)
 {
  static double x1,y1,x2,y2;
  static double xx1,yy1,xx2,yy2;
 
-   if( (what & PLACE) )
-   {
-    if( (x1!=x2 || y1!=y2) && (rubber & STARTWIRE) )
-    {
-     ORDER(x1,y1,x2,y2);
-     storeobject(-1, x1,y1,x2,y2,WIRE,0,0,NULL);
-     drawline(gc[WIRELAYER],NOW, x1,y1,x2,y2);
-    }
-    x1=x2=mousex_snap;y1=y2=mousey_snap;
-    rubber |= STARTWIRE;
-   }
-   if( what & END)
-   {
-    rubber &= ~STARTWIRE;
-   }
+   if( (what & PLACE) ) {
+     if( (x1!=x2 || y1!=y2) && (rubber & STARTWIRE) ) {
+       ORDER(x1,y1,x2,y2);
+       push_undo();
+       storeobject(-1, x1,y1,x2,y2,WIRE,0,0,NULL);
+       drawline(gc[WIRELAYER],NOW, x1,y1,x2,y2);
+     }
 
-   if(what & RUBBER)
-   {
-    xx1=x1;yy1=y1;xx2=x2;yy2=y2;
-    ORDER(xx1,yy1,xx2,yy2);
-    drawtempline(gctiled, NOW, xx1,yy1,xx2,yy2);
-    x2=mousex_snap;y2=mousey_snap;
-    xx1=x1;yy1=y1;xx2=x2;yy2=y2;
-    ORDER(xx1,yy1,xx2,yy2);
-    drawtempline(gc[WIRELAYER], NOW, xx1,yy1,xx2,yy2);
+     if(! (what &END)) {
+       x1=mx_snap;
+       y1=my_snap;
+       x2=mousex_snap;
+       y2=mousey_snap;
+       xx1=x1;
+       yy1=y1;
+       xx2=mousex_snap;
+       yy2=mousey_snap;
+       ORDER(xx1,yy1,xx2,yy2);
+       drawtempline(gc[WIRELAYER], NOW, xx1,yy1,xx2,yy2);
+     }
+
+     rubber |= STARTWIRE;
+   }
+   if( what & END) {
+     rubber &= ~STARTWIRE;
+   }
+   if( (what & RUBBER)  ) {
+     xx1=x1;yy1=y1;xx2=x2;yy2=y2;
+     ORDER(xx1,yy1,xx2,yy2);
+     drawtempline(gctiled, NOW, xx1,yy1,xx2,yy2);
+     x2 = mx_snap; y2 = my_snap;
+     xx1 = x1; yy1 = y1;
+     xx2 = x2; yy2=y2;
+     ORDER(xx1,yy1,xx2,yy2);
+     drawtempline(gc[WIRELAYER], NOW, xx1,yy1,xx2,yy2);
    }
 }
-
 
 void change_layer()
 {
@@ -1114,6 +1133,7 @@ void new_line(int what)
     if( (x1!=x2 || y1!=y2) && (rubber & STARTLINE) )
     {
      ORDER(x1,y1,x2,y2);
+     push_undo();
      drawline(gc[rectcolor], NOW, x1,y1,x2,y2);
      storeobject(-1, x1,y1,x2,y2,LINE,rectcolor, 0, NULL);
     }
@@ -1147,6 +1167,7 @@ void new_rect(int what)
     if( (x1!=x2 || y1!=y2) && (rubber & STARTRECT) )
     {
      RECTORDER(x1,y1,x2,y2); 
+     push_undo();
      drawrect(gc[rectcolor], NOW, x1,y1,x2,y2);
      filledrect(gcstipple[rectcolor], NOW, x1,y1,x2,y2);
      storeobject(-1, x1,y1,x2,y2,RECT,rectcolor, 0, NULL);

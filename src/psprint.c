@@ -291,7 +291,7 @@ void ps_draw(void)
 
  modified_save=modified;
  push_undo(); // 20161121
- check ();    // 20161121 add connection boxes on wires but undo at end
+ collapse_wires();    // 20161121 add connection boxes on wires but undo at end
  ps_colors=my_calloc(cadlayers, sizeof(Ps_color));
  if(ps_colors==NULL){
    fprintf(errfp, "ps_draw(): calloc error\n");Tcl_Eval(interp, "exit");

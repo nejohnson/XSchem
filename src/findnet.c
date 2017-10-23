@@ -21,7 +21,7 @@
  */
 
 #include "xschem.h"
-#define MAXDIST 1.0e100
+#include <float.h>
 static double distance;
 static Selected sel;
 
@@ -70,6 +70,71 @@ void find_closest_line(double mx,double my)
   sel.n = l; sel.type = LINE; 
  }
 }
+
+// 20171022 snap wire to closest pin or net endpoint
+void find_closest_net_or_symbol_pin(double mx,double my, double *x, double *y)
+{
+  int i, j, no_of_pin_rects;
+  double x0, x1, x2, y0, y1, y2, xx, yy, dist, min_dist_x=0, min_dist_y=0;
+  Box box;
+  int rot, flip;
+  static char *type=NULL;
+
+  distance = DBL_MAX;
+  for(i=0;i<lastinst;i++) {
+    x0=inst_ptr[i].x0;
+    y0=inst_ptr[i].y0;
+    rot = inst_ptr[i].rot;
+    flip = inst_ptr[i].flip;
+    my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
+
+
+    no_of_pin_rects = (inst_ptr[i].ptr+instdef)->rects[PINLAYER];
+    if( !strcmp(type, "label") ) no_of_pin_rects=1;
+    if( !strcmp(type, "ipin") ) no_of_pin_rects=1;
+    if( !strcmp(type, "opin") ) no_of_pin_rects=1;
+    if( !strcmp(type, "iopin") ) no_of_pin_rects=1;
+    for(j=0; j<no_of_pin_rects; j++) {
+      box = ((inst_ptr[i].ptr+instdef)->boxptr[PINLAYER])[j];
+      ROTATION(0.0,0.0,box.x1,box.y1,x1,y1);
+      ROTATION(0.0,0.0,box.x2,box.y2,x2,y2);
+      x1 += x0;
+      y1 += y0;
+      x2 += x0;
+      y2 += y0;
+      xx = (x1+x2)/2;
+      yy = (y1+y2)/2;
+      dist = (mx - xx) * (mx - xx) + (my - yy) * (my - yy);
+      if(dist < distance) {
+        distance = dist; 
+        min_dist_x = xx;
+        min_dist_y = yy;
+      }
+    }
+  }
+  for(i=0;i<lastwire; i++) {
+    xx=wire[i].x1; 
+    yy = wire[i].y1;
+    dist = (mx - xx) * (mx - xx) + (my - yy) * (my - yy);
+    if(dist < distance) {
+      distance = dist;
+      min_dist_x = xx;
+      min_dist_y = yy;
+    }
+    xx=wire[i].x2; 
+    yy = wire[i].y2;
+    dist = (mx - xx) * (mx - xx) + (my - yy) * (my - yy);
+    if(dist < distance) {
+      distance = dist;
+      min_dist_x = xx;
+      min_dist_y = yy;
+    }
+  }
+  *x = min_dist_x;
+  *y = min_dist_y;
+}
+
+
 
 void find_closest_box(double mx,double my)
 {
@@ -148,7 +213,7 @@ void find_closest_text(double mx,double my)
 Selected find_closest_obj(double mx,double my)
 {
  sel.n = 0L; sel.col = 0; sel.type = 0;
- distance = MAXDIST;
+ distance = DBL_MAX;
  find_closest_line(mx,my);
  find_closest_box(mx,my);
  find_closest_text(mx,my);

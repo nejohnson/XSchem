@@ -79,12 +79,12 @@ void check_touch(int i, int j,
   if(debug_var>=2) fprintf(errfp, "check_touch(): xt=%g, yt=%g\n",*xt, *yt);
 }
 
-void check(void)
+void collapse_wires(void)
 // wire coordinates must be ordered.
 {
  int j,i, changed;
  unsigned short parallel,breaks,broken,touches,included,includes;
- double xt,yt;
+ double xt=0,yt=0;
 
  do { 
    for(i=0;i<lastwire;i++)  wire[i].end1=wire[i].end2=0;

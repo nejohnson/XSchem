@@ -119,18 +119,16 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
 
     }
  }
- else if(!strcmp(argv[1],"print") ) {
-   int old_color_ps;
-   old_color_ps=color_ps;
-   if(argc==3 && !strcmp(argv[2],"color") ) {
-     color_ps=1;
+ else if(!strcmp(argv[1],"print") ) { // 20171022 added png, svg
+   if(argc==2 || (argc==3 && !strcmp(argv[2],"pdf")) ) {
+     ps_draw();
    }
-   else if(argc==3 && !strcmp(argv[2],"mono") ) {
-     color_ps=0;
+   else if(argc==3 && !strcmp(argv[2],"png") ) {
+     print_image();
    }
-   ps_draw();
-   sleep(1);
-   color_ps=old_color_ps;
+   else if(argc==3 && !strcmp(argv[2],"svg") ) {
+     svg_draw();
+   }
  }
 
  else if(!strcmp(argv[1],"inst_ptr"))
@@ -257,6 +255,13 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
   edit_property(1);
  }
 
+ else if(!strcmp(argv[1],"collapse_wires")) // 20171022
+ {
+   push_undo();
+   collapse_wires();
+   draw();
+ }
+
  else if(!strcmp(argv[1],"delete"))
  {
   if(argc==2) delete();
@@ -292,6 +297,14 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
   }
  }
 
+ // 20171010 allows to retrieve name of n-th parent schematic
+ else if(!strcmp(argv[1],"get") && !strcmp(argv[2],"schname") && argc==4) {
+   int x;
+   x = atoi(argv[3]);
+   if(x<0 && currentsch+x>=0) {
+     Tcl_AppendResult(interp, schematic[currentsch+x], NULL);
+   }
+ }
  else if(!strcmp(argv[1],"get") && argc==3)
  {
   Tcl_ResetResult(interp);
@@ -436,8 +449,22 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
         Tcl_AppendResult(interp, s,NULL);
   }
  }
-
- else if(!strcmp(argv[1],"set") && argc==4)
+ else if(!strcmp(argv[1],"set") && argc==3) { // 20171023
+  if(!strcmp(argv[2],"horizontal_move"))  { // 20171023
+    horizontal_move = atoi(Tcl_GetVar(interp, "horizontal_move", TCL_GLOBAL_ONLY));
+    if(horizontal_move) {
+      vertical_move=0;
+      Tcl_EvalEx(interp,"set vertical_move 0" , -1, TCL_EVAL_GLOBAL);
+    }
+  }
+  else if(!strcmp(argv[2],"vertical_move"))  { // 20171023
+    vertical_move = atoi(Tcl_GetVar(interp, "vertical_move", TCL_GLOBAL_ONLY));
+    if(vertical_move) {
+      horizontal_move=0;
+      Tcl_EvalEx(interp,"set horizontal_move 0" , -1, TCL_EVAL_GLOBAL);
+    }
+  }
+ } else if(!strcmp(argv[1],"set") && argc==4)
  {
   if(!strcmp(argv[2],"netlist_type"))  {
     if(!strcmp(argv[3],"vhdl")) {
@@ -754,6 +781,9 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
     place_symbol(-1, argv[2], atof(argv[3]), atof(argv[4]), atoi(argv[5]), atoi(argv[6]), argv[7],3 );
  }
 
+ else if(!strcmp(argv[1],"snap_wire")) { // 20171022
+   rubber |= MENUSTARTSNAPWIRE;
+ }
  else if(!strcmp(argv[1],"wire"))
  {   
    double x1,y1,x2,y2;

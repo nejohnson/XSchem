@@ -14,9 +14,9 @@ pressing the 'e' key, or by menu 'Edit -> Push Schematic'.
 You can return here after descending into a schematic hitting
 '<Ctrl>-e' or by menu 'Edit -> Pop'
 } 370 -780 0 0 0.4 0.4 {} 
-T {Select the component here under and press
-'<Shift>-H' to visit xschem websites
-or local docs} 420 -430 0 0 0.7 0.7 {} 
+T {Select the component here under and press'<Ctrl>-H' 
+or <Alt>-click them to visit xschem websites
+or local docs} 360 -430 0 0 0.7 0.7 {} 
 C {examples/poweramp} 150 -340 0 0 {name=x1} 
 C {examples/tesla} 150 -260 0 0 {name=x2} 
 C {examples/test_ne555} 150 -220 0 0 {name=x3} 

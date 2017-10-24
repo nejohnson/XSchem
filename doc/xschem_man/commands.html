@@ -171,7 +171,20 @@ alt+shift   '*'         Svg print
 -           ':'         Toggle flat netlist
  </pre><br>
 
- <h3>STRETCH OPERATIONS</h3><br>
+ <h3>KEYBIND CUSTOMIZATION</h3>
+ <p>
+  changes to default keybindings may be placed in the <tt>~/.xschem</tt> file as in the following examples:
+ </p>
+ <pre class="code">
+## replace Ctrl-d with Escape (so you won't kill the program :-))
+set replace_key(Control-d) Escape
+## swap w and W keybinds; Always specify Shift for capital letters
+set replace_key(Shift-W) w
+set replace_key(w) Shift-W
+ </pre><br>
+
+
+ <h3>STRETCH OPERATIONS</h3>
  <p>
   An important operation that deserves a special paragraph is the <tt>Stretch</tt> operation.
   There is frequently the need to move part of the circuit without breaking connections, for 

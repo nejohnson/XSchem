@@ -35,24 +35,32 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.2.1: 
+- some regressions in bindkeys fixed
 2.2.0:
 - Added description option -no-pie in Makefile.
   if a profiled executable is needed '-no-pie -pg' must be given.
-  Position Independent Executable is now the default on Gcc, but gprof will not work 
-  with this default.
-- xschem will not descend or go up from a schematic hierarchy level if it has been modified, the 
-  user wants to save changes but the file can not be saved, due for example to permission problems.
-  In this case the user either needs to save to a different place or say 'no' when promped for save.
-- bindkey 'W' 'show discrepancies of nets vs pin names on selected instance' changed to 'X'
-- added the 'snap wire' function (uppercase) 'W' bindkey, the wire starts/ends from/to closest instance
-  pin or net endpoint.
+  Position Independent Executable is now the default on Gcc, 
+  but gprof will not work with this default.
+- xschem will not descend or go up from a schematic hierarchy level
+  if it has been modified, the user wants to save changes but the
+  file can not be saved, due for example to permission problems.
+  In this case the user either needs to save to a different place
+  or say 'no' when prompted for save.
+- bindkey 'W' 'show discrepancies of nets vs pin names on selected
+  instance' changed to 'X'
+- added the 'snap wire' function (uppercase) 'W' bindkey, the wire
+  starts/ends from/to closest instance pin or net endpoint.
 - fixes in the undo buffer, some actions were not undoable.
-- bindkey 'H' for 'execute tclcommand or open file or http link (tclcomand or url properties) changed
-  to 'ctrl-h'
+- bindkey 'H' for 'execute tclcommand or open file or
+  http link (tclcomand or url properties) changed to 'ctrl-h'
 - bindkey 'h' for 'attach nets to instance pin' changed to 'H'
-- added constrained horizontal ('h' key) or vertical ('v' key) movement for wire, line, object copy/move.
-- added menu entries for png/pdf/svg print, h/v constrained move, collapse wires, snap wire creation.
-- '-z' xschem option now works again, this will start xschem wuth a rich rainbow colored layer set
+- added constrained horizontal ('h' key) or vertical ('v' key)
+  movement for wire, line, object copy/move.
+- added menu entries for png/pdf/svg print, h/v constrained move,
+  collapse wires, snap wire creation.
+- '-z' xschem option now works again, this will start xschem with
+  a rich rainbow colored layer set.
 - Documentation updates.
 
 2.1.14:

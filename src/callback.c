@@ -244,7 +244,7 @@ int callback(int event, int mx, int my, KeySym key,
      launcher();
      break;
    }
-   if(key == 'h') {
+   if(key == 'h' && state == 0) {
      // horizontally constrained drag 20171023
      if ( horizontal_move ) {
        Tcl_EvalEx(interp,"set horizontal_move 0" , -1, TCL_EVAL_GLOBAL);
@@ -268,7 +268,7 @@ int callback(int event, int mx, int my, KeySym key,
     attach_labels_to_inst();
     break;
    }
-   if(key == 'v') {
+   if(key == 'v' && state==0) {
      // vertically constrained drag 20171023
      if ( vertical_move ) {
        Tcl_EvalEx(interp,"set vertical_move 0" , -1, TCL_EVAL_GLOBAL);
@@ -381,7 +381,7 @@ int callback(int event, int mx, int my, KeySym key,
     change_linewidth(lw_double);
     break;
    }
-   if(key == 'X') 			// highlight discrepanciens between selected instance pin and net names
+   if(key == 'X' && state == 0) 			// highlight discrepanciens between selected instance pin and net names
    {
      // 20130628
 
@@ -426,7 +426,7 @@ int callback(int event, int mx, int my, KeySym key,
      // /20130628
      break;
    }
-   if(key== 'W') {			// 20171022 create wire snapping to closest instance pin
+   if(key== 'W' && state == ShiftMask) {			// 20171022 create wire snapping to closest instance pin
      double x, y;
      int xx, yy;
      if(!(rubber & STARTWIRE)){
@@ -442,10 +442,12 @@ int callback(int event, int mx, int my, KeySym key,
        find_closest_net_or_symbol_pin(mousex, mousey, &x, &y);
        new_wire(RUBBER, x, y);
        new_wire(PLACE|END, x, y);
+       horizontal_move = vertical_move=0; // 20171023
+       Tcl_EvalEx(interp,"set vertical_move 0; set horizontal_move 0" , -1, TCL_EVAL_GLOBAL);
      }
    }
 
-   if(key == 'w') 			// place wire
+   if(key == 'w' && state==0) 			// place wire
    {
      if(!vertical_move) {
        mx_save = mx; 
@@ -491,11 +493,11 @@ int callback(int event, int mx, int my, KeySym key,
    {
     view_unzoom(0.0); break;
    }
-   if(key=='p')		 		// pan
+   if(key=='p' && state == 0)		 		// pan
    {
     pan(BEGIN);break;
    }
-   if(key=='P') 			// pan, other way to.
+   if(key=='P' && state == ShiftMask) 			// pan, other way to.
    {
     xorigin=mousex_snap-areaw*zoom/2.0;yorigin=mousey_snap-areah*zoom/2.0;
     draw();
@@ -552,7 +554,7 @@ int callback(int event, int mx, int my, KeySym key,
      }
      break;
    }
-   if(key=='t')                        // place text
+   if(key=='t' && state == 0)                        // place text
    {
     place_text(1, mousex_snap, mousey_snap); // 1 = draw text 24122002
     break;
@@ -646,7 +648,7 @@ int callback(int event, int mx, int my, KeySym key,
     hilight_all();
     break;
    }
-   if(key=='y')           		// toggle stretching
+   if(key=='y' && state == 0)           		// toggle stretching
    {
     enable_stretch=!enable_stretch;
     
@@ -774,7 +776,7 @@ int callback(int event, int mx, int my, KeySym key,
     draw_hilight_net();
     break;
    }
-   if(key=='K')				// delete hilighted nets
+   if(key=='K' && state == ShiftMask)				// delete hilighted nets
    {
     delete_hilight_net();
     // 20160413

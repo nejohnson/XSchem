@@ -381,7 +381,7 @@ int callback(int event, int mx, int my, KeySym key,
     change_linewidth(lw_double);
     break;
    }
-   if(key == 'X' && state == 0) 			// highlight discrepanciens between selected instance pin and net names
+   if(key == 'X' && state == ShiftMask) 			// highlight discrepanciens between selected instance pin and net names
    {
      // 20130628
 
@@ -489,7 +489,7 @@ int callback(int event, int mx, int my, KeySym key,
     if(debug_var>=1) fprintf(errfp, "callback(): zoom_box call\n");
     zoom_box(BEGIN);break;
    }
-   if(key=='Z') 			// zoom in
+   if(key=='Z' && state == ShiftMask) 			// zoom in
    {
     view_unzoom(0.0); break;
    }
@@ -567,7 +567,7 @@ int callback(int event, int mx, int my, KeySym key,
     my_double_save=rint(( my*zoom + yorigin)/cadsnap)*cadsnap;
     new_rect(PLACE); break;
    }
-   if(key=='V')				// toggle spice/vhdl netlist 
+   if(key=='V' && state == ShiftMask)				// toggle spice/vhdl netlist 
    {
     netlist_type++; if(netlist_type==4) netlist_type=1;
     if(netlist_type == CAD_VHDL_NETLIST)
@@ -724,12 +724,12 @@ int callback(int event, int mx, int my, KeySym key,
     }
     break;
    }
-   if(key=='Q')           		// edit prop with vim
+   if(key=='Q' && state == ShiftMask)           		// edit prop with vim
    {
     if(semaphore==2) break;
     edit_property(1);break;
    }
-   if(key=='i')           		// descend to  symbol
+   if(key=='i' && state==0)           		// descend to  symbol
    {
     if(semaphore==2) break;
     edit_symbol();break;
@@ -797,7 +797,7 @@ int callback(int event, int mx, int my, KeySym key,
     Tcl_Eval(interp, str);
     break;
    }
-   if(key=='G')                                    // double snap factor
+   if(key=='G' && state==ShiftMask)                                    // double snap factor
    {
     set_snap(cadsnap * 2.0);
     break;
@@ -868,7 +868,7 @@ int callback(int event, int mx, int my, KeySym key,
     if(vertical_move) mousex_snap = mx_double_save;
     new_line(PLACE); break;
    }
-   if(key=='F')				// Flip
+   if(key=='F' && state==ShiftMask)				// Flip
    {
     if(rubber & STARTMOVE) move_objects(FLIP,0,0,0);
     if(rubber & STARTCOPY) copy_objects(FLIP);
@@ -880,13 +880,13 @@ int callback(int event, int mx, int my, KeySym key,
     toggle_fullscreen();
     break;
    }
-   if(key=='R')				// Rotate
+   if(key=='R' && state==ShiftMask)				// Rotate
    {
     if(rubber & STARTMOVE) move_objects(ROTATE,0,0,0);
     if(rubber & STARTCOPY) copy_objects(ROTATE);
     break;
    }
-   if(key=='m' && !(rubber & (STARTMOVE | STARTCOPY)))// move selected obj.
+   if(key=='m' && state==0 && !(rubber & (STARTMOVE | STARTCOPY)))// move selected obj.
    {
     mx_save = mx; my_save = my;	// 20070323
     mx_double_save=rint(( mx*zoom + xorigin)/cadsnap)*cadsnap;
@@ -904,7 +904,7 @@ int callback(int event, int mx, int my, KeySym key,
     copy_objects(BEGIN);
     break;
    }
-   if(key=='N')              // hierarchical netlist
+   if(key=='N' && state==ShiftMask)              // hierarchical netlist
    {
     if(set_netlist_dir(0)) {
       if(debug_var>=1) fprintf(errfp, "callback(): -------------\n");
@@ -918,7 +918,7 @@ int callback(int event, int mx, int my, KeySym key,
     }
     break;
    }
-   if(key=='n')              // netlist
+   if(key=='n' && state==0)              // netlist
    {
     if( set_netlist_dir(0) ) {
       if(debug_var>=1) fprintf(errfp, "callback(): -------------\n");
@@ -932,7 +932,7 @@ int callback(int event, int mx, int my, KeySym key,
     }
     break;
    }
-   if(key=='A')				// toggle show netlist
+   if(key=='A' && state==ShiftMask)				// toggle show netlist
    {
     netlist_show = !netlist_show;
     if(netlist_show) {
@@ -972,7 +972,7 @@ int callback(int event, int mx, int my, KeySym key,
     merge_file(0, ""); // 2nd parameter not used any more for merge 25122002
     break;
    }
-   if(key=='B') 	                // delete files
+   if(key=='B' && state==ShiftMask) 	                // delete files
    {
 
     if(semaphore==2) break; // 20160423

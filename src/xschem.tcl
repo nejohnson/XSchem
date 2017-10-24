@@ -172,6 +172,28 @@ proc convert_to_png {filename} {
   }
 }
 
+#20171024
+proc key_binding {  s  d } { 
+# always specify Shift- modifier for capital letters
+# see tk 'man keysyms' for key names
+# example format for s, d: Control-Alt-Key-asterisk
+#                          Control-Shift-Key-A
+#                          Alt-Key-c
+#
+  regsub {.*-} $d {} key
+  set state 0
+  # not found any portable way to get modifier constants ...
+  if { [regexp {(Mod1|Alt)-} $d] } { set state [expr $state +8] }
+  if { [regexp Control- $d] } { set state [expr $state +4] }
+  if { [regexp Shift- $d] } { set state [expr $state +1] }
+  # puts "$state $key <${s}>"
+  if {$d eq {} } {
+    bind .drw "<${s}>" {}
+  } else {
+    bind .drw  "<${s}>" "event_process %T %x %y [scan "$key" %c] 0 0 $state"
+  }
+}
+
 proc edit_file {filename} {
  
  global XSCHEM_HOME_DIR entry1 XSCHEM_DESIGN_DIR env netlist_type editor
@@ -2182,11 +2204,14 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    pack .drw -anchor n -side top -fill both -expand true
    pack .menubar -anchor n -side top -fill x  -before .drw
    pack .statusbar -after .drw -anchor sw  -fill x 
+
+   if {[array exists replace_key]} {
+     foreach i [array names replace_key] {
+       key_binding "$i" "$replace_key($i)"
+     }
+   }
+       
+
 }
-
-# example of bind key substitutions w <--> r
-#bind .drw  "w" "event_process %T %x %y [scan r %c] 0 %s 0"
-#bind .drw  "r" "event_process %T %x %y [scan w %c] 0 %s 0"
-
 
 

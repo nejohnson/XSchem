@@ -35,6 +35,15 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.2.2:
+- added easy keybind customization in the ~/.xschem init file. 
+  See following examples:
+  ## replace Ctrl-d with Escape (so you wont kill the program)
+  set replace_key(Control-d) Escape
+  ## swap w and W keybinds; Always specify Shift for capital letters
+  set replace_key(Shift-W) w
+  set replace_key(w) Shift-W
+- Documentation added for keybind customization.
 2.2.1: 
 - some regressions in bindkeys fixed
 2.2.0:

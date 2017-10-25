@@ -303,14 +303,21 @@ int save_symbol(char *schname) // 20171020 aded return value
   }
   unselect_all();
   fprintf(fd, "G ");
-  save_ascii_string(schvhdlprop,fd);
+  // 20171025 for symbol only put G {} field and look for format or type props in the 3 global prop strings.
+  if(schvhdlprop && (strstr(schvhdlprop,"type=") || strstr(schvhdlprop,"format="))) { 
+    save_ascii_string(schvhdlprop,fd);
+  }
+  else if(schprop && (strstr(schprop,"type=") || strstr(schprop,"format="))) {
+    save_ascii_string(schprop,fd);
+  }
+  else if(schverilogprop && (strstr(schverilogprop,"type=") || strstr(schverilogprop,"format="))) {
+    save_ascii_string(schverilogprop,fd);
+  } else {
+    fprintf(fd, "{}");
+  }
   fputc('\n', fd);
-  fprintf(fd, "V ");
-  save_ascii_string(schverilogprop,fd); //09112003
-  fputc('\n', fd);
-  fprintf(fd, "S ");
-  save_ascii_string(schprop,fd); //20100217
-  fputc('\n', fd);
+  fprintf(fd, "V {}\n");
+  fprintf(fd, "S {}\n");
   save_line(fd);
   save_box(fd);
   save_text(fd);

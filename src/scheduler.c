@@ -308,6 +308,12 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
  else if(!strcmp(argv[1],"get") && argc==3)
  {
   Tcl_ResetResult(interp);
+  if(!strcmp(argv[2],"current_type"))  { // 20171025
+     if( current_type == SYMBOL )
+        Tcl_AppendResult(interp, "SYMBOL",NULL);
+     else 
+        Tcl_AppendResult(interp, "SCHEMATIC",NULL);
+  }
   if(!strcmp(argv[2],"netlist_type"))  {
      if( netlist_type == CAD_VHDL_NETLIST )
         Tcl_AppendResult(interp, "vhdl",NULL);
@@ -473,6 +479,13 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
      netlist_type = CAD_VERILOG_NETLIST ;
     } else {
      netlist_type = CAD_SPICE_NETLIST ;
+    }
+  }
+  else if(!strcmp(argv[2],"current_type")) { // 20171025
+    if(!strcmp(argv[3],"SYMBOL")) {
+      current_type=SYMBOL;
+    } else {
+      current_type=SCHEMATIC;
     }
   }
   else if(!strcmp(argv[2],"netlist_dir"))  {
@@ -705,16 +718,21 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
 
  else if(!strcmp(argv[1],"clear"))
  {  
-  int cancel, modif;
+  int cancel;
 
-  modif=modified;
   cancel=save(1);
-  if(!modif || !cancel){  // 20161209
+  if(!cancel){  // 20161209
      currentsch = 0;
      strcpy(schematic[currentsch], "");
      clear_drawing();
      remove_symbols();
+     if(argc>=3 && !strcmp(argv[2],"SYMBOL")) { // 20171025
+       current_type=SYMBOL;
+     } else {
+       current_type=SCHEMATIC;
+     }
      draw();
+     modified=0; // 20171025
   }
  }
 

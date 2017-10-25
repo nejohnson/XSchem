@@ -35,6 +35,14 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.2.3:
+- Added menu commands 'New Schematic'; and 'New Symbol' so the
+  'current_type' global is correctly set for schematic or symbol 
+  editing and saving.
+- put global properties in G {} field when saving as symbol, take 
+  global sym props from schprop, schvhdlprop, schverilogprop, the first
+  one that contains 'format=' or 'type=' fields
+Stefan 20171025
 2.2.2:
 - added easy keybind customization in the ~/.xschem init file. 
   See following examples:

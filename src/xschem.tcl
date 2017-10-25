@@ -1858,9 +1858,13 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    
    menubutton .menubar.file -text "File" -menu .menubar.file.menu
    menu .menubar.file.menu -tearoff 0
-   .menubar.file.menu add command -label "New" \
+   .menubar.file.menu add command -label "New Schematic" \
      -command {
-       xschem clear
+       xschem clear SCHEMATIC
+     }
+   .menubar.file.menu add command -label "New Symbol" \
+     -command {
+       xschem clear SYMBOL
      }
    .menubar.file.menu add command -label "Open" -command "xschem load" -accelerator L
    .menubar.file.menu add command -label "Save" -command "xschem save" -accelerator S

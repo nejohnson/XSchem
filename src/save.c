@@ -936,6 +936,7 @@ void create_sch_from_sym(void)
   char *sub_prop;
   static char *sub2_prop=NULL;
   static char *str=NULL;
+  struct stat buf;
 
   rebuild_selected_array();
   if(lastselected > 1)  return;
@@ -944,11 +945,13 @@ void create_sch_from_sym(void)
     my_snprintf(schname, S(schname), "%s/%s.sch", 
                 Tcl_GetVar(interp, "XSCHEM_DESIGN_DIR", TCL_GLOBAL_ONLY), 
                 inst_ptr[selectedgroup[0].n].name);
-    my_strdup(&savecmd, "ask_save \" create schematic file: ");
-    my_strcat(&savecmd, schname);
-    my_strcat(&savecmd, " ?\nWARNING: this will overwrite any existing schematic file!\"");
-    tkeval(savecmd);
-    if(strcmp(Tcl_GetStringResult(interp), "yes") ) return;
+    if( !stat(schname, &buf) ) {
+      my_strdup(&savecmd, "ask_save \" create schematic file: ");
+      my_strcat(&savecmd, schname);
+      my_strcat(&savecmd, " ?\nWARNING: This schematic file already exists, it will be overwritten\"");
+      tkeval(savecmd);
+      if(strcmp(Tcl_GetStringResult(interp), "yes") ) return;
+    }
     if(!(fd=fopen(schname,"w")))
     {
       if(debug_var>=1) fprintf(errfp, "create_sch_from_sym(): problems opening file %s \n",schname);

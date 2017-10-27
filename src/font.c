@@ -38,7 +38,7 @@ void compile_font(void)
  for(code=0;code<127;code++)
  {
   unselect_all();
-  hilight_inside(code*FONTOFFSET-1,-FONTHEIGHT-1,
+  select_inside(code*FONTOFFSET-1,-FONTHEIGHT-1,
                  code*FONTOFFSET+FONTWIDTH+1,FONTDESCENT+1i, 1);
   rebuild_selected_array();
   character[code] = my_calloc(lastselected*4+1, sizeof(double));

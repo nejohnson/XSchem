@@ -85,76 +85,83 @@ int callback(int event, int mx, int my, KeySym key,
     break;
 
   case MotionNotify:
-   //printf("state= %d rubber=%d\n",rubber, state);
-   if(rubber & STARTPAN2)   pan2(RUBBER, mx, my); //20121123 -  20160425 moved up
-   if(semaphore==2) break;
-   if(rubber) {
-     snprintf(str, S(str), "mouse = %g %g - %s  selected: %d w=%g h=%g", 
-       mousex_snap, mousey_snap, schematic[currentsch], 
-       lastselected ,
-       mousex_snap-mx_double_save, mousey_snap-my_double_save // 20070322
-     );
-     statusmsg(str,1);
-   }
-   if(rubber & STARTPAN)    pan(RUBBER);
-   if(rubber & STARTPAN2)   pan2(RUBBER, mx, my); //20121123
-   if(rubber & STARTZOOM)   zoom_box(RUBBER);
-   if(rubber & STARTSELECT) select_rect(RUBBER,-1);
-   if(rubber & STARTWIRE) {
-     if(horizontal_move) mousey_snap = my_double_save; // 20171023
-     if(vertical_move) mousex_snap = mx_double_save;
-     new_wire(RUBBER, mousex_snap, mousey_snap);
-   }
-   if(rubber & STARTLINE) {
-     if(horizontal_move) mousey_snap = my_double_save; // 20171023
-     if(vertical_move) mousex_snap = mx_double_save;
-     new_line(RUBBER);
-   }
-   if(rubber & STARTMOVE) {
-     if(horizontal_move) mousey_snap = my_double_save; // 20171023
-     if(vertical_move) mousex_snap = mx_double_save;
-     move_objects(RUBBER,0,0,0);
-   }
-   if(rubber & STARTCOPY) {
-     if(horizontal_move) mousey_snap = my_double_save; // 20171023
-     if(vertical_move) mousex_snap = mx_double_save;
-     copy_objects(RUBBER);
-   }
-   if(rubber & STARTRECT)   new_rect(RUBBER);
-   if((state&Button1Mask) && !(state & ShiftMask))  // start of a mouse area selection
-   { 
-     if(mx != mx_save || my != my_save) {
-       if( !(rubber & STARTSELECT)) {
-         select_rect(BEGIN,1); 
-       }
-       if(abs(mx-mx_save) > 8 || abs(my-my_save) > 8 ) {  // 20121123 set some reasonable threshold before unselecting
-         unselect_all();
-         rubber|=STARTSELECT; // set it again cause unselect_all() clears it... 20121123
-       }
-       break;
-     }
-   }
+    //printf("state= %d rubber=%d\n",rubber, state);
+    if(rubber & STARTPAN2)   pan2(RUBBER, mx, my); //20121123 -  20160425 moved up
+    if(semaphore==2) break;
+    if(rubber) {
+      snprintf(str, S(str), "mouse = %g %g - %s  selected: %d w=%g h=%g", 
+        mousex_snap, mousey_snap, schematic[currentsch], 
+        lastselected ,
+        mousex_snap-mx_double_save, mousey_snap-my_double_save // 20070322
+      );
+      statusmsg(str,1);
+    }
+    if(rubber & STARTPAN)    pan(RUBBER);
+    if(rubber & STARTPAN2)   pan2(RUBBER, mx, my); //20121123
+    if(rubber & STARTZOOM)   zoom_box(RUBBER);
+    if(rubber & STARTSELECT) {
+      if(state & Button3Mask) { // 20171026 added unselect by area 
+          select_rect(RUBBER,0);
+      } else if(state & Button1Mask) {
+          select_rect(RUBBER,1);
+      }
+    }
+    if(rubber & STARTWIRE) {
+      if(horizontal_move) mousey_snap = my_double_save; // 20171023
+      if(vertical_move) mousex_snap = mx_double_save;
+      new_wire(RUBBER, mousex_snap, mousey_snap);
+    }
+    if(rubber & STARTLINE) {
+      if(horizontal_move) mousey_snap = my_double_save; // 20171023
+      if(vertical_move) mousex_snap = mx_double_save;
+      new_line(RUBBER);
+    }
+    if(rubber & STARTMOVE) {
+      if(horizontal_move) mousey_snap = my_double_save; // 20171023
+      if(vertical_move) mousex_snap = mx_double_save;
+      move_objects(RUBBER,0,0,0);
+    }
+    if(rubber & STARTCOPY) {
+      if(horizontal_move) mousey_snap = my_double_save; // 20171023
+      if(vertical_move) mousex_snap = mx_double_save;
+      copy_objects(RUBBER);
+    }
+    if(rubber & STARTRECT)   new_rect(RUBBER);
 
-   if((state&Button2Mask) && (state & ShiftMask)) { // 20150927 unselect area
-
-     if(mx != mx_save || my != my_save) {
-       if( !(rubber & STARTSELECT)) {
-         select_rect(BEGIN,0);
-       }
-     }
-   }
-
-   if((state&Button1Mask) && (state & ShiftMask)) {
-
-     if(mx != mx_save || my != my_save) {
-       if( !(rubber & STARTSELECT)) {
-         select_rect(BEGIN,1);
-       }
-       if(abs(mx-mx_save) > 8 || abs(my-my_save) > 8 ) {  // 20121130 set some reasonable threshold before unselecting
-         select_object(mx_save*zoom+xorigin, my_save*zoom +yorigin, 0);	// 20121130 remove near object if dragging
-       }
-     }
-   }
+    if((state&Button1Mask) && !(state & ShiftMask))  // start of a mouse area selection
+    {
+      static int onetime=0;
+      if(mx != mx_save || my != my_save) {
+        if( !(rubber & STARTSELECT)) {
+          select_rect(BEGIN,1);
+          onetime=1;
+        }
+        if(abs(mx-mx_save) > 8 || abs(my-my_save) > 8 ) { // 20121123 set some reasonable threshold before unselecting
+          if(onetime) {
+            unselect_all(); // 20171026 avoid multiple calls of unselect_all()
+            onetime=0;
+          }
+          rubber|=STARTSELECT; // set it again cause unselect_all() clears it... 20121123
+        }
+      }
+    }
+ 
+    if((state&Button3Mask) && (state & ShiftMask)) { // 20150927 unselect area
+      if( !(rubber & STARTSELECT)) {
+        select_rect(BEGIN,0);
+      }
+    }
+ 
+    if((state&Button1Mask) && (state & ShiftMask)) {
+      if(mx != mx_save || my != my_save) {
+        if( !(rubber & STARTSELECT)) {
+          select_rect(BEGIN,1);
+        }
+        if(abs(mx-mx_save) > 8 || abs(my-my_save) > 8 ) {  // 20121130 set some reasonable threshold before unselecting
+          select_object(mx_save*zoom+xorigin, my_save*zoom +yorigin, 0); // 20121130 remove near object if dragging
+        }
+      }
+    }
 
   break;
   case KeyRelease:  // 20161118
@@ -1051,7 +1058,7 @@ int callback(int event, int mx, int my, KeySym key,
     yorigin-=CADMOVESTEP*zoom/2.;
     draw();
    }
-   else if(button==Button3)
+   else if(button==Button3 && state==0)
    {
      if(semaphore<2) { // 20160425
        rebuild_selected_array();

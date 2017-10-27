@@ -35,6 +35,14 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.2.4:
+- Better drawing when selecting by area / unselecting by area. Selection drag
+  rectangle no more clutters the underlying already selected stuff.
+  When unselecting (Shift-right button drag) do a live update of objects as soon
+  as they get unselected.
+- hilight_inside() function renamed to select_inside. the previous ambigous name
+  really pissed me off.
+Stefan 20171027
 2.2.3:
 - Added menu commands 'New Schematic'; and 'New Symbol' so the
   'current_type' global is correctly set for schematic or symbol 

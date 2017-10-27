@@ -1319,12 +1319,23 @@ void select_rect(int what, int select)
  static double xrect,yrect,xrect2,yrect2;
  static double xx1,xx2,yy1,yy2;
  static int sel;
+
  if(what & RUBBER)
  {
     xx1=xrect;xx2=xrect2;yy1=yrect;yy2=yrect2;
     RECTORDER(xx1,yy1,xx2,yy2);
     drawtemprect(gctiled,NOW, xx1,yy1,xx2,yy2);
     xrect2=mousex_snap;yrect2=mousey_snap;
+
+    // 20171026 update unselected objects while dragging
+    rebuild_selected_array();
+    bbox(BEGIN,0.0, 0.0, 0.0, 0.0);
+    bbox(ADD, xx1, yy1, xx2, yy2);
+    bbox(SET,0.0, 0.0, 0.0, 0.0);
+    draw_selection(gc[SELLAYER], 0);
+    if(!sel) select_inside(xx1, yy1, xx2, yy2, sel);
+    bbox(END,0.0, 0.0, 0.0, 0.0);
+
     xx1=xrect;xx2=xrect2;yy1=yrect;yy2=yrect2;
     RECTORDER(xx1,yy1,xx2,yy2);
     drawtemprect(gc[SELLAYER],NOW, xx1,yy1,xx2,yy2);
@@ -1333,14 +1344,16 @@ void select_rect(int what, int select)
  {
     sel = select; // 20150927
     rubber |= STARTSELECT;
-    // printf(">>>>>>>>>>>>>rubber=%d\n",rubber);
-    xrect=mousex_snap;yrect=mousey_snap;xrect2=xrect;yrect2=yrect;
+    xrect=xrect2=mousex_snap;
+    yrect=yrect2=mousey_snap;
  }
  if(what & END)
  {
     RECTORDER(xrect,yrect,xrect2,yrect2);
     drawtemprect(gctiled, NOW, xrect,yrect,xrect2,yrect2);
-    hilight_inside(xrect, yrect, xrect2, yrect2, sel);
+    draw_selection(gc[SELLAYER], 0);
+    select_inside(xrect,yrect,xrect2,yrect2, sel);
+    bbox(END,0.0, 0.0, 0.0, 0.0);
     rubber &= ~STARTSELECT;
  }
 }

@@ -475,7 +475,7 @@ extern void text_bbox(char * str,double xscale, double yscale,
             double *rx2, double *ry2);
 extern unsigned short select_object(double mx,double my, unsigned short sel_mode); // return type 20160503
 extern void unselect_all(void);
-extern void hilight_inside(double x1,double y1, double x2, double y2, int sel);
+extern void select_inside(double x1,double y1, double x2, double y2, int sel);
 extern void xwin_exit(void);
 extern int Tcl_AppInit(Tcl_Interp *interp); 
 extern int callback(int event, int mx, int my, KeySym key,

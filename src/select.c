@@ -627,7 +627,7 @@ unsigned short select_object(double mousex,double mousey, unsigned short select_
    return sel.type;
 }
 
-void hilight_inside(double x1,double y1, double x2, double y2, int sel) // 20150927 added unselect (sel param)
+void select_inside(double x1,double y1, double x2, double y2, int sel) // 20150927 added unselect (sel param)
 {
  int c,i;
 

@@ -278,6 +278,7 @@ void bbox(int what,double x1,double y1, double x2, double y2)
  int i;
  static int bbx1, bbx2, bby1, bby2; 
  static int savew, saveh, savex1, savex2, savey1, savey2;
+
  switch(what)
  {
   case BEGIN:

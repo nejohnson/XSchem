@@ -65,6 +65,7 @@ void resetwin(void)
        areay1 = -2*lw;
        areaw = areax2-areax1;
        areah = areay2-areay1;
+
         XFreePixmap(display,save_pixmap);
         save_pixmap = XCreatePixmap(display,window,areaw,areah ,depth);
         XSetTile(display,gctiled, save_pixmap);
@@ -1353,7 +1354,6 @@ void select_rect(int what, int select)
     drawtemprect(gctiled, NOW, xrect,yrect,xrect2,yrect2);
     draw_selection(gc[SELLAYER], 0);
     select_inside(xrect,yrect,xrect2,yrect2, sel);
-    bbox(END,0.0, 0.0, 0.0, 0.0);
     rubber &= ~STARTSELECT;
  }
 }

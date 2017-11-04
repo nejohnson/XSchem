@@ -743,6 +743,21 @@ proc property_search {} {
   return {}
 }
 
+#20171029
+# allows to call TCL hooks from 'format' strings during netlisting
+# example of symbol spice format definition:
+# format="@name @pinlist @symname @tcleval(<<<script>>>) m=@m"
+# NOTE: spaces and quotes in <<<script>>> must be escaped
+# symname and instname are predefined variables in the <<<script>>> context
+# they can be used together with TCL xschem command to query instance or symbol 
+# attributes.
+#
+proc tclpropeval {s instname symname} {
+  regsub {^@tcleval\(} $s {} s
+  regsub {\)$} $s {} s
+  # puts $s
+  return [eval $s]
+}
 
 #20171005
 proc attach_labels_to_inst {} {
@@ -1066,7 +1081,8 @@ proc read_data_window {w f} {
  set fid [open $f "r"]
  set t [read $fid]
  #  $w delete 0.0 end
- $w insert 0.0 $t
+ ## 20171103 insert text at cursor position instead of at beginning (insert index tag)
+ $w insert insert $t
  close $fid
 }
 
@@ -1265,7 +1281,9 @@ proc textwindow {filename} {
    pack $w.xscroll -side bottom -fill x
    bind $w <Escape> "$w.buttons.dismiss invoke"
    set fileid [open $filename "r"]
-   $w.text insert 0.0 [read $fileid]
+
+   # 20171103 insert at insertion cursor(insert tag) instead of 0.0
+   $w.text insert insert [read $fileid]
    close $fileid
    return {}
 }
@@ -1303,7 +1321,8 @@ proc viewdata {data} {
    pack $w.yscroll -side right -fill y
    pack $w.text -expand yes -fill both
    pack $w.xscroll -side bottom -fill x
-   $w.text insert 0.0 $data
+   # 20171103 insert at insertion cursor(insert tag) instead of 0.0
+   $w.text insert insert $data
    return $rcode
 }
 

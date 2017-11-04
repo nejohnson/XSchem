@@ -125,7 +125,7 @@ if(name==NULL || token==NULL) return NULL;
     strcpy(entry->value,value);
     entry->hash=hashcode;
     *preventry=entry;
-    return NULL; // <<< if element inserted return NULL since it was not in table
+    return NULL; // if element inserted return NULL since it was not in table
    }
    return entry;
   }
@@ -633,7 +633,6 @@ char *subst_token(char *s,char *tok, char *new_val)
  int quote=0;
  int done_subst=0;
  int escape=0;
-
  if(new_val==NULL || new_val[0]=='\0') 
  {
   my_strdup(&result, s);
@@ -667,7 +666,8 @@ char *subst_token(char *s,char *tok, char *new_val)
   if(token_pos>=sizetok)
   {
    sizetok+=CADCHUNKALLOC;
-   my_realloc(&result,sizetok);
+   my_realloc(&token,sizetok); // 20171104 **Long** standing bug fixed, was doing realloc on result instead of token.
+                               // causing the program to crash on first very long token encountered
   }
 
   if(state==XTOKEN) 
@@ -688,7 +688,6 @@ char *subst_token(char *s,char *tok, char *new_val)
        if(c=='\\')
        {
          escape=1;
-         //c=*s++;
        }
        else 
         escape=0;
@@ -721,7 +720,6 @@ char *subst_token(char *s,char *tok, char *new_val)
   if(c=='\0')  break;
  } // end while
 
-
  if(!done_subst)  // 04052001 if tok not found add tok=new_value at end
  {
   if(result[0]=='\0') 
@@ -731,11 +729,18 @@ char *subst_token(char *s,char *tok, char *new_val)
   }
   else
   {
-   my_realloc(&result,result_pos+strlen(new_val)+strlen(tok)+2 );
-   sprintf( result, "%s %s=%s", result, tok, new_val ); // overflow safe 20161122
+   int len=strlen(new_val)+strlen(tok)+3;
+   char tmpstr[len]; // 20171104
+   sprintf(tmpstr, " %s=%s", tok, new_val ); // 20171104
+   my_realloc(&result,result_pos+len); // 20171104
+   strcat(result, tmpstr); // 20171104
+   //// 20171104 terrible bug: can not sprintf result into result !!!
+   //
+   // my_realloc(&result,result_pos+strlen(new_val)+strlen(tok)+2 );
+   // sprintf( result, "%s %s=%s", result, tok, new_val ); // overflow safe 20161122
   }
  }
-  if(debug_var>=2) fprintf(errfp, "subst_token(): returning: %s\n",result);
+ if(debug_var>=2) fprintf(errfp, "subst_token(): returning: %s\n",result);
  return result;
 }
 
@@ -795,7 +800,7 @@ void print_vhdl_element(FILE *fd, int inst) // 20071217
 
  my_strdup(&format,
      get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"format",0));
- if((name==NULL) || (format==NULL) ) return; //<<<<<<<<<<
+ if((name==NULL) || (format==NULL) ) return;
  no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
  no_of_generics= (inst_ptr[inst].ptr+instdef)->rects[GENERICLAYER];
 
@@ -805,7 +810,7 @@ void print_vhdl_element(FILE *fd, int inst) // 20071217
   if(debug_var>=2) fprintf(errfp, "print_vhdl_element(): printing inst name & subcircuit name\n");
  if( (lab = expandlabel(name, &tmp)) != NULL)
    fprintf(fd, "%d %s : %s\n", tmp, lab, skip_dir(inst_ptr[inst].name) );
- else  //  name in some strange format, probably an error <<<
+ else  //  name in some strange format, probably an error
    fprintf(fd, "1 %s : %s\n", name, skip_dir(inst_ptr[inst].name) );
   if(debug_var>=2) fprintf(errfp, "print_vhdl_element(): printing generics passed as properties\n");
 
@@ -949,7 +954,7 @@ void print_generic(FILE *fd, char *ent_or_comp, int symbol)
  my_strdup(&generic_type, get_tok_value(instdef[symbol].prop_ptr,"generic_type",0));
  // my_strdup(&template, get_tok_value(instdef[symbol].prop_ptr,"template",2)); // 07042005, was:  , 0)); // 20150409
  my_strdup(&template, instdef[symbol].templ); // 20150409
- if( !template || !(template[0]) )  return; //<<<<<<<<<<
+ if( !template || !(template[0]) )  return;
   if(debug_var>=2) fprintf(errfp, "print_generic(): symbol=%d template=%s \n", symbol, template);
 
  fprintf(fd, "%s %s ",ent_or_comp, skip_dir(instdef[symbol].name));
@@ -1060,9 +1065,10 @@ void print_verilog_param(FILE *fd, int symbol) //16112003
  int escape=0;
  int token_number=0;
 
- my_strdup(&template, get_tok_value(instdef[symbol].prop_ptr,"template",0));
+ // my_strdup(&template, get_tok_value(instdef[symbol].prop_ptr,"template",0));
+ my_strdup(&template, instdef[symbol].templ); // 20150409 20171103
  my_strdup(&generic_type, get_tok_value(instdef[symbol].prop_ptr,"generic_type",0));
- if( !template || !(template[0]) )  return; //<<<<<<<<<<
+ if( !template || !(template[0]) )  return;
   if(debug_var>=2) fprintf(errfp, "print_verilog_param(): symbol=%d template=%s \n", symbol, template);
 
  s=template;
@@ -1149,12 +1155,13 @@ void print_verilog_param(FILE *fd, int symbol) //16112003
 void print_spice_element(FILE *fd, int inst)
 {
  int i=0, mult, tmp;
- char *str_ptr;
+ char *str_ptr=NULL; 
  register int c, state=XBEGIN, space;
  static char *template=NULL,*format=NULL,*s, *value=NULL, *name=NULL, *lab=NULL, *token=NULL;
  int sizetok=0;
  int token_pos=0, escape=0;
  int no_of_pins=0;
+ int quote=0; // 20171029
  struct hashentry *ptr;
 
  my_strdup(&template,
@@ -1166,7 +1173,7 @@ void print_spice_element(FILE *fd, int inst)
 
  my_strdup(&format,
      get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"format",0));
- if((name==NULL) || (format==NULL) ) return; //<<<<< do no netlist unwanted insts(no format)
+ if((name==NULL) || (format==NULL) ) return; // do no netlist unwanted insts(no format)
  no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
  s=format;
  if(debug_var>=1) fprintf(errfp, "print_spice_element: name=%s, format=%s netlist_count=%d\n",name,format, netlist_count);
@@ -1175,12 +1182,18 @@ void print_spice_element(FILE *fd, int inst)
  while(1)
  {
   c=*s++; 
-  if(c=='"' && !escape) c=*s++;
+  if(c=='"' && escape) { 
+    quote=!quote; // 20171029
+  }
+  if(c=='"' && !escape ) c=*s++;
+  if(c=='\n' && escape ) c=*s++; // 20171030 eat escaped newlines
   // 20150317 use SPACE2() instead of SPACE()
   space=SPACE2(c);
                               // 20151028
   if( state==XBEGIN && c=='@' && !escape) state=XTOKEN;
-  else if( state==XTOKEN && space) state=XSEPARATOR;
+
+  // 20171029 added !escape, !quote
+  else if( state==XTOKEN && space && !escape && !quote) state=XSEPARATOR;
 
   if(token_pos>=sizetok)
   {
@@ -1188,7 +1201,9 @@ void print_spice_element(FILE *fd, int inst)
    my_realloc(&token,sizetok);
   }
 
-  if(state==XTOKEN) token[token_pos++]=c;
+  if(state==XTOKEN) {
+    if(c!='\\' || escape) token[token_pos++]=c; // 20171029 remove escaping backslashes
+  }
   else if(state==XSEPARATOR) 			// got a token
   {
    token[token_pos]='\0'; 
@@ -1229,6 +1244,7 @@ void print_spice_element(FILE *fd, int inst)
     for(i=0;i<no_of_pins;i++)
     {
       str_ptr =  pin_node(inst,i, &mult);
+      // fprintf(errfp, "inst: %s  --> %s\n", name, str_ptr);
       fprintf(fd, "@%d %s ", mult, str_ptr);
     }
    }
@@ -1241,9 +1257,20 @@ void print_spice_element(FILE *fd, int inst)
        ) {
        str_ptr =  pin_node(inst,i, &mult);
        fprintf(fd, "@%d %s ", mult, str_ptr);
+       break; // 20171029
      }
     }
    }
+   else if(!strncmp(token,"@tcleval", 8)) { // 20171029
+     char tclcmd[strlen(token)+100] ;
+     
+     Tcl_ResetResult(interp);
+     sprintf(tclcmd, "tclpropeval {%s} %s %s", token, name, inst_ptr[inst].name);
+     Tcl_EvalEx(interp, tclcmd, -1, TCL_EVAL_GLOBAL);
+     fprintf(fd, "%s", Tcl_GetStringResult(interp));
+     //fprintf(errfp, "%s\n", tclcmd);
+     
+   } // /20171029
 
 
                  // 20151028 dont print escaping backslashes
@@ -1299,7 +1326,7 @@ void print_verilog_element(FILE *fd, int inst)
 
  my_strdup(&format,
      get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"format",0));
- if((name==NULL) || (format==NULL) ) return; //<<<<<<<<<<
+ if((name==NULL) || (format==NULL) ) return;
  no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
 
  s=inst_ptr[inst].prop_ptr;
@@ -1389,7 +1416,7 @@ void print_verilog_element(FILE *fd, int inst)
 // print instance name
  if( (lab = expandlabel(name, &tmp)) != NULL)
    fprintf(fd, "---- instance %s (\n", lab );
- else  //  name in some strange format, probably an error <<<
+ else  //  name in some strange format, probably an error
    fprintf(fd, "---- instance %s (\n", name );
 
 
@@ -1423,6 +1450,7 @@ char *pin_node(int i, int j, int *mult)
 {
  int tmp;
  char errstr[2048];
+ static char unconn[]="<UNCONNECTED PIN>";
  static char *name=NULL;
  char str_node[40]; // 20161122 overflow safe
  if(inst_ptr[i].node[j]!=NULL)
@@ -1450,7 +1478,7 @@ char *pin_node(int i, int j, int *mult)
  }
  else
  {
-   *mult=0;
+   *mult=1;
 
    my_strdup(&name, inst_ptr[i].instname); // 20161210
    // my_strdup(&name , get_tok_value(inst_ptr[i].prop_ptr,"name",0) );
@@ -1461,7 +1489,7 @@ char *pin_node(int i, int j, int *mult)
      inst_ptr[i].flags |=4;
      hilight_nets=1;
    }
-   return NULL;
+   return unconn;
  }
 }
 
@@ -1475,17 +1503,18 @@ void print_vhdl_primitive(FILE *fd, int inst) // netlist  primitives, 20071217
  int sizetok=0;
  int token_pos=0, escape=0;
  int no_of_pins=0;
+ int quote=0; // 20171029
  struct hashentry *ptr;
 
  my_strdup(&template,
-     get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"template",2));
-
+     // get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"template",2));
+     (inst_ptr[inst].ptr+instdef)->templ); // 20150409 20171103
  my_strdup(&name, inst_ptr[inst].instname); // 20161210
  // my_strdup(&name,get_tok_value(inst_ptr[inst].prop_ptr,"name",0));
 
  my_strdup(&format,
      get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"vhdl_format",0)); // 20071217
- if((name==NULL) || (format==NULL) ) return; //<<<<< do no netlist unwanted insts(no format)
+ if((name==NULL) || (format==NULL) ) return; //do no netlist unwanted insts(no format)
  no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
  s=format;
  if(debug_var>=1) fprintf(errfp, "print_vhdl_primitive: name=%s, format=%s netlist_count=%d\n",name,format, netlist_count);
@@ -1497,10 +1526,16 @@ void print_vhdl_primitive(FILE *fd, int inst) // netlist  primitives, 20071217
  while(1)
  {
   c=*s++; 
-  if(c=='"' && !escape) c=*s++;
+  if(c=='"' && escape) {
+    quote=!quote; // 20171029
+  }
+  if(c=='"' && !escape ) c=*s++;
+  if(c=='\n' && escape ) c=*s++; // 20171030 eat escaped newlines
   space=SPACE(c);
-  if( state==XBEGIN && c=='@' ) state=XTOKEN;
-  else if( state==XTOKEN && space) state=XSEPARATOR;
+                               // 20171029
+  if( state==XBEGIN && c=='@' && !escape ) state=XTOKEN;
+  // 20171029 added !escape, !quote
+  else if( state==XTOKEN && space && !escape && !quote) state=XSEPARATOR;
 
   if(token_pos>=sizetok)
   {
@@ -1508,7 +1543,9 @@ void print_vhdl_primitive(FILE *fd, int inst) // netlist  primitives, 20071217
    my_realloc(&token,sizetok);
   }
 
-  if(state==XTOKEN) token[token_pos++]=c;
+  if(state==XTOKEN) {
+    if(c!='\\' || escape) token[token_pos++]=c; // 20171029 remove escaping backslashes
+  }
   else if(state==XSEPARATOR) 			// got a token
   {
    token[token_pos]='\0'; 
@@ -1572,10 +1609,18 @@ void print_vhdl_primitive(FILE *fd, int inst) // netlist  primitives, 20071217
        str_ptr =  pin_node(inst,i, &mult);
        //fprintf(fd, "@%d %s ", mult, str_ptr); // 25122004 disabled bus handling, until verilog.awk knows about it
        fprintf(fd, "----pin(%s) ", str_ptr);
+       break; // 20171029
      }
     }
    }
-
+   else if(!strncmp(token,"@tcleval", 8)) { // 20171029
+     char tclcmd[strlen(token)+100] ;
+     
+     Tcl_ResetResult(interp);
+     sprintf(tclcmd, "tclpropeval {%s} %s %s", token, name, inst_ptr[inst].name);
+     Tcl_EvalEx(interp, tclcmd, -1, TCL_EVAL_GLOBAL);
+     fprintf(fd, "%s", Tcl_GetStringResult(interp));
+   }
 
    if(c!='\0') fputc(c,fd);
    state=XBEGIN;
@@ -1607,6 +1652,7 @@ void print_verilog_primitive(FILE *fd, int inst) // netlist switch level primiti
  int sizetok=0;
  int token_pos=0, escape=0;
  int no_of_pins=0;
+ int quote=0; // 20171029
  struct hashentry *ptr;
 
  my_strdup(&template,
@@ -1618,7 +1664,7 @@ void print_verilog_primitive(FILE *fd, int inst) // netlist switch level primiti
 
  my_strdup(&format,
      get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"verilog_format",0));
- if((name==NULL) || (format==NULL) ) return; //<<<<< do no netlist unwanted insts(no format)
+ if((name==NULL) || (format==NULL) ) return; //do no netlist unwanted insts(no format)
  no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
  s=format;
  if(debug_var>=1) fprintf(errfp, "print_verilog_primitive: name=%s, format=%s netlist_count=%d\n",name,format, netlist_count);
@@ -1630,10 +1676,16 @@ void print_verilog_primitive(FILE *fd, int inst) // netlist switch level primiti
  while(1)
  {
   c=*s++; 
-  if(c=='"' && !escape) c=*s++;
-  space=SPACE(c);
-  if( state==XBEGIN && c=='@' ) state=XTOKEN;
-  else if( state==XTOKEN && space) state=XSEPARATOR;
+  if(c=='"' && escape) {
+    quote=!quote; // 20171029
+  }
+  if(c=='"' && !escape ) c=*s++;
+  if(c=='\n' && escape ) c=*s++; // 20171030 eat escaped newlines
+  space=SPACE(c);                
+                                 //20171029
+  if( state==XBEGIN && c=='@'  && !escape ) state=XTOKEN;
+  // 20171029 added !escape, !quote
+  else if( state==XTOKEN && space && !escape && !quote) state=XSEPARATOR;
 
   if(token_pos>=sizetok)
   {
@@ -1641,7 +1693,9 @@ void print_verilog_primitive(FILE *fd, int inst) // netlist switch level primiti
    my_realloc(&token,sizetok);
   }
 
-  if(state==XTOKEN) token[token_pos++]=c;
+  if(state==XTOKEN) {
+    if(c!='\\' || escape) token[token_pos++]=c; // 20171029 remove escaping backslashes
+  }
   else if(state==XSEPARATOR) 			// got a token
   {
    token[token_pos]='\0'; 
@@ -1705,9 +1759,19 @@ void print_verilog_primitive(FILE *fd, int inst) // netlist switch level primiti
        str_ptr =  pin_node(inst,i, &mult);
        //fprintf(fd, "@%d %s ", mult, str_ptr); // 25122004 disabled bus handling, until verilog.awk knows about it
        fprintf(fd, "----pin(%s) ", str_ptr);
+       break; // 20171029
      }
     }
    }
+   else if(!strncmp(token,"@tcleval", 8)) { // 20171029
+     char tclcmd[strlen(token)+100] ;
+     
+     Tcl_ResetResult(interp);
+     sprintf(tclcmd, "tclpropeval {%s} %s %s", token, name, inst_ptr[inst].name);
+     Tcl_EvalEx(interp, tclcmd, -1, TCL_EVAL_GLOBAL);
+     fprintf(fd, "%s", Tcl_GetStringResult(interp));
+   }
+
 
 
    if(c!='\0') fputc(c,fd);

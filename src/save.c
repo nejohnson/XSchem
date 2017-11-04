@@ -378,7 +378,7 @@ int save_file(char *schname) // 20171020 added return value
     {
       if(debug_var>=1) fprintf(errfp, "save_file(): problems opening file %s \n",name);
       tkeval("alert_ {file opening for write failed!} {}"); // 20171020
-      return -1;   // <<<<<<<<
+      return -1;
     }
     unselect_all();
     fprintf(fd, "G ");
@@ -612,7 +612,7 @@ void push_undo(void) // 20150327
       if(!(diff_fd=freopen(diff_name,"w", stdout)))	// redirect stdout to file diff_name
       {
         if(debug_var>=1) fprintf(errfp, "push_undo(): problems opening file %s \n",diff_name);
-        Tcl_Eval(interp, "exit");   // <<<<<<<<
+        Tcl_Eval(interp, "exit");
       }
       dup2(pd[0],0);                       		// connect read side of pipe to stdin
       execlp("gzip", "gzip", "-c", NULL);	// replace current process with comand
@@ -673,7 +673,7 @@ void pop_undo(int redo)  // 20150327
       head_undo_ptr--;
       cur_undo_ptr--;
     }
-    if(cur_undo_ptr<=0) return; //<<<<<<< check undo tail
+    if(cur_undo_ptr<=0) return; // check undo tail
     cur_undo_ptr--;
   }
 
@@ -692,7 +692,7 @@ void pop_undo(int redo)  // 20150327
     if(!(diff_fd=freopen(diff_name,"r", stdin)))     // redirect stdin from file name
     {
       if(debug_var>=1) fprintf(errfp, "pop_undo(): problems opening file %s \n",diff_name);
-      Tcl_Eval(interp, "exit");   // <<<<<<<<
+      Tcl_Eval(interp, "exit");
     }
     dup2(pd[1],1);                                    // connect write side of pipe to stdout
     execlp("gunzip", "gunzip", "-c", NULL);       // replace current process with command
@@ -1279,7 +1279,7 @@ void save_selection(int what)
  {
     if(debug_var>=1) fprintf(errfp, "save_selection(): problems opening file  \n");
     tkeval("alert_ {file opening for write failed!} {}"); // 20171020
-    return;   // <<<<<<<<
+    return;
  }
  fprintf(fd, "G { %g %g }\n", mousex_snap, mousey_snap);
  for(i=0;i<lastselected;i++)

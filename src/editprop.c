@@ -165,9 +165,11 @@ void my_strncpy(char *d, char *s, int n)
 void set_inst_prop(int i)
 {// find the last element of the same type and returns its prop string
  // if not found obtain it from the template string in the symbol prop list
- int j; 
+ // int j; 
  char *ptr=NULL;
- 
+
+ // this code commented as it is annoying... 20171103 
+ /*
  for(j=0;j<lastinst;j++)
  {
   if(j==i)continue;  //don't look the element we are working on ...
@@ -177,6 +179,8 @@ void set_inst_prop(int i)
   if(inst_ptr[j].name && inst_ptr[i].name && strcmp(inst_ptr[j].name, inst_ptr[i].name) == 0 )
    ptr=inst_ptr[j].prop_ptr;
  }
+ */
+
  if(ptr==NULL) 
  {
   // my_strdup(&ptr,  get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr, "template",2) ); //20150409
@@ -192,7 +196,7 @@ void set_inst_prop(int i)
 
 
    if(debug_var>=2) fprintf(errfp, "set_inst_prop(): lookin for format string: %s\n",  ptr);
-  if(ptr!=NULL) {// <<<< 03-02-2000
+  if(ptr!=NULL) {// 03-02-2000
     new_prop_string(&inst_ptr[i].prop_ptr, ptr,0);
   } else {
     my_strdup( &inst_ptr[i].prop_ptr,NULL);
@@ -263,7 +267,6 @@ void edit_text_property(int x)
        if(selectedgroup[k].type!=TEXT) continue;
        sel=selectedgroup[k].n;
 
-    				//<<<<<<<<<<<<<<<<
        rot = textelement[sel].rot;	// calculate bbox, some cleanup needed here
        flip = textelement[sel].flip;
     
@@ -317,7 +320,6 @@ void edit_text_property(int x)
        textelement[sel].yscale=atof(Tcl_GetVar(interp,"vsize",TCL_GLOBAL_ONLY));
        }
     
-    				//<<<<<<<<<<<<<<<<
        				// calculate bbox, some cleanup needed here
        text_bbox(textelement[sel].txt_ptr, textelement[sel].xscale,
                  textelement[sel].yscale, rot, flip, 

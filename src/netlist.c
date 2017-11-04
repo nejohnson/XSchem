@@ -536,7 +536,7 @@ void prepare_netlist_structs(void)
    my_strdup(&verilog_type,get_tok_value(inst_ptr[i].prop_ptr,"verilog_type",0)); //09112003
    my_strdup(&value,get_tok_value(inst_ptr[i].prop_ptr,"value",2));
    my_strdup(&class,get_tok_value(inst_ptr[i].prop_ptr,"class",0));
-   //if(!sig_type || sig_type[0]=='\0') my_strdup(&sig_type,"std_logic"); //<<<24092001
+   //if(!sig_type || sig_type[0]=='\0') my_strdup(&sig_type,"std_logic"); //24092001
 
    my_strdup(&inst_ptr[i].node[0], get_tok_value(inst_ptr[i].prop_ptr,"lab",0));
 

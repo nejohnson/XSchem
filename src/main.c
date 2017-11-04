@@ -55,7 +55,7 @@ void sig_handler(int s){
            skip_dir(schematic[currentsch]));
   if( !mkdtemp(emergency_dir) ) {
     if(debug_var>=1) fprintf(errfp, "xinit(): problems creating emergency save dir\n");
-    Tcl_Eval(interp, "exit");   // <<<<<<<<
+    Tcl_Eval(interp, "exit");
   }
 
   rename(undo_dirname, emergency_dir);

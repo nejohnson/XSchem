@@ -32,14 +32,14 @@ void statusmsg(char str[],int n)
   if(!strcmp(str, "") ) my_strcat(&s,"}");
   else my_strcat(&s,"\n}");
    if(debug_var>=2) fprintf(errfp, "statusmsg(): %s\n", s);
-  Tcl_Eval(interp, s);
+  Tcl_EvalEx(interp, s, -1, TCL_EVAL_GLOBAL);
  }
  else
  {
   my_strdup(&s,".statusbar.1 configure -text {");
   my_strcat(&s,str);
   my_strcat(&s,"}");
-  Tcl_Eval(interp, s);  
+  Tcl_EvalEx(interp, s, -1, TCL_EVAL_GLOBAL);  
  }
 }
 
@@ -585,7 +585,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
    toggle_fullscreen();
  }
 
- else if(!strcmp(argv[1],"windowid"))
+ else if(!strcmp(argv[1],"windowid")) // used by xschem.tcl for configure events
  {
    windowid();
  }
@@ -748,7 +748,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
    char str[1024]; // overflow safe 20161122
    if(argc==3) my_snprintf(str, S(str), "gensch %s", argv[2]);
    else if(argc==4) my_snprintf(str, S(str), "gensch %s %s", argv[2], argv[3]);
-   Tcl_Eval(interp, str);
+   Tcl_EvalEx(interp, str, -1, TCL_EVAL_GLOBAL);
  }
 
  else if(!strcmp(argv[1],"debug"))
@@ -757,53 +757,106 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
      debug_var=atoi(argv[2]);
      Tcl_SetVar(interp,"tcl_debug",argv[2],TCL_GLOBAL_ONLY);
   }
- }
 
- else if(!strcmp(argv[1],"select"))
- {
-  if(argc<3) return TCL_ERROR;
-  drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
-  drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
-
-  if(!strcmp(argv[2],"instance") && argc==4) {
-    int n=atol(argv[3]);
-    int i,found=0;
-     
-    // 20171006 find by instance name
-    for(i=0;i<lastinst;i++) {
-      if(!strcmp(inst_ptr[i].instname, argv[3])) {
-        select_element(i, SELECTED,0);
-        found=1;
-        break;
-      }
-    }
-    if(!found && n<lastinst) select_element(n, SELECTED,0);
-  }
-  else if(!strcmp(argv[2],"wire") && argc==4) {
-    int n=atol(argv[3]);
-    if(n<lastwire) select_wire(atol(argv[3]), SELECTED);
-  }
-  else if(!strcmp(argv[2],"text") && argc==4) {
-    int n=atol(argv[3]);
-    if(n<lasttext) select_text(atol(argv[3]), SELECTED);
-  }
-  drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
-  drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
- }
-
- else if(!strcmp(argv[1],"instance"))
- {
-  if(argc==7)
-    place_symbol(-1, argv[2], atof(argv[3]), atof(argv[4]), atoi(argv[5]), atoi(argv[6]),NULL,3 );
-  if(argc==8)
-    place_symbol(-1, argv[2], atof(argv[3]), atof(argv[4]), atoi(argv[5]), atoi(argv[6]), argv[7],3 );
- }
-
- else if(!strcmp(argv[1],"snap_wire")) { // 20171022
+ } else if( !strcmp(argv[1],"getprop")) { // 20171028
+   if(argc!=5) {
+     Tcl_AppendResult(interp, "xschem getprop needs 3 additional arguments", NULL);
+     return TCL_ERROR;
+   }
+   int i, p, found=0, mult=0, no_of_pins=0;
+   char *str_ptr=NULL;
+   Tcl_ResetResult(interp);
+   if(!strcmp(argv[2],"instance_n")) {
+     i=atol(argv[3]);
+     if(i<0 || i>lastinst) {
+       Tcl_AppendResult(interp, "Index out of range", NULL);
+       return TCL_ERROR;
+     }
+     Tcl_AppendResult(interp, get_tok_value(inst_ptr[i].prop_ptr, argv[4], 0), NULL);
+   } else if(!strcmp(argv[2],"instance")) {
+     for(i=0;i<lastinst;i++) {
+       if(!strcmp(inst_ptr[i].instname, argv[3])) {
+         found=1;
+         break;
+       }
+     }
+     if(!found) {
+       Tcl_AppendResult(interp, "Instance not found", NULL);
+       return TCL_ERROR;
+     }
+     Tcl_AppendResult(interp, get_tok_value(inst_ptr[i].prop_ptr, argv[4], 0), NULL);
+   } else if(!strcmp(argv[2], "symbol")) {
+     for(i=0; i<lastinstdef; i++) {
+       if(!strcmp(instdef[i].name,argv[3])){
+         found=1;
+         break;
+       }
+     }
+     if(!found) {
+       Tcl_AppendResult(interp, "Symbol not found", NULL);
+       return TCL_ERROR;
+     }
+     Tcl_AppendResult(interp, get_tok_value(instdef[i].prop_ptr, argv[4], 0), NULL);
+   } else if(!strcmp(argv[2],"instance_net")) { // 20171029
+     for(i=0;i<lastinst;i++) {
+       if(!strcmp(inst_ptr[i].instname, argv[3])) {
+         found=1;
+         break;
+       }
+     }
+     if(!found) {
+       Tcl_AppendResult(interp, "Instance not found", NULL);
+       return TCL_ERROR;
+     }
+     prepare_netlist_structs();
+     no_of_pins= (inst_ptr[i].ptr+instdef)->rects[PINLAYER];
+     found=0;
+     for(p=0;p<no_of_pins;p++) {
+       if(!strcmp( get_tok_value((inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][p].prop_ptr,"name",0), argv[4])) {
+         //str_ptr =  inst_ptr[i].node[p] ? inst_ptr[i].node[p]: "<UNCONNECTED PIN>";
+         str_ptr =  pin_node(i,p,&mult);
+         break;
+       }
+     } // /20171029
+     Tcl_AppendResult(interp, str_ptr, NULL);
+   }
+ } else if(!strcmp(argv[1],"select")) {
+   if(argc<3) return TCL_ERROR;
+   drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
+   drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
+ 
+   if(!strcmp(argv[2],"instance") && argc==4) {
+     int n=atol(argv[3]);
+     int i,found=0;
+      
+     // 20171006 find by instance name
+     for(i=0;i<lastinst;i++) {
+       if(!strcmp(inst_ptr[i].instname, argv[3])) {
+         select_element(i, SELECTED,0);
+         found=1;
+         break;
+       }
+     }
+     if(!found && n<lastinst) select_element(n, SELECTED,0);
+   }
+   else if(!strcmp(argv[2],"wire") && argc==4) {
+     int n=atol(argv[3]);
+     if(n<lastwire) select_wire(atol(argv[3]), SELECTED);
+   }
+   else if(!strcmp(argv[2],"text") && argc==4) {
+     int n=atol(argv[3]);
+     if(n<lasttext) select_text(atol(argv[3]), SELECTED);
+   }
+   drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
+   drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
+ } else if(!strcmp(argv[1],"instance")) {
+   if(argc==7)
+     place_symbol(-1, argv[2], atof(argv[3]), atof(argv[4]), atoi(argv[5]), atoi(argv[6]),NULL,3 );
+   if(argc==8)
+     place_symbol(-1, argv[2], atof(argv[3]), atof(argv[4]), atoi(argv[5]), atoi(argv[6]), argv[7],3 );
+ } else if(!strcmp(argv[1],"snap_wire")) { // 20171022
    rubber |= MENUSTARTSNAPWIRE;
- }
- else if(!strcmp(argv[1],"wire"))
- {   
+ } else if(!strcmp(argv[1],"wire")) {   
    double x1,y1,x2,y2;
    int pos;
    if(argc>=6) {
@@ -818,10 +871,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
      drawline(gc[WIRELAYER],NOW, x1,y1,x2,y2);
    }
    else rubber |= MENUSTARTWIRE;
- }
-
- else if(!strcmp(argv[1],"line"))
- {    
+ } else if(!strcmp(argv[1],"line")) {    
    double x1,y1,x2,y2;
    int pos;
    if(argc>=6) {
@@ -836,10 +886,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
      drawline(gc[rectcolor],NOW, x1,y1,x2,y2);
    } 
    else rubber |= MENUSTARTLINE;
- } 
-
- else if(!strcmp(argv[1],"rect"))
- {
+ } else if(!strcmp(argv[1],"rect")) {
    double x1,y1,x2,y2;
    int pos;
    if(argc>=6) {
@@ -854,22 +901,14 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
      drawrect(gc[rectcolor],NOW, x1,y1,x2,y2);
    }  
    else rubber |= MENUSTARTRECT;
- }
- 
-
- else if(!strcmp(argv[1],"align"))
- {
+ } else if(!strcmp(argv[1],"align")) {
     push_undo();
     round_schematic_to_grid(cadsnap);
     modified=1;
     draw();
- }
- else if(!strcmp(argv[1],"saveas"))
- {
+ } else if(!strcmp(argv[1],"saveas")) {
   saveas();
- }
- else if(!strcmp(argv[1],"save"))
- {
+ } else if(!strcmp(argv[1],"save")) {
     if(current_type==SYMBOL)
     {
       save_symbol(NULL);
@@ -884,16 +923,9 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
         save(0);
       }
     }
- }
-
- else if(!strcmp(argv[1],"windows"))
- {
+ } else if(!strcmp(argv[1],"windows")) {
   printf("top win:%lx\n", Tk_WindowId(Tk_Parent(Tk_MainWindow(interp))));
- 
- }
-  
- else if(!strcmp(argv[1],"globals"))
- {
+ } else if(!strcmp(argv[1],"globals")) {
   printf("*******global variables:*******\n");
   printf("lw=%d\n", lw);
   printf("lastwire=%d\n", lastwire);
@@ -927,10 +959,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
   printf("a3page=%d\n", a3page);
   printf("need_rebuild_selected_array=%d\n", need_rebuild_selected_array);
   printf("******* end global variables:*******\n");
- }
-
- else if(!strcmp(argv[1],"help"))
- {
+ } else if(!strcmp(argv[1],"help")) {
   printf("xschem : function used to communicate with the C program\n");
   printf("Usage:\n");
   printf("      xschem callback X-event_type mousex mousey Xkeysym mouse_button Xstate\n");
@@ -1050,9 +1079,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
   printf("      xschem debug  n\n");
   printf("                   set debug level to n: 1, 2, 3 for C Program \n");
   printf("                                        -1,-2,-3 for Tcl frontend\n");
-  
  }
- // Tcl_SetResult(interp,"",TCL_STATIC);  //<<<<< 26102003
  return TCL_OK;
 }
 
@@ -1061,5 +1088,5 @@ void tkeval(char str[])
  char string[1024];	// overflow safe
 
  my_strncpy(string, str,1023);
- Tcl_Eval(interp, string);
+ Tcl_EvalEx(interp, string, -1, TCL_EVAL_GLOBAL);
 }

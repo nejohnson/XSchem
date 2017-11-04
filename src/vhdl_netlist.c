@@ -353,7 +353,7 @@ void  vhdl_block_netlist(FILE *fd, int i)  //20081204
      ////           load_file-> load_syms-> type=get_sym_type(symfilename) executed within a for(;i<lastinst;) loop
      ////
      // vhdl_stop? load_file(2,NULL,0) :  load_file(1,NULL,0);  // mmmmh lets try it out 04112003
-     load_file(1,NULL,0); // <<<<<< !stop_vhdl does not print use/packages !!!!!! 27052002
+     load_file(1,NULL,0); // !stop_vhdl does not print use/packages !!!!!! 27052002
 
 
      if(debug_var>=1) fprintf(errfp, "vhdl_block_netlist():       packages\n");

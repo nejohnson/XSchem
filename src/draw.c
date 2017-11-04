@@ -85,7 +85,7 @@ void print_image()
 
 
 
-  XpmWriteFileFromPixmap(display, "plot.xpm", save_pixmap,0, NULL ); // <<<<<<< .gz ????
+  XpmWriteFileFromPixmap(display, "plot.xpm", save_pixmap,0, NULL ); // .gz ????
   if(debug_var>=1) fprintf(errfp, "print_image(): Window image saved\n");
 
 
@@ -326,7 +326,7 @@ void draw_temp_symbol_outline(int what, GC gc, int n,int layer,int tmp_flip, int
  if(layer==PROPERTYLAYER && sym_txt)
  {
   for(j=0;j< symptr->texts;j++)
-  { //<<<<<<<<<
+  {
    text = symptr->txtptr[j];
    if(text.xscale*FONTWIDTH*mooz<1) continue;
    text.txt_ptr= 
@@ -714,9 +714,6 @@ void draw(void)
 
  rebuild_selected_array();
  if(has_x) {
-    //  debug... 
-    //  not necessary since data is clipped by the program.
-    //  XSetClipRectangles(display, gc, 0,0, xrect, 1, Unsorted); 
     if(draw_pixmap)
       XFillRectangle(display, save_pixmap, gc[BACKLAYER], 
              areax1, areay1, areaw, areah);// clear pixmap

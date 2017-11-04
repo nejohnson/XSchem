@@ -48,7 +48,7 @@ void resetwin(void)
  unsigned int w,h;
  XWindowAttributes wattr;
  if(has_x) {
-       XGetWindowAttributes(display, window, &wattr); // <<< should call only when resized
+       XGetWindowAttributes(display, window, &wattr); // should call only when resized
 						      // to avoid server roundtrip replies
        //if(wattr.map_state==IsUnmapped) return;
        w=wattr.width;
@@ -149,7 +149,7 @@ void change_linewidth(double w)
       }                                  // lw  20070307
       //XSetLineAttributes (display, gctiled, lw, LineSolid, CapRound , JoinRound);
       
-      // <<<< 20101211
+      // 20101211
       XSetLineAttributes (display, gctiled, j, LineSolid, CapRound , JoinRound);
     }
     resetwin();
@@ -582,14 +582,14 @@ void place_symbol(int pos,char *symbol_name, double x, double y, int rot, int fl
    }
    n=pos;
   }
-  // <<<< 03-02-2000
+  // 03-02-2000
   if(debug_var>=1) fprintf(errfp, "place_symbol(): checked inst_ptr storage, instdef number i=%d\n", i);
   inst_ptr[n].ptr = i;
   inst_ptr[n].name=NULL;
   inst_ptr[n].instname=NULL; // 20150409
-  if(debug_var>=1) fprintf(errfp, "place_symbol(): entering my_strdup: name=%s\n",name);  // <<<< 03-02-2000
+  if(debug_var>=1) fprintf(errfp, "place_symbol(): entering my_strdup: name=%s\n",name);  // 03-02-2000
   my_strdup(&inst_ptr[n].name ,name);
-  if(debug_var>=1) fprintf(errfp, "place_symbol(): done my_strdup: name=%s\n",name);  // <<<< 03-02-2000
+  if(debug_var>=1) fprintf(errfp, "place_symbol(): done my_strdup: name=%s\n",name);  // 03-02-2000
   // inst_ptr[n].x0=symbol_name ? x : mousex_snap;
   // inst_ptr[n].y0=symbol_name ? y : mousey_snap;
   inst_ptr[n].x0= x ; // 20070228 x and y given in callback
@@ -601,14 +601,14 @@ void place_symbol(int pos,char *symbol_name, double x, double y, int rot, int fl
   inst_ptr[n].sel=0;
   inst_ptr[n].node=NULL;
   inst_ptr[n].prop_ptr=NULL;
-  if(debug_var>=1) fprintf(errfp, "place_symbol() :all inst_ptr members set\n");  // <<<< 03-02-2000
+  if(debug_var>=1) fprintf(errfp, "place_symbol() :all inst_ptr members set\n");  // 03-02-2000
   if(inst_props) {
     new_prop_string(&inst_ptr[n].prop_ptr, inst_props,0);
   }
   else {
     set_inst_prop(n);
   }
-  if(debug_var>=1) fprintf(errfp, "place_symbol(): done set_inst_prop()\n");  // <<<< 03-02-2000
+  if(debug_var>=1) fprintf(errfp, "place_symbol(): done set_inst_prop()\n");  // 03-02-2000
   hash_proplist(inst_ptr[n].prop_ptr , 0);
 
   my_strdup2(&inst_ptr[n].instname, get_tok_value(inst_ptr[n].prop_ptr,"name",0) ); // 20150409
@@ -784,7 +784,7 @@ void descend(void)
   hilight_child_pins(previous_instance[currentsch]);
   currentsch++;
   unselect_all();
-  remove_symbols(); //<<<<<<<<<<
+  remove_symbols();
   load_file(1,NULL,1);
   if(hilight_nets) 
   {
@@ -1024,7 +1024,7 @@ void draw_stuff(void)
 {
     double x1,y1,w,h, x2, y2;
     int i;
-    for(i=0;i<=2290;i++)
+    for(i=0;i<=4000;i++)
     {
      w=(float)(areaw*zoom/15) * rand() / (RAND_MAX+1.0);
      h=(float)(areah*zoom/15) * rand() / (RAND_MAX+1.0);
@@ -1036,7 +1036,7 @@ void draw_stuff(void)
      rectcolor = (int) (10.0*rand()/(RAND_MAX+1.0))+4;
      storeobject(-1, x1,y1,x2,y2,RECT,rectcolor, 0, NULL);
     }
-    for(i=0;i<=4000;i++)
+    for(i=0;i<=40;i++)
     {
      w=(float)(4);
      h=(float)(4);

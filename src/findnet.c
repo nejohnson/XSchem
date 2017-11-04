@@ -200,7 +200,7 @@ void find_closest_text(double mx,double my)
              &xx1,&yy1, &xx2,&yy2);
    if(POINTINSIDE(mx,my,xx1,yy1, xx2, yy2))
    {
-    r = i; distance = 0;  //<<<<<<<<<<<<<<<<< dist=0 !!!!!!!!
+    r = i; distance = 0;
      if(debug_var>=2) fprintf(errfp, "find_closest_text(): finding closest text, lasttext=%d, dist=%g\n",i,distance);
    }
   } // end for i

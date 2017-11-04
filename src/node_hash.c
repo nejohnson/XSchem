@@ -262,11 +262,11 @@ struct node_hashentry *node_hash_lookup(char *token, char *dir,int remove,int po
     entry->token = entry->sig_type = entry->verilog_type = 
                    entry->value = entry->class = entry->orig_tok = NULL;
     my_strdup(&(entry->token),token);
-    if(sig_type &&sig_type[0]) my_strdup( &(entry->sig_type), sig_type); //<<<< 24092001
-    if(verilog_type &&verilog_type[0]) my_strdup( &(entry->verilog_type), verilog_type); //<<<< 09112003
-    if(class && class[0]) my_strdup( &(entry->class), class); //<<<< 07102001
-    if(orig_tok && orig_tok[0]) my_strdup( &(entry->orig_tok), orig_tok); //<<<< 08102001
-    if(value && value[0]) my_strdup( &(entry->value), value); //<<<< 27092001
+    if(sig_type &&sig_type[0]) my_strdup( &(entry->sig_type), sig_type); // 24092001
+    if(verilog_type &&verilog_type[0]) my_strdup( &(entry->verilog_type), verilog_type); // 09112003
+    if(class && class[0]) my_strdup( &(entry->class), class); // 07102001
+    if(orig_tok && orig_tok[0]) my_strdup( &(entry->orig_tok), orig_tok); // 08102001
+    if(value && value[0]) my_strdup( &(entry->value), value); // 27092001
     entry->d.port=d.port;
     entry->d.in=d.in;
     entry->d.out=d.out;
@@ -286,11 +286,11 @@ struct node_hashentry *node_hash_lookup(char *token, char *dir,int remove,int po
    {
     saveptr=entry->next;
     if(entry->token) my_free( entry->token);
-    if(entry->verilog_type) my_free( entry->verilog_type); //<<<< 09112003
-    if(entry->sig_type) my_free( entry->sig_type); //<<<< 24092001
-    if(entry->class) my_free( entry->class); //<<<< 07102001
-    if(entry->orig_tok) my_free( entry->orig_tok); //<<<< 07102001
-    if(entry->value) my_free( entry->value); //<<<< 27092001
+    if(entry->verilog_type) my_free( entry->verilog_type); // 09112003
+    if(entry->sig_type) my_free( entry->sig_type); // 24092001
+    if(entry->class) my_free( entry->class); // 07102001
+    if(entry->orig_tok) my_free( entry->orig_tok); // 07102001
+    if(entry->value) my_free( entry->value); // 27092001
     my_free(entry);
     *preventry=saveptr;
     return NULL;
@@ -302,11 +302,11 @@ struct node_hashentry *node_hash_lookup(char *token, char *dir,int remove,int po
     entry->d.out+=d.out;
     entry->d.inout+=d.inout;
     if(sig_type && sig_type[0] !='\0')
-      my_strdup( &(entry->sig_type), sig_type); //<<<< 24092001
+      my_strdup( &(entry->sig_type), sig_type); // 24092001
     if(verilog_type && verilog_type[0] !='\0')
-      my_strdup( &(entry->verilog_type), verilog_type); //<<<< 09112003
+      my_strdup( &(entry->verilog_type), verilog_type); // 09112003
     if(value && value[0] !='\0')
-      my_strdup( &(entry->value), value); //<<<< 27092001
+      my_strdup( &(entry->value), value); // 27092001
     if(debug_var>=3) fprintf(errfp, "node_hash_lookup(): hashing %s : value=%s\n\n",
            entry->token, entry->value? entry->value:"NULL");
     return entry;
@@ -410,11 +410,11 @@ static struct node_hashentry *free_hash_entry(struct node_hashentry *entry)
  {
   entry->next = free_hash_entry( entry->next );
     if(entry->token) my_free( entry->token);
-    if(entry->verilog_type) my_free( entry->verilog_type); //<<<< 09112003
-    if(entry->sig_type) my_free( entry->sig_type); //<<<< 24092001
-    if(entry->class) my_free( entry->class); //<<<< 07102001
-    if(entry->orig_tok) my_free( entry->orig_tok); //<<<< 07102001
-    if(entry->value) my_free( entry->value); //<<<< 27092001
+    if(entry->verilog_type) my_free( entry->verilog_type); // 09112003
+    if(entry->sig_type) my_free( entry->sig_type); // 24092001
+    if(entry->class) my_free( entry->class); // 07102001
+    if(entry->orig_tok) my_free( entry->orig_tok); // 07102001
+    if(entry->value) my_free( entry->value); // 27092001
     my_free(entry);
  }
  return NULL;

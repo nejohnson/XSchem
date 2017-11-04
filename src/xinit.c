@@ -34,7 +34,7 @@ typedef int myproc(
              ClientData clientData,
              Tcl_Interp *interp,
              int argc,
-             CONST char *argv[]);
+             const char *argv[]);
 
 // -----------------------------------------------------------------------
 // EWMH message handling routines 20071027... borrowed from wmctrl code
@@ -169,9 +169,6 @@ void windowid()
     if(debug_var>=1) fprintf(errfp,"framewin parentID=%x\n", (unsigned int) parent_of_topwindow);
     if(debug_var>=1) fprintf(errfp,"framewin child 0=%x\n", (unsigned int) framewin_child_ptr[0]);
 
-
-
-
     // here I create the icon pixmap,to be used when iconified, 
     // I will use it when I know how to use it as icon :-(
     // removed icon, ts created by tcl  31102004
@@ -184,15 +181,8 @@ void windowid()
       hints_ptr->flags = IconPixmapHint ;
       XSetWMHints(display, parent_of_topwindow, hints_ptr);
       XFree(hints_ptr);
-
-
-
     }
-
-
-
     Tcl_SetResult(interp,"",TCL_STATIC);
-
 }
 
 
@@ -738,7 +728,10 @@ int Tcl_AppInit(Tcl_Interp *inter)
       XSetClipRectangles(display, gc[i], 0,0, xrect, 1, Unsorted);
       XSetClipRectangles(display, gcstipple[i], 0,0, xrect, 1, Unsorted);
     }
-    XSetWindowBackground(display, window, color_index[BACKLAYER]);
+
+    //// 20171103 seems redundant
+    // XSetWindowBackground(display, window, color_index[BACKLAYER]);
+
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done step e of xinit()\n");
     save_pixmap = XCreatePixmap(display,window,CADWIDTH,CADHEIGHT,depth);
     XSetTile(display,gctiled,save_pixmap);

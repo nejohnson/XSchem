@@ -433,7 +433,8 @@ int callback(int event, int mx, int my, KeySym key,
      // /20130628
      break;
    }
-   if(key== 'W' && state == ShiftMask) {			// 20171022 create wire snapping to closest instance pin
+   // 20171028 no rubber to avoid cluttering selected stuff
+   if(key== 'W' && !rubber && state == ShiftMask) {			// 20171022 create wire snapping to closest instance pin
      double x, y;
      int xx, yy;
      if(!(rubber & STARTWIRE)){
@@ -453,8 +454,8 @@ int callback(int event, int mx, int my, KeySym key,
        Tcl_EvalEx(interp,"set vertical_move 0; set horizontal_move 0" , -1, TCL_EVAL_GLOBAL);
      }
    }
-
-   if(key == 'w' && state==0) 			// place wire
+   // 20171103 no selection to avoid cluttering selected objects while placing a wire
+   if(key == 'w' /* && !(rubber & SELECTION) */ && state==0)	// place wire.
    {
      if(!vertical_move) {
        mx_save = mx; 
@@ -832,9 +833,10 @@ int callback(int event, int mx, int my, KeySym key,
     draw();
     break;
    }
-   if(key=='u' && state==ControlMask)			// testmode: save state on undo stack
+   if(key=='u' && state==ControlMask)			// testmode
    {
-    push_undo(); // 20150327
+    int mult;
+    fprintf(errfp, "%s\n", expandlabel("#net12", &mult));
     break;
    }
    if(key=='u' && state==0)				// undo
@@ -861,7 +863,8 @@ int callback(int event, int mx, int my, KeySym key,
      create_sch_from_sym();
      break;
    }
-   if(key=='l' && state == 0)				// start line
+   // 20171103 no selection to avoid cluttering selected objects while placing a wire
+   if(key=='l' /* && !(rubber & SELECTION) */ && state == 0)				// start line
    {
     if(!vertical_move) {
       mx_save = mx; 

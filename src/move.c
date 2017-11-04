@@ -363,7 +363,7 @@ void copy_objects(int what)
       ROTATION(x1, y_1, wire[n].x1, wire[n].y1, rx1,ry1);   
       ROTATION(x1, y_1, wire[n].x2, wire[n].y2, rx2,ry2);   
 
-      if( wire[n].sel & (SELECTED|SELECTED1) ) //<<<<<<<<<<
+      if( wire[n].sel & (SELECTED|SELECTED1) )
       {
        rx1+=deltax;
        ry1+=deltay;
@@ -393,7 +393,7 @@ void copy_objects(int what)
       if(c!=k) break;
       ROTATION(x1, y_1, line[c][n].x1, line[c][n].y1, rx1,ry1);   
       ROTATION(x1, y_1, line[c][n].x2, line[c][n].y2, rx2,ry2);   
-      if( line[c][n].sel & (SELECTED|SELECTED1) ) //<<<<<<<<<<
+      if( line[c][n].sel & (SELECTED|SELECTED1) )
       {
        rx1+=deltax;
        ry1+=deltay;
@@ -466,7 +466,7 @@ void copy_objects(int what)
        inst_ptr[lastinst].instname=NULL; // 20150409
        inst_ptr[lastinst].node=NULL;
        inst_ptr[lastinst].name=NULL;
-       my_strdup(&inst_ptr[lastinst].name, inst_ptr[n].name); //<<<<<<
+       my_strdup(&inst_ptr[lastinst].name, inst_ptr[n].name);
        my_strdup(&inst_ptr[lastinst].prop_ptr, inst_ptr[n].prop_ptr);
        my_strdup2(&inst_ptr[lastinst].instname, get_tok_value(inst_ptr[n].prop_ptr, "name",0)); // 20150409
        inst_ptr[n].sel=0;

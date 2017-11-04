@@ -23,7 +23,6 @@
 #include "xschem.h"
 
 
-// NEW ROUTINE!!!!!!!!!!!<<<<<<<<<<<<<<<<<<<
 // Cohen-Sutherland Algorithm for line clipping
 #define UP 8
 #define DOWN 4
@@ -70,7 +69,6 @@ int clip( int x1, int y1, int x2, int y2,
   }
  }
 }
-// END NEW ROUTINE!!!!!!!!!!!<<<<<<<<<<<<<<<<<<<
 
 
 int rectclip(int x1,int y1,int x2,int y2,

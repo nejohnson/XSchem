@@ -268,7 +268,7 @@ static void svg_draw_symbol_outline(int n,int layer,int tmp_flip, int rot,
     }
     restore_lw();
    }
-   Tcl_SetResult(interp,"",TCL_STATIC);  //<<<<< 26102003
+   Tcl_SetResult(interp,"",TCL_STATIC);  //26102003
 
 }
 

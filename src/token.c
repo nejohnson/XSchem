@@ -729,14 +729,14 @@ char *subst_token(char *s,char *tok, char *new_val)
   }
   else
   {
-   int len=strlen(new_val)+strlen(tok)+3;
-   char tmpstr[len]; // 20171104
-   sprintf(tmpstr, " %s=%s", tok, new_val ); // 20171104
-   my_realloc(&result,result_pos+len); // 20171104
-   strcat(result, tmpstr); // 20171104
+   tmp=strlen(new_val)+strlen(tok)+2; // 20171104
+   if(result_pos + tmp>=size)
+   {
+     size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
+     my_realloc(&result,size);
+   }
+   sprintf(result+result_pos, " %s=%s", tok, new_val ); // 20171104
    //// 20171104 terrible bug: can not sprintf result into result !!!
-   //
-   // my_realloc(&result,result_pos+strlen(new_val)+strlen(tok)+2 );
    // sprintf( result, "%s %s=%s", result, tok, new_val ); // overflow safe 20161122
   }
  }

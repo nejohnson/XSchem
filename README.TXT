@@ -35,6 +35,39 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.2.5:
+- **LONG** standing crashing bug fixed in token.c --> subst_token(), causing
+  xschem to crash on unusually large token strings, this can happen if a generic
+  text file is loaded as a component property, instead of the usual 
+  "name=xyyy tok1=val1 tok=val2  ..." property strings. tag 20171104
+- some other bug fixes (removed sprintf of a string into itself :-) )
+- when pressing the 'LOAD' button in tcl-tk text entries to load a file, 
+  place the file starting at the cursor position instead of at the beginning.
+- when an instance has empty property string do *not* preload the edit property text
+  widget with a copy of the property string of another instance found in the schematic.
+  This creates the illusion that the selected instance has a property string while
+  it does not.
+- added @tcleval(<<tcl script>>) tag that can be used in 'format',
+  'vhdl_format', 'verilog_format' strings to allow dynamic netlisting.
+  <<tcl script>> can be any valid tcl code, two variables are defined
+  in the script context: 'symname' and 'instname', these variables can
+  be used to query instance or symbol properties with the 'xschem' 
+  builtin command.
+  in <<tcl script>> spaces and quotes must be escaped.
+- Added 'xschem getprop' command:
+  * xschem getprop instance <<instname>> <<property>>
+    returns instance property
+    example: xschem getprop instance m3 w --> returns mos width
+  * xschem getprop instance_n <<instnum>> <<property>>
+    same as previous, but use instance index number instead of name
+  * xschem getprop symbol <<symname>> <<property>>
+    returns symbol property
+    example: xchem getprop symbol devices/nmos format 
+             --> return format property string of symbol
+  * xschem getprop instance_net <<instname>> <<pin>>
+    returns net name attached to <<pin>>
+- code cleanup (removed obsolete comments)
+
 2.2.4:
 - Better drawing when selecting by area / unselecting by area. Selection drag
   rectangle no more clutters the underlying already selected stuff.

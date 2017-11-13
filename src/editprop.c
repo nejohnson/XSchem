@@ -224,6 +224,9 @@ void edit_text_property(int x)
    sel = selectedgroup[0].n;
    if(textelement[sel].prop_ptr !=NULL)
       Tcl_SetVar(interp,"props",textelement[sel].prop_ptr,TCL_GLOBAL_ONLY); 
+   else
+      Tcl_SetVar(interp,"props","",TCL_GLOBAL_ONLY); // 20171112
+
    Tcl_SetVar(interp,"txt",textelement[sel].txt_ptr,TCL_GLOBAL_ONLY);
    Tcl_SetVar(interp,"entry1",textelement[sel].txt_ptr,TCL_GLOBAL_ONLY); // for viewdata
    my_snprintf(property, S(property), "%g",textelement[sel].yscale); 

@@ -576,7 +576,6 @@ proc enter_text {textlabel} {
    # bind .t <Visibility> { if { [regexp Obscured %s] } {raise .t; wm attributes  .t -topmost 1} }
    ## 
 
-
    set X [expr [winfo pointerx .t] - 30]
    set Y [expr [winfo pointery .t] - 25]
 
@@ -637,7 +636,11 @@ proc enter_text {textlabel} {
    pack .t.buttons.b3  -side left -fill x -expand yes
    pack .t.buttons.b4  -side left -fill x -expand yes
    pack .t.buttons -side bottom -fill x
-   bind .t <Escape> {.t.buttons.cancel invoke}
+   bind .t <Escape> {
+     if ![string compare $txt [.t.txt get 1.0 {end - 1 chars}]] {
+       .t.buttons.cancel invoke
+     }
+   }
    bind .t <Control-Return> {.t.buttons.ok invoke}
    #grab set .t
    tkwait window .t
@@ -746,9 +749,9 @@ proc property_search {} {
 #20171029
 # allows to call TCL hooks from 'format' strings during netlisting
 # example of symbol spice format definition:
-# format="@name @pinlist @symname @tcleval(<<<script>>>) m=@m"
-# NOTE: spaces and quotes in <<<script>>> must be escaped
-# symname and instname are predefined variables in the <<<script>>> context
+# format="@name @pinlist @symname @tcleval(<script>) m=@m"
+# NOTE: spaces and quotes in <script> must be escaped
+# symname and instname are predefined variables in the <script> context
 # they can be used together with TCL xschem command to query instance or symbol 
 # attributes.
 #
@@ -1027,7 +1030,12 @@ proc edit_prop {txtlabel} {
    pack .ent2.xscroll -side bottom -fill x
    pack .ent2.e1  -fill both -expand yes
    bind .ent2 <Control-Return> {.ent2.f1.b1 invoke}
-   bind .ent2 <Escape> {.ent2.f1.b2 invoke}
+   bind .ent2 <Escape> {
+     if { ![string compare $entry1 [.ent2.e1 get 1.0 {end - 1 chars}]] && \
+          ![string compare $symbol [ .ent2.f1.e2 get]] } {
+       .ent2.f1.b2 invoke
+     }
+   }
    #tkwait visibility .ent2
    #grab set .ent2
    #focus .ent2.e1
@@ -1730,15 +1738,18 @@ set_ne hspicerf_path $env(HOME)/hspice/hspicerf_2010.03
 ## cscope waveform viewer
 set_ne cscope_path $env(HOME)/cosmoscope/linux/ai_bin/cscope
 
-
-
+## cairo stuff 20171112
+set_ne cairo_font_scale 1.0
+set_ne cairo_font_line_spacing 1.0
+set_ne cairo_font_name {Monospace}
+set_ne cairo_vert_correct 0.0
 
 ##### set colors
 if {!$rainbow_colors} {
 
   set_ne cadlayers 22
   set_ne colors {
-   "#000000" "#00ccee" "#5f5f5f" "#aaaaaa" "#88dd00" 
+   "#000000" "#00ccee" "#3f3f3f" "#cccccc" "#88dd00" 
    "#bb2200" "#00ccee" "#ff0000" "#ffff00" "#ffffff" "#ff00ff" 
    "#00ff00" "#0000cc" "#aaaa00" "#aaccaa" "#ff7777" 
    "#bfff81" "#00ffcc" "#ce0097" "#d2d46b" 
@@ -1847,6 +1858,13 @@ set custom_label_prefix {}
 
 # 20121111
 xschem set netlist_dir $netlist_dir
+
+# 20171112 cairo stuff
+xschem set cairo_font_scale $cairo_font_scale
+xschem set cairo_font_line_spacing $cairo_font_line_spacing
+xschem set cairo_vert_correct $cairo_vert_correct
+# font name can not be set here as we need to wait for X-initialization 
+# to complete. Done in xinit.c
 
 
 ###
@@ -2180,16 +2198,22 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    pack .menubar.simulate -side right
    pack .menubar.waves -side right
 
-   frame .drw -background "" -takefocus 1
+   frame .drw -background {} -takefocus 1
 
    wm  title . "XSCHEM"
    wm iconname . "XSCHEM"
-   . configure  -background ""
+   . configure  -background {}
    wm  geometry . $initial_geometry
    #wm maxsize . 1600 1200
    wm protocol . WM_DELETE_WINDOW {xschem exit}
    focus .drw
 
+   frame .statusbar  
+   label .statusbar.1   -text "STATUS BAR 1"  
+   pack .statusbar.1 -side left -fill x
+   pack .drw -anchor n -side top -fill both -expand true
+   pack .menubar -anchor n -side top -fill x  -before .drw
+   pack .statusbar -after .drw -anchor sw  -fill x 
 ###
 ### Tk event handling
 ###
@@ -2217,24 +2241,11 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    }
    bind .drw  "?" { textwindow ${XSCHEM_HOME_DIR}/xschem.help }
 
-
-   frame .statusbar  
-   label .statusbar.1   -text "STATUS BAR 1"  
-   pack .statusbar.1 -side left -fill x
-
-
-
-   pack .drw -anchor n -side top -fill both -expand true
-   pack .menubar -anchor n -side top -fill x  -before .drw
-   pack .statusbar -after .drw -anchor sw  -fill x 
-
    if {[array exists replace_key]} {
      foreach i [array names replace_key] {
        key_binding "$i" "$replace_key($i)"
      }
    }
-       
-
 }
 
 

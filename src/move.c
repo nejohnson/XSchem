@@ -303,6 +303,13 @@ void copy_objects(int what)
  static char *str = NULL; // 20161122 overflow safe
  double tmpx, tmpy;
 
+ // 20171112
+ #ifdef HAS_CAIRO
+ char *textprop;
+ int textlayer;
+ #endif
+ GC savegc, gctext;
+
  if(what & BEGIN)
  {
   if(debug_var>=1) fprintf(errfp, "copy_objects(): BEGIN copy\n");
@@ -385,6 +392,7 @@ void copy_objects(int what)
         drawline(gc[k], THICK, rx1,ry1,rx2,ry2);
       else
         drawline(gc[k], ADD, rx1,ry1,rx2,ry2);
+        
       selectedgroup[i].n=lastwire;
       storeobject(-1, rx1,ry1,rx2,ry2,WIRE,0,wire[n].sel,wire[n].prop_ptr);
       wire[n].sel=0;
@@ -435,10 +443,23 @@ void copy_objects(int what)
       my_strdup(&textelement[lasttext].prop_ptr, textelement[n].prop_ptr);
       textelement[lasttext].xscale=textelement[n].xscale;
       textelement[lasttext].yscale=textelement[n].yscale;
-      draw_string(gc[k], ADD, textelement[lasttext].txt_ptr,        // draw moved txt
+
+      gctext = gc[TEXTLAYER];
+      savegc = gctext;
+      #ifdef HAS_CAIRO
+      textprop = get_tok_value(textelement[lasttext].prop_ptr, "layer", 0);
+      if(textprop[0]!=0) {
+        textlayer = atoi(textprop);
+        if(textlayer >= 0 && textlayer < cadlayers) gctext = gc[textlayer];
+      }
+      #endif
+
+
+      draw_string(gctext, ADD, textelement[lasttext].txt_ptr,        // draw moved txt
        textelement[lasttext].rot, textelement[lasttext].flip,
        rx1+deltax,ry1+deltay,
        textelement[lasttext].xscale, textelement[lasttext].yscale);
+      gctext = savegc;
       selectedgroup[i].n=lasttext;
       lasttext++;
        if(debug_var>=2) fprintf(errfp, "copy_objects(): done copy string\n");
@@ -486,6 +507,7 @@ void copy_objects(int what)
                          &inst_ptr[lastinst].x2, &inst_ptr[lastinst].y2);
        lastinst++;
       }
+
       draw_symbol_outline(ADD,gc[k], gcstipple[k], n,k, 0, 0, 0.0, 0.0);
       break;
     }
@@ -493,6 +515,7 @@ void copy_objects(int what)
    drawline(gc[k], END, 0.0, 0.0, 0.0, 0.0);
    drawrect(gc[k], END, 0.0, 0.0, 0.0, 0.0);
    if(fill) filledrect(gcstipple[k], END, 0.0, 0.0, 0.0, 0.0);
+   
   } // end for(k ...
   rubber &= ~STARTCOPY;
   check_collapsing_objects();
@@ -507,6 +530,14 @@ void move_objects(int what, int merge, double dx, double dy)
 {
  int k;
  double tx1,ty1; // temporaries for swapping coordinates 20070302
+
+ // 20171112
+ #ifdef HAS_CAIRO
+ char *textprop;
+ int textlayer;
+ #endif
+ GC savegc, gctext;
+
 
  if(what & BEGIN)
  {
@@ -596,6 +627,7 @@ void move_objects(int what, int merge, double dx, double dy)
         drawline(gc[k], THICK, wire[n].x1, wire[n].y1, wire[n].x2, wire[n].y2);
       else
         drawline(gc[k], ADD, wire[n].x1, wire[n].y1, wire[n].x2, wire[n].y2);
+
       break;
      case LINE:
       if(c!=k) break;   
@@ -696,6 +728,7 @@ void move_objects(int what, int merge, double dx, double dy)
       drawrect(gc[k], ADD, rect[c][n].x1, rect[c][n].y1, rect[c][n].x2, rect[c][n].y2);
       if(fill) filledrect(gcstipple[c], ADD, rect[c][n].x1, rect[c][n].y1, 
                  rect[c][n].x2, rect[c][n].y2);
+  
       break;
 
      case TEXT:
@@ -713,15 +746,25 @@ void move_objects(int what, int merge, double dx, double dy)
        ( (flip && (textelement[n].rot & 1) ) ? rot+2 : rot) ) & 0x3;
       textelement[n].flip=flip^textelement[n].flip;
  
-      draw_string(gc[k], ADD, textelement[n].txt_ptr,        // draw moved txt
+      // 20171112
+      gctext = gc[TEXTLAYER];
+      savegc = gctext;
+      #ifdef HAS_CAIRO
+      textprop = get_tok_value(textelement[n].prop_ptr, "layer", 0);
+      if(textprop[0]!=0) {
+        textlayer = atoi(textprop);
+        if(textlayer >= 0 && textlayer < cadlayers) gctext = gc[textlayer];
+      }
+      #endif
+      draw_string(gctext, ADD, textelement[n].txt_ptr,        // draw moved txt
        textelement[n].rot, textelement[n].flip,
        textelement[n].x0, textelement[n].y0,
        textelement[n].xscale, textelement[n].yscale);
+      gctext = savegc;
       break;
  
      case ELEMENT:
-      if(k==0)
-      {
+      if(k==0) {
        bbox(ADD, inst_ptr[n].x1, inst_ptr[n].y1, inst_ptr[n].x2, inst_ptr[n].y2 );
        ROTATION(x1, y_1, inst_ptr[n].x0, inst_ptr[n].y0, rx1,ry1);
        inst_ptr[n].x0 = rx1+deltax;
@@ -732,6 +775,7 @@ void move_objects(int what, int merge, double dx, double dy)
        symbol_bbox(n, &inst_ptr[n].x1, &inst_ptr[n].y1,
                          &inst_ptr[n].x2, &inst_ptr[n].y2);
       }
+      
       draw_symbol_outline(ADD,gc[k],gcstipple[k], n,k, 0, 0, 0.0, 0.0);
       break;
     }

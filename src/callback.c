@@ -38,12 +38,15 @@ int callback(int event, int mx, int my, KeySym key,
  {
    if(debug_var>=1) 
      fprintf(errfp, "callback(): reentrant call of callback(), semaphore=%d\n", semaphore);
-   if(event==Expose) XCopyArea(display, save_pixmap, window, gctiled, mx,my,button,aux,mx,my);
+   if(event==Expose) {
+     XCopyArea(display, save_pixmap, window, gctiled, mx,my,button,aux,mx,my);
+     
+   }
    //return 0;
  }
  semaphore++;		// used to debug Tcl-Tk frontend
- mousex=mx*zoom + xorigin;
- mousey=my*zoom + yorigin;
+ mousex=mx*zoom - xorigin;
+ mousey=my*zoom - yorigin;
  mousex_snap=rint(( mousex)/cadsnap)*cadsnap;
  mousey_snap=rint(( mousey)/cadsnap)*cadsnap;
  {
@@ -75,13 +78,24 @@ int callback(int event, int mx, int my, KeySym key,
 
   case Expose:
     XCopyArea(display, save_pixmap, window, gctiled, mx,my,button,aux,mx,my);
+    {
+      XRectangle xrect[1];
+      xrect[0].x=mx;
+      xrect[0].y=my;
+      xrect[0].width=button;
+      xrect[0].height=aux;
+      // redraw selection on expose, needed if no backing store available on the server 20171112
+      XSetClipRectangles(display, gc[SELLAYER], 0,0, xrect, 1, Unsorted);
+      rebuild_selected_array();
+      draw_selection(gc[SELLAYER],0);
+      XSetClipMask(display, gc[SELLAYER], None);
+    }
+
     if(debug_var>=1) fprintf(errfp, "callback(): Expose\n");
-
     break;
-
-
   case ConfigureNotify:
     resetwin();
+    draw();
     break;
 
   case MotionNotify:
@@ -158,7 +172,7 @@ int callback(int event, int mx, int my, KeySym key,
           select_rect(BEGIN,1);
         }
         if(abs(mx-mx_save) > 8 || abs(my-my_save) > 8 ) {  // 20121130 set some reasonable threshold before unselecting
-          select_object(mx_save*zoom+xorigin, my_save*zoom +yorigin, 0); // 20121130 remove near object if dragging
+          select_object(mx_save*zoom-xorigin, my_save*zoom -yorigin, 0); // 20121130 remove near object if dragging
         }
       }
     }
@@ -379,13 +393,13 @@ int callback(int event, int mx, int my, KeySym key,
    if(key == '+' )		// change line width
    {
     lw_double+=0.1;
-    change_linewidth(lw_double);
+    change_linewidth(lw_double,1);
     break;
    }
    if(key == '-' )		// change line width
    {
     lw_double-=0.1;if(lw_double<0.0) lw_double=0.0;
-    change_linewidth(lw_double);
+    change_linewidth(lw_double,1);
     break;
    }
    if(key == 'X' && state == ShiftMask) 			// highlight discrepanciens between selected instance pin and net names
@@ -439,11 +453,11 @@ int callback(int event, int mx, int my, KeySym key,
      int xx, yy;
      if(!(rubber & STARTWIRE)){
        find_closest_net_or_symbol_pin(mousex, mousey, &x, &y);
-       xx = (x-xorigin)*mooz;
-       yy = (y-yorigin)*mooz;
+       xx = (x+xorigin)*mooz;
+       yy = (y+yorigin)*mooz;
        mx_save = xx; my_save = yy; // 20070323
-       mx_double_save=rint(( xx*zoom + xorigin)/cadsnap)*cadsnap;
-       my_double_save=rint(( yy*zoom + yorigin)/cadsnap)*cadsnap;
+       mx_double_save=rint(( xx*zoom - xorigin)/cadsnap)*cadsnap;
+       my_double_save=rint(( yy*zoom - yorigin)/cadsnap)*cadsnap;
        new_wire(PLACE, x, y);
      }
      else {
@@ -459,11 +473,11 @@ int callback(int event, int mx, int my, KeySym key,
    {
      if(!vertical_move) {
        mx_save = mx; 
-       mx_double_save=rint(( mx*zoom + xorigin)/cadsnap)*cadsnap;
+       mx_double_save=rint(( mx*zoom - xorigin)/cadsnap)*cadsnap;
      }
      if(!horizontal_move) {
        my_save = my;	// 20070323
-       my_double_save=rint(( my*zoom + yorigin)/cadsnap)*cadsnap;
+       my_double_save=rint(( my*zoom - yorigin)/cadsnap)*cadsnap;
      }
      if(horizontal_move) mousey_snap = my_double_save; // 20171023
      if(vertical_move) mousex_snap = mx_double_save;
@@ -507,7 +521,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='P' && state == ShiftMask) 			// pan, other way to.
    {
-    xorigin=mousex_snap-areaw*zoom/2.0;yorigin=mousey_snap-areah*zoom/2.0;
+    xorigin=-mousex_snap+areaw*zoom/2.0;yorigin=-mousey_snap+areah*zoom/2.0;
     draw();
     break;
    }
@@ -527,25 +541,25 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key==XK_Right) 			// left
    {
-    xorigin+=CADMOVESTEP*zoom;
+    xorigin+=-CADMOVESTEP*zoom;
     draw();
     break;
    }
    if(key==XK_Left) 			// right
    {
-    xorigin-=CADMOVESTEP*zoom;
+    xorigin-=-CADMOVESTEP*zoom;
     draw();
     break;
    }
    if(key==XK_Down) 			// down
    {
-    yorigin+=CADMOVESTEP*zoom;
+    yorigin+=-CADMOVESTEP*zoom;
     draw();
     break;
    }
    if(key==XK_Up) 			// up
    {
-    yorigin-=CADMOVESTEP*zoom;
+    yorigin-=-CADMOVESTEP*zoom;
     draw();
     break;
    }
@@ -571,8 +585,8 @@ int callback(int event, int mx, int my, KeySym key,
    {
     if(debug_var>=1) fprintf(errfp, "callback(): start rect\n");
     mx_save = mx; my_save = my;	// 20070323
-    mx_double_save=rint(( mx*zoom + xorigin)/cadsnap)*cadsnap;
-    my_double_save=rint(( my*zoom + yorigin)/cadsnap)*cadsnap;
+    mx_double_save=rint(( mx*zoom - xorigin)/cadsnap)*cadsnap;
+    my_double_save=rint(( my*zoom - yorigin)/cadsnap)*cadsnap;
     new_rect(PLACE); break;
    }
    if(key=='V' && state == ShiftMask)				// toggle spice/vhdl netlist 
@@ -653,7 +667,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='a' && state == ControlMask)         // select all
    {
-    hilight_all();
+    select_all();
     break;
    }
    if(key=='y' && state == 0)           		// toggle stretching
@@ -835,8 +849,6 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='u' && state==ControlMask)			// testmode
    {
-    int mult;
-    fprintf(errfp, "%s\n", expandlabel("#net12", &mult));
     break;
    }
    if(key=='u' && state==0)				// undo
@@ -868,11 +880,11 @@ int callback(int event, int mx, int my, KeySym key,
    {
     if(!vertical_move) {
       mx_save = mx; 
-      mx_double_save=rint(( mx*zoom + xorigin)/cadsnap)*cadsnap;
+      mx_double_save=rint(( mx*zoom - xorigin)/cadsnap)*cadsnap;
     }
     if(!horizontal_move) {
       my_save = my;	// 20070323
-      my_double_save=rint(( my*zoom + yorigin)/cadsnap)*cadsnap;
+      my_double_save=rint(( my*zoom - yorigin)/cadsnap)*cadsnap;
     }
     if(horizontal_move) mousey_snap = my_double_save; // 20171023
     if(vertical_move) mousex_snap = mx_double_save;
@@ -899,8 +911,8 @@ int callback(int event, int mx, int my, KeySym key,
    if(key=='m' && state==0 && !(rubber & (STARTMOVE | STARTCOPY)))// move selected obj.
    {
     mx_save = mx; my_save = my;	// 20070323
-    mx_double_save=rint(( mx*zoom + xorigin)/cadsnap)*cadsnap;
-    my_double_save=rint(( my*zoom + yorigin)/cadsnap)*cadsnap;
+    mx_double_save=rint(( mx*zoom - xorigin)/cadsnap)*cadsnap;
+    my_double_save=rint(( my*zoom - yorigin)/cadsnap)*cadsnap;
     move_objects(BEGIN,0,0,0);
     break;
    }
@@ -909,8 +921,8 @@ int callback(int event, int mx, int my, KeySym key,
      !(rubber & (STARTMOVE | STARTCOPY)))
    {
     mx_save = mx; my_save = my;	// 20070323
-    mx_double_save=rint(( mx*zoom + xorigin)/cadsnap)*cadsnap;
-    my_double_save=rint(( my*zoom + yorigin)/cadsnap)*cadsnap;
+    mx_double_save=rint(( mx*zoom - xorigin)/cadsnap)*cadsnap;
+    my_double_save=rint(( my*zoom - yorigin)/cadsnap)*cadsnap;
     copy_objects(BEGIN);
     break;
    }
@@ -1042,23 +1054,23 @@ int callback(int event, int mx, int my, KeySym key,
   break;
   case ButtonPress:			// end operation
    if(debug_var>=1) fprintf(errfp, "callback(): ButtonPress  rubber=%d state=%d\n",rubber,state);
-   if(button==Button4 && state == 0 ) view_zoom(1.3);
-   else if(button==Button5 && state == 0 ) view_unzoom(1.3);
+   if(button==Button4 && state == 0 ) view_zoom(1.2);
+   else if(button==Button5 && state == 0 ) view_unzoom(1.2);
    // 20111114
    else if(button==Button5 && (state & ShiftMask) && !(state & Button2Mask)) {
-    xorigin+=CADMOVESTEP*zoom/2.;
+    xorigin+=-CADMOVESTEP*zoom/2.;
     draw();
    }
    else if(button==Button4 && (state & ShiftMask) && !(state & Button2Mask)) {
-    xorigin-=CADMOVESTEP*zoom/2.;
+    xorigin-=-CADMOVESTEP*zoom/2.;
     draw();
    }
    else if(button==Button5 && (state & ControlMask) && !(state & Button2Mask)) {
-    yorigin+=CADMOVESTEP*zoom/2.;
+    yorigin+=-CADMOVESTEP*zoom/2.;
     draw();
    }
    else if(button==Button4 && (state & ControlMask) && !(state & Button2Mask)) {
-    yorigin-=CADMOVESTEP*zoom/2.;
+    yorigin-=-CADMOVESTEP*zoom/2.;
     draw();
    }
    else if(button==Button3 && state==0)
@@ -1098,27 +1110,27 @@ int callback(int event, int mx, int my, KeySym key,
        int xx, yy;
        
        find_closest_net_or_symbol_pin(mousex, mousey, &x, &y);
-       xx = (x-xorigin)*mooz;
-       yy = (y-yorigin)*mooz;
+       xx = (x+xorigin)*mooz;
+       yy = (y+yorigin)*mooz;
        mx_save = xx; my_save = yy; // 20070323
-       mx_double_save=rint(( xx*zoom + xorigin)/cadsnap)*cadsnap;
-       my_double_save=rint(( yy*zoom + yorigin)/cadsnap)*cadsnap;
+       mx_double_save=rint(( xx*zoom - xorigin)/cadsnap)*cadsnap;
+       my_double_save=rint(( yy*zoom - yorigin)/cadsnap)*cadsnap;
        new_wire(PLACE, x, y);
        rubber &=~MENUSTARTSNAPWIRE;
        break;
      }
      if(rubber & MENUSTARTLINE) {
        mx_save = mx; my_save = my;	// 20070323
-       mx_double_save=rint(( mx*zoom + xorigin)/cadsnap)*cadsnap;
-       my_double_save=rint(( my*zoom + yorigin)/cadsnap)*cadsnap;
+       mx_double_save=rint(( mx*zoom - xorigin)/cadsnap)*cadsnap;
+       my_double_save=rint(( my*zoom - yorigin)/cadsnap)*cadsnap;
        new_line(PLACE);
        rubber &=~MENUSTARTLINE;
        break;
      }
      if(rubber & MENUSTARTRECT) {
        mx_save = mx; my_save = my;	// 20070323
-       mx_double_save=rint(( mx*zoom + xorigin)/cadsnap)*cadsnap;
-       my_double_save=rint(( my*zoom + yorigin)/cadsnap)*cadsnap;
+       mx_double_save=rint(( mx*zoom - xorigin)/cadsnap)*cadsnap;
+       my_double_save=rint(( my*zoom - yorigin)/cadsnap)*cadsnap;
        new_rect(PLACE);
        rubber &=~MENUSTARTRECT;
        break;
@@ -1158,8 +1170,8 @@ int callback(int event, int mx, int my, KeySym key,
      }
      if( !(rubber & STARTSELECT) ) {
        mx_save = mx; my_save = my;
-       mx_double_save=rint(( mx*zoom + xorigin)/cadsnap)*cadsnap; // 20070322
-       my_double_save=rint(( my*zoom + yorigin)/cadsnap)*cadsnap; // 20070322
+       mx_double_save=rint(( mx*zoom - xorigin)/cadsnap)*cadsnap; // 20070322
+       my_double_save=rint(( my*zoom - yorigin)/cadsnap)*cadsnap; // 20070322
        if( !(state & ShiftMask) ) {
          unselect_all();
        }

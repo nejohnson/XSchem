@@ -294,10 +294,10 @@ void bbox(int what,double x1,double y1, double x2, double y2)
    saveh = areah;
    break;
   case ADD:
-   x1=(x1-xorigin)/zoom;
-   y1=(y1-yorigin)/zoom;
-   x2=(x2-xorigin)/zoom;
-   y2=(y2-yorigin)/zoom;
+   x1=(x1+xorigin)/zoom;
+   y1=(y1+yorigin)/zoom;
+   x2=(x2+xorigin)/zoom;
+   y2=(y2+yorigin)/zoom;
    x1=CLIP(x1,savex1,savex2);
    x2=CLIP(x2,savex1,savex2);
    y1=CLIP(y1,savey1,savey2);
@@ -322,10 +322,13 @@ void bbox(int what,double x1,double y1, double x2, double y2)
    xrect[0].height = areah-4*lw;
    for(i=0;i<cadlayers;i++)    
    {
-    XSetClipRectangles(display, gc[i], 0,0, xrect, 1, Unsorted);
-    XSetClipRectangles(display, gcstipple[i], 0,0, xrect, 1, Unsorted);
+    XSetClipMask(display, gc[i], None); // 20171110 optimization, clipping already done in software
+    XSetClipMask(display, gcstipple[i], None); // 20171110 optimization, clipping already done in software
+    //XSetClipRectangles(display, gc[i], 0,0, xrect, 1, Unsorted);
+    //XSetClipRectangles(display, gcstipple[i], 0,0, xrect, 1, Unsorted);
    }
-   XSetClipRectangles(display, gctiled, 0,0, xrect, 1, Unsorted);
+   XSetClipMask(display, gctiled, None); // 20171110 optimization, clipping already done in software
+   // XSetClipRectangles(display, gctiled, 0,0, xrect, 1, Unsorted);
    break;
   case SET:
    areax1 = bbx1-2*lw;
@@ -343,7 +346,6 @@ void bbox(int what,double x1,double y1, double x2, double y2)
      XSetClipRectangles(display, gc[i], 0,0, xrect, 1, Unsorted);
      XSetClipRectangles(display, gcstipple[i], 0,0, xrect, 1, Unsorted);
    }
-   XSetClipRectangles(display, gc[SELLAYER], 0,0, xrect, 1, Unsorted);
    XSetClipRectangles(display, gctiled, 0,0, xrect, 1, Unsorted);
    // debug ...
    if(debug_var>=1) fprintf(errfp, "bbox(): bbox= %d %d %d %d\n",areax1,areay1,areax2,areay2);     
@@ -733,7 +735,7 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) // 201509
 
 
 
-void hilight_all(void)
+void select_all(void)
 {
  int c,i;
 

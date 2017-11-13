@@ -35,6 +35,42 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.3.0:
+- Antialiased CAIRO text for all XSCHEM elements!!
+  if variable HAS_CAIRO is set in the Makefile all text processing in XSCHEM
+  will be done using the cairo library.
+- all text elements may specify a 'layer=<number>' in the property string box
+  to specify a user layer color (instead of the default TEXTLAYER) to draw
+  the text. Available only if cairo fonts enabled.
+- a new command is added:
+     xschem set cairo_font_name {<font name>}
+  will set the font to be used for text rendering. Use only monospaced fonts
+  to allow proper bounding box calculations.
+  Example:
+     xschem set cairo_font_name {DejaVu Sans Mono}
+- various improvements in drawing engine (redraw selected elements on Expose events,
+  this is needed if the server does not provide backing store).
+- configuration variables controlling cairo fonts, may be placed in ~/.xschem:
+  #### scale all fonts by this number
+  set cairo_font_scale 1.0
+  #### scale line spacing by this number
+  set cairo_font_line_spacing 1.0
+  #### specify a font (Use only monospaced fonts!)
+  set cairo_font_name {Liberation Mono}
+  #### lift up text by some zoom-corrected pixels for
+  #### better compatibility wrt no cairo version.
+  #### USE WITH CAUTION!!! big values cause text to
+  #### go beyond the calculated bouning box, leaving garbage
+  #### on the screen when moving objects/redrawing.
+  #### Useful values in the range [-1, 3]
+  set cairo_vert_correct 1
+- following commands added to xschem tcl command, to runtime change these behaviours.
+  xschem set cairo_font_name
+  xschem set cairo_font_scale
+  xschem set cairo_font_line_spacing
+  xschem set cairo_vert_correct
+- various bug fixes due to *BIG* cairo commit.
+
 2.2.5:
 - **LONG** standing crashing bug fixed in token.c --> subst_token(), causing
   xschem to crash on unusually large token strings, this can happen if a generic

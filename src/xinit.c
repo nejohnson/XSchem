@@ -24,12 +24,12 @@
 
 static int init_done=0; // 20150409 to avoid double call by Xwindows close and TclExitHandler
 
-static Visual *visual;
 static XSetWindowAttributes winattr;
 static int screen_number;
 static Tk_Window  tkwindow, mainwindow;
 static XWMHints *hints_ptr;
 static Window topwindow;
+static XColor xcolor_exact,xcolor;
 typedef int myproc(
              ClientData clientData,
              Tcl_Interp *interp,
@@ -245,11 +245,17 @@ void xwin_exit(void)
  my_free(pixmap);
  my_free(gc);
  my_free(gcstipple);
+ #ifdef HAS_CAIRO // 20171105
+ cairo_destroy(ctx);
+ cairo_destroy(save_ctx);
+ cairo_surface_destroy(sfc);
+ cairo_surface_destroy(save_sfc);
+ #endif
+
  my_free(color_array);
  if(debug_var>=1) fprintf(errfp, "xwin_exit(): removing font\n");
  for(i=0;i<127;i++) my_free(character[i]);
 
- //if(has_x)  XCloseDisplay(display);
  if(debug_var>=1) fprintf(errfp, "xwin_exit(): closed display\n");
  my_free(filename);
  if(errfp!=stderr) fclose(errfp);
@@ -274,8 +280,6 @@ int err(Display *display, XErrorEvent *xev)
 unsigned int  find_best_color(char colorname[])
 {
  int i;
- XColor xcolor_exact,xcolor;
- static XColor xcolor_array[256];
  static int color_flag=0;
  double distance=10000000000.0, dist, r, g, b, red, green, blue;
  double deltar,deltag,deltab;
@@ -507,6 +511,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
  int i;
  int initfile_found; // 20170330
  struct stat buf;
+ // XRenderPictFormat *format;
 
  if(!getenv("DISPLAY")) has_x=0;
  if(debug_var>=1 && !has_x) fprintf(errfp, "Tcl_AppInit(): no DISPLAY environment var, assuming no X available\n");
@@ -660,7 +665,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
 
  if( !mkdtemp(undo_dirname) ) {
    if(debug_var>=1) fprintf(errfp, "xinit(): problems creating tmp undo dir\n");
-   Tcl_Eval(interp, "exit");   // <<<<<<<<
+   Tcl_Eval(interp, "exit");
  }
 
  init_pixdata();
@@ -722,26 +727,66 @@ int Tcl_AppInit(Tcl_Interp *inter)
     }
     gctiled = XCreateGC(display,window,0L, NULL);
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done step d of xinit()\n");
-   
-    for(i=0;i<cadlayers;i++) 
-    {
-      XSetClipRectangles(display, gc[i], 0,0, xrect, 1, Unsorted);
-      XSetClipRectangles(display, gcstipple[i], 0,0, xrect, 1, Unsorted);
-    }
-
-    //// 20171103 seems redundant
-    // XSetWindowBackground(display, window, color_index[BACKLAYER]);
-
+  
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done step e of xinit()\n");
+    //// save_pixmap must be created as resetwin() frees it before recreating with new size.
     save_pixmap = XCreatePixmap(display,window,CADWIDTH,CADHEIGHT,depth);
     XSetTile(display,gctiled,save_pixmap);
-    XSetClipRectangles(display, gctiled, 0,0, xrect, 1, Unsorted);
     XSetFillStyle(display,gctiled,FillTiled);
+
+
+    #ifdef HAS_CAIRO // 20171105
+    {
+      XWindowAttributes wattr;
+      XGetWindowAttributes(display, window, &wattr);
+
+      sfc = cairo_xlib_surface_create(display, window, visual, wattr.width, wattr.height);
+      save_sfc = cairo_xlib_surface_create(display, save_pixmap, visual, wattr.width, wattr.height);
+
+      ctx = cairo_create(sfc);
+      save_ctx = cairo_create(save_sfc);
+
+      // load font from tcl 20171112
+      Tcl_Eval(interp,"xschem set cairo_font_name $cairo_font_name");
+
+      cairo_select_font_face (ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+      cairo_set_font_size (ctx, 20);
+      cairo_select_font_face (save_ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+      cairo_set_font_size (save_ctx, 20);
+
+      save_ctx = cairo_create(save_sfc);
+      cairo_set_line_width(ctx, 1);
+      cairo_set_line_width(save_ctx, 1);
+      cairo_set_line_join(ctx, CAIRO_LINE_JOIN_ROUND);
+      cairo_set_line_cap(ctx, CAIRO_LINE_CAP_ROUND);
+      cairo_set_line_join(save_ctx, CAIRO_LINE_JOIN_ROUND);
+      cairo_set_line_cap(save_ctx, CAIRO_LINE_CAP_ROUND);
+
+      //// xrender
+      // format = cairo_xlib_surface_get_xrender_format (sfc);
+      // cairo_surface_destroy(sfc);
+      // sfc = cairo_xlib_surface_create_with_xrender_format (display, window, DefaultScreenOfDisplay(display), format, 1, 1); 
+
+      for(i=0;i<cadlayers;i++) {
+        XLookupColor(display, colormap, color_array[i], &xcolor_exact, &xcolor);
+        xcolor_array[i] = xcolor;
+      }
+/*
+      cairo_set_source_rgb(ctx,
+        (double)xcolor_array[TEXTLAYER].red/65535.0, 
+        (double)xcolor_array[TEXTLAYER].green/65535.0,
+        (double)xcolor_array[TEXTLAYER].blue/65535.0);
+      cairo_set_source_rgb(save_ctx,
+        (double)xcolor_array[TEXTLAYER].red/65535.0, 
+        (double)xcolor_array[TEXTLAYER].green/65535.0,
+        (double)xcolor_array[TEXTLAYER].blue/65535.0);
+*/
+    }
+    #endif
+
     set_linewidth();
-    if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): one step f of xinit()\n");
-    if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done step g of xinit()\n");
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done xinit()\n");
-    winattr.backing_store = WhenMapped;
+    // winattr.backing_store = WhenMapped; //<<<
     //winattr.backing_store = NotUseful;
     Tk_ChangeWindowAttributes(tkwindow, CWBackingStore, &winattr);
    
@@ -753,8 +798,13 @@ int Tcl_AppInit(Tcl_Interp *inter)
     Tcl_Eval(interp,"xschem line_width $line_width");
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): xserver max request size: %d\n", 
                              (int)XMaxRequestSize(display));
+
+
  }
  x_initialized=1;
+
+
+
 //  ************ END X INITIALIZATION *******************
 
 // we look here at user options, and act accordingly before going to interactive mode
@@ -780,8 +830,8 @@ int Tcl_AppInit(Tcl_Interp *inter)
    if(tmp && tmp[0]) strcpy(schematic[currentsch],tmp); // 20070323
    load_file(1, NULL,1);					// 20121110
  }
- // my_strdup(&sch_prefix[currentsch],".");		// 20121110 already done above
- zoom_full(0);						// 20121110
+ zoom_full(/*no draw */ 0);				// Necessary to tell xschem the 
+							// initial area to display
  pending_fullzoom=1; // 20121111
  if(do_netlist) {
   if(debug_var>=1) {

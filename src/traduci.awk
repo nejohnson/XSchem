@@ -14,9 +14,9 @@ END  { endfile(_filename_) }
 
 ###### begin user code ########################
 
-/^L 6 .*\{\} *$/{
+/#ifdef CAIRO/{
   found=1
-  sub(/^L 6/,"L 7") 
+  sub(/#ifdef CAIRO/, "#ifdef HAS_CAIRO")
 }
 
 ###### end  user code  ########################

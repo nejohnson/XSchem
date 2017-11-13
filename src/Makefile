@@ -1,11 +1,11 @@
 
 ## set prefix for installation
 ## XSCHEM will install in ${prefix}/bin, ${prefix}/share/xschem and ${prefix}/share/doc/xschem
-#prefix=/usr/local
 prefix=$(HOME)
 library_prefix=$(HOME)/xschem_library
 
-OBJ = icon.o callback.o actions.o move.o check.o clip.o draw.o globals.o main.o netlist.o \
+OBJ = icon.o callback.o actions.o move.o check.o clip.o draw.o \
+      globals.o main.o netlist.o \
       findnet.o scheduler.o store.o xinit.o select.o font.o editprop.o save.o paste.o \
       token.o psprint.o node_hash.o hilight.o options.o vhdl_netlist.o \
       svgdraw.o spice_netlist.o verilog_netlist.o  parselabel.o expandlabel.o
@@ -14,15 +14,28 @@ CC=gcc
 ## set the TCL-TK version on the system
 TCLVER=8.6
 
-## enable the PROFILEFLAGS below if debugging stuff is needed
+
+## set to 0 if you don't have CAIRO or don't want to use it
+## set to 1 for CAIRO antialiased fonts
+HAS_CAIRO=1
+
+ifeq ($(HAS_CAIRO),1)
+	CAIRO_INCLUDES=`pkg-config cairo xrender --cflags` -D HAS_CAIRO
+	CAIRO_LIBS=`pkg-config cairo xrender --libs`
+else
+	CAIRO_INCLUDES=
+	CAIRO_LIBS=
+endif
+
+## use the MOREFLAGS below if debugging stuff is needed
 ## -g -pg -no-pie
 ## recent gcc generates Position Independent Executable (pie), this breaks
 ## gprof, so use -no-pie together with -pg when profiling code.
-PROFILEFLAGS= -g
+## for cairo: $(pkg-config cairo  --cflags --libs)
+MOREFLAGS= -O3
 
-CFLAGS = -Wall  $(PROFILEFLAGS)  -I/usr/include/tcl${TCLVER} 
-LDFLAGS = -L/usr/X11R6/lib -lX11 -lm -lXpm -ltcl${TCLVER} -ltk${TCLVER}  -lfl  \
-$(PROFILEFLAGS)
+CFLAGS  = -Wall  $(MOREFLAGS)  -I/usr/include/tcl${TCLVER} $(CAIRO_INCLUDES)
+LDFLAGS = -L/usr/X11R6/lib $(MOREFLAGS) -lX11 -lm -lXpm -ltcl${TCLVER} -ltk${TCLVER}  -lfl $(CAIRO_LIBS)
 
 xschem: 	$(OBJ)
 	$(CC) -o $@   $^ $(LDFLAGS)

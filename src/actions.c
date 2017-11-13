@@ -44,46 +44,69 @@ int set_netlist_dir(int force) // 20081210
 
 void resetwin(void)
 {
- int tmp1;
- unsigned int w,h;
- XWindowAttributes wattr;
- if(has_x) {
-       XGetWindowAttributes(display, window, &wattr); // should call only when resized
-						      // to avoid server roundtrip replies
-       //if(wattr.map_state==IsUnmapped) return;
-       w=wattr.width;
-       h=wattr.height;
-       if(debug_var>=1) fprintf(errfp, "resetwin(): x=%d y=%d   w=%d h=%d\n",wattr.x, wattr.y, w,h);
-       if(debug_var>=1) fprintf(errfp, "resetwin(): changing size\n\n");
-       xrect[0].x = 0;
-       xrect[0].y = 0; 
-       xrect[0].width = w;
-       xrect[0].height = h;
-       areax2 = w+2*lw;
-       areay2 = h+2*lw;
-       areax1 = -2*lw;
-       areay1 = -2*lw;
-       areaw = areax2-areax1;
-       areah = areay2-areay1;
+  int i;
+  unsigned int w,h;
+  XWindowAttributes wattr;
+  if(has_x) {
+    i = XGetWindowAttributes(display, window, &wattr); // should call only when resized
+     					      // to avoid server roundtrip replies
+    if(!i) { // 20171105
+      return;
+    }
+    //if(wattr.map_state==IsUnmapped) return;
+    w=wattr.width;
+    h=wattr.height;
+    if(debug_var>=1) fprintf(errfp, "resetwin(): x=%d y=%d   w=%d h=%d\n",wattr.x, wattr.y, w,h);
+    if(debug_var>=1) fprintf(errfp, "resetwin(): changing size\n\n");
+    xrect[0].x = 0;
+    xrect[0].y = 0; 
+    xrect[0].width = w;
+    xrect[0].height = h;
+    areax2 = w+2*lw;
+    areay2 = h+2*lw;
+    areax1 = -2*lw;
+    areay1 = -2*lw;
+    areaw = areax2-areax1;
+    areah = areay2-areay1;
 
-        XFreePixmap(display,save_pixmap);
-        save_pixmap = XCreatePixmap(display,window,areaw,areah ,depth);
-        XSetTile(display,gctiled, save_pixmap);
-       for(tmp1=0;tmp1<cadlayers;tmp1++)
-       {
-         XSetClipRectangles(display, gc[tmp1], 0,0, xrect, 1, Unsorted);
-         XSetClipRectangles(display, gcstipple[tmp1], 0,0, xrect, 1, Unsorted);
-       }
-       XSetClipRectangles(display, gctiled, 0,0, xrect, 1, Unsorted);
- 
-       if(pending_fullzoom) {
-         zoom_full(0);
-         pending_fullzoom=0;
-       } 
-       draw();
-       //debug ...
-       if(debug_var>=1) fprintf(errfp, "resetwin(): Window reset\n");
- }
+    XFreePixmap(display,save_pixmap);
+    save_pixmap = XCreatePixmap(display, window, wattr.width, wattr.height, depth); // 20171111
+    // save_pixmap = XCreatePixmap(display,window,areaw,areah ,depth);
+    XSetTile(display,gctiled, save_pixmap);
+
+    #ifdef HAS_CAIRO
+    cairo_destroy(save_ctx);
+    cairo_surface_destroy(save_sfc);
+    save_sfc = cairo_xlib_surface_create(display, save_pixmap, visual, wattr.width, wattr.height);
+    save_ctx = cairo_create(save_sfc);
+    cairo_set_line_width(save_ctx, 1);
+    cairo_set_line_join(save_ctx, CAIRO_LINE_JOIN_ROUND);
+    cairo_set_line_cap(save_ctx, CAIRO_LINE_CAP_ROUND);
+    cairo_select_font_face (save_ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_set_font_size (save_ctx, 20);
+    #endif
+
+/*
+    for(i=0;i<cadlayers;i++)
+    {
+      XSetClipRectangles(display, gc[i], 0,0, xrect, 1, Unsorted);
+      XSetClipRectangles(display, gcstipple[i], 0,0, xrect, 1, Unsorted);
+    }
+    XSetClipRectangles(display, gctiled, 0,0, xrect, 1, Unsorted);
+*/
+    if(pending_fullzoom) {
+      zoom_full(0);
+      pending_fullzoom=0;
+    } 
+    //debug ...
+    if(debug_var>=1) fprintf(errfp, "resetwin(): Window reset\n");
+
+
+    #ifdef HAS_CAIRO // 20171105
+    cairo_xlib_surface_set_size(sfc, wattr.width, wattr.height);
+    #endif
+
+  }
 }
 
 void toggle_only_probes()
@@ -104,7 +127,7 @@ void toggle_only_probes()
    else {
        Tcl_SetVar(interp,"only_probes","0",TCL_GLOBAL_ONLY);
    }
-   change_linewidth(lw_double);
+   change_linewidth(lw_double, 1);
 }
 
 
@@ -138,7 +161,7 @@ void toggle_fullscreen()
     pending_fullzoom=1;
 }
 
-void change_linewidth(double w)
+void change_linewidth(double w, int dr)
 {
     int i,j;
     j=lw=lw_double=w;
@@ -147,12 +170,13 @@ void change_linewidth(double w)
       for(i=0;i<cadlayers;i++) {
           XSetLineAttributes (display, gc[i], j, LineSolid, CapRound , JoinRound);
       }                                  // lw  20070307
-      //XSetLineAttributes (display, gctiled, lw, LineSolid, CapRound , JoinRound);
-      
       // 20101211
       XSetLineAttributes (display, gctiled, j, LineSolid, CapRound , JoinRound);
     }
-    resetwin();
+    if(dr) {
+      resetwin();
+      draw();
+    }
 }
 
 
@@ -848,8 +872,10 @@ void go_back(int confirm) // 20171006 add confirm
   yorigin=zoom_array[currentsch].y;
   zoom=zoom_array[currentsch].zoom;
   mooz=1/zoom;
+
   set_linewidth();
   resetwin();
+  draw();
 
   current_type=SCHEMATIC;
   if(debug_var>=1) fprintf(errfp, "go_back(): current path: %s\n", sch_prefix[currentsch]);
@@ -867,8 +893,8 @@ void set_linewidth()
    if(has_x) {
       for(i=0;i<cadlayers;i++) {
           XSetLineAttributes (display, gc[i], j, LineSolid, CapRound , JoinRound);
-      }                                  // lw 20070307
-      XSetLineAttributes (display, gctiled, lw, LineSolid, CapRound , JoinRound);
+      }
+      XSetLineAttributes (display, gctiled, j, LineSolid, CapRound , JoinRound); // j as linewidth 20171105
    }
 }
 
@@ -936,24 +962,24 @@ void calc_drawing_bbox(Box *boundbox)
 
 void zoom_full(int dr)
 {
- Box boundbox;
- double yy1;
-    calc_drawing_bbox(&boundbox);
-    zoom=(boundbox.x2-boundbox.x1)/(areaw-4*lw);
-    yy1=(boundbox.y2-boundbox.y1)/(areah-4*lw);
-    if(yy1>zoom) zoom=yy1;
-    zoom*=1.05;
-    mooz=1/zoom;
-    xorigin=boundbox.x1-(areaw-4*lw)/40*zoom;
-    yorigin=-(areah-4*lw)*zoom+boundbox.y2 + (areah-4*lw)/40*zoom;
-    if(debug_var>=1) fprintf(errfp, "zoom_full(): areaw=%d, areah=%d\n", areaw, areah);
+  Box boundbox;
+  double yy1;
+
+  calc_drawing_bbox(&boundbox);
+  zoom=(boundbox.x2-boundbox.x1)/(areaw-4*lw);
+  yy1=(boundbox.y2-boundbox.y1)/(areah-4*lw);
+  if(yy1>zoom) zoom=yy1;
+  zoom*=1.05;
+  mooz=1/zoom;
+  xorigin=-boundbox.x1+(areaw-4*lw)/40*zoom;
+  yorigin=(areah-4*lw)*zoom-boundbox.y2 - (areah-4*lw)/40*zoom;
+  if(debug_var>=1) fprintf(errfp, "zoom_full(): areaw=%d, areah=%d\n", areaw, areah);
    
-    if(dr)
-    { 
-     set_linewidth();
-     draw(); // 20121111
-     //  resetwin(); // 20121111
-    }
+  if(dr)
+  { 
+   set_linewidth();
+   draw(); // 20121111
+  }
 }
 
 
@@ -964,52 +990,54 @@ void view_unzoom(double z)
     if(zoom<CADMINZOOM) return;
     zoom/= factor;
     mooz=1/zoom;
+    xorigin=-mousex_snap+(mousex_snap+xorigin)/factor;
+    yorigin=-mousey_snap+(mousey_snap+yorigin)/factor;
     set_linewidth();
-    xorigin=mousex_snap-(mousex_snap-xorigin)/factor;
-    yorigin=mousey_snap-(mousey_snap-yorigin)/factor;
     resetwin();
+    draw();
 }
 
 void view_zoom(double z)
 {
-    double factor;
-    factor = z!=0.0 ? z : CADZOOMSTEP;
-    if(zoom>CADMAXZOOM) return;
-    zoom*= factor;
-    mooz=1/zoom;
-
-    set_linewidth();
-    xorigin=xorigin-areaw*zoom*(1-1/factor)/2;
-    yorigin=yorigin-areah*zoom*(1-1/factor)/2;
-    resetwin();
+  double factor;
+  factor = z!=0.0 ? z : CADZOOMSTEP;
+  if(zoom>CADMAXZOOM) return;
+  zoom*= factor;
+  mooz=1/zoom;
+  xorigin=xorigin+areaw*zoom*(1-1/factor)/2;
+  yorigin=yorigin+areah*zoom*(1-1/factor)/2;
+  set_linewidth();
+  resetwin();
+  draw();
 }
 
 void zoom_box(int what)
 {
- static double x1,y1,x2,y2;
- static double xx1,yy1,xx2,yy2;
+  static double x1,y1,x2,y2;
+  static double xx1,yy1,xx2,yy2;
 
-   if( (what & BEGIN) )
-   {
+  if( (what & BEGIN) )
+  {
     x1=x2=mousex_snap;y1=y2=mousey_snap;
     rubber |= STARTZOOM;
-   }
-   if( what & END)
-   {
+  }
+  if( what & END)
+  {
     rubber &= ~STARTZOOM;
     RECTORDER(x1,y1,x2,y2);
     drawtemprect(gctiled, NOW, xx1,yy1,xx2,yy2);
-    xorigin=x1;yorigin=y1;
+    xorigin=-x1;yorigin=-y1;
     zoom=(x2-x1)/(areaw-4*lw);
     yy1=(y2-y1)/(areah-4*lw);
     if(yy1>zoom) zoom=yy1;
     mooz=1/zoom;
     set_linewidth();
     resetwin();
+    draw();
     if(debug_var>=1) fprintf(errfp, "zoom_box(): coord: %g %g %g %g zoom=%g\n",x1,y1,mousex_snap, mousey_snap,zoom);
-   }
-   if(what & RUBBER)
-   {
+  }
+  if(what & RUBBER)
+  {
     xx1=x1;yy1=y1;xx2=x2;yy2=y2;
     RECTORDER(xx1,yy1,xx2,yy2);
     drawtemprect(gctiled,NOW, xx1,yy1,xx2,yy2);
@@ -1017,37 +1045,37 @@ void zoom_box(int what)
     xx1=x1;yy1=y1;xx2=x2;yy2=y2;
     RECTORDER(xx1,yy1,xx2,yy2);
     drawtemprect(gc[SELLAYER], NOW, xx1,yy1,xx2,yy2);
-   }
+  }
 }
 
 void draw_stuff(void)
 {
-    double x1,y1,w,h, x2, y2;
-    int i;
-    for(i=0;i<=4000;i++)
+   double x1,y1,w,h, x2, y2;
+   int i;
+   for(i=0;i<=4000;i++)
     {
      w=(float)(areaw*zoom/15) * rand() / (RAND_MAX+1.0);
      h=(float)(areah*zoom/15) * rand() / (RAND_MAX+1.0);
-     x1=(float)(areaw*zoom) * rand() / (RAND_MAX+1.0)+xorigin;
-     y1=(float)(areah*zoom) * rand() / (RAND_MAX+1.0)+yorigin;
+     x1=(float)(areaw*zoom) * rand() / (RAND_MAX+1.0)-xorigin;
+     y1=(float)(areah*zoom) * rand() / (RAND_MAX+1.0)-yorigin;
      x2=x1+w;
      y2=y1+h;
      ORDER(x1,y1,x2,y2);
      rectcolor = (int) (10.0*rand()/(RAND_MAX+1.0))+4;
      storeobject(-1, x1,y1,x2,y2,RECT,rectcolor, 0, NULL);
-    }
-    for(i=0;i<=40;i++)
-    {
+   }
+   for(i=0;i<=40;i++)
+   {
      w=(float)(4);
      h=(float)(4);
-     x1=(float)(areaw*zoom) * rand() / (RAND_MAX+1.0)+xorigin;
-     y1=(float)(areah*zoom) * rand() / (RAND_MAX+1.0)+yorigin;
+     x1=(float)(areaw*zoom) * rand() / (RAND_MAX+1.0)-xorigin;
+     y1=(float)(areah*zoom) * rand() / (RAND_MAX+1.0)-yorigin;
      x2=x1+w;
      y2=y1+h;
      rectcolor = (int) (10.0*rand()/(RAND_MAX+1.0))+4;
      RECTORDER(x1,y1,x2,y2);
      storeobject(-1, x1,y1,x2,y2,RECT,rectcolor, 0, NULL);
-    }
+   }
 }
 
 void new_wire(int what, double mx_snap, double my_snap)
@@ -1192,7 +1220,45 @@ void new_rect(int what)
    }
 }
 
+#ifdef HAS_CAIRO
+void text_bbox(char *str, double xscale, double yscale,
+    int rot, int flip, double x1,double y1, double *rx1, double *ry1,
+    double *rx2, double *ry2)
+{
+  int c=0, length =0;
+  double size;
+  cairo_text_extents_t ext;
+  cairo_font_extents_t fext;
+  double ww, hh;
 
+  size = (xscale+yscale)*26.*cairo_font_scale;
+  cairo_set_font_size (ctx, size*mooz);
+  cairo_text_extents(ctx, "A", &ext);
+  cairo_font_extents(ctx, &fext);
+  cairo_longest_line=0;
+  cairo_lines=1;
+  if(str!=NULL) while( str[c] )
+  {
+   if(str[c++]=='\n') {
+     (cairo_lines)++;length=0;
+   }
+   else {
+     length++;
+   }
+   if(length > cairo_longest_line) {
+     cairo_longest_line = length;
+   }
+  }
+  ww=cairo_longest_line;
+  hh=cairo_lines;
+  ww = ww*ext.x_advance*zoom;
+  hh = hh*fext.height*cairo_font_line_spacing*zoom;
+  *rx1=x1;*ry1=y1;
+  ROTATION(0.0,0.0,ww,hh,(*rx2),(*ry2));
+  *rx2+=*rx1;*ry2+=*ry1;
+  RECTORDER((*rx1),(*ry1),(*rx2),(*ry2));
+}
+#else //!HAS_CAIRO
 void text_bbox(char * str,double xscale, double yscale,
     int rot, int flip, double x1,double y1, double *rx1, double *ry1,
     double *rx2, double *ry2)
@@ -1215,10 +1281,21 @@ void text_bbox(char * str,double xscale, double yscale,
   *rx2+=*rx1;*ry2+=*ry1;
   RECTORDER((*rx1),(*ry1),(*rx2),(*ry2)); 
 }
+#endif
 
 void place_text(int draw_text, double mx, double my)
 {
   char *txt;
+
+  // 20171112
+  #ifdef HAS_CAIRO
+  char *textprop;
+  int textlayer;
+  #endif
+  GC savegc, gctext;
+
+  Tcl_SetVar(interp,"props","",TCL_GLOBAL_ONLY);
+
   if(Tcl_GetVar(interp,"hsize",TCL_GLOBAL_ONLY)==NULL)
    Tcl_SetVar(interp,"hsize","0.4",TCL_GLOBAL_ONLY);
   if(Tcl_GetVar(interp,"vsize",TCL_GLOBAL_ONLY)==NULL)
@@ -1248,9 +1325,21 @@ void place_text(int draw_text, double mx, double my)
   // debug ...
   // textelement[lasttext].prop_ptr=NULL;
   if(debug_var>=1) fprintf(errfp, "place_text(): done text input\n");
-  if(draw_text) draw_string(gc[TEXTLAYER], NOW, textelement[lasttext].txt_ptr, 0, 0, 
+
+  gctext = gc[TEXTLAYER];
+  savegc = gctext;
+  #ifdef HAS_CAIRO
+  textprop = get_tok_value(textelement[lasttext].prop_ptr, "layer", 0);
+  if(textprop[0]!=0) {
+    textlayer = atoi(textprop);
+    if(textlayer >= 0 && textlayer < cadlayers) gctext = gc[textlayer];
+  }
+  #endif
+  if(draw_text) draw_string(gctext, NOW, textelement[lasttext].txt_ptr, 0, 0, 
               textelement[lasttext].x0,textelement[lasttext].y0,
               textelement[lasttext].xscale, textelement[lasttext].yscale);
+  gctext = savegc;
+
   if(x_initialized) drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
   if(x_initialized) drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
   select_text(lasttext, SELECTED);
@@ -1278,8 +1367,8 @@ void pan2(int what, int mx, int my) // 20121123
     ddx = abs(mx -mmx_save);
     ddy = abs(my -mmy_save);
     if(ddx>5 || ddy>5) {
-      xorigin = xorig_save - dx*zoom;
-      yorigin = yorig_save - dy*zoom;
+      xorigin = xorig_save + dx*zoom;
+      yorigin = yorig_save + dy*zoom;
       draw();
       mmx_save = mx;
       mmy_save = my;
@@ -1309,7 +1398,7 @@ void pan(int what)
  if(what & END)
  {
     rubber &= ~STARTPAN;
-    xorigin+=xpan-mousex_snap;yorigin+=ypan-mousey_snap;
+    xorigin+=-xpan+mousex_snap;yorigin+=-ypan+mousey_snap;
     draw();
  }
 }

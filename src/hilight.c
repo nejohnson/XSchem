@@ -328,7 +328,6 @@ void search_inst(char *tok, char *val, int sub, int sel, int what)
           hilight_nets=1;
           inst_ptr[i].flags |= 4;
           if(what==NOW) for(c=0;c<cadlayers;c++)
-            // draw_symbol_outline(NOW, gc[PINLAYER], gcstipple[PINLAYER], i,c,0,0,0.0,0.0);
             draw_symbol_outline(NOW,gc[col%(cadlayers-7)+7], gcstipple[col%(cadlayers-7)+7], i,c,0,0,0.0,0.0);  // 20150804
 
         }
@@ -351,7 +350,9 @@ void search_inst(char *tok, char *val, int sub, int sel, int what)
           if(debug_var>=2) fprintf(errfp, "search_inst(): wire=%d, tok=%s, val=%s \n", i,tok, str);
           if(str && str[0]) {
              bus_hilight_lookup(str, col,0);
-             if(what==NOW) drawline(gc[col%(cadlayers-7)+7], NOW, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
+             if(what==NOW) {
+               drawline(gc[col%(cadlayers-7)+7], NOW, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
+             }
           }
           if(sel) {
             select_wire(i,SELECTED);
@@ -500,10 +501,10 @@ void draw_hilight_net(void)
   for(i=0;i<lastwire;i++)
   {
     // 20150409
-    x1=(wire[i].x1-xorigin)*mooz;
-    x2=(wire[i].x2-xorigin)*mooz;
-    y1=(wire[i].y1-yorigin)*mooz;
-    y2=(wire[i].y2-yorigin)*mooz;
+    x1=(wire[i].x1+xorigin)*mooz;
+    x2=(wire[i].x2+xorigin)*mooz;
+    y1=(wire[i].y1+yorigin)*mooz;
+    y2=(wire[i].y2+yorigin)*mooz;
     if( OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2)) continue;
     // /20150409
 
@@ -526,10 +527,10 @@ void draw_hilight_net(void)
  for(i=0;i<lastinst;i++)
  {
    // 20150409
-   x1=(inst_ptr[i].x1-xorigin)*mooz;
-   x2=(inst_ptr[i].x2-xorigin)*mooz;
-   y1=(inst_ptr[i].y1-yorigin)*mooz;
-   y2=(inst_ptr[i].y2-yorigin)*mooz;
+   x1=(inst_ptr[i].x1+xorigin)*mooz;
+   x2=(inst_ptr[i].x2+xorigin)*mooz;
+   y1=(inst_ptr[i].y1+yorigin)*mooz;
+   y2=(inst_ptr[i].y2+yorigin)*mooz;
    inst_color[i]=0;
    if(OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2)) continue;
    // /20150409
@@ -559,10 +560,10 @@ void draw_hilight_net(void)
     if(inst_color[i] )
     {
      // 20150409
-     x1=(inst_ptr[i].x1-xorigin)*mooz;
-     x2=(inst_ptr[i].x2-xorigin)*mooz;
-     y1=(inst_ptr[i].y1-yorigin)*mooz;
-     y2=(inst_ptr[i].y2-yorigin)*mooz;
+     x1=(inst_ptr[i].x1+xorigin)*mooz;
+     x2=(inst_ptr[i].x2+xorigin)*mooz;
+     y1=(inst_ptr[i].y1+yorigin)*mooz;
+     y2=(inst_ptr[i].y2+yorigin)*mooz;
      if(OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2)) continue;
      if(debug_var>=1) fprintf(errfp, "draw_hilight_net(): instance:%d\n",i);
      drawline(gc[inst_color[i]], BEGIN, 0.0, 0.0, 0.0, 0.0);
@@ -600,10 +601,10 @@ void undraw_hilight_net(void) // 20160413
  for(i=0;i<lastwire;i++)
  {
    // 20150409
-   x1=(wire[i].x1-xorigin)*mooz;
-   x2=(wire[i].x2-xorigin)*mooz;
-   y1=(wire[i].y1-yorigin)*mooz;
-   y2=(wire[i].y2-yorigin)*mooz;
+   x1=(wire[i].x1+xorigin)*mooz;
+   x2=(wire[i].x2+xorigin)*mooz;
+   y1=(wire[i].y1+yorigin)*mooz;
+   y2=(wire[i].y2+yorigin)*mooz;
    if( OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2)) continue;
    // /20150409
 
@@ -625,10 +626,10 @@ void undraw_hilight_net(void) // 20160413
  for(i=0;i<lastinst;i++)
  {
    // 20150409
-   x1=(inst_ptr[i].x1-xorigin)*mooz;
-   x2=(inst_ptr[i].x2-xorigin)*mooz;
-   y1=(inst_ptr[i].y1-yorigin)*mooz;
-   y2=(inst_ptr[i].y2-yorigin)*mooz;
+   x1=(inst_ptr[i].x1+xorigin)*mooz;
+   x2=(inst_ptr[i].x2+xorigin)*mooz;
+   y1=(inst_ptr[i].y1+yorigin)*mooz;
+   y2=(inst_ptr[i].y2+yorigin)*mooz;
    inst_color[i]=0;
    if(OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2)) continue;
    // /20150409

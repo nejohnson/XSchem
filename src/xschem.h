@@ -438,12 +438,15 @@ extern int only_probes; // 20110112
 extern Zoom zoom_array[];
 extern int pending_fullzoom;
 extern int fullscreen;
+extern XColor xcolor_array[];// 20171109
+extern Visual *visual;
+
 // functions
 extern int set_netlist_dir(int force);
 extern int  check_lib(char * s);
 extern void global_spice_netlist(int global);
-extern void hilight_all(void);
-extern void change_linewidth(double w);
+extern void select_all(void);
+extern void change_linewidth(double w, int draw);
 extern void set_fill(int n);
 extern void edit_in_new_window(void);
 extern void symbol_in_new_window(void);
@@ -490,21 +493,23 @@ extern Selected find_closest_obj(double mx,double my);
 extern void find_closest_net_or_symbol_pin(double mx,double my, double *x, double *y);
 
 extern void drawline(GC gc, int what, double x1,double y1,double x2,double y2);
-extern void drawtempline(GC gc, int what, double x1,double y1,double x2,double y2);
-extern void drawgrid(void);
-extern void filledrect(GC gc, int what, double rectx1,double recty1,
-            double rectx2,double recty2);
-extern void drawrect(GC gc, int what, double rectx1,double recty1,
-            double rectx2,double recty2);
-extern void drawtemprect(GC gc, int what, double rectx1,double recty1,
-            double rectx2,double recty2);
+extern void draw_string(GC gc,int what, char *str, int flip, int rot, 
+       double x1, double y1, double xscale, double yscale);
 extern void draw_symbol_outline(int what, GC, GC, int n,int layer,
             int tmp_flip, int tmp_rot, double xoffset, double yoffset);
+extern void drawrect(GC gc, int what, double rectx1,double recty1,
+            double rectx2,double recty2);
+extern void filledrect(GC gc, int what, double rectx1,double recty1,
+            double rectx2,double recty2);
+
+
+extern void drawtempline(GC gc, int what, double x1,double y1,double x2,double y2);
+extern void drawgrid(void);
+extern void drawtemprect(GC gc, int what, double rectx1,double recty1,
+            double rectx2,double recty2);
 extern void draw_temp_symbol_outline(int what, GC gc, int n,int layer,
             int tmp_flip, int tmp_rot, double xoffset, double yoffset);
 extern void draw_temp_string(GC gc,int what, char *str, int flip, int rot, 
-       double x1, double y1, double xscale, double yscale);
-extern void draw_string(GC gc,int what, char *str, int flip, int rot, 
        double x1, double y1, double xscale, double yscale);
 
 
@@ -664,6 +669,21 @@ extern void toggle_only_probes(); // 20110112
 extern void fill_symbol_editprop_form(int x);
 extern void update_symbol(char *result, int x);
 extern void tclexit(ClientData s);
+
+#ifdef HAS_CAIRO // 20171105
+#include <cairo.h>
+#include <cairo-xlib.h>
+#include "cairo-xlib-xrender.h"
+extern cairo_surface_t *sfc, *save_sfc;
+extern cairo_t *ctx, *save_ctx;
+#endif
+extern char cairo_font_name[1024]; // should be monospaced
+extern int cairo_longest_line;
+extern int cairo_lines;
+extern double cairo_font_scale; // default: 1.0, allows to adjust font size
+extern double cairo_font_line_spacing; // allows to change line spacing: default: 1.0
+extern double cairo_vert_correct;
+
 #endif
 
 

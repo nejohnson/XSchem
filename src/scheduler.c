@@ -472,6 +472,27 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
   }
  } else if(!strcmp(argv[1],"set") && argc==4)
  {
+  #ifdef HAS_CAIRO
+  if(!strcmp(argv[2],"cairo_font_name"))  {
+    if( strlen(argv[3]) < sizeof(cairo_font_name) ) {
+      strcpy(cairo_font_name, argv[3]);
+      cairo_select_font_face (ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+      cairo_select_font_face (save_ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+    }
+  }
+  #endif
+  if(!strcmp(argv[2],"cairo_font_scale"))  {
+    double s = atof(argv[3]);
+    if(s>0.1 && s<10.0) cairo_font_scale = s;
+  }
+  if(!strcmp(argv[2],"cairo_font_line_spacing"))  {
+    double s = atof(argv[3]);
+    if(s>0.1 && s<10.0) cairo_font_line_spacing = s;
+  }
+  if(!strcmp(argv[2],"cairo_vert_correct"))  {
+    double s = atof(argv[3]);
+    if(s>-20. && s<20.) cairo_vert_correct = s;
+  }
   if(!strcmp(argv[2],"netlist_type"))  {
     if(!strcmp(argv[3],"vhdl")) {
      netlist_type = CAD_VHDL_NETLIST ;
@@ -668,7 +689,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
 
  else if(!strcmp(argv[1],"line_width") && argc==3)
  {
-    change_linewidth(atof(argv[2]));
+    change_linewidth(atof(argv[2]), 0);
  }
 
  else if(!strcmp(argv[1],"sleep") && argc==3)
@@ -678,7 +699,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
 
  else if(!strcmp(argv[1],"select_all"))
  {
-    hilight_all();
+    select_all();
  }
 
  else if(!strcmp(argv[1],"zoom_in"))
@@ -884,6 +905,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
      if(argc==7) pos=atol(argv[6]);
      storeobject(pos, x1,y1,x2,y2,LINE,rectcolor,0,NULL);
      drawline(gc[rectcolor],NOW, x1,y1,x2,y2);
+    
    } 
    else rubber |= MENUSTARTLINE;
  } else if(!strcmp(argv[1],"rect")) {

@@ -78,10 +78,10 @@ static void ps_filledrect(int gc, double rectx1,double recty1,double rectx2,doub
 {
  double x1,y1,x2,y2;
 
-  x1=(rectx1-xorigin)/zoom;
-  y1=(recty1-yorigin)/zoom;
-  x2=(rectx2-xorigin)/zoom;
-  y2=(recty2-yorigin)/zoom;
+  x1=(rectx1+xorigin)/zoom;
+  y1=(recty1+yorigin)/zoom;
+  x2=(rectx2+xorigin)/zoom;
+  y2=(recty2+yorigin)/zoom;
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
    ps_xfillrectange(gc, x1,y1,x2,y2);
@@ -92,10 +92,10 @@ static void ps_drawline(int gc, double linex1,double liney1,double linex2,double
 {
  double x1,y1,x2,y2;
 
-  x1=(linex1-xorigin)/zoom;
-  y1=(liney1-yorigin)/zoom;
-  x2=(linex2-xorigin)/zoom;
-  y2=(liney2-yorigin)/zoom;
+  x1=(linex1+xorigin)/zoom;
+  y1=(liney1+yorigin)/zoom;
+  x2=(linex2+xorigin)/zoom;
+  y2=(liney2+yorigin)/zoom;
   if( clip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
    ps_xdrawline(gc, x1, y1, x2, y2);
@@ -118,7 +118,7 @@ if(str==NULL) return;
 //   if(debug_var>=2) fprintf(errfp, "ps_draw_string(): xscale=%g zoom=%g \n",xscale,zoom);
 //  //ps_drawrect(gctext, rx1,ry1,rx2,ry2);
 // }
- else
+// else
  {
   text_bbox(str, xscale, yscale, rot, flip, x1,y1, &rx1,&ry1,&rx2,&ry2);
   if(!textclip(areax1,areay1,areax2,areay2,rx1,ry1,rx2,ry2)) return;
@@ -161,7 +161,7 @@ static void ps_drawgrid()
  if(!draw_grid) return;
  delta=CADGRID/zoom;
  while(delta<CADGRIDTHRESHOLD) delta*=CADGRIDMULTIPLY;	// <-- to be improved,but works
- x = -xorigin/zoom;y = -yorigin/zoom;
+ x = xorigin/zoom;y = yorigin/zoom;
  set_ps_colors(SELLAYER);
  if(y>areay1 && y<areay2)
  {
@@ -172,8 +172,8 @@ static void ps_drawgrid()
   ps_xdrawline(SELLAYER,(int)x,areay1+1, (int)x, areay2-1);
  }
  set_ps_colors(GRIDLAYER);
- tmp = floor((areay1+1)/delta)*delta-fmod(yorigin/zoom,delta);
- for(x=floor((areax1+1)/delta)*delta-fmod(xorigin/zoom,delta);x<areax2;x+=delta)
+ tmp = floor((areay1+1)/delta)*delta-fmod(-yorigin/zoom,delta);
+ for(x=floor((areax1+1)/delta)*delta-fmod(-xorigin/zoom,delta);x<areax2;x+=delta)
  {
   for(y=tmp;y<areay2;y+=delta)
   {
@@ -197,10 +197,10 @@ static void ps_draw_symbol_outline(int n,int layer,int tmp_flip, int rot,
 
   if(layer==0)
   {
-   x1=(inst_ptr[n].x1-xorigin)/zoom;
-   x2=(inst_ptr[n].x2-xorigin)/zoom;
-   y1=(inst_ptr[n].y1-yorigin)/zoom;
-   y2=(inst_ptr[n].y2-yorigin)/zoom;
+   x1=(inst_ptr[n].x1+xorigin)/zoom;
+   x2=(inst_ptr[n].x2+xorigin)/zoom;
+   y1=(inst_ptr[n].y1+yorigin)/zoom;
+   y2=(inst_ptr[n].y2+yorigin)/zoom;
    if(OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2))
    {
     inst_ptr[n].flags|=1;

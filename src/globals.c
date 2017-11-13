@@ -202,3 +202,25 @@ int hspice_netlist=0; // hspice veriants 20081209
 char *netlist_dir=NULL; // 20081210
 int horizontal_move=0; // 20171023
 int vertical_move=0; // 20171023
+XColor xcolor_array[256];// 20171109
+Visual *visual; //20171111
+
+#ifdef HAS_CAIRO
+cairo_surface_t *sfc, *save_sfc;
+cairo_t *ctx, *save_ctx;
+#endif
+char cairo_font_name[1024]="Monospace";
+int cairo_longest_line;
+int cairo_lines;
+double cairo_font_scale=1.0; // default: 1.0, allows to adjust font size
+double cairo_font_line_spacing=1.0; // allows to change line spacing: default: 1.0
+
+// lift up the text by 'n' pixels (zoom corrected) within the bbox. 
+// USE WITH CAUTION!!!
+// If value is too big (either positive or negative) the text may 
+// not fit in the calculated bounding box, leaving garbage in the schematic.
+// This correction is used to better align existing schematics
+// compared to the nocairo xschem version.
+// allowed values should be in the range [-1, 3]
+double cairo_vert_correct=0.0;
+                               

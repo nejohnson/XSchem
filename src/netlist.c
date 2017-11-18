@@ -209,13 +209,13 @@ int check_lib(char *s)
  char str[200]; // overflow safe 20161122
  
  found=0;
- Tcl_GlobalEval(interp, "llength $xschem_libs");
+ Tcl_EvalEx(interp, "llength $xschem_libs", -1, TCL_EVAL_GLOBAL);
  range = atoi(Tcl_GetStringResult(interp));
  if(debug_var>=1) fprintf(errfp, "check_lib(): %s, range=%d\n", s, range);
 
  for(i=0;i<range;i++){
   my_snprintf(str, S(str), "lindex $xschem_libs %d",i);
-  Tcl_GlobalEval(interp, str);
+  Tcl_EvalEx(interp, str, -1, TCL_EVAL_GLOBAL);
   if(debug_var>=1) fprintf(errfp, "check_lib(): xschem_libs=%s\n", Tcl_GetStringResult(interp));
   if( strstr(s,Tcl_GetStringResult(interp))) found=1;
  }
@@ -329,8 +329,6 @@ static void wirecheck(int k)	// recursive routine
                   wire[ptr2->n].y2, wire[k].x1,wire[k].y1) ||
                touch(wire[ptr2->n].x1,wire[ptr2->n].y1,wire[ptr2->n].x2,
                   wire[ptr2->n].y2, wire[k].x2,wire[k].y2);
-
-
      if( touches )
      {
        // short circuit check
@@ -341,7 +339,6 @@ static void wirecheck(int k)	// recursive routine
            my_strdup(&wire[ptr2->n].node, wire[k].node);
            my_strdup(&wire[ptr2->n].prop_ptr, 
              subst_token(wire[ptr2->n].prop_ptr, "lab", wire[ptr2->n].node));
-
            wirecheck(ptr2->n); // recursive check
        }
      }

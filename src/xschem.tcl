@@ -1604,6 +1604,34 @@ proc launcher {} {
   eval exec  $launcher_program $launcher_var &
 }
 
+
+proc reconfigure_layers_menu {} {
+   global colors
+   set j 0
+   foreach i $colors {
+     ## 20121121
+     if {  $j == [xschem get pinlayer] } {
+       set laylab PIN
+       set layfg white
+     } elseif { $j == [xschem get wirelayer] } {
+       set laylab WIRE
+       set layfg black
+     } elseif { $j == [xschem get textlayer] } { ;# 20161206
+       set laylab TEXT
+       set layfg blue
+     } else {
+       set laylab {        }
+       set layfg black
+     }
+     .menubar.layers.menu entryconfigure $j -background $i \
+         -command " xschem set rectcolor $j;  .menubar.layers configure -background $i "
+     incr j
+   }
+   .menubar.layers configure -background [lindex $colors [xschem get rectcolor]]
+}
+
+
+
 ### 
 ###   MAIN PROGRAM
 ###
@@ -1746,27 +1774,45 @@ set_ne cairo_vert_correct 0.0
 
 ##### set colors
 if {!$rainbow_colors} {
-
   set_ne cadlayers 22
-  set_ne colors {
+  ## 20171113
+  set_ne light_colors {
+   "#ffffff" "#0044ee" "#aaaaaa" "#222222" "#229900"
+   "#bb2200" "#00ccee" "#ff0000" "#888800" "#00aaaa"
+   "#880088" "#00ff00" "#0000cc" "#666600" "#557755"
+   "#aa2222" "#7ccc40" "#00ffcc" "#ce0097" "#d2d46b"
+   "#ef6158" "#fdb200" }
+
+  set_ne dark_colors {
    "#000000" "#00ccee" "#3f3f3f" "#cccccc" "#88dd00" 
-   "#bb2200" "#00ccee" "#ff0000" "#ffff00" "#ffffff" "#ff00ff" 
-   "#00ff00" "#0000cc" "#aaaa00" "#aaccaa" "#ff7777" 
-   "#bfff81" "#00ffcc" "#ce0097" "#d2d46b" 
+   "#bb2200" "#00ccee" "#ff0000" "#ffff00" "#ffffff"
+   "#ff00ff" "#00ff00" "#0000cc" "#aaaa00" "#aaccaa"
+   "#ff7777" "#bfff81" "#00ffcc" "#ce0097" "#d2d46b" 
    "#ef6158" "#fdb200" }
 
   set_ne ps_colors {
     0x000000 0x0000ee 0x7f7f7f 0x000000 0x338800 
-    0xbb2200 0x0000ee 0xff0000 0xffff00 0x000000 0xff00ff 
-    0x00ff00 0x0000cc 0xaaaa00 0xaaccaa 0xff7777 
-    0xbfff81 0x00ffcc 0xce0097 0xd2d46b 
+    0xbb2200 0x0000ee 0xff0000 0xffff00 0x000000 
+    0xff00ff 0x00ff00 0x0000cc 0xaaaa00 0xaaccaa 
+    0xff7777 0xbfff81 0x00ffcc 0xce0097 0xd2d46b 
     0xef6158 0xfdb200 
   }
 } else {
   # rainbow colors for bitmapping
   # skip if colors defined in ~/.xschem 20121110
   set_ne cadlayers 35
-  set_ne colors {
+  #20171113
+  set_ne light_colors {
+    "#000000" "#00ccee" "grey50"  "#ffffff" "#88dd00"
+    "#bb2200" "#0000e0" "#2000e0" "#4000e0" "#6000e0"
+    "#8000e0" "#a000e0" "#c000e0" "#e000e0" "#e000c0"
+    "#e000a0" "#e00080" "#e00060" "#e00040" "#e00020"
+    "#e00000" "#e02000" "#e04000" "#e06000" "#e08000"
+    "#e0a000" "#e0c000" "#e0e000" "#e0e020" "#e0e040"
+    "#e0e060" "#e0e080" "#e0e0a0" "#e0e0c0" "#e0e0e0"
+  }
+  # same colors as above ...
+  set_ne dark_colors {
     "#000000" "#00ccee" "grey50"  "#ffffff" "#88dd00" 
     "#bb2200" "#0000e0" "#2000e0" "#4000e0" "#6000e0"
     "#8000e0" "#a000e0" "#c000e0" "#e000e0" "#e000c0"
@@ -1785,16 +1831,21 @@ if {!$rainbow_colors} {
     0xe0e060 0xe0e080 0xe0e0a0 0xe0e0c0 0xe0e0e0
   }
 }
-# 20150408 check max # of layers
-if { $cadlayers < [llength $colors] } {
-  set colors [lrange $colors 0 [expr $cadlayers-1]]
+
+## pad missing colors with black
+for {set i 0} { $i<$cadlayers } { incr i} {
+  foreach j { ps_colors light_colors dark_colors } {
+    if { [lindex [set $j] $i] eq {} } {
+      if { $j eq {ps_colors} } {
+        lappend $j {0x000000}
+      } else {
+        lappend $j {#000000}
+      }
+    }
+  }
 }
 
-# 20150408 check max # of layers
-if { $cadlayers < [llength $ps_colors] } {
-  set ps_colors [lrange $ps_colors 0 [expr $cadlayers-1]]
-}
-
+set_ne colors $dark_colors
 ##### end set colors
 
 
@@ -1865,7 +1916,6 @@ xschem set cairo_font_line_spacing $cairo_font_line_spacing
 xschem set cairo_vert_correct $cairo_vert_correct
 # font name can not be set here as we need to wait for X-initialization 
 # to complete. Done in xinit.c
-
 
 ###
 ### build Tk widgets
@@ -2064,7 +2114,7 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
        set layfg black
      } elseif { $j == [xschem get textlayer] } { ;# 20161206
        set laylab TEXT
-       set layfg black
+       set layfg {#777777}
      } else {
        set laylab {        }
        set layfg black
@@ -2101,6 +2151,7 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
          xschem only_probes
       }
 # /20110112
+   .menubar.zoom.menu add command -label "Toggle colorscheme" -command "xschem toggle_colorscheme" -accelerator {C}
 
    menubutton .menubar.prop -text "Properties" -menu .menubar.prop.menu
    menu .menubar.prop.menu -tearoff 0
@@ -2123,6 +2174,7 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    .menubar.tools.menu add command -label "Insert snap wire" -command "xschem snap_wire" -accelerator W
    .menubar.tools.menu add command -label "Insert line" -command "xschem line" -accelerator l
    .menubar.tools.menu add command -label "Insert rect" -command "xschem rect" -accelerator r
+   .menubar.tools.menu add command -label "Insert polygon" -command "xschem polygon" -accelerator C-w
    .menubar.tools.menu add command -label "Search" -accelerator C-f -command  property_search
    .menubar.tools.menu add command -label "Align to Grid" -accelerator A-u -command  "xschem align"
    .menubar.tools.menu add command -label "Execute TCL command" -command  "tclcmd"
@@ -2247,5 +2299,4 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
      }
    }
 }
-
 

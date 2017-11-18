@@ -59,7 +59,7 @@ int callback(int event, int mx, int my, KeySym key,
  {
   case EnterNotify:
   my_snprintf(str, S(str), "%s/%s",getenv("HOME"), ".selection.sch"); // 20161115 PWD->HOME
-  if( (fp=fopen(str, "r"))==NULL && (rubber & STARTCOPY) ) 
+  if( (fp=fopen(str, "r"))==NULL && (ui_state & STARTCOPY) ) 
   {
    copy_objects(ABORT);
    unselect_all();
@@ -99,10 +99,9 @@ int callback(int event, int mx, int my, KeySym key,
     break;
 
   case MotionNotify:
-    //printf("state= %d rubber=%d\n",rubber, state);
-    if(rubber & STARTPAN2)   pan2(RUBBER, mx, my); //20121123 -  20160425 moved up
+    if(ui_state & STARTPAN2)   pan2(RUBBER, mx, my); //20121123 -  20160425 moved up
     if(semaphore==2) break;
-    if(rubber) {
+    if(ui_state) {
       snprintf(str, S(str), "mouse = %g %g - %s  selected: %d w=%g h=%g", 
         mousex_snap, mousey_snap, schematic[currentsch], 
         lastselected ,
@@ -110,43 +109,44 @@ int callback(int event, int mx, int my, KeySym key,
       );
       statusmsg(str,1);
     }
-    if(rubber & STARTPAN)    pan(RUBBER);
-    if(rubber & STARTPAN2)   pan2(RUBBER, mx, my); //20121123
-    if(rubber & STARTZOOM)   zoom_box(RUBBER);
-    if(rubber & STARTSELECT) {
+    if(ui_state & STARTPAN)    pan(RUBBER);
+    if(ui_state & STARTPAN2)   pan2(RUBBER, mx, my); //20121123
+    if(ui_state & STARTZOOM)   zoom_box(RUBBER);
+    if(ui_state & STARTSELECT) {
       if(state & Button3Mask) { // 20171026 added unselect by area 
           select_rect(RUBBER,0);
       } else if(state & Button1Mask) {
           select_rect(RUBBER,1);
       }
     }
-    if(rubber & STARTWIRE) {
+    if(ui_state & STARTWIRE) {
       if(horizontal_move) mousey_snap = my_double_save; // 20171023
       if(vertical_move) mousex_snap = mx_double_save;
       new_wire(RUBBER, mousex_snap, mousey_snap);
     }
-    if(rubber & STARTLINE) {
+    if(ui_state & STARTLINE) {
       if(horizontal_move) mousey_snap = my_double_save; // 20171023
       if(vertical_move) mousex_snap = mx_double_save;
       new_line(RUBBER);
     }
-    if(rubber & STARTMOVE) {
+    if(ui_state & STARTMOVE) {
       if(horizontal_move) mousey_snap = my_double_save; // 20171023
       if(vertical_move) mousex_snap = mx_double_save;
       move_objects(RUBBER,0,0,0);
     }
-    if(rubber & STARTCOPY) {
+    if(ui_state & STARTCOPY) {
       if(horizontal_move) mousey_snap = my_double_save; // 20171023
       if(vertical_move) mousex_snap = mx_double_save;
       copy_objects(RUBBER);
     }
-    if(rubber & STARTRECT)   new_rect(RUBBER);
+    if(ui_state & STARTRECT) new_rect(RUBBER);
+    if(ui_state & STARTPOLYGON) new_polygon(RUBBER); // 20171115
 
-    if((state&Button1Mask) && !(state & ShiftMask))  // start of a mouse area selection
+    if(!(ui_state & STARTPOLYGON) && (state&Button1Mask) && !(state & ShiftMask))  // start of a mouse area selection
     {
       static int onetime=0;
       if(mx != mx_save || my != my_save) {
-        if( !(rubber & STARTSELECT)) {
+        if( !(ui_state & STARTSELECT)) {
           select_rect(BEGIN,1);
           onetime=1;
         }
@@ -155,20 +155,20 @@ int callback(int event, int mx, int my, KeySym key,
             unselect_all(); // 20171026 avoid multiple calls of unselect_all()
             onetime=0;
           }
-          rubber|=STARTSELECT; // set it again cause unselect_all() clears it... 20121123
+          ui_state|=STARTSELECT; // set it again cause unselect_all() clears it... 20121123
         }
       }
     }
  
     if((state&Button3Mask) && (state & ShiftMask)) { // 20150927 unselect area
-      if( !(rubber & STARTSELECT)) {
+      if( !(ui_state & STARTSELECT)) {
         select_rect(BEGIN,0);
       }
     }
  
     if((state&Button1Mask) && (state & ShiftMask)) {
       if(mx != mx_save || my != my_save) {
-        if( !(rubber & STARTSELECT)) {
+        if( !(ui_state & STARTSELECT)) {
           select_rect(BEGIN,1);
         }
         if(abs(mx-mx_save) > 8 || abs(my-my_save) > 8 ) {  // 20121130 set some reasonable threshold before unselecting
@@ -180,8 +180,8 @@ int callback(int event, int mx, int my, KeySym key,
   break;
   case KeyRelease:  // 20161118
     if(key==' ') {  // pan schematic
-      if(rubber & STARTPAN2) {  // 20121123
-        rubber &=~STARTPAN2;
+      if(ui_state & STARTPAN2) {  // 20121123
+        ui_state &=~STARTPAN2;
       }
     }
   break;
@@ -189,11 +189,11 @@ int callback(int event, int mx, int my, KeySym key,
    if(key==' ') {
      if(semaphore<2) { // 20160425
        rebuild_selected_array();
-       if(lastselected==0) rubber &=~SELECTION;
+       if(lastselected==0) ui_state &=~SELECTION;
      }
-     // if(!rubber) {   // 20121123     //20121127 to be validated : pan2 even when some other rubber action in progress
+     // if(!ui_state) {   // 20121123     //20121127 to be validated : pan2 even when some other ui_state action in progress
      pan2(BEGIN, mx, my);
-     rubber |= STARTPAN2;
+     ui_state |= STARTPAN2;
      // }                               //20121127
      break;
    }
@@ -273,12 +273,12 @@ int callback(int event, int mx, int my, KeySym key,
        Tcl_EvalEx(interp,"set horizontal_move 1" , -1, TCL_EVAL_GLOBAL);
        tkeval("xschem set horizontal_move");
      }
-     if(rubber & STARTWIRE) {
+     if(ui_state & STARTWIRE) {
        if(horizontal_move) mousey_snap = my_double_save; // 20171023
        if(vertical_move) mousex_snap = mx_double_save;
        new_wire(RUBBER, mousex_snap, mousey_snap);
      }
-     if(rubber & STARTLINE) {
+     if(ui_state & STARTLINE) {
        if(horizontal_move) mousey_snap = my_double_save; // 20171023
        if(vertical_move) mousex_snap = mx_double_save;
        new_line(RUBBER);
@@ -297,12 +297,12 @@ int callback(int event, int mx, int my, KeySym key,
        Tcl_EvalEx(interp,"set vertical_move 1" , -1, TCL_EVAL_GLOBAL);
        tkeval("xschem set vertical_move");
      }
-     if(rubber & STARTWIRE) {
+     if(ui_state & STARTWIRE) {
        if(horizontal_move) mousey_snap = my_double_save; // 20171023
        if(vertical_move) mousex_snap = mx_double_save;
        new_wire(RUBBER, mousex_snap, mousey_snap);
      }
-     if(rubber & STARTLINE) {
+     if(ui_state & STARTLINE) {
        if(horizontal_move) mousey_snap = my_double_save; // 20171023
        if(vertical_move) mousex_snap = mx_double_save;
        new_line(RUBBER);
@@ -329,7 +329,7 @@ int callback(int event, int mx, int my, KeySym key,
     else {
       my_snprintf(str, S(str), "xschem gensch %s {}", schematic[currentsch]); 
     }
-    Tcl_Eval(interp,str);
+    Tcl_EvalEx(interp,str, -1, TCL_EVAL_GLOBAL);
     if(strcmp(Tcl_GetStringResult(interp), "") ) {
         my_strdup(&ss, Tcl_GetStringResult(interp));
         push_undo(); // 20150327
@@ -373,8 +373,10 @@ int callback(int event, int mx, int my, KeySym key,
 
     if(fill==1) {
      tkeval("alert_ { Stippled pattern fill} {}");
-     for(x=0;x<cadlayers;x++)     
-      XSetFillStyle(display,gcstipple[x],FillStippled);
+     for(x=0;x<cadlayers;x++) {
+       if(fill_type[x]==1) XSetFillStyle(display,gcstipple[x],FillSolid);
+       else XSetFillStyle(display,gcstipple[x],FillStippled);
+     }
     }
     else if(fill==2) {
      tkeval("alert_ { solid pattern fill} {}");
@@ -447,11 +449,10 @@ int callback(int event, int mx, int my, KeySym key,
      // /20130628
      break;
    }
-   // 20171028 no rubber to avoid cluttering selected stuff
-   if(key== 'W' && !rubber && state == ShiftMask) {			// 20171022 create wire snapping to closest instance pin
+   if(key== 'W' && state == ShiftMask) {			// 20171022 create wire snapping to closest instance pin
      double x, y;
      int xx, yy;
-     if(!(rubber & STARTWIRE)){
+     if(!(ui_state & STARTWIRE)){
        find_closest_net_or_symbol_pin(mousex, mousey, &x, &y);
        xx = (x+xorigin)*mooz;
        yy = (y+yorigin)*mooz;
@@ -468,8 +469,7 @@ int callback(int event, int mx, int my, KeySym key,
        Tcl_EvalEx(interp,"set vertical_move 0; set horizontal_move 0" , -1, TCL_EVAL_GLOBAL);
      }
    }
-   // 20171103 no selection to avoid cluttering selected objects while placing a wire
-   if(key == 'w' /* && !(rubber & SELECTION) */ && state==0)	// place wire.
+   if(key == 'w'&& state==0)	// place wire.
    {
      if(!vertical_move) {
        mx_save = mx; 
@@ -484,24 +484,28 @@ int callback(int event, int mx, int my, KeySym key,
      new_wire(PLACE,mousex_snap, mousey_snap); 
     break;
    }
+   if(key == XK_Return && ui_state & STARTPOLYGON) { // quick way to finish a polygon placement
+    new_polygon(ADD|END);
+    break;
+   }
    if(key == XK_Escape)			// abort & redraw
    {
     Tcl_EvalEx(interp,"set vertical_move 0; set horizontal_move 0" , -1, TCL_EVAL_GLOBAL);
 
     horizontal_move = vertical_move = 0; // 20171023
-    if(debug_var>=1) fprintf(errfp, "callback(): Escape: rubber=%d\n", rubber);
-    if(rubber & STARTMOVE)
+    if(debug_var>=1) fprintf(errfp, "callback(): Escape: ui_state=%ld\n", ui_state);
+    if(ui_state & STARTMOVE)
     {
      move_objects(ABORT,0,0,0);
      break;
     }
-    if(rubber & STARTCOPY)
+    if(ui_state & STARTCOPY)
     {
      copy_objects(ABORT);
      break;
     }
-    if(rubber & STARTMERGE) delete();
-    rubber = 0;
+    if(ui_state & STARTMERGE) delete();
+    ui_state = 0;
     unselect_all(); 
     draw();
     break;
@@ -516,6 +520,19 @@ int callback(int event, int mx, int my, KeySym key,
     view_unzoom(0.0); break;
    }
    if(key=='p' && state == 0)		 		// pan
+   {
+    pan(BEGIN);break;
+   }
+   if(key=='w' && !ui_state && state==ControlMask)              // start polygon, 20171115
+   {
+    if(debug_var>=1) fprintf(errfp, "callback(): start polygon\n");
+    mx_save = mx; my_save = my;
+    mx_double_save=rint(( mx*zoom - xorigin)/cadsnap)*cadsnap;
+    my_double_save=rint(( my*zoom - yorigin)/cadsnap)*cadsnap;
+    new_polygon(PLACE);
+    break;
+   }
+   if(key=='p' && state == ControlMask)		 		// pan
    {
     pan(BEGIN);break;
    }
@@ -535,7 +552,7 @@ int callback(int event, int mx, int my, KeySym key,
     if(debug_var>=1) fprintf(errfp, "callback(): new color: %d\n",color_index[rectcolor]);
     break;
    }
-   if(key==XK_Delete && (rubber & SELECTION) )	// delete objects
+   if(key==XK_Delete && (ui_state & SELECTION) )	// delete objects
    {
     delete();break;
    }
@@ -581,7 +598,7 @@ int callback(int event, int mx, int my, KeySym key,
     place_text(1, mousex_snap, mousey_snap); // 1 = draw text 24122002
     break;
    }
-   if(key=='r' && !rubber && state==0)              // start rect
+   if(key=='r' && !ui_state && state==0)              // start rect
    {
     if(debug_var>=1) fprintf(errfp, "callback(): start rect\n");
     mx_save = mx; my_save = my;	// 20070323
@@ -702,6 +719,13 @@ int callback(int event, int mx, int my, KeySym key,
     }
     break;
    }
+   if(key=='C' && state == ShiftMask)   // Toggle light/dark colorscheme 20171113
+   {
+     dark_colorscheme=!dark_colorscheme;
+     build_colors();
+     draw();
+     break;
+   }
    if(key=='v' && state == ControlMask)   // load clipboard
    {
     if(semaphore==2) break;
@@ -816,7 +840,7 @@ int callback(int event, int mx, int my, KeySym key,
     my_snprintf(str, S(str),
      "input_number \"Enter snap value (default: %g current: %g)\" \"xschem set cadsnap_noalert\"", 
      cadsnap, CADSNAP);
-    Tcl_Eval(interp, str);
+    Tcl_EvalEx(interp, str, -1, TCL_EVAL_GLOBAL);
     break;
    }
    if(key=='G' && state==ShiftMask)                                    // double snap factor
@@ -875,8 +899,7 @@ int callback(int event, int mx, int my, KeySym key,
      create_sch_from_sym();
      break;
    }
-   // 20171103 no selection to avoid cluttering selected objects while placing a wire
-   if(key=='l' /* && !(rubber & SELECTION) */ && state == 0)				// start line
+   if(key=='l' && state == 0)				// start line
    {
     if(!vertical_move) {
       mx_save = mx; 
@@ -892,8 +915,8 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='F' && state==ShiftMask)				// Flip
    {
-    if(rubber & STARTMOVE) move_objects(FLIP,0,0,0);
-    if(rubber & STARTCOPY) copy_objects(FLIP);
+    if(ui_state & STARTMOVE) move_objects(FLIP,0,0,0);
+    if(ui_state & STARTCOPY) copy_objects(FLIP);
     break;
    }
    if(key=='f'&& state==Mod1Mask)			// Fullscreen
@@ -904,11 +927,11 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='R' && state==ShiftMask)				// Rotate
    {
-    if(rubber & STARTMOVE) move_objects(ROTATE,0,0,0);
-    if(rubber & STARTCOPY) copy_objects(ROTATE);
+    if(ui_state & STARTMOVE) move_objects(ROTATE,0,0,0);
+    if(ui_state & STARTCOPY) copy_objects(ROTATE);
     break;
    }
-   if(key=='m' && state==0 && !(rubber & (STARTMOVE | STARTCOPY)))// move selected obj.
+   if(key=='m' && state==0 && !(ui_state & (STARTMOVE | STARTCOPY)))// move selected obj.
    {
     mx_save = mx; my_save = my;	// 20070323
     mx_double_save=rint(( mx*zoom - xorigin)/cadsnap)*cadsnap;
@@ -918,7 +941,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    
    if(key=='c' && state==0 &&		// copy selected obj. 
-     !(rubber & (STARTMOVE | STARTCOPY)))
+     !(ui_state & (STARTMOVE | STARTCOPY)))
    {
     mx_save = mx; my_save = my;	// 20070323
     mx_double_save=rint(( mx*zoom - xorigin)/cadsnap)*cadsnap;
@@ -1009,7 +1032,7 @@ int callback(int event, int mx, int my, KeySym key,
            schematic[currentsch]);
     }
 
-    Tcl_GlobalEval(interp, str);
+    Tcl_EvalEx(interp, str, -1, TCL_EVAL_GLOBAL);
     break;
    }
    if(key=='x' && state == 0 ) 	                // new cad session
@@ -1032,8 +1055,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='f' && state == ControlMask)         // search
    {
-    // Tcl_Eval(interp,".menubar.tools.menu  invoke Search" );
-    Tcl_Eval(interp,"property_search" );
+    Tcl_EvalEx(interp,"property_search", -1, TCL_EVAL_GLOBAL );
    }
    if(key=='f' && state == 0 ) 	                // full zoom
    {
@@ -1053,9 +1075,9 @@ int callback(int event, int mx, int my, KeySym key,
    }
   break;
   case ButtonPress:			// end operation
-   if(debug_var>=1) fprintf(errfp, "callback(): ButtonPress  rubber=%d state=%d\n",rubber,state);
-   if(button==Button4 && state == 0 ) view_zoom(1.2);
-   else if(button==Button5 && state == 0 ) view_unzoom(1.2);
+   if(debug_var>=1) fprintf(errfp, "callback(): ButtonPress  ui_state=%ld state=%d\n",ui_state,state);
+   if(button==Button4 && state == 0 ) view_zoom(CADZOOMSTEP);
+   else if(button==Button5 && state == 0 ) view_unzoom(CADZOOMSTEP);
    // 20111114
    else if(button==Button5 && (state & ShiftMask) && !(state & Button2Mask)) {
     xorigin+=-CADMOVESTEP*zoom/2.;
@@ -1077,35 +1099,35 @@ int callback(int event, int mx, int my, KeySym key,
    {
      if(semaphore<2) { // 20160425
        rebuild_selected_array();
-       if(lastselected==0) rubber &=~SELECTION;
+       if(lastselected==0) ui_state &=~SELECTION;
      }
-     // if(!rubber) {   // 20121123	//20121127 to be validated : pan2 even when some other rubber action in progress
+     // if(!ui_state) {   // 20121123	//20121127 to be validated : pan2 even when some other ui_state action in progress
      pan2(BEGIN, mx, my);
-     rubber |= STARTPAN2;
+     ui_state |= STARTPAN2;
      // }				//20121127
    }
    else if(semaphore==2) {
-     if(button==Button1 && state==0) Tcl_GlobalEval(interp, "set editprop_semaphore 2"); // 20160423
+     if(button==Button1 && state==0) Tcl_EvalEx(interp, "set editprop_semaphore 2", -1, TCL_EVAL_GLOBAL); // 20160423
      break;
    }
    else if(button==Button1)
    {
      horizontal_move = vertical_move=0; // 20171023
      Tcl_EvalEx(interp,"set vertical_move 0; set horizontal_move 0" , -1, TCL_EVAL_GLOBAL);
-     if(rubber & MENUSTARTTEXT) {
+     if(ui_state & MENUSTARTTEXT) {
        place_text(1, mousex_snap, mousey_snap); // 20161201
-       rubber &=~MENUSTARTTEXT;
+       ui_state &=~MENUSTARTTEXT;
        break; // 20161201
      }
-     if(rubber & MENUSTARTWIRE) {
+     if(ui_state & MENUSTARTWIRE) {
        mx_save = mx; my_save = my;	// 20070323
        mx_double_save=rint(( mx*zoom + xorigin)/cadsnap)*cadsnap;
        my_double_save=rint(( my*zoom + yorigin)/cadsnap)*cadsnap;
        new_wire(PLACE, mousex_snap, mousey_snap); 
-       rubber &=~MENUSTARTWIRE;
+       ui_state &=~MENUSTARTWIRE;
        break;
      }
-     if(rubber & MENUSTARTSNAPWIRE) { // 20171022
+     if(ui_state & MENUSTARTSNAPWIRE) { // 20171022
        double x, y;
        int xx, yy;
        
@@ -1116,59 +1138,75 @@ int callback(int event, int mx, int my, KeySym key,
        mx_double_save=rint(( xx*zoom - xorigin)/cadsnap)*cadsnap;
        my_double_save=rint(( yy*zoom - yorigin)/cadsnap)*cadsnap;
        new_wire(PLACE, x, y);
-       rubber &=~MENUSTARTSNAPWIRE;
+       ui_state &=~MENUSTARTSNAPWIRE;
        break;
      }
-     if(rubber & MENUSTARTLINE) {
+     if(ui_state & MENUSTARTLINE) {
        mx_save = mx; my_save = my;	// 20070323
        mx_double_save=rint(( mx*zoom - xorigin)/cadsnap)*cadsnap;
        my_double_save=rint(( my*zoom - yorigin)/cadsnap)*cadsnap;
        new_line(PLACE);
-       rubber &=~MENUSTARTLINE;
+       ui_state &=~MENUSTARTLINE;
        break;
      }
-     if(rubber & MENUSTARTRECT) {
+     if(ui_state & MENUSTARTRECT) {
        mx_save = mx; my_save = my;	// 20070323
        mx_double_save=rint(( mx*zoom - xorigin)/cadsnap)*cadsnap;
        my_double_save=rint(( my*zoom - yorigin)/cadsnap)*cadsnap;
        new_rect(PLACE);
-       rubber &=~MENUSTARTRECT;
+       ui_state &=~MENUSTARTRECT;
        break;
      }
-     if(rubber & MENUSTARTZOOM) {
+     if(ui_state & MENUSTARTPOLYGON) {
+       mx_save = mx; my_save = my;      // 20070323
+       mx_double_save=rint(( mx*zoom - xorigin)/cadsnap)*cadsnap;
+       my_double_save=rint(( my*zoom - yorigin)/cadsnap)*cadsnap;
+       new_polygon(PLACE);
+       ui_state &=~MENUSTARTPOLYGON;
+       break;
+     }
+     if(ui_state & MENUSTARTZOOM) {
        zoom_box(BEGIN);
-       rubber &=~MENUSTARTZOOM;
+       ui_state &=~MENUSTARTZOOM;
        break;
      }
-     if(rubber & STARTPAN) {
+     if(ui_state & STARTPAN) {
        pan(END);
        break;
      }
-     if(rubber & STARTZOOM) {
+     if(ui_state & STARTZOOM) {
        zoom_box(END);
        break;
      }
-     if(rubber & STARTWIRE) {
+     if(ui_state & STARTWIRE) {
        new_wire(PLACE|END, mousex_snap, mousey_snap);
        break;
      }
-     if(rubber & STARTLINE) {
+     if(ui_state & STARTLINE) {
        new_line(PLACE|END);
        break;
      }
-     if(rubber & STARTRECT) {
+     if(ui_state & STARTRECT) {
        new_rect(PLACE|END);
        break;
      }
-     if(rubber & STARTMOVE) {
+     if(ui_state & STARTPOLYGON) { // 20171115
+       if( mousex_snap == mx_save && mousey_snap == my_save) {
+         new_polygon(PLACE);
+       } else {
+         new_polygon(ADD);
+       }
+       break;
+     }
+     if(ui_state & STARTMOVE) {
        move_objects(END,0,0,0);
        break;
      }
-     if(rubber & STARTCOPY) {
+     if(ui_state & STARTCOPY) {
        copy_objects(END);
        break;
      }
-     if( !(rubber & STARTSELECT) ) {
+     if( !(ui_state & STARTSELECT) ) {
        mx_save = mx; my_save = my;
        mx_double_save=rint(( mx*zoom - xorigin)/cadsnap)*cadsnap; // 20070322
        my_double_save=rint(( my*zoom - yorigin)/cadsnap)*cadsnap; // 20070322
@@ -1199,12 +1237,12 @@ int callback(int event, int mx, int my, KeySym key,
    }
    break;
   case ButtonRelease:
-   if(debug_var>=1) fprintf(errfp, "callback(): ButtonRelease  rubber=%d state=%d\n",rubber,state);
-   if(rubber & STARTPAN2) {  // 20121123
-     rubber &=~STARTPAN2;
+   if(debug_var>=1) fprintf(errfp, "callback(): ButtonRelease  ui_state=%ld state=%d\n",ui_state,state);
+   if(ui_state & STARTPAN2) {  // 20121123
+     ui_state &=~STARTPAN2;
    }
    if(semaphore==2) break; // 20160423
-   if(rubber & STARTSELECT) {
+   if(ui_state & STARTSELECT) {
      if(state & ControlMask) {
        enable_stretch=1;
        select_rect(END,-1);
@@ -1218,7 +1256,7 @@ int callback(int event, int mx, int my, KeySym key,
    break;
   case -3:  // double click  : edit prop
    if(semaphore==2) break;
-   if(debug_var>=1) fprintf(errfp, "callback(): DoubleClick  rubber=%d state=%d\n",rubber,state);
+   if(debug_var>=1) fprintf(errfp, "callback(): DoubleClick  ui_state=%ld state=%d\n",ui_state,state);
    if(button==Button1 && !(state & ShiftMask)) {
      unselect_all();
      select_object(mousex,mousey,SELECTED);

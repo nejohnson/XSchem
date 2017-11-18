@@ -194,6 +194,12 @@ void xwin_exit(void)
    return;  // 20150409
  }
  if(has_x) {
+    #ifdef HAS_CAIRO // 20171105
+    cairo_destroy(ctx);
+    cairo_destroy(save_ctx);
+    cairo_surface_destroy(sfc);
+    cairo_surface_destroy(save_sfc);
+    #endif
     XFreePixmap(display,save_pixmap);
     for(i=0;i<cadlayers;i++)XFreePixmap(display,pixmap[i]);
     if(debug_var>=1) fprintf(errfp, "xwin_exit(): Releasing pixmaps\n");
@@ -232,26 +238,24 @@ void xwin_exit(void)
     my_free(instdef[i].lineptr);
     my_free(instdef[i].boxptr);
     my_free(instdef[i].lines);
+    my_free(instdef[i].polygons); // 20171115
     my_free(instdef[i].rects);
  }
  my_free(instdef);
  my_free(rect);
  my_free(line);
+ my_free(fill_type);
  my_free(pixdata);
  my_free(lastrect);
+ my_free(polygon); // 20171115
+ my_free(lastpolygon); // 20171115
  my_free(lastline);
- my_free(max_boxes);
+ my_free(max_rects);
+ my_free(max_polygons); // 20171115
  my_free(max_lines);
  my_free(pixmap);
  my_free(gc);
  my_free(gcstipple);
- #ifdef HAS_CAIRO // 20171105
- cairo_destroy(ctx);
- cairo_destroy(save_ctx);
- cairo_surface_destroy(sfc);
- cairo_surface_destroy(save_sfc);
- #endif
-
  my_free(color_array);
  if(debug_var>=1) fprintf(errfp, "xwin_exit(): removing font\n");
  for(i=0;i<127;i++) my_free(character[i]);
@@ -298,7 +302,8 @@ unsigned int  find_best_color(char colorname[])
    }
   }
   // debug ...
-     if(debug_var>=1) fprintf(errfp, "find_best_color(): Server failed to allocate requested color, finding substitute\n");
+  if(debug_var>=1) fprintf(errfp, 
+        "find_best_color(): Server failed to allocate requested color, finding substitute\n");
   XLookupColor(display, colormap, colorname, &xcolor_exact, &xcolor);
   red = xcolor.red; green = xcolor.green; blue = xcolor.blue;
   index=0;
@@ -330,7 +335,7 @@ void init_color_array()
  int i;
  for(i=0;i<cadlayers;i++) {
    my_snprintf(s, S(s), "lindex $colors %d",i);
-   Tcl_Eval(interp, s);
+   Tcl_EvalEx(interp, s, -1, TCL_EVAL_GLOBAL);
    if(debug_var>=1) fprintf(errfp, "init_color_array(): color:%s\n",Tcl_GetStringResult(interp));
    my_strdup(&color_array[i], Tcl_GetStringResult(interp));
  }
@@ -346,11 +351,23 @@ void set_fill(int n)
 
 void init_pixdata() 
 {
- int i,j;
-
- for(i=0;i<cadlayers;i++) 
-  for(j=0;j<32;j++)
-    pixdata[i][j] = pixdata_init[i][j];
+ int i,j, full, empty;
+ for(i=0;i<cadlayers;i++) {
+   full=1; empty=1;
+   for(j=0;j<32;j++) {
+     if(i<sizeof(pixdata_init)/sizeof(pixdata_init[0])) 
+       pixdata[i][j] = pixdata_init[i][j];
+     else 
+       pixdata[i][j] = 0x00;
+ 
+     if(pixdata[i][j]!=0xff) full=0;
+     if(pixdata[i][j]!=0x00) empty=0;
+   }
+   if(full) fill_type[i] = 1;
+   else if(empty) fill_type[i] = 0;
+   else fill_type[i]=2;
+   //fprintf(errfp, "fill_type[%d]= %d\n", i, fill_type[i]);
+ }
 }
 
 void alloc_data()
@@ -391,6 +408,11 @@ void alloc_data()
      fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
    }
 
+   instdef[i].polygonptr=my_calloc(cadlayers, sizeof(Polygon *));
+   if(instdef[i].polygonptr==NULL){
+     fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+   }
+
    instdef[i].boxptr=my_calloc(cadlayers, sizeof(Line *));
    if(instdef[i].boxptr==NULL){
      fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
@@ -405,6 +427,10 @@ void alloc_data()
    if(instdef[i].rects==NULL){
      fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
    }
+   instdef[i].polygons=my_calloc(cadlayers, sizeof(int)); // 20171115
+   if(instdef[i].polygons==NULL){
+     fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+   }
  }
 
  selectedgroup=my_calloc(max_selected, sizeof(Selected));
@@ -412,8 +438,13 @@ void alloc_data()
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
  }
 
- max_boxes=my_calloc(cadlayers, sizeof(int));
- if(max_boxes==NULL){
+ max_rects=my_calloc(cadlayers, sizeof(int));
+ if(max_rects==NULL){
+   fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+ }
+
+ max_polygons=my_calloc(cadlayers, sizeof(int)); // 20171115
+ if(max_polygons==NULL){
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
  }
 
@@ -424,7 +455,8 @@ void alloc_data()
 
  for(i=0;i<cadlayers;i++)
  {
-  max_boxes[i]=CADMAXOBJECTS;
+  max_rects[i]=CADMAXOBJECTS;
+  max_polygons[i]=CADMAXOBJECTS; // 20171115
   max_lines[i]=CADMAXOBJECTS;
  }
 
@@ -438,11 +470,21 @@ void alloc_data()
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
  }
 
+ polygon=my_calloc(cadlayers, sizeof(Polygon *));
+ if(polygon==NULL){
+   fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+ }
+
 
  for(i=0;i<cadlayers;i++)
  {
-  rect[i]=my_calloc(max_boxes[i],sizeof(Box));
+  rect[i]=my_calloc(max_rects[i],sizeof(Box));
   if(rect[i]==NULL){
+    fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+  }
+
+  polygon[i]=my_calloc(max_polygons[i],sizeof(Polygon));
+  if(polygon[i]==NULL){
     fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
   }
 
@@ -454,6 +496,11 @@ void alloc_data()
 
  lastrect=my_calloc(cadlayers, sizeof(int));
  if(lastrect==NULL){
+   fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+ }
+
+ lastpolygon=my_calloc(cadlayers, sizeof(int)); // 20171115
+ if(lastpolygon==NULL){
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
  }
 
@@ -482,6 +529,11 @@ void alloc_data()
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
  }
 
+ fill_type=my_calloc(cadlayers, sizeof(int));
+ if(fill_type==NULL){
+   fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+ }
+
  pixdata=my_calloc(cadlayers, sizeof(char*));
  if(pixdata==NULL){
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
@@ -494,9 +546,46 @@ void alloc_data()
      fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
    }
  }
-  
-
 }
+
+
+int build_colors() // 20171113
+{
+    int i;
+    if(dark_colorscheme) {
+      Tcl_EvalEx(interp, "llength $dark_colors", -1, TCL_EVAL_GLOBAL);
+      if(atoi(Tcl_GetStringResult(interp))>=cadlayers){
+        Tcl_EvalEx(interp, "set colors $dark_colors", -1, TCL_EVAL_GLOBAL);
+      }
+    } else {
+      Tcl_EvalEx(interp, "llength $light_colors", -1, TCL_EVAL_GLOBAL);
+      if(atoi(Tcl_GetStringResult(interp)) >=cadlayers){
+        Tcl_EvalEx(interp, "set colors $light_colors", -1, TCL_EVAL_GLOBAL);
+      }
+    }
+    Tcl_EvalEx(interp, "llength $colors", -1, TCL_EVAL_GLOBAL);
+    if(atoi(Tcl_GetStringResult(interp))<cadlayers){
+      fprintf(errfp,"Tcl var colors not set correctly\n");
+      return -1; // fail
+    }
+    init_color_array();
+    for(i=0;i<cadlayers;i++)
+    {
+     color_index[i] = find_best_color(color_array[i]);
+    }
+    for(i=0;i<cadlayers;i++)
+    {
+     XSetForeground(display, gc[i], color_index[i]);
+     XSetForeground(display, gcstipple[i], color_index[i]);
+    }
+    for(i=0;i<cadlayers;i++) {
+      XLookupColor(display, colormap, color_array[i], &xcolor_exact, &xcolor);
+      xcolor_array[i] = xcolor;
+    }
+    Tcl_EvalEx(interp, "reconfigure_layers_menu", -1, TCL_EVAL_GLOBAL);
+    return 0; // success
+}
+
 
 void tclexit(ClientData s)
 {
@@ -613,12 +702,16 @@ int Tcl_AppInit(Tcl_Interp *inter)
 
  if(Tcl_EvalFile(interp, name)==TCL_ERROR) {
      fprintf(errfp, "Tcl_AppInit() err 5: cannot execute %s, probably due to a syntax error\n", name);
+     fprintf(errfp, "\n%s\n", Tcl_GetStringResult(interp));
      if(has_x) {
-       Tcl_Eval(interp,
-         "tk_messageBox -icon error -type ok -message \"Tcl_AppInit() err 5: can not execute xschem.tcl, probaby due to a syntax error\"");
+       my_snprintf(tmp, S(tmp), "tk_messageBox -icon error -type ok -message \
+          {Tcl_AppInit() err 5: can not execute xschem.tcl, please fix:\n %s}",
+          Tcl_GetStringResult(interp));
+       Tcl_Eval(interp, "wm withdraw ."); // 20161217
+       Tcl_Eval(interp, tmp); // 20161217
+       Tcl_Eval(interp, "exit");
      }
-     Tcl_ResetResult(interp);
-     Tcl_AppendResult(interp, "Tcl_AppInit() err 5: can not execute xschem.tcl, probaby due to a syntax error\n",NULL);
+     Tcl_AppendResult(interp, "\nTcl_AppInit() err 5: can not execute xschem.tcl, probaby due to a syntax error\n",NULL);
      return TCL_ERROR; // 20121110
  }
 
@@ -708,32 +801,24 @@ int Tcl_AppInit(Tcl_Interp *inter)
   
     visual = DefaultVisual(display, screen_number);
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done step b of xinit()\n");
-    for(i=0;i<cadlayers;i++)
-    {
-     color_index[i] = find_best_color(color_array[i]);
-      if(debug_var>=2) fprintf(errfp, "Tcl_AppInit(): color:-->%06x  i=%d\n",color_index[i],i);
-    }
-    rectcolor= 4;
-    if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done step c of xinit()\n");
+    rectcolor= 4;  // this is the current layer when xschem started.
     for(i=0;i<cadlayers;i++)
     {
      pixmap[i] = XCreateBitmapFromData(display, window, (char*)(pixdata[i]),16,16);
      gc[i] = XCreateGC(display,window,0L,NULL);
      gcstipple[i] = XCreateGC(display,window,0L,NULL);
-     XSetForeground(display, gc[i], color_index[i]); 
-     XSetForeground(display, gcstipple[i], color_index[i]); 
      XSetStipple(display,gcstipple[i],pixmap[i]);
-     XSetFillStyle(display,gcstipple[i],FillStippled);
+     if(fill_type[i]==1)  XSetFillStyle(display,gcstipple[i],FillSolid);
+     else XSetFillStyle(display,gcstipple[i],FillStippled);
     }
     gctiled = XCreateGC(display,window,0L, NULL);
-    if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done step d of xinit()\n");
-  
+    if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done step c of xinit()\n");
+    if(build_colors()) exit(-1);
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done step e of xinit()\n");
     //// save_pixmap must be created as resetwin() frees it before recreating with new size.
     save_pixmap = XCreatePixmap(display,window,CADWIDTH,CADHEIGHT,depth);
     XSetTile(display,gctiled,save_pixmap);
     XSetFillStyle(display,gctiled,FillTiled);
-
 
     #ifdef HAS_CAIRO // 20171105
     {
@@ -747,7 +832,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
       save_ctx = cairo_create(save_sfc);
 
       // load font from tcl 20171112
-      Tcl_Eval(interp,"xschem set cairo_font_name $cairo_font_name");
+      Tcl_EvalEx(interp,"xschem set cairo_font_name $cairo_font_name", -1, TCL_EVAL_GLOBAL);
 
       cairo_select_font_face (ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
       cairo_set_font_size (ctx, 20);
@@ -766,21 +851,6 @@ int Tcl_AppInit(Tcl_Interp *inter)
       // format = cairo_xlib_surface_get_xrender_format (sfc);
       // cairo_surface_destroy(sfc);
       // sfc = cairo_xlib_surface_create_with_xrender_format (display, window, DefaultScreenOfDisplay(display), format, 1, 1); 
-
-      for(i=0;i<cadlayers;i++) {
-        XLookupColor(display, colormap, color_array[i], &xcolor_exact, &xcolor);
-        xcolor_array[i] = xcolor;
-      }
-/*
-      cairo_set_source_rgb(ctx,
-        (double)xcolor_array[TEXTLAYER].red/65535.0, 
-        (double)xcolor_array[TEXTLAYER].green/65535.0,
-        (double)xcolor_array[TEXTLAYER].blue/65535.0);
-      cairo_set_source_rgb(save_ctx,
-        (double)xcolor_array[TEXTLAYER].red/65535.0, 
-        (double)xcolor_array[TEXTLAYER].green/65535.0,
-        (double)xcolor_array[TEXTLAYER].blue/65535.0);
-*/
     }
     #endif
 
@@ -800,15 +870,12 @@ int Tcl_AppInit(Tcl_Interp *inter)
                              (int)XMaxRequestSize(display));
 
 
- }
+ } // if(has_x)
  x_initialized=1;
-
-
-
 //  ************ END X INITIALIZATION *******************
 
-// we look here at user options, and act accordingly before going to interactive mode
 
+// we look here at user options, and act accordingly before going to interactive mode
  init_done=1;  // 20171008 moved before option processing, otherwise xwin_exit will not be invoked
                // leaving undo buffer and other garbage around.
 

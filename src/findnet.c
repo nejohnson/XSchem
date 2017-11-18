@@ -46,6 +46,40 @@ void find_closest_net(double mx,double my)
  }
 }
 
+void find_closest_polygon(double mx,double my)
+// returns the polygon that is closest to the mouse pointer
+// if there are lines and distance < CADWIREMINDIST
+{
+ double tmp;
+ static double threshold = CADWIREMINDIST * CADWIREMINDIST;
+ int i, c, j, l=-1;
+ double x1, y1, x2, y2;
+ for(c=0;c<cadlayers;c++)
+ {
+  for(i=0;i<lastpolygon[c];i++)
+  {
+    //fprintf(errfp, "points=%d\n", polygon[c][i].points);
+    for(j=0; j<polygon[c][i].points-1; j++) {
+      x1 = polygon[c][i].x[j];
+      y1 = polygon[c][i].y[j];
+      x2 = polygon[c][i].x[j+1];
+      y2 = polygon[c][i].y[j+1];
+      ORDER(x1,y1,x2,y2);
+      if( (tmp = dist(x1, y1, x2, y2, mx, my)) < distance )
+      {
+       l = i; distance = tmp;sel.col = c;
+       if(debug_var>=1) fprintf(errfp, "find_closest_polygon(): distance=%g  n=%d\n", distance, i);
+      }
+    }
+  } // end for i
+ } // end for c
+ if( distance <= threshold && l!=-1)
+ {
+  sel.n = l; sel.type = POLYGON;
+ }
+}
+
+
 void find_closest_line(double mx,double my)
 // returns the line that is closest to the mouse pointer
 // if there are lines and distance < CADWIREMINDIST
@@ -134,8 +168,6 @@ void find_closest_net_or_symbol_pin(double mx,double my, double *x, double *y)
   *y = min_dist_y;
 }
 
-
-
 void find_closest_box(double mx,double my)
 {
  double tmp;
@@ -215,6 +247,7 @@ Selected find_closest_obj(double mx,double my)
  sel.n = 0L; sel.col = 0; sel.type = 0;
  distance = DBL_MAX;
  find_closest_line(mx,my);
+ find_closest_polygon(mx,my);
  find_closest_box(mx,my);
  find_closest_text(mx,my);
  find_closest_net(mx,my);

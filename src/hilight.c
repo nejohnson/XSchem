@@ -321,21 +321,21 @@ void search_inst(char *tok, char *val, int sub, int sel, int what)
         if(str && str[0]) {
            bus_hilight_lookup(str, col,0);
            if(what==NOW) for(c=0;c<cadlayers;c++)
-             draw_symbol_outline(NOW,gc[col%(cadlayers-7)+7], gcstipple[col%(cadlayers-7)+7], i,c,0,0,0.0,0.0);
+             draw_symbol_outline(NOW,col%(cadlayers-7)+7, i,c,0,0,0.0,0.0);
         }
         else {
           if(debug_var>=1) fprintf(errfp, "search_inst(): setting hilight flag on inst %d\n",i);
           hilight_nets=1;
           inst_ptr[i].flags |= 4;
           if(what==NOW) for(c=0;c<cadlayers;c++)
-            draw_symbol_outline(NOW,gc[col%(cadlayers-7)+7], gcstipple[col%(cadlayers-7)+7], i,c,0,0,0.0,0.0);  // 20150804
+            draw_symbol_outline(NOW,col%(cadlayers-7)+7, i,c,0,0,0.0,0.0);  // 20150804
 
         }
 
 
         if(sel) {
           select_element(i, SELECTED, 1);
-          rubber|=SELECTION;
+          ui_state|=SELECTION;
         }
       }
       
@@ -351,12 +351,12 @@ void search_inst(char *tok, char *val, int sub, int sel, int what)
           if(str && str[0]) {
              bus_hilight_lookup(str, col,0);
              if(what==NOW) {
-               drawline(gc[col%(cadlayers-7)+7], NOW, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
+               drawline(col%(cadlayers-7)+7, NOW, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
              }
           }
           if(sel) {
             select_wire(i,SELECTED);
-            rubber|=SELECTION;
+            ui_state|=SELECTION;
           }
       }
       else {
@@ -513,10 +513,10 @@ void draw_hilight_net(void)
     if(str && str[0]) {
       if( (entry = bus_hilight_lookup(str, 0,2)) ) {
         if(get_tok_value(wire[i].prop_ptr,"bus",0)[0])   // 26122004
-          drawline(gc[7+entry->value%(cadlayers-7)], THICK, 
+          drawline(7+entry->value%(cadlayers-7), THICK, 
              wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
         else
-          drawline(gc[7+entry->value%(cadlayers-7)], NOW, 
+          drawline(7+entry->value%(cadlayers-7), NOW, 
              wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
       }
     }
@@ -566,20 +566,20 @@ void draw_hilight_net(void)
      y2=(inst_ptr[i].y2+yorigin)*mooz;
      if(OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2)) continue;
      if(debug_var>=1) fprintf(errfp, "draw_hilight_net(): instance:%d\n",i);
-     drawline(gc[inst_color[i]], BEGIN, 0.0, 0.0, 0.0, 0.0);
-     drawrect(gc[inst_color[i]], BEGIN, 0.0, 0.0, 0.0, 0.0);
-     if(fill) filledrect(gcstipple[inst_color[i]], BEGIN, 0.0, 0.0, 0.0, 0.0);
+     drawline(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0);
+     drawrect(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0);
+     filledrect(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0);
      // 20160414 from draw()
      symptr = (inst_ptr[i].ptr+instdef);
      if( c==0 || //draw_symbol_outline call is needed on layer 0 to avoid redundant work (outside check)
          symptr->lines[c] ||
          symptr->rects[c] ||
          ((c==TEXTWIRELAYER || c==TEXTLAYER) && symptr->texts)) {
-       draw_symbol_outline(ADD, gc[inst_color[i]],gcstipple[inst_color[i]], i,c,0,0,0.0,0.0);
+       draw_symbol_outline(ADD, inst_color[i], i,c,0,0,0.0,0.0);
      }
-     drawline(gc[inst_color[i]], END, 0.0, 0.0, 0.0, 0.0);
-     drawrect(gc[inst_color[i]], END, 0.0, 0.0, 0.0, 0.0);
-     if(fill) filledrect(gcstipple[inst_color[i]], END, 0.0, 0.0, 0.0, 0.0);
+     drawline(inst_color[i], END, 0.0, 0.0, 0.0, 0.0);
+     drawrect(inst_color[i], END, 0.0, 0.0, 0.0, 0.0);
+     filledrect(inst_color[i], END, 0.0, 0.0, 0.0, 0.0);
     }
   }
  }
@@ -613,10 +613,10 @@ void undraw_hilight_net(void) // 20160413
    if(str && str[0]) {
      if( (!bus_hilight_lookup(str, 0,2)) ) {
        if(get_tok_value(wire[i].prop_ptr,"bus",0)[0])   // 26122004
-         drawline(gc[WIRELAYER], THICK, 
+         drawline(WIRELAYER, THICK, 
             wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
        else
-         drawline(gc[WIRELAYER], NOW, 
+         drawline(WIRELAYER, NOW, 
             wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
      }
    }
@@ -652,9 +652,9 @@ void undraw_hilight_net(void) // 20160413
  for(c=0;c<cadlayers;c++) {
   // 20160414 from draw()
   if(draw_single_layer!=-1 && c != draw_single_layer) continue; // 20151117
-  drawline(gc[c], BEGIN, 0.0, 0.0, 0.0, 0.0);
-  drawrect(gc[c], BEGIN, 0.0, 0.0, 0.0, 0.0);
-  if(fill) filledrect(gcstipple[c], BEGIN, 0.0, 0.0, 0.0, 0.0);
+  drawline(c, BEGIN, 0.0, 0.0, 0.0, 0.0);
+  drawrect(c, BEGIN, 0.0, 0.0, 0.0, 0.0);
+  filledrect(c, BEGIN, 0.0, 0.0, 0.0, 0.0);
   for(i=0;i<lastinst;i++)
   {
     if(!inst_color[i] )
@@ -666,13 +666,13 @@ void undraw_hilight_net(void) // 20160413
          symptr->lines[c] ||
          symptr->rects[c] ||
          ((c==TEXTWIRELAYER || c==TEXTLAYER) && symptr->texts)) {
-       draw_symbol_outline(ADD, gc[c],gcstipple[c], i,c,0,0,0.0,0.0);
+       draw_symbol_outline(ADD, c, i,c,0,0,0.0,0.0);
      }
     }
   }
-  drawline(gc[c], END, 0.0, 0.0, 0.0, 0.0);
-  drawrect(gc[c], END, 0.0, 0.0, 0.0, 0.0);
-  if(fill) filledrect(gcstipple[c], END, 0.0, 0.0, 0.0, 0.0);
+  drawline(c, END, 0.0, 0.0, 0.0, 0.0);
+  drawrect(c, END, 0.0, 0.0, 0.0, 0.0);
+  filledrect(c, END, 0.0, 0.0, 0.0, 0.0);
  }
 }
 

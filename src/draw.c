@@ -137,11 +137,11 @@ void print_image()
   {
     XSetClipMask(display, gc[tmp], None); //20171110 no need to clip, already done in software
     XSetClipMask(display, gcstipple[tmp], None); //20171110 
-    // XSetClipRectangles(display, gc[tmp], 0,0, xrect, 1, Unsorted);
-    // XSetClipRectangles(display, gcstipple[tmp], 0,0, xrect, 1, Unsorted);
+    //XSetClipRectangles(display, gc[tmp], 0,0, xrect, 1, Unsorted);
+    //XSetClipRectangles(display, gcstipple[tmp], 0,0, xrect, 1, Unsorted);
   }
   XSetClipMask(display, gctiled, None); //20171110 
-  // XSetClipRectangles(display, gctiled, 0,0, xrect, 1, Unsorted);
+  //XSetClipRectangles(display, gctiled, 0,0, xrect, 1, Unsorted);
 
   XMapWindow(display, window);
   draw_grid=1;
@@ -164,7 +164,6 @@ void cairo_draw_string_line(cairo_t *ctx, char *s,
   double lines;
   int rx1, ry1, rx2, ry2, save_rot, save_flip;
   // GC gcclear;
-
   if(s==NULL) return;
   if(llength==0) return;
   cairo_text_extents(ctx, s, &ext);
@@ -173,7 +172,7 @@ void cairo_draw_string_line(cairo_t *ctx, char *s,
   line_delta = lineno*fontheight*cairo_font_line_spacing;
   lines = (cairo_lines-1)*fontheight*cairo_font_line_spacing;
   line_offset=(cairo_longest_line-llength)*xadvance/llength;
-  if(xadvance>14000) return;
+  if(xadvance>14000) return; // too big: close to short overflow
   ix=(x+xorigin)*mooz;
   iy=(y+yorigin)*mooz;
   if(rot&1) {
@@ -237,46 +236,31 @@ void cairo_draw_string_line(cairo_t *ctx, char *s,
 }
 
 // CAIRO version
-void draw_string(GC gctext, int what, char *s, int rot, int flip, double x, double y, double xscale, double yscale)
+void draw_string(int layer, int what, char *s, int rot, int flip, double x, double y, double xscale, double yscale)
 {
   char *tt, *ss;
   char c;
   int lineno=0; 
   double size;
   cairo_font_extents_t fext;
-  int i, llength=0;
+  int llength=0;
   double rrx1,rrx2,rry1,rry2;
 
   (void)what; // UNUSED in cairo version, avoid compiler warning
   if(s==NULL || !has_x ) return;
   size = (xscale+yscale)*26.*cairo_font_scale;
+  //fprintf(errfp, "size=%g\n", size*mooz);
   if(size*mooz<3.0) return; // too small
+  if(size*mooz>800) return; // too big
 
-    for(i=0;i<cadlayers;i++) {
-      if(gctext == gc[i]) {
-
-        if(1) {
-          cairo_set_source_rgb(ctx,
-            (double)xcolor_array[i].red/65535.0,
-            (double)xcolor_array[i].green/65535.0,
-            (double)xcolor_array[i].blue/65535.0);
-          cairo_set_source_rgb(save_ctx,
-            (double)xcolor_array[i].red/65535.0,
-            (double)xcolor_array[i].green/65535.0,
-            (double)xcolor_array[i].blue/65535.0);
-        } else {
-          cairo_set_source_rgba(ctx,
-            (double)xcolor_array[i].red/65535.0,
-            (double)xcolor_array[i].green/65535.0,
-            (double)xcolor_array[i].blue/65535.0, 0.7);
-          cairo_set_source_rgba(save_ctx,
-            (double)xcolor_array[i].red/65535.0,
-            (double)xcolor_array[i].green/65535.0,
-            (double)xcolor_array[i].blue/65535.0, 0.7);
-        }
-        break;
-      }
-    }
+  cairo_set_source_rgb(ctx,
+    (double)xcolor_array[layer].red/65535.0,
+    (double)xcolor_array[layer].green/65535.0,
+    (double)xcolor_array[layer].blue/65535.0);
+  cairo_set_source_rgb(save_ctx,
+    (double)xcolor_array[layer].red/65535.0,
+    (double)xcolor_array[layer].green/65535.0,
+    (double)xcolor_array[layer].blue/65535.0);
 
   text_bbox(s, xscale, yscale, rot, flip, x,y, &rrx1,&rry1,&rrx2,&rry2);
   if(!textclip(areax1,areay1,areax2,areay2,rrx1,rry1,rrx2,rry2)) return;
@@ -321,7 +305,7 @@ void draw_temp_string(GC gctext, int what, char *s, int rot, int flip, double x,
 #else // !HAS_CAIRO
 
 // no CAIRO version
-inline void draw_string(GC gctext, int what, char *str, int rot, int flip, 
+inline void draw_string(int layer, int what, char *str, int rot, int flip, 
                  double x1,double y1, double xscale, double yscale)  
 {
  double rrx1,rrx2,rry1,rry2;
@@ -339,7 +323,6 @@ inline void draw_string(GC gctext, int what, char *str, int rot, int flip,
  if(xscale*FONTWIDTH*mooz<1) {
    if(debug_var>=1) fprintf(errfp, "draw_string(): xscale=%g zoom=%g \n",xscale,zoom);
    return;
-  //drawrect(gctext,what, rx1,ry1,rx2,ry2);
  }
  else {
   text_bbox(str, xscale, yscale, rot, flip, x1,y1, &rrx1,&rry1,&rrx2,&rry2);
@@ -372,7 +355,7 @@ inline void draw_string(GC gctext, int what, char *str, int rot, int flip,
         ROTATION(x1,y1,curr_x1,curr_y1,rx1,ry1);
         ROTATION(x1,y1,curr_x2,curr_y2,rx2,ry2);
         ORDER(rx1,ry1,rx2,ry2);
-        drawline(gctext, what, rx1, ry1, rx2, ry2);
+        drawline(layer, what, rx1, ry1, rx2, ry2);
      }
      pos++;
      a += FONTWIDTH+FONTWHITESPACE;
@@ -381,23 +364,19 @@ inline void draw_string(GC gctext, int what, char *str, int rot, int flip,
 }
 
 // no CAIRO version
-void draw_temp_string(GC gctext, int what, char *str, 
-                 int rot, int flip, 
-                 double x1,double y1,
-                 double xscale, double yscale)  
-
+void draw_temp_string(GC gctext, int what, char *str, int rot, int flip, 
+                 double x1,double y1, double xscale, double yscale)  
 {
  double  rx1,rx2,ry1,ry2;
   
  if(!has_x) return;
-
  if(debug_var>=2) fprintf(errfp, "draw_string(): string=%s\n",str);
  text_bbox(str, xscale, yscale, rot, flip, x1,y1, &rx1,&ry1,&rx2,&ry2);
  drawtemprect(gctext,what, rx1,ry1,rx2,ry2);
 }
 #endif // HAS_CAIRO
 
-void draw_symbol_outline(int what,GC gcsym, GC gcstipple, int n,int layer,int tmp_flip, int rot, 
+void draw_symbol_outline(int what,int c, int n,int layer,int tmp_flip, int rot, 
 	double xoffset, double yoffset) 
 			    // draws current layer only, should be called within 
 {		            // a "for(i=0;i<cadlayers;i++)" loop
@@ -406,17 +385,15 @@ void draw_symbol_outline(int what,GC gcsym, GC gcstipple, int n,int layer,int tm
  int flip;
  Line line;
  Box box;
+ Polygon polygon; // 20171115
  Text text;
  register Instdef *symptr; //20150408
+ int textlayer;
 
  // 20171112
  #ifdef HAS_CAIRO
- char *textprop;
- int textlayer;
+ char *textprop, *textfont;
  #endif
- GC savegc;
-
-  //drawtemprect(gcsym,NOW,inst_ptr[n].x1,inst_ptr[n].y1,inst_ptr[n].x2,inst_ptr[n].y2);
   if(!has_x) return;
   if(layer==0) {
    x1=(inst_ptr[n].x1+xoffset+xorigin)*mooz;  // 20150729 added xoffset, yoffset
@@ -450,7 +427,24 @@ void draw_symbol_outline(int what,GC gcsym, GC gcstipple, int n,int layer,int tm
     ROTATION(0.0,0.0,line.x1,line.y1,x1,y1);
     ROTATION(0.0,0.0,line.x2,line.y2,x2,y2);
     ORDER(x1,y1,x2,y2);
-    drawline(gcsym,what, x0+x1, y0+y1, x0+x2, y0+y2);
+    drawline(c,what, x0+x1, y0+y1, x0+x2, y0+y2);
+  }
+  for(j=0;j< symptr->polygons[layer];j++) // 20171115
+  { 
+    polygon = (symptr->polygonptr[layer])[j];
+    {   // scope block so we declare some auxiliary arrays for coord transforms. 20171115
+      int k;
+      double x[polygon.points];
+      double y[polygon.points];
+      for(k=0;k<polygon.points;k++) {
+        ROTATION(0.0,0.0,polygon.x[k],polygon.y[k],x[k],y[k]);
+        x[k]+= x0;
+        y[k] += y0;
+      }
+      drawpolygon(c, NOW, x, y, polygon.points);
+      drawfillpolygon(c, NOW, x, y, polygon.points);
+    }
+
   }
   for(j=0;j< symptr->rects[layer];j++)
   {
@@ -458,8 +452,8 @@ void draw_symbol_outline(int what,GC gcsym, GC gcstipple, int n,int layer,int tm
     ROTATION(0.0,0.0,box.x1,box.y1,x1,y1);
     ROTATION(0.0,0.0,box.x2,box.y2,x2,y2);
     RECTORDER(x1,y1,x2,y2); 
-    drawrect(gcsym,what, x0+x1, y0+y1, x0+x2, y0+y2);
-    if(fill) filledrect(gcstipple,what, x0+x1, y0+y1, x0+x2, y0+y2); // 20070323 added fill check
+    drawrect(c,what, x0+x1, y0+y1, x0+x2, y0+y2);
+    filledrect(c,what, x0+x1, y0+y1, x0+x2, y0+y2); // 20070323 added fill check
   }
   if( (layer==TEXTWIRELAYER && !(inst_ptr[n].flags&2) ) || 
       (sym_txt && (layer==TEXTLAYER) && (inst_ptr[n].flags&2) ) ) {
@@ -470,22 +464,33 @@ void draw_symbol_outline(int what,GC gcsym, GC gcstipple, int n,int layer,int tm
       text.txt_ptr= translate(n, text.txt_ptr);
       ROTATION(0.0,0.0,text.x0,text.y0,x1,y1);
 
-      // 20171112 user defined colors (only on cairo)
-      savegc = gcsym;
-
+      textlayer = c;
       #ifdef HAS_CAIRO
       textprop = get_tok_value(symptr->txtptr[j].prop_ptr, "layer", 0);
       if(textprop[0]!=0) {
         textlayer = atoi(textprop);
-        if(textlayer >= 0 && textlayer < cadlayers) gcsym = gc[textlayer];
+        if(textlayer < 0 || textlayer >= cadlayers) textlayer = layer;
+      }
+      textfont = get_tok_value(symptr->txtptr[j].prop_ptr, "font", 0);
+      if(textfont[0]) {
+        cairo_save(ctx);
+        cairo_save(save_ctx);
+        cairo_select_font_face (ctx, textfont, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+        cairo_select_font_face (save_ctx, textfont, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
       }
       #endif
-      draw_string(gcsym, what, text.txt_ptr,
+      draw_string(textlayer, what, text.txt_ptr,
         (text.rot + ( (flip && (text.rot & 1) ) ? rot+2 : rot) ) & 0x3,
         flip^text.flip,
         x0+x1, y0+y1, text.xscale, text.yscale);                    
-
-      gcsym = savegc;
+      #ifdef HAS_CAIRO
+      if(textfont[0]) {
+        cairo_select_font_face (ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+        cairo_select_font_face (save_ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+        cairo_restore(ctx);
+        cairo_restore(save_ctx);
+      }
+      #endif
     }
   }
 }
@@ -498,6 +503,7 @@ void draw_temp_symbol_outline(int what, GC gc, int n,int layer,int tmp_flip, int
  double x0,y0,x1,y1,x2,y2;
  int flip;
  Line line;
+ Polygon polygon;
  Box box;
  Text text;
  register Instdef *symptr; //20150408
@@ -537,6 +543,25 @@ void draw_temp_symbol_outline(int what, GC gc, int n,int layer,int tmp_flip, int
   ORDER(x1,y1,x2,y2);
   drawtempline(gc,what, x0+x1, y0+y1, x0+x2, y0+y2);
  }
+ for(j=0;j< symptr->polygons[layer];j++) // 20171115
+ {
+   //fprintf(errfp, "draw_temp_symbol_outline: polygon\n");
+   polygon = (symptr->polygonptr[layer])[j];
+
+   {   // scope block so we declare some auxiliary arrays for coord transforms. 20171115
+     int k;
+     double x[polygon.points];
+     double y[polygon.points];
+     for(k=0;k<polygon.points;k++) {
+       ROTATION(0.0,0.0,polygon.x[k],polygon.y[k],x[k],y[k]);
+       x[k]+= x0;
+       y[k] += y0;
+     }
+     drawtemppolygon(gc, NOW, x, y, polygon.points);
+    }
+
+ }
+ 
  for(j=0;j< symptr->rects[layer];j++)
  {
   box = (symptr->boxptr[layer])[j];
@@ -606,7 +631,7 @@ void drawgrid()
 }
 
 
-void drawline(GC gc, int what, double linex1, double liney1, double linex2, double liney2)
+void drawline(int c, int what, double linex1, double liney1, double linex2, double liney2)
 {
  static int i=0;
  static XSegment r[CADDRAWBUFFERSIZE];
@@ -621,9 +646,9 @@ void drawline(GC gc, int what, double linex1, double liney1, double linex2, doub
  {
   if(ii>=CADDRAWBUFFERSIZE)
   {
-   XDrawSegments(display, window, gc, rr,ii);
+   XDrawSegments(display, window, gc[c], rr,ii);
    if(draw_pixmap)
-     XDrawSegments(display, save_pixmap, gc, rr,ii);
+     XDrawSegments(display, save_pixmap, gc[c], rr,ii);
    ii=i=0;
   }
   x1=(linex1+xorigin)*mooz;
@@ -647,9 +672,9 @@ void drawline(GC gc, int what, double linex1, double liney1, double linex2, doub
   y2=(liney2+yorigin)*mooz;
   if( clip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
-   XDrawLine(display, window, gc, x1, y1, x2, y2);
+   XDrawLine(display, window, gc[c], x1, y1, x2, y2);
    if(draw_pixmap) 
-    XDrawLine(display, save_pixmap, gc, x1, y1, x2, y2);
+    XDrawLine(display, save_pixmap, gc[c], x1, y1, x2, y2);
   }
  } 
 
@@ -661,15 +686,11 @@ void drawline(GC gc, int what, double linex1, double liney1, double linex2, doub
   y2=(liney2+yorigin)*mooz;
   if( clip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
-   XSetLineAttributes (display, gc, BUS_WIDTH , LineSolid, CapRound , JoinRound);
+   XSetLineAttributes (display, gc[c], BUS_WIDTH , LineSolid, CapRound , JoinRound);
 
-   XDrawLine(display, window, gc, x1, y1, x2, y2);
-   if(draw_pixmap)
-    XDrawLine(display, save_pixmap, gc, x1, y1, x2, y2);
-   if(gc==gctiled) 
-     XSetLineAttributes (display, gc, lw, LineSolid, CapRound , JoinRound);
-   else
-     XSetLineAttributes (display, gc, lw==1? 0:lw, LineSolid, CapRound , JoinRound);
+   XDrawLine(display, window, gc[c], x1, y1, x2, y2);
+   if(draw_pixmap) XDrawLine(display, save_pixmap, gc[c], x1, y1, x2, y2);
+   XSetLineAttributes (display, gc[c], lw==1? 0:lw, LineSolid, CapRound , JoinRound);
   }
  }
 
@@ -677,9 +698,9 @@ void drawline(GC gc, int what, double linex1, double liney1, double linex2, doub
  else if(what==BEGIN) i=0;
  else if(what==END)
  {
-  XDrawSegments(display, window, gc, rr,ii);
+  XDrawSegments(display, window, gc[c], rr,ii);
   if(draw_pixmap)
-    XDrawSegments(display, save_pixmap, gc, rr,ii);
+    XDrawSegments(display, save_pixmap, gc[c], rr,ii);
   i=0;
  }
 }
@@ -752,13 +773,14 @@ void drawtempline(GC gc, int what, double linex1,double liney1,double linex2,dou
 
 
 
-void filledrect(GC gc, int what, double rectx1,double recty1,double rectx2,double recty2)
+void filledrect(int c, int what, double rectx1,double recty1,double rectx2,double recty2)
 {
  static int i=0;
  static XRectangle r[CADDRAWBUFFERSIZE];
  double x1,y1,x2,y2;
 
  if(!has_x) return;
+ if(!fill || !fill_type[c]) return;
  if(what==NOW)
  {
   x1=(rectx1+xorigin)*mooz;
@@ -767,11 +789,11 @@ void filledrect(GC gc, int what, double rectx1,double recty1,double rectx2,doubl
   y2=(recty2+yorigin)*mooz;
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
-   XFillRectangle(display, window, gc, (int)x1, (int)y1, 
+   XFillRectangle(display, window, gcstipple[c], (int)x1, (int)y1, 
     (unsigned int)x2 - (unsigned int)x1,
     (unsigned int)y2 - (unsigned int)y1);
    if(draw_pixmap)
-     XFillRectangle(display, save_pixmap,gc,  (int)x1, (int)y1, 
+     XFillRectangle(display, save_pixmap,gcstipple[c],  (int)x1, (int)y1, 
       (unsigned int)x2 - (unsigned int)x1,
       (unsigned int)y2 - (unsigned int)y1);
   }
@@ -781,9 +803,9 @@ void filledrect(GC gc, int what, double rectx1,double recty1,double rectx2,doubl
  {
   if(i>=CADDRAWBUFFERSIZE)
   {
-   XFillRectangles(display, window, gc, r,i);
+   XFillRectangles(display, window, gcstipple[c], r,i);
    if(draw_pixmap)
-     XFillRectangles(display, save_pixmap, gc, r,i);
+     XFillRectangles(display, save_pixmap, gcstipple[c], r,i);
    i=0;
   }
   x1=(rectx1+xorigin)*mooz;
@@ -801,16 +823,56 @@ void filledrect(GC gc, int what, double rectx1,double recty1,double rectx2,doubl
  }
  else if(what==END)
  {
-  XFillRectangles(display, window, gc, r,i);
+  XFillRectangles(display, window, gcstipple[c], r,i);
   if(draw_pixmap)
-    XFillRectangles(display, save_pixmap, gc, r,i);
+    XFillRectangles(display, save_pixmap, gcstipple[c], r,i);
   i=0;
  }
 }
+// Convex Nonconvex Complex
+#define Polygontype Nonconvex
+void drawpolygon(int c, int what, double *x, double *y, int points)
+{
+  XPoint p[points];
+  int i;
+  if(!has_x) return;
+  for(i=0;i<points; i++) {
+    p[i].x = (x[i] + xorigin)*mooz;
+    p[i].y = (y[i] + yorigin)*mooz;
+  }
+  XDrawLines(display, window, gc[c], p, points, CoordModeOrigin);
+  if(draw_pixmap)
+    XDrawLines(display, save_pixmap, gc[c], p, points, CoordModeOrigin);
+}
 
 
+void drawfillpolygon(int c, int what, double *x, double *y, int points)
+{
+  XPoint p[points];
+  int i;
+  if(!has_x) return;
+  if(!fill || !fill_type[c]) return;
+  for(i=0;i<points; i++) {
+    p[i].x = (x[i] + xorigin)*mooz;
+    p[i].y = (y[i] + yorigin)*mooz;
+  }
+  XFillPolygon(display, window, gcstipple[c], p, points, Polygontype, CoordModeOrigin);
+  if(draw_pixmap)
+     XFillPolygon(display, save_pixmap, gcstipple[c], p, points, Polygontype, CoordModeOrigin);
+}
+void drawtemppolygon(GC gc, int what, double *x, double *y, int points)
+{
+  XPoint p[points];
+  int i;
+  if(!has_x) return;
+  for(i=0;i<points; i++) {
+    p[i].x = (x[i] + xorigin)*mooz;
+    p[i].y = (y[i] + yorigin)*mooz;
+  }
+  XDrawLines(display, window, gc, p, points, CoordModeOrigin);
+}
 
-void drawrect(GC gc, int what, double rectx1,double recty1,double rectx2,double recty2)
+void drawrect(int c, int what, double rectx1,double recty1,double rectx2,double recty2)
 {
  static int i=0;
  static XRectangle r[CADDRAWBUFFERSIZE];
@@ -825,14 +887,14 @@ void drawrect(GC gc, int what, double rectx1,double recty1,double rectx2,double 
   y2=(recty2+yorigin)*mooz;
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
-   XDrawRectangle(display, window, gc, (int)x1, (int)y1,
+   XDrawRectangle(display, window, gc[c], (int)x1, (int)y1,
     (unsigned int)x2 - (unsigned int)x1,	// buggy, 23102001
     (unsigned int)y2 - (unsigned int)y1);	// buggy, 23102001
 //    (unsigned int)(x2 - x1),			//23102001
 //    (unsigned int)(y2 - y1) );			//23102001
    if(draw_pixmap)
    {
-    XDrawRectangle(display, save_pixmap, gc, (int)x1, (int)y1,
+    XDrawRectangle(display, save_pixmap, gc[c], (int)x1, (int)y1,
     (unsigned int)x2 - (unsigned int)x1,	// buggy, 23102001
     (unsigned int)y2 - (unsigned int)y1);	// buggy, 23102001
 //    (unsigned int)(x2 - x1),			//23102001
@@ -845,9 +907,9 @@ void drawrect(GC gc, int what, double rectx1,double recty1,double rectx2,double 
  {
   if(i>=CADDRAWBUFFERSIZE)
   {
-   XDrawRectangles(display, window, gc, r,i);
+   XDrawRectangles(display, window, gc[c], r,i);
    if(draw_pixmap)
-     XDrawRectangles(display, save_pixmap, gc, r,i);
+     XDrawRectangles(display, save_pixmap, gc[c], r,i);
    i=0;
   }
   x1=(rectx1+xorigin)*mooz;
@@ -868,14 +930,12 @@ void drawrect(GC gc, int what, double rectx1,double recty1,double rectx2,double 
  }
  else if(what==END)
  {
-  XDrawRectangles(display, window, gc, r,i);
+  XDrawRectangles(display, window, gc[c], r,i);
   if(draw_pixmap)
-    XDrawRectangles(display, save_pixmap, gc, r,i);
+    XDrawRectangles(display, save_pixmap, gc[c], r,i);
   i=0;
  }
 }
-
-
 
 void drawtemprect(GC gc, int what, double rectx1,double recty1,double rectx2,double recty2)
 {
@@ -933,104 +993,122 @@ void draw(void)
 {
  register int c,i; 
  register Instdef *symptr; // 20150408
+ int textlayer;
 
   // 20171112
   #ifdef HAS_CAIRO
-  char *textprop;
-  int textlayer;
+  char *textprop, *textfont;
   #endif
-  GC savegc, gctext;
 
  rebuild_selected_array();
  if(has_x) {
-    if(draw_pixmap)
+    if(ui_state & SELECTION) draw_dots=0; // 20171114
+    if(draw_pixmap) {
       XFillRectangle(display, save_pixmap, gc[BACKLAYER], 
              areax1, areay1, areaw, areah);// clear pixmap
+    }
     XFillRectangle(display, window, gc[BACKLAYER], areax1, areay1, areaw, areah);// clear window
     if(debug_var>=1) fprintf(errfp, "draw(): window: %d %d %d %d\n",areax1, areay1, areaw, areah);
     drawgrid();
     if(!only_probes) { // 20110112
         if(draw_single_layer==-1 || draw_single_layer==WIRELAYER){ // 20151117
-          drawline(gc[WIRELAYER],BEGIN, 0.0, 0.0, 0.0, 0.0);
-          filledrect(gc[WIRELAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
+          drawline(WIRELAYER,BEGIN, 0.0, 0.0, 0.0, 0.0);
+          filledrect(WIRELAYER, BEGIN, 0.0, 0.0, 0.0, 0.0);
           for(i=0;i<lastwire;i++)
           {
             if(get_tok_value(wire[i].prop_ptr,"bus",0)[0]) {	// 26122004
-              drawline(gc[WIRELAYER], THICK, wire[i].x1,wire[i].y1,wire[i].x2,wire[i].y2);
+              drawline(WIRELAYER, THICK, wire[i].x1,wire[i].y1,wire[i].x2,wire[i].y2);
             }
             else
-              drawline(gc[WIRELAYER], ADD, wire[i].x1,wire[i].y1,wire[i].x2,wire[i].y2);
-            if(wire[i].end1 >1 && draw_dots)  // 20150331 draw_dots
-             filledrect(gc[WIRELAYER], ADD, wire[i].x1-CADHALFDOTSIZE,wire[i].y1-CADHALFDOTSIZE,
+              drawline(WIRELAYER, ADD, wire[i].x1,wire[i].y1,wire[i].x2,wire[i].y2);
+            if(wire[i].end1 >1 && draw_dots) { // 20150331 draw_dots
+               filledrect(WIRELAYER, ADD, wire[i].x1-CADHALFDOTSIZE,wire[i].y1-CADHALFDOTSIZE,
                         wire[i].x1+CADHALFDOTSIZE,wire[i].y1+CADHALFDOTSIZE );
-            if(wire[i].end2 >1 && draw_dots)  // 20150331 draw_dots
-             filledrect(gc[WIRELAYER], ADD, wire[i].x2-CADHALFDOTSIZE,wire[i].y2-CADHALFDOTSIZE,
+            }
+            if(wire[i].end2 >1 && draw_dots) { // 20150331 draw_dots
+               filledrect(WIRELAYER, ADD, wire[i].x2-CADHALFDOTSIZE,wire[i].y2-CADHALFDOTSIZE,
                         wire[i].x2+CADHALFDOTSIZE,wire[i].y2+CADHALFDOTSIZE );
+            }
           }
-          drawline(gc[WIRELAYER], END, 0.0, 0.0, 0.0, 0.0);
-          filledrect(gc[WIRELAYER], END, 0.0, 0.0, 0.0, 0.0);
+          drawline(WIRELAYER, END, 0.0, 0.0, 0.0, 0.0);
+          filledrect(WIRELAYER, END, 0.0, 0.0, 0.0, 0.0);
         }
      
         for(c=0;c<cadlayers;c++)
         {
           if(draw_single_layer!=-1 && c != draw_single_layer) continue; // 20151117
-          drawline(gc[c], BEGIN, 0.0, 0.0, 0.0, 0.0);
-          drawrect(gc[c], BEGIN, 0.0, 0.0, 0.0, 0.0);
-          if(fill) filledrect(gcstipple[c], BEGIN, 0.0, 0.0, 0.0, 0.0);
+          drawline(c, BEGIN, 0.0, 0.0, 0.0, 0.0);
+          drawrect(c, BEGIN, 0.0, 0.0, 0.0, 0.0);
+          filledrect(c, BEGIN, 0.0, 0.0, 0.0, 0.0);
       
           for(i=0;i<lastline[c];i++) 
-            drawline(gc[c], ADD, line[c][i].x1, line[c][i].y1, line[c][i].x2, line[c][i].y2);
+            drawline(c, ADD, line[c][i].x1, line[c][i].y1, line[c][i].x2, line[c][i].y2);
           for(i=0;i<lastrect[c];i++) 
           {
-            drawrect(gc[c], ADD, rect[c][i].x1, rect[c][i].y1, rect[c][i].x2, rect[c][i].y2);
-            if(fill) filledrect(gcstipple[c], ADD, 
-                     rect[c][i].x1, rect[c][i].y1, rect[c][i].x2, rect[c][i].y2);
+            drawrect(c, ADD, rect[c][i].x1, rect[c][i].y1, rect[c][i].x2, rect[c][i].y2);
+            filledrect(c, ADD, rect[c][i].x1, rect[c][i].y1, rect[c][i].x2, rect[c][i].y2);
+          }
+          for(i=0;i<lastpolygon[c];i++) {
+            drawpolygon(c, NOW, polygon[c][i].x, polygon[c][i].y, polygon[c][i].points);
+            drawfillpolygon(c,  NOW, polygon[c][i].x, polygon[c][i].y, polygon[c][i].points);
           }
           for(i=0;i<lastinst;i++) {
             symptr = (inst_ptr[i].ptr+instdef);
             if( c==0 || //20150408 draw_symbol_outline call is needed on layer 0 to avoid redundant work (outside check)
                 symptr->lines[c] ||  // 20150408
                 symptr->rects[c] ||   // 20150408
+                symptr->polygons[c] ||   // 20150408
                 ((c==TEXTWIRELAYER || c==TEXTLAYER) && symptr->texts)) {  // 20150408
-              draw_symbol_outline(ADD, gc[c],gcstipple[c], i,c,0,0,0.0,0.0);
+              draw_symbol_outline(ADD, c, i,c,0,0,0.0,0.0);
             }  // 20150408
           }
       
-          drawline(gc[c], END, 0.0, 0.0, 0.0, 0.0);
-          drawrect(gc[c], END, 0.0, 0.0, 0.0, 0.0);
-          if(fill) filledrect(gcstipple[c], END, 0.0, 0.0, 0.0, 0.0);
+          drawline(c, END, 0.0, 0.0, 0.0, 0.0);
+          drawrect(c, END, 0.0, 0.0, 0.0, 0.0);
+          filledrect(c, END, 0.0, 0.0, 0.0, 0.0);
         }
   
         if(draw_single_layer ==-1 || draw_single_layer==TEXTLAYER) { // 20151117
 
-          gctext = gc[TEXTLAYER];
           #ifndef HAS_CAIRO
-          drawline(gctext,BEGIN, 0.0, 0.0, 0.0, 0.0);
-          drawrect(gctext,BEGIN, 0.0, 0.0, 0.0, 0.0);
+          drawline(TEXTLAYER,BEGIN, 0.0, 0.0, 0.0, 0.0);
+          drawrect(TEXTLAYER,BEGIN, 0.0, 0.0, 0.0, 0.0);
           #endif
           for(i=0;i<lasttext;i++) 
           {
+            textlayer = TEXTLAYER;
             if(debug_var >=1) fprintf(errfp, "draw(): drawing string %d = %s\n",i, textelement[i].txt_ptr);
 
-            // 20171112 user defined colors (only on cairo)
-            savegc = gctext;
-      
             #ifdef HAS_CAIRO
             textprop = get_tok_value(textelement[i].prop_ptr, "layer", 0);
             if(textprop[0]!=0) {
               textlayer = atoi(textprop);
-              if(textlayer >= 0 && textlayer < cadlayers) gctext = gc[textlayer];
+              if(textlayer < 0 ||  textlayer >= cadlayers) textlayer = TEXTLAYER;
+            }
+            textfont = get_tok_value(textelement[i].prop_ptr, "font", 0);
+            if(textfont[0]) {
+              cairo_save(ctx);
+              cairo_save(save_ctx);
+              cairo_select_font_face (ctx, textfont, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+              cairo_select_font_face (save_ctx, textfont, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
             }
             #endif
-            draw_string(gctext, ADD, textelement[i].txt_ptr,
+            draw_string(textlayer, ADD, textelement[i].txt_ptr,
               textelement[i].rot, textelement[i].flip,
               textelement[i].x0,textelement[i].y0,
               textelement[i].xscale, textelement[i].yscale); 
-            gctext = savegc;
+            #ifdef HAS_CAIRO
+            if(textfont[0]) {
+              cairo_select_font_face (ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+              cairo_select_font_face (save_ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+              cairo_restore(ctx);
+              cairo_restore(save_ctx);
+            }
+            #endif
           }
           #ifndef HAS_CAIRO
-          drawline(gctext, END, 0.0, 0.0, 0.0, 0.0);
-          drawrect(gctext, END, 0.0, 0.0, 0.0, 0.0);
+          drawline(textlayer, END, 0.0, 0.0, 0.0, 0.0);
+          drawrect(textlayer, END, 0.0, 0.0, 0.0, 0.0);
           #endif
         }
       draw_selection(gc[SELLAYER], 0);
@@ -1038,5 +1116,4 @@ void draw(void)
     draw_hilight_net();
     if(debug_var>=1) fprintf(errfp, "draw(): lw=%d\n",lw);
  } // if(has_x)
- draw_dots=0;
 }

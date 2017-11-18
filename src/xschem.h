@@ -75,7 +75,7 @@
 #define CADINITIALZOOM 1
 #define CADINITIALX 10
 #define CADINITIALY -870
-#define CADZOOMSTEP 1.5
+#define CADZOOMSTEP 1.2
 #define CADMOVESTEP 200
 #define CADMAXZOOM 10000.0
 #define CADMINZOOM 0.0001
@@ -116,6 +116,8 @@
 #define STARTPAN2     16384  // new pan method with mouse button3 20121123
 #define MENUSTARTTEXT 32768  // 20161201 click to place text if action starts from menu
 #define MENUSTARTSNAPWIRE 65536   // start wire invoked from menu, snap to pin variant 20171022
+#define STARTPOLYGON 131072   // 20171115
+#define MENUSTARTPOLYGON 262144   // 20171117
 
 #define SELECTED 1          // used in the .sel field for selected objs.
 #define SELECTED1 2	    // first point selected...
@@ -129,6 +131,7 @@
 #define LINE 4
 #define ELEMENT 8
 #define TEXT 16
+#define POLYGON 32 // 20171115
 
 
 //   some useful primes
@@ -138,18 +141,18 @@
 
 #define HASHSIZE 31627
 
-		 // parameters passed to action functions, see actions.c
-#define END 1	 // endop
-#define BEGIN 2  // begin placing something
-#define PLACE 4  // place something
-#define ADD 4    // same as above
-#define RUBBER 8 // used for drawing rubber objects while placing them
-#define NOW 8    // used for immediate (unbuffered) graphic operations
-#define ROTATE 16
-#define FLIP 32
-#define SET 64  // currently used in bbox() function (sets clip rect)
-#define ABORT 128  // used in move/copy_objects for aborting without unselecting
-#define THICK 256  // used to draw thick lines (buses)
+		   // parameters passed to action functions, see actions.c
+#define END      1 // endop
+#define BEGIN    2 // begin placing something
+#define PLACE    4 // place something
+#define ADD      8 // add something
+#define RUBBER  16 // used for drawing rubber objects while placing them
+#define NOW     32 // used for immediate (unbuffered) graphic operations
+#define ROTATE  64
+#define FLIP   128
+#define SET    256 // currently used in bbox() function (sets clip rect)
+#define ABORT  512 // used in move/copy_objects for aborting without unselecting
+#define THICK 1024 // used to draw thick lines (buses)
 
 #define FONTWIDTH 20
 #define FONTOFFSET 40
@@ -226,6 +229,19 @@ typedef struct
    char *prop_ptr;
 } Box;
 
+
+typedef struct // 20171115
+{
+  // last point coincident to first, added by program if needed.
+  // XDrawLines needs first and last point to close the polygon
+  int points;
+  double *x;
+  double *y;
+  unsigned short *selected_point;
+  unsigned short sel;
+  char *prop_ptr;
+} Polygon; 
+
 typedef struct
 {
   char *txt_ptr;
@@ -247,9 +263,11 @@ typedef struct
    double maxy;
    Line **lineptr;  // array of [cadlayers] pointers to Line
    Box  **boxptr;
+   Polygon **polygonptr; //20171115
    Text  *txtptr;
    int *lines;     // array of [cadlayers] integers
    int *rects;
+   int *polygons; //20171115
    int texts;
    char *prop_ptr;
    char *type; // 20150409
@@ -357,6 +375,7 @@ extern unsigned int button;
 extern unsigned int state; // status of shift,ctrl etc..
 extern Wire *wire;
 extern Box  **rect;
+extern Polygon **polygon; // 20171115
 extern Line **line;
 extern XPoint *gridpoint;
 extern XRectangle *rectangle;
@@ -364,6 +383,7 @@ extern Selected *selectedgroup; // array of selected objs to draw while moving
 extern int lastwire;
 extern int lastselected;
 extern int *lastrect;
+extern int *lastpolygon; // 20171115
 extern int *lastline;
 extern int lastinst ;
 extern int lastinstdef ;
@@ -381,14 +401,15 @@ extern int max_wires;
 extern int max_instances;
 extern int max_symbols;
 extern int max_selected;
-extern int *max_boxes;
+extern int *max_rects;
+extern int *max_polygons; // 20171115
 extern int *max_lines;
 extern int previous_instance[];
 extern int split_files;
 extern int hspice_netlist;
 extern char *netlist_dir;
 
-extern unsigned int rubber ; // this signals that we are doing a net place,
+extern unsigned long ui_state ; // this signals that we are doing a net place,
 			      // panning etc...
 
 extern char *undo_dirname; // 20150327
@@ -403,6 +424,7 @@ extern Window window;
 extern Window parent_of_topwindow;
 extern Pixmap cad_icon_pixmap, *pixmap,save_pixmap;
 extern int depth;
+extern int *fill_type; //20171117 for every layer: 0: no fill, 1, solid fill, 2: stipple fill
 extern unsigned char **pixdata;
 extern unsigned char pixdata_init[22][32];;
 extern int  areax1,areay1,areax2,areay2,areaw,areah;
@@ -440,6 +462,7 @@ extern int pending_fullzoom;
 extern int fullscreen;
 extern XColor xcolor_array[];// 20171109
 extern Visual *visual;
+extern int dark_colorscheme; // 20171113
 
 // functions
 extern int set_netlist_dir(int force);
@@ -471,7 +494,7 @@ extern void del_wire_table(void);
 extern void set_linewidth();
 extern void draw_selection(GC g, int interruptable);
 extern void delete(void);
-extern void delete_only_rect_and_line(void);
+extern void delete_only_rect_and_line_and_poly(void);
 extern void bbox(int what,double x1,double y1, double x2, double y2);
 extern void text_bbox(char * str,double xscale, double yscale,
             int rot, int flip, double x1,double y1, double *rx1, double *ry1,
@@ -488,18 +511,19 @@ extern void find_closest_net(double mx,double my);
 extern void find_closest_box(double mx,double my);
 extern void find_closest_element(double mx,double my);
 extern void find_closest_line(double mx,double my);
+extern void find_closest_polygon(double mx,double my);//20171115
 extern void find_closest_text(double mx,double my);
 extern Selected find_closest_obj(double mx,double my);
 extern void find_closest_net_or_symbol_pin(double mx,double my, double *x, double *y);
 
-extern void drawline(GC gc, int what, double x1,double y1,double x2,double y2);
-extern void draw_string(GC gc,int what, char *str, int flip, int rot, 
+extern void drawline(int c, int what, double x1,double y1,double x2,double y2);
+extern void draw_string(int layer,int what, char *str, int flip, int rot, 
        double x1, double y1, double xscale, double yscale);
-extern void draw_symbol_outline(int what, GC, GC, int n,int layer,
+extern void draw_symbol_outline(int what,int c, int n,int layer,
             int tmp_flip, int tmp_rot, double xoffset, double yoffset);
-extern void drawrect(GC gc, int what, double rectx1,double recty1,
+extern void drawrect(int c, int what, double rectx1,double recty1,
             double rectx2,double recty2);
-extern void filledrect(GC gc, int what, double rectx1,double recty1,
+extern void filledrect(int c, int what, double rectx1,double recty1,
             double rectx2,double recty2);
 
 
@@ -507,6 +531,9 @@ extern void drawtempline(GC gc, int what, double x1,double y1,double x2,double y
 extern void drawgrid(void);
 extern void drawtemprect(GC gc, int what, double rectx1,double recty1,
             double rectx2,double recty2);
+extern void drawtemppolygon(GC gc, int what, double *x, double *y, int points);
+extern void drawpolygon(int c, int what, double *x, double *y, int points);
+extern void drawfillpolygon(int c, int what, double *x, double *y, int points);
 extern void draw_temp_symbol_outline(int what, GC gc, int n,int layer,
             int tmp_flip, int tmp_rot, double xoffset, double yoffset);
 extern void draw_temp_string(GC gc,int what, char *str, int flip, int rot, 
@@ -529,6 +556,8 @@ extern void collapse_wires(void);
 extern void storeobject(int pos, double x1,double y1,double x2,double y2,
                         unsigned short type,unsigned int rectcolor,
 		        unsigned short sel, char *prop_ptr);
+extern void store_polygon(int pos, double *x, double *y, int points,  // 20171115
+           unsigned int rectcolor, unsigned short sel, char *prop_ptr);
 extern void freenet_nocheck(int i);
 extern void spice_netlist(FILE *fd, int spice_stop);
 extern void global_spice_netlist(int global);
@@ -562,6 +591,7 @@ extern void load_text(FILE *fd);
 extern void load_wire(FILE *fd);
 extern void load_inst(FILE *fd);
 extern void load_box(FILE *fd);
+extern void load_polygon(FILE *fd); // 20171115
 extern void load_line(FILE *fd);
 extern void create_sch_from_sym(void);
 extern void descend(void);
@@ -578,6 +608,7 @@ extern void pan2(int what, int mx, int my);
 extern void zoom_box(int what);
 extern void select_rect(int what, int select);
 extern void new_rect(int what);
+extern void new_polygon(int what); // 20171115
 extern void compile_font(void);
 extern void rebuild_selected_array(void);
 
@@ -618,6 +649,7 @@ extern void check_symbol_storage(void);
 extern void check_selected_storage(void);
 extern void check_box_storage(int c);
 extern void check_line_storage(int c);
+extern void check_polygon_storage(int c); // 20171115
 extern char *expandlabel(char *s, int *m);
 extern void merge_inst(int k, FILE *fd);
 extern void merge_file(int selection_load, char ext[]);
@@ -626,6 +658,7 @@ extern void select_element(int i, unsigned short select_mode, int fast);
 extern void select_text(int i, unsigned short select_mode);
 extern void select_box(int c, int i, unsigned short select_mode, int fast);
 extern void select_line(int c, int i, unsigned short select_mode, int fast);
+extern void select_polygon(int c, int i, unsigned short select_mode, int fast );
 extern char *pin_node(int i, int j, int *mult);
 extern void record_global_node(int what, FILE *fp, char *node);
 extern int count_labels(char *s);
@@ -669,7 +702,7 @@ extern void toggle_only_probes(); // 20110112
 extern void fill_symbol_editprop_form(int x);
 extern void update_symbol(char *result, int x);
 extern void tclexit(ClientData s);
-
+extern int build_colors(); // reparse the TCL 'colors' list and reassign colors 20171113
 #ifdef HAS_CAIRO // 20171105
 #include <cairo.h>
 #include <cairo-xlib.h>

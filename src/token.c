@@ -609,8 +609,6 @@ void new_prop_string(char **new_prop,char *old_prop, int fast)
    break;
   }
  } 
-
-
  tmp2 = subst_token(old_prop, "name", new_name); 
  if(strcmp(tmp2, old_prop) ) {
    modified=1;

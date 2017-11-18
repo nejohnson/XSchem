@@ -60,6 +60,11 @@ void check_symbol_storage(void)
   max_symbols=(1 + lastinstdef / ELEMDEF) * ELEMDEF;
   my_realloc(&instdef, sizeof(Instdef)*max_symbols);
   for(i=lastinstdef;i<max_symbols;i++) {
+    instdef[i].polygonptr=my_calloc(cadlayers, sizeof(Polygon *));
+    if(instdef[i].polygonptr==NULL){
+       fprintf(errfp, "check_symbol_storage(): calloc error\n");Tcl_Eval(interp, "exit");
+    }
+  
     instdef[i].lineptr=my_calloc(cadlayers, sizeof(Line *));
     if(instdef[i].lineptr==NULL){
        fprintf(errfp, "check_symbol_storage(): calloc error\n");Tcl_Eval(interp, "exit");
@@ -79,6 +84,10 @@ void check_symbol_storage(void)
     if(instdef[i].rects==NULL){
       fprintf(errfp, "check_symbol_storage(): calloc error\n");Tcl_Eval(interp, "exit");
     }
+    instdef[i].polygons=my_calloc(cadlayers, sizeof(int)); // 20171115
+    if(instdef[i].polygons==NULL){
+      fprintf(errfp, "check_symbol_storage(): calloc error\n");Tcl_Eval(interp, "exit");
+    }
   }
  }
 
@@ -95,10 +104,10 @@ void check_inst_storage(void)
 
 void check_box_storage(int c)
 {
- if(lastrect[c] >= max_boxes[c])
+ if(lastrect[c] >= max_rects[c])
  {
-  max_boxes[c]=(1 + lastrect[c] / CADMAXOBJECTS) * CADMAXOBJECTS;
-  my_realloc(&rect[c], sizeof(Box)*max_boxes[c]);
+  max_rects[c]=(1 + lastrect[c] / CADMAXOBJECTS) * CADMAXOBJECTS;
+  my_realloc(&rect[c], sizeof(Box)*max_rects[c]);
  }
 }
 
@@ -111,10 +120,48 @@ void check_line_storage(int c)
  }
 }
 
+void check_polygon_storage(int c) //20171115
+{
+ if(lastpolygon[c] >= max_polygons[c])
+ {
+  max_polygons[c]=(1 + lastpolygon[c] / CADMAXOBJECTS) * CADMAXOBJECTS;
+  my_realloc(&polygon[c], sizeof(Polygon)*max_polygons[c]);
+ }
+}
 
 
-
-
+void store_polygon(int pos, double *x, double *y, int points, unsigned int rectcolor, unsigned short sel, char *prop_ptr)
+{
+  int n, j;
+  check_polygon_storage(rectcolor);
+  if(pos==-1) n=lastpolygon[rectcolor];
+  else
+  {
+   for(j=lastpolygon[rectcolor];j>pos;j--)
+   {
+    polygon[rectcolor][j]=polygon[rectcolor][j-1];
+   }
+   n=pos;
+  }
+  if(debug_var>=2) fprintf(errfp, "store_polygon(): storing POLYGON %d\n",n);
+  
+  polygon[rectcolor][n].x=NULL;
+  polygon[rectcolor][n].y=NULL;
+  polygon[rectcolor][n].selected_point=NULL;
+  polygon[rectcolor][n].prop_ptr=NULL;
+  polygon[rectcolor][n].x= my_calloc(points, sizeof(double));
+  polygon[rectcolor][n].y= my_calloc(points, sizeof(double));
+  polygon[rectcolor][n].selected_point= my_calloc(points, sizeof(unsigned short));
+  my_strdup(&polygon[rectcolor][n].prop_ptr, prop_ptr);
+  for(j=0;j<points; j++) {
+    polygon[rectcolor][n].x[j] = x[j];
+    polygon[rectcolor][n].y[j] = y[j];
+  }
+  polygon[rectcolor][n].points = points;
+  polygon[rectcolor][n].sel = sel;
+  lastpolygon[rectcolor]++;
+  modified=1;
+}
 
 void storeobject(int pos, double x1,double y1,double x2,double y2,
                  unsigned short type, unsigned int rectcolor,

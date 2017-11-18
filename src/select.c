@@ -209,16 +209,52 @@ void delete(void)
    }
   }
   lastline[c] -= j;
+
+  // 20171115
+  j = 0;
+  for(i=0;i<lastpolygon[c];i++)
+  {
+   if(polygon[c][i].sel == SELECTED)
+   { 
+    int k;
+    double x1=0., y1=0., x2=0., y2=0.;
+    for(k=0; k<polygon[c][i].points; k++) {
+      if(k==0 || polygon[c][i].x[k] < x1) x1 = polygon[c][i].x[k];
+      if(k==0 || polygon[c][i].y[k] < y1) y1 = polygon[c][i].y[k];
+      if(k==0 || polygon[c][i].x[k] > x2) x2 = polygon[c][i].x[k];
+      if(k==0 || polygon[c][i].y[k] > y2) y2 = polygon[c][i].y[k];
+    }
+    //fprintf(errfp, "bbox: %g %g %g %g\n", x1, y1, x2, y2);
+    j++;
+    bbox(ADD, x1, y1, x2, y2);
+    modified=1;
+    continue;
+   }
+   if(j)
+   {
+    my_strdup(&polygon[c][i-j].prop_ptr, NULL);
+    my_free(polygon[c][i-j].x); polygon[c][i-j].x=NULL;
+    my_free(polygon[c][i-j].y); polygon[c][i-j].y=NULL;
+    my_free(polygon[c][i-j].selected_point); polygon[c][i-j].selected_point=NULL;
+    polygon[c][i-j] = polygon[c][i];
+    polygon[c][i].prop_ptr=NULL;
+    polygon[c][i].x=NULL;
+    polygon[c][i].y=NULL;
+    polygon[c][i].selected_point=NULL;
+   }
+  }
+  lastpolygon[c] -= j;
+
  }
  lastselected = 0;
  bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
  draw();
  bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
- rubber &= ~SELECTION;
+ ui_state &= ~SELECTION;
 }
 
 
-void delete_only_rect_and_line(void)
+void delete_only_rect_and_line_and_poly(void)
 {
  int i,c,j;
 
@@ -264,12 +300,50 @@ void delete_only_rect_and_line(void)
    }
   }
   lastline[c] -= j;
+
+  // 20171115
+  j = 0;
+  for(i=0;i<lastpolygon[c];i++)
+  {
+   if(polygon[c][i].sel == SELECTED)
+   {
+    int k;
+    double x1=0., y1=0., x2=0., y2=0.;
+    for(k=0; k<polygon[c][i].points; k++) {
+      if(k==0 || polygon[c][i].x[k] < x1) x1 = polygon[c][i].x[k];
+      if(k==0 || polygon[c][i].y[k] < y1) y1 = polygon[c][i].y[k];
+      if(k==0 || polygon[c][i].x[k] > x2) x2 = polygon[c][i].x[k];
+      if(k==0 || polygon[c][i].y[k] > y2) y2 = polygon[c][i].y[k];
+    }
+    //fprintf(errfp, "bbox: %g %g %g %g\n", x1, y1, x2, y2);
+    j++;
+    bbox(ADD, x1, y1, x2, y2);
+    modified=1;
+    continue;
+   }
+   if(j)
+   {
+    my_strdup(&polygon[c][i-j].prop_ptr, NULL);
+    my_free(polygon[c][i-j].x); polygon[c][i-j].x=NULL;
+    my_free(polygon[c][i-j].y); polygon[c][i-j].y=NULL;
+    my_free(polygon[c][i-j].selected_point); polygon[c][i-j].selected_point=NULL;
+    polygon[c][i-j] = polygon[c][i];
+    polygon[c][i].prop_ptr=NULL;
+    polygon[c][i].x=NULL;
+    polygon[c][i].y=NULL;
+    polygon[c][i].selected_point=NULL;
+   }
+  }
+  lastpolygon[c] -= j;
+
  }
+
+
  lastselected = 0;
  bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
  draw();
  bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
- rubber &= ~SELECTION;
+ ui_state &= ~SELECTION;
 }
 
 
@@ -337,17 +411,18 @@ void bbox(int what,double x1,double y1, double x2, double y2)
    areay2 = bby2+2*lw;
    areaw = (areax2-areax1);
    areah = (areay2-areay1);
+
    xrect[0].x = bbx1-lw;
    xrect[0].y = bby1-lw;
    xrect[0].width = bbx2-bbx1+2*lw;
    xrect[0].height = bby2-bby1+2*lw;
+
    for(i=0;i<cadlayers;i++)
    {
      XSetClipRectangles(display, gc[i], 0,0, xrect, 1, Unsorted);
      XSetClipRectangles(display, gcstipple[i], 0,0, xrect, 1, Unsorted);
    }
    XSetClipRectangles(display, gctiled, 0,0, xrect, 1, Unsorted);
-   // debug ...
    if(debug_var>=1) fprintf(errfp, "bbox(): bbox= %d %d %d %d\n",areax1,areay1,areax2,areay2);     
    break;
  }
@@ -358,7 +433,7 @@ void unselect_all(void)
  int i,c;
  char str[4096];
 
-    rubber = 0; 
+    ui_state = 0; 
     lastselected = 0;
    
     if(x_initialized) drawtempline(gctiled,BEGIN, 0.0, 0.0, 0.0, 0.0);
@@ -417,10 +492,20 @@ void unselect_all(void)
        if(x_initialized) drawtempline(gctiled, ADD, line[c][i].x1, line[c][i].y1, line[c][i].x2, line[c][i].y2);
       }
      }
+     for(i=0;i<lastpolygon[c];i++)
+     {
+      if(polygon[c][i].sel)
+      {
+       int k;
+       for(k=0;k<polygon[c][i].points; k++) polygon[c][i].selected_point[k] = 0;
+       polygon[c][i].sel = 0;
+       if(x_initialized) drawtemppolygon(gctiled, NOW, polygon[c][i].x, polygon[c][i].y, polygon[c][i].points);
+      }
+     }
     } 
     if(x_initialized) drawtempline(gctiled,END, 0.0, 0.0, 0.0, 0.0);
     if(x_initialized) drawtemprect(gctiled, END, 0.0, 0.0, 0.0, 0.0); 
-    rubber &= ~SELECTION;
+    ui_state &= ~SELECTION;
     //\statusmsg("",2);
     my_snprintf(str, S(str), "%s/%s",getenv("HOME"), ".selection.sch"); // 20161115  PWD->HOME
     unlink(str);
@@ -430,7 +515,7 @@ void select_wire(int i,unsigned short select_mode)
 {
   char str[1024]; 	// overflow safe
   //my_strncpy(s,wire[i].prop_ptr!=NULL?wire[i].prop_ptr:"<NULL>",256);
-  if( !(rubber & STARTSELECT) )
+  if( !(ui_state & STARTSELECT) )
   {
     snprintf(str, S(str), "selected wire: n=%d end1=%d end2=%d\nnode=%s",i,
            wire[i].end1, wire[i].end2, 
@@ -565,6 +650,28 @@ void select_box(int c, int i, unsigned short select_mode, int fast)
   need_rebuild_selected_array=1;
 }
 
+void select_polygon(int c, int i, unsigned short select_mode, int fast )
+{
+  char str[1024];       // overflow safe
+  char s[256];          // overflow safe
+  if(!fast)
+  {
+   my_strncpy(s,polygon[c][i].prop_ptr!=NULL?polygon[c][i].prop_ptr:"<NULL>",256);
+   snprintf(str, S(str), "selected polygon: layer=%d, n=%d properties: %s",c-4,i,s);
+   statusmsg(str,2);
+   // 20070323
+   snprintf(str, S(str), "x0 = %g  y0 = %g ...",polygon[c][i].x[0], polygon[c][i].y[0]);
+   statusmsg(str,1);
+  }
+  polygon[c][i].sel = select_mode;
+  if(select_mode) {
+   if(x_initialized) drawtemppolygon(gc[SELLAYER], NOW, polygon[c][i].x, polygon[c][i].y, polygon[c][i].points);
+  }
+  else
+   if(x_initialized) drawtemppolygon(gctiled, NOW, polygon[c][i].x, polygon[c][i].y, polygon[c][i].points);
+  need_rebuild_selected_array=1;
+}
+
 void select_line(int c, int i, unsigned short select_mode, int fast )
 {
   char str[1024]; 	// overflow safe
@@ -613,6 +720,9 @@ unsigned short select_object(double mousex,double mousey, unsigned short select_
     case LINE:
      select_line(sel.col, sel.n, select_mode,0);
      break;
+    case POLYGON:
+     select_polygon(sel.col, sel.n, select_mode,0);
+     break;
     case RECT:
      select_box(sel.col,sel.n, select_mode,0);
      break;
@@ -626,7 +736,7 @@ unsigned short select_object(double mousex,double mousey, unsigned short select_
    if(x_initialized) drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
    if(x_initialized) drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0); 
 
-   if(sel.type)  rubber |= SELECTION;
+   if(sel.type)  ui_state |= SELECTION;
    return sel.type;
 }
 
@@ -641,17 +751,17 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) // 201509
  {
   if(RECTINSIDE(wire[i].x1,wire[i].y1,wire[i].x2,wire[i].y2, x1,y1,x2,y2))
   {
-   rubber |= SELECTION;
+   ui_state |= SELECTION; // <<< set ui_state to SELECTION also if unselecting by area ????
    sel ? select_wire(i,SELECTED): select_wire(i,0);
   } 
   else if( sel && enable_stretch && POINTINSIDE(wire[i].x1,wire[i].y1, x1,y1,x2,y2) )
   {
-   rubber |= SELECTION;
+   ui_state |= SELECTION;
    select_wire(i,SELECTED1);
   }
   else if( sel && enable_stretch && POINTINSIDE(wire[i].x2,wire[i].y2, x1,y1,x2,y2) )
   {
-   rubber |= SELECTION;
+   ui_state |= SELECTION;
    select_wire(i,SELECTED2);
   }
  }
@@ -665,7 +775,7 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) // 201509
              &xx1,&yy1, &xx2,&yy2);
   if(RECTINSIDE(xx1,yy1, xx2, yy2,x1,y1,x2,y2))
   {
-   rubber |= SELECTION;
+   ui_state |= SELECTION; // <<< set ui_state to SELECTION also if unselecting by area ????
    sel ? select_text(i, SELECTED): select_text(i, 0);
   }
  }                       
@@ -673,56 +783,79 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) // 201509
  {
   if(RECTINSIDE(inst_ptr[i].xx1, inst_ptr[i].yy1, inst_ptr[i].xx2, inst_ptr[i].yy2, x1,y1,x2,y2))
   {
-   rubber |= SELECTION;
+   ui_state |= SELECTION; // <<< set ui_state to SELECTION also if unselecting by area ????
    sel ? select_element(i,SELECTED,1): select_element(i,0,1);
   }
  }
  for(c=0;c<cadlayers;c++)
  {
+
+
+  for(i=0;i<lastpolygon[c]; i++) {  // 20171115
+    int k=0, selected_points=0;
+    for(k=0; k<polygon[c][i].points; k++) {
+      if( POINTINSIDE(polygon[c][i].x[k],polygon[c][i].y[k], x1,y1,x2,y2)) {
+        polygon[c][i].selected_point[k] = sel;
+      }
+      if(polygon[c][i].selected_point[k]) selected_points++;
+    }
+    if(selected_points==0) select_polygon(c, i, 0, 1);
+    if(selected_points==polygon[c][i].points) {
+      ui_state |= SELECTION;
+      sel ? select_polygon(c, i, SELECTED, 1): select_polygon(c, i, 0, 1);
+    } else if(selected_points) {
+      if(sel && enable_stretch) select_polygon(c, i, SELECTED1,1); // for polygon, SELECTED1 means partial selection
+    }
+    
+  }
+
+
   for(i=0;i<lastline[c];i++)
   {
    if(RECTINSIDE(line[c][i].x1,line[c][i].y1,line[c][i].x2,line[c][i].y2, x1,y1,x2,y2))
    {
-    rubber |= SELECTION;
+    ui_state |= SELECTION;
     sel? select_line(c,i,SELECTED,1): select_line(c,i,0,1);
    }
    else if( sel && enable_stretch && POINTINSIDE(line[c][i].x1,line[c][i].y1, x1,y1,x2,y2) )
    {
-    rubber |= SELECTION;
+    ui_state |= SELECTION; // <<< set ui_state to SELECTION also if unselecting by area ????
     select_line(c, i,SELECTED1,1);
    }
    else if( sel && enable_stretch && POINTINSIDE(line[c][i].x2,line[c][i].y2, x1,y1,x2,y2) )
    {
-    rubber |= SELECTION;
+    ui_state |= SELECTION;
     select_line(c, i,SELECTED2,1);
    }
   }
+
+
   for(i=0;i<lastrect[c];i++)
   {
    if(RECTINSIDE(rect[c][i].x1,rect[c][i].y1,rect[c][i].x2,rect[c][i].y2, x1,y1,x2,y2))
    {
-    rubber |= SELECTION;
+    ui_state |= SELECTION; // <<< set ui_state to SELECTION also if unselecting by area ????
     sel? select_box(c,i, SELECTED, 1): select_box(c,i, 0, 1);
    }
    else { 
      if( sel && enable_stretch && POINTINSIDE(rect[c][i].x1,rect[c][i].y1, x1,y1,x2,y2) )
      {					//20070302 added stretch select
-      rubber |= SELECTION;
+      ui_state |= SELECTION;
       select_box(c, i,SELECTED1,1);
      }
      if( sel && enable_stretch && POINTINSIDE(rect[c][i].x2,rect[c][i].y1, x1,y1,x2,y2) )
      {
-      rubber |= SELECTION;
+      ui_state |= SELECTION;
       select_box(c, i,SELECTED2,1);
      }
      if( sel && enable_stretch && POINTINSIDE(rect[c][i].x1,rect[c][i].y2, x1,y1,x2,y2) )
      {
-      rubber |= SELECTION;
+      ui_state |= SELECTION;
       select_box(c, i,SELECTED3,1);
      }
      if( sel && enable_stretch && POINTINSIDE(rect[c][i].x2,rect[c][i].y2, x1,y1,x2,y2) )
      {
-      rubber |= SELECTION;
+      ui_state |= SELECTION;
       select_box(c, i,SELECTED4,1);
      }
    }
@@ -742,7 +875,7 @@ void select_all(void)
  if(x_initialized) drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
  if(x_initialized) drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0); 
 
- rubber |= SELECTION;
+ ui_state |= SELECTION;
 
  for(i=0;i<lastwire;i++)
  {

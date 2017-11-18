@@ -734,6 +734,22 @@ void edit_property(int x)
     my_strdup(&wire[selectedgroup[0].n].prop_ptr,(char *) Tcl_GetVar(interp, "entry1", TCL_GLOBAL_ONLY));
    }
    break;
+  case POLYGON: // 20171115
+   if(debug_var>=1) fprintf(errfp, "edit_property(): input property:\n");
+   if(polygon[selectedgroup[0].col][selectedgroup[0].n].prop_ptr!=NULL) {
+     Tcl_SetVar(interp,"entry1",polygon[selectedgroup[0].col][selectedgroup[0].n].prop_ptr,TCL_GLOBAL_ONLY);
+   } else { // 20161208
+     Tcl_SetVar(interp,"entry1","", TCL_GLOBAL_ONLY);
+   }
+   tkeval("text_line {Input property:} 0");
+   if(strcmp(Tcl_GetVar(interp, "rcode", TCL_GLOBAL_ONLY),"") )
+   {
+    modified=1; push_undo(); // 20150327
+    my_strdup(&polygon[selectedgroup[0].col][selectedgroup[0].n].prop_ptr,
+        (char *) Tcl_GetVar(interp, "entry1", TCL_GLOBAL_ONLY));
+   }
+   break;
+
   case LINE:
    if(debug_var>=1) fprintf(errfp, "edit_property(): input property:\n");
    if(line[selectedgroup[0].col][selectedgroup[0].n].prop_ptr!=NULL) {

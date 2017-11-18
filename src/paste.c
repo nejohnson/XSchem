@@ -265,9 +265,9 @@ void merge_file(int selection_load, char ext[])
      }
      match_merged_inst(old);
      fclose(fd);
-     rubber |= STARTMERGE;
-     if(debug_var>=1) fprintf(errfp, "merge_file(): loaded file:wire=%d inst=%d rubber=%d\n",
-             lastwire , lastinst, rubber);
+     ui_state |= STARTMERGE;
+     if(debug_var>=1) fprintf(errfp, "merge_file(): loaded file:wire=%d inst=%d ui_state=%ld\n",
+             lastwire , lastinst, ui_state);
      move_objects(BEGIN,!selection_load,0,0);
     }
 }

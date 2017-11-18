@@ -338,8 +338,23 @@ void remove_symbol(void)
     instdef[j].type=NULL;
   }
   // /20150409
-  for(c=0;c<cadlayers;c++)
+  for(c=0;c<cadlayers;c++) // 20171115
   {
+   for(i=0;i<instdef[j].polygons[c];i++)
+   {
+     if(instdef[j].polygonptr[c][i].prop_ptr != NULL) {
+       my_free(instdef[j].polygonptr[c][i].prop_ptr);
+       instdef[j].polygonptr[c][i].prop_ptr=NULL;
+     }
+     my_free(instdef[j].polygonptr[c][i].x);
+     instdef[j].polygonptr[c][i].x=NULL;
+     my_free(instdef[j].polygonptr[c][i].y);
+     instdef[j].polygonptr[c][i].y=NULL;
+     my_free(instdef[j].polygonptr[c][i].selected_point);
+     instdef[j].polygonptr[c][i].selected_point=NULL;
+   }
+   if(instdef[j].polygonptr[c]) {my_free(instdef[j].polygonptr[c]);instdef[j].polygonptr[c]=NULL;}
+
    for(i=0;i<instdef[j].lines[c];i++)
    {
     if(instdef[j].lineptr[c][i].prop_ptr != NULL)
@@ -428,8 +443,18 @@ void clear_drawing(void)
   {
    if(rect[i][j].prop_ptr!=NULL) {my_free(rect[i][j].prop_ptr);rect[i][j].prop_ptr=NULL;}
   }
+  for(j=0;j<lastpolygon[i]; j++) {// 20171115
+    if(polygon[i][j].x!=NULL) { my_free(polygon[i][j].x); polygon[i][j].x=NULL;}
+    if(polygon[i][j].y!=NULL) { my_free(polygon[i][j].y); polygon[i][j].y=NULL;}
+    if(polygon[i][j].prop_ptr!=NULL) { my_free(polygon[i][j].prop_ptr); polygon[i][j].prop_ptr=NULL;}
+    if(polygon[i][j].selected_point!=NULL) { 
+      my_free(polygon[i][j].selected_point); 
+      polygon[i][j].selected_point=NULL;
+    }
+  }
   lastline[i] = 0;
   lastrect[i] = 0;
+  lastpolygon[i] = 0;// 20171115
  }
  if(debug_var>=2) fprintf(errfp, "clear drawing(): deleted data structures, now deleting hash\n");
  free_hash();
@@ -886,7 +911,7 @@ void set_linewidth()
 {
  int i,j;
    if(change_lw) 
-    lw_double=1/zoom*1.3;		// on some servers zero width
+    lw_double=1/zoom*1.5;		// on some servers zero width
    lw=j=lw_double;			// draws fast but not good...
    if(lw==0) lw=1;			// lw used to calculate bound boxes
    if(debug_var>=1) fprintf(errfp, "set_linewidth(): lw=%d, lw_double=%g\n", lw, lw_double);
@@ -920,6 +945,23 @@ void calc_drawing_bbox(Box *boundbox)
    count++;
    updatebbox(count,boundbox,&tmp);
   }
+
+  for(i=0;i<lastpolygon[c];i++) // 20171115
+  {
+    double x1=0., y1=0., x2=0., y2=0.;
+    int k;
+    count++;
+    for(k=0; k<polygon[c][i].points; k++) {
+      //fprintf(errfp, "  poly: point %d: %g %g\n", k, pp[c][i].x[k], pp[c][i].y[k]);
+      if(k==0 || polygon[c][i].x[k] < x1) x1 = polygon[c][i].x[k];
+      if(k==0 || polygon[c][i].y[k] < y1) y1 = polygon[c][i].y[k];
+      if(k==0 || polygon[c][i].x[k] > x2) x2 = polygon[c][i].x[k];
+      if(k==0 || polygon[c][i].y[k] > y2) y2 = polygon[c][i].y[k];
+    }
+    tmp.x1=x1;tmp.y1=y1;tmp.x2=x2;tmp.y2=y2;
+    updatebbox(count,boundbox,&tmp);
+  }
+
   for(i=0;i<lastrect[c];i++)
   {
    tmp.x1=rect[c][i].x1;
@@ -1019,11 +1061,11 @@ void zoom_box(int what)
   if( (what & BEGIN) )
   {
     x1=x2=mousex_snap;y1=y2=mousey_snap;
-    rubber |= STARTZOOM;
+    ui_state |= STARTZOOM;
   }
   if( what & END)
   {
-    rubber &= ~STARTZOOM;
+    ui_state &= ~STARTZOOM;
     RECTORDER(x1,y1,x2,y2);
     drawtemprect(gctiled, NOW, xx1,yy1,xx2,yy2);
     xorigin=-x1;yorigin=-y1;
@@ -1084,11 +1126,11 @@ void new_wire(int what, double mx_snap, double my_snap)
  static double xx1,yy1,xx2,yy2;
 
    if( (what & PLACE) ) {
-     if( (x1!=x2 || y1!=y2) && (rubber & STARTWIRE) ) {
+     if( (x1!=x2 || y1!=y2) && (ui_state & STARTWIRE) ) {
        ORDER(x1,y1,x2,y2);
        push_undo();
        storeobject(-1, x1,y1,x2,y2,WIRE,0,0,NULL);
-       drawline(gc[WIRELAYER],NOW, x1,y1,x2,y2);
+       drawline(WIRELAYER,NOW, x1,y1,x2,y2);
      }
 
      if(! (what &END)) {
@@ -1104,10 +1146,10 @@ void new_wire(int what, double mx_snap, double my_snap)
        drawtempline(gc[WIRELAYER], NOW, xx1,yy1,xx2,yy2);
      }
 
-     rubber |= STARTWIRE;
+     ui_state |= STARTWIRE;
    }
    if( what & END) {
-     rubber &= ~STARTWIRE;
+     ui_state &= ~STARTWIRE;
    }
    if( (what & RUBBER)  ) {
      xx1=x1;yy1=y1;xx2=x2;yy2=y2;
@@ -1140,6 +1182,9 @@ void change_layer()
        y2 = line[c][n].y2;
        storeobject(-1, x1,y1,x2,y2,LINE,rectcolor, 0, line[c][n].prop_ptr);
      }
+     if(type==POLYGON && polygon[c][n].sel==SELECTED) {
+        store_polygon(-1, polygon[c][n].x, polygon[c][n].y, polygon[c][n].points, rectcolor, 0, polygon[c][n].prop_ptr);
+     }
      else if(type==RECT && rect[c][n].sel==SELECTED) {
        x1 = rect[c][n].x1;
        y1 = rect[c][n].y1;
@@ -1147,8 +1192,9 @@ void change_layer()
        y2 = rect[c][n].y2;
        storeobject(-1, x1,y1,x2,y2,RECT,rectcolor, 0, rect[c][n].prop_ptr);
      }
+     // 20171115 add polygon <<<<
    }
-   if(lastselected) delete_only_rect_and_line();
+   if(lastselected) delete_only_rect_and_line_and_poly();
    unselect_all();
 }
 
@@ -1159,19 +1205,19 @@ void new_line(int what)
 
    if( (what & PLACE) )
    {
-    if( (x1!=x2 || y1!=y2) && (rubber & STARTLINE) )
+    if( (x1!=x2 || y1!=y2) && (ui_state & STARTLINE) )
     {
      ORDER(x1,y1,x2,y2);
      push_undo();
-     drawline(gc[rectcolor], NOW, x1,y1,x2,y2);
+     drawline(rectcolor, NOW, x1,y1,x2,y2);
      storeobject(-1, x1,y1,x2,y2,LINE,rectcolor, 0, NULL);
     }
     x1=x2=mousex_snap;y1=y2=mousey_snap;
-    rubber |= STARTLINE;
+    ui_state |= STARTLINE;
    }
    if( what & END)
    {
-    rubber &= ~STARTLINE;
+    ui_state &= ~STARTLINE;
    }
 
    if(what & RUBBER)
@@ -1193,20 +1239,20 @@ void new_rect(int what)
 
    if( (what & PLACE) )
    {
-    if( (x1!=x2 || y1!=y2) && (rubber & STARTRECT) )
+    if( (x1!=x2 || y1!=y2) && (ui_state & STARTRECT) )
     {
      RECTORDER(x1,y1,x2,y2); 
      push_undo();
-     drawrect(gc[rectcolor], NOW, x1,y1,x2,y2);
-     filledrect(gcstipple[rectcolor], NOW, x1,y1,x2,y2);
+     drawrect(rectcolor, NOW, x1,y1,x2,y2);
+     filledrect(rectcolor, NOW, x1,y1,x2,y2);
      storeobject(-1, x1,y1,x2,y2,RECT,rectcolor, 0, NULL);
     }
     x1=x2=mousex_snap;y1=y2=mousey_snap;
-    rubber |= STARTRECT;
+    ui_state |= STARTRECT;
    }
    if( what & END)
    {
-    rubber &= ~STARTRECT;
+    ui_state &= ~STARTRECT;
    }
    if(what & RUBBER)
    {
@@ -1217,6 +1263,60 @@ void new_rect(int what)
     xx1=x1;yy1=y1;xx2=x2;yy2=y2;
     RECTORDER(xx1,yy1,xx2,yy2);
     drawtemprect(gc[rectcolor], NOW, xx1,yy1,xx2,yy2);
+   }
+}
+
+
+void new_polygon(int what) // 20171115
+{
+ static double *x=NULL, *y=NULL;
+ static int points=0;
+ static int maxpoints=0;
+
+   if( what & PLACE ) points=0; // start new polygon placement
+
+   if(points >= maxpoints-1) {	// check storage for 2 points
+     maxpoints = (1+points / CADCHUNKALLOC) * CADCHUNKALLOC;
+     my_realloc(&x, sizeof(double)*maxpoints);
+     my_realloc(&y, sizeof(double)*maxpoints);
+   }
+
+   if( what & PLACE )
+   {
+     //fprintf(errfp, "new_poly: PLACE, points=%d\n", points);
+     x[points]=mousex_snap;y[points]=mousey_snap;
+     points++;
+     x[points]=mousex_snap;y[points]=mousey_snap; // prepare next point for rubber
+     ui_state |= STARTPOLYGON;
+   }
+   if( what & ADD)
+   {
+     if(what & END) {
+       x[points] = x[0]; 
+       y[points] = y[0]; // close the polygon path by user request
+     } else {
+       x[points]=mousex_snap;
+       y[points]=mousey_snap;
+     }
+     points++;
+     x[points]=mousex_snap;y[points]=mousey_snap; // prepare next point for rubber
+     //fprintf(errfp, "new_poly: ADD, points=%d\n", points);
+     if( x[points-1] == x[0] && y[points-1] == y[0]) { // closed polygon --> END
+       push_undo();
+       store_polygon(-1, x, y, points, rectcolor, 0, NULL);
+       //fprintf(errfp, "new_poly: finish: points=%d\n", points);
+       ui_state &= ~STARTPOLYGON;
+       drawpolygon(rectcolor, NOW, x, y, points);
+       drawfillpolygon(rectcolor, NOW, x, y, points);
+     }
+   }
+   if(what & RUBBER)
+   {
+     //fprintf(errfp, "new_poly: RUBBER\n");
+     drawtemppolygon(gctiled, NOW, x, y, points+1);
+     x[points]=mousex_snap;
+     y[points] = mousey_snap;
+     drawtemppolygon(gc[rectcolor], NOW, x, y, points+1);
    }
 }
 
@@ -1231,6 +1331,7 @@ void text_bbox(char *str, double xscale, double yscale,
   cairo_font_extents_t fext;
   double ww, hh;
 
+  if(!has_x) return;
   size = (xscale+yscale)*26.*cairo_font_scale;
   cairo_set_font_size (ctx, size*mooz);
   cairo_text_extents(ctx, "A", &ext);
@@ -1253,9 +1354,16 @@ void text_bbox(char *str, double xscale, double yscale,
   hh=cairo_lines;
   ww = ww*ext.x_advance*zoom;
   hh = hh*fext.height*cairo_font_line_spacing*zoom;
-  *rx1=x1;*ry1=y1;
-  ROTATION(0.0,0.0,ww,hh,(*rx2),(*ry2));
+  *rx1=x1;*ry1=y1; 
+  ROTATION(0.0,0.0, ww,hh,(*rx2),(*ry2));
   *rx2+=*rx1;*ry2+=*ry1;
+  if(rot%2) {
+    *rx1-=cairo_vert_correct;
+    *rx2-=cairo_vert_correct;
+  } else {
+    *ry1-=cairo_vert_correct;
+    *ry2-=cairo_vert_correct;
+  }
   RECTORDER((*rx1),(*ry1),(*rx2),(*ry2));
 }
 #else //!HAS_CAIRO
@@ -1286,13 +1394,12 @@ void text_bbox(char * str,double xscale, double yscale,
 void place_text(int draw_text, double mx, double my)
 {
   char *txt;
+  int textlayer;
 
   // 20171112
   #ifdef HAS_CAIRO
-  char *textprop;
-  int textlayer;
+  char *textprop, *textfont;
   #endif
-  GC savegc, gctext;
 
   Tcl_SetVar(interp,"props","",TCL_GLOBAL_ONLY);
 
@@ -1326,20 +1433,32 @@ void place_text(int draw_text, double mx, double my)
   // textelement[lasttext].prop_ptr=NULL;
   if(debug_var>=1) fprintf(errfp, "place_text(): done text input\n");
 
-  gctext = gc[TEXTLAYER];
-  savegc = gctext;
+  textlayer = TEXTLAYER;
   #ifdef HAS_CAIRO
   textprop = get_tok_value(textelement[lasttext].prop_ptr, "layer", 0);
-  if(textprop[0]!=0) {
+  if(textprop[0]) {
     textlayer = atoi(textprop);
-    if(textlayer >= 0 && textlayer < cadlayers) gctext = gc[textlayer];
+    if(textlayer < 0 || textlayer >= cadlayers) textlayer = TEXTLAYER;
+  }
+  textfont = get_tok_value(textelement[lasttext].prop_ptr, "font", 0);
+  if(textfont[0]) {
+    cairo_save(ctx);
+    cairo_save(save_ctx);
+    cairo_select_font_face (ctx, textfont, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_select_font_face (save_ctx, textfont, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
   }
   #endif
-  if(draw_text) draw_string(gctext, NOW, textelement[lasttext].txt_ptr, 0, 0, 
+  if(draw_text) draw_string(textlayer, NOW, textelement[lasttext].txt_ptr, 0, 0, 
               textelement[lasttext].x0,textelement[lasttext].y0,
               textelement[lasttext].xscale, textelement[lasttext].yscale);
-  gctext = savegc;
-
+  #ifdef HAS_CAIRO
+  if(textfont[0]) {
+    cairo_select_font_face (ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_select_font_face (save_ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_restore(ctx);
+    cairo_restore(save_ctx);
+  }
+  #endif
   if(x_initialized) drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
   if(x_initialized) drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
   select_text(lasttext, SELECTED);
@@ -1392,12 +1511,12 @@ void pan(int what)
  }
  if(what & BEGIN)
  {
-    rubber |= STARTPAN;
+    ui_state |= STARTPAN;
     xpan=mousex_snap;ypan=mousey_snap;xpan2=xpan;ypan2=ypan;
  }
  if(what & END)
  {
-    rubber &= ~STARTPAN;
+    ui_state &= ~STARTPAN;
     xorigin+=-xpan+mousex_snap;yorigin+=-ypan+mousey_snap;
     draw();
  }
@@ -1433,7 +1552,7 @@ void select_rect(int what, int select)
  if(what & BEGIN)
  {
     sel = select; // 20150927
-    rubber |= STARTSELECT;
+    ui_state |= STARTSELECT;
     xrect=xrect2=mousex_snap;
     yrect=yrect2=mousey_snap;
  }
@@ -1443,7 +1562,7 @@ void select_rect(int what, int select)
     drawtemprect(gctiled, NOW, xrect,yrect,xrect2,yrect2);
     draw_selection(gc[SELLAYER], 0);
     select_inside(xrect,yrect,xrect2,yrect2, sel);
-    rubber &= ~STARTSELECT;
+    ui_state &= ~STARTSELECT;
  }
 }
 

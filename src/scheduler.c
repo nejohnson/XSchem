@@ -431,9 +431,9 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
         my_snprintf(s, S(s), "%d",change_lw);
         Tcl_AppendResult(interp, s,NULL);
   }
-  else if(!strcmp(argv[2],"rubber"))  {
+  else if(!strcmp(argv[2],"ui_state"))  {
         char s[30]; // overflow safe 20161122
-        my_snprintf(s, S(s), "%d",rubber);
+        my_snprintf(s, S(s), "%d",ui_state);
         Tcl_AppendResult(interp, s,NULL);
   }
   else if(!strcmp(argv[2],"netlist_dir"))  {
@@ -569,8 +569,8 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
   else if(!strcmp(argv[2],"change_lw"))  {
      change_lw=atoi(argv[3]);
   }
-  else if(!strcmp(argv[2],"rubber"))  {
-     rubber=atoi(argv[3]);
+  else if(!strcmp(argv[2],"ui_state"))  {
+     ui_state=atoi(argv[3]);
   }
  }
 
@@ -587,6 +587,13 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
  {
     rebuild_selected_array();
     save_selection(2);
+ }
+
+ else if(!strcmp(argv[1],"toggle_colorscheme"))
+ {
+   dark_colorscheme=!dark_colorscheme;
+   build_colors();
+   draw();
  }
 
  else if(!strcmp(argv[1],"cut"))
@@ -666,7 +673,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
 
  else if(!strcmp(argv[1],"zoom_box"))
  {
-    rubber|=MENUSTARTZOOM;
+    ui_state|=MENUSTARTZOOM;
  }
 
  else if(!strcmp(argv[1],"place_symbol"))
@@ -677,7 +684,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
 
  else if(!strcmp(argv[1],"place_text"))
  {
-   rubber |= MENUSTARTTEXT; // 20161201
+   ui_state |= MENUSTARTTEXT; // 20161201
    // place_text(0,mousex_snap, mousey_snap);
    // move_objects(BEGIN,0,0,0);
  }
@@ -876,7 +883,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
    if(argc==8)
      place_symbol(-1, argv[2], atof(argv[3]), atof(argv[4]), atoi(argv[5]), atoi(argv[6]), argv[7],3 );
  } else if(!strcmp(argv[1],"snap_wire")) { // 20171022
-   rubber |= MENUSTARTSNAPWIRE;
+   ui_state |= MENUSTARTSNAPWIRE;
  } else if(!strcmp(argv[1],"wire")) {   
    double x1,y1,x2,y2;
    int pos;
@@ -889,9 +896,9 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
      pos=-1;
      if(argc==7) pos=atol(argv[6]);
      storeobject(pos, x1,y1,x2,y2,WIRE,0,0,NULL);
-     drawline(gc[WIRELAYER],NOW, x1,y1,x2,y2);
+     drawline(WIRELAYER,NOW, x1,y1,x2,y2);
    }
-   else rubber |= MENUSTARTWIRE;
+   else ui_state |= MENUSTARTWIRE;
  } else if(!strcmp(argv[1],"line")) {    
    double x1,y1,x2,y2;
    int pos;
@@ -904,10 +911,10 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
      pos=-1;
      if(argc==7) pos=atol(argv[6]);
      storeobject(pos, x1,y1,x2,y2,LINE,rectcolor,0,NULL);
-     drawline(gc[rectcolor],NOW, x1,y1,x2,y2);
+     drawline(rectcolor,NOW, x1,y1,x2,y2);
     
    } 
-   else rubber |= MENUSTARTLINE;
+   else ui_state |= MENUSTARTLINE;
  } else if(!strcmp(argv[1],"rect")) {
    double x1,y1,x2,y2;
    int pos;
@@ -920,9 +927,11 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
      pos=-1;
      if(argc==7) pos=atol(argv[6]);
      storeobject(pos, x1,y1,x2,y2,RECT,rectcolor,0,NULL);
-     drawrect(gc[rectcolor],NOW, x1,y1,x2,y2);
+     drawrect(rectcolor,NOW, x1,y1,x2,y2);
    }  
-   else rubber |= MENUSTARTRECT;
+   else ui_state |= MENUSTARTRECT;
+ } else if(!strcmp(argv[1],"polygon")) {
+   ui_state |= MENUSTARTPOLYGON;
  } else if(!strcmp(argv[1],"align")) {
     push_undo();
     round_schematic_to_grid(cadsnap);
@@ -963,7 +972,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
   {
     printf("lastrect[%d]=%d\n", i, lastrect[i]);
     printf("lastline[%d]=%d\n", i, lastline[i]);
-    printf("max_boxes[%d]=%d\n", i, max_boxes[i]);
+    printf("max_rects[%d]=%d\n", i, max_rects[i]);
     printf("max_lines[%d]=%d\n", i, max_lines[i]);
     printf("zoom=%g\n", zoom);
     printf("xorigin=%g\n", xorigin);

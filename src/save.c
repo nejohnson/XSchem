@@ -209,6 +209,54 @@ void save_box(FILE *fd)
     }
 }
 
+void save_polygon(FILE *fd)
+{
+    int c, i, j;
+    Polygon *ptr;
+    for(c=0;c<cadlayers;c++)
+    {
+     ptr=polygon[c];
+     for(i=0;i<lastpolygon[c];i++)
+     {
+      fprintf(fd, "P %d %d ", c,ptr[i].points);
+      for(j=0;j<ptr[i].points;j++) {
+        fprintf(fd, "%g %g ", ptr[i].x[j], ptr[i].y[j]);
+      }
+      save_ascii_string(ptr[i].prop_ptr,fd);
+      fputc('\n' ,fd);
+     }
+    }
+}
+
+void load_polygon(FILE *fd)
+{
+    int i,c, j, points;
+    Polygon *ptr;
+
+    fscanf(fd, "%d %d",&c, &points);
+    if(c>=cadlayers) {
+      fprintf(errfp,"FATAL: polygon layer > defined cadlayers, increase cadlayers\n"); 
+      Tcl_Eval(interp, "exit");
+    } // 20150408
+    check_polygon_storage(c);
+    i=lastpolygon[c];
+    ptr=polygon[c];
+    ptr[i].x=NULL;
+    ptr[i].y=NULL;
+    ptr[i].selected_point=NULL;
+    ptr[i].prop_ptr=NULL;
+    ptr[i].x = my_calloc(points, sizeof(double));
+    ptr[i].y = my_calloc(points, sizeof(double));
+    ptr[i].selected_point= my_calloc(points, sizeof(unsigned short));
+    ptr[i].points=points;
+    ptr[i].sel=0;
+    for(j=0;j<points;j++) {
+      fscanf(fd, "%lf %lf ",&(ptr[i].x[j]), &(ptr[i].y[j]));
+    }
+    load_ascii_string( &ptr[i].prop_ptr, fd);
+    lastpolygon[c]++;
+}
+
 
 void load_box(FILE *fd)
 {
@@ -216,7 +264,10 @@ void load_box(FILE *fd)
     Box *ptr;
 
     fscanf(fd, "%d",&c);
-    if(c>=cadlayers) {fprintf(errfp,"FATAL: box layer > defined cadlayers, increase cadlayers\n"); Tcl_Eval(interp, "exit");} // 20150408
+    if(c>=cadlayers) {
+      fprintf(errfp,"FATAL: box layer > defined cadlayers, increase cadlayers\n");
+      Tcl_Eval(interp, "exit");
+    } // 20150408
     check_box_storage(c);
     i=lastrect[c];
     ptr=rect[c];
@@ -244,10 +295,6 @@ void save_line(FILE *fd)
      }
     }
 }
-
-
-
-
 
 void load_line(FILE *fd)
 {
@@ -321,6 +368,7 @@ int save_symbol(char *schname) // 20171020 aded return value
   save_line(fd);
   save_box(fd);
   save_text(fd);
+  save_polygon(fd);
   save_wire(fd);
   save_inst(fd);        
   fclose(fd);
@@ -392,6 +440,7 @@ int save_file(char *schname) // 20171020 added return value
     fputc('\n', fd);
     save_line(fd);
     save_box(fd);
+    save_polygon(fd);
     save_text(fd);
     save_wire(fd);
     save_inst(fd);
@@ -541,6 +590,9 @@ void load_file(int load_symbols, char *abs_name, int reset_undo) // 20150327 add
        case 'L':
         load_line(fd);
         break;
+       case 'P':
+        load_polygon(fd);
+        break;
        case 'B':
         load_box(fd);
         break;
@@ -584,7 +636,7 @@ void delete_undo(void)  // 20150327
     unlink(diff_name);
   }
   rmdir(undo_dirname);
-  free(undo_dirname);
+  my_free(undo_dirname);
 }
     
 void clear_undo(void) // 20150327
@@ -635,6 +687,7 @@ void push_undo(void) // 20150327
     save_ascii_string(schprop,fd);  //20100217
     fputc('\n', fd);
     save_line(fd);
+    save_polygon(fd);
     save_box(fd);
     save_text(fd);
     save_wire(fd);
@@ -722,6 +775,9 @@ void pop_undo(int redo)  // 20150327
      case 'L':
       load_line(fd);
       break;
+     case 'P':
+      load_polygon(fd);
+      break;
      case 'B':
       load_box(fd);
       break;
@@ -756,14 +812,15 @@ int load_symbol_definition(char *name)
   FILE *fd;
   char name3[4096];  // 20161122 overflow safe
   Box tmp,boundbox;
-  int i,c,count=0;
+  int i,c,count=0, k, poly_points; // 20171115 polygon stuff
   static char *aux_ptr=NULL;
   double aux_double;
   int aux_int;
   char aux_str[256]; // overflow safe 20161122
-  int lastl[cadlayers], lastr[cadlayers],lastt;
+  int lastl[cadlayers], lastr[cadlayers], lastp[cadlayers], lastt; // 20171115 lastp
   Line *ll[cadlayers];
   Box *bb[cadlayers];
+  Polygon *pp[cadlayers]; // 20171115
   Text *tt;
   int endfile=0;
 
@@ -788,9 +845,10 @@ int load_symbol_definition(char *name)
   //             is in a non modified state.
   for(c=0;c<cadlayers;c++) 
   {
-   lastl[c]=lastr[c]=0;
+   lastl[c]=lastr[c]=lastp[c]=0; // 20171115 lastp
    ll[c]=NULL;
    bb[c]=NULL;
+   pp[c]=NULL;
   }
   lastt=0;
   tt=NULL;
@@ -829,6 +887,25 @@ int load_symbol_definition(char *name)
        if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): loaded line: ptr=%lu\n", (unsigned long)ll[c]);
       lastl[c]++;
       break;
+     case 'P': // 20171115
+      fscanf(fd, "%d %d",&c, &poly_points);
+      // fprintf(errfp, "load_symbol_definition(): polygon, points=%d\n", poly_points);
+      if(c>=cadlayers) {fprintf(errfp,"FATAL: line layer > defined cadlayers, increase cadlayers\n"); Tcl_Eval(interp, "exit");} // 20150408
+      i=lastp[c];
+      my_realloc(&pp[c],(i+1)*sizeof(Polygon));
+      pp[c][i].x = my_calloc(poly_points, sizeof(double));
+      pp[c][i].y = my_calloc(poly_points, sizeof(double));
+      pp[c][i].selected_point = my_calloc(poly_points, sizeof(unsigned short));
+      pp[c][i].points = poly_points;
+      for(k=0;k<poly_points;k++) {
+        fscanf(fd, "%lf %lf ",&(pp[c][i].x[k]), &(pp[c][i].y[k]) );
+      }
+      pp[c][i].prop_ptr=NULL;
+      load_ascii_string( &pp[c][i].prop_ptr, fd);
+       if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): loaded polygon: ptr=%lu\n", (unsigned long)pp[c]);
+      lastp[c]++;
+      break;
+
      case 'B':
       fscanf(fd, "%d",&c);
       if(c>=cadlayers) {fprintf(errfp,"FATAL: box layer > defined cadlayers, increase cadlayers\n"); Tcl_Eval(interp, "exit");} // 20150408
@@ -878,7 +955,9 @@ int load_symbol_definition(char *name)
    {
     instdef[lastinstdef].lines[c] = lastl[c];
     instdef[lastinstdef].rects[c] = lastr[c];
+    instdef[lastinstdef].polygons[c] = lastp[c];
     instdef[lastinstdef].lineptr[c] = ll[c];
+    instdef[lastinstdef].polygonptr[c] = pp[c];
     instdef[lastinstdef].boxptr[c] = bb[c];
    }
    instdef[lastinstdef].texts = lastt;
@@ -899,6 +978,21 @@ int load_symbol_definition(char *name)
      count++;
      tmp.x1=bb[c][i].x1;tmp.y1=bb[c][i].y1;tmp.x2=bb[c][i].x2;tmp.y2=bb[c][i].y2;
      updatebbox(count,&boundbox,&tmp);
+    }
+    for(i=0;i<lastp[c];i++) // 20171115
+    {
+      double x1=0., y1=0., x2=0., y2=0.;
+      int k;
+      count++;
+      for(k=0; k<pp[c][i].points; k++) {
+        //fprintf(errfp, "  poly: point %d: %g %g\n", k, pp[c][i].x[k], pp[c][i].y[k]);
+        if(k==0 || pp[c][i].x[k] < x1) x1 = pp[c][i].x[k];
+        if(k==0 || pp[c][i].y[k] < y1) y1 = pp[c][i].y[k];
+        if(k==0 || pp[c][i].x[k] > x2) x2 = pp[c][i].x[k];
+        if(k==0 || pp[c][i].y[k] > y2) y2 = pp[c][i].y[k];
+      }
+      tmp.x1=x1;tmp.y1=y1;tmp.x2=x2;tmp.y2=y2;
+      updatebbox(count,&boundbox,&tmp);
     }
    }
 //   do not include symbol text in bounding box, since text length
@@ -1023,13 +1117,12 @@ void edit_symbol(void)
   static char *str=NULL;
   FILE *fd;
   int endfile=0;
-  char name[1024];   // overflow safe 20161122
+  char name[4096];   // overflow safe 20161122
   char name2[4096];   // overflow safe 20161122
   // char s[1024]; // 20121121 overflow safe 20161122 // commented out 20161210
   rebuild_selected_array();
   if(lastselected > 1)  return; //20121122
-  if(lastselected==1 && selectedgroup[0].type==ELEMENT)
-  {
+  if(lastselected==1 && selectedgroup[0].type==ELEMENT) {
    if(modified) { // 20161209
      if(save(1)) return;
    }
@@ -1097,7 +1190,7 @@ void edit_symbol(void)
   delete_netlist_structs(); // 20161222
   while(!endfile)
   {
-   if(fscanf(fd,"%1023s",name)==EOF) break;
+   if(fscanf(fd,"%4095s",name)==EOF) break;
    switch(name[0])
    {
     case 'S':
@@ -1112,6 +1205,9 @@ void edit_symbol(void)
      break;
     case 'L':
      load_line(fd);
+     break;
+    case 'P':
+     load_polygon(fd);
      break;
     case 'B':
      load_box(fd);
@@ -1166,7 +1262,7 @@ void load_symbol(char *abs_name)
     delete_netlist_structs(); // 20161222
     while(!endfile)
     {
-     if(fscanf(fd,"%s",name)==EOF) break;
+     if(fscanf(fd,"%4095s",name)==EOF) break;
      switch(name[0])
      {
       case 'V':
@@ -1178,6 +1274,9 @@ void load_symbol(char *abs_name)
       case 'G':
        load_ascii_string(&schvhdlprop,fd);
        if(debug_var>=2) fprintf(errfp, "load_symbol(): schematic property:%s\n",schvhdlprop);
+       break;
+      case 'P':
+       load_polygon(fd);
        break;
       case 'L':
        load_line(fd);

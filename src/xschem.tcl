@@ -418,8 +418,6 @@ proc filesave { msg {initialfile {}} {confirm 0}  } {
     # fix save to XSCHEM_DESIGN_DIR or libraries defined by a link 20171119
     set dir1 [file normalize "$XSCHEM_DESIGN_DIR/[file tail $dir]"]
     if { "$dir" eq "$dir1" } break
-
-    puts "$dir $file1"
   }
   return $a
   

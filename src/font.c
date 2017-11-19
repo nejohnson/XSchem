@@ -34,7 +34,7 @@ void compile_font(void)
  remove_symbols();
  my_strdup(&name, Tcl_GetVar(interp, "XSCHEM_HOME_DIR", TCL_GLOBAL_ONLY));
  my_strcat(&name, "/systemlib/font.sch");
- load_file(1,name,1);
+ load_schematic(1,name,1);
  for(code=0;code<127;code++)
  {
   unselect_all();

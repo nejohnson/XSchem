@@ -227,9 +227,9 @@ int save(int confirm) //20171006 add confirm
          if(confirm) {
            tkeval("ask_save");
            if(!strcmp(Tcl_GetStringResult(interp), "") ) cancel=1;
-           if(!strcmp(Tcl_GetStringResult(interp), "yes") ) save_ok = save_file(NULL);
+           if(!strcmp(Tcl_GetStringResult(interp), "yes") ) save_ok = save_schematic(NULL);
          } else {
-           save_ok = save_file(NULL);
+           save_ok = save_schematic(NULL);
          }
        }
      }
@@ -264,7 +264,7 @@ void saveas(void) // changed name from ask_save_file to saveas 20121201
       if(!res) return; //20071104
       // 20070323
       if( !strcmp( Tcl_GetVar(interp,"entry1",TCL_GLOBAL_ONLY), ".sch"  ) )
-        save_file(res);
+        save_schematic(res);
       else 
         save_symbol(res);
       return;
@@ -282,7 +282,7 @@ void saveas(void) // changed name from ask_save_file to saveas 20121201
       if( !strcmp( Tcl_GetVar(interp,"entry1",TCL_GLOBAL_ONLY), ".sym"  ) )
         save_symbol(res);
       else 
-        save_file(res);
+        save_schematic(res);
       return;
     }
 }
@@ -312,7 +312,7 @@ void ask_new_file(void)
      //clear_drawing();
      remove_symbols();
      if(strstr(name,".sym")) load_symbol( NULL);
-     else load_file(1, NULL,1);
+     else load_schematic(1, NULL,1);
      my_strdup(&sch_prefix[currentsch],".");
      zoom_full(1);
     }
@@ -788,7 +788,7 @@ void descend(void)
     tkeval(name);
     strcpy(schematic[currentsch], Tcl_GetStringResult(interp));
     if(!strcmp(schematic[currentsch],"")) return;
-    save_ok = save_file(schematic[currentsch]);
+    save_ok = save_schematic(schematic[currentsch]);
 
 //    Tcl_SetVar(interp,"entry1",schematic[currentsch],TCL_GLOBAL_ONLY);
 //    tkeval("entry_line {Save file:}");
@@ -834,11 +834,11 @@ void descend(void)
   currentsch++;
   unselect_all();
   remove_symbols();
-  load_file(1,NULL,1);
+  load_schematic(1,NULL,1);
   if(hilight_nets) 
   {
     prepare_netlist_structs();
-    //delete_netlist_structs(); // 20161222 done in load_file() and in prepare_netlist_structs() when needed
+    //delete_netlist_structs(); // 20161222 done in load_schematic() and in prepare_netlist_structs() when needed
  
   }
   zoom_full(1);
@@ -860,10 +860,10 @@ void go_back(int confirm) // 20171006 add confirm
    {
      if(confirm) {
        tkeval("ask_save");
-       if(!strcmp(Tcl_GetStringResult(interp), "yes") ) save_ok = save_file(NULL);
+       if(!strcmp(Tcl_GetStringResult(interp), "yes") ) save_ok = save_schematic(NULL);
        else if(!strcmp(Tcl_GetStringResult(interp), "") ) return;
      } else {
-       save_ok = save_file(NULL);
+       save_ok = save_schematic(NULL);
      }
    }
   }
@@ -884,7 +884,7 @@ void go_back(int confirm) // 20171006 add confirm
   strcpy(schematic[currentsch] , "");
   currentsch--;
   remove_symbols();
-  load_file(1,NULL,1);
+  load_schematic(1,NULL,1);
   unselect_all();
 
   if(prev_curr_type==SCHEMATIC) {

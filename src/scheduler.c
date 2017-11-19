@@ -105,7 +105,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
  else if(!strcmp(argv[1],"edit_file") ) {
     rebuild_selected_array();
     if(lastselected==0 ) {
-      save_file(NULL); // sync data with disk file before editing file
+      save_schematic(NULL); // sync data with disk file before editing file
       my_snprintf(name, S(name), "edit_file %s/%s.sch",
             Tcl_GetVar(interp, "XSCHEM_DESIGN_DIR", TCL_GLOBAL_ONLY),
             schematic[currentsch]);
@@ -170,7 +170,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
       strcpy(schematic[currentsch],Tcl_GetStringResult(interp) );
       //clear_drawing();
       remove_symbols();
-      load_file(1, NULL,1);
+      load_schematic(1, NULL,1);
       my_strdup(&sch_prefix[currentsch],".");
       zoom_full(1);
     }
@@ -646,7 +646,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
    if(strcmp(Tcl_GetStringResult(interp),"ok")==0) 
       if(current_type==SCHEMATIC)
       {
-       save_file(NULL);
+       save_schematic(NULL);
        make_symbol();
       }
  }
@@ -767,7 +767,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
  else if(!strcmp(argv[1],"reload"))
  {
    remove_symbols();
-   load_file(1,NULL,1);
+   load_schematic(1,NULL,1);
    zoom_full(1);
  }
 

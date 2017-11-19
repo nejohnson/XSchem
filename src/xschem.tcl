@@ -369,12 +369,13 @@ proc edit_netlist {schname } {
  return {}
 }
 
-proc check_valid_filename { s} { 
-  global XSCHEM_DESIGN_DIR
-  set ppp [file dirname $XSCHEM_DESIGN_DIR/$s]
-  if { [regexp "$XSCHEM_DESIGN_DIR/.+" $ppp] } { return ok }
-  return {}
-}
+## useless 20171119
+# proc check_valid_filename { s} { 
+#   global XSCHEM_DESIGN_DIR
+#   set ppp [file dirname $XSCHEM_DESIGN_DIR/$s]
+#   if { [regexp "$XSCHEM_DESIGN_DIR/.+" $ppp] } { return ok }
+#   return {}
+# }
 
 # 20161207
 proc fileload { msg {initialfile {}} {confirm 0}  } {
@@ -396,6 +397,14 @@ proc fileload { msg {initialfile {}} {confirm 0}  } {
 
 }
 
+proc savefile {name ext} {
+ global XSCHEM_HOME_DIR XSCHEM_DESIGN_DIR INITIALDIR FILESELECT_CURR_DIR entry1
+ set nn [file tail $name]
+ set FILESELECT_CURR_DIR $XSCHEM_DESIGN_DIR/[file dirname $name]
+ set a [filesave {SAVE FILE} $nn 1]
+ set entry1 [ file extension $a] 
+ return [file rootname $a]
+}
 
 # 20121111
 proc filesave { msg {initialfile {}} {confirm 0}  } {
@@ -407,15 +416,13 @@ proc filesave { msg {initialfile {}} {confirm 0}  } {
       set r [tk_getSaveFile  -title $msg -initialfile $initialfile -initialdir $FILESELECT_CURR_DIR ]
     }
     set dir [file dirname $r]
-    set cellname [file tail $r]
-    set entry1 [ file extension $r] 
-    set a [ get_cell $r]$entry1
+    set a [ get_cell $r]
+    set xschem_des_dir [file normalize $XSCHEM_DESIGN_DIR]
     if { ![string compare $r {} ] } { break } 
-    # 20170622 check for dirname after $XSCHEM_DESIGN_DIR and filename before .sch or .sym
-    #                               /dirname/filename
-    if { [regexp "$XSCHEM_DESIGN_DIR/\[^.\]+/\[^.\]+\." $r] } { break } 
+    # enforce saving in 1st level directories under XSCHEM_DESIGN_DIR 20171119
+    if { ![regexp "^$xschem_des_dir/\[^./\]+$" $dir] } { continue } 
     
-    # fix save to XSCHEM_DESIGN_DIR or libraries defined by a link 20171119
+    # fix save to XSCHEM_DESIGN_DIR for libraries defined by a link 20171119
     set dir1 [file normalize "$XSCHEM_DESIGN_DIR/[file tail $dir]"]
     if { "$dir" eq "$dir1" } break
   }
@@ -460,15 +467,6 @@ proc loadfile {ext} {
    return {}
  }
  return $a
-}
-
-proc savefile {name ext} {
- global XSCHEM_HOME_DIR XSCHEM_DESIGN_DIR INITIALDIR FILESELECT_CURR_DIR entry1
- set nn [file tail $name]
- set FILESELECT_CURR_DIR $XSCHEM_DESIGN_DIR/[file dirname $name]
- set a [filesave {SAVE FILE} $nn 1]
- set entry1 [ file extension $a] 
- return [file rootname $a]
 }
 
 proc delete_files { dir } { 

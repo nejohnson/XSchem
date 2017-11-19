@@ -385,7 +385,7 @@ int save_symbol(char *schname) // 20171020 aded return value
 
 
 
-int save_file(char *schname) // 20171020 added return value
+int save_schematic(char *schname) // 20171020 added return value
 {
     FILE *fd;
     char name[4096]; // overflow safe 20161122
@@ -395,26 +395,26 @@ int save_file(char *schname) // 20171020 added return value
       else return -1;
     }
 
-    // if no correct filename given enforce a correct one or Cancel the save
-    my_snprintf(name, S(name), "check_valid_filename %s", schematic[currentsch]); // 20121111
-    Tcl_Eval(interp, name); 
-    if( strcmp(Tcl_GetStringResult(interp), "ok") ) { 
-         return -1 ; // 20170622
-    }
+    //// useless 20171119 if no correct filename given enforce a correct one or Cancel the save
+    // my_snprintf(name, S(name), "check_valid_filename %s", schematic[currentsch]); // 20121111
+    // Tcl_Eval(interp, name); 
+    // if( strcmp(Tcl_GetStringResult(interp), "ok") ) { 
+    //      return -1 ; // 20170622
+    // }
 
     if(!strcmp(schematic[currentsch],"")) {
-      if(debug_var>=1) fprintf(errfp, "save_file(): no name specified , cant save\n");
+      if(debug_var>=1) fprintf(errfp, "save_schematic(): no name specified , cant save\n");
 
       // 20121111
       if(has_x) {
         Tcl_Eval(interp,
-          "tk_messageBox -icon error -type ok -message \"save_file(): no name specified , cant save\"");
+          "tk_messageBox -icon error -type ok -message \"save_schematic(): no name specified , cant save\"");
       }
 
       return -1;
     }
     if(schname !=NULL)
-    if(debug_var>=1) fprintf(errfp, "save_file(): currentsch=%d name=%s\n",currentsch, schname);
+    if(debug_var>=1) fprintf(errfp, "save_schematic(): currentsch=%d name=%s\n",currentsch, schname);
     my_snprintf(name, S(name), "%s/%s.sch",Tcl_GetVar(interp,"XSCHEM_DESIGN_DIR", TCL_GLOBAL_ONLY),
      schematic[currentsch]);
     if(has_x) {
@@ -424,7 +424,7 @@ int save_file(char *schname) // 20171020 added return value
 
     if(!(fd=fopen(name,"w")))
     {
-      if(debug_var>=1) fprintf(errfp, "save_file(): problems opening file %s \n",name);
+      if(debug_var>=1) fprintf(errfp, "save_schematic(): problems opening file %s \n",name);
       tkeval("alert_ {file opening for write failed!} {}"); // 20171020
       return -1;
     }
@@ -483,7 +483,7 @@ char *get_sym_type(char *name)
  return NULL;
 }
 
-void load_syms(void) // 20150326 separated from load_file()
+void link_symbols_to_instances(void) // 20150326 separated from load_schematic()
 {
   int i,symbol, missing;
   static char *type=NULL; // 20150407 added static 
@@ -498,14 +498,14 @@ void load_syms(void) // 20150326 separated from load_file()
      //type=get_sym_type(symfilename); // 20150403 not used anymore for vhdl_block_netlist()
                                        // ************* huge execution time hog !!!! ********
 
-     if(debug_var>=2) fprintf(errfp, "load_syms(): inst=%d\n", i);
-     if(debug_var>=2) fprintf(errfp, "load_syms(): matching inst %d name=%s \n",i, inst_ptr[i].name);
-     if(debug_var>=2) fprintf(errfp, "load_syms(): -------\n");
+     if(debug_var>=2) fprintf(errfp, "link_symbols_to_instances(): inst=%d\n", i);
+     if(debug_var>=2) fprintf(errfp, "link_symbols_to_instances(): matching inst %d name=%s \n",i, inst_ptr[i].name);
+     if(debug_var>=2) fprintf(errfp, "link_symbols_to_instances(): -------\n");
      
      symbol = match_symbol(symfilename);
      if(symbol == -1) 
      {
-      if(debug_var>=1) fprintf(errfp, "load_syms(): missing symbol, skipping...\n");
+      if(debug_var>=1) fprintf(errfp, "link_symbols_to_instances(): missing symbol, skipping...\n");
       hash_proplist(inst_ptr[i].prop_ptr , 1); // 06052001 remove props from hash table 
       my_strdup(&inst_ptr[i].prop_ptr, NULL);  // 06052001 remove properties
       delete_inst_node(i);
@@ -514,9 +514,9 @@ void load_syms(void) // 20150326 separated from load_file()
       missing++;
       continue;
      }
-      if(debug_var>=2) fprintf(errfp, "load_syms(): \n");
+      if(debug_var>=2) fprintf(errfp, "link_symbols_to_instances(): \n");
      inst_ptr[i].ptr = symbol;
-      if(debug_var>=2) fprintf(errfp, "load_syms(): missing=%d\n",missing);
+      if(debug_var>=2) fprintf(errfp, "link_symbols_to_instances(): missing=%d\n",missing);
      if(missing) 
      {
       inst_ptr[i-missing] = inst_ptr[i];
@@ -543,7 +543,7 @@ void load_syms(void) // 20150326 separated from load_file()
 
 }
 
-void load_file(int load_symbols, char *abs_name, int reset_undo) // 20150327 added reset_undo
+void load_schematic(int load_symbols, char *abs_name, int reset_undo) // 20150327 added reset_undo
 {
   char c[256]; // overflow safe 20161122
   int endfile=0;
@@ -554,8 +554,8 @@ void load_file(int load_symbols, char *abs_name, int reset_undo) // 20150327 add
   if(reset_undo) clear_undo();
   if(strcmp(schematic[currentsch], "")==0)
   {
-   if(debug_var>=1) fprintf(errfp, "load_file(): Error: schematic[currentsch] not set\n");
-   if(debug_var>=1) fprintf(errfp, "load_file():        nothing loaded\n");
+   if(debug_var>=1) fprintf(errfp, "load_schematic(): Error: schematic[currentsch] not set\n");
+   if(debug_var>=1) fprintf(errfp, "load_schematic():        nothing loaded\n");
    unselect_all();
    clear_drawing();
    return;
@@ -565,7 +565,7 @@ void load_file(int load_symbols, char *abs_name, int reset_undo) // 20150327 add
   } else {
     my_snprintf(name, S(name), "%s", abs_name);
   }
-  if(debug_var>=2) fprintf(errfp, "load_file(): opening file for loading:%s\n",name);
+  if(debug_var>=2) fprintf(errfp, "load_schematic(): opening file for loading:%s\n",name);
 
   clear_drawing();
   //free_hash();  // delete whole hash table
@@ -585,7 +585,7 @@ void load_file(int load_symbols, char *abs_name, int reset_undo) // 20150327 add
          break;
        case 'G':
         load_ascii_string(&schvhdlprop,fd);
-        if(debug_var>=2) fprintf(errfp, "load_file(): schematic property:%s\n",schvhdlprop?schvhdlprop:"<NULL>");
+        if(debug_var>=2) fprintf(errfp, "load_schematic(): schematic property:%s\n",schvhdlprop?schvhdlprop:"<NULL>");
         break;
        case 'L':
         load_line(fd);
@@ -606,15 +606,15 @@ void load_file(int load_symbols, char *abs_name, int reset_undo) // 20150327 add
         load_inst(fd);
         break;
        default:
-        if(debug_var>=2) fprintf(errfp, "load_file(): end file reached\n");
+        if(debug_var>=2) fprintf(errfp, "load_schematic(): end file reached\n");
         endfile=1;
         break;
       }
     }
     fclose(fd); // 20150326 moved before load symbols
 
-    if(debug_var>=2) fprintf(errfp, "load_file(): loaded file:wire=%d inst=%d\n",lastwire , lastinst);
-    if(load_symbols) load_syms();
+    if(debug_var>=2) fprintf(errfp, "load_schematic(): loaded file:wire=%d inst=%d\n",lastwire , lastinst);
+    if(load_symbols) link_symbols_to_instances();
     delete_netlist_structs(); // 20161222
     modified=0;
 
@@ -623,7 +623,7 @@ void load_file(int load_symbols, char *abs_name, int reset_undo) // 20150327 add
     Tcl_Eval(interp, "wm title . [file tail [xschem get schpath]]"); // 20150417 set window and icon title
     Tcl_Eval(interp, "wm iconname . [file tail [xschem get schpath]]");
   }
-  if(debug_var>=2) fprintf(errfp, "load_file(): returning\n");
+  if(debug_var>=2) fprintf(errfp, "load_schematic(): returning\n");
 }
 
 void delete_undo(void)  // 20150327
@@ -770,7 +770,7 @@ void pop_undo(int redo)  // 20150327
        break;
      case 'G':
       load_ascii_string(&schvhdlprop,fd);
-      if(debug_var>=2) fprintf(errfp, "load_file(): schematic property:%s\n",schvhdlprop?schvhdlprop:"<NULL>");
+      if(debug_var>=2) fprintf(errfp, "load_schematic(): schematic property:%s\n",schvhdlprop?schvhdlprop:"<NULL>");
       break;
      case 'L':
       load_line(fd);
@@ -791,17 +791,17 @@ void pop_undo(int redo)  // 20150327
       load_inst(fd);
       break;
      default:
-      if(debug_var>=2) fprintf(errfp, "load_file(): end file reached\n");
+      if(debug_var>=2) fprintf(errfp, "load_schematic(): end file reached\n");
       endfile=1;
       break;
     }
   }
   fclose(fd); // 20150326 moved before load symbols
 
-  if(debug_var>=2) fprintf(errfp, "load_file(): loaded file:wire=%d inst=%d\n",lastwire , lastinst);
-  load_syms();
+  if(debug_var>=2) fprintf(errfp, "load_schematic(): loaded file:wire=%d inst=%d\n",lastwire , lastinst);
+  link_symbols_to_instances();
   modified=1;
-  if(debug_var>=2) fprintf(errfp, "load_file(): returning\n");
+  if(debug_var>=2) fprintf(errfp, "load_schematic(): returning\n");
   waitpid(pid, NULL, 0);
 }
 
@@ -877,7 +877,10 @@ int load_symbol_definition(char *name)
       break;
      case 'L':
       fscanf(fd, "%d",&c);
-      if(c>=cadlayers) {fprintf(errfp,"FATAL: line layer > defined cadlayers, increase cadlayers\n"); Tcl_Eval(interp, "exit");} // 20150408
+      if(c>=cadlayers) {
+        fprintf(errfp,"FATAL: line layer > defined cadlayers, increase cadlayers\n");
+        Tcl_Eval(interp, "exit");
+      } // 20150408
       i=lastl[c];
       my_realloc(&ll[c],(i+1)*sizeof(Line));
       fscanf(fd, "%lf %lf %lf %lf ",&ll[c][i].x1, &ll[c][i].y1, 
@@ -890,7 +893,10 @@ int load_symbol_definition(char *name)
      case 'P': // 20171115
       fscanf(fd, "%d %d",&c, &poly_points);
       // fprintf(errfp, "load_symbol_definition(): polygon, points=%d\n", poly_points);
-      if(c>=cadlayers) {fprintf(errfp,"FATAL: line layer > defined cadlayers, increase cadlayers\n"); Tcl_Eval(interp, "exit");} // 20150408
+      if(c>=cadlayers) {
+        fprintf(errfp,"FATAL: line layer > defined cadlayers, increase cadlayers\n");
+        Tcl_Eval(interp, "exit");
+      } // 20150408
       i=lastp[c];
       my_realloc(&pp[c],(i+1)*sizeof(Polygon));
       pp[c][i].x = my_calloc(poly_points, sizeof(double));
@@ -908,7 +914,10 @@ int load_symbol_definition(char *name)
 
      case 'B':
       fscanf(fd, "%d",&c);
-      if(c>=cadlayers) {fprintf(errfp,"FATAL: box layer > defined cadlayers, increase cadlayers\n"); Tcl_Eval(interp, "exit");} // 20150408
+      if(c>=cadlayers) {
+        fprintf(errfp,"FATAL: box layer > defined cadlayers, increase cadlayers\n");
+        Tcl_Eval(interp, "exit");
+      } // 20150408
       i=lastr[c];
       my_realloc(&bb[c],(i+1)*sizeof(Box));
       fscanf(fd, "%lf %lf %lf %lf ",&bb[c][i].x1, &bb[c][i].y1, 
@@ -941,7 +950,7 @@ int load_symbol_definition(char *name)
       load_ascii_string(&aux_ptr,fd);
       break;
      default:
-      if(debug_var>=1) fprintf(errfp, "load_file(): unknown line, assuming EOF\n");
+      if(debug_var>=1) fprintf(errfp, "load_schematic(): unknown line, assuming EOF\n");
       endfile=1;
       break;
     }
@@ -1128,7 +1137,7 @@ void edit_symbol(void)
    }
    my_strdup( &str,
        get_tok_value(inst_ptr[selectedgroup[0].n].prop_ptr,"name",0)  // moved before ask_save 20121129
-								      // because save_file clears selection
+								      // because save_schematic clears selection
    );
    my_snprintf(name, S(name), "%s", inst_ptr[selectedgroup[0].n].name);
    // dont allow descend in the default missing symbol
@@ -1201,7 +1210,7 @@ void edit_symbol(void)
      break;
     case 'G':
      load_ascii_string(&schvhdlprop,fd);
-     if(debug_var>=2) fprintf(errfp, "load_file(): schematic property:%s\n",schvhdlprop);
+     if(debug_var>=2) fprintf(errfp, "load_schematic(): schematic property:%s\n",schvhdlprop);
      break;
     case 'L':
      load_line(fd);

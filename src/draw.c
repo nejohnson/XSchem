@@ -829,13 +829,36 @@ void filledrect(int c, int what, double rectx1,double recty1,double rectx2,doubl
   i=0;
  }
 }
+
+void polygon_bbox(double *x, double *y, int points, double *bx1, double *by1, double *bx2, double *by2)
+{
+  int j;
+  for(j=0; j<points; j++) {
+    if(j==0 || x[j] < *bx1) *bx1 = x[j];
+    if(j==0 || y[j] < *by1) *by1 = y[j];
+    if(j==0 || x[j] > *bx2) *bx2 = x[j];
+    if(j==0 || y[j] > *by2) *by2 = y[j];
+  }
+}
+
+
 // Convex Nonconvex Complex
 #define Polygontype Nonconvex
 void drawpolygon(int c, int what, double *x, double *y, int points)
 {
+  double x1,y1,x2,y2;
   XPoint p[points];
   int i;
   if(!has_x) return;
+  polygon_bbox(x, y, points, &x1,&y1,&x2,&y2);
+  x1=(x1+xorigin)*mooz;
+  y1=(y1+yorigin)*mooz;
+  x2=(x2+xorigin)*mooz;
+  y2=(y2+yorigin)*mooz;
+  if( !rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) ) {
+    return;
+  }
+
   for(i=0;i<points; i++) {
     p[i].x = (x[i] + xorigin)*mooz;
     p[i].y = (y[i] + yorigin)*mooz;
@@ -848,9 +871,18 @@ void drawpolygon(int c, int what, double *x, double *y, int points)
 
 void drawfillpolygon(int c, int what, double *x, double *y, int points)
 {
+  double x1,y1,x2,y2;
   XPoint p[points];
   int i;
   if(!has_x) return;
+  polygon_bbox(x, y, points, &x1,&y1,&x2,&y2);
+  x1=(x1+xorigin)*mooz;
+  y1=(y1+yorigin)*mooz;
+  x2=(x2+xorigin)*mooz;
+  y2=(y2+yorigin)*mooz;
+  if( !rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) ) {
+    return;
+  }
   if(!fill || !fill_type[c]) return;
   for(i=0;i<points; i++) {
     p[i].x = (x[i] + xorigin)*mooz;
@@ -862,9 +894,18 @@ void drawfillpolygon(int c, int what, double *x, double *y, int points)
 }
 void drawtemppolygon(GC gc, int what, double *x, double *y, int points)
 {
+  double x1,y1,x2,y2;
   XPoint p[points];
   int i;
   if(!has_x) return;
+  polygon_bbox(x, y, points, &x1,&y1,&x2,&y2);
+  x1=(x1+xorigin)*mooz;
+  y1=(y1+yorigin)*mooz;
+  x2=(x2+xorigin)*mooz;
+  y2=(y2+yorigin)*mooz;
+  if( !rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) ) {
+    return;
+  }
   for(i=0;i<points; i++) {
     p[i].x = (x[i] + xorigin)*mooz;
     p[i].y = (y[i] + yorigin)*mooz;

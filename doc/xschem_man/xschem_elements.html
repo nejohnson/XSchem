@@ -53,17 +53,34 @@ p{padding: 15px  30px 10px;}
    <tt>'r'</tt> bindkey
   </p>
   <img src="xschem_rectangles.png">
+  <h3> POLYGONS </h3>
+  <p>
+   Polygons are closed paths that can be drawn on any layer. Placements begins with the <tt>'ctrl-w'</tt> key
+   and continues as long as the user clicks points on the drawing area. Placement ends when the last point
+   is coincident with the first point or by hitting the <tt>'Return</tt> key, in this case the polygon is 
+   closed automatically.
+  </p>
+  <img src="xschem_polygons.png">
   <h3> TEXT </h3>
   <p>
    Text can be placed with the <tt>'t'</tt> bindkey. 
-   A dialog box appears where the user inputs the text and text size.
+   A dialog box appears where the user inputs the text and text size. 
   </p>
   <img src="xschem_texts.png">
+  <p>
+   The <tt>layer</tt> property can be used
+   to draw text on a different layer, for example, setting <tt>layer=6</tt> will draw on cyan color. 
+   A <tt>font</tt> property is defined to change the default font. Use only Monospaced fonts because 
+   bounding box is not correctly calculated by XSCHEM for proportional typefaces. You wil learn in the 
+   <a href="xschem_properties.html">xschem properties chapter</a> how to set, edit and change object
+   properties.
+  </p>
+  <img src="xschem_texts1.png">
   <h3> SYMBOLS </h3>
   <p>
    Symbols are graphical elements that represent electrical components. A symbol represents an electronic
    device, like for example a resistor a bipolar transistor, an amplifier etc. As you can see graphically 
-   symbols are built with lines, rectangles and texts, the graphical primitives shown before.
+   symbols are built with lines, rectangles, polygons and texts, the graphical primitives shown before.
    In the picture below some components are placed in a schematic window. Components are instances of symbols.
    For example you see three placements of the 'npn' bipolar transistor symbol. 
    Like in C++, where objects are instances of classes, here components are instances of symbols.

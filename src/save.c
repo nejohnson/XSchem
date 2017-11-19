@@ -1366,7 +1366,7 @@ void round_schematic_to_grid(double cadsnap)
 void save_selection(int what)
 {
  FILE *fd;
- int i, c, n;
+ int i, c, n, k;
  char name[4096];
 
  if(what==1)
@@ -1403,6 +1403,15 @@ void save_selection(int what)
       fputc('\n' ,fd);
      break;
 
+     case POLYGON: // 20171117
+      fprintf(fd, "P %d %d ", c, polygon[c][n].points);
+      for(k=0; k<polygon[c][n].points; k++) {
+        fprintf(fd, "%g %g ", polygon[c][n].x[k], polygon[c][n].y[k]);
+      }
+      save_ascii_string(polygon[c][n].prop_ptr,fd);
+      fputc('\n' ,fd);
+     break;
+     
      case WIRE:
       fprintf(fd, "N %g %g %g %g ",wire[n].x1, wire[n].y1, wire[n].x2, wire[n].y2);
       save_ascii_string(wire[n].prop_ptr,fd);

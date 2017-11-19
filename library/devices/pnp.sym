@@ -1,6 +1,6 @@
 G {type=pnp
 format="@name @pinlist @model area=@area"
-template="name=Q1 model=DPNP area=1"} 
+template="name=Q1 model=pnp area=1"} 
 V {}
 S {}
 L 4 0 -30 0 30 {} 

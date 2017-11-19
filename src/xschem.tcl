@@ -407,12 +407,19 @@ proc filesave { msg {initialfile {}} {confirm 0}  } {
       set r [tk_getSaveFile  -title $msg -initialfile $initialfile -initialdir $FILESELECT_CURR_DIR ]
     }
     set dir [file dirname $r]
+    set cellname [file tail $r]
     set entry1 [ file extension $r] 
     set a [ get_cell $r]$entry1
     if { ![string compare $r {} ] } { break } 
     # 20170622 check for dirname after $XSCHEM_DESIGN_DIR and filename before .sch or .sym
     #                               /dirname/filename
     if { [regexp "$XSCHEM_DESIGN_DIR/\[^.\]+/\[^.\]+\." $r] } { break } 
+    
+    # fix save to XSCHEM_DESIGN_DIR or libraries defined by a link 20171119
+    set dir1 [file normalize "$XSCHEM_DESIGN_DIR/[file tail $dir]"]
+    if { "$dir" eq "$dir1" } break
+
+    puts "$dir $file1"
   }
   return $a
   
@@ -565,7 +572,7 @@ proc select_dir {} {
 }
 
 proc enter_text {textlabel} {
-   global txt rcode
+   global txt rcode has_cairo
    set rcode {}
    toplevel .t -class Dialog
    wm title .t {Enter text}
@@ -594,7 +601,11 @@ proc enter_text {textlabel} {
      pack  .t.edit.lab -side left 
      pack  .t.edit.entries -side left -fill x  -expand yes
      pack .t.edit  -side top  -fill x 
-       entry .t.edit.entries.hsize -relief sunken -textvariable hsize -width 20
+       if {$has_cairo } {
+         entry .t.edit.entries.hsize -relief sunken -textvariable vsize -width 20
+       } else {
+         entry .t.edit.entries.hsize -relief sunken -textvariable hsize -width 20
+       }
        entry .t.edit.entries.vsize -relief sunken -textvariable vsize -width 20
        entry .t.edit.entries.props -relief sunken -textvariable props -width 20 
        pack .t.edit.entries.hsize .t.edit.entries.vsize  \
@@ -1771,7 +1782,8 @@ set_ne cairo_font_scale 1.0
 set_ne cairo_font_line_spacing 1.0
 set_ne cairo_font_name {Monospace}
 set_ne cairo_vert_correct 0.0
-
+# has_cairo set by c program if cairo enabled
+set has_cairo 0 
 ##### set colors
 if {!$rainbow_colors} {
   set_ne cadlayers 22

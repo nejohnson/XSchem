@@ -784,6 +784,10 @@ int Tcl_AppInit(Tcl_Interp *inter)
 //  ************ X INITIALIZATION *******************
  if( has_x ) {
     mainwindow=Tk_MainWindow(interp);
+    if(!mainwindow) {
+       fprintf(errfp, "Tcl_AppInit() err 6: Tk_MainWindow returned NULL...\n");
+       return TCL_ERROR;
+    }
     display = Tk_Display(mainwindow);
     tkwindow = Tk_NameToWindow(interp, ".drw", mainwindow);
     Tk_MakeWindowExist(tkwindow);
@@ -833,7 +837,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
 
       // load font from tcl 20171112
       Tcl_EvalEx(interp,"xschem set cairo_font_name $cairo_font_name", -1, TCL_EVAL_GLOBAL);
-
+      Tcl_SetVar(interp, "has_cairo", "1", TCL_GLOBAL_ONLY);
       cairo_select_font_face (ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
       cairo_set_font_size (ctx, 20);
       cairo_select_font_face (save_ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);

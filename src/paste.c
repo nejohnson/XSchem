@@ -63,6 +63,10 @@ void merge_box(FILE *fd)
     Box *ptr;
 
     fscanf(fd, "%d",&c);
+    if(c>=cadlayers) {
+      fprintf(errfp,"FATAL: rectangle layer > defined cadlayers, increase cadlayers\n");
+      Tcl_Eval(interp, "exit");
+    } // 20150408
     check_box_storage(c);
     i=lastrect[c];
     ptr=rect[c];
@@ -76,12 +80,48 @@ void merge_box(FILE *fd)
     modified=1;
 }
 
+
+void merge_polygon(FILE *fd)
+{
+    int i,c, j, points;
+    Polygon *ptr;
+
+    fscanf(fd, "%d %d",&c, &points);
+    if(c>=cadlayers) {
+      fprintf(errfp,"FATAL: polygon layer > defined cadlayers, increase cadlayers\n");
+      Tcl_Eval(interp, "exit");
+    } // 20150408
+    check_polygon_storage(c);
+    i=lastpolygon[c];
+    ptr=polygon[c];
+    ptr[i].x=NULL;
+    ptr[i].y=NULL;
+    ptr[i].selected_point=NULL;
+    ptr[i].prop_ptr=NULL;
+    ptr[i].x = my_calloc(points, sizeof(double));
+    ptr[i].y = my_calloc(points, sizeof(double));
+    ptr[i].selected_point= my_calloc(points, sizeof(unsigned short));
+    ptr[i].points=points;
+    ptr[i].sel=0;
+    for(j=0;j<points;j++) {
+      fscanf(fd, "%lf %lf ",&(ptr[i].x[j]), &(ptr[i].y[j]));
+    }
+    load_ascii_string( &ptr[i].prop_ptr, fd);
+    select_polygon(c,i, SELECTED, 1);
+    lastpolygon[c]++;
+    modified=1;
+}
+
 void merge_line(FILE *fd)
 {
     int i,c;
     Line *ptr;
 
     fscanf(fd, "%d",&c);
+    if(c>=cadlayers) {
+      fprintf(errfp,"FATAL: line layer > defined cadlayers, increase cadlayers\n");
+      Tcl_Eval(interp, "exit");
+    } // 20150408
     check_line_storage(c);
     i=lastline[c];
     ptr=line[c];
@@ -247,6 +287,9 @@ void merge_file(int selection_load, char ext[])
         break;
        case 'B':
         merge_box(fd);
+        break;
+       case 'P':
+        merge_polygon(fd);
         break;
        case 'T':
         merge_text(fd);

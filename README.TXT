@@ -35,6 +35,53 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.3.3:
+- do not try to draw polygons that are offscreen (discard by
+  checking bounding box) - faster and no arithetic int16 overflow
+- copy /paste was not implemented yet for polygons - fixed.
+- bug fix for copy/save to clipboard of polygons
+- select_all() was not updated for polygons - fixed.
+- fix an error in the tcl code that prevented saving to libraries
+  pointed to by symlinks (20171119 tag in xschem.tcl)
+
+2.3.2:
+- added polygon graphic primitive in addition to lines, rectangles and text.
+  ctrl-w command or menu 'Tools-> Insert Polygon'. Operation is concluded by
+  closing the polygon, i.e. placing the last point over the first, or
+  by hitting the 'Return' key.
+- added font="font name" property for text objects, allowing to change
+  font on specific text objects. Use only monospaced types, expecially
+  if you plan to rotate or flip the text, as bounding box calculation is not
+  accurate for proportional typefaces.
+- performance improvement: do not call Fill drawing routines for shapes that
+  are on layers with no visible fill pattern defined.
+- the 'set cairo_vert_correct x' (with x=positive or negative number)
+  can now be set in the .xschem file to any value, text bounding box is
+  shifted accordingly. This allows to change the vertical alignment of fonts
+  for best appearance.
+- white and dark colorscheme toggle View->Toggle colorscheme, Shift-C key)
+- added 'xschem toggle_colorscheme' command
+- removed obsolete and deprecated Tcl_GlobalEval, replaced with Tcl_EvalEx
+- Tcl_Eval()s referring to TCL global vars changed to Tcl_EvalEx, so we ensure the
+  script is run in the global scope.
+- print error message if execution of xschem.tcl fails due to errors in the tcl code
+  before dying. this way we have a clue to fix the error.
+- custom colorschemes can be set in the ~/.xschem file: 
+    set cadlayers 22
+    set light_colors {
+     "#ffffff" "#0044ee" "#aaaaaa" "#222222" "#229900"
+     "#bb2200" "#00ccee" "#ff0000" "#888800" "#00aaaa"
+     "#880088" "#00ff00" "#0000cc" "#666600" "#557755"
+     "#aa2222" "#7ccc40" "#00ffcc" "#ce0097" "#d2d46b"
+     "#ef6158" "#fdb200" }
+  
+    set dark_colors {
+     "#000000" "#00ccee" "#3f3f3f" "#cccccc" "#88dd00"
+     "#bb2200" "#00ccee" "#ff0000" "#ffff00" "#ffffff"
+     "#ff00ff" "#00ff00" "#0000cc" "#aaaa00" "#aaccaa"
+     "#ff7777" "#bfff81" "#00ffcc" "#ce0097" "#d2d46b"
+     "#ef6158" "#fdb200" }
+
 2.3.0:
 - Antialiased CAIRO text for all XSCHEM elements!!
   if variable HAS_CAIRO is set in the Makefile all text processing in XSCHEM

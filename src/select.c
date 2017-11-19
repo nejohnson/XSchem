@@ -891,6 +891,10 @@ void select_all(void)
  }
  for(c=0;c<cadlayers;c++)
  {
+  for(i=0;i<lastpolygon[c];i++)
+  {
+    select_polygon(c,i,SELECTED,1);
+  }
   for(i=0;i<lastline[c];i++)
   {
     select_line(c,i,SELECTED,1);

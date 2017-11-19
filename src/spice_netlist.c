@@ -46,7 +46,7 @@ void global_spice_netlist(int global)  // netlister driver
    tkeval(name);
    strcpy(schematic[currentsch], Tcl_GetStringResult(interp));
    if(!strcmp(schematic[currentsch],"")) return;
-   save_file(schematic[currentsch]);
+   save_schematic(schematic[currentsch]);
  }
 
  my_snprintf(netl, S(netl), "%s/%s", netlist_dir, skip_dir(schematic[currentsch]) );
@@ -116,10 +116,10 @@ void global_spice_netlist(int global)  // netlister driver
 
  if(global)
  {
-   if(modified) save_file(NULL);
+   if(modified) save_schematic(NULL);
 
    remove_symbols(); // 20161205 ensure all unused symbols purged before descending hierarchy
-   load_file(1,NULL,0);
+   load_schematic(1,NULL,0);
 
    currentsch++;
     if(debug_var>=2) fprintf(errfp, "global_spice_netlist(): last defined symbol=%d\n",lastinstdef);
@@ -142,7 +142,7 @@ void global_spice_netlist(int global)  // netlister driver
    strcpy(schematic[currentsch] , "");
    currentsch--;
    remove_symbols();
-   load_file(1,NULL,0);
+   load_schematic(1,NULL,0);
  }
 
  // print globals nodes found in netlist 28032003
@@ -237,7 +237,7 @@ void spice_block_netlist(FILE *fd, int i)  //20081223
   
      //clear_drawing();
      strcpy(schematic[currentsch],instdef[i].name);
-     load_file(1,NULL,0);
+     load_schematic(1,NULL,0);
      spice_netlist(fd, spice_stop);  // 20111113 added spice_stop
      netlist_count++;
 

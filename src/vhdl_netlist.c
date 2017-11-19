@@ -51,7 +51,7 @@ void global_vhdl_netlist(int global)  // netlister driver
    tkeval(name);
    strcpy(schematic[currentsch], Tcl_GetStringResult(interp));
    if(!strcmp(schematic[currentsch],"")) return;
-   save_file(schematic[currentsch]);
+   save_schematic(schematic[currentsch]);
  }
  my_snprintf(netl, S(netl), "%s/%s", netlist_dir, skip_dir(schematic[currentsch]) );
  fd=fopen(netl, "w"); 
@@ -98,16 +98,16 @@ void global_vhdl_netlist(int global)  // netlister driver
  // 20071015 end
 
  // flush data structures (remove unused symbols)
- if(modified) save_file(NULL); // save and flush unused symbols
+ if(modified) save_schematic(NULL); // save and flush unused symbols
  remove_symbols();  // removed 25122002, readded 04112003.. this removes unused symbols
- load_file(1,NULL,0); 
+ load_schematic(1,NULL,0); 
 
 
  // 20071009 print top level generics if defined in symbol
  load_symbol_definition( schematic[currentsch] );
  print_generic(fd,"entity", lastinstdef-1);  // added print top level params
  remove_symbol();
- // load_file(1,NULL,0); 
+ // load_schematic(1,NULL,0); 
  // 20071009 end
 
 
@@ -269,11 +269,11 @@ void global_vhdl_netlist(int global)  // netlister driver
 
  if(global)
  {
-   if(modified) save_file(NULL); // 20160302 prepare_netlist_structs (called above from verilog_netlist() 
+   if(modified) save_schematic(NULL); // 20160302 prepare_netlist_structs (called above from verilog_netlist() 
                                  // may change wire node labels, so save.
 
    remove_symbols(); // 20161205 ensure all unused symbols purged before descending hierarchy
-   load_file(1,NULL,0);
+   load_schematic(1,NULL,0);
 
    currentsch++;
     if(debug_var>=2) fprintf(errfp, "global_vhdl_netlist(): last defined symbol=%d\n",lastinstdef);
@@ -294,7 +294,7 @@ void global_vhdl_netlist(int global)  // netlister driver
    strcpy(schematic[currentsch] , "");
    currentsch--;
    remove_symbols();
-   load_file(1,NULL,0);
+   load_schematic(1,NULL,0);
  }
  if(debug_var>=1) fprintf(errfp, "global_vhdl_netlist(): starting awk on netlist!\n");
  if(!split_files) {
@@ -348,12 +348,13 @@ void  vhdl_block_netlist(FILE *fd, int i)  //20081204
 
 
 
-     //// 20150403  I dont see any difference just using the original unconditioned load_file()
+     //// 20150403  I dont see any difference just using the original unconditioned load_schematic()
      ////           below line introduces **HUGE** performance issues in 
-     ////           load_file-> load_syms-> type=get_sym_type(symfilename) executed within a for(;i<lastinst;) loop
+     ////           load_schematic-> link_symbols_to_instances-> type=get_sym_type(symfilename) executed 
+     ////           within a for(;i<lastinst;) loop
      ////
-     // vhdl_stop? load_file(2,NULL,0) :  load_file(1,NULL,0);  // mmmmh lets try it out 04112003
-     load_file(1,NULL,0); // !stop_vhdl does not print use/packages !!!!!! 27052002
+     // vhdl_stop? load_schematic(2,NULL,0) :  load_schematic(1,NULL,0);  // mmmmh lets try it out 04112003
+     load_schematic(1,NULL,0); // !stop_vhdl does not print use/packages !!!!!! 27052002
 
 
      if(debug_var>=1) fprintf(errfp, "vhdl_block_netlist():       packages\n");

@@ -413,7 +413,7 @@ void update_symbol(char *result, int x)
 
   if(copy_cell) { // 20150911
     remove_symbols();
-    load_syms();
+    link_symbols_to_instances();
   }
 
    prefix=0;

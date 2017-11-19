@@ -579,13 +579,13 @@ extern void place_symbol(int pos, char *symbol_name, double x, double y, int rot
                          char *inst_props, int draw_sym);
 extern void attach_labels_to_inst(void);
 extern int match_symbol(char name[]);
-extern int save_file(char *); // 20171020 added return value
+extern int save_schematic(char *); // 20171020 added return value
 extern void push_undo(void);
 extern void pop_undo(int redo);
 extern void delete_undo(void);
 extern void clear_undo(void);
-extern void load_file(int load_symbol, char *abs_name, int reset_undo);
-extern void load_syms(void);
+extern void load_schematic(int load_symbol, char *abs_name, int reset_undo);
+extern void link_symbols_to_instances(void);
 extern void load_ascii_string(char **ptr, FILE *fd);
 extern void load_text(FILE *fd);
 extern void load_wire(FILE *fd);

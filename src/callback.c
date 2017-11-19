@@ -349,9 +349,9 @@ int callback(int event, int mx, int my, KeySym key,
         else if( lastselected==0 ) 
           place_symbol(-1,ss,mx, my, 0, 0, NULL,3);
         if(found) {
-          save_file(NULL);
+          save_schematic(NULL);
           remove_symbols();
-          load_file(1,NULL, 0);
+          load_schematic(1,NULL, 0);
           draw();
         }
     }
@@ -677,7 +677,7 @@ int callback(int event, int mx, int my, KeySym key,
     if(strcmp(Tcl_GetStringResult(interp),"ok")==0) 
       if(current_type==SCHEMATIC)
       {
-       save_file(NULL);
+       save_schematic(NULL);
        make_symbol();
       }
     break;
@@ -748,7 +748,7 @@ int callback(int event, int mx, int my, KeySym key,
     rebuild_selected_array();
     if(lastselected==0 ) {
       if(current_type==SCHEMATIC) {
-        save_file(NULL); // sync data with disk file before editing file
+        save_schematic(NULL); // sync data with disk file before editing file
         my_snprintf(str, S(str), "edit_file %s/%s.sch",
               Tcl_GetVar(interp, "XSCHEM_DESIGN_DIR", TCL_GLOBAL_ONLY),
               schematic[currentsch]);
@@ -790,7 +790,7 @@ int callback(int event, int mx, int my, KeySym key,
      tkeval("tk_messageBox -type okcancel -message {Are you sure you want to reload from disk?}");
      if(strcmp(Tcl_GetStringResult(interp),"ok")==0) {
         remove_symbols();
-        load_file(1,NULL, 1);
+        load_schematic(1,NULL, 1);
         //zoom_full(1);
         draw();
      }

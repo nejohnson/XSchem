@@ -891,7 +891,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
     strcpy(schematic[currentsch], Tcl_GetStringResult(interp));
     remove_symbols();
     if(strstr(filename,".sym")) load_symbol( NULL);
-    else load_file(1, NULL,1);
+    else load_schematic(1, NULL,1);
  }
  else { 
    char * tmp; // 20121110
@@ -899,7 +899,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
    if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): tmp=%s\n", tmp);
 
    if(tmp && tmp[0]) strcpy(schematic[currentsch],tmp); // 20070323
-   load_file(1, NULL,1);					// 20121110
+   load_schematic(1, NULL,1);					// 20121110
  }
  zoom_full(/*no draw */ 0);				// Necessary to tell xschem the 
 							// initial area to display

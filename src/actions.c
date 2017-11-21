@@ -1024,7 +1024,7 @@ void zoom_full(int dr)
   Box boundbox;
   double yy1;
 
-  lw = lw_double=1.;
+  if(change_lw) lw = lw_double=1.;
   areax1 = -2*lw;
   areay1 = -2*lw;
   areax2 = xrect[0].width+2*lw;
@@ -1044,7 +1044,7 @@ void zoom_full(int dr)
    
   if(dr)
   { 
-   set_linewidth();
+   if(change_lw) set_linewidth();
    draw(); // 20121111
   }
 }

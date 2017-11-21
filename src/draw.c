@@ -1150,8 +1150,8 @@ void draw(void)
             #endif
           }
           #ifndef HAS_CAIRO
-          drawline(textlayer, END, 0.0, 0.0, 0.0, 0.0);
-          drawrect(textlayer, END, 0.0, 0.0, 0.0, 0.0);
+          drawline(TEXTLAYER, END, 0.0, 0.0, 0.0, 0.0);
+          drawrect(TEXTLAYER, END, 0.0, 0.0, 0.0, 0.0);
           #endif
         }
         draw_selection(gc[SELLAYER], 0);

@@ -163,20 +163,27 @@ void toggle_fullscreen()
 
 void change_linewidth(double w, int dr)
 {
-    int i,j;
-    j=lw=lw_double=w;
-    if(lw==0) lw=1;
-    if(has_x) {
-      for(i=0;i<cadlayers;i++) {
-          XSetLineAttributes (display, gc[i], j, LineSolid, CapRound , JoinRound);
-      }                                  // lw  20070307
-      // 20101211
-      XSetLineAttributes (display, gctiled, j, LineSolid, CapRound , JoinRound);
-    }
-    if(dr) {
-      resetwin();
-      draw();
-    }
+  int i,j;
+  j=lw=lw_double=w;
+  if(lw==0) lw=1;
+  if(has_x) {
+    for(i=0;i<cadlayers;i++) {
+        XSetLineAttributes (display, gc[i], j, LineSolid, CapRound , JoinRound);
+    }                                  // lw  20070307
+    // 20101211
+    XSetLineAttributes (display, gctiled, j, LineSolid, CapRound , JoinRound);
+  }
+  areax1 = -2*lw;
+  areay1 = -2*lw;
+  areax2 = xrect[0].width+2*lw;
+  areay2 = xrect[0].height+2*lw;
+  areaw = areax2-areax1;
+  areah = areay2 - areay1;
+
+  if(dr) {
+    resetwin();
+    draw();
+  }
 }
 
 
@@ -910,8 +917,11 @@ void go_back(int confirm) // 20171006 add confirm
 void set_linewidth()
 {
  int i,j;
-   if(change_lw) 
-    lw_double=1/zoom*1.5;		// on some servers zero width
+   if(change_lw)  {
+     lw_double=1/zoom*1.5;		// on some servers zero width
+     //if(lw_double > 50.) lw_double=50; // clamp max width?
+   }
+    
    lw=j=lw_double;			// draws fast but not good...
    if(lw==0) lw=1;			// lw used to calculate bound boxes
    if(debug_var>=1) fprintf(errfp, "set_linewidth(): lw=%d, lw_double=%g\n", lw, lw_double);
@@ -921,6 +931,12 @@ void set_linewidth()
       }
       XSetLineAttributes (display, gctiled, j, LineSolid, CapRound , JoinRound); // j as linewidth 20171105
    }
+   areax1 = -2*lw;
+   areay1 = -2*lw;
+   areax2 = xrect[0].width+2*lw;
+   areay2 = xrect[0].height+2*lw;
+   areaw = areax2-areax1;
+   areah = areay2 - areay1;
 }
 
 void calc_drawing_bbox(Box *boundbox)
@@ -983,12 +999,13 @@ void calc_drawing_bbox(Box *boundbox)
  }
  for(i=0;i<lasttext;i++)
  {
-   text_bbox(textelement[i].txt_ptr, textelement[i].xscale,
+   if(text_bbox(textelement[i].txt_ptr, textelement[i].xscale,
          textelement[i].yscale,textelement[i].rot, textelement[i].flip,
          textelement[i].x0, textelement[i].y0,
-         &tmp.x1,&tmp.y1, &tmp.x2,&tmp.y2);
-   count++;
-   updatebbox(count,boundbox,&tmp);
+         &tmp.x1,&tmp.y1, &tmp.x2,&tmp.y2) ) {
+     count++;
+     updatebbox(count,boundbox,&tmp);
+   }
  }
  for(i=0;i<lastinst;i++)
  {
@@ -1006,6 +1023,14 @@ void zoom_full(int dr)
 {
   Box boundbox;
   double yy1;
+
+  lw = lw_double=1.;
+  areax1 = -2*lw;
+  areay1 = -2*lw;
+  areax2 = xrect[0].width+2*lw;
+  areay2 = xrect[0].height+2*lw;
+  areaw = areax2-areax1;
+  areah = areay2 - areay1;
 
   calc_drawing_bbox(&boundbox);
   zoom=(boundbox.x2-boundbox.x1)/(areaw-4*lw);
@@ -1284,22 +1309,27 @@ void new_polygon(int what) // 20171115
    if( what & PLACE )
    {
      //fprintf(errfp, "new_poly: PLACE, points=%d\n", points);
-     x[points]=mousex_snap;y[points]=mousey_snap;
+     y[points]=mousey_snap;
+     x[points]=mousex_snap;
      points++;
-     x[points]=mousex_snap;y[points]=mousey_snap; // prepare next point for rubber
+     x[points]=x[points-1];
+     y[points] = y[points-1];
+     //fprintf(errfp, "added point: %g %g\n", x[points-1], y[points-1]);
      ui_state |= STARTPOLYGON;
    }
    if( what & ADD)
    {
      if(what & END) {
+       drawtemppolygon(gctiled, NOW, x, y, points+1);
        x[points] = x[0]; 
        y[points] = y[0]; // close the polygon path by user request
      } else {
-       x[points]=mousex_snap;
-       y[points]=mousey_snap;
+       x[points] = mousex_snap;
+       y[points] = mousey_snap;
      }
      points++;
-     x[points]=mousex_snap;y[points]=mousey_snap; // prepare next point for rubber
+     //fprintf(errfp, "added point: %g %g\n", x[points-1], y[points-1]);
+     x[points]=x[points-1];y[points]=y[points-1]; // prepare next point for rubber
      //fprintf(errfp, "new_poly: ADD, points=%d\n", points);
      if( x[points-1] == x[0] && y[points-1] == y[0]) { // closed polygon --> END
        push_undo();
@@ -1314,14 +1344,14 @@ void new_polygon(int what) // 20171115
    {
      //fprintf(errfp, "new_poly: RUBBER\n");
      drawtemppolygon(gctiled, NOW, x, y, points+1);
-     x[points]=mousex_snap;
      y[points] = mousey_snap;
+     x[points] = mousex_snap;
      drawtemppolygon(gc[rectcolor], NOW, x, y, points+1);
    }
 }
 
 #ifdef HAS_CAIRO
-void text_bbox(char *str, double xscale, double yscale,
+int text_bbox(char *str, double xscale, double yscale,
     int rot, int flip, double x1,double y1, double *rx1, double *ry1,
     double *rx2, double *ry2)
 {
@@ -1331,8 +1361,11 @@ void text_bbox(char *str, double xscale, double yscale,
   cairo_font_extents_t fext;
   double ww, hh;
 
-  if(!has_x) return;
+  if(!has_x) return 0;
   size = (xscale+yscale)*26.*cairo_font_scale;
+  if(size*mooz>800.) {
+    return 0;
+  }
   cairo_set_font_size (ctx, size*mooz);
   cairo_text_extents(ctx, "A", &ext);
   cairo_font_extents(ctx, &fext);
@@ -1357,17 +1390,15 @@ void text_bbox(char *str, double xscale, double yscale,
   *rx1=x1;*ry1=y1; 
   ROTATION(0.0,0.0, ww,hh,(*rx2),(*ry2));
   *rx2+=*rx1;*ry2+=*ry1;
-  if(rot%2) {
-    *rx1-=cairo_vert_correct;
-    *rx2-=cairo_vert_correct;
-  } else {
-    *ry1-=cairo_vert_correct;
-    *ry2-=cairo_vert_correct;
-  }
+  if     (rot==0) {*ry1-=cairo_vert_correct; *ry2-=cairo_vert_correct;}
+  else if(rot==1) {*rx1+=cairo_vert_correct; *rx2+=cairo_vert_correct;}
+  else if(rot==2) {*ry1+=cairo_vert_correct; *ry2+=cairo_vert_correct;}
+  else if(rot==3) {*rx1-=cairo_vert_correct; *rx2-=cairo_vert_correct;}
   RECTORDER((*rx1),(*ry1),(*rx2),(*ry2));
+  return 1;
 }
 #else //!HAS_CAIRO
-void text_bbox(char * str,double xscale, double yscale,
+int text_bbox(char * str,double xscale, double yscale,
     int rot, int flip, double x1,double y1, double *rx1, double *ry1,
     double *rx2, double *ry2)
 {
@@ -1388,6 +1419,7 @@ void text_bbox(char * str,double xscale, double yscale,
   ROTATION(0.0,0.0,w,h,(*rx2),(*ry2));
   *rx2+=*rx1;*ry2+=*ry1;
   RECTORDER((*rx1),(*ry1),(*rx2),(*ry2)); 
+  return 1;
 }
 #endif
 

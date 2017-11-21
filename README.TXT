@@ -35,6 +35,19 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.3.4:
+- fix zoom full function, expecially when zooming back
+  from a very very deep zoom in.
+- avoid calling cairo_text_extents() and cairo_set_font_size() for
+  extremely large characters (this happens when doing an extreme zoom in)
+  as this causes Floating point exceptions on older cairo versions
+- enable constrained move (vertical/horizontal) when drawing polygons
+- better text alignent on rotated objects, when non-zero cairo_vert_correct
+  parameter is defined in ~/.xschem
+- lock hsize and vsize when entering text with cairo enabled, since there is
+  no option in cairo text for different x/y scaling.
+- code cleanups
+
 2.3.3:
 - do not try to draw polygons that are offscreen (discard by
   checking bounding box) - faster and no arithetic int16 overflow

@@ -162,6 +162,7 @@ void cairo_draw_string_line(cairo_t *ctx, char *s,
   int line_offset;
   double xadvance;
   double lines;
+  double vc; // 20171121 vert correct
   int rx1, ry1, rx2, ry2, save_rot, save_flip;
   // GC gcclear;
   if(s==NULL) return;
@@ -179,16 +180,16 @@ void cairo_draw_string_line(cairo_t *ctx, char *s,
     rot1=3;
   } else rot1=0;
 
-  fontascent-=cairo_vert_correct*mooz;
+  vc = cairo_vert_correct*mooz; // converted to device (pixel) space
 
-  if(     rot==0 && flip==0) {iy+=line_delta+fontascent;}
-  else if(rot==1 && flip==0) {iy+=xadvance+line_offset;ix=ix-fontheight+fontascent-lines+line_delta;}
-  else if(rot==2 && flip==0) {iy=iy-fontheight-lines+line_delta+fontascent; ix=ix-xadvance-line_offset;}
-  else if(rot==3 && flip==0) {ix+=line_delta+fontascent;}
-  else if(rot==0 && flip==1) {ix=ix-xadvance-line_offset;iy+=line_delta+fontascent;}
-  else if(rot==1 && flip==1) {ix=ix-fontheight+line_delta-lines+fontascent;}
-  else if(rot==2 && flip==1) {iy=iy-fontheight-lines+line_delta+fontascent;}
-  else if(rot==3 && flip==1) {iy=iy+xadvance+line_offset;ix+=line_delta+fontascent;}
+  if(     rot==0 && flip==0) {iy+=line_delta+fontascent-vc;}
+  else if(rot==1 && flip==0) {iy+=xadvance+line_offset;ix=ix-fontheight+fontascent+vc-lines+line_delta;}
+  else if(rot==2 && flip==0) {iy=iy-fontheight-lines+line_delta+fontascent+vc; ix=ix-xadvance-line_offset;}
+  else if(rot==3 && flip==0) {ix+=line_delta+fontascent-vc;}
+  else if(rot==0 && flip==1) {ix=ix-xadvance-line_offset;iy+=line_delta+fontascent-vc;}
+  else if(rot==1 && flip==1) {ix=ix-fontheight+line_delta-lines+fontascent+vc;}
+  else if(rot==2 && flip==1) {iy=iy-fontheight-lines+line_delta+fontascent+vc;}
+  else if(rot==3 && flip==1) {iy=iy+xadvance+line_offset;ix+=line_delta+fontascent-vc;}
 
   // clear area before drawing antialiased text.
   save_rot=rot;
@@ -253,6 +254,9 @@ void draw_string(int layer, int what, char *s, int rot, int flip, double x, doub
   if(size*mooz<3.0) return; // too small
   if(size*mooz>800) return; // too big
 
+  text_bbox(s, xscale, yscale, rot, flip, x,y, &rrx1,&rry1,&rrx2,&rry2);
+  if(!textclip(areax1,areay1,areax2,areay2,rrx1,rry1,rrx2,rry2)) return;
+
   cairo_set_source_rgb(ctx,
     (double)xcolor_array[layer].red/65535.0,
     (double)xcolor_array[layer].green/65535.0,
@@ -262,8 +266,6 @@ void draw_string(int layer, int what, char *s, int rot, int flip, double x, doub
     (double)xcolor_array[layer].green/65535.0,
     (double)xcolor_array[layer].blue/65535.0);
 
-  text_bbox(s, xscale, yscale, rot, flip, x,y, &rrx1,&rry1,&rrx2,&rry2);
-  if(!textclip(areax1,areay1,areax2,areay2,rrx1,rry1,rrx2,rry2)) return;
   cairo_set_font_size (ctx, size*mooz);
   cairo_set_font_size (save_ctx, size*mooz);
   cairo_font_extents(ctx, &fext);
@@ -298,7 +300,7 @@ void draw_temp_string(GC gctext, int what, char *s, int rot, int flip, double x,
  double  rx1,rx2,ry1,ry2;
 
  if(!has_x) return;
- text_bbox(s, xscale, yscale, rot, flip, x,y, &rx1,&ry1,&rx2,&ry2);
+ if(!text_bbox(s, xscale, yscale, rot, flip, x,y, &rx1,&ry1,&rx2,&ry2)) return;
  drawtemprect(gctext,what, rx1,ry1,rx2,ry2);
 }
 
@@ -1140,8 +1142,8 @@ void draw(void)
               textelement[i].xscale, textelement[i].yscale); 
             #ifdef HAS_CAIRO
             if(textfont[0]) {
-              cairo_select_font_face (ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-              cairo_select_font_face (save_ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+              // cairo_select_font_face (ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+              // cairo_select_font_face (save_ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
               cairo_restore(ctx);
               cairo_restore(save_ctx);
             }
@@ -1152,7 +1154,7 @@ void draw(void)
           drawrect(textlayer, END, 0.0, 0.0, 0.0, 0.0);
           #endif
         }
-      draw_selection(gc[SELLAYER], 0);
+        draw_selection(gc[SELLAYER], 0);
     } // !only_probes, 20110112
     draw_hilight_net();
     if(debug_var>=1) fprintf(errfp, "draw(): lw=%d\n",lw);

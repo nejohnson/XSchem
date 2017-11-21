@@ -32,7 +32,7 @@ endif
 ## recent gcc generates Position Independent Executable (pie), this breaks
 ## gprof, so use -no-pie together with -pg when profiling code.
 ## for cairo: $(pkg-config cairo  --cflags --libs)
-MOREFLAGS= -g
+MOREFLAGS= -g 
 
 CFLAGS  = -Wall  $(MOREFLAGS)  -I/usr/include/tcl${TCLVER} $(CAIRO_INCLUDES)
 LDFLAGS = -L/usr/X11R6/lib $(MOREFLAGS) -lX11 -lm -lXpm -ltcl${TCLVER} -ltk${TCLVER}  -lfl $(CAIRO_LIBS)

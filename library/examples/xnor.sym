@@ -2,8 +2,8 @@ G {type=xnor
 verilog_format="xnor #(@risedel , @falldel ) @name ( @@Z , @@A , @@B );"
 template="name=x1 risedel=100 falldel=200"
 } 
-V {} 
-S {} 
+V {}
+S {}
 L 4 -2.5 -30 10 -27.5 {} 
 L 4 10 -27.5 22.5 -17.5 {} 
 L 4 -2.5 30 10 27.5 {} 

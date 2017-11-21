@@ -615,6 +615,9 @@ proc enter_text {textlabel} {
    button .t.buttons.ok -text "OK" -command  \
    {
     set txt [.t.txt get 1.0 {end - 1 chars}]
+    if {$has_cairo} { 
+      set hsize $vsize
+    }
     set rcode {ok}
     destroy .t 
    }

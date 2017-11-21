@@ -140,7 +140,11 @@ int callback(int event, int mx, int my, KeySym key,
       copy_objects(RUBBER);
     }
     if(ui_state & STARTRECT) new_rect(RUBBER);
-    if(ui_state & STARTPOLYGON) new_polygon(RUBBER); // 20171115
+    if(ui_state & STARTPOLYGON) {
+      if(horizontal_move) mousey_snap = my_double_save;
+      if(vertical_move) mousex_snap = mx_double_save;
+      new_polygon(RUBBER); // 20171115
+    }
 
     if(!(ui_state & STARTPOLYGON) && (state&Button1Mask) && !(state & ShiftMask))  // start of a mouse area selection
     {
@@ -471,16 +475,22 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key == 'w'&& state==0)	// place wire.
    {
-     if(!vertical_move) {
-       mx_save = mx; 
-       mx_double_save=rint(( mx*zoom - xorigin)/cadsnap)*cadsnap;
+     if(ui_state & STARTWIRE) {
+       if(!vertical_move) {
+         mx_save = mx;
+         mx_double_save=mousex_snap;
+       }
+       if(!horizontal_move) {
+         my_save = my;   // 20070323
+         my_double_save=mousey_snap;
+       }
+       if(horizontal_move) mousey_snap = my_double_save; // 20171023
+       if(vertical_move) mousex_snap = mx_double_save;
+     } else {
+       mx_save = mx; my_save = my;       // 20070323
+       mx_double_save=mousex_snap;
+       my_double_save=mousey_snap;
      }
-     if(!horizontal_move) {
-       my_save = my;	// 20070323
-       my_double_save=rint(( my*zoom - yorigin)/cadsnap)*cadsnap;
-     }
-     if(horizontal_move) mousey_snap = my_double_save; // 20171023
-     if(vertical_move) mousex_snap = mx_double_save;
      new_wire(PLACE,mousex_snap, mousey_snap); 
     break;
    }
@@ -525,12 +535,12 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='w' && !ui_state && state==ControlMask)              // start polygon, 20171115
    {
-    if(debug_var>=1) fprintf(errfp, "callback(): start polygon\n");
-    mx_save = mx; my_save = my;
-    mx_double_save=rint(( mx*zoom - xorigin)/cadsnap)*cadsnap;
-    my_double_save=rint(( my*zoom - yorigin)/cadsnap)*cadsnap;
-    new_polygon(PLACE);
-    break;
+     if(debug_var>=1) fprintf(errfp, "callback(): start polygon\n");
+     mx_save = mx; my_save = my;       // 20070323
+     mx_double_save=mousex_snap;
+     my_double_save=mousey_snap;
+     new_polygon(PLACE);
+     break;
    }
    if(key=='p' && state == ControlMask)		 		// pan
    {
@@ -602,8 +612,8 @@ int callback(int event, int mx, int my, KeySym key,
    {
     if(debug_var>=1) fprintf(errfp, "callback(): start rect\n");
     mx_save = mx; my_save = my;	// 20070323
-    mx_double_save=rint(( mx*zoom - xorigin)/cadsnap)*cadsnap;
-    my_double_save=rint(( my*zoom - yorigin)/cadsnap)*cadsnap;
+    mx_double_save=mousex_snap;
+    my_double_save=mousey_snap;
     new_rect(PLACE); break;
    }
    if(key=='V' && state == ShiftMask)				// toggle spice/vhdl netlist 
@@ -630,7 +640,7 @@ int callback(int event, int mx, int my, KeySym key,
    if(key=='S' && (state == ShiftMask) )	// save 20121201
    {
      if(semaphore==2) break;
-     if(!strcmp(schematic[currentsch],"")) {   // 20170622 check if unnamed schematic, use saveas in this case...
+     if(!strcmp(schematic[currentsch],"")) { // 20170622 check if unnamed schematic, use saveas in this case...
        saveas();
      } else {
        save(1);
@@ -894,23 +904,29 @@ int callback(int event, int mx, int my, KeySym key,
     draw();
     break;
    }
-   if(key=='l' && state == ControlMask) {		// create schematic from selected symbol 20171004
+   if(key=='l' && state == ControlMask) { // create schematic from selected symbol 20171004
      
      create_sch_from_sym();
      break;
    }
-   if(key=='l' && state == 0)				// start line
+   if(key=='l' && state == 0) // start line
    {
-    if(!vertical_move) {
-      mx_save = mx; 
-      mx_double_save=rint(( mx*zoom - xorigin)/cadsnap)*cadsnap;
+    if(ui_state & STARTLINE) {
+      if(!vertical_move) {
+        mx_save = mx; 
+        mx_double_save=mousex_snap;
+      }
+      if(!horizontal_move) {
+        my_save = my;	// 20070323
+        my_double_save=mousey_snap;
+      }
+      if(horizontal_move) mousey_snap = my_double_save; // 20171023
+      if(vertical_move) mousex_snap = mx_double_save;
+    } else {
+      mx_save = mx; my_save = my;	// 20070323
+      mx_double_save=mousex_snap;
+      my_double_save=mousey_snap;
     }
-    if(!horizontal_move) {
-      my_save = my;	// 20070323
-      my_double_save=rint(( my*zoom - yorigin)/cadsnap)*cadsnap;
-    }
-    if(horizontal_move) mousey_snap = my_double_save; // 20171023
-    if(vertical_move) mousex_snap = mx_double_save;
     new_line(PLACE); break;
    }
    if(key=='F' && state==ShiftMask)				// Flip
@@ -934,8 +950,8 @@ int callback(int event, int mx, int my, KeySym key,
    if(key=='m' && state==0 && !(ui_state & (STARTMOVE | STARTCOPY)))// move selected obj.
    {
     mx_save = mx; my_save = my;	// 20070323
-    mx_double_save=rint(( mx*zoom - xorigin)/cadsnap)*cadsnap;
-    my_double_save=rint(( my*zoom - yorigin)/cadsnap)*cadsnap;
+    mx_double_save=mousex_snap;
+    my_double_save=mousey_snap;
     move_objects(BEGIN,0,0,0);
     break;
    }
@@ -944,8 +960,8 @@ int callback(int event, int mx, int my, KeySym key,
      !(ui_state & (STARTMOVE | STARTCOPY)))
    {
     mx_save = mx; my_save = my;	// 20070323
-    mx_double_save=rint(( mx*zoom - xorigin)/cadsnap)*cadsnap;
-    my_double_save=rint(( my*zoom - yorigin)/cadsnap)*cadsnap;
+    mx_double_save=mousex_snap;
+    my_double_save=mousey_snap;
     copy_objects(BEGIN);
     break;
    }
@@ -1101,19 +1117,21 @@ int callback(int event, int mx, int my, KeySym key,
        rebuild_selected_array();
        if(lastselected==0) ui_state &=~SELECTION;
      }
-     // if(!ui_state) {   // 20121123	//20121127 to be validated : pan2 even when some other ui_state action in progress
      pan2(BEGIN, mx, my);
      ui_state |= STARTPAN2;
-     // }				//20121127
    }
    else if(semaphore==2) {
-     if(button==Button1 && state==0) Tcl_EvalEx(interp, "set editprop_semaphore 2", -1, TCL_EVAL_GLOBAL); // 20160423
+     if(button==Button1 && state==0) {
+       Tcl_EvalEx(interp, "set editprop_semaphore 2", -1, TCL_EVAL_GLOBAL); // 20160423
+     }
      break;
    }
    else if(button==Button1)
    {
-     horizontal_move = vertical_move=0; // 20171023
-     Tcl_EvalEx(interp,"set vertical_move 0; set horizontal_move 0" , -1, TCL_EVAL_GLOBAL);
+     if(!(ui_state & STARTPOLYGON)) {
+       horizontal_move = vertical_move=0; // 20171023
+       Tcl_EvalEx(interp,"set vertical_move 0; set horizontal_move 0" , -1, TCL_EVAL_GLOBAL);
+     }
      if(ui_state & MENUSTARTTEXT) {
        place_text(1, mousex_snap, mousey_snap); // 20161201
        ui_state &=~MENUSTARTTEXT;
@@ -1121,8 +1139,8 @@ int callback(int event, int mx, int my, KeySym key,
      }
      if(ui_state & MENUSTARTWIRE) {
        mx_save = mx; my_save = my;	// 20070323
-       mx_double_save=rint(( mx*zoom + xorigin)/cadsnap)*cadsnap;
-       my_double_save=rint(( my*zoom + yorigin)/cadsnap)*cadsnap;
+       mx_double_save=mousex_snap;
+       my_double_save=mousey_snap;
        new_wire(PLACE, mousex_snap, mousey_snap); 
        ui_state &=~MENUSTARTWIRE;
        break;
@@ -1143,24 +1161,24 @@ int callback(int event, int mx, int my, KeySym key,
      }
      if(ui_state & MENUSTARTLINE) {
        mx_save = mx; my_save = my;	// 20070323
-       mx_double_save=rint(( mx*zoom - xorigin)/cadsnap)*cadsnap;
-       my_double_save=rint(( my*zoom - yorigin)/cadsnap)*cadsnap;
+       mx_double_save=mousex_snap;
+       my_double_save=mousey_snap;
        new_line(PLACE);
        ui_state &=~MENUSTARTLINE;
        break;
      }
      if(ui_state & MENUSTARTRECT) {
        mx_save = mx; my_save = my;	// 20070323
-       mx_double_save=rint(( mx*zoom - xorigin)/cadsnap)*cadsnap;
-       my_double_save=rint(( my*zoom - yorigin)/cadsnap)*cadsnap;
+       mx_double_save=mousex_snap;
+       my_double_save=mousey_snap;
        new_rect(PLACE);
        ui_state &=~MENUSTARTRECT;
        break;
      }
      if(ui_state & MENUSTARTPOLYGON) {
        mx_save = mx; my_save = my;      // 20070323
-       mx_double_save=rint(( mx*zoom - xorigin)/cadsnap)*cadsnap;
-       my_double_save=rint(( my*zoom - yorigin)/cadsnap)*cadsnap;
+       mx_double_save=mousex_snap;
+       my_double_save=mousey_snap;
        new_polygon(PLACE);
        ui_state &=~MENUSTARTPOLYGON;
        break;
@@ -1191,11 +1209,17 @@ int callback(int event, int mx, int my, KeySym key,
        break;
      }
      if(ui_state & STARTPOLYGON) { // 20171115
+       if(horizontal_move) mousey_snap = my_double_save;
+       if(vertical_move) mousex_snap = mx_double_save;
        if( mousex_snap == mx_save && mousey_snap == my_save) {
          new_polygon(PLACE);
        } else {
          new_polygon(ADD);
        }
+       mx_double_save=mousex_snap;
+       my_double_save=mousey_snap;
+       horizontal_move = vertical_move=0; // 20171023
+       Tcl_EvalEx(interp,"set vertical_move 0; set horizontal_move 0" , -1, TCL_EVAL_GLOBAL);
        break;
      }
      if(ui_state & STARTMOVE) {
@@ -1208,8 +1232,8 @@ int callback(int event, int mx, int my, KeySym key,
      }
      if( !(ui_state & STARTSELECT) ) {
        mx_save = mx; my_save = my;
-       mx_double_save=rint(( mx*zoom - xorigin)/cadsnap)*cadsnap; // 20070322
-       my_double_save=rint(( my*zoom - yorigin)/cadsnap)*cadsnap; // 20070322
+       mx_double_save=mousex_snap; // 20070322
+       my_double_save=mousey_snap; // 20070322
        if( !(state & ShiftMask) ) {
          unselect_all();
        }
@@ -1230,7 +1254,7 @@ int callback(int event, int mx, int my, KeySym key,
        }
        break;
      }
-   }
+   } //button==Button1
    else if(button==Button2 && !(state & ShiftMask))
    {
     select_object(mousex, mousey, 0);

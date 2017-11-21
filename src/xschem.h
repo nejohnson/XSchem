@@ -496,7 +496,7 @@ extern void draw_selection(GC g, int interruptable);
 extern void delete(void);
 extern void delete_only_rect_and_line_and_poly(void);
 extern void bbox(int what,double x1,double y1, double x2, double y2);
-extern void text_bbox(char * str,double xscale, double yscale,
+extern int text_bbox(char * str,double xscale, double yscale,
             int rot, int flip, double x1,double y1, double *rx1, double *ry1,
             double *rx2, double *ry2);
 extern unsigned short select_object(double mx,double my, unsigned short sel_mode); // return type 20160503

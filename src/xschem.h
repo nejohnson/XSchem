@@ -495,10 +495,19 @@ extern void set_linewidth();
 extern void draw_selection(GC g, int interruptable);
 extern void delete(void);
 extern void delete_only_rect_and_line_and_poly(void);
+extern void polygon_bbox(double *x, double *y, int points, double *bx1, double *by1, double *bx2, double *by2);
 extern void bbox(int what,double x1,double y1, double x2, double y2);
+extern int set_text_custom_font(Text *txt);
 extern int text_bbox(char * str,double xscale, double yscale,
             int rot, int flip, double x1,double y1, double *rx1, double *ry1,
             double *rx2, double *ry2);
+
+#ifdef HAS_CAIRO
+extern int text_bbox_nocairo(char * str,double xscale, double yscale,
+            int rot, int flip, double x1,double y1, double *rx1, double *ry1,
+            double *rx2, double *ry2);
+#endif
+
 extern unsigned short select_object(double mx,double my, unsigned short sel_mode); // return type 20160503
 extern void unselect_all(void);
 extern void select_inside(double x1,double y1, double x2, double y2, int sel);
@@ -533,7 +542,6 @@ extern void drawtemprect(GC gc, int what, double rectx1,double recty1,
             double rectx2,double recty2);
 extern void drawtemppolygon(GC gc, int what, double *x, double *y, int points);
 extern void drawpolygon(int c, int what, double *x, double *y, int points);
-extern void drawfillpolygon(int c, int what, double *x, double *y, int points);
 extern void draw_temp_symbol_outline(int what, GC gc, int n,int layer,
             int tmp_flip, int tmp_rot, double xoffset, double yoffset);
 extern void draw_temp_string(GC gc,int what, char *str, int flip, int rot, 

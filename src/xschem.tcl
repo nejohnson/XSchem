@@ -157,7 +157,9 @@ proc convert_to_pdf {filename} {
   if { $a3page == 1 } { set paper a3 } else { set paper a4 }
   if { ![catch "exec ps2pdf -sPAPERSIZE=$paper $filename" msg] } {
     # ps2pdf succeeded, so remove original .ps file
-    file delete $filename
+    if { ![xschem get debug_var] } {
+      file delete $filename
+    }
   }
 }
 

@@ -86,6 +86,32 @@ static void svg_xfillrectangle(int layer, double x1, double y1, double x2, doubl
  currentlayer = layer;
 }
 
+static void svg_drawpolygon(int c, int what, double *x, double *y, int points)
+{
+  double x1,y1,x2,y2;
+  double xx, yy;
+  int i;
+  polygon_bbox(x, y, points, &x1,&y1,&x2,&y2);
+  x1=(x1+xorigin)*mooz;
+  y1=(y1+yorigin)*mooz;
+  x2=(x2+xorigin)*mooz;
+  y2=(y2+yorigin)*mooz;
+  if( !rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) ) {
+    return;
+  }
+
+ if( currentlayer !=-1 && c!= currentlayer)  fprintf(fd,"\"/>\n");
+ if(c!= currentlayer)  fprintf(fd,"<path class=\"l%d\" d=\"", c);
+  for(i=0;i<points; i++) {
+    xx = (x[i] + xorigin)*mooz;
+    yy = (y[i] + yorigin)*mooz;
+    if(i==0) fprintf(fd, "M%g %g", xx, yy);
+    else fprintf(fd, "L%g %g", xx, yy);
+  }
+  fprintf(fd, "z\n");
+  currentlayer = c;
+}
+
 static void svg_filledrect(int gc, double rectx1,double recty1,double rectx2,double recty2)
 {
  double x1,y1,x2,y2;
@@ -132,7 +158,12 @@ if(str==NULL) return;
 // }
  else
  {
+  #ifdef HAS_CAIRO
+  text_bbox_nocairo(str, xscale, yscale, rot, flip, x1,y1, &rx1,&ry1,&rx2,&ry2);
+  #else
   text_bbox(str, xscale, yscale, rot, flip, x1,y1, &rx1,&ry1,&rx2,&ry2);
+  #endif
+
   if(!textclip(areax1,areay1,areax2,areay2,rx1,ry1,rx2,ry2)) return;
   x1=rx1;y1=ry1;
   if(rot&1) {y1=ry2;rot=3;}
@@ -206,6 +237,7 @@ static void svg_draw_symbol_outline(int n,int layer,int tmp_flip, int rot,
  Line line;
  Box box;
  Text text;
+ Polygon polygon;
 
   if(layer==0)
   {
@@ -243,6 +275,24 @@ static void svg_draw_symbol_outline(int n,int layer,int tmp_flip, int rot,
     ORDER(x1,y1,x2,y2);
     svg_drawline(layer, x0+x1, y0+y1, x0+x2, y0+y2);
    }
+
+   for(j=0;j< (inst_ptr[n].ptr+instdef)->polygons[layer];j++) // 20171115
+   {
+     polygon = ((inst_ptr[n].ptr+instdef)->polygonptr[layer])[j];
+     {   // scope block so we declare some auxiliary arrays for coord transforms. 20171115
+       int k;
+       double x[polygon.points];
+       double y[polygon.points];
+       for(k=0;k<polygon.points;k++) {
+         ROTATION(0.0,0.0,polygon.x[k],polygon.y[k],x[k],y[k]);
+         x[k]+= x0;
+         y[k] += y0;
+       }
+       svg_drawpolygon(layer, NOW, x, y, polygon.points);
+     }
+
+   }
+
    for(j=0;j< (inst_ptr[n].ptr+instdef)->rects[layer];j++)
    {
     box = ((inst_ptr[n].ptr+instdef)->boxptr[layer])[j];
@@ -333,7 +383,7 @@ void svg_draw(void)
  for(i=0;i<cadlayers;i++){
    
    filledrect=0;
-   if( (i==PINLAYER || i==WIRELAYER) && fill) {
+   if( (i==PINLAYER || i==WIRELAYER || i==4) && fill) {
      filledrect=1;
    }
    svg_linew = lw_double;
@@ -343,6 +393,7 @@ void svg_draw(void)
    else           fprintf(fd, "  fill: none;\n");
    fprintf(fd, "  stroke: #%02x%02x%02x;\n", svg_colors[i].red, svg_colors[i].green, svg_colors[i].blue);
    fprintf(fd, "  stroke-linecap:round;\n");
+   fprintf(fd, "  stroke-linejoin:round;\n");
    fprintf(fd, "  stroke-width: %g;\n", svg_linew);
    fprintf(fd, "}\n");
  }
@@ -390,6 +441,9 @@ void svg_draw(void)
    for(c=0;c<cadlayers;c++)
    {
     set_svg_colors(c);
+    for(i=0;i<lastpolygon[c];i++) {
+      svg_drawpolygon(c, NOW, polygon[c][i].x, polygon[c][i].y, polygon[c][i].points);
+    }
     for(i=0;i<lastline[c];i++) 
      svg_drawline(c, line[c][i].x1, line[c][i].y1, line[c][i].x2, line[c][i].y2);
     for(i=0;i<lastrect[c];i++) 

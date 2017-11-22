@@ -222,14 +222,23 @@ void find_closest_text(double mx,double my)
  double xx1,xx2,yy1,yy2;
  static double threshold = CADWIREMINDIST * CADWIREMINDIST;
  int i,r=-1;
+ #ifdef HAS_CAIRO
+ int customfont;
+ #endif
   for(i=0;i<lasttext;i++)
   {
    rot = textelement[i].rot;
    flip = textelement[i].flip;
+   #ifdef HAS_CAIRO
+   customfont = set_text_custom_font(&textelement[i]);
+   #endif
    text_bbox(textelement[i].txt_ptr, 
              textelement[i].xscale, textelement[i].yscale, rot, flip,
              textelement[i].x0, textelement[i].y0,
              &xx1,&yy1, &xx2,&yy2);
+   #ifdef HAS_CAIRO
+   if(customfont) cairo_restore(ctx);
+   #endif
    if(POINTINSIDE(mx,my,xx1,yy1, xx2, yy2))
    {
     r = i; distance = 0;

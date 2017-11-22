@@ -215,6 +215,9 @@ void set_inst_prop(int i)
 // x=0 use text widget   x=1 use vim editor
 void edit_text_property(int x)
 {
+   #ifdef HAS_CAIRO
+   int customfont;
+   #endif
    int sel, k, text_changed; 
    int c,l;
    double xx1,yy1,xx2,yy2;
@@ -272,11 +275,17 @@ void edit_text_property(int x)
 
        rot = textelement[sel].rot;	// calculate bbox, some cleanup needed here
        flip = textelement[sel].flip;
-    
+       #ifdef HAS_CAIRO
+       customfont = set_text_custom_font(&textelement[sel]);
+       #endif
        text_bbox(textelement[sel].txt_ptr, textelement[sel].xscale,
                  textelement[sel].yscale, rot, flip, 
                  textelement[sel].x0, textelement[sel].y0,
                  &xx1,&yy1,&xx2,&yy2);
+       #ifdef HAS_CAIRO
+       if(customfont) cairo_restore(ctx);
+       #endif
+
        bbox(ADD, xx1, yy1, xx2, yy2 );        
     
        if(debug_var>=1) fprintf(errfp, "edit_property(): text props: props=%s  text=%s\n",
@@ -288,10 +297,17 @@ void edit_text_property(int x)
            for(l=0;l<c;l++) {
              if(!strcmp( (get_tok_value(rect[PINLAYER][l].prop_ptr, "name",0)),
                           textelement[sel].txt_ptr) ) {
+               #ifdef HAS_CAIRO
+               customfont = set_text_custom_font(&textelement[sel]);
+               #endif
                text_bbox(textelement[sel].txt_ptr, textelement[sel].xscale,
                textelement[sel].yscale, rot, flip,
                textelement[sel].x0, textelement[sel].y0,
                &xx1,&yy1,&xx2,&yy2);
+               #ifdef HAS_CAIRO
+               if(customfont) cairo_restore(ctx);
+               #endif
+
 	       pcx = (rect[PINLAYER][l].x1+rect[PINLAYER][l].x2)/2.0;
 	       pcy = (rect[PINLAYER][l].y1+rect[PINLAYER][l].y2)/2.0;
 
@@ -324,10 +340,17 @@ void edit_text_property(int x)
        }
     
        				// calculate bbox, some cleanup needed here
+       #ifdef HAS_CAIRO
+       customfont = set_text_custom_font(&textelement[sel]);
+       #endif
        text_bbox(textelement[sel].txt_ptr, textelement[sel].xscale,
                  textelement[sel].yscale, rot, flip, 
                  textelement[sel].x0, textelement[sel].y0,
                  &xx1,&yy1,&xx2,&yy2);
+       #ifdef HAS_CAIRO
+       if(customfont) cairo_restore(ctx);
+       #endif
+
        bbox(ADD, xx1, yy1, xx2, yy2 );        
     
        bbox(SET,0.0,0.0,0.0,0.0);

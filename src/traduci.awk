@@ -1,4 +1,4 @@
-#!/usr/bin/awk -f
+#!/usr/bin/gawk -f
 
 
 
@@ -14,11 +14,12 @@ END  { endfile(_filename_) }
 
 ###### begin user code ########################
 
-/#ifdef CAIRO/{
+/^ *customfont *= *set_text_custom_font.*/{
+  aa=$0
+  sub(/[^ ].*/,"",aa)
   found=1
-  sub(/#ifdef CAIRO/, "#ifdef HAS_CAIRO")
+  $0 = aa "#ifdef HAS_CAIRO\n" $0 "\n" aa "#endif"
 }
-
 ###### end  user code  ########################
 
 

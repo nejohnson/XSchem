@@ -21,6 +21,8 @@
  */
 
 #include "xschem.h"
+
+static double textx1,textx2,texty1,texty2;
  
 int textclip(int x1,int y1,int x2,int y2,
           double xa,double ya,double xb,double yb)
@@ -151,6 +153,28 @@ void print_image()
 }
 
 #ifdef HAS_CAIRO
+// remember to call cairo_restore(ctx) when done !!
+int set_text_custom_font(Text *txt) // 20171122 for correct text_bbox calculation
+{
+  char *textfont;
+
+  textfont = get_tok_value(txt->prop_ptr, "font", 0);
+  if(textfont[0]) {
+    cairo_save(ctx);
+    cairo_select_font_face (ctx, textfont, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+    return 1;
+  }
+  return 0;
+}
+#else
+int set_text_custom_font(Text *txt)
+{
+  return 0;
+}
+#endif
+
+
+#ifdef HAS_CAIRO
 void cairo_draw_string_line(cairo_t *ctx, char *s,
     double x, double y, double size, int rot, int flip, 
     int lineno, double fontheight, double fontascent, double fontdescent, int llength)
@@ -163,7 +187,7 @@ void cairo_draw_string_line(cairo_t *ctx, char *s,
   double xadvance;
   double lines;
   double vc; // 20171121 vert correct
-  int rx1, ry1, rx2, ry2, save_rot, save_flip;
+  //int rx1, ry1, rx2, ry2, save_rot, save_flip;
   // GC gcclear;
   if(s==NULL) return;
   if(llength==0) return;
@@ -172,7 +196,7 @@ void cairo_draw_string_line(cairo_t *ctx, char *s,
 
   line_delta = lineno*fontheight*cairo_font_line_spacing;
   lines = (cairo_lines-1)*fontheight*cairo_font_line_spacing;
-  line_offset=(cairo_longest_line-llength)*xadvance/llength;
+  line_offset=cairo_longest_line-xadvance;
   if(xadvance>14000) return; // too big: close to short overflow
   ix=(x+xorigin)*mooz;
   iy=(y+yorigin)*mooz;
@@ -191,7 +215,8 @@ void cairo_draw_string_line(cairo_t *ctx, char *s,
   else if(rot==2 && flip==1) {iy=iy-fontheight-lines+line_delta+fontascent+vc;}
   else if(rot==3 && flip==1) {iy=iy+xadvance+line_offset;ix+=line_delta+fontascent-vc;}
 
-  // clear area before drawing antialiased text.
+// clear area before drawing antialiased text.
+/* 
   save_rot=rot;
   save_flip=flip;
   rot=rot1;
@@ -209,7 +234,6 @@ void cairo_draw_string_line(cairo_t *ctx, char *s,
   }
   RECTORDER(rx1,ry1,rx2,ry2);
  
-/* 
   if(hilight_nets) gcclear=gc[BACKLAYER]; // clear string draw area when overstriking 
   else gcclear=gctiled;                   // with highlighted labels
   if(ctx == save_ctx) {
@@ -221,9 +245,9 @@ void cairo_draw_string_line(cairo_t *ctx, char *s,
         (unsigned int)rx2 - (unsigned int )rx1,
         (unsigned int)ry2 - (unsigned int)ry1);
   }
-*/
   rot=save_rot;
   flip=save_flip;
+*/
   cairo_save(ctx);
   cairo_translate(ctx, ix, iy);
   cairo_rotate(ctx, M_PI/2*rot1);
@@ -245,7 +269,6 @@ void draw_string(int layer, int what, char *s, int rot, int flip, double x, doub
   double size;
   cairo_font_extents_t fext;
   int llength=0;
-  double rrx1,rrx2,rry1,rry2;
 
   (void)what; // UNUSED in cairo version, avoid compiler warning
   if(s==NULL || !has_x ) return;
@@ -254,8 +277,8 @@ void draw_string(int layer, int what, char *s, int rot, int flip, double x, doub
   if(size*mooz<3.0) return; // too small
   if(size*mooz>800) return; // too big
 
-  text_bbox(s, xscale, yscale, rot, flip, x,y, &rrx1,&rry1,&rrx2,&rry2);
-  if(!textclip(areax1,areay1,areax2,areay2,rrx1,rry1,rrx2,rry2)) return;
+  text_bbox(s, xscale, yscale, rot, flip, x,y, &textx1,&texty1,&textx2,&texty2);
+  if(!textclip(areax1,areay1,areax2,areay2,textx1,texty1,textx2,texty2)) return;
 
   cairo_set_source_rgb(ctx,
     (double)xcolor_array[layer].red/65535.0,
@@ -297,11 +320,10 @@ void draw_string(int layer, int what, char *s, int rot, int flip, double x, doub
 void draw_temp_string(GC gctext, int what, char *s, int rot, int flip, double x, double y, 
      double xscale, double yscale)
 {
- double  rx1,rx2,ry1,ry2;
 
  if(!has_x) return;
- if(!text_bbox(s, xscale, yscale, rot, flip, x,y, &rx1,&ry1,&rx2,&ry2)) return;
- drawtemprect(gctext,what, rx1,ry1,rx2,ry2);
+ if(!text_bbox(s, xscale, yscale, rot, flip, x,y, &textx1,&texty1,&textx2,&texty2)) return;
+ drawtemprect(gctext,what, textx1,texty1,textx2,texty2);
 }
 
 #else // !HAS_CAIRO
@@ -310,7 +332,6 @@ void draw_temp_string(GC gctext, int what, char *s, int rot, int flip, double x,
 inline void draw_string(int layer, int what, char *str, int rot, int flip, 
                  double x1,double y1, double xscale, double yscale)  
 {
- double rrx1,rrx2,rry1,rry2;
  double a=0.0,yy;
  register double rx1=0,rx2=0,ry1=0,ry2=0;
  double curr_x1,curr_y1,curr_x2,curr_y2;
@@ -327,10 +348,10 @@ inline void draw_string(int layer, int what, char *str, int rot, int flip,
    return;
  }
  else {
-  text_bbox(str, xscale, yscale, rot, flip, x1,y1, &rrx1,&rry1,&rrx2,&rry2);
-  if(!textclip(areax1,areay1,areax2,areay2,rrx1,rry1,rrx2,rry2)) return;
-  x1=rrx1;y1=rry1;
-  if(rot&1) {y1=rry2;rot=3;}
+  text_bbox(str, xscale, yscale, rot, flip, x1,y1, &textx1,&texty1,&textx2,&texty2);
+  if(!textclip(areax1,areay1,areax2,areay2,textx1,texty1,textx2,texty2)) return;
+  x1=textx1;y1=texty1;
+  if(rot&1) {y1=texty2;rot=3;}
   else rot=0;
   flip = 0; yy=y1;
   invxscale=1/xscale;
@@ -369,12 +390,10 @@ inline void draw_string(int layer, int what, char *str, int rot, int flip,
 void draw_temp_string(GC gctext, int what, char *str, int rot, int flip, 
                  double x1,double y1, double xscale, double yscale)  
 {
- double  rx1,rx2,ry1,ry2;
-  
  if(!has_x) return;
  if(debug_var>=2) fprintf(errfp, "draw_string(): string=%s\n",str);
- text_bbox(str, xscale, yscale, rot, flip, x1,y1, &rx1,&ry1,&rx2,&ry2);
- drawtemprect(gctext,what, rx1,ry1,rx2,ry2);
+ if(!text_bbox(str, xscale, yscale, rot, flip, x1,y1, &textx1,&texty1,&textx2,&texty2)) return;
+ drawtemprect(gctext,what, textx1,texty1,textx2,texty2);
 }
 #endif // HAS_CAIRO
 
@@ -444,7 +463,6 @@ void draw_symbol_outline(int what,int c, int n,int layer,int tmp_flip, int rot,
         y[k] += y0;
       }
       drawpolygon(c, NOW, x, y, polygon.points);
-      drawfillpolygon(c, NOW, x, y, polygon.points);
     }
 
   }
@@ -487,8 +505,8 @@ void draw_symbol_outline(int what,int c, int n,int layer,int tmp_flip, int rot,
         x0+x1, y0+y1, text.xscale, text.yscale);                    
       #ifdef HAS_CAIRO
       if(textfont[0]) {
-        cairo_select_font_face (ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-        cairo_select_font_face (save_ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+        //cairo_select_font_face (ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+        //cairo_select_font_face (save_ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
         cairo_restore(ctx);
         cairo_restore(save_ctx);
       }
@@ -509,6 +527,9 @@ void draw_temp_symbol_outline(int what, GC gc, int n,int layer,int tmp_flip, int
  Box box;
  Text text;
  register Instdef *symptr; //20150408
+ #ifdef HAS_CAIRO
+ int customfont;
+ #endif
 
  if(!has_x) return;
  if(layer==0) { // 20150424
@@ -581,9 +602,16 @@ void draw_temp_symbol_outline(int what, GC gc, int n,int layer,int tmp_flip, int
    text.txt_ptr= 
      translate(n, text.txt_ptr);
    ROTATION(0.0,0.0,text.x0,text.y0,x1,y1);
+   #ifdef HAS_CAIRO
+   customfont = set_text_custom_font(&text);
+   #endif
    draw_temp_string(gc, what, text.txt_ptr,
      (text.rot + ( (flip && (text.rot & 1) ) ? rot+2 : rot) ) & 0x3,
      flip^text.flip, x0+x1, y0+y1, text.xscale, text.yscale);                    
+   #ifdef HAS_CAIRO
+   if(customfont) cairo_restore(ctx);
+   #endif
+
   }
  }
 }
@@ -868,32 +896,12 @@ void drawpolygon(int c, int what, double *x, double *y, int points)
   XDrawLines(display, window, gc[c], p, points, CoordModeOrigin);
   if(draw_pixmap)
     XDrawLines(display, save_pixmap, gc[c], p, points, CoordModeOrigin);
-}
-
-
-void drawfillpolygon(int c, int what, double *x, double *y, int points)
-{
-  double x1,y1,x2,y2;
-  XPoint p[points];
-  int i;
-  if(!has_x) return;
-  polygon_bbox(x, y, points, &x1,&y1,&x2,&y2);
-  x1=(x1+xorigin)*mooz;
-  y1=(y1+yorigin)*mooz;
-  x2=(x2+xorigin)*mooz;
-  y2=(y2+yorigin)*mooz;
-  if( !rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) ) {
-    return;
-  }
   if(!fill || !fill_type[c]) return;
-  for(i=0;i<points; i++) {
-    p[i].x = (x[i] + xorigin)*mooz;
-    p[i].y = (y[i] + yorigin)*mooz;
-  }
   XFillPolygon(display, window, gcstipple[c], p, points, Polygontype, CoordModeOrigin);
   if(draw_pixmap)
      XFillPolygon(display, save_pixmap, gcstipple[c], p, points, Polygontype, CoordModeOrigin);
 }
+
 void drawtemppolygon(GC gc, int what, double *x, double *y, int points)
 {
   double x1,y1,x2,y2;
@@ -1093,7 +1101,6 @@ void draw(void)
           }
           for(i=0;i<lastpolygon[c];i++) {
             drawpolygon(c, NOW, polygon[c][i].x, polygon[c][i].y, polygon[c][i].points);
-            drawfillpolygon(c,  NOW, polygon[c][i].x, polygon[c][i].y, polygon[c][i].points);
           }
           for(i=0;i<lastinst;i++) {
             symptr = (inst_ptr[i].ptr+instdef);

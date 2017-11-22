@@ -945,6 +945,9 @@ void calc_drawing_bbox(Box *boundbox)
  Box tmp;
  int c, i; 
  int count=0;
+ #ifdef HAS_CAIRO
+ int customfont;
+ #endif
 
  boundbox->x1=-100;
  boundbox->x2=100;
@@ -999,6 +1002,9 @@ void calc_drawing_bbox(Box *boundbox)
  }
  for(i=0;i<lasttext;i++)
  {
+   #ifdef HAS_CAIRO
+   customfont = set_text_custom_font(&textelement[i]);
+   #endif
    if(text_bbox(textelement[i].txt_ptr, textelement[i].xscale,
          textelement[i].yscale,textelement[i].rot, textelement[i].flip,
          textelement[i].x0, textelement[i].y0,
@@ -1006,6 +1012,9 @@ void calc_drawing_bbox(Box *boundbox)
      count++;
      updatebbox(count,boundbox,&tmp);
    }
+   #ifdef HAS_CAIRO
+   if(customfont) cairo_restore(ctx);
+   #endif
  }
  for(i=0;i<lastinst;i++)
  {
@@ -1337,7 +1346,6 @@ void new_polygon(int what) // 20171115
        //fprintf(errfp, "new_poly: finish: points=%d\n", points);
        ui_state &= ~STARTPOLYGON;
        drawpolygon(rectcolor, NOW, x, y, points);
-       drawfillpolygon(rectcolor, NOW, x, y, points);
      }
    }
    if(what & RUBBER)
@@ -1356,39 +1364,55 @@ int text_bbox(char *str, double xscale, double yscale,
     double *rx2, double *ry2)
 {
   int c=0, length =0;
+  char *str_ptr;
   double size;
   cairo_text_extents_t ext;
   cairo_font_extents_t fext;
   double ww, hh;
 
   if(!has_x) return 0;
+  if(!str) return 0;
   size = (xscale+yscale)*26.*cairo_font_scale;
   if(size*mooz>800.) {
     return 0;
   }
   cairo_set_font_size (ctx, size*mooz);
-  cairo_text_extents(ctx, "A", &ext);
   cairo_font_extents(ctx, &fext);
+
+  ww=0.; hh=1.;
+  c=0;
   cairo_longest_line=0;
   cairo_lines=1;
-  if(str!=NULL) while( str[c] )
-  {
-   if(str[c++]=='\n') {
-     (cairo_lines)++;length=0;
-   }
-   else {
-     length++;
-   }
-   if(length > cairo_longest_line) {
-     cairo_longest_line = length;
-   }
+  str_ptr = str;
+  while( str[c] ) {
+    if(str[c] == '\n') {
+      str[c]='\0';
+      hh++;
+      cairo_lines++;
+      length=0;
+      if(str_ptr[0]!='\0') {
+        cairo_text_extents(ctx, str_ptr, &ext);
+        if(ext.x_advance > ww) ww= ext.x_advance;
+      }
+      str[c]='\n';
+      str_ptr = str+c+1;
+    } else {
+      length++;
+    }
+    if(length > cairo_longest_line) {
+      cairo_longest_line = length;
+    }
+    c++;
   }
-  ww=cairo_longest_line;
-  hh=cairo_lines;
-  ww = ww*ext.x_advance*zoom;
-  hh = hh*fext.height*cairo_font_line_spacing*zoom;
+  if(str_ptr[0]!='\0') {
+    cairo_text_extents(ctx, str_ptr, &ext);
+    if(ext.x_advance > ww) ww= ext.x_advance;
+  }
+  hh = hh*fext.height*cairo_font_line_spacing;
+  cairo_longest_line = ww;
+
   *rx1=x1;*ry1=y1; 
-  ROTATION(0.0,0.0, ww,hh,(*rx2),(*ry2));
+  ROTATION(0.0,0.0, ww*zoom,hh*zoom,(*rx2),(*ry2));
   *rx2+=*rx1;*ry2+=*ry1;
   if     (rot==0) {*ry1-=cairo_vert_correct; *ry2-=cairo_vert_correct;}
   else if(rot==1) {*rx1+=cairo_vert_correct; *rx2+=cairo_vert_correct;}
@@ -1397,10 +1421,14 @@ int text_bbox(char *str, double xscale, double yscale,
   RECTORDER((*rx1),(*ry1),(*rx2),(*ry2));
   return 1;
 }
-#else //!HAS_CAIRO
+int text_bbox_nocairo(char * str,double xscale, double yscale,
+    int rot, int flip, double x1,double y1, double *rx1, double *ry1,
+    double *rx2, double *ry2)
+#else
 int text_bbox(char * str,double xscale, double yscale,
     int rot, int flip, double x1,double y1, double *rx1, double *ry1,
     double *rx2, double *ry2)
+#endif
 {
  register int c=0, length =0;
  double w, h;
@@ -1421,7 +1449,6 @@ int text_bbox(char * str,double xscale, double yscale,
   RECTORDER((*rx1),(*ry1),(*rx2),(*ry2)); 
   return 1;
 }
-#endif
 
 void place_text(int draw_text, double mx, double my)
 {

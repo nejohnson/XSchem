@@ -67,12 +67,42 @@ static void ps_xfillrectange(int layer, double x1, double y1, double x2,
  //fprintf(fd, "%g %g moveto %g %g lineto %g %g lineto %g %g lineto closepath\n",
  //       x1,y1,x2,y1,x2,y2,x1,y2);
  fprintf(fd, "%g %g %g %g R\n", x1,y1,x2-x1,y2-y1);
- if( (layer==PINLAYER || layer==WIRELAYER) && fill) {
+ if( (layer==4 || layer==PINLAYER || layer==WIRELAYER) && fill) {
    fprintf(fd, "%g %g %g %g RF\n", x1,y1,x2-x1,y2-y1);
    // fprintf(fd,"fill\n");
  }
  //fprintf(fd,"stroke\n");
 }
+
+// Convex Nonconvex Complex
+#define Polygontype Nonconvex
+static void ps_drawpolygon(int c, int what, double *x, double *y, int points)
+{
+  double x1,y1,x2,y2;
+  double xx, yy;
+  int i;
+  polygon_bbox(x, y, points, &x1,&y1,&x2,&y2);
+  x1=(x1+xorigin)*mooz;
+  y1=(y1+yorigin)*mooz;
+  x2=(x2+xorigin)*mooz;
+  y2=(y2+yorigin)*mooz;
+  if( !rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) ) {
+    return;
+  }
+
+  for(i=0;i<points; i++) {
+    xx = (x[i] + xorigin)*mooz;
+    yy = (y[i] + yorigin)*mooz;
+    if(i==0) fprintf(fd, "%g %g MT\n", xx, yy);
+    else fprintf(fd, "%g %g LT\n", xx, yy);
+  }
+  fprintf(fd, "closepath gsave stroke\n");
+  fprintf(fd, "grestore\n");
+  if( (c==4 || c==PINLAYER || c==WIRELAYER) && fill) {
+    fprintf(fd, " fill\n");
+  }
+}
+
 
 static void ps_filledrect(int gc, double rectx1,double recty1,double rectx2,double recty2)
 {
@@ -120,7 +150,11 @@ if(str==NULL) return;
 // }
 // else
  {
+  #ifdef HAS_CAIRO
+  text_bbox_nocairo(str, xscale, yscale, rot, flip, x1,y1, &rx1,&ry1,&rx2,&ry2);
+  #else
   text_bbox(str, xscale, yscale, rot, flip, x1,y1, &rx1,&ry1,&rx2,&ry2);
+  #endif
   if(!textclip(areax1,areay1,areax2,areay2,rx1,ry1,rx2,ry2)) return;
   x1=rx1;y1=ry1;
   if(rot&1) {y1=ry2;rot=3;}
@@ -194,6 +228,8 @@ static void ps_draw_symbol_outline(int n,int layer,int tmp_flip, int rot,
  Line line;
  Box box;
  Text text;
+ Polygon polygon;
+
 
   if(layer==0)
   {
@@ -231,6 +267,23 @@ static void ps_draw_symbol_outline(int n,int layer,int tmp_flip, int rot,
     ORDER(x1,y1,x2,y2);
     ps_drawline(layer, x0+x1, y0+y1, x0+x2, y0+y2);
    }
+   for(j=0;j< (inst_ptr[n].ptr+instdef)->polygons[layer];j++) // 20171115
+   {
+     polygon = ((inst_ptr[n].ptr+instdef)->polygonptr[layer])[j];
+     {   // scope block so we declare some auxiliary arrays for coord transforms. 20171115
+       int k;
+       double x[polygon.points];
+       double y[polygon.points];
+       for(k=0;k<polygon.points;k++) {
+         ROTATION(0.0,0.0,polygon.x[k],polygon.y[k],x[k],y[k]);
+         x[k]+= x0;
+         y[k] += y0;
+       }
+       ps_drawpolygon(layer, NOW, x, y, polygon.points);
+     }
+ 
+   }
+
    for(j=0;j< (inst_ptr[n].ptr+instdef)->rects[layer];j++)
    {
     box = ((inst_ptr[n].ptr+instdef)->boxptr[layer])[j];
@@ -327,6 +380,8 @@ void ps_draw(void)
  fprintf(fd, "%%%%Page: 1 1\n\n");
 
  fprintf(fd,"/cm {28.346457 mul} bind def\n");
+ fprintf(fd,"/LT {lineto} bind def\n");
+ fprintf(fd,"/MT {moveto} bind def\n");
  fprintf(fd,"/L {moveto lineto stroke} bind def\n");
  fprintf(fd,"/R {rectstroke} bind def\n");
  fprintf(fd,"/RF {rectfill} bind def\n");
@@ -383,6 +438,10 @@ void ps_draw(void)
    for(c=0;c<cadlayers;c++)
    {
     set_ps_colors(c);
+    for(i=0;i<lastpolygon[c];i++) {
+      ps_drawpolygon(c, NOW, polygon[c][i].x, polygon[c][i].y, polygon[c][i].points);
+    }
+
     for(i=0;i<lastline[c];i++) 
      ps_drawline(c, line[c][i].x1, line[c][i].y1, line[c][i].x2, line[c][i].y2);
     for(i=0;i<lastrect[c];i++) 

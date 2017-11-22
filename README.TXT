@@ -35,6 +35,9 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.3.5:
+- proportional fonts now fully supported, text correctly aligned even on rotated objects
+- postscript and svg print routines updated to render polygons.
 2.3.4:
 - fix zoom full function, expecially when zooming back
   from a very very deep zoom in.

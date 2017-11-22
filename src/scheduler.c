@@ -421,6 +421,11 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
         my_snprintf(s, S(s), "%d",rectcolor);
         Tcl_AppendResult(interp, s,NULL);
   }
+  else if(!strcmp(argv[2],"debug_var"))  {
+        char s[30]; // overflow safe 20161122
+        my_snprintf(s, S(s), "%d",debug_var);
+        Tcl_AppendResult(interp, s,NULL);
+  }
   else if(!strcmp(argv[2],"semaphore"))  {
         char s[30]; // overflow safe 20161122
         my_snprintf(s, S(s), "%d",semaphore);

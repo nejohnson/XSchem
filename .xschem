@@ -30,8 +30,8 @@ set initial_geometry {800x600}
 # set cairo_font_scale 1.0
 #### scale line spacing by this number
 # set cairo_font_line_spacing 1.0
-#### specify a font (Use only monospaced fonts!)
-# set cairo_font_name {Liberation Mono}
+#### specify a font
+set cairo_font_name {Arial}
 #### lift up text by some zoom-corrected pixels for
 #### better compatibility wrt no cairo version.
 #### Useful values in the range [-1, 3]

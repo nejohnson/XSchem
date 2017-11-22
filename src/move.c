@@ -165,6 +165,9 @@ void draw_selection(GC g, int interruptable)
 {
   drawtempline(g, BEGIN, 0.0, 0.0, 0.0, 0.0);
   drawtemprect(g, BEGIN, 0.0, 0.0, 0.0, 0.0);
+  #ifdef HAS_CAIRO
+  int customfont;
+  #endif
 
   if(g == gc[SELLAYER]) lastsel = lastselected;
   for(i=0;i<lastsel;i++)
@@ -174,12 +177,19 @@ void draw_selection(GC g, int interruptable)
    {
     case TEXT:
      ROTATION(x1, y_1, textelement[n].x0, textelement[n].y0, rx1,ry1);
+     #ifdef HAS_CAIRO
+     customfont =  set_text_custom_font(&textelement[n]);
+     #endif
      draw_temp_string(g,ADD, textelement[n].txt_ptr,
       (textelement[n].rot +
       ( (flip && (textelement[n].rot & 1) ) ? rot+2 : rot) ) & 0x3,
        textelement[n].flip^flip,
        rx1+deltax, ry1+deltay,
        textelement[n].xscale, textelement[n].yscale);
+     #ifdef HAS_CAIRO
+     if(customfont) cairo_restore(ctx);
+     #endif
+
      break;
     case RECT:
      ROTATION(x1, y_1, rect[c][n].x1, rect[c][n].y1, rx1,ry1);
@@ -475,7 +485,6 @@ void copy_objects(int what)
           }
         }
         drawpolygon(k,  NOW, x, y, polygon[c][n].points);
-        drawfillpolygon(k,  NOW, x, y, polygon[c][n].points);
         selectedgroup[i].n=lastpolygon[c];
         store_polygon(-1, x, y, polygon[c][n].points, c, polygon[c][n].sel, polygon[c][n].prop_ptr);
         polygon[c][n].sel=0;
@@ -523,8 +532,8 @@ void copy_objects(int what)
        textelement[lasttext].xscale, textelement[lasttext].yscale);
       #ifdef HAS_CAIRO
       if(textfont[0]) {
-        cairo_select_font_face (ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-        cairo_select_font_face (save_ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+        // cairo_select_font_face (ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+        // cairo_select_font_face (save_ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
         cairo_restore(ctx);
         cairo_restore(save_ctx);
       }
@@ -599,7 +608,9 @@ void move_objects(int what, int merge, double dx, double dy)
  int k;
  double tx1,ty1; // temporaries for swapping coordinates 20070302
  int textlayer;
-
+ #ifdef HAS_CAIRO
+ int customfont;
+ #endif
  // 20171112
  #ifdef HAS_CAIRO
  char *textprop, *textfont;
@@ -747,7 +758,6 @@ void move_objects(int what, int merge, double dx, double dy)
         bbox(ADD, bx1, by1, bx2, by2);
       }
       drawpolygon(k,  NOW, polygon[c][n].x, polygon[c][n].y, polygon[c][n].points);
-      drawfillpolygon(k,  NOW, polygon[c][n].x, polygon[c][n].y, polygon[c][n].points);
       break;
 
      case RECT:
@@ -824,10 +834,16 @@ void move_objects(int what, int merge, double dx, double dy)
 
      case TEXT:
       if(k!=TEXTLAYER) break;
+      #ifdef HAS_CAIRO
+      customfont = set_text_custom_font(&textelement[n]);
+      #endif
       text_bbox(textelement[n].txt_ptr, textelement[n].xscale,
    	     textelement[n].yscale, textelement[n].rot,textelement[n].flip,
                 textelement[n].x0, textelement[n].y0,
                 &rx1,&ry1, &rx2,&ry2);
+      #ifdef HAS_CAIRO
+      if(customfont) cairo_restore(ctx);
+      #endif
       bbox(ADD, rx1, ry1, rx2, ry2 );
  
       ROTATION(x1, y_1, textelement[n].x0, textelement[n].y0, rx1,ry1);   
@@ -859,8 +875,8 @@ void move_objects(int what, int merge, double dx, double dy)
        textelement[n].xscale, textelement[n].yscale);
       #ifdef HAS_CAIRO
       if(textfont[0]) {
-        cairo_select_font_face (ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-        cairo_select_font_face (save_ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+        //cairo_select_font_face (ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+        //cairo_select_font_face (save_ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
         cairo_restore(ctx);
         cairo_restore(save_ctx);
       }

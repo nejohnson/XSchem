@@ -38,6 +38,9 @@ void symbol_bbox(int i, double *x1,double *y1, double *x2, double *y2)
    double text_x0, text_y0;
    int sym_rot, sym_flip;
    double xx1,yy1,xx2,yy2;
+   #ifdef HAS_CAIRO
+   int customfont;
+   #endif
    // symbol bbox
    flip = inst_ptr[i].flip;
    rot = inst_ptr[i].rot;
@@ -69,10 +72,16 @@ void symbol_bbox(int i, double *x1,double *y1, double *x2, double *y2)
 
       if(debug_var>=2) fprintf(errfp, "symbol_bbox(): translated text: %s\n", tmp_txt);
      ROTATION(0.0,0.0,text.x0, text.y0,text_x0,text_y0);
+     #ifdef HAS_CAIRO
+     customfont=set_text_custom_font(&text);
+     #endif
      text_bbox(tmp_txt, text.xscale, text.yscale, 
        (text.rot + ( (sym_flip && (text.rot & 1) ) ? sym_rot+2 : sym_rot)) &0x3,
        sym_flip ^ text.flip,
        x0+text_x0,y0+text_y0, &xx1,&yy1,&xx2,&yy2);
+     #ifdef HAS_CAIRO
+     if(customfont) cairo_restore(ctx);
+     #endif
      if(xx1<*x1) *x1=xx1;
      if(yy1<*y1) *y1=yy1;
      if(xx2>*x2) *x2=xx2;
@@ -85,6 +94,9 @@ void symbol_bbox(int i, double *x1,double *y1, double *x2, double *y2)
 void delete(void)
 {
  int i,c,j;
+ #ifdef HAS_CAIRO
+ int customfont;
+ #endif
 
  j = 0;
  bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0);
@@ -96,10 +108,16 @@ void delete(void)
   {
    rot = textelement[i].rot;
    flip = textelement[i].flip;
+   #ifdef HAS_CAIRO
+   customfont = set_text_custom_font(&textelement[i]);
+   #endif
    text_bbox(textelement[i].txt_ptr, textelement[i].xscale,
 	     textelement[i].yscale, rot, flip,
              textelement[i].x0, textelement[i].y0,
              &xx1,&yy1, &xx2,&yy2);
+   #ifdef HAS_CAIRO
+   if(customfont) cairo_restore(ctx);
+   #endif
    bbox(ADD, xx1, yy1, xx2, yy2 );
    my_strdup(&textelement[i].prop_ptr, NULL);
    my_strdup(&textelement[i].txt_ptr, NULL);
@@ -432,7 +450,9 @@ void unselect_all(void)
 {
  int i,c;
  char str[4096];
-
+ #ifdef HAS_CAIRO
+ int customfont;
+ #endif
     ui_state = 0; 
     lastselected = 0;
    
@@ -468,10 +488,16 @@ void unselect_all(void)
      if(textelement[i].sel == SELECTED)
      {
       textelement[i].sel = 0;
+      #ifdef HAS_CAIRO
+      customfont = set_text_custom_font(& textelement[i]);
+      #endif
       if(x_initialized) draw_temp_string(gctiled,ADD, textelement[i].txt_ptr,
        textelement[i].rot, textelement[i].flip,
        textelement[i].x0, textelement[i].y0,
        textelement[i].xscale, textelement[i].yscale);
+      #ifdef HAS_CAIRO
+      if(customfont) cairo_restore(ctx);
+      #endif
      }
     }          
     for(c=0;c<cadlayers;c++)
@@ -597,9 +623,15 @@ void select_text(int i,unsigned short select_mode)
   my_strncpy(s,textelement[i].prop_ptr!=NULL?textelement[i].prop_ptr:"<NULL>",256);
   snprintf(str, S(str), "selected text %d: properties: %s", i,s);
   statusmsg(str,2);
+  #ifdef HAS_CAIRO
+  int customfont;
+  #endif
 
   textelement[i].sel = select_mode;
 
+  #ifdef HAS_CAIRO
+  customfont = set_text_custom_font(&textelement[i]);
+  #endif
   if(select_mode)
     draw_temp_string(gc[SELLAYER],ADD, textelement[i].txt_ptr,
      textelement[i].rot, textelement[i].flip,
@@ -610,6 +642,9 @@ void select_text(int i,unsigned short select_mode)
      textelement[i].rot, textelement[i].flip,
      textelement[i].x0, textelement[i].y0,
      textelement[i].xscale, textelement[i].yscale);
+  #ifdef HAS_CAIRO
+  if(customfont) cairo_restore(ctx);
+  #endif
   need_rebuild_selected_array=1;
 }
 
@@ -743,7 +778,9 @@ unsigned short select_object(double mousex,double mousey, unsigned short select_
 void select_inside(double x1,double y1, double x2, double y2, int sel) // 20150927 added unselect (sel param)
 {
  int c,i;
-
+ #ifdef HAS_CAIRO
+ int customfont;
+ #endif
  if(x_initialized) drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
  if(x_initialized) drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0); 
 
@@ -769,10 +806,16 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) // 201509
  {
   rot = textelement[i].rot;
   flip = textelement[i].flip;
+  #ifdef HAS_CAIRO
+  customfont = set_text_custom_font(&textelement[i]);
+  #endif
   text_bbox(textelement[i].txt_ptr, 
              textelement[i].xscale, textelement[i].yscale, rot, flip,
              textelement[i].x0, textelement[i].y0,
              &xx1,&yy1, &xx2,&yy2);
+  #ifdef HAS_CAIRO
+  if(customfont) cairo_restore(ctx);
+  #endif
   if(RECTINSIDE(xx1,yy1, xx2, yy2,x1,y1,x2,y2))
   {
    ui_state |= SELECTION; // <<< set ui_state to SELECTION also if unselecting by area ????

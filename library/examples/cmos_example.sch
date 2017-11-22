@@ -3,14 +3,12 @@ V {}
 S {} 
 T {CMOS DIFFERENTIAL AMPLIFIER
 EXAMPLE} 810 -570 0 0 0.4 0.4 {} 
-N 500 -180 500 -120 {lab=0} 
 N 60 -240 60 -210 {lab=VCC} 
 N 60 -240 90 -240 {lab=VCC} 
 N 240 -260 240 -210 {lab=GN} 
 N 240 -210 280 -210 {lab=GN} 
 N 280 -210 280 -180 {lab=GN} 
 N 280 -180 460 -180 {lab=GN} 
-N 240 -180 240 -120 {lab=0} 
 N 500 -250 500 -210 {lab=SN} 
 N 430 -280 450 -280 {lab=0} 
 N 550 -280 570 -280 {lab=0} 
@@ -33,6 +31,14 @@ N 60 -370 60 -340 {lab=PLUS}
 N 60 -370 90 -370 {lab=PLUS} 
 N 60 -520 60 -490 {lab=MINUS} 
 N 60 -520 90 -520 {lab=MINUS} 
+N 500 -150 500 -120 {} 
+N 500 -150 520 -150 {} 
+N 520 -180 520 -150 {} 
+N 500 -180 520 -180 {} 
+N 240 -150 240 -120 {} 
+N 220 -150 240 -150 {} 
+N 220 -180 220 -150 {} 
+N 220 -180 240 -180 {} 
 C {devices/netlist_not_shown} 870 -190 0 0 {name=STIMULI
 only_toplevel=true
 value=".option PARHIER=LOCAL RUNLVL=6 post MODMONTE=1 warn maxwarns=400

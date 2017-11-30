@@ -66,7 +66,7 @@ static void svg_xdrawline(int layer, double x1, double y1, double x2,
 
  if( currentlayer !=-1 && layer!= currentlayer)  fprintf(fd,"\"/>\n");
  if(layer!= currentlayer)  fprintf(fd,"<path class=\"l%d\" d=\"", layer);
- fprintf(fd,"M%g %gL%g %g\n", x1, y1, x2, y2);
+ fprintf(fd,"M%.16g %.16gL%.16g %.16g\n", x1, y1, x2, y2);
  currentlayer = layer;
 }
 
@@ -74,7 +74,7 @@ static void svg_xdrawpoint(int layer, double x1, double y1)
 {
   if( currentlayer !=-1 && layer!= currentlayer)  fprintf(fd,"\"/>\n");
   if(layer!= currentlayer)  fprintf(fd,"<path class=\"l%d\" d=\"", layer);
- fprintf(fd,"M%g %gL%g %gL%g%gL%g %gL%g %gz\n", x1, y1, x1+1.0, y1, x1+1.0, y1+1.0, x1, y1+1.0, x1, y1);
+ fprintf(fd,"M%.16g %.16gL%.16g %.16gL%.16g%.16gL%.16g %.16gL%.16g %.16gz\n", x1, y1, x1+1.0, y1, x1+1.0, y1+1.0, x1, y1+1.0, x1, y1);
  currentlayer = layer;
 }
 
@@ -82,7 +82,7 @@ static void svg_xfillrectangle(int layer, double x1, double y1, double x2, doubl
 {
  if( currentlayer !=-1 && layer!= currentlayer)  fprintf(fd,"\"/>\n");
  if(layer!= currentlayer)  fprintf(fd,"<path class=\"l%d\" d=\"", layer);
- fprintf(fd,"M%g %gL%g %gL%g %gL%g %gL%g %gz\n", x1, y1, x2, y1, x2, y2, x1, y2, x1, y1);
+ fprintf(fd,"M%.16g %.16gL%.16g %.16gL%.16g %.16gL%.16g %.16gL%.16g %.16gz\n", x1, y1, x2, y1, x2, y2, x1, y2, x1, y1);
  currentlayer = layer;
 }
 
@@ -105,8 +105,8 @@ static void svg_drawpolygon(int c, int what, double *x, double *y, int points)
   for(i=0;i<points; i++) {
     xx = (x[i] + xorigin)*mooz;
     yy = (y[i] + yorigin)*mooz;
-    if(i==0) fprintf(fd, "M%g %g", xx, yy);
-    else fprintf(fd, "L%g %g", xx, yy);
+    if(i==0) fprintf(fd, "M%.16g %.16g", xx, yy);
+    else fprintf(fd, "L%.16g %.16g", xx, yy);
   }
   fprintf(fd, "z\n");
   currentlayer = c;
@@ -153,7 +153,7 @@ static void svg_draw_string(int gctext,  char *str,
 if(str==NULL) return;
 // if(xscale*FONTWIDTH/zoom<1)
 // {
-//   if(debug_var>=2) fprintf(errfp, "svg_draw_string(): xscale=%g zoom=%g \n",xscale,zoom);
+//   if(debug_var>=2) fprintf(errfp, "svg_draw_string(): xscale=%.16g zoom=%.16g \n",xscale,zoom);
 //  //svg_drawrect(gctext, rx1,ry1,rx2,ry2);
 // }
  else
@@ -367,7 +367,7 @@ void svg_draw(void)
  calc_drawing_bbox(&bb);
  dx=areax2-areax1;
  dy=areay2-areay1;
- if(debug_var>=1) fprintf(errfp, "svg_draw(): dx=%g  dy=%g\n", dx, dy);
+ if(debug_var>=1) fprintf(errfp, "svg_draw(): dx=%.16g  dy=%.16g\n", dx, dy);
 
 
  modified_save=modified;
@@ -377,7 +377,7 @@ void svg_draw(void)
   
  fd=fopen("plot.svg", "w");
 
- fprintf(fd, "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"%g\" height=\"%g\" version=\"1.1\">\n", dx, dy);
+ fprintf(fd, "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"%.16g\" height=\"%.16g\" version=\"1.1\">\n", dx, dy);
 
  fprintf(fd, "<style type=\"text/css\">\n");  // use css stylesheet 20121119
  for(i=0;i<cadlayers;i++){
@@ -394,19 +394,19 @@ void svg_draw(void)
    fprintf(fd, "  stroke: #%02x%02x%02x;\n", svg_colors[i].red, svg_colors[i].green, svg_colors[i].blue);
    fprintf(fd, "  stroke-linecap:round;\n");
    fprintf(fd, "  stroke-linejoin:round;\n");
-   fprintf(fd, "  stroke-width: %g;\n", svg_linew);
+   fprintf(fd, "  stroke-width: %.16g;\n", svg_linew);
    fprintf(fd, "}\n");
  }
  fprintf(fd, "</style>\n");
 
  if(color_ps) {
    // black background
-   fprintf(fd,"<rect x=\"%g\" y=\"%g\" width=\"%g\" height=\"%g\" fill=\"rgb(%d,%d,%d)\" stroke=\"rgb(%d,%d,%d)\" stroke-width=\"%g\" />\n",
+   fprintf(fd,"<rect x=\"%.16g\" y=\"%.16g\" width=\"%.16g\" height=\"%.16g\" fill=\"rgb(%d,%d,%d)\" stroke=\"rgb(%d,%d,%d)\" stroke-width=\"%.16g\" />\n",
                    0.0,      0.0,      dx,           dy,    0, 0, 0,
                                                             0, 0, 0, svg_linew);
  } else {
    // white background
-   fprintf(fd,"<rect x=\"%g\" y=\"%g\" width=\"%g\" height=\"%g\" fill=\"rgb(%d,%d,%d)\" stroke=\"rgb(%d,%d,%d)\" stroke-width=\"%g\" />\n",
+   fprintf(fd,"<rect x=\"%.16g\" y=\"%.16g\" width=\"%.16g\" height=\"%.16g\" fill=\"rgb(%d,%d,%d)\" stroke=\"rgb(%d,%d,%d)\" stroke-width=\"%.16g\" />\n",
                    0.0,      0.0,      dx,           dy,    255, 255, 255,
                                                             255, 255, 255, svg_linew);
 

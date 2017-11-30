@@ -49,12 +49,9 @@ int callback(int event, int mx, int my, KeySym key,
  mousey=my*zoom - yorigin;
  mousex_snap=rint(( mousex)/cadsnap)*cadsnap;
  mousey_snap=rint(( mousey)/cadsnap)*cadsnap;
- {
-  snprintf(str, S(str), "mouse = %g %g - %s  selected: %d", 
-    mousex_snap, mousey_snap, schematic[currentsch],
-    lastselected );
-  statusmsg(str,1);
- }
+ snprintf(str, S(str), "mouse = %.16g %.16g - %s  selected: %d", 
+   mousex_snap, mousey_snap, schematic[currentsch], lastselected );
+ statusmsg(str,1);
  switch(event)
  {
   case EnterNotify:
@@ -79,13 +76,13 @@ int callback(int event, int mx, int my, KeySym key,
   case Expose:
     XCopyArea(display, save_pixmap, window, gctiled, mx,my,button,aux,mx,my);
     {
-      XRectangle xrect[1];
-      xrect[0].x=mx;
-      xrect[0].y=my;
-      xrect[0].width=button;
-      xrect[0].height=aux;
+      XRectangle xr[1];
+      xr[0].x=mx;
+      xr[0].y=my;
+      xr[0].width=button;
+      xr[0].height=aux;
       // redraw selection on expose, needed if no backing store available on the server 20171112
-      XSetClipRectangles(display, gc[SELLAYER], 0,0, xrect, 1, Unsorted);
+      XSetClipRectangles(display, gc[SELLAYER], 0,0, xr, 1, Unsorted);
       rebuild_selected_array();
       draw_selection(gc[SELLAYER],0);
       XSetClipMask(display, gc[SELLAYER], None);
@@ -102,7 +99,13 @@ int callback(int event, int mx, int my, KeySym key,
     if(ui_state & STARTPAN2)   pan2(RUBBER, mx, my); //20121123 -  20160425 moved up
     if(semaphore==2) break;
     if(ui_state) {
-      snprintf(str, S(str), "mouse = %g %g - %s  selected: %d w=%g h=%g", 
+      #ifdef TURBOX_FIX
+      // fix Exceed TurboX bugs when drawing with pixmap tiled fill pattern
+      // *NOT* a solution but at least makes the program useable. 20171130
+      XSetClipRectangles(display, gctiled, 0,0, xrect, 1, Unsorted);
+      #endif
+      if(ui_state & SELECTION) rebuild_selected_array(); // 20171129
+      snprintf(str, S(str), "mouse = %.16g %.16g - %s  selected: %d w=%.16g h=%.16g", 
         mousex_snap, mousey_snap, schematic[currentsch], 
         lastselected ,
         mousex_snap-mx_double_save, mousey_snap-my_double_save // 20070322
@@ -369,7 +372,7 @@ int callback(int event, int mx, int my, KeySym key,
 
     break;
    }
-   if(key == '=' )		// toggle fill rectangles
+   if(key == '='  && (state &ControlMask))		// toggle fill rectangles
    {
     int x;
     fill++;
@@ -396,19 +399,37 @@ int callback(int event, int mx, int my, KeySym key,
     draw();
     break;
    }
-   if(key == '+' )		// change line width
+   if(key == '+'  && state&ControlMask)		// change line width
    {
     lw_double+=0.1;
     change_linewidth(lw_double,1);
     break;
    }
-   if(key == '-' )		// change line width
+   if(key == '+'  && !(state&ControlMask))		// brite colors
+   {
+     color_dim +=0.1;
+     if(color_dim >5.) color_dim=5.;
+     build_colors(skip_dim_background, color_dim);
+     draw();
+     break;
+   }
+     
+   if(key == '-'  && !(state&ControlMask))		// dim colors
+   {
+     color_dim -=0.1;
+     if(color_dim <-5.) color_dim=-5.;
+     build_colors(skip_dim_background, color_dim);
+     draw();
+     break;
+   }
+     
+   if(key == '-'  && state&ControlMask)		// change line width
    {
     lw_double-=0.1;if(lw_double<0.0) lw_double=0.0;
     change_linewidth(lw_double,1);
     break;
    }
-   if(key == 'X' && state == ShiftMask) 			// highlight discrepanciens between selected instance pin and net names
+   if(key == 'X' && state == ShiftMask) // highlight discrepanciens between selected instance pin and net names
    {
      // 20130628
 
@@ -472,6 +493,7 @@ int callback(int event, int mx, int my, KeySym key,
        horizontal_move = vertical_move=0; // 20171023
        Tcl_EvalEx(interp,"set vertical_move 0; set horizontal_move 0" , -1, TCL_EVAL_GLOBAL);
      }
+     break;
    }
    if(key == 'w'&& state==0)	// place wire.
    {
@@ -614,7 +636,8 @@ int callback(int event, int mx, int my, KeySym key,
     mx_save = mx; my_save = my;	// 20070323
     mx_double_save=mousex_snap;
     my_double_save=mousey_snap;
-    new_rect(PLACE); break;
+    new_rect(PLACE);
+    break;
    }
    if(key=='V' && state == ShiftMask)				// toggle spice/vhdl netlist 
    {
@@ -729,10 +752,16 @@ int callback(int event, int mx, int my, KeySym key,
     }
     break;
    }
+   if(key=='c' && state == Mod1Mask)   // toggle background dim
+   {
+     skip_dim_background = !skip_dim_background;
+     break;
+   }
    if(key=='C' && state == ShiftMask)   // Toggle light/dark colorscheme 20171113
    {
      dark_colorscheme=!dark_colorscheme;
-     build_colors();
+     color_dim=0.0;
+     build_colors(0, 0.0);
      draw();
      break;
    }
@@ -750,7 +779,6 @@ int callback(int event, int mx, int my, KeySym key,
    {
     if(semaphore==2) break;
     edit_property(0);
-
     break;
    }
    if(key=='q' && state==Mod1Mask)           		// edit .sch file (DANGER!!)
@@ -792,7 +820,8 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key==XK_Insert)			// insert sym
    {
-    place_symbol(-1,NULL,mousex_snap, mousey_snap, 0, 0, NULL,3);break;
+    place_symbol(-1,NULL,mousex_snap, mousey_snap, 0, 0, NULL,3);
+    break;
    }
    if(key=='s' && state & Mod1Mask)			// reload
    {
@@ -823,7 +852,6 @@ int callback(int event, int mx, int my, KeySym key,
     unhilight_net();
     undraw_hilight_net();
     // draw();
-
     break;
    }
    if(key=='k' && state==0)				// hilight net
@@ -848,7 +876,7 @@ int callback(int event, int mx, int my, KeySym key,
    if(key=='g' && state==ControlMask)              // set snap factor 20161212
    {
     my_snprintf(str, S(str),
-     "input_number \"Enter snap value (default: %g current: %g)\" \"xschem set cadsnap_noalert\"", 
+     "input_number \"Enter snap value (default: %.16g current: %.16g)\" \"xschem set cadsnap_noalert\"", 
      cadsnap, CADSNAP);
     Tcl_EvalEx(interp, str, -1, TCL_EVAL_GLOBAL);
     break;
@@ -883,6 +911,8 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='u' && state==ControlMask)			// testmode
    {
+    XCopyArea(display, save_pixmap, window, gctiled, 0, 0, xrect[0].width, xrect[0].height, 0, 0);
+    fprintf(errfp, "testmode: painting window with save pixmap\n");
     break;
    }
    if(key=='u' && state==0)				// undo
@@ -1009,10 +1039,12 @@ int callback(int event, int mx, int my, KeySym key,
    if(key=='>') { // 20151117
      if(draw_single_layer< cadlayers-1) draw_single_layer++; 
      draw();
+     break;
    }
    if(key=='<') { // 20151117
      if(draw_single_layer>=0 ) draw_single_layer--; 
      draw();
+     break;
    }
    if(key==':')				// toggle flat netlist (only spice) 
    {
@@ -1072,6 +1104,7 @@ int callback(int event, int mx, int my, KeySym key,
    if(key=='f' && state == ControlMask)         // search
    {
     Tcl_EvalEx(interp,"property_search", -1, TCL_EVAL_GLOBAL );
+    break;
    }
    if(key=='f' && state == 0 ) 	                // full zoom
    {
@@ -1085,7 +1118,8 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='!') 	                // empty slot
    {
-     if(has_x) XCopyArea(display, cad_icon_pixmap, window, gc[WIRELAYER], 0, 0, 60, 41,  100, 100);
+     XFillRectangle(display, window, gcstipple[8], 0, 0, xrect[0].width, xrect[0].height);
+      //if(has_x) XCopyArea(display, cad_icon_pixmap, window, gc[WIRELAYER], 0, 0, 60, 41,  100, 100);
       //XIconifyWindow(display, topwindow, DefaultScreen(display) );
      break;
    }

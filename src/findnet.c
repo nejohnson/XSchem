@@ -68,7 +68,7 @@ void find_closest_polygon(double mx,double my)
       if( (tmp = dist(x1, y1, x2, y2, mx, my)) < distance )
       {
        l = i; distance = tmp;sel.col = c;
-       if(debug_var>=1) fprintf(errfp, "find_closest_polygon(): distance=%g  n=%d\n", distance, i);
+       if(debug_var>=1) fprintf(errfp, "find_closest_polygon(): distance=%.16g  n=%d\n", distance, i);
       }
     }
   } // end for i
@@ -95,7 +95,7 @@ void find_closest_line(double mx,double my)
          < distance )
    {
     l = i; distance = tmp;sel.col = c;
-    if(debug_var>=1) fprintf(errfp, "find_closest_line(): distance=%g  n=%d\n", distance, i);
+    if(debug_var>=1) fprintf(errfp, "find_closest_line(): distance=%.16g  n=%d\n", distance, i);
    }
   } // end for i
  } // end for c
@@ -187,7 +187,7 @@ void find_closest_box(double mx,double my)
    }
   } // end for i
  } // end for c
- if(debug_var>=1) fprintf(errfp, "find_closest_box(): distance=%g\n", distance);
+ if(debug_var>=1) fprintf(errfp, "find_closest_box(): distance=%.16g\n", distance);
  if( r!=-1)
  {
   sel.n = r; sel.type = RECT;
@@ -207,7 +207,7 @@ void find_closest_element(double mx,double my)
    {
     r = i; distance = tmp;
    }
-    if(debug_var>=2) fprintf(errfp, "find_closest_element(): finding closest element, lastinst=%d, dist=%g\n",i,tmp);
+    if(debug_var>=2) fprintf(errfp, "find_closest_element(): finding closest element, lastinst=%d, dist=%.16g\n",i,tmp);
   }
  } // end for i
  if( r!=-1 )
@@ -242,7 +242,7 @@ void find_closest_text(double mx,double my)
    if(POINTINSIDE(mx,my,xx1,yy1, xx2, yy2))
    {
     r = i; distance = 0;
-     if(debug_var>=2) fprintf(errfp, "find_closest_text(): finding closest text, lasttext=%d, dist=%g\n",i,distance);
+     if(debug_var>=2) fprintf(errfp, "find_closest_text(): finding closest text, lasttext=%d, dist=%.16g\n",i,distance);
    }
   } // end for i
  if( distance <= threshold && r!=-1)

@@ -29,7 +29,7 @@ int textclip(int x1,int y1,int x2,int y2,
 // check if some of (xa,ya-xb,yb) is inside (x1,y1-x2,y2)
 // coordinates should be ordered, x1<x2,ya<yb and so on...
 {
- if(debug_var>=2) fprintf(errfp, "textclip(): %g %g %g %g - %d %d %d %d\n",
+ if(debug_var>=2) fprintf(errfp, "textclip(): %.16g %.16g %.16g %.16g - %d %d %d %d\n",
  (xa+xorigin*mooz),(ya+yorigin*mooz),
  (xb+xorigin*mooz),(yb+yorigin*mooz),x1,y1,x2,y2);
  // drawtemprect(gc[WIRELAYER],xa,ya,xb,yb);
@@ -55,7 +55,7 @@ void print_image()
   ww=areaw-4*lw; hh=areah-4*lw;
  
   ////  use this if you want huge pixmap
-  //   w=1280*4; h=1024*4;
+  //w=3200; h=2000;
   w=ww; h=hh;  // 20121122 
 
   xrect[0].x = 0;
@@ -74,11 +74,24 @@ void print_image()
                                                          // cliprectangle to avoid random borders
   XSetTile(display,gctiled, save_pixmap);
 
-
   #ifdef HAS_CAIRO
   cairo_destroy(save_ctx);
   cairo_surface_destroy(save_sfc);
+
+  #if HAS_XRENDER==1
+  #if HAS_XCB==1
+  save_sfc = cairo_xcb_surface_create_with_xrender_format(xcbconn, screen_xcb, save_pixmap, &format_rgb, w, h);
+  #else
+  save_sfc = cairo_xlib_surface_create_with_xrender_format (display, save_pixmap, DefaultScreenOfDisplay(display), format, w, h);
+  #endif //HAS_XCB
+  #else
   save_sfc = cairo_xlib_surface_create(display, save_pixmap, visual, w, h);
+  #endif //HAS_XRENDER
+
+  if(cairo_surface_status(save_sfc)!=CAIRO_STATUS_SUCCESS) {
+    fprintf(stderr, "ERROR: invalid cairo xcb surface\n");
+     exit(-1);
+  }
   save_ctx = cairo_create(save_sfc);
   cairo_set_line_width(save_ctx, 1);
   cairo_set_line_join(save_ctx, CAIRO_LINE_JOIN_ROUND);
@@ -86,7 +99,7 @@ void print_image()
   cairo_select_font_face (save_ctx, cairo_font_name, 
        CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
   cairo_set_font_size (save_ctx, 20);
-  #endif
+  #endif //HAS_CAIRO
 
   for(tmp=0;tmp<cadlayers;tmp++)
   {
@@ -97,7 +110,7 @@ void print_image()
 
   draw_grid=0;
   draw_pixmap=1;
-  //zoom_full(0); // 20121127 leave zoom as it is, we probably dont want to always print full...
+  // zoom_full(0);
   draw();
 
   XpmWriteFileFromPixmap(display, "plot.xpm", save_pixmap,0, NULL ); // .gz ????
@@ -122,28 +135,40 @@ void print_image()
   save_pixmap = XCreatePixmap(display,window,areaw,areah,depth);
   XSetTile(display,gctiled, save_pixmap);
 
-  #ifdef HAS_CAIRO
+
+#ifdef HAS_CAIRO
   cairo_destroy(save_ctx);
   cairo_surface_destroy(save_sfc);
+
+  #if HAS_XRENDER==1
+  #if HAS_XCB==1
+  save_sfc = cairo_xcb_surface_create_with_xrender_format(xcbconn, screen_xcb, save_pixmap, &format_rgb, w, h);
+  #else
+  save_sfc = cairo_xlib_surface_create_with_xrender_format (display, save_pixmap, DefaultScreenOfDisplay(display), format, w, h);
+  #endif //HAS_XCB
+  #else
   save_sfc = cairo_xlib_surface_create(display, save_pixmap, visual, w, h);
+  #endif //HAS_XRENDER
+
+  if(cairo_surface_status(save_sfc)!=CAIRO_STATUS_SUCCESS) {
+    fprintf(stderr, "ERROR: invalid cairo xcb surface\n");
+     exit(-1);
+  }
   save_ctx = cairo_create(save_sfc);
   cairo_set_line_width(save_ctx, 1);
   cairo_set_line_join(save_ctx, CAIRO_LINE_JOIN_ROUND);
   cairo_set_line_cap(save_ctx, CAIRO_LINE_CAP_ROUND);
-  cairo_select_font_face (save_ctx, cairo_font_name, 
-     CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+  cairo_select_font_face (save_ctx, cairo_font_name,
+       CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
   cairo_set_font_size (save_ctx, 20);
-  #endif
+  #endif //HAS_CAIRO
 
   for(tmp=0;tmp<cadlayers;tmp++)
   {
     XSetClipMask(display, gc[tmp], None); //20171110 no need to clip, already done in software
     XSetClipMask(display, gcstipple[tmp], None); //20171110 
-    //XSetClipRectangles(display, gc[tmp], 0,0, xrect, 1, Unsorted);
-    //XSetClipRectangles(display, gcstipple[tmp], 0,0, xrect, 1, Unsorted);
   }
   XSetClipMask(display, gctiled, None); //20171110 
-  //XSetClipRectangles(display, gctiled, 0,0, xrect, 1, Unsorted);
 
   XMapWindow(display, window);
   draw_grid=1;
@@ -273,8 +298,8 @@ void draw_string(int layer, int what, char *s, int rot, int flip, double x, doub
   (void)what; // UNUSED in cairo version, avoid compiler warning
   if(s==NULL || !has_x ) return;
   size = (xscale+yscale)*26.*cairo_font_scale;
-  //fprintf(errfp, "size=%g\n", size*mooz);
-  if(size*mooz<3.0) return; // too small
+  //fprintf(errfp, "size=%.16g\n", size*mooz);
+  if(size*mooz<5.0) return; // too small
   if(size*mooz>800) return; // too big
 
   text_bbox(s, xscale, yscale, rot, flip, x,y, &textx1,&texty1,&textx2,&texty2);
@@ -316,16 +341,6 @@ void draw_string(int layer, int what, char *s, int rot, int flip, double x, doub
   }
 }
 
-// CAIRO version
-void draw_temp_string(GC gctext, int what, char *s, int rot, int flip, double x, double y, 
-     double xscale, double yscale)
-{
-
- if(!has_x) return;
- if(!text_bbox(s, xscale, yscale, rot, flip, x,y, &textx1,&texty1,&textx2,&texty2)) return;
- drawtemprect(gctext,what, textx1,texty1,textx2,texty2);
-}
-
 #else // !HAS_CAIRO
 
 // no CAIRO version
@@ -344,7 +359,7 @@ inline void draw_string(int layer, int what, char *str, int rot, int flip,
  if(str==NULL || !has_x ) return;
  if(debug_var>=2) fprintf(errfp, "draw_string(): string=%s\n",str);
  if(xscale*FONTWIDTH*mooz<1) {
-   if(debug_var>=1) fprintf(errfp, "draw_string(): xscale=%g zoom=%g \n",xscale,zoom);
+   if(debug_var>=1) fprintf(errfp, "draw_string(): xscale=%.16g zoom=%.16g \n",xscale,zoom);
    return;
  }
  else {
@@ -386,7 +401,8 @@ inline void draw_string(int layer, int what, char *str, int rot, int flip,
  }
 }
 
-// no CAIRO version
+#endif // HAS_CAIRO
+
 void draw_temp_string(GC gctext, int what, char *str, int rot, int flip, 
                  double x1,double y1, double xscale, double yscale)  
 {
@@ -395,7 +411,6 @@ void draw_temp_string(GC gctext, int what, char *str, int rot, int flip,
  if(!text_bbox(str, xscale, yscale, rot, flip, x1,y1, &textx1,&texty1,&textx2,&texty2)) return;
  drawtemprect(gctext,what, textx1,texty1,textx2,texty2);
 }
-#endif // HAS_CAIRO
 
 void draw_symbol_outline(int what,int c, int n,int layer,int tmp_flip, int rot, 
 	double xoffset, double yoffset) 
@@ -666,20 +681,18 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
  static int i=0;
  static XSegment r[CADDRAWBUFFERSIZE];
  double x1,y1,x2,y2;
- register int ii;
  register XSegment *rr;
 
  if(!has_x) return;
- ii=i;
  rr=r;
  if(what==ADD)
  {
-  if(ii>=CADDRAWBUFFERSIZE)
+  if(i>=CADDRAWBUFFERSIZE)
   {
-   XDrawSegments(display, window, gc[c], rr,ii);
+   XDrawSegments(display, window, gc[c], rr,i);
    if(draw_pixmap)
-     XDrawSegments(display, save_pixmap, gc[c], rr,ii);
-   ii=i=0;
+     XDrawSegments(display, save_pixmap, gc[c], rr,i);
+   i=0;
   }
   x1=(linex1+xorigin)*mooz;
   y1=(liney1+yorigin)*mooz;
@@ -723,14 +736,11 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
    XSetLineAttributes (display, gc[c], lw==1? 0:lw, LineSolid, CapRound , JoinRound);
   }
  }
-
-
  else if(what==BEGIN) i=0;
- else if(what==END)
+ else if(what==END && i)
  {
-  XDrawSegments(display, window, gc[c], rr,ii);
-  if(draw_pixmap)
-    XDrawSegments(display, save_pixmap, gc[c], rr,ii);
+  XDrawSegments(display, window, gc[c], rr,i);
+  if(draw_pixmap) XDrawSegments(display, save_pixmap, gc[c], rr,i);
   i=0;
  }
 }
@@ -793,7 +803,7 @@ void drawtempline(GC gc, int what, double linex1,double liney1,double linex2,dou
  }
 
  else if(what==BEGIN) i=0;
- else if(what==END)
+ else if(what==END && i)
  {
   XDrawSegments(display, window, gc, r,i);
   i=0;
@@ -851,11 +861,10 @@ void filledrect(int c, int what, double rectx1,double recty1,double rectx2,doubl
    i++;
   }
  }
- else if(what==END)
+ else if(what==END && i)
  {
   XFillRectangles(display, window, gcstipple[c], r,i);
-  if(draw_pixmap)
-    XFillRectangles(display, save_pixmap, gcstipple[c], r,i);
+  if(draw_pixmap) XFillRectangles(display, save_pixmap, gcstipple[c], r,i);
   i=0;
  }
 }
@@ -979,11 +988,10 @@ void drawrect(int c, int what, double rectx1,double recty1,double rectx2,double 
    i++;
   }
  }
- else if(what==END)
+ else if(what==END && i)
  {
   XDrawRectangles(display, window, gc[c], r,i);
-  if(draw_pixmap)
-    XDrawRectangles(display, save_pixmap, gc[c], r,i);
+  if(draw_pixmap) XDrawRectangles(display, save_pixmap, gc[c], r,i);
   i=0;
  }
 }
@@ -1033,7 +1041,7 @@ void drawtemprect(GC gc, int what, double rectx1,double recty1,double rectx2,dou
    i++;
   }
  }
- else if(what==END)
+ else if(what==END && i)
  {
   XDrawRectangles(display, window, gc, r,i);
   i=0;
@@ -1056,9 +1064,15 @@ void draw(void)
     if(ui_state & SELECTION) draw_dots=0; // 20171114
     if(draw_pixmap) {
       XFillRectangle(display, save_pixmap, gc[BACKLAYER], 
-             areax1, areay1, areaw, areah);// clear pixmap
+             areax1, areay1, areaw, areah);
     }
-    XFillRectangle(display, window, gc[BACKLAYER], areax1, areay1, areaw, areah);// clear window
+    // XClearArea seems not be clipped by XSetClipRectangles.--> do not use
+    // XClearArea(display, window, areax1, areay1, areaw, areah, 0); // 20171124 faster???
+
+    // fprintf(errfp, "draw(): areax: %d %d %d %d, xrect: %d %d %d %d\n", 
+    //               areax1, areay1,areaw, areah,xrect[0].x, xrect[0].y, xrect[0].width, xrect[0].height);
+
+    XFillRectangle(display, window, gc[BACKLAYER], areax1, areay1, areaw, areah);
     if(debug_var>=1) fprintf(errfp, "draw(): window: %d %d %d %d\n",areax1, areay1, areaw, areah);
     drawgrid();
     if(!only_probes) { // 20110112
@@ -1165,5 +1179,10 @@ void draw(void)
     } // !only_probes, 20110112
     draw_hilight_net();
     if(debug_var>=1) fprintf(errfp, "draw(): lw=%d\n",lw);
+    /*
+    cairo_move_to(ctx, 0, 0);
+    cairo_line_to(ctx, 400, 400);
+    cairo_stroke(ctx);
+    */
  } // if(has_x)
 }

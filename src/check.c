@@ -76,7 +76,7 @@ void check_touch(int i, int j,
   if((*xt > x1 && *xt < x2)||(*yt > y1 && *yt < y2)) *broken = 1;
  }
  if(touch1 && touch2) *includes = 1;
-  if(debug_var>=2) fprintf(errfp, "check_touch(): xt=%g, yt=%g\n",*xt, *yt);
+  if(debug_var>=2) fprintf(errfp, "check_touch(): xt=%.16g, yt=%.16g\n",*xt, *yt);
 }
 
 void collapse_wires(void)

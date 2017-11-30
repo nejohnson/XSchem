@@ -140,7 +140,8 @@ Pixmap cad_icon_pixmap=0, *pixmap,save_pixmap;	// save_pixmap used to restore wi
 int areax1,areay1,areax2,areay2,areaw,areah; // window corners / size
 GC *gcstipple,*gc, gctiled;
 Display *display;
-XRectangle xrect[1];
+XRectangle xrect[1] = {{0,0,0,0}};
+int xschem_h, xschem_w; // 20171130 window size
 double mousex,mousey; // mouse coord.
 double mousex_snap,mousey_snap; // mouse coord. snapped to grid
 //double xorigin=-CADWIDTH/2.0,yorigin=-CADHEIGHT/2.0;
@@ -213,11 +214,22 @@ int vertical_move=0; // 20171023
 XColor xcolor_array[256];// 20171109
 Visual *visual; //20171111
 int dark_colorscheme=1; // 20171113
+double color_dim=0.0; // 20171123
+int skip_dim_background=1;
 
 #ifdef HAS_CAIRO
 cairo_surface_t *sfc, *save_sfc;
 cairo_t *ctx, *save_ctx;
-#endif
+XRenderPictFormat *format;
+
+#if HAS_XCB==1
+xcb_connection_t *xcbconn; // 20171125
+xcb_render_pictforminfo_t format_rgb, format_rgba;
+xcb_screen_t *screen_xcb;
+xcb_visualtype_t *visual_xcb;
+#endif //HAS_XCB
+
+#endif //HAS_CAIRO
 char cairo_font_name[1024]="Monospace";
 int cairo_longest_line;
 int cairo_lines;
@@ -225,11 +237,8 @@ double cairo_font_scale=1.0; // default: 1.0, allows to adjust font size
 double cairo_font_line_spacing=1.0; // allows to change line spacing: default: 1.0
 
 // lift up the text by 'n' pixels (zoom corrected) within the bbox. 
-// USE WITH CAUTION!!!
-// If value is too big (either positive or negative) the text may 
-// not fit in the calculated bounding box, leaving garbage in the schematic.
 // This correction is used to better align existing schematics
 // compared to the nocairo xschem version.
-// allowed values should be in the range [-1, 3]
+// allowed values should be in the range [-4, 4]
 double cairo_vert_correct=0.0;
                                

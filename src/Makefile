@@ -19,9 +19,20 @@ TCLVER=8.6
 ## set to 1 for CAIRO antialiased fonts
 HAS_CAIRO=1
 
+HAS_XCB=1
+HAS_XRENDER=1
+
+XCB_INC=
+ifeq ($(HAS_XCB),1)
+  XCB_INC = xcb x11-xcb xcb-render xrender
+else ifeq  ($(HAS_XRENDER),1)
+  XCB_INC = xrender
+endif
+
 ifeq ($(HAS_CAIRO),1)
-	CAIRO_INCLUDES=`pkg-config cairo xrender --cflags` -D HAS_CAIRO
-	CAIRO_LIBS=`pkg-config cairo xrender --libs`
+	CAIRO_INCLUDES=`pkg-config cairo $(XCB_INC) --cflags` \
+              -DHAS_CAIRO -DHAS_XRENDER=$(HAS_XRENDER) -DHAS_XCB=$(HAS_XCB)
+	CAIRO_LIBS=`pkg-config cairo $(XCB_INC)  --libs`
 else
 	CAIRO_INCLUDES=
 	CAIRO_LIBS=
@@ -32,10 +43,14 @@ endif
 ## recent gcc generates Position Independent Executable (pie), this breaks
 ## gprof, so use -no-pie together with -pg when profiling code.
 ## for cairo: $(pkg-config cairo  --cflags --libs)
-MOREFLAGS= -O3
 
-CFLAGS  = -Wall  $(MOREFLAGS)  -I/usr/include/tcl${TCLVER} $(CAIRO_INCLUDES)
-LDFLAGS = -L/usr/X11R6/lib $(MOREFLAGS) -lX11 -lm -lXpm -ltcl${TCLVER} -ltk${TCLVER}  -lfl $(CAIRO_LIBS)
+## to fix rendering problems due to bugs in the exceed turboX server
+## add -DTURBOX_FIX
+MOREFLAGS= -g
+
+CFLAGS  = -Wall  $(MOREFLAGS)  -I/usr/include/tcl${TCLVER} $(CAIRO_INCLUDES) -I/home/sschippe/include
+LDFLAGS = -L/usr/X11R6/lib -L/home/sschippe/lib $(MOREFLAGS) -lX11 -lm -lXpm -ltcl${TCLVER} -ltk${TCLVER} \
+           -lfl $(CAIRO_LIBS)
 
 xschem: 	$(OBJ)
 	$(CC) -o $@   $^ $(LDFLAGS)

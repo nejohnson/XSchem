@@ -84,11 +84,11 @@
 #define CADWIREMINDIST 30.0
 #define CADMAXWIRES 100
 #define CADMAXTEXT 100
-#define CADMAXOBJECTS 100    // max # of lines, rects (for each layer!!)
-#define MAXGROUP 300	    // max # of objects that can be drawn while moving
-#define ELEMINST 200        // max # of placed elements,   was 600 20102004
-#define ELEMDEF 120         // max # of defined elements
-#define CADMAXGRIDPOINTS 1000
+#define CADMAXOBJECTS 100   // (initial) max # of lines, rects (for each layer!!)
+#define MAXGROUP 300	    // (initial) max # of objects that can be drawn while moving
+#define ELEMINST 200        // (initial) max # of placed elements,   was 600 20102004
+#define ELEMDEF 120         // (initial) max # of defined elements
+#define CADMAXGRIDPOINTS 512
 #define CADMAXHIER 40
 #define CADCHUNKALLOC 64 // was 256  20102004
 #define CADDRAWBUFFERSIZE 512
@@ -432,6 +432,7 @@ extern GC *gc, *gcstipple, gctiled;
 extern Display *display;
 extern Tcl_Interp *interp;
 extern XRectangle xrect[];
+extern int xschem_h, xschem_w; // 20171130 window size
 extern double xorigin,yorigin;
 extern double zoom;
 extern double mooz;
@@ -463,6 +464,8 @@ extern int fullscreen;
 extern XColor xcolor_array[];// 20171109
 extern Visual *visual;
 extern int dark_colorscheme; // 20171113
+extern double color_dim;
+extern int skip_dim_background;
 
 // functions
 extern int set_netlist_dir(int force);
@@ -710,14 +713,27 @@ extern void toggle_only_probes(); // 20110112
 extern void fill_symbol_editprop_form(int x);
 extern void update_symbol(char *result, int x);
 extern void tclexit(ClientData s);
-extern int build_colors(); // reparse the TCL 'colors' list and reassign colors 20171113
+extern int build_colors(int skip_background, double dim); // reparse the TCL 'colors' list and reassign colors 20171113
 #ifdef HAS_CAIRO // 20171105
 #include <cairo.h>
 #include <cairo-xlib.h>
 #include "cairo-xlib-xrender.h"
+
+  #if HAS_XCB==1
+  #include <X11/Xlib-xcb.h>  // 20171125
+  #include <cairo-xcb.h>
+  extern xcb_connection_t *xcbconn; // 20171125
+  extern xcb_screen_t *screen_xcb;
+  extern xcb_render_pictforminfo_t format_rgb, format_rgba;
+  extern xcb_visualtype_t *visual_xcb;
+  #endif  // HAS_XCB
+
 extern cairo_surface_t *sfc, *save_sfc;
 extern cairo_t *ctx, *save_ctx;
-#endif
+extern XRenderPictFormat *format;
+
+
+#endif // HAS_CAIRO
 extern char cairo_font_name[1024]; // should be monospaced
 extern int cairo_longest_line;
 extern int cairo_lines;

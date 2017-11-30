@@ -324,14 +324,16 @@ void draw_selection(GC g, int interruptable)
        rx1-inst_ptr[n].x0+deltax,ry1-inst_ptr[n].y0+deltay);
      break;
    }
-   drawtempline(g, END, 0.0, 0.0, 0.0, 0.0);
-   drawtemprect(g, END, 0.0, 0.0, 0.0, 0.0);
    if(XPending(display) && interruptable)
    {
+    drawtempline(g, END, 0.0, 0.0, 0.0, 0.0);
+    drawtemprect(g, END, 0.0, 0.0, 0.0, 0.0);
     lastsel = i+1;
     return;
    }
   }
+  drawtempline(g, END, 0.0, 0.0, 0.0, 0.0);
+  drawtemprect(g, END, 0.0, 0.0, 0.0, 0.0);
   lastsel = i;
 }
 

@@ -412,7 +412,7 @@ proc savefile {name ext} {
 proc filesave { msg {initialfile {}} {confirm 0}  } {
   global FILESELECT_CURR_DIR XSCHEM_DESIGN_DIR  entry1 tcl_version
   while {1} {
-    if {$tcl_version > 8.4} {
+    if {$tcl_version > 8.5} {
       set r [tk_getSaveFile  -title $msg -initialfile $initialfile -initialdir $FILESELECT_CURR_DIR -confirmoverwrite $confirm]
     } else {
       set r [tk_getSaveFile  -title $msg -initialfile $initialfile -initialdir $FILESELECT_CURR_DIR ]

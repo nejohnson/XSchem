@@ -38,6 +38,7 @@ void symbol_bbox(int i, double *x1,double *y1, double *x2, double *y2)
    double text_x0, text_y0;
    int sym_rot, sym_flip;
    double xx1,yy1,xx2,yy2;
+
    #ifdef HAS_CAIRO
    int customfont;
    #endif
@@ -57,7 +58,7 @@ void symbol_bbox(int i, double *x1,double *y1, double *x2, double *y2)
    inst_ptr[i].yy1 = *y1;		// for easier select
    inst_ptr[i].xx2 = *x2;
    inst_ptr[i].yy2 = *y2;
-    if(debug_var>=2) fprintf(errfp, "symbol_bbox(): instance=%d %g %g %g %g\n",i,*x1, *y1, *x2, *y2);
+    if(debug_var>=1) fprintf(errfp, "symbol_bbox(): instance=%d %.16g %.16g %.16g %.16g\n",i,*x1, *y1, *x2, *y2);
    
    // strings bbox
    for(j=0;j< (inst_ptr[i].ptr+instdef)->texts;j++)
@@ -86,7 +87,7 @@ void symbol_bbox(int i, double *x1,double *y1, double *x2, double *y2)
      if(yy1<*y1) *y1=yy1;
      if(xx2>*x2) *x2=xx2;
      if(yy2>*y2) *y2=yy2;
-      if(debug_var>=2) fprintf(errfp, "symbol_bbox(): instance=%d text=%d %g %g %g %g\n",i,j, *x1, *y1, *x2, *y2);
+      if(debug_var>=2) fprintf(errfp, "symbol_bbox(): instance=%d text=%d %.16g %.16g %.16g %.16g\n",i,j, *x1, *y1, *x2, *y2);
 
    }
 }
@@ -242,7 +243,7 @@ void delete(void)
       if(k==0 || polygon[c][i].x[k] > x2) x2 = polygon[c][i].x[k];
       if(k==0 || polygon[c][i].y[k] > y2) y2 = polygon[c][i].y[k];
     }
-    //fprintf(errfp, "bbox: %g %g %g %g\n", x1, y1, x2, y2);
+    //fprintf(errfp, "bbox: %.16g %.16g %.16g %.16g\n", x1, y1, x2, y2);
     j++;
     bbox(ADD, x1, y1, x2, y2);
     modified=1;
@@ -333,7 +334,7 @@ void delete_only_rect_and_line_and_poly(void)
       if(k==0 || polygon[c][i].x[k] > x2) x2 = polygon[c][i].x[k];
       if(k==0 || polygon[c][i].y[k] > y2) y2 = polygon[c][i].y[k];
     }
-    //fprintf(errfp, "bbox: %g %g %g %g\n", x1, y1, x2, y2);
+    //fprintf(errfp, "bbox: %.16g %.16g %.16g %.16g\n", x1, y1, x2, y2);
     j++;
     bbox(ADD, x1, y1, x2, y2);
     modified=1;
@@ -370,10 +371,16 @@ void bbox(int what,double x1,double y1, double x2, double y2)
  int i;
  static int bbx1, bbx2, bby1, bby2; 
  static int savew, saveh, savex1, savex2, savey1, savey2;
+ static int semaphore=0;
 
+ // fprintf(errfp, "bbox: what=%d\n", what);
  switch(what)
  {
   case BEGIN:
+   if(semaphore==1) {
+     fprintf(errfp, "ERROR: rentrant bbox() call\n"); 
+     exit(-1);
+   }
    bbx1 = 300000000;
    bbx2 = 0;
    bby1 = 300000000; 
@@ -384,8 +391,13 @@ void bbox(int what,double x1,double y1, double x2, double y2)
    savey2 = areay2;
    savew = areaw;
    saveh = areah;
+   semaphore=1;
    break;
   case ADD:
+   if(semaphore==0) {
+     fprintf(errfp, "ERROR: bbox(ADD) call before bbox(BEGIN)\n"); 
+     exit(-1);
+   }
    x1=(x1+xorigin)/zoom;
    y1=(y1+yorigin)/zoom;
    x2=(x2+xorigin)/zoom;
@@ -408,21 +420,29 @@ void bbox(int what,double x1,double y1, double x2, double y2)
    areay2 = savey2;
    areaw =  savew;
    areah =  saveh;
-   xrect[0].x = areax1+2*lw;
-   xrect[0].y = areay1+2*lw;
+   xrect[0].x = 0;
+   xrect[0].y = 0;
    xrect[0].width = areaw-4*lw;
    xrect[0].height = areah-4*lw;
+
+   XSetClipMask(display, gctiled, None); // 20171110 optimization, clipping already done in software
+
    for(i=0;i<cadlayers;i++)    
    {
     XSetClipMask(display, gc[i], None); // 20171110 optimization, clipping already done in software
     XSetClipMask(display, gcstipple[i], None); // 20171110 optimization, clipping already done in software
-    //XSetClipRectangles(display, gc[i], 0,0, xrect, 1, Unsorted);
-    //XSetClipRectangles(display, gcstipple[i], 0,0, xrect, 1, Unsorted);
    }
-   XSetClipMask(display, gctiled, None); // 20171110 optimization, clipping already done in software
-   // XSetClipRectangles(display, gctiled, 0,0, xrect, 1, Unsorted);
+   #ifdef HAS_CAIRO
+   cairo_reset_clip(ctx);
+   cairo_reset_clip(save_ctx);
+   #endif
+   semaphore=0;
    break;
   case SET:
+   if(semaphore==0) {
+     fprintf(errfp, "ERROR: bbox(SET) call before bbox(BEGIN)\n"); 
+     exit(-1);
+   }
    areax1 = bbx1-2*lw;
    areax2 = bbx2+2*lw;
    areay1 = bby1-2*lw;
@@ -442,6 +462,12 @@ void bbox(int what,double x1,double y1, double x2, double y2)
    }
    XSetClipRectangles(display, gctiled, 0,0, xrect, 1, Unsorted);
    if(debug_var>=1) fprintf(errfp, "bbox(): bbox= %d %d %d %d\n",areax1,areay1,areax2,areay2);     
+   #ifdef HAS_CAIRO
+   cairo_rectangle(ctx, xrect[0].x, xrect[0].y, xrect[0].width, xrect[0].height);
+   cairo_clip(ctx);
+   cairo_rectangle(save_ctx, xrect[0].x, xrect[0].y, xrect[0].width, xrect[0].height);
+   cairo_clip(save_ctx);
+   #endif
    break;
  }
 }
@@ -489,7 +515,7 @@ void unselect_all(void)
      {
       textelement[i].sel = 0;
       #ifdef HAS_CAIRO
-      customfont = set_text_custom_font(& textelement[i]);
+      customfont = set_text_custom_font(& textelement[i]); // needed for bbox calculation
       #endif
       if(x_initialized) draw_temp_string(gctiled,ADD, textelement[i].txt_ptr,
        textelement[i].rot, textelement[i].flip,
@@ -548,7 +574,7 @@ void select_wire(int i,unsigned short select_mode)
            wire[i].prop_ptr? wire[i].prop_ptr: "(null)");
     statusmsg(str,2);
    // 20070323
-   snprintf(str, S(str), "x = %g  y = %g  w = %g h = %g",wire[i].x1, wire[i].y1,
+   snprintf(str, S(str), "x = %.16g  y = %.16g  w = %.16g h = %.16g",wire[i].x1, wire[i].y1,
       wire[i].x2-wire[i].x1, wire[i].y2-wire[i].y1
    );
    statusmsg(str,1);
@@ -597,7 +623,7 @@ void select_element(int i,unsigned short select_mode, int fast)
      statusmsg(str,2);
     }
    }
-   snprintf(str, S(str), "x = %g  y = %g  w = %g h = %g",inst_ptr[i].xx1, inst_ptr[i].yy1,
+   snprintf(str, S(str), "x = %.16g  y = %.16g  w = %.16g h = %.16g",inst_ptr[i].xx1, inst_ptr[i].yy1,
       inst_ptr[i].xx2-inst_ptr[i].xx1, inst_ptr[i].yy2-inst_ptr[i].yy1
    );
    statusmsg(str,1);
@@ -658,7 +684,7 @@ void select_box(int c, int i, unsigned short select_mode, int fast)
    snprintf(str, S(str), "selected box : layer=%d, n=%d properties: %s",c-4,i,s);
    statusmsg(str,2);
    // 20070323
-   snprintf(str, S(str), "x = %g  y = %g  w = %g h = %g",rect[c][i].x1, rect[c][i].y1,
+   snprintf(str, S(str), "x = %.16g  y = %.16g  w = %.16g h = %.16g",rect[c][i].x1, rect[c][i].y1,
       rect[c][i].x2-rect[c][i].x1, rect[c][i].y2-rect[c][i].y1
    );
    statusmsg(str,1);
@@ -695,7 +721,7 @@ void select_polygon(int c, int i, unsigned short select_mode, int fast )
    snprintf(str, S(str), "selected polygon: layer=%d, n=%d properties: %s",c-4,i,s);
    statusmsg(str,2);
    // 20070323
-   snprintf(str, S(str), "x0 = %g  y0 = %g ...",polygon[c][i].x[0], polygon[c][i].y[0]);
+   snprintf(str, S(str), "x0 = %.16g  y0 = %.16g ...",polygon[c][i].x[0], polygon[c][i].y[0]);
    statusmsg(str,1);
   }
   polygon[c][i].sel = select_mode;
@@ -717,7 +743,7 @@ void select_line(int c, int i, unsigned short select_mode, int fast )
    snprintf(str, S(str), "selected line: layer=%d, n=%d properties: %s",c-4,i,s);
    statusmsg(str,2);
    // 20070323
-   snprintf(str, S(str), "x = %g  y = %g  w = %g h = %g",line[c][i].x1, line[c][i].y1,
+   snprintf(str, S(str), "x = %.16g  y = %.16g  w = %.16g h = %.16g",line[c][i].x1, line[c][i].y1,
       line[c][i].x2-line[c][i].x1, line[c][i].y2-line[c][i].y1
    );
    statusmsg(str,1);

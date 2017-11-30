@@ -232,9 +232,9 @@ void edit_text_property(int x)
 
    Tcl_SetVar(interp,"txt",textelement[sel].txt_ptr,TCL_GLOBAL_ONLY);
    Tcl_SetVar(interp,"entry1",textelement[sel].txt_ptr,TCL_GLOBAL_ONLY); // for viewdata
-   my_snprintf(property, S(property), "%g",textelement[sel].yscale); 
+   my_snprintf(property, S(property), "%.16g",textelement[sel].yscale); 
    Tcl_SetVar(interp,"vsize",property,TCL_GLOBAL_ONLY);
-   my_snprintf(property, S(property), "%g",textelement[sel].xscale); 
+   my_snprintf(property, S(property), "%.16g",textelement[sel].xscale); 
    Tcl_SetVar(interp,"hsize",property,TCL_GLOBAL_ONLY);
    if(x==0) tkeval("enter_text {text:}");
    else if(x==2) tkeval("viewdata $::entry1");

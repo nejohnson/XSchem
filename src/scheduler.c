@@ -597,7 +597,14 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
  else if(!strcmp(argv[1],"toggle_colorscheme"))
  {
    dark_colorscheme=!dark_colorscheme;
-   build_colors();
+   build_colors(0, 0.0);
+   draw();
+ }
+
+ else if(!strcmp(argv[1],"color_dim"))
+ {
+   if(argc==3)
+   build_colors(skip_dim_background, atof(argv[2]));
    draw();
  }
 
@@ -979,9 +986,9 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
     printf("lastline[%d]=%d\n", i, lastline[i]);
     printf("max_rects[%d]=%d\n", i, max_rects[i]);
     printf("max_lines[%d]=%d\n", i, max_lines[i]);
-    printf("zoom=%g\n", zoom);
-    printf("xorigin=%g\n", xorigin);
-    printf("yorigin=%g\n", yorigin);
+    printf("zoom=%.16g\n", zoom);
+    printf("xorigin=%.16g\n", xorigin);
+    printf("yorigin=%.16g\n", yorigin);
     
   }
   printf("currentsch=%d\n", currentsch);

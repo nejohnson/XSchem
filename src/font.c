@@ -43,7 +43,7 @@ void compile_font(void)
   rebuild_selected_array();
   character[code] = my_calloc(lastselected*4+1, sizeof(double));
   character[code][0] = (double)lastselected;
-  if(debug_var >=2) fprintf(errfp, "compile_font(): character[%d][]={%g",code,character[code][0]);
+  if(debug_var >=2) fprintf(errfp, "compile_font(): character[%d][]={%.16g",code,character[code][0]);
   for(i=0;i<lastselected;i++)
   {
    character[code][i*4+1] = 
@@ -54,7 +54,7 @@ void compile_font(void)
       line[selectedgroup[i].col][selectedgroup[i].n].x2-code*FONTOFFSET;
    character[code][i*4+4] = 
       line[selectedgroup[i].col][selectedgroup[i].n].y2+FONTHEIGHT;
-   if(debug_var>=2) fprintf(errfp, ",\n%g,%g,%g,%g",
+   if(debug_var>=2) fprintf(errfp, ",\n%.16g,%.16g,%.16g,%.16g",
     character[code][i*4+1],character[code][i*4+2],
     character[code][i*4+3],character[code][i*4+4]);
   }

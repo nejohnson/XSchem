@@ -35,9 +35,25 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+
+2.3.6:
+- some cleanups in the code, 
+- performance optimization, do not call symbol_bbox() in view_zoom and view_unzoom, 
+- dim and bright colors (+ and - keys) 
+- include/exclude background color in dim/bright operations (alt-c)
+- cairo clipping implemented in bbox() so text will not be overstriked making it look bold
+  when placing and deleting objects that partially overlap text.
+- Dirty hack in callback() (TURBOX_FIX) to work-around bugs in the Exceed
+  TurboX server. Include -DTURBOX_FIX in the Makefile if needed.
+  without this hack repainting the window with the save_pixmap (FillTiled fill style)
+  will sometimes not work, leaving garbage or empty areas.
+- full precision in save operations (%.16g instead of %g), allowing *much* bigger
+  drawing areas to be saved and restored without loss of precision.
+
 2.3.5:
 - proportional fonts now fully supported, text correctly aligned even on rotated objects
 - postscript and svg print routines updated to render polygons.
+
 2.3.4:
 - fix zoom full function, expecially when zooming back
   from a very very deep zoom in.

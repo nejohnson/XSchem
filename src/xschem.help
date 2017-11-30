@@ -8,7 +8,7 @@ Options:
   -x               dont use X (only command mode)
   -z               use a raibow-looking layer color table
   -s               set netlist type to SPICE
-  -S               show simulation waveforms
+  -W               show simulation waveforms
   -f               set flat netlist (for spice format only)
   -r               start without the tclreadline package ( this is necessary if
                    stdin and stdout are to be redirected for example 

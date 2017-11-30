@@ -14,11 +14,9 @@ END  { endfile(_filename_) }
 
 ###### begin user code ########################
 
-/^ *customfont *= *set_text_custom_font.*/{
-  aa=$0
-  sub(/[^ ].*/,"",aa)
+/%g/{
   found=1
-  $0 = aa "#ifdef HAS_CAIRO\n" $0 "\n" aa "#endif"
+  gsub(/%g/,"%.16g")
 }
 ###### end  user code  ########################
 

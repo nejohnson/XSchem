@@ -35,16 +35,16 @@ static Ps_color *ps_colors;
 static void restore_lw(void) 
 {
  if(lw_double==0.0)
-   fprintf(fd, "%g setlinewidth\n",0.5);
+   fprintf(fd, "%.16g setlinewidth\n",0.5);
  else
-   if(a3page) fprintf(fd, "%g setlinewidth\n",lw_double/sqrt(2));
-   else fprintf(fd, "%g setlinewidth\n",lw_double);
+   if(a3page) fprintf(fd, "%.16g setlinewidth\n",lw_double/sqrt(2));
+   else fprintf(fd, "%.16g setlinewidth\n",lw_double);
 }
 
 static void set_ps_colors(unsigned int pixel)
 {
  
-   if(color_ps) fprintf(fd, "%g %g %g setrgbcolor\n", 
+   if(color_ps) fprintf(fd, "%.16g %.16g %.16g setrgbcolor\n", 
     (double)ps_colors[pixel].red/256.0, (double)ps_colors[pixel].green/256.0, 
     (double)ps_colors[pixel].blue/256.0);
  
@@ -53,22 +53,22 @@ static void set_ps_colors(unsigned int pixel)
 static void ps_xdrawline(int layer, double x1, double y1, double x2, 
                   double y2)
 {
- fprintf(fd, "%g %g %g %g L\n", x2, y2, x1, y1);
+ fprintf(fd, "%.16g %.16g %.16g %.16g L\n", x2, y2, x1, y1);
 }
 
 static void ps_xdrawpoint(int layer, double x1, double y1)
 {
- fprintf(fd, "%g %g %g %g L\n", x1, y1,x1,y1);
+ fprintf(fd, "%.16g %.16g %.16g %.16g L\n", x1, y1,x1,y1);
 }
 
 static void ps_xfillrectange(int layer, double x1, double y1, double x2,
                   double y2)
 {
- //fprintf(fd, "%g %g moveto %g %g lineto %g %g lineto %g %g lineto closepath\n",
+ //fprintf(fd, "%.16g %.16g moveto %.16g %.16g lineto %.16g %.16g lineto %.16g %.16g lineto closepath\n",
  //       x1,y1,x2,y1,x2,y2,x1,y2);
- fprintf(fd, "%g %g %g %g R\n", x1,y1,x2-x1,y2-y1);
+ fprintf(fd, "%.16g %.16g %.16g %.16g R\n", x1,y1,x2-x1,y2-y1);
  if( (layer==4 || layer==PINLAYER || layer==WIRELAYER) && fill) {
-   fprintf(fd, "%g %g %g %g RF\n", x1,y1,x2-x1,y2-y1);
+   fprintf(fd, "%.16g %.16g %.16g %.16g RF\n", x1,y1,x2-x1,y2-y1);
    // fprintf(fd,"fill\n");
  }
  //fprintf(fd,"stroke\n");
@@ -93,8 +93,8 @@ static void ps_drawpolygon(int c, int what, double *x, double *y, int points)
   for(i=0;i<points; i++) {
     xx = (x[i] + xorigin)*mooz;
     yy = (y[i] + yorigin)*mooz;
-    if(i==0) fprintf(fd, "%g %g MT\n", xx, yy);
-    else fprintf(fd, "%g %g LT\n", xx, yy);
+    if(i==0) fprintf(fd, "%.16g %.16g MT\n", xx, yy);
+    else fprintf(fd, "%.16g %.16g LT\n", xx, yy);
   }
   fprintf(fd, "closepath gsave stroke\n");
   fprintf(fd, "grestore\n");
@@ -145,7 +145,7 @@ static void ps_draw_string(int gctext,  char *str,
 if(str==NULL) return;
 // if(xscale*FONTWIDTH/zoom<1)
 // {
-//   if(debug_var>=2) fprintf(errfp, "ps_draw_string(): xscale=%g zoom=%g \n",xscale,zoom);
+//   if(debug_var>=2) fprintf(errfp, "ps_draw_string(): xscale=%.16g zoom=%.16g \n",xscale,zoom);
 //  //ps_drawrect(gctext, rx1,ry1,rx2,ry2);
 // }
 // else
@@ -357,7 +357,7 @@ void ps_draw(void)
  calc_drawing_bbox(&bb);
  dx=areax2-areax1;
  dy=areay2-areay1;
- if(debug_var>=1) fprintf(errfp, "ps_draw(): dx=%g  dy=%g\n", dx, dy);
+ if(debug_var>=1) fprintf(errfp, "ps_draw(): dx=%.16g  dy=%.16g\n", dx, dy);
   
  fd=fopen("plot.ps", "w");
  fprintf(fd, "%%!\n");
@@ -402,12 +402,12 @@ void ps_draw(void)
   if(a3page) fprintf(fd,"28.99137803 cm 41.29503602 cm translate\n");
   else fprintf(fd,"20 cm 28.7 cm translate\n");
   fprintf(fd,"-90 rotate\n");
-  fprintf(fd,"%g %g scale\n",scale,-scale);
+  fprintf(fd,"%.16g %.16g scale\n",scale,-scale);
  }
  else
  {
   fprintf(fd,"1 cm 28.7 cm translate\n");
-  fprintf(fd,"%g %g scale\n",scale,-scale);
+  fprintf(fd,"%.16g %.16g scale\n",scale,-scale);
  }
 
  fprintf(fd, "1 setlinejoin 1 setlinecap\n");

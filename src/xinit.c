@@ -262,10 +262,10 @@ void xwin_exit(void)
 
  if(debug_var>=1) fprintf(errfp, "xwin_exit(): closed display\n");
  my_free(filename);
- if(errfp!=stderr) fclose(errfp);
- errfp=stderr;
  delete_undo(); // 20150327
  if(debug_var>=1) fprintf(errfp, "xwin_exit(): deleted undo buffer\n");
+ if(errfp!=stderr) fclose(errfp);
+ errfp=stderr;
  printf("\n");
  init_done=0; // 20150409 to avoid multiple calls
 }
@@ -329,15 +329,38 @@ unsigned int  find_best_color(char colorname[])
 }
 
 
-void init_color_array()
+void init_color_array(int skip_background, double dim)
 {
  char s[256]; // overflow safe 20161122
  int i;
+ int r, g, b; // 20171123
+ double rr, gg, bb; // 20171123
  for(i=0;i<cadlayers;i++) {
    my_snprintf(s, S(s), "lindex $colors %d",i);
    Tcl_EvalEx(interp, s, -1, TCL_EVAL_GLOBAL);
    if(debug_var>=1) fprintf(errfp, "init_color_array(): color:%s\n",Tcl_GetStringResult(interp));
-   my_strdup(&color_array[i], Tcl_GetStringResult(interp));
+
+   sscanf(Tcl_GetStringResult(interp), "#%02x%02x%02x", &r, &g, &b);// 20171123
+   rr=r; gg=g; bb=b;
+  
+   if(1|| !(i==0 && skip_background) ) {
+     if(dim>=0.) {
+       rr +=(51.-rr/5.)*dim;
+       gg +=(51.-gg/5.)*dim;
+       bb +=(51.-bb/5.)*dim;
+     } else {
+       rr +=(rr/5.)*dim;
+       gg +=(gg/5.)*dim;
+       bb +=(bb/5.)*dim;
+     }
+     // fprintf(errfp, "init_color_array: colors: %.16g %.16g %.16g dim=%.16g c=%d\n", rr, gg, bb, dim, i);
+     r=rr;g=gg;b=bb;
+     if(r>0xff) r=0xff;
+     if(g>0xff) g=0xff;
+     if(b>0xff) b=0xff;
+   }
+   my_snprintf(s, S(s), "#%02x%02x%02x", r, g, b);
+   my_strdup(&color_array[i], s);
  }
 
 }
@@ -549,7 +572,7 @@ void alloc_data()
 }
 
 
-int build_colors() // 20171113
+int build_colors(int skip_background, double dim) // 20171113
 {
     int i;
     if(dark_colorscheme) {
@@ -568,21 +591,26 @@ int build_colors() // 20171113
       fprintf(errfp,"Tcl var colors not set correctly\n");
       return -1; // fail
     }
-    init_color_array();
+    init_color_array(skip_background, dim);
     for(i=0;i<cadlayers;i++)
     {
      color_index[i] = find_best_color(color_array[i]);
     }
     for(i=0;i<cadlayers;i++)
     {
-     XSetForeground(display, gc[i], color_index[i]);
-     XSetForeground(display, gcstipple[i], color_index[i]);
+      if(!(i==0 && skip_background) ) {
+        XSetForeground(display, gc[i], color_index[i]);
+        XSetForeground(display, gcstipple[i], color_index[i]);
+      }
     }
     for(i=0;i<cadlayers;i++) {
       XLookupColor(display, colormap, color_array[i], &xcolor_exact, &xcolor);
       xcolor_array[i] = xcolor;
     }
     Tcl_EvalEx(interp, "reconfigure_layers_menu", -1, TCL_EVAL_GLOBAL);
+    if(!skip_background) {
+      XSetWindowBackground(display, window, color_index[0]); // 20171124
+    }
     return 0; // success
 }
 
@@ -593,6 +621,29 @@ void tclexit(ClientData s)
   xwin_exit();
 }
 
+#if HAS_XCB==1
+// from xcb.freedesktop.org -- don't ask me what it does... 20171125
+static xcb_visualtype_t *find_visual(xcb_connection_t *xcbconn, xcb_visualid_t visual)
+{
+    xcb_screen_iterator_t screen_iter = xcb_setup_roots_iterator(xcb_get_setup(xcbconn));
+
+    printf("\n");
+    for (; screen_iter.rem; xcb_screen_next(&screen_iter)) {
+        xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(screen_iter.data);
+        for (; depth_iter.rem; xcb_depth_next(&depth_iter)) {
+            xcb_visualtype_iterator_t visual_iter = xcb_depth_visuals_iterator(depth_iter.data);
+            for (; visual_iter.rem; xcb_visualtype_next(&visual_iter)) {
+                if (visual == visual_iter.data->visual_id) {
+                    return visual_iter.data;
+                }
+            }
+        }
+    }
+
+    return NULL;
+}
+#endif //HAS_XCB
+
 int Tcl_AppInit(Tcl_Interp *inter)
 {
  static char *name=NULL; // overflow safe 20161122
@@ -600,7 +651,12 @@ int Tcl_AppInit(Tcl_Interp *inter)
  int i;
  int initfile_found; // 20170330
  struct stat buf;
- // XRenderPictFormat *format;
+
+ #if HAS_XCB==1
+ xcb_render_query_pict_formats_reply_t *formats_reply;
+ xcb_render_pictforminfo_t *formats;
+ xcb_render_query_pict_formats_cookie_t formats_cookie;
+ #endif
 
  if(!getenv("DISPLAY")) has_x=0;
  if(debug_var>=1 && !has_x) fprintf(errfp, "Tcl_AppInit(): no DISPLAY environment var, assuming no X available\n");
@@ -762,7 +818,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
  }
 
  init_pixdata();
- init_color_array();
+ init_color_array(0, 0.0);
  my_snprintf(tmp, S(tmp), "%d",debug_var);
  Tcl_SetVar(interp,"tcl_debug",tmp ,TCL_GLOBAL_ONLY);
  if(flat_netlist) Tcl_SetVar(interp,"flat_netlist","1",TCL_GLOBAL_ONLY);
@@ -797,6 +853,44 @@ int Tcl_AppInit(Tcl_Interp *inter)
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): drawing window ID=0x%lx\n",window);
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): top window ID=0x%lx\n",topwindow);
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done tkinit()\n");                  
+
+    #if HAS_XCB==1
+    // grab an existing xlib connection  20171125
+    xcbconn = XGetXCBConnection(display);
+    if(xcb_connection_has_error(xcbconn)) {
+      fprintf(stderr, "Could not connect to X11 server");
+      return 1;
+    }
+    screen_xcb = xcb_setup_roots_iterator(xcb_get_setup(xcbconn)).data;
+    visual_xcb = find_visual(xcbconn, screen_xcb->root_visual);
+    if(!visual_xcb) {
+      fprintf(stderr, "got NULL (xcb_visualtype_t)visual");
+      return 1;
+    }
+    ///--------------------------Xrender xcb  stuff-------
+    formats_cookie = xcb_render_query_pict_formats(xcbconn);
+    formats_reply = xcb_render_query_pict_formats_reply(xcbconn, formats_cookie, 0);
+
+    formats = xcb_render_query_pict_formats_formats(formats_reply);
+    for (i = 0; i < formats_reply->num_formats; i++) {
+            // fprintf(errfp, "i=%d depth=%d  type=%d red_shift=%d\n", i, 
+            //      formats[i].depth, formats[i].type, formats[i].direct.red_shift);
+            if (formats[i].direct.red_mask != 0xff &&
+                formats[i].direct.red_shift != 16)
+                    continue;
+            if (formats[i].type == XCB_RENDER_PICT_TYPE_DIRECT &&
+                formats[i].depth == 24 && formats[i].direct.red_shift == 16)
+                    format_rgb = formats[i];
+            if (formats[i].type == XCB_RENDER_PICT_TYPE_DIRECT &&
+                formats[i].depth == 32 &&
+                formats[i].direct.alpha_mask == 0xff &&
+                formats[i].direct.alpha_shift == 24)
+                    format_rgba = formats[i];
+    }
+    free(formats_reply);
+    ///----------------------------------------------------
+    // /20171125
+    #endif //HAS_XCB
    
     screen_number = DefaultScreen(display);
     colormap = DefaultColormap(display, screen_number);
@@ -817,13 +911,12 @@ int Tcl_AppInit(Tcl_Interp *inter)
     }
     gctiled = XCreateGC(display,window,0L, NULL);
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done step c of xinit()\n");
-    if(build_colors()) exit(-1);
+    if(build_colors(0, 0.0)) exit(-1);
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done step e of xinit()\n");
     //// save_pixmap must be created as resetwin() frees it before recreating with new size.
     save_pixmap = XCreatePixmap(display,window,CADWIDTH,CADHEIGHT,depth);
     XSetTile(display,gctiled,save_pixmap);
     XSetFillStyle(display,gctiled,FillTiled);
-
     #ifdef HAS_CAIRO // 20171105
     {
       XWindowAttributes wattr;
@@ -832,6 +925,30 @@ int Tcl_AppInit(Tcl_Interp *inter)
       sfc = cairo_xlib_surface_create(display, window, visual, wattr.width, wattr.height);
       save_sfc = cairo_xlib_surface_create(display, save_pixmap, visual, wattr.width, wattr.height);
 
+      #if HAS_XCB==1 && HAS_XRENDER==1
+      cairo_surface_destroy(sfc);
+      cairo_surface_destroy(save_sfc);
+      sfc = cairo_xcb_surface_create_with_xrender_format(xcbconn, screen_xcb, window, &format_rgb, 1 , 1);
+      save_sfc = cairo_xcb_surface_create_with_xrender_format(xcbconn, screen_xcb, save_pixmap, &format_rgb, 1 , 1);
+      #elif HAS_XRENDER==1
+      // format = cairo_xlib_surface_get_xrender_format (sfc);
+      format = XRenderFindStandardFormat(display, PictStandardRGB24);
+      cairo_surface_destroy(sfc);
+      sfc = cairo_xlib_surface_create_with_xrender_format (display, window, DefaultScreenOfDisplay(display), format, 1, 1); 
+      // format = cairo_xlib_surface_get_xrender_format (save_sfc);
+      cairo_surface_destroy(save_sfc);
+      save_sfc = cairo_xlib_surface_create_with_xrender_format (display, save_pixmap, DefaultScreenOfDisplay(display), format, 1, 1); 
+      #endif //HAS_XRENDER
+  
+
+      if(cairo_surface_status(sfc)!=CAIRO_STATUS_SUCCESS) {
+        fprintf(stderr, "ERROR: invalid cairo surface\n");
+        return 1;
+      }
+      if(cairo_surface_status(save_sfc)!=CAIRO_STATUS_SUCCESS) {
+        fprintf(stderr, "ERROR: invalid cairo surface\n");
+        return 1;
+      }
       ctx = cairo_create(sfc);
       save_ctx = cairo_create(save_sfc);
 
@@ -851,10 +968,6 @@ int Tcl_AppInit(Tcl_Interp *inter)
       cairo_set_line_join(save_ctx, CAIRO_LINE_JOIN_ROUND);
       cairo_set_line_cap(save_ctx, CAIRO_LINE_CAP_ROUND);
 
-      //// xrender
-      // format = cairo_xlib_surface_get_xrender_format (sfc);
-      // cairo_surface_destroy(sfc);
-      // sfc = cairo_xlib_surface_create_with_xrender_format (display, window, DefaultScreenOfDisplay(display), format, 1, 1); 
     }
     #endif
 

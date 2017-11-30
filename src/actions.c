@@ -26,7 +26,7 @@ void set_snap(double newsnap) // 20161212 set new snap factor and just notify ne
 {
     char str[256];
     cadsnap = newsnap;
-    my_snprintf(str, S(str), "alert_ {snap: %g, default: %g} {}", cadsnap, CADSNAP);
+    my_snprintf(str, S(str), "alert_ {snap: %.16g, default: %.16g} {}", cadsnap, CADSNAP);
     tkeval(str);
 }
 
@@ -45,7 +45,6 @@ int set_netlist_dir(int force) // 20081210
 void resetwin(void)
 {
   int i;
-  unsigned int w,h;
   XWindowAttributes wattr;
   if(has_x) {
     i = XGetWindowAttributes(display, window, &wattr); // should call only when resized
@@ -54,66 +53,77 @@ void resetwin(void)
       return;
     }
     //if(wattr.map_state==IsUnmapped) return;
-    w=wattr.width;
-    h=wattr.height;
-    if(debug_var>=1) fprintf(errfp, "resetwin(): x=%d y=%d   w=%d h=%d\n",wattr.x, wattr.y, w,h);
-    if(debug_var>=1) fprintf(errfp, "resetwin(): changing size\n\n");
-    xrect[0].x = 0;
-    xrect[0].y = 0; 
-    xrect[0].width = w;
-    xrect[0].height = h;
-    areax2 = w+2*lw;
-    areay2 = h+2*lw;
+
+    xschem_w=wattr.width;
+    xschem_h=wattr.height;
+    areax2 = xschem_w+2*lw;
+    areay2 = xschem_h+2*lw;
     areax1 = -2*lw;
     areay1 = -2*lw;
     areaw = areax2-areax1;
     areah = areay2-areay1;
 
-    XFreePixmap(display,save_pixmap);
-    save_pixmap = XCreatePixmap(display, window, wattr.width, wattr.height, depth); // 20171111
-    // save_pixmap = XCreatePixmap(display,window,areaw,areah ,depth);
-    XSetTile(display,gctiled, save_pixmap);
+    if( xschem_w !=xrect[0].width || xschem_h !=xrect[0].height) { //20171123 avoid unnecessary work if no resize
+      if(debug_var>=1) fprintf(errfp, "resetwin(): x=%d y=%d   xschem_w=%d xschem_h=%d\n",
+                       wattr.x, wattr.y, xschem_w,xschem_h);
+      if(debug_var>=1) fprintf(errfp, "resetwin(): changing size\n\n");
+      xrect[0].x = 0;
+      xrect[0].y = 0; 
+      xrect[0].width = xschem_w;
+      xrect[0].height = xschem_h;
+  
+      XFreePixmap(display,save_pixmap);
+      save_pixmap = XCreatePixmap(display, window, xschem_w, xschem_h, depth); // 20171111
+      XSetTile(display,gctiled, save_pixmap);
 
-    #ifdef HAS_CAIRO
-    cairo_destroy(save_ctx);
-    cairo_surface_destroy(save_sfc);
-    save_sfc = cairo_xlib_surface_create(display, save_pixmap, visual, wattr.width, wattr.height);
-    save_ctx = cairo_create(save_sfc);
-    cairo_set_line_width(save_ctx, 1);
-    cairo_set_line_join(save_ctx, CAIRO_LINE_JOIN_ROUND);
-    cairo_set_line_cap(save_ctx, CAIRO_LINE_CAP_ROUND);
-    cairo_select_font_face (save_ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size (save_ctx, 20);
-    #endif
+      #ifdef HAS_CAIRO
+      cairo_destroy(save_ctx);
+      cairo_surface_destroy(save_sfc);
 
-/*
-    for(i=0;i<cadlayers;i++)
-    {
-      XSetClipRectangles(display, gc[i], 0,0, xrect, 1, Unsorted);
-      XSetClipRectangles(display, gcstipple[i], 0,0, xrect, 1, Unsorted);
-    }
-    XSetClipRectangles(display, gctiled, 0,0, xrect, 1, Unsorted);
-*/
+      #if HAS_XRENDER==1
+      #if HAS_XCB==1
+      save_sfc = cairo_xcb_surface_create_with_xrender_format(xcbconn, screen_xcb, save_pixmap, 
+           &format_rgb, xschem_w, xschem_h);
+      #else
+      save_sfc = cairo_xlib_surface_create_with_xrender_format(display, save_pixmap, 
+           DefaultScreenOfDisplay(display), format, xschem_w, xschem_h);
+      #endif //HAS_XCB
+      #else
+      save_sfc = cairo_xlib_surface_create(display, save_pixmap, visual, xschem_w, xschem_h);
+      #endif //HAS_XRENDER
+
+      if(cairo_surface_status(save_sfc)!=CAIRO_STATUS_SUCCESS) {
+        fprintf(stderr, "ERROR: invalid cairo xcb surface\n");
+         exit(-1);
+      }
+      save_ctx = cairo_create(save_sfc);
+      cairo_set_line_width(save_ctx, 1);
+      cairo_set_line_join(save_ctx, CAIRO_LINE_JOIN_ROUND);
+      cairo_set_line_cap(save_ctx, CAIRO_LINE_CAP_ROUND);
+      cairo_select_font_face (save_ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+      cairo_set_font_size (save_ctx, 20);
+      //// 20171125 select xlib or xcb :-)
+      #if HAS_XCB==1
+      cairo_xcb_surface_set_size(sfc, xschem_w, xschem_h); // 20171123
+      #else
+      cairo_xlib_surface_set_size(sfc, xschem_w, xschem_h); // 20171123
+      #endif //HAS_XCB
+      #endif //HAS_CAIRO
+
+    } 
+
     if(pending_fullzoom) {
       zoom_full(0);
       pending_fullzoom=0;
     } 
     //debug ...
     if(debug_var>=1) fprintf(errfp, "resetwin(): Window reset\n");
-
-
-    #ifdef HAS_CAIRO // 20171105
-    cairo_xlib_surface_set_size(sfc, wattr.width, wattr.height);
-    #endif
-
   }
 }
 
 void toggle_only_probes()
 {
-
    static double save_lw;
-
    if(!only_probes) {
      save_lw = lw_double;
      lw_double=3.0;
@@ -129,7 +139,6 @@ void toggle_only_probes()
    }
    change_linewidth(lw_double, 1);
 }
-
 
 void toggle_fullscreen()
 {
@@ -181,7 +190,7 @@ void change_linewidth(double w, int dr)
   areah = areay2 - areay1;
 
   if(dr) {
-    resetwin();
+    // resetwin();
     draw();
   }
 }
@@ -258,7 +267,6 @@ int save(int confirm) //20171006 add confirm
 }
 void saveas(void) // changed name from ask_save_file to saveas 20121201
 {
-
     static char *name=NULL; // overflow safe 20161122
     static char *res=NULL;
     if(current_type==SYMBOL)
@@ -505,7 +513,7 @@ void attach_labels_to_inst() // offloaded from callback.c 20171005
       continue;
     // /20111030
 
-    if(debug_var>=1) fprintf(errfp, " 200711 1--> %s %g %g   %s\n", 
+    if(debug_var>=1) fprintf(errfp, " 200711 1--> %s %.16g %.16g   %s\n", 
         inst_ptr[selectedgroup[j].n].name, 
         inst_ptr[selectedgroup[j].n].x0, 
         inst_ptr[selectedgroup[j].n].y0, 
@@ -594,7 +602,7 @@ void attach_labels_to_inst() // offloaded from callback.c 20171005
 
 
        }
-       if(debug_var>=1) fprintf(errfp, "%d   %g %g %s\n", i, pinx0, piny0,labname);
+       if(debug_var>=1) fprintf(errfp, "%d   %.16g %.16g %s\n", i, pinx0, piny0,labname);
     }
   }
   // draw things if last place_symbol was skipped
@@ -906,7 +914,7 @@ void go_back(int confirm) // 20171006 add confirm
   mooz=1/zoom;
 
   set_linewidth();
-  resetwin();
+  // resetwin();
   draw();
 
   current_type=SCHEMATIC;
@@ -924,7 +932,7 @@ void set_linewidth()
     
    lw=j=lw_double;			// draws fast but not good...
    if(lw==0) lw=1;			// lw used to calculate bound boxes
-   if(debug_var>=1) fprintf(errfp, "set_linewidth(): lw=%d, lw_double=%g\n", lw, lw_double);
+   if(debug_var>=1) fprintf(errfp, "set_linewidth(): lw=%d, lw_double=%.16g\n", lw, lw_double);
    if(has_x) {
       for(i=0;i<cadlayers;i++) {
           XSetLineAttributes (display, gc[i], j, LineSolid, CapRound , JoinRound);
@@ -971,7 +979,7 @@ void calc_drawing_bbox(Box *boundbox)
     int k;
     count++;
     for(k=0; k<polygon[c][i].points; k++) {
-      //fprintf(errfp, "  poly: point %d: %g %g\n", k, pp[c][i].x[k], pp[c][i].y[k]);
+      //fprintf(errfp, "  poly: point %d: %.16g %.16g\n", k, pp[c][i].x[k], pp[c][i].y[k]);
       if(k==0 || polygon[c][i].x[k] < x1) x1 = polygon[c][i].x[k];
       if(k==0 || polygon[c][i].y[k] < y1) y1 = polygon[c][i].y[k];
       if(k==0 || polygon[c][i].x[k] > x2) x2 = polygon[c][i].x[k];
@@ -1032,6 +1040,7 @@ void zoom_full(int dr)
 {
   Box boundbox;
   double yy1;
+  int i;
 
   if(change_lw) lw = lw_double=1.;
   areax1 = -2*lw;
@@ -1050,10 +1059,17 @@ void zoom_full(int dr)
   xorigin=-boundbox.x1+(areaw-4*lw)/40*zoom;
   yorigin=(areah-4*lw)*zoom-boundbox.y2 - (areah-4*lw)/40*zoom;
   if(debug_var>=1) fprintf(errfp, "zoom_full(): areaw=%d, areah=%d\n", areaw, areah);
+
+  for(i=0;i<lastinst;i++) { // 20171127
+    if(inst_ptr[i].ptr <0) continue;
+    symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1,
+                      &inst_ptr[i].x2, &inst_ptr[i].y2);
+  }
    
   if(dr)
   { 
    if(change_lw) set_linewidth();
+
    draw(); // 20121111
   }
 }
@@ -1062,6 +1078,7 @@ void zoom_full(int dr)
 void view_unzoom(double z)
 {
     double factor;
+    // int i;
     factor = z!=0.0 ? z : CADZOOMSTEP;
     if(zoom<CADMINZOOM) return;
     zoom/= factor;
@@ -1069,13 +1086,20 @@ void view_unzoom(double z)
     xorigin=-mousex_snap+(mousex_snap+xorigin)/factor;
     yorigin=-mousey_snap+(mousey_snap+yorigin)/factor;
     set_linewidth();
-    resetwin();
+    //// performance hit 20171130
+    // for(i=0;i<lastinst;i++) { // 20171127
+    //   if(inst_ptr[i].ptr <0) continue;
+    //   symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1,
+    //                     &inst_ptr[i].x2, &inst_ptr[i].y2);
+    // }
+    //resetwin();
     draw();
 }
 
 void view_zoom(double z)
 {
   double factor;
+  // int i;
   factor = z!=0.0 ? z : CADZOOMSTEP;
   if(zoom>CADMAXZOOM) return;
   zoom*= factor;
@@ -1083,7 +1107,13 @@ void view_zoom(double z)
   xorigin=xorigin+areaw*zoom*(1-1/factor)/2;
   yorigin=yorigin+areah*zoom*(1-1/factor)/2;
   set_linewidth();
-  resetwin();
+  //// performance hit 20171130
+  // for(i=0;i<lastinst;i++) { // 20171127
+  //   if(inst_ptr[i].ptr <0) continue;
+  //   symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1,
+  //                     &inst_ptr[i].x2, &inst_ptr[i].y2);
+  // }
+  // resetwin();
   draw();
 }
 
@@ -1091,6 +1121,7 @@ void zoom_box(int what)
 {
   static double x1,y1,x2,y2;
   static double xx1,yy1,xx2,yy2;
+  int i;
 
   if( (what & BEGIN) )
   {
@@ -1108,9 +1139,14 @@ void zoom_box(int what)
     if(yy1>zoom) zoom=yy1;
     mooz=1/zoom;
     set_linewidth();
-    resetwin();
+    for(i=0;i<lastinst;i++) { // 20171127
+      if(inst_ptr[i].ptr <0) continue;
+      symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1,
+                        &inst_ptr[i].x2, &inst_ptr[i].y2);
+    }
+    // resetwin();
     draw();
-    if(debug_var>=1) fprintf(errfp, "zoom_box(): coord: %g %g %g %g zoom=%g\n",x1,y1,mousex_snap, mousey_snap,zoom);
+    if(debug_var>=1) fprintf(errfp, "zoom_box(): coord: %.16g %.16g %.16g %.16g zoom=%.16g\n",x1,y1,mousex_snap, mousey_snap,zoom);
   }
   if(what & RUBBER)
   {
@@ -1323,7 +1359,7 @@ void new_polygon(int what) // 20171115
      points++;
      x[points]=x[points-1];
      y[points] = y[points-1];
-     //fprintf(errfp, "added point: %g %g\n", x[points-1], y[points-1]);
+     //fprintf(errfp, "added point: %.16g %.16g\n", x[points-1], y[points-1]);
      ui_state |= STARTPOLYGON;
    }
    if( what & ADD)
@@ -1337,7 +1373,7 @@ void new_polygon(int what) // 20171115
        y[points] = mousey_snap;
      }
      points++;
-     //fprintf(errfp, "added point: %g %g\n", x[points-1], y[points-1]);
+     //fprintf(errfp, "added point: %.16g %.16g\n", x[points-1], y[points-1]);
      x[points]=x[points-1];y[points]=y[points-1]; // prepare next point for rubber
      //fprintf(errfp, "new_poly: ADD, points=%d\n", points);
      if( x[points-1] == x[0] && y[points-1] == y[0]) { // closed polygon --> END
@@ -1584,16 +1620,21 @@ void pan(int what)
 // 20150927 select=1: select objects, select=0: unselect objects
 void select_rect(int what, int select)
 {
- static double xrect,yrect,xrect2,yrect2;
+ static double xr,yr,xr2,yr2;
  static double xx1,xx2,yy1,yy2;
  static int sel;
+ static int semaphore=0; // 20171130
 
  if(what & RUBBER)
  {
-    xx1=xrect;xx2=xrect2;yy1=yrect;yy2=yrect2;
+    if(semaphore==0) {
+      fprintf(errfp, "ERROR: select_rect() RUBBER called before BEGIN\n");
+      exit(-1);
+    }
+    xx1=xr;xx2=xr2;yy1=yr;yy2=yr2;
     RECTORDER(xx1,yy1,xx2,yy2);
     drawtemprect(gctiled,NOW, xx1,yy1,xx2,yy2);
-    xrect2=mousex_snap;yrect2=mousey_snap;
+    xr2=mousex_snap;yr2=mousey_snap;
 
     // 20171026 update unselected objects while dragging
     rebuild_selected_array();
@@ -1603,25 +1644,30 @@ void select_rect(int what, int select)
     draw_selection(gc[SELLAYER], 0);
     if(!sel) select_inside(xx1, yy1, xx2, yy2, sel);
     bbox(END,0.0, 0.0, 0.0, 0.0);
-
-    xx1=xrect;xx2=xrect2;yy1=yrect;yy2=yrect2;
+    xx1=xr;xx2=xr2;yy1=yr;yy2=yr2;
     RECTORDER(xx1,yy1,xx2,yy2);
     drawtemprect(gc[SELLAYER],NOW, xx1,yy1,xx2,yy2);
  }
- if(what & BEGIN)
+ else if(what & BEGIN)
  {
+    if(semaphore==1) {
+      fprintf(errfp, "ERROR: reentrant call of select_rect()\n");
+      exit(-1);
+    }
     sel = select; // 20150927
     ui_state |= STARTSELECT;
-    xrect=xrect2=mousex_snap;
-    yrect=yrect2=mousey_snap;
+    xr=xr2=mousex_snap;
+    yr=yr2=mousey_snap;
+    semaphore=1;
  }
- if(what & END)
+ else if(what & END)
  {
-    RECTORDER(xrect,yrect,xrect2,yrect2);
-    drawtemprect(gctiled, NOW, xrect,yrect,xrect2,yrect2);
+    RECTORDER(xr,yr,xr2,yr2);
+    drawtemprect(gctiled, NOW, xr,yr,xr2,yr2);
     draw_selection(gc[SELLAYER], 0);
-    select_inside(xrect,yrect,xrect2,yrect2, sel);
+    select_inside(xr,yr,xr2,yr2, sel);
     ui_state &= ~STARTSELECT;
+    semaphore=0;
  }
 }
 

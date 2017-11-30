@@ -91,7 +91,7 @@ void save_text(FILE *fd)
  {
   fprintf(fd, "T ");
   save_ascii_string(ptr[i].txt_ptr,fd);
-  fprintf(fd, "%g %g %d %d %g %g ",
+  fprintf(fd, "%.16g %.16g %d %d %.16g %.16g ",
    ptr[i].x0, ptr[i].y0, ptr[i].rot, ptr[i].flip, ptr[i].xscale,
     ptr[i].yscale);
   save_ascii_string(ptr[i].prop_ptr,fd);
@@ -124,7 +124,7 @@ void save_wire(FILE *fd)
  ptr=wire;
  for(i=0;i<lastwire;i++)
  {
-  fprintf(fd, "N %g %g %g %g ",ptr[i].x1, ptr[i].y1, ptr[i].x2,
+  fprintf(fd, "N %.16g %.16g %.16g %.16g ",ptr[i].x1, ptr[i].y1, ptr[i].x2,
      ptr[i].y2);
   save_ascii_string(ptr[i].prop_ptr,fd);
   fputc('\n' ,fd);
@@ -155,7 +155,7 @@ void save_inst(FILE *fd)
   fprintf(fd, "C ");
   
   save_ascii_string(ptr[i].name,fd);
-  fprintf(fd, "%g %g %d %d ",ptr[i].x0, ptr[i].y0, ptr[i].rot, ptr[i].flip ); 
+  fprintf(fd, "%.16g %.16g %d %d ",ptr[i].x0, ptr[i].y0, ptr[i].rot, ptr[i].flip ); 
   save_ascii_string(ptr[i].prop_ptr,fd);
   fputc('\n' ,fd);
  }
@@ -201,7 +201,7 @@ void save_box(FILE *fd)
      ptr=rect[c];
      for(i=0;i<lastrect[c];i++)
      {
-      fprintf(fd, "B %d %g %g %g %g ", c,ptr[i].x1, ptr[i].y1,ptr[i].x2,
+      fprintf(fd, "B %d %.16g %.16g %.16g %.16g ", c,ptr[i].x1, ptr[i].y1,ptr[i].x2,
        ptr[i].y2);
       save_ascii_string(ptr[i].prop_ptr,fd);
       fputc('\n' ,fd);
@@ -220,7 +220,7 @@ void save_polygon(FILE *fd)
      {
       fprintf(fd, "P %d %d ", c,ptr[i].points);
       for(j=0;j<ptr[i].points;j++) {
-        fprintf(fd, "%g %g ", ptr[i].x[j], ptr[i].y[j]);
+        fprintf(fd, "%.16g %.16g ", ptr[i].x[j], ptr[i].y[j]);
       }
       save_ascii_string(ptr[i].prop_ptr,fd);
       fputc('\n' ,fd);
@@ -288,7 +288,7 @@ void save_line(FILE *fd)
      ptr=line[c];
      for(i=0;i<lastline[c];i++)
      {
-      fprintf(fd, "L %d %g %g %g %g ", c,ptr[i].x1, ptr[i].y1,ptr[i].x2,
+      fprintf(fd, "L %d %.16g %.16g %.16g %.16g ", c,ptr[i].x1, ptr[i].y1,ptr[i].x2,
        ptr[i].y2 );
       save_ascii_string(ptr[i].prop_ptr,fd);
       fputc('\n' ,fd);
@@ -498,9 +498,9 @@ void link_symbols_to_instances(void) // 20150326 separated from load_schematic()
      //type=get_sym_type(symfilename); // 20150403 not used anymore for vhdl_block_netlist()
                                        // ************* huge execution time hog !!!! ********
 
-     if(debug_var>=2) fprintf(errfp, "link_symbols_to_instances(): inst=%d\n", i);
-     if(debug_var>=2) fprintf(errfp, "link_symbols_to_instances(): matching inst %d name=%s \n",i, inst_ptr[i].name);
-     if(debug_var>=2) fprintf(errfp, "link_symbols_to_instances(): -------\n");
+     if(debug_var>=1) fprintf(errfp, "link_symbols_to_instances(): inst=%d\n", i);
+     if(debug_var>=1) fprintf(errfp, "link_symbols_to_instances(): matching inst %d name=%s \n",i, inst_ptr[i].name);
+     if(debug_var>=1) fprintf(errfp, "link_symbols_to_instances(): -------\n");
      
      symbol = match_symbol(symfilename);
      if(symbol == -1) 
@@ -994,7 +994,7 @@ int load_symbol_definition(char *name)
       int k;
       count++;
       for(k=0; k<pp[c][i].points; k++) {
-        //fprintf(errfp, "  poly: point %d: %g %g\n", k, pp[c][i].x[k], pp[c][i].y[k]);
+        //fprintf(errfp, "  poly: point %d: %.16g %.16g\n", k, pp[c][i].x[k], pp[c][i].y[k]);
         if(k==0 || pp[c][i].x[k] < x1) x1 = pp[c][i].x[k];
         if(k==0 || pp[c][i].y[k] < y1) y1 = pp[c][i].y[k];
         if(k==0 || pp[c][i].x[k] > x2) x2 = pp[c][i].x[k];
@@ -1086,7 +1086,7 @@ void create_sch_from_sym(void)
       x=-120.0;
       my_realloc(&str, 100+strlen(sub_prop));
       sprintf(str, "name=g%d lab=%s", p++, sub_prop);
-      fprintf(fd, "C {devices/generic_pin} %g %g %g %g ", x, 20.0*(ypos++), 0.0, 0.0 );
+      fprintf(fd, "C {devices/generic_pin} %.16g %.16g %.16g %.16g ", x, 20.0*(ypos++), 0.0, 0.0 );
       save_ascii_string(str, fd);
       fputc('\n' ,fd);
     } // for(i)
@@ -1111,7 +1111,7 @@ void create_sch_from_sym(void)
         if(!strcmp(dir, pindir[j])) { 
           my_realloc(&str, 100+strlen(sub2_prop));
           sprintf(str, "name=g%d lab=%s", p++, sub2_prop);
-          fprintf(fd, "C {%s} %g %g %g %g ", pinname[j], x, 20.0*(ypos++), 0.0, 0.0);
+          fprintf(fd, "C {%s} %.16g %.16g %.16g %.16g ", pinname[j], x, 20.0*(ypos++), 0.0, 0.0);
           save_ascii_string(str, fd);
           fputc('\n' ,fd);
         } // if()
@@ -1389,7 +1389,7 @@ void save_selection(int what)
     tkeval("alert_ {file opening for write failed!} {}"); // 20171020
     return;
  }
- fprintf(fd, "G { %g %g }\n", mousex_snap, mousey_snap);
+ fprintf(fd, "G { %.16g %.16g }\n", mousex_snap, mousey_snap);
  for(i=0;i<lastselected;i++)
  {
    c = selectedgroup[i].col;n = selectedgroup[i].n;
@@ -1398,7 +1398,7 @@ void save_selection(int what)
      case TEXT:
       fprintf(fd, "T ");
       save_ascii_string(textelement[n].txt_ptr,fd);
-      fprintf(fd, "%g %g %d %d %g %g ",
+      fprintf(fd, "%.16g %.16g %d %d %.16g %.16g ",
        textelement[n].x0, textelement[n].y0, textelement[n].rot, textelement[n].flip, 
        textelement[n].xscale, textelement[n].yscale);
       save_ascii_string(textelement[n].prop_ptr,fd);
@@ -1406,7 +1406,7 @@ void save_selection(int what)
      break;
     
      case RECT:
-      fprintf(fd, "B %d %g %g %g %g ", c,rect[c][n].x1, rect[c][n].y1,rect[c][n].x2,
+      fprintf(fd, "B %d %.16g %.16g %.16g %.16g ", c,rect[c][n].x1, rect[c][n].y1,rect[c][n].x2,
        rect[c][n].y2);
       save_ascii_string(rect[c][n].prop_ptr,fd);
       fputc('\n' ,fd);
@@ -1415,20 +1415,20 @@ void save_selection(int what)
      case POLYGON: // 20171117
       fprintf(fd, "P %d %d ", c, polygon[c][n].points);
       for(k=0; k<polygon[c][n].points; k++) {
-        fprintf(fd, "%g %g ", polygon[c][n].x[k], polygon[c][n].y[k]);
+        fprintf(fd, "%.16g %.16g ", polygon[c][n].x[k], polygon[c][n].y[k]);
       }
       save_ascii_string(polygon[c][n].prop_ptr,fd);
       fputc('\n' ,fd);
      break;
      
      case WIRE:
-      fprintf(fd, "N %g %g %g %g ",wire[n].x1, wire[n].y1, wire[n].x2, wire[n].y2);
+      fprintf(fd, "N %.16g %.16g %.16g %.16g ",wire[n].x1, wire[n].y1, wire[n].x2, wire[n].y2);
       save_ascii_string(wire[n].prop_ptr,fd);
       fputc('\n' ,fd);
      break;
 
      case LINE:
-      fprintf(fd, "L %d %g %g %g %g ", c,line[c][n].x1, line[c][n].y1,line[c][n].x2,
+      fprintf(fd, "L %d %.16g %.16g %.16g %.16g ", c,line[c][n].x1, line[c][n].y1,line[c][n].x2,
        line[c][n].y2 );
       save_ascii_string(line[c][n].prop_ptr,fd);
       fputc('\n' ,fd);
@@ -1437,7 +1437,7 @@ void save_selection(int what)
      case ELEMENT:
       fprintf(fd, "C ");
       save_ascii_string(inst_ptr[n].name,fd);
-      fprintf(fd, "%g %g %d %d ",inst_ptr[n].x0, inst_ptr[n].y0, inst_ptr[n].rot, inst_ptr[n].flip ); 
+      fprintf(fd, "%.16g %.16g %d %d ",inst_ptr[n].x0, inst_ptr[n].y0, inst_ptr[n].rot, inst_ptr[n].flip ); 
       save_ascii_string(inst_ptr[n].prop_ptr,fd);
       fputc('\n' ,fd);
      break;

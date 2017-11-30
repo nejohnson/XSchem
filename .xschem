@@ -25,6 +25,22 @@ set change_lw 1
 set color_ps 1
 set initial_geometry {800x600}
 
+#### Custom colors  may be defined here
+#  set cadlayers 22
+#  set light_colors {
+#   "#ffffff" "#0044ee" "#aaaaaa" "#222222" "#229900"
+#   "#bb2200" "#00ccee" "#ff0000" "#888800" "#00aaaa"
+#   "#880088" "#00ff00" "#0000cc" "#666600" "#557755"
+#   "#aa2222" "#7ccc40" "#00ffcc" "#ce0097" "#d2d46b"
+#   "#ef6158" "#fdb200" }
+#
+#  set dark_colors {
+#   "#000000" "#00ccee" "#3f3f3f" "#cccccc" "#88dd00"
+#   "#bb2200" "#00ccee" "#ff0000" "#ffff00" "#ffffff"
+#   "#ff00ff" "#00ff00" "#0000cc" "#aaaa00" "#aaccaa"
+#   "#ff7777" "#bfff81" "#00ffcc" "#ce0097" "#d2d46b"
+#   "#ef6158" "#fdb200" }
+
 #### CAIRO STUFF
 #### scale all fonts by this number
 # set cairo_font_scale 1.0
@@ -35,7 +51,7 @@ set cairo_font_name {Arial}
 #### lift up text by some zoom-corrected pixels for
 #### better compatibility wrt no cairo version.
 #### Useful values in the range [-1, 3]
-set cairo_vert_correct 3
+set cairo_vert_correct 1
 
 #### KEYBINDINGS
 #### general format for specifying a replacement for a keybind

@@ -512,7 +512,8 @@ void draw_hilight_net(void)
     //str = wire[i].node;
     if(str && str[0]) {
       if( (entry = bus_hilight_lookup(str, 0,2)) ) {
-        if(get_tok_value(wire[i].prop_ptr,"bus",0)[0])   // 26122004
+        // if(get_tok_value(wire[i].prop_ptr,"bus",0)[0])   // 26122004
+        if(wire[i].bus) // 20171201
           drawline(7+entry->value%(cadlayers-7), THICK, 
              wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
         else
@@ -612,7 +613,8 @@ void undraw_hilight_net(void) // 20160413
    //str = wire[i].node;
    if(str && str[0]) {
      if( (!bus_hilight_lookup(str, 0,2)) ) {
-       if(get_tok_value(wire[i].prop_ptr,"bus",0)[0])   // 26122004
+       // if(get_tok_value(wire[i].prop_ptr,"bus",0)[0])   // 26122004
+       if(wire[i].bus)  // 20171201
          drawline(WIRELAYER, THICK, 
             wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
        else

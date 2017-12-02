@@ -142,6 +142,7 @@ void delete(void)
   if(inst_ptr[i].sel == SELECTED)
   {
    modified=1;
+   symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1, &inst_ptr[i].x2, &inst_ptr[i].y2); //20171201
    bbox(ADD, inst_ptr[i].x1, inst_ptr[i].y1, inst_ptr[i].x2, inst_ptr[i].y2);
    if(inst_ptr[i].prop_ptr != NULL) 
    {
@@ -172,7 +173,8 @@ void delete(void)
    if(wire[i].sel == SELECTED)
    {
     j++; 
-    if(get_tok_value(wire[i].prop_ptr,"bus",0)[0])   // 26122004
+    // if(get_tok_value(wire[i].prop_ptr,"bus",0)[0])   // 26122004
+    if(wire[i].bus) // 20171201
       bbox(ADD, wire[i].x1-BUS_WIDTH, wire[i].y1-BUS_WIDTH , wire[i].x2+BUS_WIDTH , wire[i].y2+BUS_WIDTH );
     else
       bbox(ADD, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
@@ -491,7 +493,8 @@ void unselect_all(void)
       {
        wire[i].sel = 0;
        if(x_initialized) {
-         if(get_tok_value(wire[i].prop_ptr,"bus",0)[0])        // 26122004
+         // if(get_tok_value(wire[i].prop_ptr,"bus",0)[0])        // 26122004
+         if(wire[i].bus) // 20171201
            drawtempline(gctiled, THICK, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
          else
            drawtempline(gctiled, ADD, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
@@ -585,13 +588,15 @@ void select_wire(int i,unsigned short select_mode)
   else 
    wire[i].sel = select_mode;
   if(select_mode) {
-   if(get_tok_value(wire[i].prop_ptr,"bus",0)[0])  // 26122004
+   // if(get_tok_value(wire[i].prop_ptr,"bus",0)[0])  // 26122004
+   if(wire[i].bus) // 20171201
      drawtempline(gc[SELLAYER], THICK, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
    else
      drawtempline(gc[SELLAYER], ADD, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
   }
   else {
-   if(get_tok_value(wire[i].prop_ptr,"bus",0)[0])
+   // if(get_tok_value(wire[i].prop_ptr,"bus",0)[0])
+   if(wire[i].bus) // 20171201
      drawtempline(gctiled, THICK, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
    else
      drawtempline(gctiled, NOW, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);

@@ -36,6 +36,13 @@ If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
 
+2.3.7:
+- do not recalculate symbol bounding box on any zoom / pan / draw operation, 
+  do it when moving / changing props / deleting / loading / drawing selection.
+- added a 'bus' int field in the wire struct, where the 'bus' property is cached
+  this avoid many get_tok_value() calls on every draw() call.
+- fixed a regression introduced by [20171104] in subst_token() [20171201]
+
 2.3.6:
 - some cleanups in the code, 
 - performance optimization, do not call symbol_bbox() in view_zoom and view_unzoom, 

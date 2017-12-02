@@ -755,6 +755,8 @@ void edit_property(int x)
    {
     modified=1; push_undo(); // 20150327
     my_strdup(&wire[selectedgroup[0].n].prop_ptr,(char *) Tcl_GetVar(interp, "entry1", TCL_GLOBAL_ONLY));
+    if(get_tok_value(wire[selectedgroup[0].n].prop_ptr,"bus",0)[0]) wire[selectedgroup[0].n].bus=1; // 20171201
+    else wire[selectedgroup[0].n].bus=0;
    }
    break;
   case POLYGON: // 20171115

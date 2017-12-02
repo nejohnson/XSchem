@@ -1026,6 +1026,7 @@ void calc_drawing_bbox(Box *boundbox)
  }
  for(i=0;i<lastinst;i++)
  {
+  symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1, &inst_ptr[i].x2, &inst_ptr[i].y2); //20171201
   tmp.x1=inst_ptr[i].x1;
   tmp.y1=inst_ptr[i].y1;
   tmp.x2=inst_ptr[i].x2;
@@ -1040,7 +1041,6 @@ void zoom_full(int dr)
 {
   Box boundbox;
   double yy1;
-  int i;
 
   if(change_lw) lw = lw_double=1.;
   areax1 = -2*lw;
@@ -1060,12 +1060,6 @@ void zoom_full(int dr)
   yorigin=(areah-4*lw)*zoom-boundbox.y2 - (areah-4*lw)/40*zoom;
   if(debug_var>=1) fprintf(errfp, "zoom_full(): areaw=%d, areah=%d\n", areaw, areah);
 
-  for(i=0;i<lastinst;i++) { // 20171127
-    if(inst_ptr[i].ptr <0) continue;
-    symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1,
-                      &inst_ptr[i].x2, &inst_ptr[i].y2);
-  }
-   
   if(dr)
   { 
    if(change_lw) set_linewidth();
@@ -1086,13 +1080,6 @@ void view_unzoom(double z)
     xorigin=-mousex_snap+(mousex_snap+xorigin)/factor;
     yorigin=-mousey_snap+(mousey_snap+yorigin)/factor;
     set_linewidth();
-    //// performance hit 20171130
-    // for(i=0;i<lastinst;i++) { // 20171127
-    //   if(inst_ptr[i].ptr <0) continue;
-    //   symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1,
-    //                     &inst_ptr[i].x2, &inst_ptr[i].y2);
-    // }
-    //resetwin();
     draw();
 }
 
@@ -1121,7 +1108,6 @@ void zoom_box(int what)
 {
   static double x1,y1,x2,y2;
   static double xx1,yy1,xx2,yy2;
-  int i;
 
   if( (what & BEGIN) )
   {
@@ -1139,11 +1125,6 @@ void zoom_box(int what)
     if(yy1>zoom) zoom=yy1;
     mooz=1/zoom;
     set_linewidth();
-    for(i=0;i<lastinst;i++) { // 20171127
-      if(inst_ptr[i].ptr <0) continue;
-      symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1,
-                        &inst_ptr[i].x2, &inst_ptr[i].y2);
-    }
     // resetwin();
     draw();
     if(debug_var>=1) fprintf(errfp, "zoom_box(): coord: %.16g %.16g %.16g %.16g zoom=%.16g\n",x1,y1,mousex_snap, mousey_snap,zoom);

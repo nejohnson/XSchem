@@ -733,7 +733,7 @@ char *subst_token(char *s,char *tok, char *new_val)
      size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
      my_realloc(&result,size);
    }
-   sprintf(result+result_pos, " %s=%s", tok, new_val ); // 20171104
+   sprintf(result+result_pos-1, " %s=%s", tok, new_val ); // 20171104, 20171201 -> result_pos-1
    //// 20171104 terrible bug: can not sprintf result into result !!!
    // sprintf( result, "%s %s=%s", result, tok, new_val ); // overflow safe 20161122
   }

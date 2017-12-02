@@ -980,16 +980,15 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
   printf("max_wires=%d\n", max_wires);
   printf("max_instances=%d\n", max_instances);
   printf("max_selected=%d\n", max_selected);
+  printf("zoom=%.16g\n", zoom);
+  printf("xorigin=%.16g\n", xorigin);
+  printf("yorigin=%.16g\n", yorigin);
   for(i=0;i<cadlayers;i++)
   {
     printf("lastrect[%d]=%d\n", i, lastrect[i]);
     printf("lastline[%d]=%d\n", i, lastline[i]);
     printf("max_rects[%d]=%d\n", i, max_rects[i]);
     printf("max_lines[%d]=%d\n", i, max_lines[i]);
-    printf("zoom=%.16g\n", zoom);
-    printf("xorigin=%.16g\n", xorigin);
-    printf("yorigin=%.16g\n", yorigin);
-    
   }
   printf("currentsch=%d\n", currentsch);
   for(i=0;i<currentsch;i++)

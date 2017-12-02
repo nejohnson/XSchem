@@ -158,6 +158,10 @@ void collapse_wires(void)
            wire[lastwire].sel=0;
            wire[lastwire].prop_ptr=NULL;
            my_strdup(&wire[lastwire].prop_ptr, wire[i].prop_ptr);
+           if(get_tok_value(wire[lastwire].prop_ptr,"bus",0)[0]) // 20171201
+             wire[lastwire].bus=1;
+           else
+             wire[lastwire].bus=0;
            wire[lastwire].node=NULL;
            my_strdup(&wire[lastwire].node, wire[i].node);
            lastwire++;
@@ -182,6 +186,10 @@ void collapse_wires(void)
            wire[lastwire].sel=0;
            wire[lastwire].prop_ptr=NULL;
            my_strdup(&wire[lastwire].prop_ptr, wire[j].prop_ptr);
+           if(get_tok_value(wire[lastwire].prop_ptr,"bus",0)[0]) // 20171201
+             wire[lastwire].bus=1;
+           else
+             wire[lastwire].bus=0;
            wire[lastwire].node=NULL;
            my_strdup(&wire[lastwire].node, wire[j].node);
            lastwire++;

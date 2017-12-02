@@ -237,6 +237,9 @@ void storeobject(int pos, double x1,double y1,double x2,double y2,
      wire[n].end1=0;
      wire[n].end2=0;
      my_strdup(&wire[n].prop_ptr, prop_ptr);
+     if(get_tok_value(wire[n].prop_ptr,"bus",0)[0]) wire[n].bus=1; // 20171201
+     else wire[n].bus=0;
+
      wire[n].sel=sel;
      lastwire++;
      modified=1;

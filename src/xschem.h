@@ -207,6 +207,7 @@ typedef struct
    unsigned short sel;
    char  *node;
    char *prop_ptr;
+   int bus; // 20171201 cache here wire "bus" property, to avoid too many get_tok_value() calls
 } Wire;
 
 typedef struct
@@ -252,6 +253,8 @@ typedef struct
   double xscale;
   double yscale;
   char *prop_ptr;
+  // int layer; // 20171201 for cairo 
+  // char *font; // 20171201 for cairo
 } Text;
 
 typedef struct

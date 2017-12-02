@@ -24,7 +24,7 @@
 static double rx1, rx2, ry1, ry2;
 static int rot = 0;
 static int  flip = 0;
-static double x1,y_1,x2,y_2,deltax = 0.0, deltay = 0.0;
+static double x1=0.0, y_1=0.0, x2=0.0, y_2=0.0, deltax = 0.0, deltay = 0.0;
 static int i,c,n,k;
 static int lastsel;
 
@@ -279,21 +279,24 @@ void draw_selection(GC g, int interruptable)
      ORDER(rx1,ry1,rx2,ry2);
      if(wire[n].sel==SELECTED)
      {
-      if(get_tok_value(wire[n].prop_ptr,"bus",0)[0])        // 26122004
+      //if(get_tok_value(wire[n].prop_ptr,"bus",0)[0])        // 26122004
+      if(wire[n].bus) // 20171201
         drawtempline(g, THICK, rx1+deltax, ry1+deltay, rx2+deltax, ry2+deltay);
       else
         drawtempline(g, ADD, rx1+deltax, ry1+deltay, rx2+deltax, ry2+deltay);
      }
      else if(wire[n].sel==SELECTED1)
      {
-      if(get_tok_value(wire[n].prop_ptr,"bus",0)[0])        //26122004
+      //if(get_tok_value(wire[n].prop_ptr,"bus",0)[0])        //26122004
+      if(wire[n].bus) // 20171201
         drawtempline(g, THICK, rx1+deltax, ry1+deltay, rx2, ry2);
       else
         drawtempline(g, ADD, rx1+deltax, ry1+deltay, rx2, ry2);
      }
      else if(wire[n].sel==SELECTED2)
      {
-      if(get_tok_value(wire[n].prop_ptr,"bus",0)[0])        // 26122004
+      //if(get_tok_value(wire[n].prop_ptr,"bus",0)[0])        // 26122004
+      if(wire[n].bus) // 20171201
         drawtempline(g, THICK, rx1, ry1, rx2+deltax, ry2+deltay);
       else
         drawtempline(g, ADD, rx1, ry1, rx2+deltax, ry2+deltay);
@@ -428,7 +431,8 @@ void copy_objects(int what)
        if(wire[n].sel == SELECTED1) wire[n].sel = SELECTED2;
        else if(wire[n].sel == SELECTED2) wire[n].sel = SELECTED1;
       }
-      if(get_tok_value(wire[n].prop_ptr,"bus",0)[0])        // 26122004
+      // if(get_tok_value(wire[n].prop_ptr,"bus",0)[0])        // 26122004
+      if(wire[n].bus) // 20171201
         drawline(k, THICK, rx1,ry1,rx2,ry2);
       else
         drawline(k, ADD, rx1,ry1,rx2,ry2);
@@ -598,7 +602,7 @@ void copy_objects(int what)
   } // end for(k ...
   ui_state &= ~STARTCOPY;
   check_collapsing_objects();
-  rot=flip=deltax=deltay=0;
+  x1=y_1=x2=y_2=rot=flip=deltax=deltay=0;
   need_rebuild_selected_array=1;
  }
  draw_selection(gc[SELLAYER], 0);
@@ -675,7 +679,8 @@ void move_objects(int what, int merge, double dx, double dy)
     {
      case WIRE:
       if(k!=WIRELAYER) break;
-      if(get_tok_value(wire[n].prop_ptr,"bus",0)[0])   // 26122004
+      // if(get_tok_value(wire[n].prop_ptr,"bus",0)[0])   // 26122004
+      if(wire[n].bus) // 20171201
         bbox(ADD, wire[n].x1-BUS_WIDTH, wire[n].y1-BUS_WIDTH , wire[n].x2+BUS_WIDTH , wire[n].y2+BUS_WIDTH );
       else
         bbox(ADD, wire[n].x1, wire[n].y1, wire[n].x2, wire[n].y2);
@@ -703,7 +708,8 @@ void move_objects(int what, int merge, double dx, double dy)
       wire[n].y1=ry1;
       wire[n].x2=rx2;
       wire[n].y2=ry2;
-      if(get_tok_value(wire[n].prop_ptr,"bus",0)[0])        // 26122004
+      // if(get_tok_value(wire[n].prop_ptr,"bus",0)[0])        // 26122004
+      if(wire[n].bus) // 20171201
         drawline(k, THICK, wire[n].x1, wire[n].y1, wire[n].x2, wire[n].y2);
       else
         drawline(k, ADD, wire[n].x1, wire[n].y1, wire[n].x2, wire[n].y2);
@@ -887,6 +893,7 @@ void move_objects(int what, int merge, double dx, double dy)
  
      case ELEMENT:
       if(k==0) {
+       symbol_bbox(n, &inst_ptr[n].x1, &inst_ptr[n].y1, &inst_ptr[n].x2, &inst_ptr[n].y2 ); // 20171201
        bbox(ADD, inst_ptr[n].x1, inst_ptr[n].y1, inst_ptr[n].x2, inst_ptr[n].y2 );
        ROTATION(x1, y_1, inst_ptr[n].x0, inst_ptr[n].y0, rx1,ry1);
        inst_ptr[n].x0 = rx1+deltax;
@@ -909,7 +916,7 @@ void move_objects(int what, int merge, double dx, double dy)
   ui_state &= ~STARTMOVE;
   ui_state &= ~STARTMERGE;
   check_collapsing_objects();
-  rot=flip=deltax=deltay=0;
+  x1=y_1=x2=y_2=rot=flip=deltax=deltay=0;
   bbox(SET , 0.0 , 0.0 , 0.0 , 0.0); 
   draw();
   bbox(END , 0.0 , 0.0 , 0.0 , 0.0);

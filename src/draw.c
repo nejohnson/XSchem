@@ -1081,7 +1081,8 @@ void draw(void)
           filledrect(WIRELAYER, BEGIN, 0.0, 0.0, 0.0, 0.0);
           for(i=0;i<lastwire;i++)
           {
-            if(get_tok_value(wire[i].prop_ptr,"bus",0)[0]) {	// 26122004
+            // if(get_tok_value(wire[i].prop_ptr,"bus",0)[0]) {	// 26122004
+            if(wire[i].bus) {
               drawline(WIRELAYER, THICK, wire[i].x1,wire[i].y1,wire[i].x2,wire[i].y2);
             }
             else
@@ -1142,7 +1143,6 @@ void draw(void)
           {
             textlayer = TEXTLAYER;
             if(debug_var >=1) fprintf(errfp, "draw(): drawing string %d = %s\n",i, textelement[i].txt_ptr);
-
             #ifdef HAS_CAIRO
             textprop = get_tok_value(textelement[i].prop_ptr, "layer", 0);
             if(textprop[0]!=0) {

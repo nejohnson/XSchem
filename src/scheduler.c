@@ -60,7 +60,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
             atoi(argv[6]), atoi(argv[7]), atoi(argv[8]) );
  }
 
- if(!strcmp(argv[1],"netlist") ) {
+ else if(!strcmp(argv[1],"netlist") ) {
     if( set_netlist_dir(0) ) {
       if(netlist_type == CAD_SPICE_NETLIST)
         global_spice_netlist(1);                  // 1 means global netlist
@@ -148,7 +148,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
       currentsch = 0;
       my_snprintf(s, S(s), "get_cell {%s}", argv[2]);
       tkeval(s);
-      strcpy(schematic[currentsch],Tcl_GetStringResult(interp) );
+      my_strncpy(schematic[currentsch],Tcl_GetStringResult(interp), S(schematic[currentsch]));
       //clear_drawing();
       remove_symbols();
       load_symbol(NULL);
@@ -167,7 +167,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
       currentsch = 0;
       my_snprintf(s, S(s), "get_cell {%s}", argv[2]);
       tkeval(s);
-      strcpy(schematic[currentsch],Tcl_GetStringResult(interp) );
+      my_strncpy(schematic[currentsch],Tcl_GetStringResult(interp), S(schematic[currentsch]));
       //clear_drawing();
       remove_symbols();
       load_schematic(1, NULL,1);
@@ -314,7 +314,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
      else 
         Tcl_AppendResult(interp, "SCHEMATIC",NULL);
   }
-  if(!strcmp(argv[2],"netlist_type"))  {
+  else if(!strcmp(argv[2],"netlist_type"))  {
      if( netlist_type == CAD_VHDL_NETLIST )
         Tcl_AppendResult(interp, "vhdl",NULL);
      else if( netlist_type == CAD_SPICE_NETLIST )
@@ -459,6 +459,9 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
         my_snprintf(s, S(s), "%d",TEXTLAYER);
         Tcl_AppendResult(interp, s,NULL);
   }
+  else {
+    fprintf(errfp, "xschem get %s: invalid command.\n", argv[2]);
+  }
  }
  else if(!strcmp(argv[1],"set") && argc==3) { // 20171023
   if(!strcmp(argv[2],"horizontal_move"))  { // 20171023
@@ -475,30 +478,37 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
       Tcl_EvalEx(interp,"set horizontal_move 0" , -1, TCL_EVAL_GLOBAL);
     }
   }
+  else {
+    fprintf(errfp, "xschem set %s : invalid command.\n", argv[2]);
+  }
  } else if(!strcmp(argv[1],"set") && argc==4)
  {
   #ifdef HAS_CAIRO
   if(!strcmp(argv[2],"cairo_font_name"))  {
     if( strlen(argv[3]) < sizeof(cairo_font_name) ) {
-      strcpy(cairo_font_name, argv[3]);
+      my_strncpy(cairo_font_name, argv[3], S(cairo_font_name));
       cairo_select_font_face (ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
       cairo_select_font_face (save_ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
     }
-  }
+  } else
   #endif
-  if(!strcmp(argv[2],"cairo_font_scale"))  {
+  if(!strcmp(argv[2],"no_undo"))  { // 20171204
+    int s = atoi(argv[3]);
+    no_undo=s;
+  }
+  else if(!strcmp(argv[2],"cairo_font_scale"))  {
     double s = atof(argv[3]);
     if(s>0.1 && s<10.0) cairo_font_scale = s;
   }
-  if(!strcmp(argv[2],"cairo_font_line_spacing"))  {
+  else if(!strcmp(argv[2],"cairo_font_line_spacing"))  {
     double s = atof(argv[3]);
     if(s>0.1 && s<10.0) cairo_font_line_spacing = s;
   }
-  if(!strcmp(argv[2],"cairo_vert_correct"))  {
+  else if(!strcmp(argv[2],"cairo_vert_correct"))  {
     double s = atof(argv[3]);
     if(s>-20. && s<20.) cairo_vert_correct = s;
   }
-  if(!strcmp(argv[2],"netlist_type"))  {
+  else if(!strcmp(argv[2],"netlist_type"))  {
     if(!strcmp(argv[3],"vhdl")) {
      netlist_type = CAD_VHDL_NETLIST ;
     } else if(!strcmp(argv[3],"verilog")) {
@@ -576,6 +586,9 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
   }
   else if(!strcmp(argv[2],"ui_state"))  {
      ui_state=atoi(argv[3]);
+  }
+  else {
+    fprintf(errfp, "xschem set %s %s : invalid command.\n", argv[2], argv[3]);
   }
  }
 
@@ -690,7 +703,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
 
  else if(!strcmp(argv[1],"place_symbol"))
  {
-   place_symbol(-1,NULL,0.0, 0.0, 0, 0, NULL,3);
+   place_symbol(-1,NULL,0.0, 0.0, 0, 0, NULL, 3, 1);
    move_objects(BEGIN,0,0,0);
  }
 
@@ -763,7 +776,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
   cancel=save(1);
   if(!cancel){  // 20161209
      currentsch = 0;
-     strcpy(schematic[currentsch], "");
+     my_strncpy(schematic[currentsch], "", S(schematic[currentsch]));
      clear_drawing();
      remove_symbols();
      if(argc>=3 && !strcmp(argv[2],"SYMBOL")) { // 20171025
@@ -848,13 +861,13 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
        Tcl_AppendResult(interp, "Instance not found", NULL);
        return TCL_ERROR;
      }
-     prepare_netlist_structs();
+     prepare_netlist_structs(1);
      no_of_pins= (inst_ptr[i].ptr+instdef)->rects[PINLAYER];
      found=0;
      for(p=0;p<no_of_pins;p++) {
        if(!strcmp( get_tok_value((inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][p].prop_ptr,"name",0), argv[4])) {
          //str_ptr =  inst_ptr[i].node[p] ? inst_ptr[i].node[p]: "<UNCONNECTED PIN>";
-         str_ptr =  pin_node(i,p,&mult);
+         str_ptr =  pin_node(i,p,&mult, 0);
          break;
        }
      } // /20171029
@@ -881,19 +894,19 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
    }
    else if(!strcmp(argv[2],"wire") && argc==4) {
      int n=atol(argv[3]);
-     if(n<lastwire) select_wire(atol(argv[3]), SELECTED);
+     if(n<lastwire) select_wire(atol(argv[3]), SELECTED, 0);
    }
    else if(!strcmp(argv[2],"text") && argc==4) {
      int n=atol(argv[3]);
-     if(n<lasttext) select_text(atol(argv[3]), SELECTED);
+     if(n<lasttext) select_text(atol(argv[3]), SELECTED, 0);
    }
    drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
    drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
  } else if(!strcmp(argv[1],"instance")) {
    if(argc==7)
-     place_symbol(-1, argv[2], atof(argv[3]), atof(argv[4]), atoi(argv[5]), atoi(argv[6]),NULL,3 );
+     place_symbol(-1, argv[2], atof(argv[3]), atof(argv[4]), atoi(argv[5]), atoi(argv[6]),NULL, 3, 1);
    if(argc==8)
-     place_symbol(-1, argv[2], atof(argv[3]), atof(argv[4]), atoi(argv[5]), atoi(argv[6]), argv[7],3 );
+     place_symbol(-1, argv[2], atof(argv[3]), atof(argv[4]), atoi(argv[5]), atoi(argv[6]), argv[7], 3, 1);
  } else if(!strcmp(argv[1],"snap_wire")) { // 20171022
    ui_state |= MENUSTARTSNAPWIRE;
  } else if(!strcmp(argv[1],"wire")) {   
@@ -1121,6 +1134,9 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
   printf("      xschem debug  n\n");
   printf("                   set debug level to n: 1, 2, 3 for C Program \n");
   printf("                                        -1,-2,-3 for Tcl frontend\n");
+ }
+ else {
+   fprintf(errfp, "xschem %s: invalid command.\n", argv[1]);
  }
  return TCL_OK;
 }

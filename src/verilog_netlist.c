@@ -47,7 +47,7 @@ void global_verilog_netlist(int global)  // netlister driver
    my_snprintf(name, S(name), "savefile %s.sch .sch",schematic[currentsch]);
    if(debug_var>=1) fprintf(errfp, "global_spice_netlist(): saving: %s\n",name);
    tkeval(name);
-   strcpy(schematic[currentsch], Tcl_GetStringResult(interp));
+   my_strncpy(schematic[currentsch], Tcl_GetStringResult(interp), S(schematic[currentsch]));
    if(!strcmp(schematic[currentsch],"")) return;
    save_schematic(schematic[currentsch]);
  }
@@ -243,7 +243,7 @@ void global_verilog_netlist(int global)  // netlister driver
         verilog_block_netlist(fd, i); // 20081205
     }
    }
-   strcpy(schematic[currentsch] , "");
+   my_strncpy(schematic[currentsch] , "", S(schematic[currentsch]));
    currentsch--;
    remove_symbols();
    load_schematic(1,NULL,0);
@@ -295,7 +295,7 @@ void verilog_block_netlist(FILE *fd, int i)  //20081205
      fprintf(fd, "\n// expanding   symbol:  %s # of pins=%d\n\n", 
            instdef[i].name,instdef[i].rects[PINLAYER] );
 
-     strcpy(schematic[currentsch],instdef[i].name);
+     my_strncpy(schematic[currentsch],instdef[i].name, S(schematic[currentsch]));
      verilog_stop? load_schematic(0,NULL,0) :  load_schematic(1,NULL,0);
 
      fprintf(fd, "module %s (\n", skip_dir(instdef[i].name));
@@ -373,7 +373,7 @@ void verilog_netlist(FILE *fd , int verilog_stop)
  int i;
  static char *type=NULL;
 
- prepare_netlist_structs();
+ prepare_netlist_structs(0);
  modified=1; // 20160302 prepare_netlist_structs could change schematic (wire node naming for example)
  if(debug_var>=2) fprintf(errfp, "verilog_netlist(): end prepare_netlist_structs\n");
  traverse_node_hash();  // print all warnings about unconnected floatings etc

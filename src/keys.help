@@ -4,28 +4,28 @@ LeftButton              Clear selection and select a graphic object
                         (line, rectangle, symbol, wire)
                         if clicking on blank area: clear selection
 
-Shift+LeftButton        Select without clearing previous selection
+shift+LeftButton        Select without clearing previous selection
 
-Alt+LeftButton          if an 'url' or 'tclcommand' property is defined on 
+alt+LeftButton          if an 'url' or 'tclcommand' property is defined on 
                         selected instance open the url or execute the 
                         tclcommand
 
 LeftButton drag         Select objects by area, clearing previous selection
 
-Shift+LeftButton drag   Select objects by area, without clearing 
+shift+LeftButton drag   Select objects by area, without clearing 
                         previous selection
 
 Ctrl+LeftButton drag    Select objects by area to perform a 
                         subsequent   'stretch'  move operation
 
-Shift+                  Select objects by area without unselecting
+shift+                  Select objects by area without unselecting
 Ctrl+LeftButton drag    to perform a subsequent   'stretch'  move operation
 
 Mouse Wheel             Zoom in / out
 
 MidButton               Unselect selected object
 
-Shift+RightButton drag  Unselect objects by area
+shift+RightButton drag  Unselect objects by area
 
 RightButton drag        Pan viewable area
 
@@ -60,25 +60,29 @@ shift       'C'         Toggle Light / Dark colorscheme
 ctrl        'd'         Exit
 ctrl        'e'         Back to parent schematic
 -           'e'         Descend to schematic
-Alt         'e'         Edit selected schematic in a new window
+alt         'e'         Edit selected schematic in a new window
+shift+alt   'F'         Toggle Full screen
 shift       'F'         Flip
+alt         'f'         Flip objects around their anchor points
 ctrl        'f'         Find/select by substring or regexp
 -           'f'         Full zoom
 shift       'G'         Double snap factor
 -           'g'         Half snap factor
 ctrl        'g'         Set snap factor
 -           'h'         Constrained horizontal move/copy of objects
+alt         'h'         create symbol pins from schematic pins
 ctrl        'h'         Follow http link or execute command (url, tclcommand properties)
 shift       'H'         Attach net labels to selected instance
 -           'i'         Descend to  symbol
-Alt         'i'         Edit selected symbol in a new window
+alt         'i'         Edit selected symbol in a new window
 shift       'J'         Create symbol from pin list
-alt+Shift   'J'         Create labels with 'i' prefix from highlighted nets/pins
+alt+shift   'J'         Create labels with 'i' prefix from highlighted nets/pins
 alt         'j'         Create labels without 'i' prefix from highlighted nets/pins
 ctrl        'j'         Create ports from highlight nets
 alt+ctrl    'j'         Print list of highlighted nets/pins with label expansion
 -           'j'         Print list of highlighted nets/pins
 -           'k'         Hilight selected nets
+ctrl+shift  'K'         highlight net passing through elements with 'propagate_to' property set on pins
 shift       'K'         Unhilight all nets
 ctrl        'k'         Unhilight selected nets
 -           'l'         Start line
@@ -94,12 +98,13 @@ alt         'q'         Edit schematic file (dangerous!)
 -           'q'         Edit prop
 shift       'Q'         Edit prop with vim
 ctrl        'q'         View prop
+alt         'r'         Rotate objects around their anchor points
 shift       'R'         Rotate
 -           'r'         Start rect
 ctrl        's'         Change element order
 ctr+shift   'S'         Save  as symbol
 shift       'S'         Save schematic
-Alt         's'         Reload current schematic from disk
+alt         's'         Reload current schematic from disk
 -           's'         Save-as schematic
 -           't'         Place text
 alt         'u'         Align to current grid selected objects

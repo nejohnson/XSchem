@@ -82,16 +82,16 @@
 #define CADHALFDOTSIZE 2.5
 #define CADNULLNODE -1	    // no valid node number
 #define CADWIREMINDIST 30.0
-#define CADMAXWIRES 100
-#define CADMAXTEXT 100
-#define CADMAXOBJECTS 100   // (initial) max # of lines, rects (for each layer!!)
+#define CADMAXWIRES 4096
+#define CADMAXTEXT 2048
+#define CADMAXOBJECTS 512   // (initial) max # of lines, rects (for each layer!!)
 #define MAXGROUP 300	    // (initial) max # of objects that can be drawn while moving
-#define ELEMINST 200        // (initial) max # of placed elements,   was 600 20102004
-#define ELEMDEF 120         // (initial) max # of defined elements
+#define ELEMINST 4096        // (initial) max # of placed elements,   was 600 20102004
+#define ELEMDEF 256         // (initial) max # of defined elements
 #define CADMAXGRIDPOINTS 512
-#define CADMAXHIER 40
-#define CADCHUNKALLOC 64 // was 256  20102004
-#define CADDRAWBUFFERSIZE 512
+#define CADMAXHIER 80
+#define CADCHUNKALLOC 512 // was 256  20102004
+#define CADDRAWBUFFERSIZE 256
 
 #define SCHEMATIC 1
 #define SYMBOL 2
@@ -133,6 +133,10 @@
 #define TEXT 16
 #define POLYGON 32 // 20171115
 
+// for netlist.c
+#define BOXSIZE 200
+#define NBOXES 600
+
 
 //   some useful primes
 //   109, 163, 251, 367, 557, 823, 1237, 1861, 2777, 4177, 6247, 9371, 14057
@@ -153,6 +157,7 @@
 #define SET    256 // currently used in bbox() function (sets clip rect)
 #define ABORT  512 // used in move/copy_objects for aborting without unselecting
 #define THICK 1024 // used to draw thick lines (buses)
+#define ROTATELOCAL 2048 // rotate each selected object around its own anchor point 20171208
 
 #define FONTWIDTH 20
 #define FONTOFFSET 40
@@ -253,8 +258,8 @@ typedef struct
   double xscale;
   double yscale;
   char *prop_ptr;
-  // int layer; // 20171201 for cairo 
-  // char *font; // 20171201 for cairo
+  int layer; // 20171201 for cairo 
+  char *font; // 20171201 for cairo
 } Text;
 
 typedef struct
@@ -339,6 +344,20 @@ struct hilight_hashentry {
                   int value;
                  };
 
+// for netlist.c
+struct instpinentry {
+ struct instpinentry *next;
+ double x0,y0;
+ int n;
+ int pin;
+};
+
+struct wireentry {
+  struct wireentry *next;
+  int n;
+};
+
+
 extern int help; //20140406
 extern char *cad_icon[];
 extern int semaphore;
@@ -347,6 +366,7 @@ extern int cadlayers;
 extern  int hilight_color;
 extern int do_print;
 extern int prepared_netlist_structs;
+extern int prepared_hilight_structs;
 extern int x_initialized;
 extern int has_x; 
 extern int sym_txt;
@@ -469,7 +489,11 @@ extern Visual *visual;
 extern int dark_colorscheme; // 20171113
 extern double color_dim;
 extern int skip_dim_background;
+extern int no_undo; // 20171204
+extern int enable_drill;
 
+extern struct wireentry *wiretable[NBOXES][NBOXES];
+extern struct instpinentry *instpintable[NBOXES][NBOXES];
 // functions
 extern int set_netlist_dir(int force);
 extern int  check_lib(char * s);
@@ -496,7 +520,6 @@ extern void make_symbol(void);
 extern char *get_sym_template(char *s, char *extra);
 extern void zoom_full(int draw);
 extern void updatebbox(int count,Box *boundbox,Box *tmp);
-extern void del_wire_table(void);
 extern void set_linewidth();
 extern void draw_selection(GC g, int interruptable);
 extern void delete(void);
@@ -507,6 +530,14 @@ extern int set_text_custom_font(Text *txt);
 extern int text_bbox(char * str,double xscale, double yscale,
             int rot, int flip, double x1,double y1, double *rx1, double *ry1,
             double *rx2, double *ry2);
+
+////test 20171203
+extern void del_object_table(void);
+extern void object_iterator(int k);
+extern void hash_wire( int n );
+extern void hash_object( int n ); // 20171203 insert instance bbox in spatial hash table
+
+
 
 #ifdef HAS_CAIRO
 extern int text_bbox_nocairo(char * str,double xscale, double yscale,
@@ -590,7 +621,7 @@ extern int load_symbol_definition(char name[]);
 extern void load_symbol(char *abs_name);
 extern void edit_symbol(void);
 extern void place_symbol(int pos, char *symbol_name, double x, double y, int rot, int flip, 
-                         char *inst_props, int draw_sym);
+                         char *inst_props, int draw_sym, int first_call);
 extern void attach_labels_to_inst(void);
 extern int match_symbol(char name[]);
 extern int save_schematic(char *); // 20171020 added return value
@@ -633,7 +664,7 @@ extern void tkeval(char str[]);
 extern void statusmsg(char str[],int n);
 extern void place_text(int draw_text, double mx, double my);
 extern void hash_proplist(char *s,int remove);
-extern struct hashentry *hash_lookup(char *token,char *name,char *value,int remove);
+extern struct hashentry *hash_lookup(char *token,char *value,int remove);
 extern void free_hash(void);
 extern char *translate(int inst, char* s);
 extern void print_spice_element(FILE *fd, int inst);
@@ -646,7 +677,7 @@ extern int  my_snprintf(char *str, int size, const char *fmt, ...);
 extern void my_strdup(char **dest, const char *src);
 extern void my_strndup(char **dest, const char *src, int n);
 extern void my_strdup2(char **dest, const char *src);
-extern void my_strncpy(char *d, char *s, int n);
+extern void my_strncpy(char *d, const char *s, int n);
 extern char *subst_token(char *s,char *tok, char *new_val);
 extern void new_prop_string(char **new_prop,char *old_prop,int fast);
 extern void symbol_bbox(int i, double *x1,double *y1, double *x2, double *y2);
@@ -667,13 +698,13 @@ extern void check_polygon_storage(int c); // 20171115
 extern char *expandlabel(char *s, int *m);
 extern void merge_inst(int k, FILE *fd);
 extern void merge_file(int selection_load, char ext[]);
-extern void select_wire(int i, unsigned short select_mode);
+extern void select_wire(int i, unsigned short select_mode, int fast);
 extern void select_element(int i, unsigned short select_mode, int fast);
-extern void select_text(int i, unsigned short select_mode);
+extern void select_text(int i, unsigned short select_mode, int fast);
 extern void select_box(int c, int i, unsigned short select_mode, int fast);
 extern void select_line(int c, int i, unsigned short select_mode, int fast);
 extern void select_polygon(int c, int i, unsigned short select_mode, int fast );
-extern char *pin_node(int i, int j, int *mult);
+extern char *pin_node(int i, int j, int *mult, int hash_prefix_unnamed_net);
 extern void record_global_node(int what, FILE *fp, char *node);
 extern int count_labels(char *s);
 extern void my_strcat(char **, char *);
@@ -697,7 +728,7 @@ extern void hilight_net();
 extern void unhilight_net();
 extern void draw_hilight_net();
 extern void undraw_hilight_net(void); // 20160413
-extern void prepare_netlist_structs(void);
+extern void prepare_netlist_structs(int for_hilight_only);
 extern void delete_netlist_structs(void);
 extern void delete_inst_node(int i);
 extern void delete_hilight_net(void);
@@ -717,6 +748,8 @@ extern void fill_symbol_editprop_form(int x);
 extern void update_symbol(char *result, int x);
 extern void tclexit(ClientData s);
 extern int build_colors(int skip_background, double dim); // reparse the TCL 'colors' list and reassign colors 20171113
+extern void drill_hilight(void);
+extern void get_square(double x, double y, int *xx, int *yy);
 #ifdef HAS_CAIRO // 20171105
 #include <cairo.h>
 #include <cairo-xlib.h>

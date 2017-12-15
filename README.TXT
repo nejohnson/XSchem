@@ -35,6 +35,61 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.4.0:
+- some string overflow checks (schematic[])
+- major speed improvement in instance wiring tool ('H' bindkey) for multiple selected
+  instances.
+- 'first_call' parameter in place_symbol() to speed up finding unique
+  instance name in case of multiple placements of the same type.
+- 'drill through' option in net highlight, (ctrl-alt-k key) this command
+  will highlight a net passing through components with pins that have a
+  'propagate_to' property set to the number of the pin to pass the
+  highlight to.
+  Example:
+  if pin #0 on a resistor has 'propagate_to=1' property set
+  then hilight net on pin 0 will propagate to pin #1.
+  the reverse propagate_to may be set as well.
+
+  propagate_to=1     propagate_to=0
+  pin #0             pin #1
+      o---/\/\/\/\---o
+
+- correctly redraw selected objects when passing with selection rectangle
+  over already selected items
+- select_text and select_wire now have 'fast' param to avoid drawing information
+  in window status line, this is used when doing block selection of multiple objects
+  to make the process *much* faster
+- skip drawing symbols whose bounding box in current zoom factor <0.3 pixels.
+- fixed some wrong bbox() usage in edit_text_property
+- performance improvements in prepare_netlist_structs when called for highlighting nets
+- fixed a regression in copy_objects of polygons
+- 'xschem' tcl command: print error message if unknow subcommand given
+- fixed some regression in partial rectangle selections (select_box() )
+- 'hash_prefix_unnamed_net' parameter in pin_node(), needed for correctly
+  hashing unnamed nets for 'drill' hilight.
+- added 'unselect' radio button in instance search tool (ctrl-f key)
+- added 'layer' and 'font' members to text struct, caching the respective
+  'layer=n and font=string' properties, to avoid calling get_tok_value
+- more flexibility in 'attach_labels_to_inst ('H' key), allow to wire all
+  selected instances without querying the user, option for user set rotated text
+- performance optimization, do not call symbol_bbox on every full zoom
+- create symbol pins from selected schematic pins (Alt-h key)
+- Alt-s key (reload from disk) now correctly reloads symbol (.sym) file
+  if editing a symbol.
+- fullscreen key moved to Alt-Shift-F
+- added Alt-h and Alt-r keys to flip and rotate objects around their anchor points 
+  while copying/moving
+- performance optimization: skip drawing of objects that are too small in
+  current zoom factor.
+- added command' xschem set no_undo [01]' to disable/reenable undo.
+- performance improvements in wirecheck(), skip wires that already have a .node field
+- renamed functions in netlist.c for better understanding
+- performance improvement, simplified and almost eliminated use of hash_lookup function (token.c)
+  it is now used only to store instance names to allow collision checking in new_prop_string().
+  hash_proplist() now only inserts instance name in hash table, rest of property string is skipped.
+- new_prop_string, start checking from 0 instead of from 1 when looking for free instance
+  name slots (x0 instead of x1 as first free name for subcircuit instances, for example)
+- xschem.tcl: refer to $HOME/.clipboard.sch instead of $PWD/.clipboard.sch
 
 2.3.7:
 - do not recalculate symbol bounding box on any zoom / pan / draw operation, 

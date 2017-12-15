@@ -165,12 +165,14 @@ proc convert_to_pdf {filename} {
 
 # 20161121
 proc convert_to_png {filename} {
-  global to_png
+  global to_png tcl_debug
   set destfile [file rootname $filename].png
   # puts "---> $to_png $filename $destfile"
   if { ![catch "exec $to_png $filename $destfile" msg] } {
     # conversion succeeded, so remove original .xpm file
-    file delete $filename
+    if {$tcl_debug>=0} { 
+      file delete $filename
+    }
   }
 }
 
@@ -494,13 +496,87 @@ proc create_pins {} {
   # viewdata $entry1
   set pcnt 0
   set y 0
-  set fd [open $env(PWD)/.clipboard.sch "w"]
+  set fd [open $env(HOME)/.clipboard.sch "w"]
   foreach i $lines { 
     puts $fd "C \{devices/[lindex $i 1]\} 0 [set y [expr $y-20]]  0 0 \{ name=p[incr pcnt] lab=[lindex $i 0] \}"
   }
   close $fd
-  xschem merge $env(PWD)/.clipboard.sch
+  xschem merge $env(HOME)/.clipboard.sch
 }
+
+proc rectorder {x1 y1 x2 y2} {
+  if {$x2 < $x1} {set tmp $x1; set x1 $x2; set x2 $tmp}
+  if {$y2 < $y1} {set tmp $y1; set y1 $y2; set y2 $tmp}
+  return [list $x1 $y1 $x2 $y2]
+}
+
+proc order {x1 y1 x2 y2} {
+  if {$x2 < $x1} {set tmp $x1; set x1 $x2; set x2 $tmp; set tmp $y1; set y1 $y2; set y2 $tmp
+  } elseif {$x2==$x1 && $y2<$y1} {set tmp $y1; set y1 $y2; set y2 $tmp}
+  return [list $x1 $y1 $x2 $y2]
+}
+
+proc rotation {x0 y0 x y rot flip} {
+  set tmp [expr $flip? 2*$x0-$x : $x]
+  if {$rot==0} {set rx $tmp; set ry $y }
+  if {$rot==1} {set rx [expr $x0 - $y +$y0]; set ry [expr $y0+$tmp-$x0]}
+  if {$rot==2} {set rx [expr 2*$x0-$tmp]; set ry [expr 2*$y0-$y]}
+  if {$rot==3} {set rx [expr $x0+$y-$y0]; set ry [expr $y0-$tmp+$x0]}
+  return [list $rx $ry]
+}
+
+proc schpins_to_sympins {} {
+  global env
+  set pinhsize 2.5
+  xschem copy
+  set clipboard [read_data_nonewline $env(HOME)/.clipboard.sch]
+  set lines [split $clipboard \n]
+  set fd [open $env(HOME)/.clipboard.sch "w"]
+  foreach i $lines {
+    if {[regexp {devices/(i|o|io)pin} [lindex $i 1]]} {
+      if {[regexp {devices/ipin} [lindex $i 1]]} { set dir in }
+      if {[regexp {devices/opin} [lindex $i 1]]} { set dir out }
+      if {[regexp {devices/iopin} [lindex $i 1]]} { set dir inout }
+      set rot [lindex $i 4]
+      set flip [lindex $i 5]
+      regsub {^.*lab=} $i {} lab
+      regsub {[\} ].*} $lab {} lab
+      set x0 [lindex $i 2]
+      set y0 [lindex $i 3]
+      set pinx1 [expr $x0-$pinhsize]
+      set pinx2 [expr $x0+$pinhsize]
+      set piny1 [expr $y0-$pinhsize]
+      set piny2 [expr $y0+$pinhsize]
+      if {$dir eq "out" || $dir eq "inout"} {
+        set linex1 [expr $x0-20]
+        set liney1 $y0
+        set linex2 $x0
+        set liney2 $y0
+        set textx0 [expr $x0-25] 
+        set texty0 [expr $y0-4]
+        set textflip [expr !$flip]
+      } else {
+        set linex1 [expr $x0+20]
+        set liney1 $y0
+        set linex2 $x0
+        set liney2 $y0
+        set textx0 [expr $x0+25]
+        set texty0 [expr $y0-4]
+        set textflip [expr $flip]
+      }
+      lassign [rotation $x0 $y0 $linex1 $liney1 $rot $flip] linex1 liney1
+      lassign [rotation $x0 $y0 $linex2 $liney2 $rot $flip] linex2 liney2
+      lassign [order $linex1 $liney1 $linex2 $liney2] linex1 liney1 linex2 liney2
+      lassign [rotation $x0 $y0 $textx0 $texty0 $rot $flip] textx0 texty0
+      puts $fd "B 5 $pinx1 $piny1 $pinx2 $piny2 \{name=$lab dir=$dir\}"
+      puts $fd "L 4 $linex1 $liney1 $linex2 $liney2 \{\}"
+      puts $fd "T \{$lab\} $textx0 $texty0 $rot $textflip 0.2 0.2 \{\}"
+    }
+  }
+  close $fd
+  xschem paste
+}
+
 
 # 20120913
 proc add_lab_no_prefix {} { 
@@ -514,12 +590,12 @@ proc add_lab_no_prefix {} {
   # viewdata $entry1
   set pcnt 0
   set y 0
-  set fd [open $env(PWD)/.clipboard.sch "w"]
+  set fd [open $env(HOME)/.clipboard.sch "w"]
   foreach i $lines {
     puts $fd "C \{devices/lab_pin\} 0 [set y [expr $y+20]]  0 0 \{ name=p[incr pcnt] verilog_type=wire lab=[lindex $i 0] \}"
   }
   close $fd
-  xschem merge $env(PWD)/.clipboard.sch
+  xschem merge $env(HOME)/.clipboard.sch
 }
 
 
@@ -534,12 +610,12 @@ proc add_lab_prefix {} {
   # viewdata $entry1
   set pcnt 0
   set y 0
-  set fd [open $env(PWD)/.clipboard.sch "w"]
+  set fd [open $env(HOME)/.clipboard.sch "w"]
   foreach i $lines {
     puts $fd "C \{devices/lab_pin\} 0 [set y [expr $y+20]]  0 0 \{ name=p[incr pcnt] verilog_type=reg lab=i[lindex $i 0] \}"
   }
   close $fd
-  xschem merge $env(PWD)/.clipboard.sch
+  xschem merge $env(HOME)/.clipboard.sch
 }
 
 
@@ -739,10 +815,15 @@ proc property_search {} {
   }
   button .lw.but.cancel -text Cancel -command { destroy .lw }
   checkbutton .lw.but.sub -text Substring -variable search_substring
-  checkbutton .lw.but.sel -text Select -variable search_select
+  radiobutton .lw.but.nosel -text {No selection} -variable search_select -value 0
+  radiobutton .lw.but.sel -text {Select} -variable search_select -value 1
+  # 20171211 added unselect
+  radiobutton .lw.but.unsel -text {Unselect} -variable search_select -value -1
   pack .lw.but.ok  -anchor w -side left
   pack .lw.but.sub  -side left
+  pack .lw.but.nosel  -side left
   pack .lw.but.sel  -side left
+  pack .lw.but.unsel  -side left
   pack .lw.but.cancel -anchor e
 
   pack .lw.custom  -anchor e
@@ -770,15 +851,15 @@ proc property_search {} {
 proc tclpropeval {s instname symname} {
   regsub {^@tcleval\(} $s {} s
   regsub {\)$} $s {} s
-  # puts $s
   return [eval $s]
 }
 
 #20171005
 proc attach_labels_to_inst {} {
-  global use_lab_wire use_label_prefix custom_label_prefix rcode
+  global use_lab_wire use_label_prefix custom_label_prefix rcode do_all_inst rotated_text
 
   toplevel .label -class Dialog
+  set rcode {}
   wm title .label {Add labels to instances}
   bind .label <Visibility> { if { [regexp Obscured %s] } {raise .label; if { $tcl_version > 8.4 } {wm attributes  .label -topmost 1} } }
 
@@ -805,10 +886,16 @@ proc attach_labels_to_inst {} {
   }
   button .label.but.cancel -text Cancel -command { set rcode {}; destroy .label }
   checkbutton .label.but.wire -text {use wire labels} -variable use_lab_wire
+  checkbutton .label.but.do_all -text {Do all} -variable do_all_inst
+  label .label.but.rot -text {Rotated Text}
+  entry .label.but.rotated -textvariable rotated_text -width 2
   checkbutton .label.but.prefix -text {use prefix} -variable use_label_prefix
   pack .label.but.ok  -anchor w -side left
   pack .label.but.prefix  -side left
   pack .label.but.wire  -side left
+  pack .label.but.do_all  -side left
+  pack .label.but.rotated  -side left
+  pack .label.but.rot  -side left
   pack .label.but.cancel -anchor e
 
   pack .label.custom  -anchor e
@@ -1785,6 +1872,7 @@ set_ne cairo_font_name {Monospace}
 set_ne cairo_vert_correct 0.0
 # has_cairo set by c program if cairo enabled
 set has_cairo 0 
+set rotated_text {} ;#20171208
 ##### set colors
 if {!$rainbow_colors} {
   set_ne cadlayers 22
@@ -1816,7 +1904,7 @@ if {!$rainbow_colors} {
   set_ne cadlayers 35
   #20171113
   set_ne light_colors {
-    "#000000" "#00ccee" "grey50"  "#ffffff" "#88dd00"
+    "#000000" "#00ccee" "#aaaaaa" "#ffffff" "#88dd00"
     "#bb2200" "#0000e0" "#2000e0" "#4000e0" "#6000e0"
     "#8000e0" "#a000e0" "#c000e0" "#e000e0" "#e000c0"
     "#e000a0" "#e00080" "#e00060" "#e00040" "#e00020"
@@ -1826,7 +1914,7 @@ if {!$rainbow_colors} {
   }
   # same colors as above ...
   set_ne dark_colors {
-    "#000000" "#00ccee" "grey50"  "#ffffff" "#88dd00" 
+    "#000000" "#00ccee" "#3f3f3f" "#ffffff" "#88dd00" 
     "#bb2200" "#0000e0" "#2000e0" "#4000e0" "#6000e0"
     "#8000e0" "#a000e0" "#c000e0" "#e000e0" "#e000c0"
     "#e000a0" "#e00080" "#e00060" "#e00040" "#e00020"
@@ -1865,7 +1953,7 @@ set_ne colors $dark_colors
 # 20111005 added missing initialization of globals...
 set rbutton1 0
 set rbutton2 0
-
+set search_select 0
 
 # gensch variables
 array unset gensch_pinarray
@@ -2178,6 +2266,7 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    .menubar.sym.menu add command -label "Make symbol from schematic" -command "xschem make_symbol" -accelerator a
    .menubar.sym.menu add command -label "Make schematic from symbol" -command "xschem make_sch" -accelerator C-l
    .menubar.sym.menu add command -label "Attach pins to component instance" -command "xschem attach_pins" -accelerator H
+   .menubar.sym.menu add command -label "Create Symbol pins from selected schematic pins" -command "schpins_to_sympins" -accelerator A-h
 
    menubutton .menubar.tools -text "Tools" -menu .menubar.tools.menu
    menu .menubar.tools.menu -tearoff 0

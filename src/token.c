@@ -34,27 +34,45 @@ struct hashentry {
 		  struct hashentry *next;
 		  unsigned int hash;
 		  char *token;
-		  char *name;
 		  char *value;
 		 };
 
 static struct hashentry *table[HASHSIZE];
 
 // calculate the hash function relative to string s
-static unsigned int hash(char *tok, char *name)
+static unsigned int hash(char *tok)
+{
+  unsigned int hash = 0;
+  int c;
+
+  while ( (c = *tok++) )
+      hash = c + (hash << 6) + (hash << 16) - hash;
+  return hash;
+}
+
+/*
+static unsigned int hash(char *tok)
+{
+  unsigned int hash = 5381;
+  int c;
+
+  while (( c = *(tok++) ))
+    hash = ((hash << 5) + hash) ^ c;
+  return hash;
+}
+
+
+static unsigned int hash(char *tok)
 {
  register unsigned int h=0;
  while(*tok) {
   h^=*tok++; // 20161221 xor
   h=(h>>5) | (h<<(8*sizeof(unsigned int)-5)); // 20161221 rotate
  }
- while(*name!='\0'  && *name!='[') {  
-  h^=*name++; // 20161221 xor
-  h=(h>>5) | (h<<(8*sizeof(unsigned int)-5)); // 20161221 rotate
-}
- if(debug_var>=2) fprintf(errfp, "hash(): %d name=%s, tok=%s\n",h%HASHSIZE, name, tok);
+ if(debug_var>=2) fprintf(errfp, "hash(): %d tok=%s\n",h%HASHSIZE, tok);
  return h;
 }
+*/
 
 int name_strcmp(char *s, char *d) // compare strings up to '\0' or'['
 {
@@ -76,7 +94,7 @@ int name_strcmp(char *s, char *d) // compare strings up to '\0' or'['
  }
 }
 
-struct hashentry *hash_lookup(char *token, char *name, char *value,int remove)
+struct hashentry *hash_lookup(char *token, char *value,int remove)
 //    token        value      remove    ... what ...
 // --------------------------------------------------------------------------
 // "whatever"    "whatever"     0	insert in hash table if not in.
@@ -87,13 +105,14 @@ struct hashentry *hash_lookup(char *token, char *name, char *value,int remove)
 // "whatever"    "whatever"     1	delete entry if found,return NULL
 // "whatever"       NULL        1	delete entry if found,return NULL
 {
- unsigned int hashcode, index;
+ unsigned int hashcode; 
+ unsigned int index;
  struct hashentry *entry, *saveptr, **preventry;
  char *ptr;
- int t,n,v,s ;
+ int t,v,s ;
  
-if(name==NULL || token==NULL) return NULL;
- hashcode=hash(token,name); 
+if(token==NULL) return NULL;
+ hashcode=hash(token); 
  index=hashcode % HASHSIZE; 
  entry=table[index];
  preventry=&table[index];
@@ -105,36 +124,28 @@ if(name==NULL || token==NULL) return NULL;
   {
    if(value && !remove)		// insert data
    {
-    if(debug_var>=3) fprintf(errfp, "hash_lookup(): inserting token <%s>, name <%s> , value <%s>\n",
-     token, name, value);
+    if(debug_var>=3) fprintf(errfp, "hash_lookup(): inserting token <%s>, value <%s>\n",
+     token, value);
     s=sizeof( struct hashentry );
     t=strlen(token)+1;
-    n=strlen(name)+1;
     v=strlen(value)+1;
-    ptr= my_malloc(s + t + n + v );
+    ptr= my_malloc(s + t + v );
     entry=(struct hashentry *)ptr;
-    ptr+=s;
+    *preventry=entry;
     entry->next=NULL;
+    entry->hash=hashcode;
+    ptr+=s;
     entry->token=(char *)ptr;
-    ptr+=t;
     strcpy(entry->token,token);
-    entry->name=(char *)ptr;
-    ptr+=n;
-    strcpy(entry->name,name);
+    ptr+=t;
     entry->value=(char *)ptr;
     strcpy(entry->value,value);
-    entry->hash=hashcode;
-    *preventry=entry;
     return NULL; // if element inserted return NULL since it was not in table
    }
    return entry;
   }
-  if( entry -> hash==hashcode && 
-      strcmp(token,entry->token)==0 &&
-      strcmp(name,entry->name)==0 )
-//      name_strcmp(name,entry->name)==0 ) // 20161226 compare whole instname, including [..]
-			// found a matching token
-  {
+  if( entry->hash==hashcode && !strcmp(token,entry->token) ) {
+   // found a matching token
    if(remove) 		// remove token from the hash table ...
    {
     saveptr=entry->next;
@@ -150,13 +161,16 @@ if(name==NULL || token==NULL) return NULL;
  if(debug_var>=3) fprintf(errfp, "\n");
 }
 
-static  int collisions, max_collisions=0;
+static  int collisions, max_collisions=0, n_elements=0;
 static struct hashentry *free_hash_entry(struct hashentry *entry)
 {
  if(entry) 
  {
+  n_elements++;
   collisions++;
   entry->next = free_hash_entry( entry->next );
+  // entry->token and entry->value dont need to be freed since 
+  // entry struct allocated with token and value included
   if(debug_var>=3) fprintf(errfp, "free_hash_entry(): removing entry %lu\n", (unsigned long)entry);
   my_free(entry);
  }
@@ -168,6 +182,7 @@ void free_hash(void) // remove the whole hash table
  int i;
   
  if(debug_var>=3) fprintf(errfp, "free_hash(): removing hash table\n");
+ n_elements=0;
  for(i=0;i<HASHSIZE;i++)
  {
   collisions=0;
@@ -175,95 +190,16 @@ void free_hash(void) // remove the whole hash table
   if(collisions>max_collisions) max_collisions=collisions;
 
  }
- if(debug_var>=1) fprintf(errfp, "# free_hash(): max_collisions=%d\n", max_collisions);
+ if(debug_var>=1) fprintf(errfp, "# free_hash(): max_collisions=%d n_elements=%d hashsize=%d\n", 
+                   max_collisions, n_elements, HASHSIZE);
+ max_collisions=0;
 }
 
-// state machine that parses a string made up of <token> <value> ...
-// couples and inserts the tokens in the hash table
-// the first token must be name=... as it is used for
-// indexing information in the table
-// if name not found, nothing is inserted in the hash table.
-void hash_proplist(char *s,int remove)
+// insert **only** name in hash table
+void hash_proplist(char *s,int remove) // 20171205
 {
- register int c, state=XBEGIN, space;
- static char *token=NULL, *value=NULL, *name=NULL;
- int sizetok=0, sizeval=0;
- int token_pos=0, value_pos=0;
- int quote=0;
- int escape=0;
- int token_number=0;
-
- if(debug_var>=3) fprintf(errfp, "hash_proplist(): parsing %s\n",s?s:"<NULL>");
- if(s==NULL) return;
-
- sizetok=CADCHUNKALLOC;
- if(token==NULL) token=my_malloc(sizetok);
- else my_realloc(&token,sizetok);
-
- sizeval=CADCHUNKALLOC;
- if(value==NULL) value=my_malloc(sizeval);
- else my_realloc(&value,sizeval);
-
- while(1)
- {
-  c=*s++; 
-  if(c=='\\')
-  {
-    escape=1;
-    c=*s++;
-  }
-  else 
-   escape=0;
-  space=SPACE(c) ;
-  if( state==XBEGIN && !space ) state=XTOKEN;
-  else if( state==XTOKEN && space) state=XEND;
-  else if( state==XTOKEN && c=='=') state=XSEPARATOR;
-  else if( state==XSEPARATOR && !space) state=XVALUE;
-  else if( state==XVALUE && space && !quote) state=XEND;
-
-  if(value_pos>=sizeval)
-  {
-   sizeval+=CADCHUNKALLOC;
-   my_realloc(&value,sizeval);
-  }
-
-  if(token_pos>=sizetok)
-  {
-   sizetok+=CADCHUNKALLOC;
-   my_realloc(&token,sizetok);
-  }
-
-  if(state==XTOKEN) token[token_pos++]=c;
-  else if(state==XVALUE) 
-  {
-   if(c=='"' && !escape) quote=!quote;
-   else value[value_pos++]=c;
-  }
-
-  else if(state==XEND) 
-  {
-   token[token_pos]='\0'; 
-   token_pos=0;
-   token_number++;
-   value[value_pos]='\0';
-   value_pos=0;
-   if(strcmp(token,"name")==0)
-   {
-     if(debug_var>=1) fprintf(errfp, "hash_proplist(): duplicating 'name' (%s) with \"%s\"\n",name, value);
-     my_strdup(&name,value);
-     if(debug_var>=1) fprintf(errfp, "hash_proplist(): duplicated 'name' (%s) with \"%s\"\n",name, value);
-   }
-   else if(token_number==1) return; // if first token is not "name" exit, put nothing into hash 18112002
-   if(name!=NULL && name[0] != '\0') 
-   {
-    //struct hashentry *a; 20161226
-    if(debug_var>=2) fprintf(errfp, "hash_proplist(): putting %s=%s in hash tbl\n",token,value);
-    hash_lookup(token,name,value,remove);
-   }
-   state=XBEGIN;
-  }
-  if(c=='\0') break;
- }
+  char *name=get_tok_value(s, "name",0);
+  if(name[0]) hash_lookup(name, "", remove);
 }
 
 int match_symbol(char *name)  // never returns -1, if symbol not found load systemlib/missing.sym
@@ -287,8 +223,6 @@ int match_symbol(char *name)  // never returns -1, if symbol not found load syst
  if(debug_var>=1) fprintf(errfp, "match_symbol(): returning %d\n",i);
  return i;
 }
-
-
 
 // update **s modifying only the token values that are
 // different between *new and *old
@@ -590,7 +524,7 @@ void new_prop_string(char **new_prop,char *old_prop, int fast)
  }
  prefix=old_name[0];
  // don't change old_prop if name does not conflict.
- if(hash_lookup("name", old_name, NULL, 0) == NULL)
+ if(hash_lookup(old_name, NULL, 0) == NULL)
  {
   my_strdup(new_prop, old_prop);
   if(debug_var>=1) fprintf(errfp, "new_prop_string():-1-  new=%s old=%s fast=%d\n",*new_prop, old_prop,fast);
@@ -598,12 +532,12 @@ void new_prop_string(char **new_prop,char *old_prop, int fast)
  }
  tmp=find_bracket(old_name);
  my_realloc(&new_name, strlen(old_name)+40);
- qq=fast ?  last[(int)prefix] : 1; 
+ qq=fast ?  last[(int)prefix] : 0; 
  if(debug_var>=1) fprintf(errfp, "new_prop_string(): -2- new=%s old=%s fast=%d\n",*new_prop, old_prop,fast);
  for(q=qq;;q++)
  {
   sprintf(new_name, "%c%d%s", prefix,q, tmp); // overflow safe 20161122
-  if(hash_lookup("name", new_name, NULL, 0) == NULL) 
+  if(hash_lookup(new_name, NULL, 0) == NULL) 
   {
    if(fast) {last[(int)prefix]=q+1;not_zero=1;}
    break;
@@ -921,7 +855,7 @@ void print_vhdl_element(FILE *fd, int inst) // 20071217
  tmp=0;
  for(i=0;i<no_of_pins;i++)
  {
-   if( (str_ptr =  pin_node(inst,i, &mult)) )
+   if( (str_ptr =  pin_node(inst,i, &mult, 0)) )
    {
      if(tmp) fprintf(fd, " ,\n");
      fprintf(fd, "   %s => %s",
@@ -1160,7 +1094,7 @@ void print_spice_element(FILE *fd, int inst)
  int token_pos=0, escape=0;
  int no_of_pins=0;
  int quote=0; // 20171029
- struct hashentry *ptr;
+ // struct hashentry *ptr;
 
  my_strdup(&template,
      // get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"template",2)); // 20150409
@@ -1206,16 +1140,15 @@ void print_spice_element(FILE *fd, int inst)
   {
    token[token_pos]='\0'; 
    token_pos=0;
-   ptr=hash_lookup(token+1, name, NULL, 0);  // lookup token
-   if(ptr!=NULL) 
-     value=ptr->value;
-   else
-     value=get_tok_value(template, token+1,0); // if not found get tok from tmplt
 
-   // alternative way
-   //value = get_tok_value(inst_ptr[inst].prop_ptr, token+1);
-   //if(value[0] == '\0')
-   // value=get_tok_value(template, token+1);
+   // ptr=hash_lookup(token+1, name, NULL, 0);  // lookup token
+   // if(ptr!=NULL) 
+   //   value=ptr->value;
+   // else
+   //   value=get_tok_value(template, token+1,0); // if not found get tok from tmplt
+   value = get_tok_value(inst_ptr[inst].prop_ptr, token+1, 2);
+   if(value[0] == '\0')
+   value=get_tok_value(template, token+1, 0);
 
    if(value[0]!='\0')
    {  // instance names (name) and node labels (lab) go thru the expandlabel function.
@@ -1241,7 +1174,7 @@ void print_spice_element(FILE *fd, int inst)
    {					// and node number: m1 n1 m2 n2 ....
     for(i=0;i<no_of_pins;i++)
     {
-      str_ptr =  pin_node(inst,i, &mult);
+      str_ptr =  pin_node(inst,i, &mult, 0);
       // fprintf(errfp, "inst: %s  --> %s\n", name, str_ptr);
       fprintf(fd, "@%d %s ", mult, str_ptr);
     }
@@ -1253,7 +1186,7 @@ void print_spice_element(FILE *fd, int inst)
           token+2
          )
        ) {
-       str_ptr =  pin_node(inst,i, &mult);
+       str_ptr =  pin_node(inst,i, &mult, 0);
        fprintf(fd, "@%d %s ", mult, str_ptr);
        break; // 20171029
      }
@@ -1263,10 +1196,10 @@ void print_spice_element(FILE *fd, int inst)
      char tclcmd[strlen(token)+100] ;
      
      Tcl_ResetResult(interp);
-     sprintf(tclcmd, "tclpropeval {%s} %s %s", token, name, inst_ptr[inst].name);
+     sprintf(tclcmd, "tclpropeval {%s} {%s} {%s}", token, name, inst_ptr[inst].name);
      Tcl_EvalEx(interp, tclcmd, -1, TCL_EVAL_GLOBAL);
      fprintf(fd, "%s", Tcl_GetStringResult(interp));
-     //fprintf(errfp, "%s\n", tclcmd);
+     // fprintf(errfp, "%s\n", tclcmd);
      
    } // /20171029
 
@@ -1428,7 +1361,7 @@ void print_verilog_element(FILE *fd, int inst)
  tmp=0;
  for(i=0;i<no_of_pins;i++)
  {
-   if( (str_ptr =  pin_node(inst,i, &mult)) )
+   if( (str_ptr =  pin_node(inst,i, &mult, 0)) )
    {
      //printf("print_verilog_element(): expandlabel: str=%s mult=%d\n", str_ptr, mult);
      if(tmp) fprintf(fd,"\n");
@@ -1444,7 +1377,7 @@ void print_verilog_element(FILE *fd, int inst)
 }
 
 
-char *pin_node(int i, int j, int *mult)
+char *pin_node(int i, int j, int *mult, int hash_prefix_unnamed_net)
 {
  int tmp;
  char errstr[2048];
@@ -1459,10 +1392,17 @@ char *pin_node(int i, int j, int *mult)
    *mult = get_unnamed_node(3, 0, strtol((inst_ptr[i].node[j])+4, NULL,10) );
     if(debug_var>=2) fprintf(errfp, "pin_node(): node = %s  n=%d mult=%d\n",
      inst_ptr[i].node[j], atoi(inst_ptr[i].node[j]), *mult);
-   if(*mult>1)   // unnamed is a bus
-    my_snprintf(str_node, S(str_node), "%s[%d:0]", (inst_ptr[i].node[j])+1, *mult-1);
-   else
-    my_snprintf(str_node, S(str_node), "%s", (inst_ptr[i].node[j])+1 );
+   if(hash_prefix_unnamed_net) {
+     if(*mult>1)   // unnamed is a bus
+      my_snprintf(str_node, S(str_node), "%s[%d:0]", (inst_ptr[i].node[j]), *mult-1);
+     else
+      my_snprintf(str_node, S(str_node), "%s", (inst_ptr[i].node[j]) );
+   } else {
+     if(*mult>1)   // unnamed is a bus
+      my_snprintf(str_node, S(str_node), "%s[%d:0]", (inst_ptr[i].node[j])+1, *mult-1);
+     else
+      my_snprintf(str_node, S(str_node), "%s", (inst_ptr[i].node[j])+1 );
+   }
    expandlabel(get_tok_value(
            (inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][j].prop_ptr,"name",0), mult);
    return expandlabel(str_node, &tmp);
@@ -1502,7 +1442,7 @@ void print_vhdl_primitive(FILE *fd, int inst) // netlist  primitives, 20071217
  int token_pos=0, escape=0;
  int no_of_pins=0;
  int quote=0; // 20171029
- struct hashentry *ptr;
+ // struct hashentry *ptr;
 
  my_strdup(&template,
      // get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"template",2));
@@ -1548,16 +1488,15 @@ void print_vhdl_primitive(FILE *fd, int inst) // netlist  primitives, 20071217
   {
    token[token_pos]='\0'; 
    token_pos=0;
-   ptr=hash_lookup(token+1, name, NULL, 0);  // lookup token
-   if(ptr!=NULL) 
-     value=ptr->value;
-   else
-     value=get_tok_value(template, token+1,0); // if not found get tok from tmplt
-
-   // alternative way
-   //value = get_tok_value(inst_ptr[inst].prop_ptr, token+1);
-   //if(value[0] == '\0')
-   // value=get_tok_value(template, token+1);
+   
+   // ptr=hash_lookup(token+1, name, NULL, 0);  // lookup token
+   // if(ptr!=NULL) 
+   //   value=ptr->value;
+   // else
+   //   value=get_tok_value(template, token+1,0); // if not found get tok from tmplt
+   value = get_tok_value(inst_ptr[inst].prop_ptr, token+1, 2);
+   if(value[0] == '\0')
+   value=get_tok_value(template, token+1, 0);
 
    if(value[0]!='\0')
    {  // instance names (name) and node labels (lab) go thru the expandlabel function.
@@ -1592,7 +1531,7 @@ void print_vhdl_primitive(FILE *fd, int inst) // netlist  primitives, 20071217
    {					// and node number: m1 n1 m2 n2 ....
     for(i=0;i<no_of_pins;i++)
     {
-      str_ptr =  pin_node(inst,i, &mult);
+      str_ptr =  pin_node(inst,i, &mult, 0);
       //fprintf(fd, "@%d %s ", mult, str_ptr); // 25122004 disabled bus handling, until verilog.awk knows about it
       fprintf(fd, "----pin(%s) ", str_ptr);
     }
@@ -1604,7 +1543,7 @@ void print_vhdl_primitive(FILE *fd, int inst) // netlist  primitives, 20071217
           token+2
          )
        ) {
-       str_ptr =  pin_node(inst,i, &mult);
+       str_ptr =  pin_node(inst,i, &mult, 0);
        //fprintf(fd, "@%d %s ", mult, str_ptr); // 25122004 disabled bus handling, until verilog.awk knows about it
        fprintf(fd, "----pin(%s) ", str_ptr);
        break; // 20171029
@@ -1615,7 +1554,7 @@ void print_vhdl_primitive(FILE *fd, int inst) // netlist  primitives, 20071217
      char tclcmd[strlen(token)+100] ;
      
      Tcl_ResetResult(interp);
-     sprintf(tclcmd, "tclpropeval {%s} %s %s", token, name, inst_ptr[inst].name);
+     sprintf(tclcmd, "tclpropeval {%s} {%s} {%s}", token, name, inst_ptr[inst].name);
      Tcl_EvalEx(interp, tclcmd, -1, TCL_EVAL_GLOBAL);
      fprintf(fd, "%s", Tcl_GetStringResult(interp));
    }
@@ -1651,7 +1590,7 @@ void print_verilog_primitive(FILE *fd, int inst) // netlist switch level primiti
  int token_pos=0, escape=0;
  int no_of_pins=0;
  int quote=0; // 20171029
- struct hashentry *ptr;
+ // struct hashentry *ptr;
 
  my_strdup(&template,
      // get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"template",2)); // 20150409
@@ -1698,16 +1637,15 @@ void print_verilog_primitive(FILE *fd, int inst) // netlist switch level primiti
   {
    token[token_pos]='\0'; 
    token_pos=0;
-   ptr=hash_lookup(token+1, name, NULL, 0);  // lookup token
-   if(ptr!=NULL) 
-     value=ptr->value;
-   else
-     value=get_tok_value(template, token+1,0); // if not found get tok from tmplt
 
-   // alternative way
-   //value = get_tok_value(inst_ptr[inst].prop_ptr, token+1);
-   //if(value[0] == '\0')
-   // value=get_tok_value(template, token+1);
+   //ptr=hash_lookup(token+1, name, NULL, 0);  // lookup token
+   //if(ptr!=NULL) 
+   //  value=ptr->value;
+   //else
+   //  value=get_tok_value(template, token+1,0); // if not found get tok from tmplt
+   value = get_tok_value(inst_ptr[inst].prop_ptr, token+1, 2);
+   if(value[0] == '\0')
+   value=get_tok_value(template, token+1, 0);
 
    if(value[0]!='\0')
    {  // instance names (name) and node labels (lab) go thru the expandlabel function.
@@ -1742,7 +1680,7 @@ void print_verilog_primitive(FILE *fd, int inst) // netlist switch level primiti
    {					// and node number: m1 n1 m2 n2 ....
     for(i=0;i<no_of_pins;i++)
     {
-      str_ptr =  pin_node(inst,i, &mult);
+      str_ptr =  pin_node(inst,i, &mult, 0);
       //fprintf(fd, "@%d %s ", mult, str_ptr); // 25122004 disabled bus handling, until verilog.awk knows about it
       fprintf(fd, "----pin(%s) ", str_ptr);
     }
@@ -1754,7 +1692,7 @@ void print_verilog_primitive(FILE *fd, int inst) // netlist switch level primiti
           token+2
          )
        ) {
-       str_ptr =  pin_node(inst,i, &mult);
+       str_ptr =  pin_node(inst,i, &mult, 0);
        //fprintf(fd, "@%d %s ", mult, str_ptr); // 25122004 disabled bus handling, until verilog.awk knows about it
        fprintf(fd, "----pin(%s) ", str_ptr);
        break; // 20171029
@@ -1765,7 +1703,7 @@ void print_verilog_primitive(FILE *fd, int inst) // netlist switch level primiti
      char tclcmd[strlen(token)+100] ;
      
      Tcl_ResetResult(interp);
-     sprintf(tclcmd, "tclpropeval {%s} %s %s", token, name, inst_ptr[inst].name);
+     sprintf(tclcmd, "tclpropeval {%s} {%s} {%s}", token, name, inst_ptr[inst].name);
      Tcl_EvalEx(interp, tclcmd, -1, TCL_EVAL_GLOBAL);
      fprintf(fd, "%s", Tcl_GetStringResult(interp));
    }
@@ -1804,7 +1742,7 @@ char *translate(int inst, char* s)
  char *tmp_sym_name;
  int sizetok=0;
  int result_pos=0, token_pos=0;
- struct hashentry *ptr;
+ // struct hashentry *ptr;
  struct stat time_buf;
  struct tm *tm;
  char file_name[4096];
@@ -1854,19 +1792,9 @@ char *translate(int inst, char* s)
   {
    token[token_pos]='\0'; 
    token_pos=0;
-   ptr=hash_lookup(token+1, inst_ptr[inst].instname, NULL, 0);
-   // 20161226
-   if(debug_var>=2) fprintf(errfp, "translate(): hash_lookup token=%s, instname=%s hash=%d ptr=%lx --> %s\n", 
-           token, inst_ptr[inst].instname, ptr? ptr->hash: 0, (unsigned long) ptr, ptr? ptr->value: "NULL");
 
-   // 20100401
-   if(ptr!=NULL)
-     value=ptr->value;
-   else {
-     value=get_tok_value((inst_ptr[inst].ptr+instdef)->templ, token+1,0); // if not found get tok from tmplt 20150409
-   }
-   // /20100401
-
+   value = get_tok_value(inst_ptr[inst].prop_ptr, token+1, 0); // 20171205 use get_tok_value instead of hash_lookup
+   if(!value[0]) value=get_tok_value((inst_ptr[inst].ptr+instdef)->templ, token+1, 0);
 
    if(value[0] != 0) {
     tmp=strlen(value);

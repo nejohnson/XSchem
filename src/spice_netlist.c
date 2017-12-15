@@ -44,7 +44,7 @@ void global_spice_netlist(int global)  // netlister driver
    my_snprintf(name, S(name), "savefile %s.sch .sch",schematic[currentsch]);
    if(debug_var>=1) fprintf(errfp, "global_spice_netlist(): saving: %s\n",name);
    tkeval(name);
-   strcpy(schematic[currentsch], Tcl_GetStringResult(interp));
+   my_strncpy(schematic[currentsch], Tcl_GetStringResult(interp), S(schematic[currentsch]));
    if(!strcmp(schematic[currentsch],"")) return;
    save_schematic(schematic[currentsch]);
  }
@@ -139,7 +139,7 @@ void global_spice_netlist(int global)  // netlister driver
     }
    }
    //clear_drawing();
-   strcpy(schematic[currentsch] , "");
+   my_strncpy(schematic[currentsch] , "", S(schematic[currentsch]));
    currentsch--;
    remove_symbols();
    load_schematic(1,NULL,0);
@@ -236,7 +236,7 @@ void spice_block_netlist(FILE *fd, int i)  //20081223
      fprintf(fd, "\n");
   
      //clear_drawing();
-     strcpy(schematic[currentsch],instdef[i].name);
+     my_strncpy(schematic[currentsch],instdef[i].name, S(schematic[currentsch]));
      load_schematic(1,NULL,0);
      spice_netlist(fd, spice_stop);  // 20111113 added spice_stop
      netlist_count++;
@@ -263,7 +263,7 @@ void spice_netlist(FILE *fd, int spice_stop )
  static char *type=NULL;
  static char *place=NULL;  // 20121223
 
- prepare_netlist_structs();
+ prepare_netlist_structs(0);
  modified=1; // 20160302 prepare_netlist_structs could change schematic (wire node naming for example)
  traverse_node_hash();  // print all warnings about unconnected floatings etc
 

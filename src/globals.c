@@ -174,6 +174,7 @@ int netlist_show=0;
 int flat_netlist=0;
 int netlist_type=-1;
 int prepared_netlist_structs=0;
+int prepared_hilight_structs=0;
 //
 // following data is relative to the current schematic
 //
@@ -216,6 +217,10 @@ Visual *visual; //20171111
 int dark_colorscheme=1; // 20171113
 double color_dim=0.0; // 20171123
 int skip_dim_background=1;
+int no_undo=0; // 20171204
+int enable_drill=0; // 20171211 pass net hilights through components with 'propagate_to' property set on pins
+struct instpinentry *instpintable[NBOXES][NBOXES];
+struct wireentry *wiretable[NBOXES][NBOXES];
 
 #ifdef HAS_CAIRO
 cairo_surface_t *sfc, *save_sfc;

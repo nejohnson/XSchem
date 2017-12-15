@@ -272,6 +272,11 @@ int callback(int event, int mx, int my, KeySym key,
      launcher();
      break;
    }
+   if(key == 'h'  && state==Mod1Mask)	// create symbol pins from schematic pins 20171208
+   {
+     tkeval("schpins_to_sympins");
+     break;
+   }
    if(key == 'h' && state == 0) {
      // horizontally constrained drag 20171023
      if ( horizontal_move ) {
@@ -351,10 +356,14 @@ int callback(int event, int mx, int my, KeySym key,
           found=1;break;
          }
         }
-        if( lastselected && strcmp(ss, inst_ptr[selectedgroup[0].n].name) ) 
-          place_symbol(-1,ss,mx, my, 0, 0, NULL,3);
-        else if( lastselected==0 ) 
-          place_symbol(-1,ss,mx, my, 0, 0, NULL,3);
+        // ??? 20171214 
+        // if( lastselected && strcmp(ss, inst_ptr[selectedgroup[0].n].name) ) 
+        //   place_symbol(-1,ss,mx, my, 0, 0, NULL,3, 1);
+        // else if( lastselected==0 ) 
+        //   place_symbol(-1,ss,mx, my, 0, 0, NULL,3, 1);
+        // /???
+        place_symbol(-1,ss,mx, my, 0, 0, NULL,3, 1);
+
         if(found) {
           save_schematic(NULL);
           remove_symbols();
@@ -444,7 +453,7 @@ int callback(int event, int mx, int my, KeySym key,
      Box *rect;
 
      rebuild_selected_array();
-     prepare_netlist_structs();
+     prepare_netlist_structs(1);
      for(k=0; k<lastselected; k++) {
        if(selectedgroup[k].type!=ELEMENT) continue;
        j = selectedgroup[k].n ;
@@ -458,7 +467,7 @@ int callback(int event, int mx, int my, KeySym key,
        for(i=0;i<npin;i++) {
          my_strdup(&labname,get_tok_value(rect[i].prop_ptr,"name",0));
          my_strdup(&lab, expandlabel(labname, &mult));
-         my_strdup(&netname, pin_node(j,i,&mult));
+         my_strdup(&netname, pin_node(j,i,&mult, 0));
          if(debug_var>=1) fprintf(errfp, "i=%d labname=%s explabname = %s  net = %s\n", i, labname, lab, netname);
          if(netname && strcmp(lab, netname)) { 
            if(debug_var>=1) fprintf(errfp, "hilight: %s\n", netname);
@@ -469,7 +478,6 @@ int callback(int event, int mx, int my, KeySym key,
 
      } 
      draw_hilight_net();
-     //delete_netlist_structs(); // 20161222 done in prepare_netlist_structs() when needed
 
      // /20130628
      break;
@@ -820,7 +828,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key==XK_Insert)			// insert sym
    {
-    place_symbol(-1,NULL,mousex_snap, mousey_snap, 0, 0, NULL,3);
+    place_symbol(-1,NULL,mousex_snap, mousey_snap, 0, 0, NULL,3, 1);
     break;
    }
    if(key=='s' && state & Mod1Mask)			// reload
@@ -829,7 +837,8 @@ int callback(int event, int mx, int my, KeySym key,
      tkeval("tk_messageBox -type okcancel -message {Are you sure you want to reload from disk?}");
      if(strcmp(Tcl_GetStringResult(interp),"ok")==0) {
         remove_symbols();
-        load_schematic(1,NULL, 1);
+        if(current_type==SCHEMATIC) load_schematic(1,NULL, 1);
+        else load_symbol(NULL); // 20171206
         //zoom_full(1);
         draw();
      }
@@ -846,12 +855,20 @@ int callback(int event, int mx, int my, KeySym key,
     change_elem_order();
     break;
    }
-   if(key=='k' && state==ControlMask)				// hilight net
+   if(key=='k' && state==ControlMask)				// unhilight net
    {
     //// 20160413
     unhilight_net();
     undraw_hilight_net();
     // draw();
+    break;
+   }
+   if(key=='K' && state==(ControlMask|ShiftMask))	// hilight net drilling thru elements 
+							// with 'propagate_to' prop set on pins
+   {
+    enable_drill=1;
+    hilight_net();
+    draw_hilight_net();
     break;
    }
    if(key=='k' && state==0)				// hilight net
@@ -862,6 +879,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='K' && state == ShiftMask)				// delete hilighted nets
    {
+    enable_drill=0;
     delete_hilight_net();
     // 20160413
     undraw_hilight_net();
@@ -959,22 +977,34 @@ int callback(int event, int mx, int my, KeySym key,
     }
     new_line(PLACE); break;
    }
-   if(key=='F' && state==ShiftMask)				// Flip
+   if(key=='F' && state==ShiftMask)			// Flip
    {
     if(ui_state & STARTMOVE) move_objects(FLIP,0,0,0);
     if(ui_state & STARTCOPY) copy_objects(FLIP);
     break;
    }
-   if(key=='f'&& state==Mod1Mask)			// Fullscreen
+   if(key=='F' && state==(ShiftMask|Mod1Mask))		// Fullscreen
    {
     if(debug_var>=1) fprintf(errfp, "callback(): toggle fullscreen\n");
     toggle_fullscreen();
     break;
    }
-   if(key=='R' && state==ShiftMask)				// Rotate
+   if(key=='f' && state==Mod1Mask)		// flip objects around their anchor points 20171208
+   {
+    if(ui_state & STARTMOVE) move_objects(FLIP|ROTATELOCAL,0,0,0);
+    if(ui_state & STARTCOPY) copy_objects(FLIP|ROTATELOCAL);
+    break;
+   }
+   if(key=='R' && state==ShiftMask)		// Rotate
    {
     if(ui_state & STARTMOVE) move_objects(ROTATE,0,0,0);
     if(ui_state & STARTCOPY) copy_objects(ROTATE);
+    break;
+   }
+   if(key=='r' && state==Mod1Mask)		// Rotate objects around their anchor points 20171208
+   {
+    if(ui_state & STARTMOVE) move_objects(ROTATE|ROTATELOCAL,0,0,0);
+    if(ui_state & STARTCOPY) copy_objects(ROTATE|ROTATELOCAL);
     break;
    }
    if(key=='m' && state==0 && !(ui_state & (STARTMOVE | STARTCOPY)))// move selected obj.
@@ -1095,12 +1125,34 @@ int callback(int event, int mx, int my, KeySym key,
     }
     break;
    }
-   if(key==';' && state & Mod1Mask ) 	// debug:  for performance testing
+   if(key==';' && state & ControlMask ) 	// testmode 20171203
+   {
+    int i;
+    rebuild_selected_array();
+    if(1) {
+      del_object_table();
+      for(i=0;i<lastinst; i++) hash_object(i);
+    }
+    if(lastselected==1 && selectedgroup[0].type==ELEMENT) {
+      object_iterator(selectedgroup[0].n);
+    }
+    break;
+   }
+   if(key==';' && state & Mod1Mask ) 	// testmode:  for performance testing
    {
     draw_stuff(); 
     draw();
     break;
    }
+   if(key=='#' && !(state&ControlMask)) 	// testmode
+   {
+    clock_t start=clock();
+      // select_inside(-1e12, -1e12, 1e12, 1e12,SELECTED);
+      select_all();
+    fprintf(errfp,"done in %g seconds\n", ((double) (clock()-start))/CLOCKS_PER_SEC);
+    break;
+   }
+
    if(key=='f' && state == ControlMask)         // search
    {
     Tcl_EvalEx(interp,"property_search", -1, TCL_EVAL_GLOBAL );
@@ -1116,7 +1168,7 @@ int callback(int event, int mx, int my, KeySym key,
      view_zoom(0.0); 
      break;
    }
-   if(key=='!') 	                // empty slot
+   if(key=='!') 	                // testmode
    {
      XFillRectangle(display, window, gcstipple[8], 0, 0, xrect[0].width, xrect[0].height);
       //if(has_x) XCopyArea(display, cad_icon_pixmap, window, gc[WIRELAYER], 0, 0, 60, 41,  100, 100);

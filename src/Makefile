@@ -19,8 +19,8 @@ TCLVER=8.6
 ## set to 1 for CAIRO antialiased fonts
 HAS_CAIRO=1
 
-HAS_XCB=0
-HAS_XRENDER=0
+HAS_XCB=1
+HAS_XRENDER=1
 
 XCB_INC=
 ifeq ($(HAS_XCB),1)
@@ -46,7 +46,7 @@ endif
 
 ## to fix rendering problems due to bugs in the exceed turboX server
 ## add -DTURBOX_FIX
-MOREFLAGS=   -g
+MOREFLAGS=  -g 
 
 CFLAGS  = -Wall  $(MOREFLAGS)  -I/usr/include/tcl${TCLVER} $(CAIRO_INCLUDES) -I/home/sschippe/include
 LDFLAGS = -L/usr/X11R6/lib -L/home/sschippe/lib $(MOREFLAGS) -lX11 -lm -lXpm -ltcl${TCLVER} -ltk${TCLVER} \

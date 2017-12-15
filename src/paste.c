@@ -29,6 +29,7 @@
 void merge_text(FILE *fd)
 {
    int i;
+   char *strlayer;
     check_text_storage();
     i=lasttext;
      textelement[i].txt_ptr=NULL;
@@ -38,9 +39,15 @@ void merge_text(FILE *fd)
       &textelement[i].flip, &textelement[i].xscale,
       &textelement[i].yscale);
      textelement[i].prop_ptr=NULL;
+     textelement[i].font=NULL;
      textelement[i].sel=0;
      load_ascii_string(&textelement[i].prop_ptr,fd);
-     select_text(i,SELECTED);
+     my_strdup(&textelement[i].font, get_tok_value(textelement[i].prop_ptr, "font", 0));//20171206
+     strlayer = get_tok_value(textelement[i].prop_ptr, "layer", 0); //20171206
+     if(strlayer[0]) textelement[i].layer = atoi(strlayer);
+     else textelement[i].layer = -1;
+
+     select_text(i,SELECTED, 1);
      modified=1;
      lasttext++;
 }
@@ -54,7 +61,7 @@ void merge_wire(FILE *fd)
     fscanf(fd, "%lf %lf %lf %lf",&x1, &y1, &x2, &y2 );
     load_ascii_string( &ptr, fd);
     storeobject(-1, x1,y1,x2,y2,WIRE,0,SELECTED,ptr);
-    select_wire(i, SELECTED);
+    select_wire(i, SELECTED, 1);
 }
 
 void merge_box(FILE *fd)
@@ -64,8 +71,8 @@ void merge_box(FILE *fd)
 
     fscanf(fd, "%d",&c);
     if(c>=cadlayers) {
-      fprintf(errfp,"FATAL: rectangle layer > defined cadlayers, increase cadlayers\n");
-      Tcl_Eval(interp, "exit");
+      fprintf(errfp,"Rectangle layer > defined cadlayers, increase cadlayers\n");
+      c=cadlayers-1;
     } // 20150408
     check_box_storage(c);
     i=lastrect[c];
@@ -88,8 +95,8 @@ void merge_polygon(FILE *fd)
 
     fscanf(fd, "%d %d",&c, &points);
     if(c>=cadlayers) {
-      fprintf(errfp,"FATAL: polygon layer > defined cadlayers, increase cadlayers\n");
-      Tcl_Eval(interp, "exit");
+      fprintf(errfp,"Rectangle layer > defined cadlayers, increase cadlayers\n");
+      c=cadlayers-1;
     } // 20150408
     check_polygon_storage(c);
     i=lastpolygon[c];
@@ -119,8 +126,8 @@ void merge_line(FILE *fd)
 
     fscanf(fd, "%d",&c);
     if(c>=cadlayers) {
-      fprintf(errfp,"FATAL: line layer > defined cadlayers, increase cadlayers\n");
-      Tcl_Eval(interp, "exit");
+      fprintf(errfp,"Rectangle layer > defined cadlayers, increase cadlayers\n");
+      c=cadlayers-1;
     } // 20150408
     check_line_storage(c);
     i=lastline[c];

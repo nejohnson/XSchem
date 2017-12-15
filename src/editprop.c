@@ -149,7 +149,7 @@ void my_free(void *ptr)
  free(ptr);
 }
 
-void my_strncpy(char *d, char *s, int n)
+void my_strncpy(char *d, const char *s, int n)
 {
  int i=0;
  n-=1;
@@ -223,6 +223,8 @@ void edit_text_property(int x)
    double xx1,yy1,xx2,yy2;
    double pcx,pcy;	// pin center 20070317
    char property[1024];// used for float 2 string conv (xscale  and yscale) overflow safe
+   char *strlayer;
+
    if(debug_var>=1) fprintf(errfp, "edit_text_property(): entering\n");
    sel = selectedgroup[0].n;
    if(textelement[sel].prop_ptr !=NULL)
@@ -312,8 +314,11 @@ void edit_text_property(int x)
 	       pcy = (rect[PINLAYER][l].y1+rect[PINLAYER][l].y2)/2.0;
 
                if(
-                   (fabs( (yy1+yy2)/2 - pcy) < CADGRID/2 && fabs((xx1+xx2)/2 - pcx) < CADGRID*6) ||
-                   (fabs( (xx1+xx2)/2 - pcx) < CADGRID/2 && fabs((yy1+yy2)/2 - pcy) < CADGRID*2)
+                   // 20171206
+                   (fabs( (yy1+yy2)/2 - pcy) < CADGRID/2 && fabs(xx1 - pcx) < CADGRID*6) ||
+                   (fabs( (xx1+xx2)/2 - pcx) < CADGRID/2 && fabs(yy1 - pcy) < CADGRID*6)
+                   // (fabs( (yy1+yy2)/2 - pcy) < CADGRID/2 && fabs((xx1+xx2)/2 - pcx) < CADGRID*6) ||
+                   // (fabs( (xx1+xx2)/2 - pcx) < CADGRID/2 && fabs((yy1+yy2)/2 - pcy) < CADGRID*2)
                ) {
                  if(x==0)  // 20080804
                    my_strdup(&rect[PINLAYER][l].prop_ptr, 
@@ -335,6 +340,10 @@ void edit_text_property(int x)
        }
        if(x==0) {
        my_strdup(&textelement[sel].prop_ptr,(char *) Tcl_GetVar(interp,"props",TCL_GLOBAL_ONLY));
+       my_strdup(&textelement[sel].font, get_tok_value(textelement[sel].prop_ptr, "font", 0));//20171206
+       strlayer = get_tok_value(textelement[sel].prop_ptr, "layer", 0); // 20171206
+       if(strlayer[0]) textelement[sel].layer = atoi(strlayer);
+       else textelement[sel].layer=-1;
        textelement[sel].xscale=atof(Tcl_GetVar(interp,"hsize",TCL_GLOBAL_ONLY));
        textelement[sel].yscale=atof(Tcl_GetVar(interp,"vsize",TCL_GLOBAL_ONLY));
        }
@@ -353,10 +362,10 @@ void edit_text_property(int x)
 
        bbox(ADD, xx1, yy1, xx2, yy2 );        
     
-       bbox(SET,0.0,0.0,0.0,0.0);
-       draw();
-       bbox(END,0.0,0.0,0.0,0.0);
      }
+     bbox(SET,0.0,0.0,0.0,0.0);
+     draw();
+     bbox(END,0.0,0.0,0.0,0.0);
    }
 }
 
@@ -459,8 +468,7 @@ void update_symbol(char *result, int x)
     }
    }
    else sym_number=-1;
-   //if(hash_lookup("name", get_tok_value( Tcl_GetStringResult(interp),"name"),NULL,0)==NULL)
-   //  return;
+
    bbox(BEGIN,0.0,0.0,0.0,0.0);
 
    for(k=0;k<lastselected;k++)

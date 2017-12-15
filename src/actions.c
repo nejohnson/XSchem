@@ -323,7 +323,7 @@ void ask_new_file(void)
      if(debug_var>=1) fprintf(errfp, "ask_new_file(): load file: %s\n",Tcl_GetStringResult(interp));
      delete_hilight_net();
      currentsch = 0;
-     strcpy(schematic[currentsch], Tcl_GetStringResult(interp));
+     my_strncpy(schematic[currentsch], Tcl_GetStringResult(interp), S(schematic[currentsch]));
      //clear_drawing();
      remove_symbols();
      if(strstr(name,".sym")) load_symbol( NULL);
@@ -401,6 +401,11 @@ void remove_symbol(void)
     my_free(instdef[j].txtptr[i].txt_ptr);
     instdef[j].txtptr[i].txt_ptr=NULL;
    }
+   if(instdef[j].txtptr[i].font != NULL)
+   {
+    my_free(instdef[j].txtptr[i].font);
+    instdef[j].txtptr[i].font=NULL;
+   }
   }
   if(instdef[j].txtptr) my_free(instdef[j].txtptr);
   instdef[j].txtptr =NULL;
@@ -442,6 +447,8 @@ void clear_drawing(void)
  lastinst = 0;
  for(i=0;i<lasttext;i++)
  {
+  if(textelement[i].font!=NULL) 
+    {my_free(textelement[i].font);textelement[i].font=NULL;}
   if(textelement[i].prop_ptr!=NULL) 
     {my_free(textelement[i].prop_ptr);textelement[i].prop_ptr=NULL;}
   if(textelement[i].txt_ptr!=NULL) 
@@ -477,34 +484,50 @@ void clear_drawing(void)
 
 void attach_labels_to_inst() // offloaded from callback.c 20171005
 {
-  Instdef *symbol, *symbol1;
+  Instdef *symbol;
   int npin, i, j;
-  int npin1;
-  double x0,y0, x10, y10, pinx0, piny0, pin1x0, pin1y0; 
+  double x0,y0, pinx0, piny0; 
   int flip, rot, rot1 ; // 20101129 
-  Box *rect, *rect1;
+  Box *rect;
   static char *labname=NULL;
   static char *prop=NULL; // 20161122 overflow safe
   char symname_pin[] = "devices/lab_pin";
   char symname_wire[] = "devices/lab_wire"; // 20171005
   static char *type=NULL;
   int dir;
-  int drawsym;
-  int k,ii,iii, skip;
+  int k,ii, skip;
+  int do_all_inst=0; // 20171206
+  const char *rot_txt;
+  int rotated_text=-1; // 20171208
+
+  struct wireentry *wptr; // 20171214
+  struct instpinentry *iptr;
+  int sqx, sqy;
+  int first_call;
 
   rebuild_selected_array();
   k = lastselected;
+  first_call=1; // 20171214 for place_symbol--> new_prop_string
+  prepare_netlist_structs(1);
   if(k) push_undo(); // 20150327
   bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0);
   for(j=0;j<k;j++) if(selectedgroup[j].type==ELEMENT) {
 
 
-    // 20171005
     my_strdup(&prop, inst_ptr[selectedgroup[j].n].instname);
     my_strcat(&prop, "_");
     Tcl_SetVar(interp,"custom_label_prefix", prop, TCL_GLOBAL_ONLY);
-    tkeval("attach_labels_to_inst");
-    if(!strcmp(Tcl_GetVar(interp, "rcode", TCL_GLOBAL_ONLY),"") ) continue;
+    // 20171005
+    if(!do_all_inst) {
+      tkeval("attach_labels_to_inst");
+      if(!strcmp(Tcl_GetVar(interp, "rcode", TCL_GLOBAL_ONLY),"") ) {
+        bbox(END, 0., 0., 0., 0.);
+        return;
+      }
+    }
+
+    rot_txt = Tcl_GetVar(interp,"rotated_text",TCL_GLOBAL_ONLY);
+    if(strcmp(rot_txt,"")) rotated_text=atoi(rot_txt); // 20171208
 
     // 20111030 skip labels / pins
     // my_strdup(&type,get_tok_value((inst_ptr[selectedgroup[j].n].ptr+instdef)->prop_ptr,"type",0)); // 20150409
@@ -512,6 +535,8 @@ void attach_labels_to_inst() // offloaded from callback.c 20171005
     if( type && (strcmp(type,"label") && strcmp(type,"ipin")&&strcmp(type,"opin")&&strcmp(type,"iopin") )==0)
       continue;
     // /20111030
+
+    if(!do_all_inst && !strcmp(Tcl_GetVar(interp,"do_all_inst",TCL_GLOBAL_ONLY),"1")) do_all_inst=1; // 20171206
 
     if(debug_var>=1) fprintf(errfp, " 200711 1--> %s %.16g %.16g   %s\n", 
         inst_ptr[selectedgroup[j].n].name, 
@@ -528,58 +553,48 @@ void attach_labels_to_inst() // offloaded from callback.c 20171005
     rect=symbol->boxptr[PINLAYER];
     
     for(i=0;i<npin;i++) {
-       drawsym=0;
        my_strdup(&labname,get_tok_value(rect[i].prop_ptr,"name",0));
        if(debug_var>=1) fprintf(errfp,"200711 2 --> labname=%s\n", labname);
        
+       pinx0 = (rect[i].x1+rect[i].x2)/2;
+       piny0 = (rect[i].y1+rect[i].y2)/2;
+
        if(strcmp(get_tok_value(rect[i].prop_ptr,"dir",0),"in")) dir=1; // out or inout pin
        else dir=0; // input pin
 
-       ROTATION(0.0, 0.0, (rect[i].x1+rect[i].x2)/2, (rect[i].y1+rect[i].y2)/2, pinx0, piny0); // 20101129
+       // opin or iopin on left of symbol--> reverse orientation 20171205
+       if(rotated_text ==-1 && dir==1 && pinx0<0) dir=0;
+      
+       ROTATION(0.0, 0.0, pinx0, piny0, pinx0, piny0); // 20101129
+ 
        pinx0 += x0;
        piny0 += y0;
-       // pinx0=x0+(rect[i].x1+rect[i].x2)/2;
-       // piny0=y0+(rect[i].y1+rect[i].y2)/2;
+
+       get_square(pinx0, piny0, &sqx, &sqy);
+       iptr=instpintable[sqx][sqy];
+       wptr=wiretable[sqx][sqy];
 
        skip=0;
-       for(ii=0;ii<lastinst;ii++) {   // 20090217 no labels if already labeled pin
-         if(ii == selectedgroup[j].n) continue;
-  
-       // 20111030 correctly handle pins and orientations
-         x10 = inst_ptr[ii].x0;
-         y10 = inst_ptr[ii].y0;
-         rot = inst_ptr[ii].rot;
-         flip = inst_ptr[ii].flip;
-         symbol1 = instdef + inst_ptr[ii].ptr;
-         npin1 = symbol1->rects[PINLAYER];
-         rect1 = symbol1->boxptr[PINLAYER];
-
-         for(iii=0;iii<npin1;iii++) {
-           ROTATION(0.0, 0.0, (rect1[iii].x1+rect1[iii].x2)/2, (rect1[iii].y1+rect1[iii].y2)/2, pin1x0, pin1y0);
-           pin1x0 += x10;
-           pin1y0 += y10;
-
-       // /20111030
-
-
-           if( pin1x0 == pinx0 && pin1y0 == piny0 ) {
-             skip=1;
-             break;
-           }
-
-         // 20111030
+       while(iptr) {
+         ii = iptr->n;
+         if(ii == selectedgroup[j].n) {
+           iptr = iptr->next;
+           continue;
          }
-         rot = inst_ptr[selectedgroup[j].n].rot;  // restore original flip and rot values
-         flip = inst_ptr[selectedgroup[j].n].flip;
-         // /20111030
-       }
-       for(ii=0; ii<lastwire; ii++) {  // 20090225 also skip if wires attached
-
-         if( touch(wire[ii].x1, wire[ii].y1, wire[ii].x2, wire[ii].y2, pinx0, piny0)) {
-
+  
+         if( iptr->x0 == pinx0 && iptr->y0 == piny0 ) {
            skip=1;
            break;
          }
+         iptr = iptr->next;
+       }
+       while(wptr) {
+         if( touch(wire[wptr->n].x1, wire[wptr->n].y1,
+             wire[wptr->n].x2, wire[wptr->n].y2, pinx0, piny0) ) {
+           skip=1;
+           break;
+         }
+         wptr = wptr->next;
        }
        if(!skip) {
          my_strdup(&prop, "name=p1 lab=");
@@ -592,12 +607,18 @@ void attach_labels_to_inst() // offloaded from callback.c 20171005
 
          my_strcat(&prop, labname);
          dir ^= flip; // 20101129  20111030
-         rot1=rot; // 20111103
-         if(rot1==1 || rot1==2) { dir=!dir;rot1 = (rot1+2) %4;}  // 20111103
-         if(!strcmp(Tcl_GetVar(interp,"use_lab_wire",TCL_GLOBAL_ONLY),"0")) {
-           place_symbol(-1,symname_pin, pinx0, piny0, rot1, dir, prop, drawsym);
+         if(rotated_text ==-1) {
+           rot1=rot;
+           if(rot1==1 || rot1==2) { dir=!dir;rot1 = (rot1+2) %4;}  // 20111103
          } else {
-           place_symbol(-1,symname_wire, pinx0, piny0, rot1, dir, prop, drawsym);
+           rot1=(rot+rotated_text)%4; // 20111103 // 20171208 text_rotation
+         }
+         if(!strcmp(Tcl_GetVar(interp,"use_lab_wire",TCL_GLOBAL_ONLY),"0")) {
+           place_symbol(-1,symname_pin, pinx0, piny0, rot1, dir, prop, 0, first_call);
+           first_call=0;
+         } else {
+           place_symbol(-1,symname_wire, pinx0, piny0, rot1, dir, prop, 0, first_call);
+           first_call=0;
          }
 
 
@@ -605,7 +626,7 @@ void attach_labels_to_inst() // offloaded from callback.c 20171005
        if(debug_var>=1) fprintf(errfp, "%d   %.16g %.16g %s\n", i, pinx0, piny0,labname);
     }
   }
-  // draw things if last place_symbol was skipped
+  // draw things 
   bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
   draw();
   bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
@@ -615,8 +636,11 @@ void attach_labels_to_inst() // offloaded from callback.c 20171005
 // draw_sym==1 end bbox, draw placed symbols 
 // draw_sym==2 start  bbox
 // draw_sym==0 dont draw
+//
+// first_call: set to 1 on first invocation for a given set of symbols (same prefix)
+// set to 0 on next calls, this speeds up searching for unique names in prop string
 void place_symbol(int pos,char *symbol_name, double x, double y, int rot, int flip, 
-                   char *inst_props, int draw_sym)
+                   char *inst_props, int draw_sym, int first_call)
 // if symbol_name is a valid string load specified cell and
 // use the given params, otherwise query user
 {
@@ -667,7 +691,7 @@ void place_symbol(int pos,char *symbol_name, double x, double y, int rot, int fl
   inst_ptr[n].prop_ptr=NULL;
   if(debug_var>=1) fprintf(errfp, "place_symbol() :all inst_ptr members set\n");  // 03-02-2000
   if(inst_props) {
-    new_prop_string(&inst_ptr[n].prop_ptr, inst_props,0);
+    new_prop_string(&inst_ptr[n].prop_ptr, inst_props,!first_call); // 20171214 first_call
   }
   else {
     set_inst_prop(n);
@@ -801,14 +825,10 @@ void descend(void)
     my_strcat(&name, ".sch .sch");
     if(debug_var>=1) fprintf(errfp, "descend(): saving: %s\n",name);
     tkeval(name);
-    strcpy(schematic[currentsch], Tcl_GetStringResult(interp));
+    my_strncpy(schematic[currentsch], Tcl_GetStringResult(interp), S(schematic[currentsch]));
     if(!strcmp(schematic[currentsch],"")) return;
     save_ok = save_schematic(schematic[currentsch]);
 
-//    Tcl_SetVar(interp,"entry1",schematic[currentsch],TCL_GLOBAL_ONLY);
-//    tkeval("entry_line {Save file:}");
-//    strcpy(schematic[currentsch], Tcl_GetStringResult(interp));
-//    if(!strcmp(schematic[currentsch],"")) return;
     if(save_ok==-1) return; // 20171020
   }
 
@@ -839,7 +859,7 @@ void descend(void)
   my_strcat(&sch_prefix[currentsch+1], ".");
   if(debug_var>=1) fprintf(errfp, "descend(): current path: %s\n", sch_prefix[currentsch+1]);
 
-  strcpy(schematic[currentsch+1],inst_ptr[selectedgroup[0].n].name);
+  my_strncpy(schematic[currentsch+1],inst_ptr[selectedgroup[0].n].name, S(schematic[currentsch+1]));
   //clear_drawing();
   previous_instance[currentsch]=selectedgroup[0].n;
   zoom_array[currentsch].x=xorigin;
@@ -852,9 +872,8 @@ void descend(void)
   load_schematic(1,NULL,1);
   if(hilight_nets) 
   {
-    prepare_netlist_structs();
-    //delete_netlist_structs(); // 20161222 done in load_schematic() and in prepare_netlist_structs() when needed
- 
+    prepare_netlist_structs(1);
+    if(enable_drill) drill_hilight(); // 20171212
   }
   zoom_full(1);
  }
@@ -896,7 +915,7 @@ void go_back(int confirm) // 20171006 add confirm
    }
   }
   if(save_ok==-1) return; // 20171020
-  strcpy(schematic[currentsch] , "");
+  my_strncpy(schematic[currentsch] , "", S(schematic[currentsch]));
   currentsch--;
   remove_symbols();
   load_schematic(1,NULL,1);
@@ -904,10 +923,7 @@ void go_back(int confirm) // 20171006 add confirm
 
   if(prev_curr_type==SCHEMATIC) {
     hilight_parent_pins();
-  } // else {
-    //   prepare_netlist_structs();  // 20150407 moved above
-    //   delete_netlist_structs();
-    //}
+  }
   xorigin=zoom_array[currentsch].x;
   yorigin=zoom_array[currentsch].y;
   zoom=zoom_array[currentsch].zoom;
@@ -1026,7 +1042,7 @@ void calc_drawing_bbox(Box *boundbox)
  }
  for(i=0;i<lastinst;i++)
  {
-  symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1, &inst_ptr[i].x2, &inst_ptr[i].y2); //20171201
+  // symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1, &inst_ptr[i].x2, &inst_ptr[i].y2); // cpu hog 20171206
   tmp.x1=inst_ptr[i].x1;
   tmp.y1=inst_ptr[i].y1;
   tmp.x2=inst_ptr[i].x2;
@@ -1042,6 +1058,7 @@ void zoom_full(int dr)
   Box boundbox;
   double yy1;
 
+  if(!has_x) return;
   if(change_lw) lw = lw_double=1.;
   areax1 = -2*lw;
   areay1 = -2*lw;
@@ -1135,6 +1152,16 @@ void zoom_box(int what)
     RECTORDER(xx1,yy1,xx2,yy2);
     drawtemprect(gctiled,NOW, xx1,yy1,xx2,yy2);
     x2=mousex_snap;y2=mousey_snap;
+
+
+    // 20171211 update selected objects while dragging
+    rebuild_selected_array();
+    bbox(BEGIN,0.0, 0.0, 0.0, 0.0);
+    bbox(ADD, xx1, yy1, xx2, yy2);
+    bbox(SET,0.0, 0.0, 0.0, 0.0);
+    draw_selection(gc[SELLAYER], 0);
+    bbox(END,0.0, 0.0, 0.0, 0.0);
+
     xx1=x1;yy1=y1;xx2=x2;yy2=y2;
     RECTORDER(xx1,yy1,xx2,yy2);
     drawtemprect(gc[SELLAYER], NOW, xx1,yy1,xx2,yy2);
@@ -1243,7 +1270,6 @@ void change_layer()
        y2 = rect[c][n].y2;
        storeobject(-1, x1,y1,x2,y2,RECT,rectcolor, 0, rect[c][n].prop_ptr);
      }
-     // 20171115 add polygon <<<<
    }
    if(lastselected) delete_only_rect_and_line_and_poly();
    unselect_all();
@@ -1471,10 +1497,11 @@ void place_text(int draw_text, double mx, double my)
 {
   char *txt;
   int textlayer;
+  char *strlayer;
 
   // 20171112
   #ifdef HAS_CAIRO
-  char *textprop, *textfont;
+  char  *textfont;
   #endif
 
   Tcl_SetVar(interp,"props","",TCL_GLOBAL_ONLY);
@@ -1494,6 +1521,7 @@ void place_text(int draw_text, double mx, double my)
   check_text_storage();
   textelement[lasttext].txt_ptr=NULL;
   textelement[lasttext].prop_ptr=NULL;  // 20111006 added missing initialization of pointer
+  textelement[lasttext].font=NULL;  // 20171206
   my_strdup(&textelement[lasttext].txt_ptr, txt);
   textelement[lasttext].x0=mx;
   textelement[lasttext].y0=my;
@@ -1504,20 +1532,20 @@ void place_text(int draw_text, double mx, double my)
    atof(Tcl_GetVar(interp,"hsize",TCL_GLOBAL_ONLY));
   textelement[lasttext].yscale=
    atof(Tcl_GetVar(interp,"vsize",TCL_GLOBAL_ONLY));
-   my_strdup(& textelement[lasttext].prop_ptr, (char *)Tcl_GetVar(interp,"props",TCL_GLOBAL_ONLY));
+   my_strdup(&textelement[lasttext].prop_ptr, (char *)Tcl_GetVar(interp,"props",TCL_GLOBAL_ONLY));
   // debug ...
   // textelement[lasttext].prop_ptr=NULL;
   if(debug_var>=1) fprintf(errfp, "place_text(): done text input\n");
-
+  strlayer = get_tok_value(textelement[lasttext].prop_ptr, "layer", 0);
+  if(strlayer[0]) textelement[lasttext].layer = atoi(strlayer);
+  else textelement[lasttext].layer = -1;
+  my_strdup(&textelement[lasttext].font, get_tok_value(textelement[lasttext].prop_ptr, "font", 0));//20171206
   textlayer = TEXTLAYER;
   #ifdef HAS_CAIRO
-  textprop = get_tok_value(textelement[lasttext].prop_ptr, "layer", 0);
-  if(textprop[0]) {
-    textlayer = atoi(textprop);
-    if(textlayer < 0 || textlayer >= cadlayers) textlayer = TEXTLAYER;
-  }
-  textfont = get_tok_value(textelement[lasttext].prop_ptr, "font", 0);
-  if(textfont[0]) {
+  textlayer = textelement[lasttext].layer;
+  if(textlayer < 0 || textlayer >= cadlayers) textlayer = TEXTLAYER;
+  textfont = textelement[lasttext].font;
+  if(textfont && textfont[0]) {
     cairo_save(ctx);
     cairo_save(save_ctx);
     cairo_select_font_face (ctx, textfont, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
@@ -1528,7 +1556,7 @@ void place_text(int draw_text, double mx, double my)
               textelement[lasttext].x0,textelement[lasttext].y0,
               textelement[lasttext].xscale, textelement[lasttext].yscale);
   #ifdef HAS_CAIRO
-  if(textfont[0]) {
+  if(textfont && textfont[0]) {
     cairo_select_font_face (ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
     cairo_select_font_face (save_ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
     cairo_restore(ctx);
@@ -1537,7 +1565,7 @@ void place_text(int draw_text, double mx, double my)
   #endif
   if(x_initialized) drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
   if(x_initialized) drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
-  select_text(lasttext, SELECTED);
+  select_text(lasttext, SELECTED, 0);
   if(x_initialized) drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
   if(x_initialized) drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
   lasttext++;
@@ -1610,7 +1638,7 @@ void select_rect(int what, int select)
  {
     if(semaphore==0) {
       fprintf(errfp, "ERROR: select_rect() RUBBER called before BEGIN\n");
-      exit(-1);
+      tkeval("alert_ {ERROR: select_rect() RUBBER called before BEGIN} {}"); // 20171020
     }
     xx1=xr;xx2=xr2;yy1=yr;yy2=yr2;
     RECTORDER(xx1,yy1,xx2,yy2);
@@ -1619,12 +1647,14 @@ void select_rect(int what, int select)
 
     // 20171026 update unselected objects while dragging
     rebuild_selected_array();
-    bbox(BEGIN,0.0, 0.0, 0.0, 0.0);
-    bbox(ADD, xx1, yy1, xx2, yy2);
-    bbox(SET,0.0, 0.0, 0.0, 0.0);
-    draw_selection(gc[SELLAYER], 0);
-    if(!sel) select_inside(xx1, yy1, xx2, yy2, sel);
-    bbox(END,0.0, 0.0, 0.0, 0.0);
+    if(!sel) {
+      bbox(BEGIN,0.0, 0.0, 0.0, 0.0);
+      bbox(ADD, xx1, yy1, xx2, yy2);
+      bbox(SET,0.0, 0.0, 0.0, 0.0);
+      draw_selection(gc[SELLAYER], 0);
+      select_inside(xx1, yy1, xx2, yy2, sel);
+      bbox(END,0.0, 0.0, 0.0, 0.0);
+    }
     xx1=xr;xx2=xr2;yy1=yr;yy2=yr2;
     RECTORDER(xx1,yy1,xx2,yy2);
     drawtemprect(gc[SELLAYER],NOW, xx1,yy1,xx2,yy2);
@@ -1633,7 +1663,7 @@ void select_rect(int what, int select)
  {
     if(semaphore==1) {
       fprintf(errfp, "ERROR: reentrant call of select_rect()\n");
-      exit(-1);
+      tkeval("alert_ {ERROR: reentrant call of select_rect()} {}"); // 20171020
     }
     sel = select; // 20150927
     ui_state |= STARTSELECT;
@@ -1645,7 +1675,7 @@ void select_rect(int what, int select)
  {
     RECTORDER(xr,yr,xr2,yr2);
     drawtemprect(gctiled, NOW, xr,yr,xr2,yr2);
-    draw_selection(gc[SELLAYER], 0);
+    // draw_selection(gc[SELLAYER], 0);
     select_inside(xr,yr,xr2,yr2, sel);
     ui_state &= ~STARTSELECT;
     semaphore=0;

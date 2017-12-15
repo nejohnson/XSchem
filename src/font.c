@@ -29,8 +29,7 @@ void compile_font(void)
 
  currentsch = 0;
  clear_drawing();
- strcpy(schematic[currentsch], "");
- strcpy(schematic[0] , "system/font");
+ my_strncpy(schematic[currentsch] , "system/font", S(schematic[currentsch]));
  remove_symbols();
  my_strdup(&name, Tcl_GetVar(interp, "XSCHEM_HOME_DIR", TCL_GLOBAL_ONLY));
  my_strcat(&name, "/systemlib/font.sch");
@@ -63,6 +62,6 @@ void compile_font(void)
  clear_drawing();
  unselect_all();
  currentsch = 0;
- strcpy(schematic[currentsch], "");
+ my_strncpy(schematic[currentsch], "", S(schematic[currentsch]));
 }
 

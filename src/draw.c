@@ -183,8 +183,8 @@ int set_text_custom_font(Text *txt) // 20171122 for correct text_bbox calculatio
 {
   char *textfont;
 
-  textfont = get_tok_value(txt->prop_ptr, "font", 0);
-  if(textfont[0]) {
+  textfont = txt->font;
+  if(textfont && textfont[0]) {
     cairo_save(ctx);
     cairo_select_font_face (ctx, textfont, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
     return 1;
@@ -222,7 +222,10 @@ void cairo_draw_string_line(cairo_t *ctx, char *s,
   line_delta = lineno*fontheight*cairo_font_line_spacing;
   lines = (cairo_lines-1)*fontheight*cairo_font_line_spacing;
   line_offset=cairo_longest_line-xadvance;
-  if(xadvance>14000) return; // too big: close to short overflow
+
+  // 20171215 NO! will skip drawing of long strings
+  // if(xadvance>14000) return; // too big: close to short overflow
+
   ix=(x+xorigin)*mooz;
   iy=(y+yorigin)*mooz;
   if(rot&1) {
@@ -280,7 +283,6 @@ void cairo_draw_string_line(cairo_t *ctx, char *s,
   // fprintf(errfp, "string_line: |%s|, y_bearing: %f descent: %f ascent: %f height: %f\n",
   //     s, ext.y_bearing, fontdescent, fontascent, fontheight);
   cairo_move_to(ctx, 0,0);
-
   cairo_show_text(ctx, s);
   cairo_restore(ctx);
 }
@@ -299,11 +301,13 @@ void draw_string(int layer, int what, char *s, int rot, int flip, double x, doub
   if(s==NULL || !has_x ) return;
   size = (xscale+yscale)*26.*cairo_font_scale;
   //fprintf(errfp, "size=%.16g\n", size*mooz);
-  if(size*mooz<5.0) return; // too small
+  if(size*mooz<3.0) return; // too small
   if(size*mooz>800) return; // too big
 
   text_bbox(s, xscale, yscale, rot, flip, x,y, &textx1,&texty1,&textx2,&texty2);
-  if(!textclip(areax1,areay1,areax2,areay2,textx1,texty1,textx2,texty2)) return;
+  if(!textclip(areax1,areay1,areax2,areay2,textx1,texty1,textx2,texty2)) {
+    return;
+  }
 
   cairo_set_source_rgb(ctx,
     (double)xcolor_array[layer].red/65535.0,
@@ -428,7 +432,7 @@ void draw_symbol_outline(int what,int c, int n,int layer,int tmp_flip, int rot,
 
  // 20171112
  #ifdef HAS_CAIRO
- char *textprop, *textfont;
+ char *textfont;
  #endif
   if(!has_x) return;
   if(layer==0) {
@@ -436,7 +440,11 @@ void draw_symbol_outline(int what,int c, int n,int layer,int tmp_flip, int rot,
    x2=(inst_ptr[n].x2+xoffset+xorigin)*mooz;
    y1=(inst_ptr[n].y1+yoffset+yorigin)*mooz;
    y2=(inst_ptr[n].y2+yoffset+yorigin)*mooz;
-   if(OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2)) 
+   if(!only_probes && (x2-x1)< 0.3 && (y2-y1)< 0.3) {
+     inst_ptr[n].flags|=1;
+     return; // 20171210
+   }
+   else if(OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2)) 
    {
     inst_ptr[n].flags|=1;
     return;
@@ -501,13 +509,10 @@ void draw_symbol_outline(int what,int c, int n,int layer,int tmp_flip, int rot,
 
       textlayer = c;
       #ifdef HAS_CAIRO
-      textprop = get_tok_value(symptr->txtptr[j].prop_ptr, "layer", 0);
-      if(textprop[0]!=0) {
-        textlayer = atoi(textprop);
-        if(textlayer < 0 || textlayer >= cadlayers) textlayer = layer;
-      }
-      textfont = get_tok_value(symptr->txtptr[j].prop_ptr, "font", 0);
-      if(textfont[0]) {
+      textlayer = symptr->txtptr[j].layer;
+      if(textlayer < 0 || textlayer >= cadlayers) textlayer = c;
+      textfont = symptr->txtptr[j].font;
+      if(textfont && textfont[0]) {
         cairo_save(ctx);
         cairo_save(save_ctx);
         cairo_select_font_face (ctx, textfont, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
@@ -519,9 +524,7 @@ void draw_symbol_outline(int what,int c, int n,int layer,int tmp_flip, int rot,
         flip^text.flip,
         x0+x1, y0+y1, text.xscale, text.yscale);                    
       #ifdef HAS_CAIRO
-      if(textfont[0]) {
-        //cairo_select_font_face (ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-        //cairo_select_font_face (save_ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+      if(textfont && textfont[0]) {
         cairo_restore(ctx);
         cairo_restore(save_ctx);
       }
@@ -698,6 +701,7 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
   y1=(liney1+yorigin)*mooz;
   x2=(linex2+xorigin)*mooz;
   y2=(liney2+yorigin)*mooz;
+  if(!only_probes && (x2-x1)< 0.3 && (y2-y1) < 0.3) return; // 20171206
   if( clip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
    rr[i].x1=(short)x1; 
@@ -713,6 +717,7 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
   y1=(liney1+yorigin)*mooz;
   x2=(linex2+xorigin)*mooz;
   y2=(liney2+yorigin)*mooz;
+  if(!only_probes && (x2-x1)< 0.3 && (y2-y1)< 0.3) return; // 20171206
   if( clip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
    XDrawLine(display, window, gc[c], x1, y1, x2, y2);
@@ -727,6 +732,7 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
   y1=(liney1+yorigin)*mooz;
   x2=(linex2+xorigin)*mooz;
   y2=(liney2+yorigin)*mooz;
+  if(!only_probes && (x2-x1)< 0.3 && (y2-y1)< 0.3) return; // 20171206
   if( clip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
    XSetLineAttributes (display, gc[c], BUS_WIDTH , LineSolid, CapRound , JoinRound);
@@ -827,6 +833,7 @@ void filledrect(int c, int what, double rectx1,double recty1,double rectx2,doubl
   y1=(recty1+yorigin)*mooz;
   x2=(rectx2+xorigin)*mooz;
   y2=(recty2+yorigin)*mooz;
+  if(!only_probes && (x2-x1)< 2 && (y2-y1)< 2) return; // 20171206
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
    XFillRectangle(display, window, gcstipple[c], (int)x1, (int)y1, 
@@ -852,6 +859,7 @@ void filledrect(int c, int what, double rectx1,double recty1,double rectx2,doubl
   y1=(recty1+yorigin)*mooz;
   x2=(rectx2+xorigin)*mooz;
   y2=(recty2+yorigin)*mooz;
+  if(!only_probes && (x2-x1)< 2 && (y2-y1)< 2) return; // 20171206
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
    r[i].x=(short)x1; 
@@ -897,6 +905,7 @@ void drawpolygon(int c, int what, double *x, double *y, int points)
   if( !rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) ) {
     return;
   }
+  if( !only_probes && (x2-x1)<0.3 && (y2-y1)<0.3) return; // 20171206
 
   for(i=0;i<points; i++) {
     p[i].x = (x[i] + xorigin)*mooz;
@@ -945,6 +954,7 @@ void drawrect(int c, int what, double rectx1,double recty1,double rectx2,double 
   y1=(recty1+yorigin)*mooz;
   x2=(rectx2+xorigin)*mooz;
   y2=(recty2+yorigin)*mooz;
+  if(!only_probes && (x2-x1)< 0.3 && (y2-y1)< 0.3) return; // 20171206
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
    XDrawRectangle(display, window, gc[c], (int)x1, (int)y1,
@@ -976,6 +986,7 @@ void drawrect(int c, int what, double rectx1,double recty1,double rectx2,double 
   y1=(recty1+yorigin)*mooz;
   x2=(rectx2+xorigin)*mooz;
   y2=(recty2+yorigin)*mooz;
+  if(!only_probes && (x2-x1)< 0.3 && (y2-y1)< 0.3) return; // 20171206
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
    r[i].x=(short)x1; 
@@ -1053,10 +1064,9 @@ void draw(void)
  register int c,i; 
  register Instdef *symptr; // 20150408
  int textlayer;
-
   // 20171112
   #ifdef HAS_CAIRO
-  char *textprop, *textfont;
+  char *textfont;
   #endif
 
  rebuild_selected_array();
@@ -1087,11 +1097,11 @@ void draw(void)
             }
             else
               drawline(WIRELAYER, ADD, wire[i].x1,wire[i].y1,wire[i].x2,wire[i].y2);
-            if(wire[i].end1 >1 && draw_dots) { // 20150331 draw_dots
+            if(draw_dots && wire[i].end1 >1 && CADHALFDOTSIZE*mooz>=0.5) { // 20150331 draw_dots
                filledrect(WIRELAYER, ADD, wire[i].x1-CADHALFDOTSIZE,wire[i].y1-CADHALFDOTSIZE,
                         wire[i].x1+CADHALFDOTSIZE,wire[i].y1+CADHALFDOTSIZE );
             }
-            if(wire[i].end2 >1 && draw_dots) { // 20150331 draw_dots
+            if(draw_dots && wire[i].end2 >1 && CADHALFDOTSIZE*mooz>=0.5) { // 20150331 draw_dots
                filledrect(WIRELAYER, ADD, wire[i].x2-CADHALFDOTSIZE,wire[i].y2-CADHALFDOTSIZE,
                         wire[i].x2+CADHALFDOTSIZE,wire[i].y2+CADHALFDOTSIZE );
             }
@@ -1144,13 +1154,10 @@ void draw(void)
             textlayer = TEXTLAYER;
             if(debug_var >=1) fprintf(errfp, "draw(): drawing string %d = %s\n",i, textelement[i].txt_ptr);
             #ifdef HAS_CAIRO
-            textprop = get_tok_value(textelement[i].prop_ptr, "layer", 0);
-            if(textprop[0]!=0) {
-              textlayer = atoi(textprop);
-              if(textlayer < 0 ||  textlayer >= cadlayers) textlayer = TEXTLAYER;
-            }
-            textfont = get_tok_value(textelement[i].prop_ptr, "font", 0);
-            if(textfont[0]) {
+            textlayer = textelement[i].layer; //20171206
+            if(textlayer < 0 ||  textlayer >= cadlayers) textlayer = TEXTLAYER;
+            textfont = textelement[i].font; // 20171206
+            if(textfont && textfont[0]) {
               cairo_save(ctx);
               cairo_save(save_ctx);
               cairo_select_font_face (ctx, textfont, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
@@ -1162,7 +1169,7 @@ void draw(void)
               textelement[i].x0,textelement[i].y0,
               textelement[i].xscale, textelement[i].yscale); 
             #ifdef HAS_CAIRO
-            if(textfont[0]) {
+            if(textfont && textfont[0]) {
               // cairo_select_font_face (ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
               // cairo_select_font_face (save_ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
               cairo_restore(ctx);

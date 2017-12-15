@@ -24,7 +24,7 @@
 #include <sys/wait.h>
 
 
-void updatebbox(int count,Box *boundbox,Box *tmp)
+inline void updatebbox(int count, Box *boundbox, Box *tmp)
 {
  if(count==1)  *boundbox = *tmp;
  else
@@ -102,6 +102,7 @@ void save_text(FILE *fd)
 void load_text(FILE *fd)
 {
    int i;
+   char *strlayer;
     check_text_storage();
     i=lasttext;
      textelement[i].txt_ptr=NULL;
@@ -111,8 +112,13 @@ void load_text(FILE *fd)
       &textelement[i].flip, &textelement[i].xscale,
       &textelement[i].yscale);
      textelement[i].prop_ptr=NULL;
+     textelement[i].font=NULL;
      textelement[i].sel=0;
      load_ascii_string(&textelement[i].prop_ptr,fd);
+     my_strdup(&textelement[i].font, get_tok_value(textelement[i].prop_ptr, "font", 0));//20171206
+     strlayer = get_tok_value(textelement[i].prop_ptr, "layer", 0); //20171206
+     if(strlayer[0]) textelement[i].layer = atoi(strlayer);
+     else textelement[i].layer = -1;
      lasttext++;
 }
 
@@ -336,7 +342,7 @@ int save_symbol(char *schname) // 20171020 aded return value
   char name[4096];  // overflow safe 20161122
   if(schname!=NULL) 
   {
-   if(strcmp(schname,"") ) strcpy(schematic[currentsch], schname);
+   if(strcmp(schname,"") ) my_strncpy(schematic[currentsch], schname, S(schematic[currentsch]));
    else return -1;
   }
   if(!strcmp(schematic[currentsch],"")) return -1;
@@ -378,7 +384,10 @@ int save_symbol(char *schname) // 20171020 aded return value
    symbol = match_symbol(inst_ptr[i].name);
    inst_ptr[i].ptr = symbol;
   } 
-  delete_netlist_structs(); // 20161222
+  prepared_hilight_structs=0; // 20171212
+  prepared_netlist_structs=0; // 20171212
+  // delete_netlist_structs(); // 20161222
+
   modified=0;
   return 0;
 }
@@ -391,7 +400,7 @@ int save_schematic(char *schname) // 20171020 added return value
     char name[4096]; // overflow safe 20161122
     if(schname!=NULL)
     {
-      if( strcmp(schname,"") ) strcpy(schematic[currentsch], schname);
+      if( strcmp(schname,"") ) my_strncpy(schematic[currentsch], schname, S(schematic[currentsch]));
       else return -1;
     }
 
@@ -445,7 +454,9 @@ int save_schematic(char *schname) // 20171020 added return value
     save_wire(fd);
     save_inst(fd);
     fclose(fd);
-    delete_netlist_structs(); // 20161222
+    prepared_hilight_structs=0; // 20171212
+    prepared_netlist_structs=0; // 20171212
+    // delete_netlist_structs(); // 20161222
     modified=0;
     return 0;
 }
@@ -615,7 +626,9 @@ void load_schematic(int load_symbols, char *abs_name, int reset_undo) // 2015032
 
     if(debug_var>=2) fprintf(errfp, "load_schematic(): loaded file:wire=%d inst=%d\n",lastwire , lastinst);
     if(load_symbols) link_symbols_to_instances();
-    delete_netlist_structs(); // 20161222
+    prepared_hilight_structs=0; // 20171212
+    prepared_netlist_structs=0; // 20171212
+    // delete_netlist_structs(); // 20161222
     modified=0;
 
   }  // end if(fd=fopen(name,"r"))!= NULL)
@@ -653,6 +666,7 @@ void push_undo(void) // 20150327
     char diff_name[4096]; // overflow safe 20161122
     pid_t pid;
 
+    if(no_undo)return;
     if(debug_var>=1) fprintf(errfp, "push_undo(): cur_undo_ptr=%d tail_undo_ptr=%d head_undo_ptr=%d\n", 
        cur_undo_ptr, tail_undo_ptr, head_undo_ptr);
     my_snprintf(diff_name, S(diff_name), "%s/undo%d", undo_dirname, cur_undo_ptr%max_undo);
@@ -709,6 +723,7 @@ void pop_undo(int redo)  // 20150327
   char diff_name[4096];
   pid_t pid;
 
+  if(no_undo)return;
   if(redo) { 
     if(cur_undo_ptr < head_undo_ptr) {
       if(debug_var>=1) fprintf(errfp, "pop_undo(): redo; cur_undo_ptr=%d tail_undo_ptr=%d head_undo_ptr=%d\n", 
@@ -823,6 +838,7 @@ int load_symbol_definition(char *name)
   Polygon *pp[cadlayers]; // 20171115
   Text *tt;
   int endfile=0;
+  char *strlayer;
 
   if(debug_var>=1) fprintf(errfp, "load_symbol_definition(): name=%s\n", name);
   my_snprintf(name3, S(name3), "%s/%s.sym", Tcl_GetVar(interp,"XSCHEM_DESIGN_DIR", TCL_GLOBAL_ONLY),
@@ -931,12 +947,19 @@ int load_symbol_definition(char *name)
       i=lastt;
       my_realloc(&tt,(i+1)*sizeof(Text));
       tt[i].txt_ptr=NULL;
+      tt[i].font=NULL;
       load_ascii_string(&tt[i].txt_ptr,fd);
       fscanf(fd, "%lf %lf %d %d %lf %lf ",&tt[i].x0, &tt[i].y0, &tt[i].rot,
          &tt[i].flip, &tt[i].xscale, &tt[i].yscale);
       tt[i].prop_ptr=NULL;
       load_ascii_string(&tt[i].prop_ptr,fd);
        if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): loaded text\n");
+
+      my_strdup(&tt[i].font, get_tok_value(tt[i].prop_ptr, "font", 0));//20171206
+      strlayer = get_tok_value(tt[i].prop_ptr, "layer", 0); //20171206
+      if(strlayer[0]) tt[i].layer = atoi(strlayer);
+      else tt[i].layer = -1;
+
       lastt++;
       break;
      case 'N':
@@ -1186,7 +1209,7 @@ void edit_symbol(void)
   current_type=SYMBOL; 	// 20070823  change current type only if we really are editing a symbol
 			// previously this line was at the beginning of the function, changing
   clear_drawing();	// the current type also if user cancels the operation.
-  strcpy(schematic[currentsch], name);
+  my_strncpy(schematic[currentsch], name, S(schematic[currentsch]));
   my_snprintf(name2, S(name2), "%s/%s.sym",Tcl_GetVar(interp,"XSCHEM_DESIGN_DIR", TCL_GLOBAL_ONLY),
    name);
   if(debug_var>=1) fprintf(errfp, "edit_symbol(): filename choosen: %s\n", name2); // 20121121
@@ -1196,7 +1219,9 @@ void edit_symbol(void)
    return ;      //20121122
   }
   modified=0;
-  delete_netlist_structs(); // 20161222
+  prepared_hilight_structs=0; // 20171212
+  prepared_netlist_structs=0; // 20171212
+  // delete_netlist_structs(); // 20161222
   while(!endfile)
   {
    if(fscanf(fd,"%4095s",name)==EOF) break;
@@ -1268,7 +1293,9 @@ void load_symbol(char *abs_name)
   if( (fd=fopen(name,"r"))!= NULL)
   {
     modified=0;
-    delete_netlist_structs(); // 20161222
+    prepared_hilight_structs=0; // 20171212
+    prepared_netlist_structs=0; // 20171212
+    // delete_netlist_structs(); // 20161222
     while(!endfile)
     {
      if(fscanf(fd,"%4095s",name)==EOF) break;

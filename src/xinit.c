@@ -389,6 +389,7 @@ void init_pixdata()
    if(full) fill_type[i] = 1;
    else if(empty) fill_type[i] = 0;
    else fill_type[i]=2;
+   if(rainbow_colors && i>5) fill_type[i]=1; // 20171212 solid fill style
    //fprintf(errfp, "fill_type[%d]= %d\n", i, fill_type[i]);
  }
 }
@@ -1001,7 +1002,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
     char str[1024];  // 20161122 overflow safe
     my_snprintf(str, S(str), "get_cell {%s}", filename);
     tkeval(str);
-    strcpy(schematic[currentsch], Tcl_GetStringResult(interp));
+    my_strncpy(schematic[currentsch], Tcl_GetStringResult(interp), S(schematic[currentsch]));
     remove_symbols();
     if(strstr(filename,".sym")) load_symbol( NULL);
     else load_schematic(1, NULL,1);
@@ -1011,7 +1012,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
    tmp = (char *) Tcl_GetVar(interp, "XSCHEM_START_WINDOW", TCL_GLOBAL_ONLY); // 20121110
    if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): tmp=%s\n", tmp);
 
-   if(tmp && tmp[0]) strcpy(schematic[currentsch],tmp); // 20070323
+   if(tmp && tmp[0]) my_strncpy(schematic[currentsch],tmp, S(schematic[currentsch])); // 20070323
    load_schematic(1, NULL,1);					// 20121110
  }
  zoom_full(/*no draw */ 0);				// Necessary to tell xschem the 

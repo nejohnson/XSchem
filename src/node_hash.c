@@ -29,6 +29,27 @@ static struct node_hashentry *table[HASHSIZE];
 
 static unsigned int hash(char *tok)
 {
+  unsigned int hash = 0;
+  int c;
+
+  while ( (c = *tok++) )
+      hash = c + (hash << 6) + (hash << 16) - hash;
+  return hash;
+}
+
+/*
+static unsigned int hash(char *tok)
+{
+  unsigned int hash = 5381;
+  int c;
+
+  while (( c = *(tok++) ))
+    hash = ((hash << 5) + hash) ^ c; 
+  return hash;
+}
+
+static unsigned int hash(char *tok)
+{
  register unsigned int h=0;
  while(*tok) {
    h^=*tok++; // 20161221 xor
@@ -37,6 +58,7 @@ static unsigned int hash(char *tok)
 
  return h;
 }
+*/
 
 struct node_hashentry **get_node_table_ptr(void)
 {
@@ -403,11 +425,12 @@ void traverse_node_hash()
 }
 
 
-
+static  int collisions, max_collisions=0, n_elements=0;
 static struct node_hashentry *free_hash_entry(struct node_hashentry *entry)
 {
  if(entry) 
  {
+  n_elements++; collisions++;
   entry->next = free_hash_entry( entry->next );
     if(entry->token) my_free( entry->token);
     if(entry->verilog_type) my_free( entry->verilog_type); // 09112003
@@ -424,10 +447,17 @@ void free_node_hash(void) // remove the whole hash table
 {
  int i;
   
-  if(debug_var>=2) fprintf(errfp, "free_hash(): removing hash table\n");
+ if(debug_var>=2) fprintf(errfp, "free_hash(): removing hash table\n");
+ n_elements=0;
  for(i=0;i<HASHSIZE;i++)
  {
+  collisions=0;
   table[i] = free_hash_entry( table[i] );
+  if(collisions>max_collisions) max_collisions=collisions;
  }
+ if(debug_var>=1) fprintf(errfp, "# free_node_hash(): max_collisions=%d n_elements=%d hashsize=%d\n",
+                   max_collisions, n_elements, HASHSIZE);
+ max_collisions=0;
+
 }
 

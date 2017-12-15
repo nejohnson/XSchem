@@ -121,6 +121,7 @@ void delete(void)
    #endif
    bbox(ADD, xx1, yy1, xx2, yy2 );
    my_strdup(&textelement[i].prop_ptr, NULL);
+   my_strdup(&textelement[i].font, NULL);
    my_strdup(&textelement[i].txt_ptr, NULL);
    modified=1;
    j++;
@@ -132,6 +133,7 @@ void delete(void)
    textelement[i-j] = textelement[i];
    textelement[i].txt_ptr=NULL;
    textelement[i].prop_ptr=NULL;
+   textelement[i].font=NULL;
    if(debug_var>=1) fprintf(errfp, "select(); new string %d = %s\n",i-j,textelement[i-j].txt_ptr);
   }
  }
@@ -381,7 +383,7 @@ void bbox(int what,double x1,double y1, double x2, double y2)
   case BEGIN:
    if(semaphore==1) {
      fprintf(errfp, "ERROR: rentrant bbox() call\n"); 
-     exit(-1);
+     tkeval("alert_ {ERROR: reentrant bbox() call} {}");//20171215
    }
    bbx1 = 300000000;
    bbx2 = 0;
@@ -398,7 +400,7 @@ void bbox(int what,double x1,double y1, double x2, double y2)
   case ADD:
    if(semaphore==0) {
      fprintf(errfp, "ERROR: bbox(ADD) call before bbox(BEGIN)\n"); 
-     exit(-1);
+     tkeval("alert_ {ERROR: bbox(ADD) call before bbox(BEGIN)} {}");//20171215
    }
    x1=(x1+xorigin)/zoom;
    y1=(y1+yorigin)/zoom;
@@ -443,7 +445,7 @@ void bbox(int what,double x1,double y1, double x2, double y2)
   case SET:
    if(semaphore==0) {
      fprintf(errfp, "ERROR: bbox(SET) call before bbox(BEGIN)\n"); 
-     exit(-1);
+     tkeval("alert_ {ERROR: bbox(SET) call before bbox(BEGIN)} {}");//20171215
    }
    areax1 = bbx1-2*lw;
    areax2 = bbx2+2*lw;
@@ -566,11 +568,11 @@ void unselect_all(void)
     unlink(str);
 }
 
-void select_wire(int i,unsigned short select_mode)
+void select_wire(int i,unsigned short select_mode, int fast)
 {
   char str[1024]; 	// overflow safe
   //my_strncpy(s,wire[i].prop_ptr!=NULL?wire[i].prop_ptr:"<NULL>",256);
-  if( !(ui_state & STARTSELECT) )
+  if( !fast )
   {
     snprintf(str, S(str), "selected wire: n=%d end1=%d end2=%d\nnode=%s",i,
            wire[i].end1, wire[i].end2, 
@@ -647,13 +649,15 @@ void select_element(int i,unsigned short select_mode, int fast)
   need_rebuild_selected_array=1;
 }
 
-void select_text(int i,unsigned short select_mode)
+void select_text(int i,unsigned short select_mode, int fast)
 {
   char str[1024]; 	// overflow safe
   char s[256];		// overflow safe
-  my_strncpy(s,textelement[i].prop_ptr!=NULL?textelement[i].prop_ptr:"<NULL>",256);
-  snprintf(str, S(str), "selected text %d: properties: %s", i,s);
-  statusmsg(str,2);
+  if(!fast) {
+    my_strncpy(s,textelement[i].prop_ptr!=NULL?textelement[i].prop_ptr:"<NULL>",256);
+    snprintf(str, S(str), "selected text %d: properties: %s", i,s);
+    statusmsg(str,2);
+  }
   #ifdef HAS_CAIRO
   int customfont;
   #endif
@@ -693,27 +697,23 @@ void select_box(int c, int i, unsigned short select_mode, int fast)
       rect[c][i].x2-rect[c][i].x1, rect[c][i].y2-rect[c][i].y1
    );
    statusmsg(str,1);
-
   }
-  if( ((rect[c][i].sel|select_mode) == (SELECTED1|SELECTED2|SELECTED3|SELECTED4)) || // added partial(strech)
-      ((rect[c][i].sel == SELECTED) && select_mode) )				     // select 20070302	
-    rect[c][i].sel = SELECTED;
-
   if(select_mode) {
-    if(rect[c][i].sel != SELECTED) {
-      rect[c][i].sel |= select_mode; //20070202
-      drawtemprect(gc[SELLAYER], ADD, rect[c][i].x1, rect[c][i].y1, rect[c][i].x2, rect[c][i].y2);
-    } 
-    else {
+    if(select_mode==SELECTED) {
       rect[c][i].sel = select_mode; //20070202
-      drawtemprect(gc[SELLAYER], ADD, rect[c][i].x1, rect[c][i].y1, rect[c][i].x2, rect[c][i].y2);
+    } else {
+      rect[c][i].sel |= select_mode; //20070202
     }
-  }
-  else {
+    if(x_initialized) drawtemprect(gc[SELLAYER], ADD, rect[c][i].x1, rect[c][i].y1, rect[c][i].x2, rect[c][i].y2);
+  } else {
     rect[c][i].sel = 0; //20070202
-    drawtemprect(gctiled, NOW, rect[c][i].x1, rect[c][i].y1, rect[c][i].x2, rect[c][i].y2);
+    if(x_initialized) drawtemprect(gctiled, NOW, rect[c][i].x1, rect[c][i].y1, rect[c][i].x2, rect[c][i].y2);
   }
+
+  if( rect[c][i].sel == (SELECTED1|SELECTED2|SELECTED3|SELECTED4)) rect[c][i].sel = SELECTED;
+
   need_rebuild_selected_array=1;
+  // fprintf(errfp, "select_box(): select_mode=%d, box#=%d, rect[].sel=%d\n", select_mode, i, rect[c][i].sel);
 }
 
 void select_polygon(int c, int i, unsigned short select_mode, int fast )
@@ -778,10 +778,10 @@ unsigned short select_object(double mousex,double mousey, unsigned short select_
    switch(sel.type)
    {
     case WIRE:
-     select_wire(sel.n, select_mode);
+     select_wire(sel.n, select_mode, 0);
      break;
     case TEXT:
-     select_text(sel.n, select_mode);
+     select_text(sel.n, select_mode, 0);
      break;
     case LINE:
      select_line(sel.col, sel.n, select_mode,0);
@@ -820,17 +820,17 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) // 201509
   if(RECTINSIDE(wire[i].x1,wire[i].y1,wire[i].x2,wire[i].y2, x1,y1,x2,y2))
   {
    ui_state |= SELECTION; // <<< set ui_state to SELECTION also if unselecting by area ????
-   sel ? select_wire(i,SELECTED): select_wire(i,0);
+   sel ? select_wire(i,SELECTED, 1): select_wire(i,0, 1);
   } 
   else if( sel && enable_stretch && POINTINSIDE(wire[i].x1,wire[i].y1, x1,y1,x2,y2) )
   {
    ui_state |= SELECTION;
-   select_wire(i,SELECTED1);
+   select_wire(i,SELECTED1, 1);
   }
   else if( sel && enable_stretch && POINTINSIDE(wire[i].x2,wire[i].y2, x1,y1,x2,y2) )
   {
    ui_state |= SELECTION;
-   select_wire(i,SELECTED2);
+   select_wire(i,SELECTED2, 1);
   }
  }
  for(i=0;i<lasttext;i++)
@@ -850,7 +850,7 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) // 201509
   if(RECTINSIDE(xx1,yy1, xx2, yy2,x1,y1,x2,y2))
   {
    ui_state |= SELECTION; // <<< set ui_state to SELECTION also if unselecting by area ????
-   sel ? select_text(i, SELECTED): select_text(i, 0);
+   sel ? select_text(i, SELECTED, 1): select_text(i, 0, 1);
   }
  }                       
  for(i=0;i<lastinst;i++)
@@ -953,11 +953,11 @@ void select_all(void)
 
  for(i=0;i<lastwire;i++)
  {
-   select_wire(i,SELECTED);
+   select_wire(i,SELECTED, 1);
  }
  for(i=0;i<lasttext;i++)
  {
-   select_text(i, SELECTED);
+   select_text(i, SELECTED, 1);
  }                       
  for(i=0;i<lastinst;i++)
  {

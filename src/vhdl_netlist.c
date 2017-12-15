@@ -49,7 +49,7 @@ void global_vhdl_netlist(int global)  // netlister driver
    my_snprintf(name, S(name), "savefile %s.sch .sch",schematic[currentsch]);
    if(debug_var>=1) fprintf(errfp, "global_spice_netlist(): saving: %s\n",name);
    tkeval(name);
-   strcpy(schematic[currentsch], Tcl_GetStringResult(interp));
+   my_strncpy(schematic[currentsch], Tcl_GetStringResult(interp), S(schematic[currentsch]));
    if(!strcmp(schematic[currentsch],"")) return;
    save_schematic(schematic[currentsch]);
  }
@@ -291,7 +291,7 @@ void global_vhdl_netlist(int global)  // netlister driver
         vhdl_block_netlist(fd, i);  // 20081205
     }
    }
-   strcpy(schematic[currentsch] , "");
+   my_strncpy(schematic[currentsch] , "", S(schematic[currentsch]));
    currentsch--;
    remove_symbols();
    load_schematic(1,NULL,0);
@@ -309,7 +309,6 @@ void global_vhdl_netlist(int global)  // netlister driver
    }
    if(!debug_var) unlink(netl);
  }
- // prepare_netlist_structs(); 18102004 removed, possible memory leak
 }
 
 
@@ -341,7 +340,7 @@ void  vhdl_block_netlist(FILE *fd, int i)  //20081204
      if(debug_var>=1) fprintf(errfp, "vhdl_block_netlist(): expanding %s\n",  instdef[i].name);
      fprintf(fd, "\n-- expanding   symbol:  %s # of pins=%d\n\n", 
            instdef[i].name,instdef[i].rects[PINLAYER] );
-     strcpy(schematic[currentsch],instdef[i].name);
+     my_strncpy(schematic[currentsch],instdef[i].name, S(schematic[currentsch]));
      // load symbol schematic in order to print use/package before declaring entity
 
 
@@ -486,7 +485,7 @@ void vhdl_netlist(FILE *fd , int vhdl_stop)
  int i,l;
  static char *type=NULL;
 
- prepare_netlist_structs();
+ prepare_netlist_structs(0);
  modified=1; // 20160302 prepare_netlist_structs could change schematic (wire node naming for example)
  traverse_node_hash();  // print all warnings about unconnected floatings etc
 

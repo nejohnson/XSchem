@@ -25,13 +25,27 @@
 static struct hilight_hashentry *table[HASHSIZE];
 static int nelements=0; // 20161221
 
+
+static unsigned int hash(char *tok)
+{
+  unsigned int hash = 0;
+  char *str;
+  int c;
+
+  str=sch_prefix[currentsch];
+  while ( (c = *tok++) )
+      hash = c + (hash << 6) + (hash << 16) - hash;
+  while ( (c = *str++) )
+      hash = c + (hash << 6) + (hash << 16) - hash;
+  return hash;
+}
+
+/*
 static unsigned int hash(char *tok)
 {
  register unsigned int h=0;
  register char *str;
  str=sch_prefix[currentsch];
- // while(*tok) h=(h<<1)+*tok++;
- // while(*str) h=(h<<1)+*str++;
  while(*str) { // 20161221
    h^=*str++; // xor
    h=(h>>5) | (h<<(8*sizeof(unsigned int)-5)); // 20161221 rotate
@@ -43,6 +57,7 @@ static unsigned int hash(char *tok)
  }
  return h;
 }
+*/
 
 static struct hilight_hashentry *free_hilight_entry(struct hilight_hashentry *entry)
 {
@@ -200,7 +215,7 @@ void hilight_parent_pins(void)
  struct hilight_hashentry *entry;
  
  if(!hilight_nets) return;
- prepare_netlist_structs();
+ prepare_netlist_structs(1);
  save_currentsch=currentsch;
  i=previous_instance[currentsch];
  if(debug_var>=1) fprintf(errfp, "hilight_parent_pins(): previous_instance=%d\n", previous_instance[currentsch]);
@@ -226,7 +241,6 @@ void hilight_parent_pins(void)
  }
 
  currentsch=save_currentsch;
- //delete_netlist_structs(); // 20161222 done in prepare_netlist_structs() when needed
 
 }
 
@@ -239,7 +253,7 @@ void hilight_child_pins(int i)
 
  if(!hilight_nets) return;
  save_currentsch=currentsch;
- prepare_netlist_structs();
+ prepare_netlist_structs(1);
  rects = (inst_ptr[i].ptr+instdef)->rects[PINLAYER];
  for(j=0;j<rects;j++)
  {
@@ -257,7 +271,6 @@ void hilight_child_pins(int i)
   }
  }
  currentsch=save_currentsch;
- //delete_netlist_structs(); // 20161222 done in prepare_netlist_structs() when needed
 }
 
 
@@ -281,7 +294,7 @@ void search_inst(char *tok, char *val, int sub, int sel, int what)
 
  if(regcomp(&re, val , REG_EXTENDED)) return;
  if(debug_var>=1) fprintf(errfp, "search_inst():val=%s\n", val);
- if(sel) {
+ if(sel==1) {
    if(x_initialized) drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
    if(x_initialized) drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
  }
@@ -290,7 +303,7 @@ void search_inst(char *tok, char *val, int sub, int sel, int what)
     col=hilight_color;
     if(incr_hilight) hilight_color++;
 
-    prepare_netlist_structs();
+    prepare_netlist_structs(1);
     bus=bus_search(val);
     for(i=0;i<lastinst;i++) {
       if(!strcmp(tok,"cell__name")) {
@@ -333,9 +346,12 @@ void search_inst(char *tok, char *val, int sub, int sel, int what)
         }
 
 
-        if(sel) {
+        if(sel==1) {
           select_element(i, SELECTED, 1);
           ui_state|=SELECTION;
+        }
+        if(sel==-1) { // 20171211 unselect
+          select_element(i, 0, 1);
         }
       }
       
@@ -355,7 +371,7 @@ void search_inst(char *tok, char *val, int sub, int sel, int what)
              }
           }
           if(sel) {
-            select_wire(i,SELECTED);
+            select_wire(i,SELECTED, 1);
             ui_state|=SELECTION;
           }
       }
@@ -376,13 +392,114 @@ void search_inst(char *tok, char *val, int sub, int sel, int what)
 
 
 
+// 20171211
+// "drill" option (pass through resistors or pass gates or whatever elements with 
+// 'propagate_to' properties set on pins)
+void drill_hilight(void)
+{
+  static char *netname=NULL, *propagated_net=NULL;;
+  int mult=0;
+  int found;
+  Instdef *symbol;
+  Box *rect;
+  int i, j, npin;
+  char *propagate_str;
+  int propagate;
+  struct hilight_hashentry *entry, *propag_entry;
+  int count;
+
+  prepare_netlist_structs(1);
+  count=0;
+  while(1) { 
+    found=0;
+    count++;
+    for(i=0; i<lastinst;i++) {
+      symbol = inst_ptr[i].ptr+instdef;
+      npin = symbol->rects[PINLAYER];
+      rect=symbol->boxptr[PINLAYER];
+      for(j=0; j<npin;j++) {
+        my_strdup(&netname, pin_node(i, j, &mult, 1));
+        propagate_str=get_tok_value(rect[j].prop_ptr, "propagate_to", 0);
+        if(propagate_str[0] && (entry=bus_hilight_lookup(netname, 0, 2))) {
+          propagate = atoi(propagate_str);
+          my_strdup(&propagated_net, pin_node(i, propagate, &mult, 1)); // get net to propagate highlight to...
+          propag_entry = bus_hilight_lookup(propagated_net, entry->value, 0); // add net to highlight list
+          if(!propag_entry) {
+            // fprintf(errfp, "inst %s: j=%d  count=%d propagate=%d --> net %s, propagate to --> %s color %d\n", 
+            //   inst_ptr[i].instname, j, count, propagate, netname, pin_node(i, propagate, &mult, 1), entry->value);
+            found=1; // keep looping until no more nets are found.
+          }
+          
+        }
+      } // for(j...)
+    } // for(i...)
+    if(!found) break;
+  } // while(1)
+}
+
+/*
+void traverse_schematic()
+{
+  int i;
+  char *str;
+
+  for(i=0;i<lastinst; i++) {
+    if(                   // do not descend if not subcircuit
+      strcmp(
+       // get_tok_value( (inst_ptr[selectedgroup[0].n].ptr+instdef)->prop_ptr, "type",0), // 20150409
+       (inst_ptr[i].ptr+instdef)->type, // 20150409
+        "subcircuit"
+      ) &&
+      strcmp(
+       // get_tok_value( (inst_ptr[selectedgroup[0].n].ptr+instdef)->prop_ptr, "type",0), // 20150409
+       (inst_ptr[i].ptr+instdef)->type, // 20150409
+        "primitive"
+      )
+      ) continue;
+    fprintf(errfp, "traverse_schematic(): processing inst %d\n", i);
+    if(modified)
+    {
+      if(save(1)) return; // 20161209
+    }
+    // build up current hierarchy path
+    str=inst_ptr[i].instname; // 20150409
+    my_strdup(&sch_prefix[currentsch+1], sch_prefix[currentsch]);
+    my_strcat(&sch_prefix[currentsch+1], str);
+    my_strcat(&sch_prefix[currentsch+1], ".");
+    my_strncpy(schematic[currentsch+1],inst_ptr[i].name, S(schematic[currentsch+1]);
+    previous_instance[currentsch]=i;
+    zoom_array[currentsch].x=xorigin;
+    zoom_array[currentsch].y=yorigin;
+    zoom_array[currentsch].zoom=zoom;
+    hilight_child_pins(previous_instance[currentsch]);
+    currentsch++;
+    unselect_all();
+    remove_symbols();
+    load_schematic(1,NULL,1);
+    if(hilight_nets)
+    {
+      drill_hilight();
+    }
+    my_strncpy(schematic[currentsch] , "", S(schematic[currentsch]);
+    currentsch--;
+    remove_symbols();
+    load_schematic(1,NULL,1);
+    hilight_parent_pins();
+    xorigin=zoom_array[currentsch].x;
+    yorigin=zoom_array[currentsch].y;
+    zoom=zoom_array[currentsch].zoom;
+    mooz=1/zoom;
+  }
+}
+*/
+
 
 void hilight_net(void)
 {
-  int i,n;
+  int i, n;
   char *str;
 
-  prepare_netlist_structs();
+  prepare_netlist_structs(1);
   if(debug_var>=1) fprintf(errfp, "hilight_net(): entering\n");
   rebuild_selected_array();
   for(i=0;i<lastselected;i++)
@@ -394,7 +511,6 @@ void hilight_net(void)
      if(wire[n].sel==SELECTED)
      {
       str = get_tok_value(wire[n].prop_ptr, "lab",0);
-      //str = wire[n].node;
       if(str && str[0])
       {
         hilight_nets=1;
@@ -409,7 +525,6 @@ void hilight_net(void)
      if(inst_ptr[n].sel==SELECTED)
      {
       str = get_tok_value(inst_ptr[n].prop_ptr, "lab",0);
-      //str = wire[n].node;
       if(str && str[0])
       {
        if(!bus_hilight_lookup(str, hilight_color,0)) {
@@ -430,8 +545,10 @@ void hilight_net(void)
      break;
    }
   }
-  // delete_netlist_structs(); // 20161222 done in prepare_netlist_structs() when needed
-  // unselect_all(); // 20160413
+  if(enable_drill) {
+    drill_hilight();
+    //traverse_schematic();
+  }
 }
 
 
@@ -441,7 +558,7 @@ void unhilight_net(void)
   char *str;
 
 
-  prepare_netlist_structs();
+  prepare_netlist_structs(1);
   if(debug_var>=1) fprintf(errfp, "unhilight_net(): entering\n");
   rebuild_selected_array();
   for(i=0;i<lastselected;i++)
@@ -483,7 +600,6 @@ void unhilight_net(void)
    }
   }
   unselect_all();
-  // delete_netlist_structs();  // 20111201 moved to end // 20161222 done in prepare_netlist_structs() when needed
 }
 
 
@@ -676,6 +792,7 @@ void undraw_hilight_net(void) // 20160413
   drawrect(c, END, 0.0, 0.0, 0.0, 0.0);
   filledrect(c, END, 0.0, 0.0, 0.0, 0.0);
  }
+ if(ui_state & SELECTION) draw_selection(gc[SELLAYER], 0); // 20171211
 }
 
 // show == 0   ==> create pins from highlight nets
@@ -696,7 +813,7 @@ void print_hilight_net(int show)
 
 
  // 20111116 20111201
- prepare_netlist_structs();
+ prepare_netlist_structs(1);
 
 // 20111106
  mkstemp(filetmp1);
@@ -790,7 +907,9 @@ void print_hilight_net(int show)
 
  // 20170323 this delete_netlist_structs is necessary, without it segfaults when going back (ctrl-e) 
  // from a schematic after placing pins (ctrl-j) and changing some pin direction (ipin -->iopin)
- delete_netlist_structs();
+ prepared_hilight_structs=0; // 20171212
+ prepared_netlist_structs=0; // 20171212
+ // delete_netlist_structs();
 
 
 }

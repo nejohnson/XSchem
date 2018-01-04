@@ -93,23 +93,20 @@ void collapse_wires(void)
    {
     for(j=i+1;j<lastwire;j++)
     {
-      if(i==j) continue;
-  
       check_touch(i,j, 
        &parallel,&breaks,&broken,&touches,&included,&includes, &xt,&yt);
    
       if(included) 
       {
-         freenet_nocheck(i);i--;
+         freenet_nocheck(i);
+         i--;
          changed=1;
          break;
-  //     return; // nothing to do, wire already present.
       }
       if(includes)
       {
          freenet_nocheck(j);
          changed=1;
-         if(j<i)i--;
          j--;
          continue;
   			// new net contains net, so delete that
@@ -126,8 +123,7 @@ void collapse_wires(void)
                   wire[i].x2 = wire[j].x2;wire[i].y2 = wire[j].y2;
                   wire[i].end2=wire[j].end2;
                   freenet_nocheck(j);
-                  i--;
-                  if(j<i) i--;
+                  j--;
                   break;
                }
             }
@@ -139,8 +135,7 @@ void collapse_wires(void)
                   wire[i].x1 = wire[j].x1;wire[i].y1 = wire[j].y1;
                   wire[i].end1=wire[j].end1;
                   freenet_nocheck(j);
-                  i--;
-                  if(j<i) i--;
+                  j--;
                   break;
                }
             }
@@ -214,6 +209,9 @@ void collapse_wires(void)
    } // end for i 
    if(changed) {
      modified=1;
+     prepared_netlist_structs=0;
+     prepared_hilight_structs=0;
+     prepared_hash_wires=0;
    }
   } while( changed ) ;
   draw_dots=1;

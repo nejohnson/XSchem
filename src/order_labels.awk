@@ -1,5 +1,4 @@
-#!/bin/sh
-mawk '
+#!/usr/bin/awk -f
 #------------------------
 BEGIN{
   i=0
@@ -149,4 +148,3 @@ function comp(a,b)
  else return lab_name(a) > lab_name(b)
 }
 
-' $@

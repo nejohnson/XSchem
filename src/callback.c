@@ -28,7 +28,6 @@ int callback(int event, int mx, int my, KeySym key,
                  int button, int aux, int state)  
 {
  static int mx_save, my_save;
- static double mx_double_save, my_double_save; // 20070322
  char str[4096];// overflow safe 20161122
  FILE *fp;
  unsigned short sel;
@@ -924,6 +923,11 @@ int callback(int event, int mx, int my, KeySym key,
     push_undo(); // 20150327
     round_schematic_to_grid(cadsnap);
     modified=1;
+    prepared_hash_objects=0;
+    prepared_hash_wires=0;
+    prepared_netlist_structs=0;
+    prepared_hilight_structs=0;
+ 
     draw();
     break;
    }
@@ -1127,11 +1131,13 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key==';' && state & ControlMask ) 	// testmode 20171203
    {
-    int i;
     rebuild_selected_array();
     if(1) {
+      clock_t start=clock();
       del_object_table();
-      for(i=0;i<lastinst; i++) hash_object(i);
+      hash_objects();
+      fprintf(errfp,"done in %g seconds\n", ((double) (clock()-start))/CLOCKS_PER_SEC);
+      
     }
     if(lastselected==1 && selectedgroup[0].type==ELEMENT) {
       object_iterator(selectedgroup[0].n);
@@ -1146,10 +1152,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='#' && !(state&ControlMask)) 	// testmode
    {
-    clock_t start=clock();
-      // select_inside(-1e12, -1e12, 1e12, 1e12,SELECTED);
-      select_all();
-    fprintf(errfp,"done in %g seconds\n", ((double) (clock()-start))/CLOCKS_PER_SEC);
+    drawline(4, NOW,areax1*zoom-xorigin+30, areay1*zoom-yorigin+30, areax2*zoom-xorigin-30, areay2*zoom-yorigin-30);
     break;
    }
 
@@ -1197,14 +1200,18 @@ int callback(int event, int mx, int my, KeySym key,
     yorigin-=-CADMOVESTEP*zoom/2.;
     draw();
    }
-   else if(button==Button3 && state==0)
-   {
-     if(semaphore<2) { // 20160425
-       rebuild_selected_array();
-       if(lastselected==0) ui_state &=~SELECTION;
+   else if(button==Button3) {
+     mx_save = mx; my_save = my;	// 20171218
+     mx_double_save=mousex_snap;
+     my_double_save=mousey_snap;
+     if(state==0) {
+       if(semaphore<2) { // 20160425
+         rebuild_selected_array();
+         if(lastselected==0) ui_state &=~SELECTION;
+       }
+       pan2(BEGIN, mx, my);
+       ui_state |= STARTPAN2;
      }
-     pan2(BEGIN, mx, my);
-     ui_state |= STARTPAN2;
    }
    else if(semaphore==2) {
      if(button==Button1 && state==0) {

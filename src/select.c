@@ -144,6 +144,10 @@ void delete(void)
   if(inst_ptr[i].sel == SELECTED)
   {
    modified=1;
+   prepared_hash_objects=0;
+   prepared_netlist_structs=0;
+   prepared_hilight_structs=0;
+
    symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1, &inst_ptr[i].x2, &inst_ptr[i].y2); //20171201
    bbox(ADD, inst_ptr[i].x1, inst_ptr[i].y1, inst_ptr[i].x2, inst_ptr[i].y2);
    if(inst_ptr[i].prop_ptr != NULL) 
@@ -181,6 +185,10 @@ void delete(void)
     else
       bbox(ADD, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
     modified=1;
+    prepared_hash_wires=0;
+    prepared_netlist_structs=0;
+    prepared_hilight_structs=0;
+
     continue;
    }
    if(j) 

@@ -35,6 +35,23 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.4.1: 
+- spatial hash iterator added in drawing engine when the viewing area is small compared
+  to the total area of a freaking big schematic; using spatial hash the lookup of elements
+  (instances and wires for now) that are in the viewing area is *much* faster.
+  so we avoid lot of clip checks on the whole wire[] and inst_ptr[] arrays.
+  When a full zoom is done (viewing area is big) we return to normal loop
+  on the wire and inst_ptr arrays, since spatial hash gives no gain in this case.
+  (20180104)
+- some small glitches about not drawing small objects (for performance reasons) fixed.
+  (20171206)
+- some fixes in symbol editing: rename pins next to pin labels (20171221)
+- fixed regresion in print_hilight_net() to recognize pin direction when creating pins
+  from hilight nets (20171221)
+- allow multi-instance primitive format specifications (verilog_format prop) using the
+  #xxx#@name construct to build unique names for nodes and inst names,
+  as done for spice primitives
+
 2.4.0:
 - some string overflow checks (schematic[])
 - major speed improvement in instance wiring tool ('H' bindkey) for multiple selected

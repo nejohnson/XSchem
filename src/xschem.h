@@ -81,7 +81,7 @@
 #define CADMINZOOM 0.0001
 #define CADHALFDOTSIZE 2.5
 #define CADNULLNODE -1	    // no valid node number
-#define CADWIREMINDIST 30.0
+#define CADWIREMINDIST 8.0
 #define CADMAXWIRES 4096
 #define CADMAXTEXT 2048
 #define CADMAXOBJECTS 512   // (initial) max # of lines, rects (for each layer!!)
@@ -92,6 +92,13 @@
 #define CADMAXHIER 80
 #define CADCHUNKALLOC 512 // was 256  20102004
 #define CADDRAWBUFFERSIZE 256
+
+// 20180104 when x-width of drawing area s below this threshold use spatial
+// hash table for drawing wires and instances (for faster lookup) instead of
+// looping through the whole wire[] and inst_ptr[] arrays
+// when drawing area is very big using spatial hash table may take longer than
+// a simple for() loop through the big arrays + clip check.
+#define ITERATOR_THRESHOLD  7000.0
 
 #define SCHEMATIC 1
 #define SYMBOL 2
@@ -134,8 +141,8 @@
 #define POLYGON 32 // 20171115
 
 // for netlist.c
-#define BOXSIZE 200
-#define NBOXES 600
+#define BOXSIZE 500
+#define NBOXES 500
 
 
 //   some useful primes
@@ -144,6 +151,12 @@
 //   1215497, 1823231, 2734867, 4102283, 6153409, 9230113, 13845163
 
 #define HASHSIZE 31627
+
+// 20180104
+// big enouth to contain instances and wires in viewable area when draw() switching
+// to spatial hash iterator. Dont make it too big as clearing big hash tables
+// (and this is done on every redraw) takes time.
+#define INTHASHSIZE 6247
 
 		   // parameters passed to action functions, see actions.c
 #define END      1 // endop
@@ -321,6 +334,10 @@ struct drivers {
                };
        
 
+struct int_hashentry { // 20180104
+                  struct int_hashentry *next;
+                  unsigned int token;
+                 };
 
 
 struct node_hashentry {
@@ -357,6 +374,11 @@ struct wireentry {
   int n;
 };
 
+struct objectentry {
+ struct objectentry *next;
+ int n;
+};
+
 
 extern int help; //20140406
 extern char *cad_icon[];
@@ -367,6 +389,8 @@ extern  int hilight_color;
 extern int do_print;
 extern int prepared_netlist_structs;
 extern int prepared_hilight_structs;
+extern int prepared_hash_objects;
+extern int prepared_hash_wires;
 extern int x_initialized;
 extern int has_x; 
 extern int sym_txt;
@@ -494,6 +518,9 @@ extern int enable_drill;
 
 extern struct wireentry *wiretable[NBOXES][NBOXES];
 extern struct instpinentry *instpintable[NBOXES][NBOXES];
+extern double mx_double_save, my_double_save; // 20070322
+extern struct objectentry *objecttable[NBOXES][NBOXES];
+
 // functions
 extern int set_netlist_dir(int force);
 extern int  check_lib(char * s);
@@ -534,10 +561,11 @@ extern int text_bbox(char * str,double xscale, double yscale,
 ////test 20171203
 extern void del_object_table(void);
 extern void object_iterator(int k);
-extern void hash_wire( int n );
-extern void hash_object( int n ); // 20171203 insert instance bbox in spatial hash table
+extern void hash_wires(void);
+extern void hash_objects(void); // 20171203 insert instance bbox in spatial hash table
 
-
+extern struct int_hashentry *int_hash_lookup(struct int_hashentry **table, int token, int remove); // 20180104
+extern void free_int_hash(struct int_hashentry **table); // 20180104
 
 #ifdef HAS_CAIRO
 extern int text_bbox_nocairo(char * str,double xscale, double yscale,

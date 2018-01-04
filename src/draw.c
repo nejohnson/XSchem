@@ -89,7 +89,7 @@ void print_image()
   #endif //HAS_XRENDER
 
   if(cairo_surface_status(save_sfc)!=CAIRO_STATUS_SUCCESS) {
-    fprintf(stderr, "ERROR: invalid cairo xcb surface\n");
+    fprintf(errfp, "ERROR: invalid cairo xcb surface\n");
      exit(-1);
   }
   save_ctx = cairo_create(save_sfc);
@@ -151,7 +151,7 @@ void print_image()
   #endif //HAS_XRENDER
 
   if(cairo_surface_status(save_sfc)!=CAIRO_STATUS_SUCCESS) {
-    fprintf(stderr, "ERROR: invalid cairo xcb surface\n");
+    fprintf(errfp, "ERROR: invalid cairo xcb surface\n");
      exit(-1);
   }
   save_ctx = cairo_create(save_sfc);
@@ -701,7 +701,7 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
   y1=(liney1+yorigin)*mooz;
   x2=(linex2+xorigin)*mooz;
   y2=(liney2+yorigin)*mooz;
-  if(!only_probes && (x2-x1)< 0.3 && (y2-y1) < 0.3) return; // 20171206
+  if(!only_probes && (x2-x1)< 0.3 && fabs(y2-y1) < 0.3) return; // 20171206
   if( clip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
    rr[i].x1=(short)x1; 
@@ -717,7 +717,7 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
   y1=(liney1+yorigin)*mooz;
   x2=(linex2+xorigin)*mooz;
   y2=(liney2+yorigin)*mooz;
-  if(!only_probes && (x2-x1)< 0.3 && (y2-y1)< 0.3) return; // 20171206
+  if(!only_probes && (x2-x1)< 0.3 && fabs(y2-y1)< 0.3) return; // 20171206
   if( clip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
    XDrawLine(display, window, gc[c], x1, y1, x2, y2);
@@ -732,7 +732,7 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
   y1=(liney1+yorigin)*mooz;
   x2=(linex2+xorigin)*mooz;
   y2=(liney2+yorigin)*mooz;
-  if(!only_probes && (x2-x1)< 0.3 && (y2-y1)< 0.3) return; // 20171206
+  if(!only_probes && (x2-x1)< 0.3 && fabs(y2-y1)< 0.3) return; // 20171206
   if( clip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
    XSetLineAttributes (display, gc[c], BUS_WIDTH , LineSolid, CapRound , JoinRound);
@@ -1061,6 +1061,19 @@ void drawtemprect(GC gc, int what, double rectx1,double recty1,double rectx2,dou
 
 void draw(void)
 {
+
+ // inst_ptr  and wire hash iterator 20171224
+ int tmpi,tmpj, firsti,firstj,j;
+ double x1, y1, x2, y2;
+ int x1a,x1b, x2a,x2b, y1a,y1b, y2a,y2b;
+ int ii;
+ struct objectentry *instanceptr;
+ struct wireentry *wireptr;
+ static struct int_hashentry *insthash[INTHASHSIZE]; // 20180104
+ static struct int_hashentry *wirehash[INTHASHSIZE]; // 20180104
+
+ // /20171224
+
  register int c,i; 
  register Instdef *symptr; // 20150408
  int textlayer;
@@ -1083,33 +1096,106 @@ void draw(void)
     //               areax1, areay1,areaw, areah,xrect[0].x, xrect[0].y, xrect[0].width, xrect[0].height);
 
     XFillRectangle(display, window, gc[BACKLAYER], areax1, areay1, areaw, areah);
-    if(debug_var>=1) fprintf(errfp, "draw(): window: %d %d %d %d\n",areax1, areay1, areaw, areah);
+    if(debug_var>=2) fprintf(errfp, "draw(): window: %d %d %d %d\n",areax1, areay1, areax2, areay2);
     drawgrid();
+        
+    // --------------------------------- inst_ptr iterator 20171224
+    x1 = areax1*zoom -xorigin;
+    y1 = areay1*zoom -yorigin;
+    x2 = areax2*zoom -xorigin;
+    y2 = areay2*zoom -yorigin;
+    if( x2 - x1  < ITERATOR_THRESHOLD) {
+      hash_objects();
+      hash_wires();
+      if(debug_var>=2) fprintf(errfp, "draw(): window: %g %g %g %g\n",x1, y1, x2, y2);
+      
+      // calculate square 4 1st corner of drawing area
+      x1a=floor(x1/BOXSIZE) ;
+      x1b=x1a % NBOXES; if(x1b<0) x1b+=NBOXES;
+      
+      y1a=floor(y1/BOXSIZE) ;
+      y1b=y1a % NBOXES; if(y1b<0) y1b+=NBOXES;
+      
+      // calculate square 4 2nd corner of drawing area
+      x2a=floor(x2/BOXSIZE);
+      x2b=x2a % NBOXES; if(x2b<0) x2b+=NBOXES;
+      
+      y2a=floor(y2/BOXSIZE);
+      y2b=y2a % NBOXES; if(y2b<0) y2b+=NBOXES;
+      // --------------------------------- /20171224
+    }
+
     if(!only_probes) { // 20110112
+        
         if(draw_single_layer==-1 || draw_single_layer==WIRELAYER){ // 20151117
           drawline(WIRELAYER,BEGIN, 0.0, 0.0, 0.0, 0.0);
           filledrect(WIRELAYER, BEGIN, 0.0, 0.0, 0.0, 0.0);
-          for(i=0;i<lastwire;i++)
-          {
-            // if(get_tok_value(wire[i].prop_ptr,"bus",0)[0]) {	// 26122004
-            if(wire[i].bus) {
-              drawline(WIRELAYER, THICK, wire[i].x1,wire[i].y1,wire[i].x2,wire[i].y2);
+
+
+
+          if( x2 - x1  < ITERATOR_THRESHOLD) {
+            if(debug_var>2) fprintf(errfp, "using spatial hash table iterator\n");
+            //loop thru all squares that intersect drawing area
+            firsti=1;
+            free_int_hash(wirehash);
+            for(i=x1a; i<=x2a;i++)
+            {
+             tmpi=i%NBOXES; if(tmpi<0) tmpi+=NBOXES;
+             if(tmpi==x1b && !firsti) break;
+             firsti=0;
+             firstj=1;
+             for(j=y1a; j<=y2a;j++)
+             {
+              tmpj=j%NBOXES; if(tmpj<0) tmpj+=NBOXES;
+              if(tmpj==y1b && !firstj) break;
+              firstj=0;
+              wireptr=wiretable[tmpi][tmpj];
+              while(wireptr) {
+                ii=wireptr->n;
+                if( !int_hash_lookup(wirehash, ii, 0)) {
+                  if(wire[ii].bus) {
+                    drawline(WIRELAYER, THICK, wire[ii].x1,wire[ii].y1,wire[ii].x2,wire[ii].y2);
+                  }
+                  else
+                    drawline(WIRELAYER, ADD, wire[ii].x1,wire[ii].y1,wire[ii].x2,wire[ii].y2);
+                  if(draw_dots && wire[ii].end1 >1 && CADHALFDOTSIZE*mooz>=0.5) { // 20150331 draw_dots
+                     filledrect(WIRELAYER, ADD, wire[ii].x1-CADHALFDOTSIZE,wire[ii].y1-CADHALFDOTSIZE,
+                              wire[ii].x1+CADHALFDOTSIZE,wire[ii].y1+CADHALFDOTSIZE );
+                  }
+                  if(draw_dots && wire[ii].end2 >1 && CADHALFDOTSIZE*mooz>=0.5) { // 20150331 draw_dots
+                     filledrect(WIRELAYER, ADD, wire[ii].x2-CADHALFDOTSIZE,wire[ii].y2-CADHALFDOTSIZE,
+                              wire[ii].x2+CADHALFDOTSIZE,wire[ii].y2+CADHALFDOTSIZE );
+                  }
+                }
+                wireptr=wireptr->next;
+              }  // 20150408
+             }
             }
-            else
-              drawline(WIRELAYER, ADD, wire[i].x1,wire[i].y1,wire[i].x2,wire[i].y2);
-            if(draw_dots && wire[i].end1 >1 && CADHALFDOTSIZE*mooz>=0.5) { // 20150331 draw_dots
-               filledrect(WIRELAYER, ADD, wire[i].x1-CADHALFDOTSIZE,wire[i].y1-CADHALFDOTSIZE,
-                        wire[i].x1+CADHALFDOTSIZE,wire[i].y1+CADHALFDOTSIZE );
-            }
-            if(draw_dots && wire[i].end2 >1 && CADHALFDOTSIZE*mooz>=0.5) { // 20150331 draw_dots
-               filledrect(WIRELAYER, ADD, wire[i].x2-CADHALFDOTSIZE,wire[i].y2-CADHALFDOTSIZE,
-                        wire[i].x2+CADHALFDOTSIZE,wire[i].y2+CADHALFDOTSIZE );
+          } else {
+            for(i=0;i<lastwire;i++)
+            {
+              // if(get_tok_value(wire[i].prop_ptr,"bus",0)[0]) {	// 26122004
+              if(wire[i].bus) {
+                drawline(WIRELAYER, THICK, wire[i].x1,wire[i].y1,wire[i].x2,wire[i].y2);
+              }
+              else
+                drawline(WIRELAYER, ADD, wire[i].x1,wire[i].y1,wire[i].x2,wire[i].y2);
+              if(draw_dots && wire[i].end1 >1 && CADHALFDOTSIZE*mooz>=0.5) { // 20150331 draw_dots
+                 filledrect(WIRELAYER, ADD, wire[i].x1-CADHALFDOTSIZE,wire[i].y1-CADHALFDOTSIZE,
+                          wire[i].x1+CADHALFDOTSIZE,wire[i].y1+CADHALFDOTSIZE );
+              }
+              if(draw_dots && wire[i].end2 >1 && CADHALFDOTSIZE*mooz>=0.5) { // 20150331 draw_dots
+                 filledrect(WIRELAYER, ADD, wire[i].x2-CADHALFDOTSIZE,wire[i].y2-CADHALFDOTSIZE,
+                          wire[i].x2+CADHALFDOTSIZE,wire[i].y2+CADHALFDOTSIZE );
+              }
             }
           }
           drawline(WIRELAYER, END, 0.0, 0.0, 0.0, 0.0);
           filledrect(WIRELAYER, END, 0.0, 0.0, 0.0, 0.0);
         }
      
+
+        free_int_hash(insthash); // 20180104
         for(c=0;c<cadlayers;c++)
         {
           if(draw_single_layer!=-1 && c != draw_single_layer) continue; // 20151117
@@ -1127,24 +1213,61 @@ void draw(void)
           for(i=0;i<lastpolygon[c];i++) {
             drawpolygon(c, NOW, polygon[c][i].x, polygon[c][i].y, polygon[c][i].points);
           }
-          for(i=0;i<lastinst;i++) {
-            symptr = (inst_ptr[i].ptr+instdef);
-            if( c==0 || //20150408 draw_symbol_outline call is needed on layer 0 to avoid redundant work (outside check)
-                symptr->lines[c] ||  // 20150408
-                symptr->rects[c] ||   // 20150408
-                symptr->polygons[c] ||   // 20150408
-                ((c==TEXTWIRELAYER || c==TEXTLAYER) && symptr->texts)) {  // 20150408
-              draw_symbol_outline(ADD, c, i,c,0,0,0.0,0.0);
-            }  // 20150408
+
+
+
+          if( x2 - x1  < ITERATOR_THRESHOLD) {
+            // --------------------------------- inst_ptr iterator 20171224
+            //loop thru all squares that intersect drawing area
+            firsti=1;
+            for(i=x1a; i<=x2a;i++)
+            {
+             tmpi=i%NBOXES; if(tmpi<0) tmpi+=NBOXES;
+             if(tmpi==x1b && !firsti) break;
+             firsti=0;
+             firstj=1;
+             for(j=y1a; j<=y2a;j++)
+             {
+              tmpj=j%NBOXES; if(tmpj<0) tmpj+=NBOXES;
+              if(tmpj==y1b && !firstj) break;
+              firstj=0;
+              instanceptr=objecttable[tmpi][tmpj];
+              if(debug_var>=2) fprintf(errfp, "drawing instances in square: %d %d\n", tmpi, tmpj);
+              while(instanceptr) {
+               if( !int_hash_lookup(insthash, instanceptr->n*cadlayers+c, 0)) {
+                 symptr = (inst_ptr[instanceptr->n].ptr+instdef);
+                 if( c==0 || //20150408 draw_symbol_outline call is needed on layer 0 to avoid redundant work (outside check)
+                     symptr->lines[c] ||  // 20150408
+                     symptr->rects[c] ||   // 20150408
+                     symptr->polygons[c] ||   // 20150408
+                     ((c==TEXTWIRELAYER || c==TEXTLAYER) && symptr->texts)) {  // 20150408
+                   draw_symbol_outline(ADD, c, instanceptr->n, c,0,0,0.0,0.0);
+                 }  // 20150408
+               }
+               instanceptr=instanceptr->next;
+              }
+             }
+            }
+            // --------------------------------- /20171224
+          } else {
+            for(i=0;i<lastinst;i++) {
+              symptr = (inst_ptr[i].ptr+instdef);
+              if( c==0 || //20150408 draw_symbol_outline call is needed on layer 0 to avoid redundant work (outside check)
+                  symptr->lines[c] ||  // 20150408
+                  symptr->rects[c] ||   // 20150408
+                  symptr->polygons[c] ||   // 20150408
+                  ((c==TEXTWIRELAYER || c==TEXTLAYER) && symptr->texts)) {  // 20150408
+                draw_symbol_outline(ADD, c, i,c,0,0,0.0,0.0);
+              }  // 20150408
+            }
           }
       
           drawline(c, END, 0.0, 0.0, 0.0, 0.0);
           drawrect(c, END, 0.0, 0.0, 0.0, 0.0);
           filledrect(c, END, 0.0, 0.0, 0.0, 0.0);
         }
-  
-        if(draw_single_layer ==-1 || draw_single_layer==TEXTLAYER) { // 20151117
 
+        if(draw_single_layer ==-1 || draw_single_layer==TEXTLAYER) { // 20151117
           #ifndef HAS_CAIRO
           drawline(TEXTLAYER,BEGIN, 0.0, 0.0, 0.0, 0.0);
           drawrect(TEXTLAYER,BEGIN, 0.0, 0.0, 0.0, 0.0);
@@ -1170,8 +1293,6 @@ void draw(void)
               textelement[i].xscale, textelement[i].yscale); 
             #ifdef HAS_CAIRO
             if(textfont && textfont[0]) {
-              // cairo_select_font_face (ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-              // cairo_select_font_face (save_ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
               cairo_restore(ctx);
               cairo_restore(save_ctx);
             }
@@ -1186,10 +1307,5 @@ void draw(void)
     } // !only_probes, 20110112
     draw_hilight_net();
     if(debug_var>=1) fprintf(errfp, "draw(): lw=%d\n",lw);
-    /*
-    cairo_move_to(ctx, 0, 0);
-    cairo_line_to(ctx, 400, 400);
-    cairo_stroke(ctx);
-    */
  } // if(has_x)
 }

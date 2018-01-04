@@ -48,11 +48,19 @@ BEGIN{
 /^---- start primitive/{primitive_line=""; primitive_mult=$4;primitive=1; next}
 /^---- end primitive/{
   primitive=0
-#  print "<<<<" primitive_line ">>>>"
   $0 = primitive_line
   gsub(/----pin\(/, " ----pin(",$0)
+  gsub(/----name\(/, " ----name(",$0)
   for(j=1;j<= primitive_mult; j++) {
+    prefix=""
+    # print $0 > "/dev/stderr"
     for(i=1;i<=NF;i++) {
+      if($i ~/^#[a-zA-Z_]+#$/) {
+         prefix=$i
+         sub(/^#/,"", prefix)
+         sub(/#$/,"", prefix)
+         continue
+      }
       prim_field=$i
       if($i ~ /^----pin\(.*\)/) {
         sub(/----pin\(/,"",prim_field)
@@ -63,12 +71,12 @@ BEGIN{
         # if bussed port connected to primitive and primitive mult==1 print only basename of bus
         if(primitive_mult==1 && pport_mult>1) {
           if(check2(prim_field_array, pport_mult)) 
-           printf "%s[%s:%s] ", s_b(prim_field_array[1]), 
+           printf "%s[%s:%s] ", prefix s_b(prim_field_array[1]), 
               s_i(prim_field_array[1]), s_i(prim_field_array[pport_mult]) 
           else {
             printf " { "
             for(s=1;s<= pport_mult; s++) {
-              printf "%s", prim_field_array[s]
+              printf "%s", prefix prim_field_array[s]
               if(s<pport_mult) printf ","
             }
             printf "} "
@@ -85,9 +93,10 @@ BEGIN{
         split(prim_field, prim_field_array,/,/)
         sub(/\[/,"_", prim_field_array[j])
         sub(/\]/,"", prim_field_array[j])
-        printf "%s ", prim_field_array[j]
+        printf "%s ", prefix prim_field_array[j]
       }
       else  printf "%s ", prim_field
+      prefix=""
     } # end for i
     printf "\n"
   } # end for j

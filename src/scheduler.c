@@ -786,6 +786,11 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
      }
      draw();
      modified=0; // 20171025
+     prepared_hash_objects=0;
+     prepared_hash_wires=0;
+     prepared_netlist_structs=0;
+     prepared_hilight_structs=0;
+ 
   }
  }
 
@@ -961,6 +966,10 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
     push_undo();
     round_schematic_to_grid(cadsnap);
     modified=1;
+    prepared_hash_objects=0;
+    prepared_hash_wires=0;
+    prepared_netlist_structs=0;
+    prepared_hilight_structs=0;
     draw();
  } else if(!strcmp(argv[1],"saveas")) {
   saveas();

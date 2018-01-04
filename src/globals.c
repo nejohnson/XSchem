@@ -115,7 +115,10 @@ unsigned char pixdata_init[22][32]={	// fill patterns... indexed by laynumb.
    0x10, 0x10, 0x08, 0x08, 0x04, 0x04, 0x02, 0x02, 0x01, 0x01, 0x80, 0x80,
    0x40, 0x40, 0x20, 0x20, 0x10, 0x10, 0x08, 0x08
 },
-{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},//13
+{//13
+   0x11, 0x11, 0x22, 0x22, 0x44, 0x44, 0x88, 0x88, 0x11, 0x11, 0x22, 0x22, 0x44, 0x44, 0x88, 0x88,
+   0x11, 0x11, 0x22, 0x22, 0x44, 0x44, 0x88, 0x88, 0x11, 0x11, 0x22, 0x22, 0x44, 0x44, 0x88, 0x88
+},
 {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},//14
 {//15
    0x44, 0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x44, 0x44, 0x00, 0x00,
@@ -144,6 +147,8 @@ XRectangle xrect[1] = {{0,0,0,0}};
 int xschem_h, xschem_w; // 20171130 window size
 double mousex,mousey; // mouse coord.
 double mousex_snap,mousey_snap; // mouse coord. snapped to grid
+double mx_double_save, my_double_save; // 20070322
+
 //double xorigin=-CADWIDTH/2.0,yorigin=-CADHEIGHT/2.0;
 double cadsnap = CADSNAP;
 
@@ -175,6 +180,8 @@ int flat_netlist=0;
 int netlist_type=-1;
 int prepared_netlist_structs=0;
 int prepared_hilight_structs=0;
+int prepared_hash_objects=0;
+int prepared_hash_wires=0;
 //
 // following data is relative to the current schematic
 //
@@ -221,6 +228,8 @@ int no_undo=0; // 20171204
 int enable_drill=0; // 20171211 pass net hilights through components with 'propagate_to' property set on pins
 struct instpinentry *instpintable[NBOXES][NBOXES];
 struct wireentry *wiretable[NBOXES][NBOXES];
+struct objectentry *objecttable[NBOXES][NBOXES];
+
 
 #ifdef HAS_CAIRO
 cairo_surface_t *sfc, *save_sfc;

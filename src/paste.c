@@ -174,6 +174,9 @@ void merge_inst(int k,FILE *fd)
     hash_proplist(inst_ptr[i].prop_ptr,0);
     lastinst++;
     modified=1;
+    prepared_hash_objects=0;
+    prepared_netlist_structs=0;
+    prepared_hilight_structs=0;
 }
 
 

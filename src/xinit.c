@@ -66,7 +66,7 @@ static int client_msg(Display *disp, Window win, char *msg, /* {{{ */
         return EXIT_SUCCESS;
     }
     else {
-        fprintf(stderr, "Cannot send %s event.\n", msg);
+        fprintf(errfp, "Cannot send %s event.\n", msg);
         return EXIT_FAILURE;
     }
 }/*}}}*/
@@ -87,7 +87,7 @@ int window_state (Display *disp, Window win, char *arg) {/*{{{*/
     if(debug_var>=1) fprintf(errfp,"window_state() , win=0x%x arg_copy=%s\n", 
           (int)win,arg_copy);
     if (!arg_copy || strlen(arg_copy) == 0) {
-        fputs(argerr, stderr);
+        fputs(argerr, errfp);
         return EXIT_FAILURE;
     }
 
@@ -107,7 +107,7 @@ int window_state (Display *disp, Window win, char *arg) {/*{{{*/
             action = _NET_WM_STATE_TOGGLE;
         }
         else {
-            fputs("Invalid action. Use either remove, add or toggle.\n", stderr);
+            fputs("Invalid action. Use either remove, add or toggle.\n", errfp);
             return EXIT_FAILURE;
         }
         p1++;
@@ -118,7 +118,7 @@ int window_state (Display *disp, Window win, char *arg) {/*{{{*/
             *p2 = '\0';
             p2++;
             if (strlen(p2) == 0) {
-                fputs("Invalid zero length property.\n", stderr);
+                fputs("Invalid zero length property.\n", errfp);
                 return EXIT_FAILURE;
             }
             for( i = 0; p2[i]; i++) tmp2[i] = toupper( p2[i] );
@@ -128,7 +128,7 @@ int window_state (Display *disp, Window win, char *arg) {/*{{{*/
 
         /* the first property */
         if (strlen(p1) == 0) {
-            fputs("Invalid zero length property.\n", stderr);
+            fputs("Invalid zero length property.\n", errfp);
             return EXIT_FAILURE;
         }
         for( i = 0; p1[i]; i++) tmp1[i] = toupper( p1[i] );
@@ -140,7 +140,7 @@ int window_state (Display *disp, Window win, char *arg) {/*{{{*/
             action, (unsigned long)prop1, (unsigned long)prop2, 0, 0);
     }
     else {
-        fputs(argerr, stderr);
+        fputs(argerr, errfp);
         return EXIT_FAILURE;
     }
 }/*}}}*/
@@ -859,13 +859,13 @@ int Tcl_AppInit(Tcl_Interp *inter)
     // grab an existing xlib connection  20171125
     xcbconn = XGetXCBConnection(display);
     if(xcb_connection_has_error(xcbconn)) {
-      fprintf(stderr, "Could not connect to X11 server");
+      fprintf(errfp, "Could not connect to X11 server");
       return 1;
     }
     screen_xcb = xcb_setup_roots_iterator(xcb_get_setup(xcbconn)).data;
     visual_xcb = find_visual(xcbconn, screen_xcb->root_visual);
     if(!visual_xcb) {
-      fprintf(stderr, "got NULL (xcb_visualtype_t)visual");
+      fprintf(errfp, "got NULL (xcb_visualtype_t)visual");
       return 1;
     }
     ///--------------------------Xrender xcb  stuff-------
@@ -943,11 +943,11 @@ int Tcl_AppInit(Tcl_Interp *inter)
   
 
       if(cairo_surface_status(sfc)!=CAIRO_STATUS_SUCCESS) {
-        fprintf(stderr, "ERROR: invalid cairo surface\n");
+        fprintf(errfp, "ERROR: invalid cairo surface\n");
         return 1;
       }
       if(cairo_surface_status(save_sfc)!=CAIRO_STATUS_SUCCESS) {
-        fprintf(stderr, "ERROR: invalid cairo surface\n");
+        fprintf(errfp, "ERROR: invalid cairo surface\n");
         return 1;
       }
       ctx = cairo_create(sfc);

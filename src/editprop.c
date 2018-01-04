@@ -314,11 +314,12 @@ void edit_text_property(int x)
 	       pcy = (rect[PINLAYER][l].y1+rect[PINLAYER][l].y2)/2.0;
 
                if(
-                   // 20171206
-                   (fabs( (yy1+yy2)/2 - pcy) < CADGRID/2 && fabs(xx1 - pcx) < CADGRID*6) ||
-                   (fabs( (xx1+xx2)/2 - pcx) < CADGRID/2 && fabs(yy1 - pcy) < CADGRID*6)
-                   // (fabs( (yy1+yy2)/2 - pcy) < CADGRID/2 && fabs((xx1+xx2)/2 - pcx) < CADGRID*6) ||
-                   // (fabs( (xx1+xx2)/2 - pcx) < CADGRID/2 && fabs((yy1+yy2)/2 - pcy) < CADGRID*2)
+                   // 20171206 20171221
+                   (fabs( (yy1+yy2)/2 - pcy) < CADGRID/2 && 
+                   (fabs(xx1 - pcx) < CADGRID*6 || fabs(xx2 - pcx) < CADGRID*6) )
+                   || 
+                   (fabs( (xx1+xx2)/2 - pcx) < CADGRID/2 && 
+                   (fabs(yy1 - pcy) < CADGRID*6 || fabs(yy2 - pcy) < CADGRID*6) )
                ) {
                  if(x==0)  // 20080804
                    my_strdup(&rect[PINLAYER][l].prop_ptr, 
@@ -458,7 +459,12 @@ void update_symbol(char *result, int x)
 
     // 20150911
     //     |
-    if(strcmp(symbol, inst_ptr[i].name)) modified=1;
+    if(strcmp(symbol, inst_ptr[i].name)) {
+      modified=1;
+      prepared_hash_objects=0; // 20171224
+      prepared_netlist_structs=0;
+      prepared_hilight_structs=0;
+    }
     sym_number=match_symbol(symbol); // check if exist
     if(sym_number>=0)
     {
@@ -477,11 +483,17 @@ void update_symbol(char *result, int x)
     if(selectedgroup[k].type!=ELEMENT) continue;
     i=selectedgroup[k].n;
     if(!pushed) { push_undo(); pushed=1;} // 20150327 push_undo
+
+    // 20171220 calculate bbox before changes to correctly redraw areas
+    // must be recalculated as cairo text extents vary with zoom factor.
+    symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1, &inst_ptr[i].x2, &inst_ptr[i].y2);
+
     if(sym_number>=0) // changing symbol !
     {
      my_strdup(&inst_ptr[i].name,symbol);
      inst_ptr[i].ptr=sym_number;
     }
+
 
     bbox(ADD, inst_ptr[i].x1, inst_ptr[i].y1, inst_ptr[i].x2, inst_ptr[i].y2);
 
@@ -495,6 +507,9 @@ void update_symbol(char *result, int x)
              my_strdup2(&inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); // 20160308
 												// allow change name
              modified=1;
+             prepared_hash_objects=0; // 20171224
+             prepared_netlist_structs=0;
+             prepared_hilight_structs=0;
            }
      }
      else {
@@ -506,6 +521,9 @@ void update_symbol(char *result, int x)
            my_strdup(&inst_ptr[i].prop_ptr, new_prop);
            my_strdup2(&inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); // 20150409
            modified=1;
+           prepared_hash_objects=0; // 20171224
+           prepared_netlist_structs=0;
+           prepared_hilight_structs=0;
          }
        }  else {  // 20111205
          my_strdup(&inst_ptr[i].prop_ptr, "");
@@ -536,9 +554,8 @@ void update_symbol(char *result, int x)
      else inst_ptr[i].flags &=~2;
     }
     hash_proplist(inst_ptr[i].prop_ptr , 0); // put new props in hash table
-    // new symbol bbox
-    symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1,
-                      &inst_ptr[i].x2, &inst_ptr[i].y2);
+    // new symbol bbox after prop changes (may change due to text length)
+    symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1, &inst_ptr[i].x2, &inst_ptr[i].y2);
  
     bbox(ADD, inst_ptr[i].x1, inst_ptr[i].y1, inst_ptr[i].x2, inst_ptr[i].y2);
    } 
@@ -635,6 +652,9 @@ void change_elem_order(void)
      {
       push_undo(); // 20150327
       modified=1;
+      prepared_hash_objects=0; // 20171224
+      prepared_netlist_structs=0;
+      prepared_hilight_structs=0;
      }
      sscanf(Tcl_GetVar(interp, "entry1", TCL_GLOBAL_ONLY), "%d",&new_n);
 

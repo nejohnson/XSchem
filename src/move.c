@@ -429,6 +429,10 @@ void copy_objects(int what)
   draw_selection(gctiled,0);
   tmp=0;
   modified=1; push_undo(); // 20150327 push_undo
+  prepared_hash_objects=0; // 20171224
+  prepared_hash_wires=0; // 20171224
+  prepared_netlist_structs=0;
+  prepared_hilight_structs=0;
 
   for(k=0;k<cadlayers;k++)
   {
@@ -727,6 +731,11 @@ void move_objects(int what, int merge, double dx, double dy)
   draw_selection(gctiled,0);
   bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0);
   modified=1; 
+  prepared_hash_objects=0; // 20171224
+  prepared_hash_wires=0; // 20171224
+  prepared_netlist_structs=0;
+  prepared_hilight_structs=0;
+
   if(! ( ui_state & STARTMERGE) ) push_undo(); // 20150327 push_undo
 
   if(dx!=0.0 || dy!=0.0) {

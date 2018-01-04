@@ -93,7 +93,7 @@ void resetwin(void)
       #endif //HAS_XRENDER
 
       if(cairo_surface_status(save_sfc)!=CAIRO_STATUS_SUCCESS) {
-        fprintf(stderr, "ERROR: invalid cairo xcb surface\n");
+        fprintf(errfp, "ERROR: invalid cairo xcb surface\n");
          exit(-1);
       }
       save_ctx = cairo_create(save_sfc);
@@ -721,6 +721,9 @@ void place_symbol(int pos,char *symbol_name, double x, double y, int rot, int fl
     bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
   }
   modified=1;
+  prepared_hash_objects=0; // 20171224
+  prepared_netlist_structs=0;
+  prepared_hilight_structs=0;
   //  hilight new element 24122002
   if(x_initialized) drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
   if(x_initialized) drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
@@ -1647,14 +1650,12 @@ void select_rect(int what, int select)
 
     // 20171026 update unselected objects while dragging
     rebuild_selected_array();
-    if(!sel) {
-      bbox(BEGIN,0.0, 0.0, 0.0, 0.0);
-      bbox(ADD, xx1, yy1, xx2, yy2);
-      bbox(SET,0.0, 0.0, 0.0, 0.0);
-      draw_selection(gc[SELLAYER], 0);
-      select_inside(xx1, yy1, xx2, yy2, sel);
-      bbox(END,0.0, 0.0, 0.0, 0.0);
-    }
+    bbox(BEGIN,0.0, 0.0, 0.0, 0.0);
+    bbox(ADD, xx1, yy1, xx2, yy2);
+    bbox(SET,0.0, 0.0, 0.0, 0.0);
+    draw_selection(gc[SELLAYER], 0);
+    if(!sel) select_inside(xx1, yy1, xx2, yy2, sel);
+    bbox(END,0.0, 0.0, 0.0, 0.0);
     xx1=xr;xx2=xr2;yy1=yr;yy2=yr2;
     RECTORDER(xx1,yy1,xx2,yy2);
     drawtemprect(gc[SELLAYER],NOW, xx1,yy1,xx2,yy2);
@@ -1667,8 +1668,15 @@ void select_rect(int what, int select)
     }
     sel = select; // 20150927
     ui_state |= STARTSELECT;
-    xr=xr2=mousex_snap;
-    yr=yr2=mousey_snap;
+
+    // use m[xy]_double_save instead of mouse[xy]_snap
+    // to avoid delays in setting the start point of a
+    // selection rectangle, this is noticeable and annoying on
+    // networked / slow X servers. 20171218
+    //xr=xr2=mousex_snap;
+    //yr=yr2=mousey_snap;
+    xr=xr2=mx_double_save;
+    yr=yr2=my_double_save;
     semaphore=1;
  }
  else if(what & END)
@@ -1677,6 +1685,15 @@ void select_rect(int what, int select)
     drawtemprect(gctiled, NOW, xr,yr,xr2,yr2);
     // draw_selection(gc[SELLAYER], 0);
     select_inside(xr,yr,xr2,yr2, sel);
+
+    // 20171219
+    bbox(BEGIN,0.0, 0.0, 0.0, 0.0);
+    bbox(ADD, xr, yr, xr2, yr2);
+    bbox(SET,0.0, 0.0, 0.0, 0.0);
+    draw_selection(gc[SELLAYER], 0);
+    bbox(END,0.0, 0.0, 0.0, 0.0);
+    // /20171219
+
     ui_state &= ~STARTSELECT;
     semaphore=0;
  }

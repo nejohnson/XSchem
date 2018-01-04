@@ -243,6 +243,9 @@ void storeobject(int pos, double x1,double y1,double x2,double y2,
      wire[n].sel=sel;
      lastwire++;
      modified=1;
+     prepared_hash_wires=0;
+     prepared_netlist_structs=0;
+     prepared_hilight_structs=0;
     }
 }
 

@@ -386,6 +386,8 @@ int save_symbol(char *schname) // 20171020 aded return value
   } 
   prepared_hilight_structs=0; // 20171212
   prepared_netlist_structs=0; // 20171212
+  prepared_hash_objects=0; // 20171224
+  prepared_hash_wires=0; // 20171224
   // delete_netlist_structs(); // 20161222
 
   modified=0;
@@ -456,6 +458,8 @@ int save_schematic(char *schname) // 20171020 added return value
     fclose(fd);
     prepared_hilight_structs=0; // 20171212
     prepared_netlist_structs=0; // 20171212
+    prepared_hash_objects=0; // 20171224
+    prepared_hash_wires=0; // 20171224
     // delete_netlist_structs(); // 20161222
     modified=0;
     return 0;
@@ -628,6 +632,8 @@ void load_schematic(int load_symbols, char *abs_name, int reset_undo) // 2015032
     if(load_symbols) link_symbols_to_instances();
     prepared_hilight_structs=0; // 20171212
     prepared_netlist_structs=0; // 20171212
+    prepared_hash_objects=0; // 20171224
+    prepared_hash_wires=0; // 20171224
     // delete_netlist_structs(); // 20161222
     modified=0;
 
@@ -816,6 +822,10 @@ void pop_undo(int redo)  // 20150327
   if(debug_var>=2) fprintf(errfp, "load_schematic(): loaded file:wire=%d inst=%d\n",lastwire , lastinst);
   link_symbols_to_instances();
   modified=1;
+  prepared_hash_objects=0; // 20171224
+  prepared_hash_wires=0; // 20171224
+  prepared_netlist_structs=0; // 20171224
+  prepared_hilight_structs=0; // 20171224
   if(debug_var>=2) fprintf(errfp, "load_schematic(): returning\n");
   waitpid(pid, NULL, 0);
 }
@@ -857,8 +867,6 @@ int load_symbol_definition(char *name)
     }
   }
 
-  // modified=0; 09122002: loading a symbol does not mean that the schematic that instantiates it
-  //             is in a non modified state.
   for(c=0;c<cadlayers;c++) 
   {
    lastl[c]=lastr[c]=lastp[c]=0; // 20171115 lastp
@@ -1221,6 +1229,8 @@ void edit_symbol(void)
   modified=0;
   prepared_hilight_structs=0; // 20171212
   prepared_netlist_structs=0; // 20171212
+  prepared_hash_objects=0; // 20171224
+  prepared_hash_wires=0; // 20171224
   // delete_netlist_structs(); // 20161222
   while(!endfile)
   {
@@ -1293,8 +1303,10 @@ void load_symbol(char *abs_name)
   if( (fd=fopen(name,"r"))!= NULL)
   {
     modified=0;
+    prepared_hash_objects=0; // 20171224
     prepared_hilight_structs=0; // 20171212
     prepared_netlist_structs=0; // 20171212
+    prepared_hash_wires=0; // 20171224
     // delete_netlist_structs(); // 20161222
     while(!endfile)
     {

@@ -813,7 +813,8 @@ void print_hilight_net(int show)
 
 
  // 20111116 20111201
- prepare_netlist_structs(1);
+ prepare_netlist_structs(0); // use full prepare_netlist_structs(0)  to recognize pin direction
+                             // when creating pins from hilight nets 20171221
 
 // 20111106
  mkstemp(filetmp1);

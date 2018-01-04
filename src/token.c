@@ -50,30 +50,6 @@ static unsigned int hash(char *tok)
   return hash;
 }
 
-/*
-static unsigned int hash(char *tok)
-{
-  unsigned int hash = 5381;
-  int c;
-
-  while (( c = *(tok++) ))
-    hash = ((hash << 5) + hash) ^ c;
-  return hash;
-}
-
-
-static unsigned int hash(char *tok)
-{
- register unsigned int h=0;
- while(*tok) {
-  h^=*tok++; // 20161221 xor
-  h=(h>>5) | (h<<(8*sizeof(unsigned int)-5)); // 20161221 rotate
- }
- if(debug_var>=2) fprintf(errfp, "hash(): %d tok=%s\n",h%HASHSIZE, tok);
- return h;
-}
-*/
-
 int name_strcmp(char *s, char *d) // compare strings up to '\0' or'['
 {
  int i=0;
@@ -545,7 +521,6 @@ void new_prop_string(char **new_prop,char *old_prop, int fast)
  } 
  tmp2 = subst_token(old_prop, "name", new_name); 
  if(strcmp(tmp2, old_prop) ) {
-   modified=1;
    if(debug_var>=1) fprintf(errfp, "new_prop_string(): tmp2=%s, old_prop=%s\n", tmp2, old_prop);
    my_strdup(new_prop, tmp2);
  }
@@ -1916,5 +1891,72 @@ char *translate(int inst, char* s)
    return result;
   }
  }
+}
+
+
+
+// integer general purpose hash function 20180104
+struct int_hashentry *int_hash_lookup(struct int_hashentry **table, int token, int remove)
+//    token     remove     ... what ...
+// -----------------------------------------------------------------
+// whatever        0       insert in hash table if not in.
+//                         if already present just return entry 
+//                         address, NULL otherwise
+// whatever        2       lookup in hash table,return entry addr.
+//                         return NULL if not found
+// whatever        1       delete entry if found,return NULL
+
+{
+ unsigned int index;
+ struct int_hashentry *entry, *saveptr, **preventry;
+ int s ;
+
+ index=token % INTHASHSIZE;
+ entry=table[index];
+ preventry=&table[index];
+ while(1) {
+  if( !entry ) { // empty slot
+   if(!remove) { // insert data
+    s=sizeof( struct int_hashentry );
+    entry=(struct int_hashentry *) malloc(s);
+    entry->next=NULL;
+    entry->token=token;
+    *preventry=entry;
+   }
+   return NULL; // not found or was not in table before insert
+  }
+  if( entry -> token==token) { // found matching token
+   if(remove==1) { // remove token from the hash table ...
+    saveptr=entry->next;
+    free(entry);
+    *preventry=saveptr;
+    return NULL;
+   }
+   else return entry;   // found matching entry, return the address
+  }
+  preventry=&entry->next; // descend into the list.
+  entry = entry->next;
+ }
+}
+
+void free_int_hash(struct int_hashentry **table) // remove the whole hash table 
+{
+ int i;
+ struct int_hashentry *entry, *ptr;
+
+ max_collisions=0;
+ for(i=0;i<INTHASHSIZE;i++) {
+  collisions=0;
+  entry=table[i];
+  while(entry) {
+    collisions++;
+    if(collisions > max_collisions) max_collisions=collisions;
+    ptr = entry->next;
+    free(entry);
+    entry=ptr;
+  }
+  table[i]=NULL;
+ }
+ if(debug_var>2) fprintf(errfp, "free_int_hash(): max_collisions=%d\n", max_collisions);
 }
 

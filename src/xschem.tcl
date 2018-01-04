@@ -194,7 +194,7 @@ proc key_binding {  s  d } {
   if {$d eq {} } {
     bind .drw "<${s}>" {}
   } else {
-    bind .drw  "<${s}>" "event_process %T %x %y [scan "$key" %c] 0 0 $state"
+    bind .drw  "<${s}>" "xschem callback %T %x %y [scan "$key" %c] 0 0 $state"
   }
 }
 
@@ -1433,13 +1433,6 @@ proc viewdata {data} {
    return $rcode
 }
 
-proc event_process {s1 s2 s3 s4 s5 s6 s7} {
-  global tcl_debug ps_colors svg_colors
-  if $tcl_debug<=-2 then {puts "event_process{}: xschem callback $s1 $s2 $s3 $s4 $s5 $s6 $s7"}
-  xschem callback $s1 $s2 $s3 $s4 $s5 $s6 $s7
-  return {}
-}
-
 ################## GENSCH procedure  #########################
 
 # gensch bonelli/0_top hiace5/hmicro_rom_ptrif
@@ -2371,21 +2364,21 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
 ###
 ### Tk event handling
 ###
-   bind .drw <Double-Button-1> {event_process -3 %x %y 0 %b 0 %s}
-   bind .drw <Double-Button-2> {event_process -3 %x %y 0 %b 0 %s}
-   bind .drw <Double-Button-3> {event_process -3 %x %y 0 %b 0 %s}
-   bind .drw <Expose> {event_process %T %x %y 0 %w %h %s}
-   bind .drw <Configure> {xschem windowid; event_process %T %x %y 0 %w %h 0}
-   bind .drw <ButtonPress> {event_process %T %x %y 0 %b 0 %s}
-   bind .drw <ButtonRelease> {event_process %T %x %y 0 %b 0 %s}
-   bind .drw <KeyPress> {event_process %T %x %y %N 0 0 %s}
-   bind .drw <KeyRelease> {event_process %T %x %y %N 0 0 %s} ;# 20161118
+   bind .drw <Double-Button-1> {xschem callback -3 %x %y 0 %b 0 %s}
+   bind .drw <Double-Button-2> {xschem callback -3 %x %y 0 %b 0 %s}
+   bind .drw <Double-Button-3> {xschem callback -3 %x %y 0 %b 0 %s}
+   bind .drw <Expose> {xschem callback %T %x %y 0 %w %h %s}
+   bind .drw <Configure> {xschem windowid; xschem callback %T %x %y 0 %w %h 0}
+   bind .drw <ButtonPress> {xschem callback %T %x %y 0 %b 0 %s}
+   bind .drw <ButtonRelease> {xschem callback %T %x %y 0 %b 0 %s}
+   bind .drw <KeyPress> {xschem callback %T %x %y %N 0 0 %s}
+   bind .drw <KeyRelease> {xschem callback %T %x %y %N 0 0 %s} ;# 20161118
 
-   bind .drw <Motion> {event_process %T %x %y 0 0 0 %s}
+   bind .drw <Motion> {xschem callback %T %x %y 0 0 0 %s}
    #bind .drw <Motion> {puts  "xschem.tcl: Motion %T %x %y 0 0 %s"}
    #bind .drw <KeyPress> {puts "xschem.tcl: KeyPress %T %x %y %N 0 %s"}
    bind .drw  <Enter> {
-    event_process %T %x %y 0 0 0 0
+    xschem callback %T %x %y 0 0 0 0
    }
    bind .drw <Leave> {
    }

@@ -630,19 +630,19 @@ void load_schematic(int load_symbols, char *abs_name, int reset_undo) // 2015032
 
     if(debug_var>=2) fprintf(errfp, "load_schematic(): loaded file:wire=%d inst=%d\n",lastwire , lastinst);
     if(load_symbols) link_symbols_to_instances();
-    prepared_hilight_structs=0; // 20171212
-    prepared_netlist_structs=0; // 20171212
-    prepared_hash_objects=0; // 20171224
-    prepared_hash_wires=0; // 20171224
-    // delete_netlist_structs(); // 20161222
-    modified=0;
 
   }  // end if(fd=fopen(name,"r"))!= NULL)
+  prepared_hilight_structs=0; // 20171212
+  prepared_netlist_structs=0; // 20171212
+  prepared_hash_objects=0; // 20171224
+  prepared_hash_wires=0; // 20171224
+  modified=0;
+
   if(has_x) { // 20161207 moved after if( (fd=..)) 
     Tcl_Eval(interp, "wm title . [file tail [xschem get schpath]]"); // 20150417 set window and icon title
     Tcl_Eval(interp, "wm iconname . [file tail [xschem get schpath]]");
   }
-  if(debug_var>=2) fprintf(errfp, "load_schematic(): returning\n");
+  if(debug_var>=1) fprintf(errfp, "load_schematic(): returning\n");
 }
 
 void delete_undo(void)  // 20150327
@@ -1302,11 +1302,6 @@ void load_symbol(char *abs_name)
   unselect_all();
   if( (fd=fopen(name,"r"))!= NULL)
   {
-    modified=0;
-    prepared_hash_objects=0; // 20171224
-    prepared_hilight_structs=0; // 20171212
-    prepared_netlist_structs=0; // 20171212
-    prepared_hash_wires=0; // 20171224
     // delete_netlist_structs(); // 20161222
     while(!endfile)
     {
@@ -1352,6 +1347,11 @@ void load_symbol(char *abs_name)
     Tcl_Eval(interp, "wm title . [file tail [xschem get schpath]]"); // 20150417 set window and icon title
     Tcl_Eval(interp, "wm iconname . [file tail [xschem get schpath]]");
   }
+  modified=0;
+  prepared_hash_objects=0; // 20171224
+  prepared_hilight_structs=0; // 20171212
+  prepared_netlist_structs=0; // 20171212
+  prepared_hash_wires=0; // 20171224
 }
 
 

@@ -422,7 +422,7 @@ void remove_symbols(void)
    if(debug_var>=2) fprintf(errfp, "remove_symbols(): removing symbol %d\n",j);
    remove_symbol();
  }
-  if(debug_var>=2) fprintf(errfp, "remove_symbols(): done\n");
+  if(debug_var>=1) fprintf(errfp, "remove_symbols(): done\n");
 }
 
 void clear_drawing(void)
@@ -478,7 +478,7 @@ void clear_drawing(void)
   lastrect[i] = 0;
   lastpolygon[i] = 0;// 20171115
  }
- if(debug_var>=2) fprintf(errfp, "clear drawing(): deleted data structures, now deleting hash\n");
+ if(debug_var>=1) fprintf(errfp, "clear drawing(): deleted data structures, now deleting hash\n");
  free_hash();
 }
 
@@ -835,6 +835,8 @@ void descend(void)
     if(save_ok==-1) return; // 20171020
   }
 
+  if(debug_var>0) fprintf(errfp, "type of instance: %s\n", (inst_ptr[selectedgroup[0].n].ptr+instdef)->type);
+
   if(			// do not descend if not subcircuit
      strcmp(
         // get_tok_value( (inst_ptr[selectedgroup[0].n].ptr+instdef)->prop_ptr, "type",0), // 20150409
@@ -878,6 +880,7 @@ void descend(void)
     prepare_netlist_structs(1);
     if(enable_drill) drill_hilight(); // 20171212
   }
+  if(debug_var>0) fprintf(errfp, "descend(): before zoom(): prepared_hash_objects=%d\n", prepared_hash_objects);
   zoom_full(1);
  }
 }

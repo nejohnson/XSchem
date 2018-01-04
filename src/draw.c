@@ -1232,8 +1232,8 @@ void draw(void)
               if(tmpj==y1b && !firstj) break;
               firstj=0;
               instanceptr=objecttable[tmpi][tmpj];
-              if(debug_var>=2) fprintf(errfp, "drawing instances in square: %d %d\n", tmpi, tmpj);
               while(instanceptr) {
+               if(debug_var>0) fprintf(errfp, "drawing instance %d in square: %d %d\n", instanceptr->n, tmpi, tmpj);
                if( !int_hash_lookup(insthash, instanceptr->n*cadlayers+c, 0)) {
                  symptr = (inst_ptr[instanceptr->n].ptr+instdef);
                  if( c==0 || //20150408 draw_symbol_outline call is needed on layer 0 to avoid redundant work (outside check)

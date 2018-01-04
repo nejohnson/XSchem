@@ -4,9 +4,9 @@ S {}
 T {PARASITIC
 CAP} 1020 -510 0 0 0.25 0.2 {} 
 T {TESLA COIL HIGH VOLTAGE GENERATOR EXAMPLE} 420 -740 0 0 0.4 0.4 {} 
-N 60 -550 60 -500 {lab=VCCS} 
-N 60 -640 60 -610 {lab=VCC} 
-N 150 -640 150 -500 {lab=VCC} 
+N 140 -550 140 -500 {lab=VCCS} 
+N 140 -640 140 -610 {lab=VCC} 
+N 230 -640 230 -500 {lab=VCC} 
 N 870 -530 1010 -530 {lab=HV} 
 N 1010 -420 1010 -250 {lab=VSS} 
 N 1010 -530 1010 -480 {lab=HV} 
@@ -81,15 +81,15 @@ N 580 -640 580 -490 {lab=VCC}
 N 870 -530 870 -490 {lab=HV} 
 N 870 -430 870 -340 {lab=FB} 
 N 580 -170 580 -150 {lab=VSS} 
-N 60 -640 150 -640 {lab=VCC} 
-N 60 -420 150 -420 {lab=VSS} 
+N 140 -640 230 -640 {lab=VCC} 
+N 140 -420 230 -420 {lab=VSS} 
 N 800 -220 800 -200 {lab=VCC} 
 N 800 -140 870 -140 {lab=FB} 
-N 150 -440 150 -420 {lab=VSS} 
-N 60 -440 60 -420 {lab=VSS} 
+N 230 -440 230 -420 {lab=VSS} 
+N 140 -440 140 -420 {lab=VSS} 
 N 460 -200 540 -200 {lab=FB} 
 N 580 -280 580 -230 {lab=D} 
-N 150 -640 580 -640 {lab=VCC} 
+N 230 -640 580 -640 {lab=VCC} 
 N 470 -280 470 -260 {lab=VCC} 
 N 460 -420 460 -400 {lab=VCC} 
 N 460 -340 520 -340 {lab=#net3} 
@@ -106,11 +106,11 @@ vvss vss 0 dc 0
 .meas tran iavg AVG i(vc) from=950u to=990u
 .probe tran p(q1) i(d2) i(d1) i(d3) i(l1) i(l2) i(L3)
 .meas tran pavg AVG p(q1) from=950u to=990u"} 
-C {devices/lab_pin} 60 -640 0 0 {name=p1 lab=VCC} 
-C {devices/res} 60 -580 0 1 {name=rs m=1 value=1} 
-C {devices/vsource} 60 -470 0 1 {name=vvcc value="pwl 0 0 1u 12"} 
-C {devices/lab_pin} 60 -420 0 0 {name=p7 lab=VSS} 
-C {devices/capa} 150 -470 0 0 {name=cvcc m=1 value=10u} 
+C {devices/lab_pin} 140 -640 0 0 {name=p1 lab=VCC} 
+C {devices/res} 140 -580 0 1 {name=rs m=1 value=1} 
+C {devices/vsource} 140 -470 0 1 {name=vvcc value="pwl 0 0 1u 12"} 
+C {devices/lab_pin} 140 -420 0 0 {name=p7 lab=VSS} 
+C {devices/capa} 230 -470 0 0 {name=cvcc m=1 value=10u} 
 C {devices/launcher} 1180 -530 0 0 {name=h2 
 descr="BJT MODELS" 
 url="http://www.zen22142.zen.co.uk/ltspice/standard.bjt"} 
@@ -123,7 +123,7 @@ url="http://hamwaves.com/antennas/inductance.html"}
 C {devices/launcher} 1180 -630 0 0 {name=h4 
 descr="ltwiki BJT MODELS" 
 url="http://ltwiki.org/?title=Standard.bjt"} 
-C {devices/lab_pin} 60 -530 0 0 {name=p6 lab=VCCS} 
+C {devices/lab_pin} 140 -530 0 0 {name=p6 lab=VCCS} 
 C {devices/lab_pin} 870 -560 0 1 {name=p4 lab=HV} 
 C {devices/capa} 1010 -450 0 0 {name=c1 m=1 value=1p} 
 C {devices/lab_pin} 1010 -250 0 0 {name=p3 lab=VSS} 

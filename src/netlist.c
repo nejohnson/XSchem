@@ -54,6 +54,7 @@ void del_object_table(void)
   for(j=0;j<NBOXES;j++)
    objecttable[i][j] = delobjectentry(objecttable[i][j]);
  prepared_hash_objects=0;
+ if(debug_var>0) fprintf(errfp, "cleared object hash table\n");
 }
 
 void object_iterator(int k)	// 20171203
@@ -162,6 +163,7 @@ void hash_objects(void) // 20171203 insert object bbox in spatial hash table
      firstj=0;
      // insert object_ptr[n] in region [tmpi, tmpj]
      objectinsert(n, tmpi, tmpj); // 20171203 
+     if(debug_var>0) fprintf(errfp, "hash_objects(): hashing inst %d\n", n);
     }
    }
  }

@@ -327,6 +327,7 @@ function compact_pinlist(inst,inst_sub                  , prevgroup, group,i,ii,
 # PP A[3] A[2] A[1] B C K[10] K[9] K[5] K[4] K[3] K[1]
 function compact_label_str(str,        a, b, ar, ret,start,i)
 {
+  # print "compact_label_str(): str=" str
   a=1
   b=split(str, ar,",")
   ret=""
@@ -339,14 +340,7 @@ function compact_label_str(str,        a, b, ar, ret,start,i)
           else {ret = ret ar[i-1] ","; start=i }
         }
       }
-      else if(lab_name(ar[i])!=lab_name(ar[i-1]) ||                     # lab basename changed
-
-          ( lab_index(ar[start])!=lab_index(ar[i]) &&           # range count != element count
-            abs(start-i)!=abs(lab_index(ar[start])-lab_index(ar[i]))) ||
-
-          ( lab_index(ar[i]) != lab_index(ar[i-1])-1 &&                 # index not equal, +1,-1
-            lab_index(ar[i]) != lab_index(ar[i-1])+1 &&               # to previous
-            lab_index(ar[i]) != lab_index(ar[start])   ) ) {
+      else if(lab_name(ar[i])!=lab_name(ar[i-1])) {                     # lab basename changed
         if(start<i-1 && lab_index(ar[start]) == lab_index(ar[i-1]) )
           ret = ret (i-start) "*" ar[i-1] ",";
         else if(start<i-1)
@@ -355,6 +349,40 @@ function compact_label_str(str,        a, b, ar, ret,start,i)
           ret = ret lab_name(ar[start]) "[" lab_index(ar[start]) "],"
         start=i
       }
+
+      else if( lab_index(ar[i]) != lab_index(ar[i-1])-1 &&                # index not equal, +1,-1
+               lab_index(ar[i]) != lab_index(ar[i-1])+1 ) {               # to previous
+        if(start<i-1 && lab_index(ar[start]) == lab_index(ar[i-1]) )
+          ret = ret (i-start) "*" ar[i-1] ",";
+        else if(start<i-1)
+          ret = ret lab_name(ar[start]) "[" lab_index(ar[start]) ":" lab_index(ar[i-1]) "],"
+        else
+          ret = ret lab_name(ar[start]) "[" lab_index(ar[start]) "],"
+        start=i
+      }
+
+      else if( lab_index(ar[start])!=lab_index(ar[i]) &&           # range count != element count
+               abs(start-i)!=abs(lab_index(ar[start])-lab_index(ar[i]))) { 
+        if(start<i-1 && lab_index(ar[start]) == lab_index(ar[i-1]) )
+          ret = ret (i-start) "*" ar[i-1] ",";
+        else if(start<i-1)
+          ret = ret lab_name(ar[start]) "[" lab_index(ar[start]) ":" lab_index(ar[i-1]) "],"
+        else
+          ret = ret lab_name(ar[start]) "[" lab_index(ar[start]) "],"
+        start=i
+      }
+
+#      else if( lab_index(ar[i]) != lab_index(ar[start])  ) {
+#        if(start<i-1 && lab_index(ar[start]) == lab_index(ar[i-1]) )
+#          ret = ret (i-start) "*" ar[i-1] ",";
+#        else if(start<i-1)
+#          ret = ret lab_name(ar[start]) "[" lab_index(ar[start]) ":" lab_index(ar[i-1]) "],"
+#        else
+#          ret = ret lab_name(ar[start]) "[" lab_index(ar[start]) "],"
+#        start=i
+#      }
+
+
     }
   }
   if(ar[b] !~ /\[/)  {
@@ -367,6 +395,8 @@ function compact_label_str(str,        a, b, ar, ret,start,i)
     ret = ret lab_name(ar[start]) "[" lab_index(ar[start]) ":" lab_index(ar[b]) "]"
   else
     ret = ret lab_name(ar[b]) "[" lab_index(ar[b]) "]"
+
+  # print "compact_label_str(): ret=" ret
   return ret
 }
 
@@ -376,6 +406,7 @@ function compact_label(name, ar,a,b,        ret,start,i)
 {
   ret=""
   for(i=a;i<=b;i++) {
+    # print "compact_label(): ar[" name ", " i "]=" ar[name,i]
     if(i==a) {start=a}
     else {
       if(ar[name,i-1] !~ /\[/)  {
@@ -384,14 +415,7 @@ function compact_label(name, ar,a,b,        ret,start,i)
           else {ret = ret ar[name,i-1] ","; start=i }
         }
       }
-      else if(lab_name(ar[name,i])!=lab_name(ar[name,i-1]) || 			# lab basename changed
-
-          ( lab_index(ar[name,start])!=lab_index(ar[name,i]) && 		# range count != element count
-            abs(start-i)!=abs(lab_index(ar[name,start])-lab_index(ar[name,i]))) ||
-
-          ( lab_index(ar[name,i]) != lab_index(ar[name,i-1])-1 && 		# index not equal, +1,-1
-            lab_index(ar[name,i]) != lab_index(ar[name,i-1])+1 &&               # to previous
-            lab_index(ar[name,i]) != lab_index(ar[name,start])   ) ) {
+      else if(lab_name(ar[name,i])!=lab_name(ar[name,i-1])) { 			# lab basename changed
         if(start<i-1 && lab_index(ar[name,start]) == lab_index(ar[name,i-1]) )
           ret = ret (i-start) "*" ar[name,i-1] ",";
         else if(start<i-1) 
@@ -400,6 +424,38 @@ function compact_label(name, ar,a,b,        ret,start,i)
           ret = ret lab_name(ar[name,start]) "[" lab_index(ar[name,start]) "],"
         start=i
       }
+      else if(lab_index(ar[name,i]) != lab_index(ar[name,i-1])-1 &&               # index not equal, +1,-1 previous
+              lab_index(ar[name,i]) != lab_index(ar[name,i-1])+1  ) {             
+        if(start<i-1 && lab_index(ar[name,start]) == lab_index(ar[name,i-1]) )
+          ret = ret (i-start) "*" ar[name,i-1] ",";
+        else if(start<i-1)
+          ret = ret lab_name(ar[name,start]) "[" lab_index(ar[name,start]) ":" lab_index(ar[name,i-1]) "],"
+        else
+          ret = ret lab_name(ar[name,start]) "[" lab_index(ar[name,start]) "],"
+        start=i
+      }
+      else if( lab_index(ar[name,start])!=lab_index(ar[name,i]) &&                 # range count != element count
+               abs(start-i)!=abs(lab_index(ar[name,start])-lab_index(ar[name,i])) ) {
+        if(start<i-1 && lab_index(ar[name,start]) == lab_index(ar[name,i-1]) )
+          ret = ret (i-start) "*" ar[name,i-1] ",";
+        else if(start<i-1)
+          ret = ret lab_name(ar[name,start]) "[" lab_index(ar[name,start]) ":" lab_index(ar[name,i-1]) "],"
+        else
+          ret = ret lab_name(ar[name,start]) "[" lab_index(ar[name,start]) "],"
+        start=i
+      }
+
+#      else if( lab_index(ar[name,i]) != lab_index(ar[name,start])  ) {
+#        if(start<i-1 && lab_index(ar[name,start]) == lab_index(ar[name,i-1]) )
+#          ret = ret (i-start) "*" ar[name,i-1] ",";
+#        else if(start<i-1)
+#          ret = ret lab_name(ar[name,start]) "[" lab_index(ar[name,start]) ":" lab_index(ar[name,i-1]) "],"
+#        else
+#          ret = ret lab_name(ar[name,start]) "[" lab_index(ar[name,start]) "],"
+#        start=i
+#      }
+
+
     }
   }
   if(ar[name,b] !~ /\[/)  {
@@ -412,6 +468,8 @@ function compact_label(name, ar,a,b,        ret,start,i)
     ret = ret lab_name(ar[name,start]) "[" lab_index(ar[name,start]) ":" lab_index(ar[name,b]) "]"
   else
     ret = ret lab_name(ar[name,b]) "[" lab_index(ar[name,b]) "]"
+
+  # print "compact_label(): ret=" ret
   return ret
 }
 
@@ -659,7 +717,7 @@ function print_sym(sym, template, dir, pin,
    printf "B 5 " (-x-size) " " (y+ooo*space-size) " " (-x+size) " " (y+ooo*space+size) \
          " {name=" pin[i] " dir=out " >sym
    printf "}\n" >sym
-   print "L 4 " (-x),(y+ooo*space),(-x-lwidth), (y+ooo*space),"{}" >sym
+   print "L 4 " (-x-lwidth),(y+ooo*space),(-x), (y+ooo*space),"{}" >sym
    print "T {" pin[i] "}",-x-lwidth-textdist,y+ooo*space-lab_voffset,0,1,labsize, labsize, "{}" >sym
    ooo++
   }
@@ -668,7 +726,7 @@ function print_sym(sym, template, dir, pin,
    printf "B 5 " (-x-size) " " (y+ooo*space-size) " " (-x+size) " " (y+ooo*space+size) \
          " {name=" pin[i] " dir=inout " >sym
    printf "}\n" >sym
-   print "L 7 " (-x),(y+ooo*space),(-x-lwidth), (y+ooo*space),"{}" >sym
+   print "L 7 " (-x-lwidth),(y+ooo*space),(-x), (y+ooo*space),"{}" >sym
    print "T {" pin[i] "}",-x-lwidth-textdist,y+ooo*space-lab_voffset,0,1,labsize, labsize, "{}" >sym
    ooo++
   }

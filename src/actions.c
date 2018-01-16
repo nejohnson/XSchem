@@ -715,15 +715,15 @@ void place_symbol(int pos,char *symbol_name, double x, double y, int rot, int fl
   bbox(ADD, inst_ptr[n].x1, inst_ptr[n].y1, 
             inst_ptr[n].x2, inst_ptr[n].y2);
   lastinst++;
+  modified=1;
+  prepared_hash_objects=0; // 20171224
+  prepared_netlist_structs=0;
+  prepared_hilight_structs=0;
   if(draw_sym&1) {
     bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
     draw();
     bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
   }
-  modified=1;
-  prepared_hash_objects=0; // 20171224
-  prepared_netlist_structs=0;
-  prepared_hilight_structs=0;
   //  hilight new element 24122002
   if(x_initialized) drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
   if(x_initialized) drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);

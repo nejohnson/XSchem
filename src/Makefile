@@ -46,7 +46,7 @@ endif
 
 ## to fix rendering problems due to bugs in the exceed turboX server
 ## add -DTURBOX_FIX
-MOREFLAGS=  -g  -pg -no-pie
+MOREFLAGS=  -g  
 
 CFLAGS  = -Wall  $(MOREFLAGS)  -I/usr/include/tcl${TCLVER} $(CAIRO_INCLUDES) -I/home/sschippe/include
 LDFLAGS = -L/usr/X11R6/lib -L/home/sschippe/lib $(MOREFLAGS) -lX11 -lm -lXpm -ltcl${TCLVER} -ltk${TCLVER} \

@@ -1071,6 +1071,7 @@ void draw(void)
  struct wireentry *wireptr;
  static struct int_hashentry *insthash[INTHASHSIZE]; // 20180104
  static struct int_hashentry *wirehash[INTHASHSIZE]; // 20180104
+ char *type=NULL; // 20180109
 
  // /20171224
 
@@ -1241,7 +1242,15 @@ void draw(void)
                      symptr->rects[c] ||   // 20150408
                      symptr->polygons[c] ||   // 20150408
                      ((c==TEXTWIRELAYER || c==TEXTLAYER) && symptr->texts)) {  // 20150408
-                   draw_symbol_outline(ADD, c, instanceptr->n, c,0,0,0.0,0.0);
+
+                   type = (inst_ptr[instanceptr->n].ptr+instdef)->type;
+                   if( (!hilight_nets ||
+                     !type  ||
+                     (strcmp(type,"label") && strcmp(type,"ipin") && strcmp(type,"iopin") && strcmp(type,"opin")) ||
+                     !bus_hilight_lookup( get_tok_value(inst_ptr[instanceptr->n].prop_ptr,"lab",0) , 0, 2 ) )
+                   ) {
+                     draw_symbol_outline(ADD, c, instanceptr->n,c,0,0,0.0,0.0);
+                   }
                  }  // 20150408
                }
                instanceptr=instanceptr->next;
@@ -1257,7 +1266,16 @@ void draw(void)
                   symptr->rects[c] ||   // 20150408
                   symptr->polygons[c] ||   // 20150408
                   ((c==TEXTWIRELAYER || c==TEXTLAYER) && symptr->texts)) {  // 20150408
-                draw_symbol_outline(ADD, c, i,c,0,0,0.0,0.0);
+
+
+                type = (inst_ptr[i].ptr+instdef)->type;
+                if( (!hilight_nets ||
+                  !type ||
+                  (strcmp(type,"label") && strcmp(type,"ipin") && strcmp(type,"iopin") && strcmp(type,"opin")) ||
+                  !bus_hilight_lookup( get_tok_value(inst_ptr[i].prop_ptr,"lab",0) , 0, 2 ) )
+                ) {
+                  draw_symbol_outline(ADD, c, i,c,0,0,0.0,0.0);
+                }
               }  // 20150408
             }
           }

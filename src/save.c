@@ -279,6 +279,8 @@ void load_box(FILE *fd)
     ptr=rect[c];
     fscanf(fd, "%lf %lf %lf %lf ",&ptr[i].x1, &ptr[i].y1, 
        &ptr[i].x2, &ptr[i].y2);
+
+    RECTORDER(ptr[i].x1, ptr[i].y1, ptr[i].x2, ptr[i].y2); // 20180108
     ptr[i].prop_ptr=NULL;
     ptr[i].sel=0;
     load_ascii_string( &ptr[i].prop_ptr, fd);
@@ -314,6 +316,7 @@ void load_line(FILE *fd)
     ptr=line[c];
     fscanf(fd, "%lf %lf %lf %lf ",&ptr[i].x1, &ptr[i].y1, 
        &ptr[i].x2, &ptr[i].y2);
+    ORDER(ptr[i].x1, ptr[i].y1, ptr[i].x2, ptr[i].y2); // 20180108
     ptr[i].prop_ptr=NULL;
     ptr[i].sel=0;
     load_ascii_string( &ptr[i].prop_ptr, fd);
@@ -909,6 +912,8 @@ int load_symbol_definition(char *name)
       my_realloc(&ll[c],(i+1)*sizeof(Line));
       fscanf(fd, "%lf %lf %lf %lf ",&ll[c][i].x1, &ll[c][i].y1, 
          &ll[c][i].x2, &ll[c][i].y2);
+      ORDER(ll[c][i].x1, ll[c][i].y1, ll[c][i].x2, ll[c][i].y2); // 20180108
+
       ll[c][i].prop_ptr=NULL;
       load_ascii_string( &ll[c][i].prop_ptr, fd);
        if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): loaded line: ptr=%lu\n", (unsigned long)ll[c]);
@@ -946,6 +951,7 @@ int load_symbol_definition(char *name)
       my_realloc(&bb[c],(i+1)*sizeof(Box));
       fscanf(fd, "%lf %lf %lf %lf ",&bb[c][i].x1, &bb[c][i].y1, 
          &bb[c][i].x2, &bb[c][i].y2);
+      RECTORDER(bb[c][i].x1, bb[c][i].y1, bb[c][i].x2, bb[c][i].y2); // 20180108
       bb[c][i].prop_ptr=NULL;
       load_ascii_string( &bb[c][i].prop_ptr, fd);
        if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): loaded rect: ptr=%lu\n", (unsigned long)bb[c]);

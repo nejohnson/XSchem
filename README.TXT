@@ -35,6 +35,12 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.4.2:
+- delete objects (mainly for text) before overstriking with hilight color, this avoids
+  ugly character borders of hilighted texts (antialiasing presumes you draw text 
+  on empty background)
+- small bug fixes of regressions introduced by previous commit
+
 2.4.1: 
 - spatial hash iterator added in drawing engine when the viewing area is small compared
   to the total area of a freaking big schematic; using spatial hash the lookup of elements

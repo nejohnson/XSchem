@@ -80,6 +80,7 @@ void merge_box(FILE *fd)
     fscanf(fd, "%lf %lf %lf %lf ",&ptr[i].x1, &ptr[i].y1, 
        &ptr[i].x2, &ptr[i].y2);
     ptr[i].prop_ptr=NULL;
+    RECTORDER(ptr[i].x1, ptr[i].y1, ptr[i].x2, ptr[i].y2); // 20180108
     ptr[i].sel=0;
     load_ascii_string( &ptr[i].prop_ptr, fd);
     select_box(c,i, SELECTED, 1);
@@ -134,6 +135,8 @@ void merge_line(FILE *fd)
     ptr=line[c];
     fscanf(fd, "%lf %lf %lf %lf ",&ptr[i].x1, &ptr[i].y1, 
        &ptr[i].x2, &ptr[i].y2);
+    ORDER(ptr[i].x1, ptr[i].y1, ptr[i].x2, ptr[i].y2); // 20180108
+
     ptr[i].prop_ptr=NULL;
     ptr[i].sel=0;
     load_ascii_string( &ptr[i].prop_ptr, fd);

@@ -2070,7 +2070,7 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    .menubar.option.menu add checkbutton -label "show info win" -variable show_infowindow \
      -command {
 	if { $show_infowindow != 0 } {wm deiconify .infotext
-        } else { destroy .infotext }
+        } else {wm withdraw .infotext}
       }
    .menubar.option.menu add checkbutton -label "color postscript" -variable color_ps \
       -command {

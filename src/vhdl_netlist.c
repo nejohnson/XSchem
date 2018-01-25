@@ -263,7 +263,7 @@ void global_vhdl_netlist(int global)  // netlister driver
      continue;
    }
    my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
-   if(!strcmp(type,"netlist_commands")) {
+   if(type && !strcmp(type,"netlist_commands")) {
      fprintf(fd, "%s\n", get_tok_value(inst_ptr[i].prop_ptr,"value",2)); // 20180124
    }
  }
@@ -494,7 +494,7 @@ void  vhdl_block_netlist(FILE *fd, int i)  //20081204
          !strcmp(get_tok_value(inst_ptr[l].prop_ptr, "only_toplevel", 0), "true")) continue; // 20160418
 
        my_strdup(&type,(inst_ptr[l].ptr+instdef)->type);
-       if(!strcmp(type,"netlist_commands")) { 
+       if(type && !strcmp(type,"netlist_commands")) { 
          fprintf(fd, "%s\n", get_tok_value(inst_ptr[l].prop_ptr,"value",2)); // 20180124
        }
      }

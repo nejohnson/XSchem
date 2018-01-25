@@ -74,7 +74,7 @@ N 300 -860 350 -860 {lab=FBN}
 N 300 -400 350 -400 {lab=FB} 
 N 530 -1050 570 -1050 {lab=VSS} 
 N 530 -1060 530 -1050 {lab=VSS} 
-C {devices/netlist_not_shown} 1000 -510 0 0 {name=STIMULI
+C {devices/code} 1000 -510 0 0 {name=STIMULI
 only_toplevel=true
 value=".option PARHIER=LOCAL RUNLVL=6 post MODMONTE=1 warn maxwarns=400
 .option sampling_method = SRS 
@@ -88,7 +88,7 @@ vvss vss 0 dc 0
 .FOUR 20k v(outm,outp)
 .probe i(*) 
 .probe p(r*) p(v*)"} 
-C {devices/netlist_not_shown} 1000 -660 0 0 {name=MODELS 
+C {devices/code} 1000 -660 0 0 {name=MODELS 
 only_toplevel=true
 value=".MODEL bd139_2 npn
 +IS=1e-09 BF=222.664 NF=0.85 VAF=36.4079

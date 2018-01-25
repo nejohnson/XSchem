@@ -11,7 +11,7 @@ N 820 -300 820 -280 {lab=Q}
 N 770 -300 770 -150 {lab=Q} 
 N 560 -150 770 -150 {lab=Q} 
 N 560 -260 560 -150 {lab=Q} 
-C {devices/netlist_not_shown} 320 -210 0 0 {name=STIMULI value="
+C {devices/code} 320 -210 0 0 {name=STIMULI value="
 
 .option RUNLVL=5 post
 .param VCC=10

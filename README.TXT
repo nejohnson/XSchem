@@ -35,6 +35,13 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.4.3:
+- devices/code.sym component added: this component has a 'value' property that may be
+  used to place arbitrary code (spice/verilog/VHDL code) into a schematic. Multiple
+  'code.sym' components may be used, their 'value' properties will be concatenated
+  into the resulting netlist. code may be entered by editing the value property
+  with <shift-q>
+
 2.4.2:
 - delete objects (mainly for text) before overstriking with hilight color, this avoids
   ugly character borders of hilighted texts (antialiasing presumes you draw text 

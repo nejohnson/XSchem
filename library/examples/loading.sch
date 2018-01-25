@@ -1,4 +1,44 @@
-G {
+G {} 
+V {// test} 
+S {* test} 
+T {rrreal type:
+-----------
+
+rreal is a record type containing voltage value, drive strength and
+capacitive loading of an electrical node.
+
+rrreal is a resolved subtype of rreal.
+
+The resolution function invoked by the simulator updates
+voltages, strengths and capacitive loading of all nodes.
+
+this allows to simulate voltage transients, charge sharing,
+floating conditions and more.
+the example uses bidirectional analog switches and simulates charge pumps 
+which have a finite driving capability (output impedance)} 10 -410 0 0 0.3 0.3 {} 
+T {VHDL DESIGN EXAMPLE} 140 -1290 0 0 1 1 {} 
+T {set netlist mode to VHDL
+- create netlist
+- simulate with ghdl
+- view waveforms} 110 -1200 0 0 0.6 0.6 {} 
+N 830 -680 900 -680 {lab=VXS} 
+N 450 -680 510 -680 {lab=VX} 
+N 450 -680 450 -570 {lab=VX} 
+N 1230 -680 1240 -680 {lab=SP} 
+N 340 -680 450 -680 {lab=VX} 
+N 830 -680 830 -570 {lab=VXS} 
+N 1230 -680 1230 -570 {lab=SP} 
+N 470 -800 480 -800 {lab=VX2} 
+N 810 -800 810 -680 {lab=VXS} 
+N 780 -800 810 -800 {lab=VXS} 
+N 350 -910 470 -910 {lab=VX2} 
+N 470 -910 470 -800 {lab=VX2} 
+N 810 -680 830 -680 {lab=VXS} 
+N 1200 -680 1230 -680 {lab=SP} 
+N 340 -800 470 -800 {lab=VX2} 
+C {devices/code} 600 -200 0 0 {name=CODE
+vhdl_ignore=false
+value="
 -- these assignments are done to have the voltage values available
 -- in the waveform file
 V_VX <= VX.value;
@@ -67,46 +107,10 @@ wait for 200 ns;
 wait;
 end process;
 
+
+"
 } 
-V {// test} 
-S {* test} 
-T {rrreal type:
------------
-
-rreal is a record type containing voltage value, drive strength and
-capacitive loading of an electrical node.
-
-rrreal is a resolved subtype of rreal.
-
-The resolution function invoked by the simulator updates
-voltages, strengths and capacitive loading of all nodes.
-
-this allows to simulate voltage transients, charge sharing,
-floating conditions and more.
-the example uses bidirectional analog switches and simulates charge pumps 
-which have a finite driving capability (output impedance)} 10 -410 0 0 0.3 0.3 {} 
-T {VHDL DESIGN EXAMPLE} 140 -1290 0 0 1 1 {} 
-T {set netlist mode to VHDL
-- create netlist
-- simulate with ghdl
-- view waveforms} 110 -1200 0 0 0.6 0.6 {} 
-N 830 -680 900 -680 {lab=VXS} 
-N 450 -680 510 -680 {lab=VX} 
-N 450 -680 450 -570 {lab=VX} 
-N 1230 -680 1240 -680 {lab=SP} 
-N 340 -680 450 -680 {lab=VX} 
-N 830 -680 830 -570 {lab=VXS} 
-N 1230 -680 1230 -570 {lab=SP} 
-N 470 -800 480 -800 {lab=VX2} 
-N 810 -800 810 -680 {lab=VXS} 
-N 780 -800 810 -800 {lab=VXS} 
-N 350 -910 470 -910 {lab=VX2} 
-N 470 -910 470 -800 {lab=VX2} 
-N 810 -680 830 -680 {lab=VXS} 
-N 1200 -680 1230 -680 {lab=SP} 
-N 340 -800 470 -800 {lab=VX2} 
-C {devices/lab_wire} 430 -680 0 1 {name=l1  lab=VX sig_type=rrreal } 
-C {devices/use} 680 -310 0 0 {library ieee;
+C {devices/use} 840 -220 0 0 {library ieee;
 use std.TEXTIO.all;
 use ieee.std_logic_1164.all;
 
@@ -130,10 +134,10 @@ C {examples/pump} 250 -800 0 0 {name=x7 conduct="1.0/40000.0" val=3.0}
 C {devices/lab_pin} 150 -800 0 0 {name=l7  lab=ING1} 
 C {examples/switch_rreal} 630 -790 0 0 {name=x8 del="2 ns"} 
 C {devices/lab_pin} 480 -780 0 0 {name=l0  lab=SW2} 
-C {devices/lab_wire} 460 -800 0 1 {name=l8  lab=VX2 sig_type=rrreal
+C {devices/lab_wire} 400 -800 0 1 {name=l8  lab=VX2 sig_type=rrreal
 } 
 C {examples/real_capa} 350 -880 0 0 {name=x9 cap=40.0} 
-C {devices/package_not_shown} 670 -430 0 0 {
+C {devices/package_not_shown} 830 -340 0 0 {
     library ieee, std;
     use std.textio.all;
  
@@ -345,8 +349,9 @@ end procedure;
 
     end rrreal; -- end package body
 } 
-C {devices/title} 160 0 0 0 {name=l9 author="Stefan Schippers"} 
-C {devices/arch_declarations} 670 -370 0 0 {
+C {devices/title} 160 -40 0 0 {name=l9 author="Stefan Schippers"} 
+C {devices/arch_declarations} 830 -280 0 0 {
 signal V_VX, V_VX2, V_VXS, V_SP: real;
 
 } 
+C {devices/lab_wire} 430 -680 0 1 {name=l1  lab=VX sig_type=rrreal } 

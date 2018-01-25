@@ -94,7 +94,7 @@ N 470 -280 470 -260 {lab=VCC}
 N 460 -420 460 -400 {lab=VCC} 
 N 460 -340 520 -340 {lab=#net3} 
 N 720 -280 720 -260 {lab=VSS} 
-C {devices/netlist_not_shown} 1140 -170 0 0 {
+C {devices/code} 1140 -170 0 0 {
 name=STIMULI 
 value=".option SCALE=1e-6 PARHIER=LOCAL RUNLVL=6 post MODMONTE=1
 .option sampling_method = SRS
@@ -154,7 +154,7 @@ C {devices/ammeter} 580 -310 0 0 {name=vmeasure}
 C {devices/diode} 720 -310 2 0 {name=D4 model=d1n5400 area=1
 } 
 C {devices/lab_pin} 720 -260 0 0 {name=p14 lab=VSS} 
-C {devices/netlist_not_shown} 1140 -330 0 0 {name=MODELS 
+C {devices/code} 1140 -330 0 0 {name=MODELS 
 only_toplevel=true
 value=".MODEL bd139_2 npn
 +IS=1e-09 BF=222.664 NF=0.85 VAF=36.4079

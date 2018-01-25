@@ -13,14 +13,9 @@ FNR == 1 {
 END  { endfile(_filename_) }
 
 ###### begin user code ########################
-# B 17 6640 -67110 17800 -66620 {}
-/^B 17/{
-  found=1
-  l1 = "L 17 " $3 " " $4 " " $5 " " $4 " {}\n"
-  l2 = "L 17 " $5 " " $4 " " $5 " " $6 " {}\n"
-  l3 = "L 17 " $5 " " $6 " " $3 " " $6 " {}\n"
-  l4 = "L 17 " $3 " " $6 " " $3 " " $4 " {}"
-  $0= l1 l2 l3 l4
+/{devices\/netlist_not_shown}/{
+ found=1
+ sub(/{devices\/netlist_not_shown}/,"{devices/code}")
 }
 ###### end  user code  ########################
 

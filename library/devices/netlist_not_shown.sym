@@ -1,12 +1,10 @@
 G {type=netlist_commands
-vhdl_ignore=true
-verilog_ignore=true
 template="name=s1 only_toplevel=false value=blabla"
 format="
 @value
 "} 
-V {} 
-S {} 
+V {}
+S {}
 L 3 20 30 60 30 {} 
 L 3 20 40 40 40 {} 
 L 3 20 50 60 50 {} 

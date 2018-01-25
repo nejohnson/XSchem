@@ -1,6 +1,6 @@
 G {type=resistor
 format="@name @pinlist @value m=@m"
-template="name=r1 m=1 value=1k"} 
+template="name=r0 m=1 value=1k"} 
 V {}
 S {}
 L 4 0 20 0 30 {} 

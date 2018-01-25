@@ -1,18 +1,5 @@
 G {} 
-V {initial begin
-  $dumpfile("dumpfile.vcd");
-  $dumpvars;
-  A=0;
-end
-
-always begin
-  #1000;
-  $display("%08b %08b", A, B);
-  A=A + 1;
-  if(A==0) $finish;
-end
-
-} 
+V {} 
 S {} 
 T {BINARY} 500 -780 0 0 0.4 0.4 {} 
 T {GRAY} 830 -780 0 0 0.4 0.4 {} 
@@ -132,4 +119,16 @@ C {devices/lab_pin} 1230 -310 0 1 {name=p23 lab=C[2]}
 C {devices/lab_pin} 1230 -230 0 1 {name=p24 lab=C[1]} 
 C {devices/lab_pin} 1230 -150 0 1 {name=p25 lab=C[0]} 
 C {devices/opin} 150 -190 0 0 { name=p26 lab=C[7:0] } 
-C {devices/architecture} 70 -720 0 0 { nothing here, use global schematic properties } 
+C {devices/code} 330 -250 0 0 {name=TESTBENCH only_toplevel=false value="initial begin
+  $dumpfile(\\"dumpfile.vcd\\");
+  $dumpvars;
+  A=0;
+end
+
+always begin
+  #1000;
+  $display(\\"%08b %08b\\", A, B);
+  A=A + 1;
+  if(A==0) $finish;
+end
+"} 

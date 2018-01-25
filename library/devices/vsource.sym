@@ -1,6 +1,6 @@
 G {type=vsource
 format="@name @pinlist @value"
-template="name=v1 value=3"} 
+template="name=v0 value=3"} 
 L 4 2.5 -22.5 7.5 -22.5 {} 
 L 4 5 -25 5 -20 {} 
 L 4 -0 -30 -0 30 {} 

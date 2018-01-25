@@ -140,7 +140,7 @@ C {devices/lab_pin} 250 -540 0 0 {name=p6 lab=PLUS}
 C {devices/lab_pin} 490 -540 0 1 {name=p24 lab=MINUS} 
 C {devices/npn} 470 -540 0 1 {name=Q9 model=q2n2222 area=1} 
 C {devices/lab_pin} 670 -640 0 0 {name=p9 lab=C6} 
-C {devices/netlist_not_shown} 1080 -210 0 0 {name=STIMULI
+C {devices/code} 1080 -210 0 0 {name=STIMULI
 only_toplevel=true
 value=".option PARHIER=LOCAL RUNLVL=6 post MODMONTE=1 warn maxwarn=6000
 .option sampling_method = SRS
@@ -193,7 +193,7 @@ C {devices/lab_pin} 160 -110 0 0 {name=p11 lab=VNN}
 C {devices/capa} 160 -220 0 0 {name=c3 m=1 value=100n} 
 C {devices/res} 670 -580 0 1 {name=r12 m=1 value=1300} 
 C {devices/lab_pin} 800 -810 0 0 {name=p12 lab=B1} 
-C {devices/netlist_not_shown} 920 -210 0 0 {name=MODELS 
+C {devices/code} 920 -210 0 0 {name=MODELS 
 only_toplevel=true
 value=".MODEL bd139_2 npn
 +IS=1e-09 BF=222.664 NF=0.85 VAF=36.4079

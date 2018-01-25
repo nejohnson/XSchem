@@ -206,6 +206,21 @@ void global_verilog_netlist(int global)  // netlister driver
  verilog_netlist(fd, 0);
  netlist_count++;
  fprintf(fd,"---- begin user architecture code\n");
+
+ // 20180124
+ for(i=0;i<lastinst;i++) {
+   if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"verilog_ignore",0),"true")==0 ) continue; // 20140416
+   if(inst_ptr[i].ptr<0) continue;
+   if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "verilog_ignore",0 ), "true") ) {
+     continue;
+   }
+   my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
+   if(!strcmp(type,"netlist_commands")) {
+     fprintf(fd, "%s\n", get_tok_value(inst_ptr[i].prop_ptr,"value",2)); // 20180124
+   }
+ }
+
+
  if(schverilogprop && schverilogprop[0]) fprintf(fd, "%s\n", schverilogprop); 
  fprintf(fd,"---- end user architecture code\n");
  fprintf(fd, "endmodule\n");
@@ -267,11 +282,12 @@ void global_verilog_netlist(int global)  // netlister driver
 
 void verilog_block_netlist(FILE *fd, int i)  //20081205
 {
- int j, tmp;
+ int j, l, tmp;
  int verilog_stop=0;
  static char *dir_tmp = NULL;
  static char *sig_type = NULL;
  static char *port_value = NULL;
+ static char *type = NULL; // 20180124
  char netl[1024];
  char netl2[1024];  // 20081202
  char netl3[1024];  // 20081202
@@ -355,6 +371,23 @@ void verilog_block_netlist(FILE *fd, int i)  //20081205
      verilog_netlist(fd, verilog_stop);
      netlist_count++;
      fprintf(fd,"---- begin user architecture code\n");
+
+     // 20180124
+     for(l=0;l<lastinst;l++) {
+       if( strcmp(get_tok_value(inst_ptr[l].prop_ptr,"verilog_ignore",0),"true")==0 ) continue; // 20140416
+       if(inst_ptr[l].ptr<0) continue;
+       if(!strcmp(get_tok_value( (inst_ptr[l].ptr+instdef)->prop_ptr, "verilog_ignore",0 ), "true") ) {
+         continue;
+       }
+       if(netlist_count &&
+         !strcmp(get_tok_value(inst_ptr[l].prop_ptr, "only_toplevel", 0), "true")) continue; // 20160418
+
+       my_strdup(&type,(inst_ptr[l].ptr+instdef)->type);
+       if(!strcmp(type,"netlist_commands")) {
+         fprintf(fd, "%s\n", get_tok_value(inst_ptr[l].prop_ptr,"value",2)); // 20180124
+       }
+     }
+
      if(schverilogprop && schverilogprop[0]) fprintf(fd, "%s\n", schverilogprop);
      fprintf(fd,"---- end user architecture code\n");
      fprintf(fd, "endmodule\n");
@@ -403,6 +436,7 @@ void verilog_netlist(FILE *fd , int verilog_stop)
          strcmp(type,"opin")&&
          strcmp(type,"iopin")&&
          strcmp(type,"use")&&
+         strcmp(type,"netlist_commands")&& // 20180124
          strcmp(type,"timescale")&&
          strcmp(type,"package")  &&
          strcmp(type,"attributes") &&

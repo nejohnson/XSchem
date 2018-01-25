@@ -37,7 +37,6 @@ void global_vhdl_netlist(int global)  // netlister driver
  static char *type=NULL;
 
  statusmsg("",2);  // clear infowindow
- netlist_count=0; 
  // top sch properties used for library use declarations and type definitions
  // to be printed before any entity declarations
 
@@ -255,8 +254,20 @@ void global_vhdl_netlist(int global)  // netlister driver
  
  if(debug_var>=1) fprintf(errfp, "global_vhdl_netlist(): netlisting  top level\n");
  vhdl_netlist(fd, 0);
- netlist_count++;
  fprintf(fd,"//// begin user architecture code\n");
+ // 20180124
+ for(i=0;i<lastinst;i++) {
+   if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20140416
+   if(inst_ptr[i].ptr<0) continue;
+   if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
+     continue;
+   }
+   my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
+   if(!strcmp(type,"netlist_commands")) {
+     fprintf(fd, "%s\n", get_tok_value(inst_ptr[i].prop_ptr,"value",2)); // 20180124
+   }
+ }
+
  if(schvhdlprop && schvhdlprop[0]) fprintf(fd, "%s\n", schvhdlprop); 
  fprintf(fd, "end arch_%s ;\n\n", skip_dir( schematic[currentsch]) );
 
@@ -266,6 +277,7 @@ void global_vhdl_netlist(int global)  // netlister driver
    tkeval(netl2);
    if(debug_var==0) unlink(netl);
  }
+ netlist_count++;
 
  if(global)
  {
@@ -468,8 +480,26 @@ void  vhdl_block_netlist(FILE *fd, int i)  //20081204
      if(debug_var>=1) fprintf(errfp, "vhdl_block_netlist():  netlisting %s\n", 
         skip_dir( schematic[currentsch]));
      vhdl_netlist(fd, vhdl_stop);
-     netlist_count++;
      fprintf(fd,"//// begin user architecture code\n");
+
+
+     // 20180124
+     for(l=0;l<lastinst;l++) {
+       if( strcmp(get_tok_value(inst_ptr[l].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20140416
+       if(inst_ptr[l].ptr<0) continue;
+       if(!strcmp(get_tok_value( (inst_ptr[l].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
+         continue;
+       }                                             
+       if(netlist_count &&
+         !strcmp(get_tok_value(inst_ptr[l].prop_ptr, "only_toplevel", 0), "true")) continue; // 20160418
+
+       my_strdup(&type,(inst_ptr[l].ptr+instdef)->type);
+       if(!strcmp(type,"netlist_commands")) { 
+         fprintf(fd, "%s\n", get_tok_value(inst_ptr[l].prop_ptr,"value",2)); // 20180124
+       }
+     }
+
+
      if(schvhdlprop && schvhdlprop[0]) fprintf(fd, "%s\n", schvhdlprop);
      fprintf(fd, "end arch_%s ;\n\n", skip_dir( schematic[currentsch]) );
      if(split_files) { // 20081204
@@ -478,6 +508,7 @@ void  vhdl_block_netlist(FILE *fd, int i)  //20081204
        tkeval(netl2);
        if(debug_var==0) unlink(netl);
      }
+     netlist_count++;
 } 
 
 void vhdl_netlist(FILE *fd , int vhdl_stop)
@@ -538,6 +569,7 @@ void vhdl_netlist(FILE *fd , int vhdl_stop)
          strcmp(type,"opin")&&
          strcmp(type,"iopin")&&
          strcmp(type,"use")&&
+         strcmp(type,"netlist_commands")&& // 20180124
          strcmp(type,"timescale")&&
          strcmp(type,"package")  &&
          strcmp(type,"attributes")  &&
@@ -547,9 +579,12 @@ void vhdl_netlist(FILE *fd , int vhdl_stop)
     {
      if(lastselected) 
      {
-      if(inst_ptr[i].sel==SELECTED) print_vhdl_element(fd, i) ;
+      if(inst_ptr[i].sel==SELECTED) {
+        print_vhdl_element(fd, i) ;
+      }
+     } else {
+        print_vhdl_element(fd, i) ;
      }
-      else print_vhdl_element(fd, i) ;  // this is the element line 
     }
    }
  }

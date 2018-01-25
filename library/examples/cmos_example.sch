@@ -39,7 +39,7 @@ N 240 -150 240 -120 {}
 N 220 -150 240 -150 {} 
 N 220 -180 220 -150 {} 
 N 220 -180 240 -180 {} 
-C {devices/netlist_not_shown} 870 -190 0 0 {name=STIMULI
+C {devices/code} 870 -190 0 0 {name=STIMULI
 only_toplevel=true
 value=".option PARHIER=LOCAL RUNLVL=6 post MODMONTE=1 warn maxwarns=400
 .option sampling_method = SRS 
@@ -52,7 +52,7 @@ value=".option PARHIER=LOCAL RUNLVL=6 post MODMONTE=1 warn maxwarns=400
 "} 
 C {devices/lab_pin} 60 -150 0 0 {name=p17 lab=0} 
 C {devices/title} 160 -30 0 0 {name=l1 author="Stefan Schippers"} 
-C {devices/netlist_not_shown} 1010 -190 0 0 {name=MOSIS_MODELS value="
+C {devices/code} 1010 -190 0 0 {name=MOSIS_MODELS value="
 
 * hdif    = 0.5e-6
 .MODEL CMOSN NMOS (

@@ -3,7 +3,7 @@ V {}
 S {} 
 T {NE555 TIMER IC EXAMPLE} 360 -490 0 0 0.4 0.4 {} 
 N 130 -150 200 -150 {lab=TRIG} 
-C {devices/netlist_not_shown} 710 -190 0 0 {
+C {devices/code} 710 -190 0 0 {
 name=STIMULI 
 value=".option SCALE=1e-6 PARHIER=LOCAL RUNLVL=6 post MODMONTE=1
 .option sampling_method = SRS
@@ -12,7 +12,7 @@ vvss vss 0 dc 0
 
 .temp 30
 .tran 1n 1m uic"} 
-C {devices/netlist_not_shown} 710 -340 0 0 {
+C {devices/code} 710 -340 0 0 {
 name=MODELS 
 value=".MODEL bd139_2 npn
 +IS=1e-09 BF=222.664 NF=0.85 VAF=36.4079

@@ -99,7 +99,7 @@ N 1380 -630 1380 -570 {lab=#net1}
 N 1410 -420 1410 -380 {lab=VSS} 
 N 1670 -420 1670 -350 {lab=#net6} 
 N 1410 -390 1410 -260 {lab=VSS} 
-C {devices/netlist_not_shown} 1850 -510 0 0 {
+C {devices/code} 1850 -510 0 0 {
 name=STIMULI 
 value=".option PARHIER=LOCAL RUNLVL=6 post MODMONTE=1
 .option sampling_method = SRS
@@ -203,7 +203,7 @@ C {devices/res} 940 -520 1 1 {name=r3 m=1 value=1.5}
 C {devices/vsource_pwl} 810 -490 0 0 {name=E10 TABLE="1 0 7 8"} 
 C {devices/vsource_pwl} 810 -610 0 0 {name=E3 TABLE="1 0 7 8"} 
 C {devices/res} 1670 -260 0 1 {name=rfb m=1 value=10} 
-C {devices/netlist_not_shown} 1850 -660 0 0 {name=MODELS 
+C {devices/code} 1850 -660 0 0 {name=MODELS 
 only_toplevel=true
 value=".MODEL bd139_2 npn
 +IS=1e-09 BF=222.664 NF=0.85 VAF=36.4079

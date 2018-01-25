@@ -15,7 +15,7 @@ N 550 -240 550 -200 {lab=E}
 N 550 -140 550 -100 {lab=VSS} 
 N 380 -210 400 -210 {lab=E} 
 N 400 -210 550 -210 {lab=E} 
-C {devices/netlist_not_shown} 750 -190 0 0 {
+C {devices/code} 750 -190 0 0 {
 name=STIMULI 
 value=".option RUNLVL=6 post 
 vvss vss 0 dc 0
@@ -30,7 +30,7 @@ C {devices/lab_pin} 250 -400 0 0 {name=p0 lab=VSS}
 C {devices/lab_pin} 690 -300 0 1 {name=p3 lab=OUT} 
 C {devices/lab_pin} 380 -80 0 0 {name=p5 lab=VSS} 
 C {devices/lab_pin} 250 -460 0 0 {name=p6 lab=VCC} 
-C {devices/netlist_not_shown} 750 -350 0 0 {
+C {devices/code} 750 -350 0 0 {
 name=MODELS 
 value=".MODEL bd139_2 npn
 +IS=1e-09 BF=222.664 NF=0.85 VAF=36.4079

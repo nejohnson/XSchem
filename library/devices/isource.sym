@@ -1,6 +1,6 @@
 G {type=isource
 format="@name @pinlist @value"
-template="name=i1 value=1m"} 
+template="name=i0 value=1m"} 
 V {}
 S {}
 L 4 0 -30 0 -15 {} 

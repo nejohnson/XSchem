@@ -1,7 +1,7 @@
 G {type=capacitor
 format="@name @pinlist @value m=@m"
 verilog_ignore=true
-template="name=c1 m=1 value=1p"} 
+template="name=c0 m=1 value=1p"} 
 V {}
 S {}
 L 4 0 5 0 30 {} 

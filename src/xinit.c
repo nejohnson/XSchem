@@ -974,7 +974,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
 
     set_linewidth();
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done xinit()\n");
-    // winattr.backing_store = WhenMapped; //<<<
+    winattr.backing_store = WhenMapped; //<<<
     //winattr.backing_store = NotUseful;
     Tk_ChangeWindowAttributes(tkwindow, CWBackingStore, &winattr);
    

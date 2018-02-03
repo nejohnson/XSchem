@@ -35,6 +35,13 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.4.4:
+- improvements in spice.awk, do not clobber with user defined code 
+- re-enabled backing store, (xserver takes care of saving obscured window portions)
+  this was disabled to ensure correct response of XSCHEM to expose events after
+  some changes in the drawing engine.
+Stefan, 20180203
+
 2.4.3:
 - devices/code.sym component added: this component has a 'value' property that may be
   used to place arbitrary code (spice/verilog/VHDL code) into a schematic. Multiple

@@ -24,6 +24,7 @@
 
 BEGIN{
  first=1
+ user_code=0 #20180129
  # 20081209 hspice syntax variants
  if( ARGV[1] == "-hspice" ) {
    hspice=1
@@ -59,6 +60,22 @@ END{
 
 function process(        i, iprefix)
 {
+
+  if($0 ~/\*\*\*\* begin user architecture code/){ #20180129
+    user_code=1
+    print
+    return
+  }
+  if($0 ~/\*\*\*\* end user architecture code/){ #20180129
+    user_code=0
+    print
+    return
+  }
+  if(user_code) { #20180129
+    print
+    return
+  }
+
  #20150922 handle the case of pmos elements that netlist also a diode
  # format="@name @pinlist @model w=@w l=@l geomod=0 m=@m
  # #dx#name 0 @@b dnwell area=... pj=..."

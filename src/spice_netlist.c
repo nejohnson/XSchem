@@ -79,6 +79,9 @@ void global_spice_netlist(int global)  // netlister driver
 
  spice_netlist(fd, 0);
 
+ // 20100217
+ fprintf(fd,"**** begin user architecture code\n");
+
  // 20150922
  for(i=0;i<lastinst;i++) // print netlist_commands of top level cell with no 'place=end' property
  {
@@ -98,8 +101,6 @@ void global_spice_netlist(int global)  // netlister driver
 
  netlist_count++;
 
- // 20100217
- fprintf(fd,"**** begin user architecture code\n");
  if(schprop && schprop[0]) fprintf(fd, "%s\n", schprop);
  fprintf(fd,"**** end user architecture code\n");
  // /20100217

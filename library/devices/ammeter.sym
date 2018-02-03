@@ -4,8 +4,8 @@ format="@name @pinlist 0
 template="name=vmeasure"} 
 V {}
 S {}
-L 4 -10 -0 -0 10 {} 
-L 4 -0 10 10 0 {} 
+L 4 -7.5 0 -0 10 {} 
+L 4 -0 10 7.5 0 {} 
 L 13 0 -30 0 30 {} 
 B 5 -2.5 -32.5 2.5 -27.5 {name=p dir=inout propagate_to=1} 
 B 5 -2.5 27.5 2.5 32.5 {name=m dir=inout propagate_to=0} 

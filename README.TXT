@@ -35,6 +35,12 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.4.5:
+- 20180208 fix crashing bug: delete node info if changing symbol
+  if number of pins is different we must delete these data *before*
+  changing ysmbol, otherwise i might end up deleting non allocated data.
+Stefan, 20180417
+
 2.4.4:
 - improvements in spice.awk, do not clobber with user defined code 
 - re-enabled backing store, (xserver takes care of saving obscured window portions)

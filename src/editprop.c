@@ -490,6 +490,9 @@ void update_symbol(char *result, int x)
 
     if(sym_number>=0) // changing symbol !
     {
+     delete_inst_node(i); // 20180208 fix crashing bug: delete node info if changing symbol
+                          // if number of pins is different we must delete these data *before*
+                          // changing ysmbol, otherwise i might end up deleting non allocated data.
      my_strdup(&inst_ptr[i].name,symbol);
      inst_ptr[i].ptr=sym_number;
     }

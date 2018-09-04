@@ -637,6 +637,8 @@ void prepare_netlist_structs(int for_hilight_only)
        strcmp(get_tok_value(inst_ptr[i].prop_ptr,"spice_ignore",0),"true")==0 ) continue; 
      if( netlist_type == CAD_VHDL_NETLIST && 
        strcmp(get_tok_value(inst_ptr[i].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; 
+     if( netlist_type == CAD_TEDAX_NETLIST && 
+       strcmp(get_tok_value(inst_ptr[i].prop_ptr,"tedax_ignore",0),"true")==0 ) continue; 
    }
    port=0;
    if( strcmp(type,"label") ){  // instance is a port (not a label)

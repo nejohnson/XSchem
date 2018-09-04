@@ -90,6 +90,7 @@ BEGIN{
       else if($i ~ /^----name\(.*\)/) {
         sub(/----name\(/,"",prim_field)
         sub(/\)$/,"",prim_field)
+        sub(/:/, "_slot_", prim_field)
         split(prim_field, prim_field_array,/,/)
         sub(/\[/,"_", prim_field_array[j])
         sub(/\]/,"", prim_field_array[j])

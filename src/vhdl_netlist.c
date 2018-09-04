@@ -67,6 +67,11 @@ void global_vhdl_netlist(int global)  // netlister driver
   {
    if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20140416
    if(inst_ptr[i].ptr<0) continue;
+   if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
+     continue;
+   }
+
+
    my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
    if( type && (strcmp(type,"package"))==0)
    {
@@ -83,6 +88,9 @@ void global_vhdl_netlist(int global)  // netlister driver
   {
    if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20140416
    if(inst_ptr[i].ptr<0) continue;
+   if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
+     continue;
+   }
    my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
    if( type && (strcmp(type,"use"))==0)
    {
@@ -146,6 +154,9 @@ void global_vhdl_netlist(int global)  // netlister driver
  {
   if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20140416
   if(inst_ptr[i].ptr<0) continue;
+  if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
+    continue;
+  }
   my_strdup(&sig_type,get_tok_value(inst_ptr[i].prop_ptr,"sig_type",0));
   if(!sig_type || sig_type[0]=='\0') my_strdup(&sig_type,"std_logic");
   my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
@@ -164,6 +175,9 @@ void global_vhdl_netlist(int global)  // netlister driver
  {
   if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20140416
   if(inst_ptr[i].ptr<0) continue;
+  if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
+    continue;
+  }
   my_strdup(&sig_type,get_tok_value(inst_ptr[i].prop_ptr,"sig_type",0));
   if(!sig_type || sig_type[0]=='\0') my_strdup(&sig_type,"std_logic");
   my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
@@ -182,6 +196,9 @@ void global_vhdl_netlist(int global)  // netlister driver
  {
   if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20140416
   if(inst_ptr[i].ptr<0) continue;
+  if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
+    continue;
+  }
   my_strdup(&sig_type,get_tok_value(inst_ptr[i].prop_ptr,"sig_type",0));
   if(!sig_type || sig_type[0]=='\0') my_strdup(&sig_type,"std_logic");
   my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
@@ -201,6 +218,9 @@ void global_vhdl_netlist(int global)  // netlister driver
   {
    if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20140416
    if(inst_ptr[i].ptr<0) continue;
+   if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
+     continue;
+   }
    my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
    if( type && (strcmp(type,"port_attributes"))==0)
    {
@@ -373,6 +393,9 @@ void  vhdl_block_netlist(FILE *fd, int i)  //20081204
      {
       if( strcmp(get_tok_value(inst_ptr[l].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20140416
       if(inst_ptr[l].ptr<0) continue;
+      if(!strcmp(get_tok_value( (inst_ptr[l].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
+        continue;
+      }
       if( !strcmp((inst_ptr[l].ptr+instdef)->type, "package") )
        fprintf(fd, "%s\n", inst_ptr[l].prop_ptr);
      }
@@ -382,6 +405,9 @@ void  vhdl_block_netlist(FILE *fd, int i)  //20081204
      {
       if( strcmp(get_tok_value(inst_ptr[l].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20140416
       if(inst_ptr[l].ptr<0) continue;
+      if(!strcmp(get_tok_value( (inst_ptr[l].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
+        continue;
+      }
       if( !strcmp((inst_ptr[l].ptr+instdef)->type, "use") )
        fprintf(fd, "%s\n", inst_ptr[l].prop_ptr);
      }
@@ -417,6 +443,9 @@ void  vhdl_block_netlist(FILE *fd, int i)  //20081204
      {
       if( strcmp(get_tok_value(inst_ptr[l].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20140416
       if(inst_ptr[l].ptr<0) continue;
+      if(!strcmp(get_tok_value( (inst_ptr[l].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
+        continue;
+      }
       my_strdup(&type,(inst_ptr[l].ptr+instdef)->type);
       if( type && (strcmp(type,"port_attributes"))==0)
       {
@@ -443,6 +472,10 @@ void  vhdl_block_netlist(FILE *fd, int i)  //20081204
          for(l=0;l<lastinst;l++)
          {
           if( strcmp(get_tok_value(inst_ptr[l].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20140416
+          if(inst_ptr[l].ptr<0) continue;
+          if(!strcmp(get_tok_value( (inst_ptr[l].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
+            continue;
+          }
           if(!strcmp(instdef[j].name,inst_ptr[l].name))
           { 
            found=1; break;
@@ -527,6 +560,9 @@ void vhdl_netlist(FILE *fd , int vhdl_stop)
  {
   if( strcmp(get_tok_value(inst_ptr[l].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20140416
   if(inst_ptr[l].ptr<0) continue;
+  if(!strcmp(get_tok_value( (inst_ptr[l].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
+    continue;
+  }                                             
   if(!strcmp((inst_ptr[l].ptr+instdef)->type, "arch_declarations") )
    fprintf(fd, "%s\n", inst_ptr[l].prop_ptr?  inst_ptr[l].prop_ptr: "");
  }
@@ -542,6 +578,9 @@ void vhdl_netlist(FILE *fd , int vhdl_stop)
  {
   if( strcmp(get_tok_value(inst_ptr[l].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20140416
   if(inst_ptr[l].ptr<0) continue;
+  if(!strcmp(get_tok_value( (inst_ptr[l].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
+    continue;
+  }                                             
   my_strdup(&type,(inst_ptr[l].ptr+instdef)->type);
   if( type && (strcmp(type,"attributes"))==0)
   {

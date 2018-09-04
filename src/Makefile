@@ -8,7 +8,7 @@ OBJ = icon.o callback.o actions.o move.o check.o clip.o draw.o \
       globals.o main.o netlist.o \
       findnet.o scheduler.o store.o xinit.o select.o font.o editprop.o save.o paste.o \
       token.o psprint.o node_hash.o hilight.o options.o vhdl_netlist.o \
-      svgdraw.o spice_netlist.o verilog_netlist.o  parselabel.o expandlabel.o
+      svgdraw.o spice_netlist.o tedax_netlist.o verilog_netlist.o  parselabel.o expandlabel.o
 CC=gcc
 
 ## set the TCL-TK version on the system
@@ -89,6 +89,7 @@ install: xschem
 	cp order_labels.awk $(prefix)/share/xschem
 	cp sort_labels.awk $(prefix)/share/xschem
 	cp spice.awk $(prefix)/share/xschem
+	cp tedax.awk $(prefix)/share/xschem
 	cp verilog.awk $(prefix)/share/xschem
 	cp vhdl.awk $(prefix)/share/xschem
 	cp -r ../doc/* $(prefix)/share/doc/xschem/
@@ -96,6 +97,7 @@ install: xschem
 	cp -ru ../library/mylib $(library_prefix)
 	cp -ru ../library/devices $(library_prefix)
 	cp -ru ../library/examples $(library_prefix)
+	cp -ru ../library/pcb $(library_prefix)
 
 .PHONY: uninstall
 uninstall:

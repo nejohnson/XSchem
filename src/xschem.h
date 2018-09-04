@@ -105,6 +105,7 @@
 #define CAD_SPICE_NETLIST 1
 #define CAD_VHDL_NETLIST 2
 #define CAD_VERILOG_NETLIST 3
+#define CAD_TEDAX_NETLIST 4
 
 #define STARTWIRE 1	    // possible states, encoded in global 'rubber'
 #define STARTPAN  2
@@ -142,7 +143,7 @@
 
 // for netlist.c
 #define BOXSIZE 500
-#define NBOXES 500
+#define NBOXES 100
 
 
 //   some useful primes
@@ -440,6 +441,7 @@ extern Instdef *instdef;	// Pointer to element definition
 extern Text *textelement; 
 extern char schematic[CADMAXHIER][256];
 extern int currentsch;
+extern char *schtedaxprop; 
 extern char *schprop; 
 extern char *schvhdlprop; 
 extern char *schverilogprop; 
@@ -524,7 +526,6 @@ extern struct objectentry *objecttable[NBOXES][NBOXES];
 // functions
 extern int set_netlist_dir(int force);
 extern int  check_lib(char * s);
-extern void global_spice_netlist(int global);
 extern void select_all(void);
 extern void change_linewidth(double w, int draw);
 extern void set_fill(int n);
@@ -633,7 +634,9 @@ extern void store_polygon(int pos, double *x, double *y, int points,  // 2017111
            unsigned int rectcolor, unsigned short sel, char *prop_ptr);
 extern void freenet_nocheck(int i);
 extern void spice_netlist(FILE *fd, int spice_stop);
+extern void tedax_netlist(FILE *fd, int spice_stop);
 extern void global_spice_netlist(int global);
+extern void global_tedax_netlist(int global);
 extern void vhdl_netlist(FILE *fd, int vhdl_stop);
 extern void global_vhdl_netlist(int global);
 extern void verilog_netlist(FILE *fd, int verilog_stop);
@@ -641,6 +644,7 @@ extern void global_verilog_netlist(int global);
 extern void vhdl_block_netlist(FILE *fd, int i);
 extern void verilog_block_netlist(FILE *fd, int i);
 extern void spice_block_netlist(FILE *fd, int i);
+extern void tedax_block_netlist(FILE *fd, int i);
 extern int save_symbol(char *);
 extern void remove_symbols(void);
 extern void remove_symbol(void);
@@ -695,6 +699,7 @@ extern void hash_proplist(char *s,int remove);
 extern struct hashentry *hash_lookup(char *token,char *value,int remove);
 extern void free_hash(void);
 extern char *translate(int inst, char* s);
+extern void print_tedax_element(FILE *fd, int inst);
 extern void print_spice_element(FILE *fd, int inst);
 extern void print_vhdl_element(FILE *fd, int inst);
 extern void print_verilog_element(FILE *fd, int inst);

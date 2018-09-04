@@ -118,7 +118,7 @@ char *expandlabel(char *s, int *m)
 			 if(bracket) return B_IDXNUM;
 			 else return B_NUM;
 			}
-[\n.=_a-zA-Z][.=_a-zA-Z0-9]*	{
+[.=_a-zA-Z][:.=_a-zA-Z0-9]*	{
 			 //yylval.ptr.str=strdup(yytext);
                          yylval.ptr.str=NULL; //19102004
                          my_strdup(&yylval.ptr.str, yytext); //19102004

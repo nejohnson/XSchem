@@ -684,7 +684,7 @@ void print_vhdl_element(FILE *fd, int inst) // 20071217
  char *str_ptr;
  register int c, state=XBEGIN, space;
  static char  *lab=NULL, *name=NULL;
- static char  *generic_value=NULL, *generic_type=NULL, *format=NULL;
+ static char  *generic_value=NULL, *generic_type=NULL;
  static char *template=NULL,*s, *value=NULL,  *token=NULL;
  int no_of_pins=0, no_of_generics=0;
  int sizetok=0, sizeval=0;
@@ -705,9 +705,7 @@ void print_vhdl_element(FILE *fd, int inst) // 20071217
  my_strdup(&name,inst_ptr[inst].instname); // 20161210
  // my_strdup(&name,get_tok_value(inst_ptr[inst].prop_ptr,"name",0));
 
- my_strdup(&format,
-     get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"format",0));
- if((name==NULL) || (format==NULL) ) return;
+ if((name==NULL) ) return;
  no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
  no_of_generics= (inst_ptr[inst].ptr+instdef)->rects[GENERICLAYER];
 
@@ -1054,11 +1052,6 @@ void print_verilog_param(FILE *fd, int symbol) //16112003
 
 
 
-
-
-
-
-
 void print_spice_element(FILE *fd, int inst)
 {
  int i=0, mult, tmp;
@@ -1197,12 +1190,191 @@ void print_spice_element(FILE *fd, int inst)
 
 
 
+
+
+void print_tedax_element(FILE *fd, int inst)
+{
+ int i=0, mult;
+ char *str_ptr=NULL; 
+ register int c, state=XBEGIN, space;
+ static char *template=NULL,*format=NULL,*s, *value=NULL, *name=NULL, *token=NULL;
+ static char *pinnumber=NULL, *pinname=NULL, *extra=NULL, *extra_pinnumber=NULL;
+ static char *numslots=NULL;
+ char *extra_token, *extra_ptr, *extra_token_val;
+ char *extra_pinnumber_token, *extra_pinnumber_ptr;
+ char *saveptr1, *saveptr2;
+ int instance_based=0;
+ int sizetok=0;
+ int token_pos=0, escape=0;
+ int no_of_pins=0;
+ int quote=0; // 20171029
+ // struct hashentry *ptr;
+
+
+ my_strdup(&extra, get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"extra",2));
+ my_strdup(&extra_pinnumber, get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"extra_pinnumber",2));
+ my_strdup(&template,
+     // get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"template",2)); // 20150409
+     (inst_ptr[inst].ptr+instdef)->templ); // 20150409
+ my_strdup(&numslots, get_tok_value(inst_ptr[inst].prop_ptr,"numslots",2));
+ if(!numslots) my_strdup(&numslots, get_tok_value(template,"numslots",2));
+ if(!numslots) my_strdup(&numslots, "1");
+
+ my_strdup(&name,inst_ptr[inst].instname); // 20161210
+ // my_strdup(&name,get_tok_value(inst_ptr[inst].prop_ptr,"name",0));
+
+ my_strdup(&format,
+     get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"tedax_format",0));
+ if((name==NULL) ) return; // do no netlist unwanted insts(no format)
+ no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
+
+ fprintf(fd, "begin_inst %s numslots %s\n", name, numslots);
+ for(i=0;i<no_of_pins; i++) {
+   my_strdup(&pinnumber, get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"pinnumber",0));
+   my_strdup(&pinname, get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"name",0));
+   if(!pinnumber) my_strdup(&pinnumber, "--UNDEF--");
+   if(!pinname) my_strdup(&pinnumber, "--UNDEF--");
+   fprintf(fd, "conn %s %s %s %s %d\n", name, pin_node(inst,i, &mult, 0), pinname, pinnumber, i+1);
+ }
+
+ if(extra){ 
+   // fprintf(fd, "extra: %s\n", extra);
+   for(extra_ptr = extra, extra_pinnumber_ptr = extra_pinnumber; ; extra_ptr=NULL, extra_pinnumber_ptr=NULL) {
+     extra_pinnumber_token=strtok_r(extra_pinnumber_ptr, " ", &saveptr1);
+     extra_token=strtok_r(extra_ptr, " ", &saveptr2);
+     if(!extra_token) break;
+     // fprintf(fd, "extra token:%s\n", extra_token);
+     instance_based=0;
+     extra_token_val=get_tok_value(inst_ptr[inst].prop_ptr, extra_token, 0);
+     if(!extra_token_val[0]) extra_token_val=get_tok_value(template, extra_token, 0);
+     else instance_based=1;
+     if(!extra_token_val[0]) extra_token_val="--UNDEF--";
+     
+     fprintf(fd, "conn %s %s %s %s %d", name, extra_token_val, extra_token, extra_pinnumber_token, i+1);
+     i++;
+     if(instance_based) fprintf(fd, " # instance_based");
+     fprintf(fd,"\n");
+   }
+ }
+     
+ if(format) {
+  s=format;
+  if(debug_var>=1) fprintf(errfp, "print_tedax_element: name=%s, tedax_format=%s netlist_count=%d\n",name,format, netlist_count);
+  // begin parsing format string
+  while(1)
+  {
+   c=*s++; 
+   if(c=='"' && escape) { 
+     quote=!quote; // 20171029
+   }
+   if(c=='"' && !escape ) c=*s++;
+   if(c=='\n' && escape ) c=*s++; // 20171030 eat escaped newlines
+   // 20150317 use SPACE2() instead of SPACE()
+   space=SPACE2(c);
+                               // 20151028
+   if( state==XBEGIN && c=='@' && !escape) state=XTOKEN;
+ 
+   // 20171029 added !escape, !quote
+   else if( state==XTOKEN && space && !escape && !quote) state=XSEPARATOR;
+ 
+   if(token_pos>=sizetok)
+   {
+    sizetok+=CADCHUNKALLOC;
+    my_realloc(&token,sizetok);
+   }
+ 
+   if(state==XTOKEN) {
+     if(c!='\\' || escape) token[token_pos++]=c; // 20171029 remove escaping backslashes
+   }
+   else if(state==XSEPARATOR) 			// got a token
+   {
+    token[token_pos]='\0'; 
+    token_pos=0;
+ 
+    // ptr=hash_lookup(token+1, name, NULL, 0);  // lookup token
+    // if(ptr!=NULL) 
+    //   value=ptr->value;
+    // else
+    //   value=get_tok_value(template, token+1,0); // if not found get tok from tmplt
+    value = get_tok_value(inst_ptr[inst].prop_ptr, token+1, 2);
+    if(value[0] == '\0')
+    value=get_tok_value(template, token+1, 0);
+ 
+    if(value[0]!='\0')
+    {
+      fputs(value,fd);
+    }
+    else if(strcmp(token,"@symname")==0)	// of course symname must not be present 
+ 					// in hash table
+    {
+     fputs(skip_dir(inst_ptr[inst].name),fd);
+    }
+    else if(strcmp(token,"@schname")==0)	// of course schname must not be present 
+ 					// in hash table
+    {
+     fputs(schematic[currentsch],fd);
+    }
+    else if(strcmp(token,"@pinlist")==0)	// of course pinlist must not be present 
+ 					// in hash table. print multiplicity
+    {					// and node number: m1 n1 m2 n2 ....
+     for(i=0;i<no_of_pins;i++)
+     {
+       str_ptr =  pin_node(inst,i, &mult, 0);
+       // fprintf(errfp, "inst: %s  --> %s\n", name, str_ptr);
+       fprintf(fd, "@%d %s ", mult, str_ptr);
+     }
+    }
+    else if(token[0]=='@' && token[1]=='@') {    // recognize single pins 15112003
+     for(i=0;i<no_of_pins;i++) {
+      if(!strcmp(
+           get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"name",0),
+           token+2
+          )
+        ) {
+        str_ptr =  pin_node(inst,i, &mult, 0);
+        fprintf(fd, "@%d %s ", mult, str_ptr);
+        break; // 20171029
+      }
+     }
+    }
+    else if(!strncmp(token,"@tcleval", 8)) { // 20171029
+      char tclcmd[strlen(token)+100] ;
+      
+      Tcl_ResetResult(interp);
+      sprintf(tclcmd, "tclpropeval {%s} {%s} {%s}", token, name, inst_ptr[inst].name);
+      Tcl_EvalEx(interp, tclcmd, -1, TCL_EVAL_GLOBAL);
+      fprintf(fd, "%s", Tcl_GetStringResult(interp));
+      // fprintf(errfp, "%s\n", tclcmd);
+      
+    } // /20171029
+ 
+ 
+                  // 20151028 dont print escaping backslashes
+    if(c!='\0' && (c!='\\'  || escape) ) fputc(c,fd);
+    state=XBEGIN;
+   }
+                  // 20151028 dont print escaping backslashes
+   else if(state==XBEGIN && c!='\0' && (c!='\\' || escape))  fputc(c,fd);
+   if(c=='\0') 
+   {
+    fputc('\n',fd);
+    break ;
+   }
+   if(c=='\\')  escape=1;  else escape=0;
+ 
+  }
+ } // if(format)
+ fprintf(fd,"end_inst\n");
+}
+
+
+
 void print_verilog_element(FILE *fd, int inst)
 {
  int i=0, mult, tmp;
  char *str_ptr;
  static char  *lab=NULL, *name=NULL;
- static char  *format=NULL, *generic_type=NULL;
+ static char  *generic_type=NULL;
  static char *template=NULL,*s;
  int no_of_pins=0;
 
@@ -1230,9 +1402,7 @@ void print_verilog_element(FILE *fd, int inst)
  my_strdup(&name,inst_ptr[inst].instname); // 20161210
  // my_strdup(&name,get_tok_value(inst_ptr[inst].prop_ptr,"name",0));
 
- my_strdup(&format,
-     get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"format",0));
- if((name==NULL) || (format==NULL) ) return;
+ if(name==NULL) return;
  no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
 
  s=inst_ptr[inst].prop_ptr;
@@ -1865,6 +2035,19 @@ char *translate(int inst, char* s)
       my_realloc(&result,size);
      }
      strcpy(result+result_pos,schprop);
+     result_pos+=tmp;
+   }
+   // /20100217
+
+   else if(strcmp(token,"@schtedaxprop")==0 && schtedaxprop)
+   {
+     tmp=strlen(schtedaxprop);
+     if(result_pos + tmp>=size)
+     {
+      size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
+      my_realloc(&result,size);
+     }
+     strcpy(result+result_pos,schtedaxprop);
      result_pos+=tmp;
    }
    // /20100217

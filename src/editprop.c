@@ -701,7 +701,13 @@ void edit_property(int x)
     else
       Tcl_SetVar(interp,"entry1","",TCL_GLOBAL_ONLY);
    }
-   else {  // netlist_type==CAD_VHDL_NETLIST
+   else if(netlist_type==CAD_TEDAX_NETLIST && current_type==SCHEMATIC) { // 20100217
+    if(schtedaxprop!=NULL) 
+      Tcl_SetVar(interp,"entry1",schtedaxprop,TCL_GLOBAL_ONLY);
+    else
+      Tcl_SetVar(interp,"entry1","",TCL_GLOBAL_ONLY);
+   }
+   else { // this is used for symbol global props also
     if(schvhdlprop!=NULL)
       Tcl_SetVar(interp,"entry1",schvhdlprop,TCL_GLOBAL_ONLY);
     else
@@ -731,6 +737,11 @@ void edit_property(int x)
         (!schprop || strcmp(schprop, Tcl_GetVar(interp, "entry1", TCL_GLOBAL_ONLY) ) ) ) { // 20120209
         modified=1; push_undo(); // 20150327
         my_strdup(&schprop, (char *) Tcl_GetVar(interp, "entry1", TCL_GLOBAL_ONLY)); //09112003 
+
+     } else if(netlist_type==CAD_TEDAX_NETLIST && current_type==SCHEMATIC && // 20120228 check if schprop NULL
+        (!schtedaxprop || strcmp(schtedaxprop, Tcl_GetVar(interp, "entry1", TCL_GLOBAL_ONLY) ) ) ) { // 20120209
+        modified=1; push_undo(); // 20150327
+        my_strdup(&schtedaxprop, (char *) Tcl_GetVar(interp, "entry1", TCL_GLOBAL_ONLY)); //09112003 
 
      } else if(netlist_type==CAD_VHDL_NETLIST && current_type==SCHEMATIC && // 20120228 check if schvhdlprop NULL
         (!schvhdlprop || strcmp(schvhdlprop, Tcl_GetVar(interp, "entry1", TCL_GLOBAL_ONLY) ) ) ) { // netlist_type==CAD_VHDL_NETLIST // 20120209

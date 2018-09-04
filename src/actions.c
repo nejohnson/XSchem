@@ -428,6 +428,7 @@ void remove_symbols(void)
 void clear_drawing(void)
 {
  int i,j;
+ if(schtedaxprop!=NULL) {my_free(schtedaxprop);schtedaxprop=NULL;}
  if(schprop!=NULL) {my_free(schprop);schprop=NULL;}
  if(schvhdlprop!=NULL) {my_free(schvhdlprop);schvhdlprop=NULL;}
  if(schverilogprop!=NULL) {my_free(schverilogprop);schverilogprop=NULL;} //09112003

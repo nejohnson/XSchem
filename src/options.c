@@ -26,7 +26,7 @@ void
      int c;
      
      while (1) {
-         c = getopt (argc, argv, "S3cpxzl:d:nfhrsvwWq");
+         c = getopt (argc, argv, "S3cpxzl:d:nfhrsvwtWq");
          if (c == -1)
              break;
  
@@ -92,6 +92,11 @@ void
          case 'w':
              if(debug_var>=1) fprintf(errfp, "process_options(): set netlist type to verilog\n");
              netlist_type=CAD_VERILOG_NETLIST;
+             break;
+ 
+         case 't':
+             if(debug_var>=1) fprintf(errfp, "process_options(): set netlist type to tEDAx\n");
+             netlist_type=CAD_TEDAX_NETLIST;
              break;
  
          case 'q':

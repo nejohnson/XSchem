@@ -64,6 +64,10 @@ void global_spice_netlist(int global)  // netlister driver
  for(i=0;i<lastinst;i++)
  {
   if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"spice_ignore",0),"true")==0 ) continue; // 20140416
+  if(inst_ptr[i].ptr<0) continue;
+  if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "spice_ignore",0 ), "true") ) {
+    continue;
+  }
   // my_strdup(&type,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"type",0)); // 20150409
   my_strdup(&type,(inst_ptr[i].ptr+instdef)->type); // 20150409
   if(debug_var>=1) fprintf(errfp, "global_spice_netlist(): >>>>>>> |%s|\n", type);
@@ -86,6 +90,10 @@ void global_spice_netlist(int global)  // netlister driver
  for(i=0;i<lastinst;i++) // print netlist_commands of top level cell with no 'place=end' property
  {
   if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"spice_ignore",0),"true")==0 ) continue; // 20140416
+  if(inst_ptr[i].ptr<0) continue;
+  if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "spice_ignore",0 ), "true") ) {
+    continue;
+  }
   // my_strdup(&type,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"type",0)); // 20150409
   my_strdup(&type,(inst_ptr[i].ptr+instdef)->type); // 20150409
   my_strdup(&place,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"place",0));  // 20121223
@@ -153,6 +161,10 @@ void global_spice_netlist(int global)  // netlister driver
  if(!split_files) for(i=0;i<lastinst;i++) // print netlist_commands of top level cell with 'place=end' property
  {
   if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"spice_ignore",0),"true")==0 ) continue; // 20140416
+  if(inst_ptr[i].ptr<0) continue;
+  if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "spice_ignore",0 ), "true") ) {
+    continue;
+  }
   // my_strdup(&type,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"type",0)); // 20150409
   my_strdup(&type,(inst_ptr[i].ptr+instdef)->type); // 20150409
   my_strdup(&place,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"place",0));  // 20121223
@@ -273,6 +285,10 @@ void spice_netlist(FILE *fd, int spice_stop )
    for(i=0;i<lastinst;i++) // print first ipin/opin defs ...
    {
     if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"spice_ignore",0),"true")==0 ) continue; // 20140416
+    if(inst_ptr[i].ptr<0) continue;
+    if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "spice_ignore",0 ), "true") ) {
+      continue;
+    }
     // my_strdup(&type,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"type",0)); // 20150409
     my_strdup(&type,(inst_ptr[i].ptr+instdef)->type); // 20150409
     my_strdup(&place,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"place",0));  // 20121223

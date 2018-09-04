@@ -1,0 +1,85 @@
+tEDAx v1
+begin netlist v1 linear_stab
+	conn gnd U1 2
+	conn gnd CONN1 1
+	conn gnd CONN2 1
+	conn in U1 1
+	conn in CONN1 2
+	conn out U1 3
+	conn out CONN2 2
+	conn gnd C1 1
+	conn in C1 2
+	conn gnd C2 1
+	conn out C2 2
+	nettag in max_current 0.5A
+	nettag out max_current 1A
+	footprint CONN1 SIP2
+	footprint CONN2 SIP2
+	footprint U1 TO220
+	footprint C1 1206
+	footprint C2 1206
+	value C1 100 nf
+	value C2 100 nf
+	device C1 ceramic\ capacitor
+	device C2 ceramic\ capacitor
+	device U1 7805
+	comptag U1 heatsink yes
+end netlist
+
+
+tEDAx v1
+begin netlist v1 NANDs
+	device U5 74LS00
+	footprint U5 dip(14)
+	conn gnd U5 7
+	conn vcc U5 14
+	conn gnd U5 1
+	conn gnd U5 2
+	conn gnd U5 4
+	conn gnd U5 5
+	conn gnd U5 9
+	conn gnd U5 10
+	conn gnd U5 12
+	conn gnd U5 13
+
+	pinname U5 7 ground
+	pinname U5 14 power
+	pinname U5 1 A
+	pinname U5 2 B
+	pinname U5 3 Y
+	pinname U5 4 A
+	pinname U5 5 B
+	pinname U5 6 Y
+	pinname U5 9 A
+	pinname U5 10 B
+	pinname U5 8 Y
+	pinname U5 12 A
+	pinname U5 13 B
+	pinname U5 11 Y
+
+	pinslot U5 1 1
+	pinslot U5 2 1
+	pinslot U5 3 1
+	pinidx U5 1 1
+	pinidx U5 2 2
+	pinidx U5 3 3
+	pinslot U5 4 2
+	pinslot U5 5 2
+	pinslot U5 6 2
+	pinidx U5 4 1
+	pinidx U5 5 2
+	pinidx U5 6 3
+	pinslot U5 9 3
+	pinslot U5 10 3
+	pinslot U5 8 3
+	pinidx U5 9 1
+	pinidx U5 10 2
+	pinidx U5 8 3
+	pinslot U5 12 4
+	pinslot U5 13 4
+	pinslot U5 11 4
+	pinidx U5 12 1
+	pinidx U5 13 2
+	pinidx U5 11 3
+end netlist
+

@@ -648,7 +648,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='V' && state == ShiftMask)				// toggle spice/vhdl netlist 
    {
-    netlist_type++; if(netlist_type==4) netlist_type=1;
+    netlist_type++; if(netlist_type==5) netlist_type=1;
     if(netlist_type == CAD_VHDL_NETLIST)
     {
      tkeval("alert_ { netlist type set to VHDL} {}");
@@ -663,6 +663,11 @@ int callback(int event, int mx, int my, KeySym key,
     {
      tkeval("alert_ { netlist type set to VERILOG} {}");
      Tcl_SetVar(interp,"netlist_type","verilog",TCL_GLOBAL_ONLY);
+    }
+    else if(netlist_type == CAD_TEDAX_NETLIST)
+    {
+     tkeval("alert_ { netlist type set to tEDAx} {}");
+     Tcl_SetVar(interp,"netlist_type","tedax",TCL_GLOBAL_ONLY);
     }
     break;
    }
@@ -1039,6 +1044,8 @@ int callback(int event, int mx, int my, KeySym key,
         global_vhdl_netlist(1);
       else if(netlist_type == CAD_VERILOG_NETLIST)
         global_verilog_netlist(1);
+      else if(netlist_type == CAD_TEDAX_NETLIST)
+        global_tedax_netlist(1);
       if(debug_var>=1) fprintf(errfp, "callback(): -------------\n");
     }
     break;
@@ -1053,6 +1060,8 @@ int callback(int event, int mx, int my, KeySym key,
         global_vhdl_netlist(0);
       else if(netlist_type == CAD_VERILOG_NETLIST)
         global_verilog_netlist(0);
+      else if(netlist_type == CAD_TEDAX_NETLIST)
+        global_tedax_netlist(0);
       if(debug_var>=1) fprintf(errfp, "callback(): -------------\n");
     }
     break;

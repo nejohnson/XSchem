@@ -1,6 +1,7 @@
 G {} 
 V {} 
 S {} 
+E {} 
 L 3 920 -460 970 -440 {} 
 L 3 890 -580 1210 -580 {} 
 L 8 910 -440 960 -460 {} 
@@ -44,10 +45,10 @@ T {TEXT} 900 -570 1 0 0.7 0.7 {layer=6 font=FreeMono}
 T {Text} 910 -560 0 0 0.5 0.5 {layer=7 font="Times"} 
 T {TEXT} 1000 -560 1 0 0.5 0.5 {} 
 T {Text} 1020 -550 0 0 0.6 0.6 {layer=4} 
-N 880 -200 1000 -200 {} 
-N 920 -240 920 -150 {} 
-N 920 -170 980 -170 {} 
-N 940 -210 970 -200 {} 
+N 880 -200 1000 -200 {lab=#net1} 
+N 920 -240 920 -150 {lab=#net2} 
+N 920 -170 980 -170 {lab=#net2} 
+N 940 -210 970 -200 {lab=#net1} 
 C {examples/poweramp} 160 -310 0 0 {name=x1} 
 C {examples/tesla} 160 -230 0 0 {name=x2} 
 C {examples/test_ne555} 160 -190 0 0 {name=x3} 
@@ -58,15 +59,17 @@ C {devices/title} 160 -30 0 0 {name=l1 author="Stefan Schippers"}
 C {devices/launcher} 450 -290 0 0 {name=h8 
 descr="XSCHEM WEBSITE" 
 url="https://xschem.sourceforge.io/stefan/xschem.html"
-} 
+program=x-www-browser} 
 C {devices/launcher} 450 -190 0 0 {name=h1 
 descr="XSCHEM ON SOURCEFORGE" 
 url="https://sourceforge.net/projects/xschem/"
-} 
+program=x-www-browser} 
 C {examples/cmos_example} 160 -350 0 0 {name=x6} 
 C {devices/launcher} 450 -240 0 0 {name=h2 
 descr="LOCAL DOCUMENTATION" 
 url="$env(HOME)/share/doc/xschem/xschem.html"
+program=x-www-browser
+
 } 
 C {examples/greycnt} 160 -390 0 0 {name=x8} 
 C {examples/loading} 160 -430 0 0 {name=x9} 
@@ -76,3 +79,4 @@ colorscheme"
 tclcommand="xschem toggle_colorscheme"
 } 
 C {examples/inv} 940 -100 0 0 {name=E1 TABLE="1.4 3.0 1.6 0.0"} 
+C {pcb/pcb_test1} 160 -470 0 0 {name=x0} 

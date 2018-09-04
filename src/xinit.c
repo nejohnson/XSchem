@@ -776,10 +776,12 @@ int Tcl_AppInit(Tcl_Interp *inter)
  if(netlist_type==-1) {
   if(!strcmp(Tcl_GetVar(interp, "netlist_type", TCL_GLOBAL_ONLY),"vhdl") ) netlist_type=CAD_VHDL_NETLIST;
   else if(!strcmp(Tcl_GetVar(interp, "netlist_type", TCL_GLOBAL_ONLY),"verilog") ) netlist_type=CAD_VERILOG_NETLIST;
+  else if(!strcmp(Tcl_GetVar(interp, "netlist_type", TCL_GLOBAL_ONLY),"tedax") ) netlist_type=CAD_TEDAX_NETLIST;
   else netlist_type=CAD_SPICE_NETLIST;
  } else {
   if(netlist_type==CAD_VHDL_NETLIST)  Tcl_SetVar(interp,"netlist_type","vhdl",TCL_GLOBAL_ONLY);
   else if(netlist_type==CAD_VERILOG_NETLIST)  Tcl_SetVar(interp,"netlist_type","verilog",TCL_GLOBAL_ONLY);
+  else if(netlist_type==CAD_TEDAX_NETLIST)  Tcl_SetVar(interp,"netlist_type","tedax",TCL_GLOBAL_ONLY);
   else Tcl_SetVar(interp,"netlist_type","spice",TCL_GLOBAL_ONLY);
  }
 
@@ -1033,6 +1035,8 @@ int Tcl_AppInit(Tcl_Interp *inter)
     global_vhdl_netlist(1);                   // 1 means global netlist
   else if(netlist_type == CAD_VERILOG_NETLIST)
     global_verilog_netlist(1);                   // 1 means global netlist
+  else if(netlist_type == CAD_TEDAX_NETLIST)
+    global_tedax_netlist(1);                   // 1 means global netlist
  }
  if(do_print) {
    if(!filename) {

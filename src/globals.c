@@ -202,6 +202,7 @@ int lasttext=0;
 char schematic[CADMAXHIER][256];
 int currentsch = 0;
 char *schprop=NULL;  // spice
+char *schtedaxprop=NULL;  // tEDAx
 char *schvhdlprop=NULL; // vhdl and symbol property string
 char *schverilogprop=NULL;// verilog
 int show_erc=1;

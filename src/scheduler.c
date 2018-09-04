@@ -68,6 +68,8 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
         global_vhdl_netlist(1);
       else if(netlist_type == CAD_VERILOG_NETLIST)
         global_verilog_netlist(1);
+      else if(netlist_type == CAD_TEDAX_NETLIST)
+        global_tedax_netlist(1);
     }
  }
 
@@ -229,6 +231,9 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
   else if(!strcmp(argv[2],"verilog")) {
     netlist_type=CAD_VERILOG_NETLIST;
   }
+  else if(!strcmp(argv[2],"tedax")) {
+    netlist_type=CAD_TEDAX_NETLIST;
+  }
   else {
     netlist_type=CAD_SPICE_NETLIST;
   }
@@ -319,6 +324,8 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
         Tcl_AppendResult(interp, "vhdl",NULL);
      else if( netlist_type == CAD_SPICE_NETLIST )
         Tcl_AppendResult(interp, "spice",NULL);
+     else if( netlist_type == CAD_TEDAX_NETLIST )
+        Tcl_AppendResult(interp, "tedax",NULL);
      else 
         Tcl_AppendResult(interp, "verilog",NULL);
   }
@@ -513,6 +520,8 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
      netlist_type = CAD_VHDL_NETLIST ;
     } else if(!strcmp(argv[3],"verilog")) {
      netlist_type = CAD_VERILOG_NETLIST ;
+    } else if(!strcmp(argv[3],"tedax")) {
+     netlist_type = CAD_TEDAX_NETLIST ;
     } else {
      netlist_type = CAD_SPICE_NETLIST ;
     }
@@ -1045,7 +1054,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
   printf("      xschem netlist\n");
   printf("                   perform a global netlist on current schematic\n");
   printf("      xschem netlist_type type\n");
-  printf("                   set netlist type to <type>, currently spice or vhdl\n");
+  printf("                   set netlist type to <type>, currently spice, vhdl, verilog or tedax\n");
   printf("      xschem netlist_show yes|no\n");
   printf("                   show or not netlist in a window\n");
   printf("      xschem save [library/name]\n");

@@ -70,6 +70,10 @@ void global_verilog_netlist(int global)  // netlister driver
  for(i=0;i<lastinst;i++)
  {
   if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"verilog_ignore",0),"true")==0 ) continue; // 20140416
+  if(inst_ptr[i].ptr<0) continue;
+  if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "verilog_ignore",0 ), "true") ) {
+    continue;
+  }
   my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
   if( type && (strcmp(type,"timescale"))==0)
   {
@@ -95,6 +99,10 @@ void global_verilog_netlist(int global)  // netlister driver
  for(i=0;i<lastinst;i++)
  {
   if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"verilog_ignore",0),"true")==0 ) continue; // 20140416
+  if(inst_ptr[i].ptr<0) continue;
+  if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "verilog_ignore",0 ), "true") ) {
+    continue;
+  }
   my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
   if( type && (strcmp(type,"opin"))==0)
   {
@@ -109,6 +117,10 @@ void global_verilog_netlist(int global)  // netlister driver
  for(i=0;i<lastinst;i++)
  {
   if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"verilog_ignore",0),"true")==0 ) continue; // 20140416
+  if(inst_ptr[i].ptr<0) continue;
+  if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "verilog_ignore",0 ), "true") ) {
+    continue;
+  }
   my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
   if( type && (strcmp(type,"iopin"))==0)
   {
@@ -123,6 +135,10 @@ void global_verilog_netlist(int global)  // netlister driver
  for(i=0;i<lastinst;i++)
  {
   if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"verilog_ignore",0),"true")==0 ) continue; // 20140416
+  if(inst_ptr[i].ptr<0) continue;
+  if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "verilog_ignore",0 ), "true") ) {
+    continue;
+  }
   my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
   if( type && (strcmp(type,"ipin"))==0)
   {
@@ -149,6 +165,10 @@ void global_verilog_netlist(int global)  // netlister driver
  for(i=0;i<lastinst;i++)
  {
   if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"verilog_ignore",0),"true")==0 ) continue; // 20140416
+  if(inst_ptr[i].ptr<0) continue;
+  if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "verilog_ignore",0 ), "true") ) {
+    continue;
+  }
   my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
   if( type && (strcmp(type,"opin"))==0)
   {
@@ -168,6 +188,10 @@ void global_verilog_netlist(int global)  // netlister driver
  for(i=0;i<lastinst;i++)
  {
   if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"verilog_ignore",0),"true")==0 ) continue; // 20140416
+  if(inst_ptr[i].ptr<0) continue;
+  if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "verilog_ignore",0 ), "true") ) {
+    continue;
+  }
   my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
   if( type && (strcmp(type,"iopin"))==0)
   {
@@ -187,6 +211,10 @@ void global_verilog_netlist(int global)  // netlister driver
  for(i=0;i<lastinst;i++)
  {
   if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"verilog_ignore",0),"true")==0 ) continue; // 20140416
+  if(inst_ptr[i].ptr<0) continue;
+  if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "verilog_ignore",0 ), "true") ) {
+    continue;
+  }
   my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
   if( type && (strcmp(type,"ipin"))==0)
   {

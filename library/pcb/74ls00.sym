@@ -1,0 +1,38 @@
+G {type=nand
+verilog_format="nand #(@risedel , @falldel ) @name ( @@Z , @@A , @@B );"
+tedax_format="footprint @name @footprint
+device @name @symname"
+template="name=U1 footprint=\\"dip(14)\\" risedel=100 falldel=200 numslots=4 power=VCC ground=GND"
+extra="power ground"
+extra_pinnumber="14 7"} 
+V {}
+S {}
+L 4 -40 -20 -25 -20 {} 
+L 4 -25 -30 -25 30 {} 
+L 4 -25 -30 0 -30 {} 
+L 4 -25 30 0 30 {} 
+L 4 -40 20 -25 20 {} 
+L 4 12.5 -27.5 22.5 -22.5 {} 
+L 4 0 -30 12.5 -27.5 {} 
+L 4 12.5 27.5 22.5 22.5 {} 
+L 4 0 30 12.5 27.5 {} 
+L 4 22.5 22.5 30 15 {} 
+L 4 30 15 33.75 7.5 {} 
+L 4 33.75 7.5 35 0 {} 
+L 4 22.5 -22.5 30 -15 {} 
+L 4 30 -15 33.75 -7.5 {} 
+L 4 33.75 -7.5 35 0 {} 
+L 4 35 -2.5 35 2.5 {} 
+L 4 35 -2.5 37.5 -5 {} 
+L 4 37.5 -5 42.5 -5 {} 
+L 4 42.5 -5 45 -2.5 {} 
+L 4 45 -2.5 45 2.5 {} 
+L 4 42.5 5 45 2.5 {} 
+L 4 37.5 5 42.5 5 {} 
+L 4 35 2.5 37.5 5 {} 
+L 4 45 0 60 0 {} 
+B 5 -42.5 -22.5 -37.5 -17.5 {name=A dir=in pinnumber=1:4:9:12} 
+B 5 -42.5 17.5 -37.5 22.5 {name=B dir=in pinnumber=2:5:10:13} 
+B 5 57.5 -2.5 62.5 2.5 {name=Z dir=out verilog_type=wire pinnumber=3:6:8:11} 
+T {@name} -22.5 -20 0 0 0.2 0.2 {} 
+T {@symname} -22.5 0 0 0 0.2 0.2 {} 

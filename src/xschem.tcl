@@ -118,6 +118,13 @@ proc netlist {source_file show netlist_file} {
      textwindow $netlist_dir/$netlist_file
    }
  }
+ if [regexp {\.tdx$} $netlist_file ] {
+   eval exec "${XSCHEM_HOME_DIR}/tedax.awk $netlist_dir/$source_file \
+              > $netlist_dir/$netlist_file"
+   if ![string compare $show "show"] {
+     textwindow $netlist_dir/$netlist_file
+   }
+ }
  if [regexp {\.v$} $netlist_file ] {
    eval exec "${XSCHEM_HOME_DIR}/verilog.awk $netlist_dir/$source_file \
               > $netlist_dir/$netlist_file"
@@ -366,6 +373,8 @@ proc edit_netlist {schname } {
      task "$editor $ftype  ${schname}.v" $netlist_dir bg
    } elseif { $netlist_type=="spice" } {
      task "$editor $ftype ${schname}.spice" $netlist_dir bg
+   } elseif { $netlist_type=="tedax" } {
+     task "$editor $ftype ${schname}.tdx" $netlist_dir bg
    } elseif { $netlist_type=="vhdl" } { 
      task "$editor $ftype ${schname}.vhdl" $netlist_dir bg
    }
@@ -419,12 +428,10 @@ proc filesave { msg {initialfile {}} {confirm 0}  } {
     } else {
       set r [tk_getSaveFile  -title $msg -initialfile $initialfile -initialdir $FILESELECT_CURR_DIR ]
     }
-    set dir [file dirname $r]
+    set dir [file normalize [file dirname $r]]
     set a [ get_cell $r]
     set xschem_des_dir [file normalize $XSCHEM_DESIGN_DIR]
     if { ![string compare $r {} ] } { break } 
-    # enforce saving in 1st level directories under XSCHEM_DESIGN_DIR 20171119
-    if { ![regexp "^$xschem_des_dir/\[^./\]+$" $dir] } { continue } 
     
     # fix save to XSCHEM_DESIGN_DIR for libraries defined by a link 20171119
     set dir1 [file normalize "$XSCHEM_DESIGN_DIR/[file tail $dir]"]
@@ -1274,7 +1281,11 @@ proc text_line {txtlabel clear} {
    pack .ent2.yscroll -side right -fill y 
    pack .ent2.xscroll -side bottom -fill x
    pack .ent2.e1   -expand yes -fill both
-   bind .ent2 <Escape> {.ent2.f1.b2 invoke}
+   bind .ent2 <Escape> {
+     if ![string compare $entry1 [.ent2.e1 get 1.0 {end - 1 chars}]] {
+       .ent2.f1.b2 invoke
+     }
+   }
    bind .ent2 <Control-Return> {.ent2.f1.b1 invoke}
    #tkwait visibility .ent2
    #grab set .ent2
@@ -2154,6 +2165,9 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    .menubar.option.menu add radiobutton -label "Spice netlist" -variable netlist_type -value spice \
         -accelerator {V-toggle} \
 	-command "xschem netlist_type spice"
+   .menubar.option.menu add radiobutton -label "tEDAx netlist" -variable netlist_type -value tedax \
+        -accelerator {V-toggle} \
+	-command "xschem netlist_type tedax"
    menubutton .menubar.edit -text "Edit" -menu .menubar.edit.menu
    menu .menubar.edit.menu -tearoff 0
    .menubar.edit.menu add command -label "Undo" -state disabled -accelerator u

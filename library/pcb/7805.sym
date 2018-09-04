@@ -1,0 +1,20 @@
+G {type=regulator
+format="x@name @pinlist r@symname"
+verilog_format="nand #(@risedel , @falldel ) @name ( @@Z , @@A , @@B );"
+tedax_format="footprint @name @footprint
+device @name @symname"
+template="name=U1 footprint=TO220"} 
+V {}
+S {}
+L 4 -60 0 -50 0 {} 
+L 4 50 0 60 0 {} 
+L 4 -50 -20 50 -20 {} 
+L 4 50 -20 50 20 {} 
+L 4 -50 20 50 20 {} 
+L 4 -50 -20 -50 20 {} 
+L 4 0 20 0 30 {} 
+B 5 -62.5 -2.5 -57.5 2.5 {name=IN dir=in pinnumber=1} 
+B 5 -2.5 27.5 2.5 32.5 {name=GND dir=inout pinnumber=2} 
+B 5 57.5 -2.5 62.5 2.5 {name=OUT dir=out pinnumber=3} 
+T {@name} -22.5 -15 0 0 0.2 0.2 {} 
+T {@symname} -22.5 5 0 0 0.2 0.2 {} 

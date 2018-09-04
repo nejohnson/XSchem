@@ -4,10 +4,11 @@ Options:
   -n               do a netlist of the given schematic cell
   -v               set netlist type to VHDL
   -w               set netlist type to verilog
+  -t               set netlist type to tedax
+  -s               set netlist type to SPICE
   -3               set page size for printing to A3
   -x               dont use X (only command mode)
   -z               use a raibow-looking layer color table
-  -s               set netlist type to SPICE
   -W               show simulation waveforms
   -f               set flat netlist (for spice format only)
   -r               start without the tclreadline package ( this is necessary if

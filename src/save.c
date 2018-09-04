@@ -363,6 +363,9 @@ int save_symbol(char *schname) // 20171020 aded return value
   if(schvhdlprop && (strstr(schvhdlprop,"type=") || strstr(schvhdlprop,"format="))) { 
     save_ascii_string(schvhdlprop,fd);
   }
+  else if(schtedaxprop && (strstr(schtedaxprop,"type=") || strstr(schtedaxprop,"format="))) {
+    save_ascii_string(schtedaxprop,fd);
+  }
   else if(schprop && (strstr(schprop,"type=") || strstr(schprop,"format="))) {
     save_ascii_string(schprop,fd);
   }
@@ -451,6 +454,9 @@ int save_schematic(char *schname) // 20171020 added return value
     fputc('\n', fd);
     fprintf(fd, "S ");
     save_ascii_string(schprop,fd);  // 20100217
+    fputc('\n', fd);
+    fprintf(fd, "E ");
+    save_ascii_string(schtedaxprop,fd);  // 20100217
     fputc('\n', fd);
     save_line(fd);
     save_box(fd);
@@ -595,6 +601,9 @@ void load_schematic(int load_symbols, char *abs_name, int reset_undo) // 2015032
       if(fscanf(fd,"%255s",c)==EOF) break;
       switch(c[0])
       {
+       case 'E':
+        load_ascii_string(&schtedaxprop,fd); //20100217
+        break;
        case 'S':
         load_ascii_string(&schprop,fd); //20100217
         break;
@@ -709,6 +718,9 @@ void push_undo(void) // 20150327
     fprintf(fd, "S ");
     save_ascii_string(schprop,fd);  //20100217
     fputc('\n', fd);
+    fprintf(fd, "E ");
+    save_ascii_string(schtedaxprop,fd);  //20100217
+    fputc('\n', fd);
     save_line(fd);
     save_polygon(fd);
     save_box(fd);
@@ -788,6 +800,9 @@ void pop_undo(int redo)  // 20150327
     {
      case 'S':
       load_ascii_string(&schprop,fd); //20100217
+      break;
+     case 'E':
+      load_ascii_string(&schtedaxprop,fd); //20100217
       break;
      case 'V':
       load_ascii_string(&schverilogprop,fd); //09112003
@@ -889,6 +904,9 @@ int load_symbol_definition(char *name)
     if(fscanf(fd,"%255s",aux_str)==EOF) break;
     switch(aux_str[0])
     {
+     case 'E':
+      load_ascii_string(&aux_ptr,fd);
+      break;
      case 'V': //09112003
       load_ascii_string(&aux_ptr,fd);
       break;
@@ -1246,6 +1264,9 @@ void edit_symbol(void)
     case 'S':
      load_ascii_string(&schprop,fd); //20100217
      break;
+    case 'E':
+     load_ascii_string(&schtedaxprop,fd); //20100217
+     break;
     case 'V':
      load_ascii_string(&schverilogprop,fd); //09112003
      break;
@@ -1319,6 +1340,9 @@ void load_symbol(char *abs_name)
        break;
       case 'S':
        load_ascii_string(&schprop,fd); //20100217
+       break;
+      case 'E':
+       load_ascii_string(&schtedaxprop,fd); //20100217
        break;
       case 'G':
        load_ascii_string(&schvhdlprop,fd);

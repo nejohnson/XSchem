@@ -35,6 +35,17 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.4.8:
+- added (experimental for now) tEDAx netlist export, this is a netlist format that
+  the pcb-rnd printed board editor understands.
+  sample test schematic included in the source distribution (pcb_test1.sch)
+- better lookup of spice_ignore, verilog_ignore and vhdl_ignore for netlisting,
+  after looking in instance properties look also in symbol definition.
+- fixed a bug in TCL savefile procedure, where it refused to save a schematic
+  in a library pointed to by a symlink
+- Escape key no more closes a property edit dialog (proc text_line) if something has been written
+  into it.
+
 2.4.5:
 - 20180208 fix crashing bug: delete node info if changing symbol
   if number of pins is different we must delete these data *before*

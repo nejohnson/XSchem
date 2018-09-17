@@ -32,43 +32,49 @@ p{padding: 15px  30px 10px;}
   <li>Symbols</li>
  </ul>
  <p>
-  Consider for example the <tt>res.sym</tt> symbol
-  (you may open it with the <tt>Open</tt> menu item)
+  Consider for example the <kbd>res.sym</kbd> symbol
+  (you may open it with the <kbd>Open</kbd> menu item)
   if you click inside one of the red pins and press the 'edit property'
-  bindkey <tt>'q'</tt> a dialog box
+  bindkey <kbd>'q'</kbd> a dialog box
   shows the property string associated with the selected pin:
  </p>
  <img src="edit_property.png">
  <p> 
-  The <tt>name=p&nbsp;dir=inout</tt> property string tells that the
-  selected pin name is <tt>'p'</tt>,
+  The <kbd>name=p&nbsp;dir=inout</kbd> property string tells that the
+  selected pin name is <kbd>'p'</kbd>,
   this will be the symbol positive pin name in the produced netlist.
-  The property string also defines a <tt>dir</tt> attribute with value
-  <tt>inout</tt>. This tells XSCHEM that electrically this is an input/output pin.
+  The property string also defines a <kbd>dir</kbd> attribute with value
+  <kbd>inout</kbd>. This tells XSCHEM that electrically this is an input/output pin.
   This is important when producing VHDL/verilog netlists.
-  The second (bottom) pin property string is <tt>name=m&nbsp;dir=inout</tt> and this
+  The second (bottom) pin property string is <kbd>name=m&nbsp;dir=inout</kbd> and this
   defines the negative pin.
-  The text primitives also have properties. For texts the property string is simply the
-  displayed text.
+  The text primitives also have properties. For texts the property string may be used 
+  to specify font and the layer to use for displaying text.
  </p>
  <img src="text_property.png">
  <h3>GLOBAL PROPERTIES</h3>
  <p>
   If you click outside of any displayed graphics in XSCHEM
   the selection set will be cleared.
-  Clicking the edit property <tt>'q'</tt> key when nothing is
+  Clicking the edit property <kbd>'q'</kbd> key when nothing is
   selected will display the global property string of the
-  schematic (.sch) or symbol window (.sym).
+  schematic (.sch) or symbol window (.sym). 
+  <p class="important">
+  There is actually one different global property
+  string defined for any available netlisting modes, so if XCHEM is set to produce SPICE
+  netlists the SPICE global property string is displayed.
+  </p>
+  <p>
   So, in addition to properties associated to graphical objects and
   symbols we also have properties associated to schematic (.sch) and symbol files (.sym)
  </p>
  <img src="global_property.png">
  <p>
-  The <tt>format</tt> attribute defines the format of the SPICE netlist. 
+  The <kbd>format</kbd> attribute defines the format of the SPICE netlist. 
   The SPICE netlist element line starts with the 
   symbol name (in this case a resistor so 'rxxxxx'), the list of pins, the
   resistor value and a multiplicity factor (m).<br>
-  <tt>@pinlist</tt> will resolve to the parent nets attached to the resistor 
+  <kbd>@pinlist</kbd> will resolve to the parent nets attached to the resistor 
   nodes, in the order they appear in the
   symbol (in this example; first node = 'p', second node = 'm').<br>
   We will return on component instantiation later, but for now,
@@ -76,28 +82,28 @@ p{padding: 15px  30px 10px;}
   </p>
   <img src="nets_pins.png"> 
   <p>
-  the <tt>@pinlist</tt> for the <tt>r1</tt> component will expand to <tt>POS&nbsp;NEG</tt>.<br>
-  <tt>@value</tt> resolves to the resistor value assigned in component instantiation.
-  The <tt>template</tt> attribute defines default values if component
+  the <kbd>@pinlist</kbd> for the <kbd>r1</kbd> component will expand to <kbd>POS&nbsp;NEG</kbd>.<br>
+  <kbd>@value</kbd> resolves to the resistor value assigned in component instantiation.
+  The <kbd>template</kbd> attribute defines default values if component
   instantiation does not define values for them.<br>
   If you want to add a pin to an existing symbol you may copy one
-  of these. Select a pin, press the copy <tt>'c'</tt>
+  of these. Select a pin, press the copy <kbd>'c'</kbd>
   bindkey and place a new copy of it somewhere.
  </p>
  <img src="place_pin.png" style="width: 90%;">
  <p>
   After copying the pin you may change its properties, for example you
   will change its property string to 
-  something like: <tt> name=body&nbsp;dir=in</tt> (just as an example).<br>
+  something like: <kbd> name=body&nbsp;dir=in</kbd> (just as an example).<br>
   Note that pins in symbols are nothing more than rectangles
-  drawn with the <tt>pin</tt> layer; instead of copying an
+  drawn with the <kbd>pin</kbd> layer; instead of copying an
   existing one you may create it from scratch, select the pin
-  layer from the <tt>Layers</tt> menu, point the mouse where
-  you want to place the pin, press the <tt>'r'</tt> bindkey and drag the mouse
+  layer from the <kbd>Layers</kbd> menu, point the mouse where
+  you want to place the pin, press the <kbd>'r'</kbd> bindkey and drag the mouse
   to the desired pin size. There is no inherent limit or assumption
   on pin sizes, you are allowed to create any rectangular/square sizes. 
   After placing the rectangle you must create a property string by selecting it
-  and pressing the <tt>'q'</tt> bindkey. An empty string is shown in the
+  and pressing the <kbd>'q'</kbd> bindkey. An empty string is shown in the
   dialog. Add a valid string as explained and you are all done.
  </p>
  <h3> PIN ORDERING</h3>
@@ -108,9 +114,9 @@ p{padding: 15px  30px 10px;}
   has 3 pins and should be in a specific order (collector, base, emitter).
   When done placing pins on a newly created symbol you can specify the order
   by selecting the one that must be the first in the netlist
-  and hitting the <tt>&lt;ctrl&gt;s</tt>  bindkey; set the number to zero; 
+  and hitting the <kbd>'&lt;shift&gt;S'</kbd>  bindkey; set the number to zero; 
   this will make the selected pin the first one. Next,
-  select the second pin and again hit <tt>&lt;ctrl&gt;s</tt>,
+  select the second pin and again hit <kbd>'&lt;shift&gt;S'</kbd>,
   set its number to 1 and so on.
   By doing so you have defined a specific pin ordering of the symbol.
  </p>

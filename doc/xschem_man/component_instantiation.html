@@ -28,22 +28,22 @@ p{padding: 15px  30px 10px;}
  </p>
  <img src="load_schematic.png">
  <p>
-  Now start by inserting a component, consider for example <tt>devices/nmos4.sym</tt>; press the
-  <tt>Insert</tt> key, navigate to the <tt>devices</tt> design library and open the <tt>nmos4.sym</tt>
+  Now start by inserting a component, consider for example <kbd>devices/nmos4.sym</kbd>; press the
+  <kbd>Insert</kbd> key, navigate to the <kbd>devices</kbd> design library and open the <kbd>nmos4.sym</kbd>
   symbol.
  </p>
  <img src="nmos4_symbol.png">
  <p>
   Now draw some wires on each pin of the nmos; place the mouse pointer on the component pins and
-  use the <tt>'w'</tt> bindkey.
+  use the <kbd>'w'</kbd> bindkey.
  </p>
  <img src="nmos4_wires.png">
  <p> 
-  we need now to put labels on wire ends: use the <tt>Insert</tt> key and locate the 
-  <tt>devices/lab_pin.sym</tt> symbol. After the <tt>lab_pin</tt> symbol is placed you can move it
-  by selecting it with the mouse and pressing the <tt>'m'</tt> bindkey. You can also flip
-  ( <tt>'F'</tt>) and rotate while moving (<tt>'R'</tt>) to adjust the orientation. After
-  placing the first one you may copy the others from it (<tt>'c'</tt> bindkey). The end result 
+  we need now to put labels on wire ends: use the <kbd>Insert</kbd> key and locate the 
+  <kbd>devices/lab_pin.sym</kbd> symbol. After the <kbd>lab_pin</kbd> symbol is placed you can move it
+  by selecting it with the mouse and pressing the <kbd>'m'</kbd> bindkey. You can also flip
+  ( <kbd>'F'</kbd>) and rotate while moving (<kbd>'R'</kbd>) to adjust the orientation. After
+  placing the first one you may copy the others from it (<kbd>'c'</kbd> bindkey). The end result 
   should look  like this:
  </p>
  <img src="nmos4_labels.png">
@@ -57,13 +57,13 @@ p{padding: 15px  30px 10px;}
   This circuit is absolutely equivalent to the previous one: it will produce the same 
   device connectivity netlist.<br>
   Now we need to set appropriate labels on the NMOS terminals. This is -again- accomplished with 
-  component properties. Select the wire label on the nmos source pin and press the <tt>'q'</tt>
+  component properties. Select the wire label on the nmos source pin and press the <kbd>'q'</kbd>
   bindkey: 
  </p>
  <img src="nmos4_editprop.png">
  <p>
   Now, replace the 'xxx' default string in the dialog with a different name (example: SOURCE)
-  After clicking <tt>OK</tt> the source terminal will have the right label.
+  After clicking <kbd>OK</kbd> the source terminal will have the right label.
  </p>
  <img src="nmos4_editprop2.png">
  <p>
@@ -71,7 +71,7 @@ p{padding: 15px  30px 10px;}
  </p>
  <img src="nmos4_editprop3.png">
  <p>
-  The following picture shows the <tt>lab_pin</tt> component with its properties and
+  The following picture shows the <kbd>lab_pin</kbd> component with its properties and
   the corresponding symbol definition with its global properties (remember global properties in 
   the <a href="xschem_properties.html">xschem_properties</a> slide)
  </p>
@@ -83,27 +83,27 @@ p{padding: 15px  30px 10px;}
   <pre class="code">m1 DRAIN GATE SOURCE BODY nmos w=5u l=0.18u m=1</pre>
  </p>
  <p>
-  We need now to edit the nmos properties. Select it and press the <tt>'q'</tt> bindkey
+  We need now to edit the nmos properties. Select it and press the <kbd>'q'</kbd> bindkey
  </p>
  <img src="nmos_properties.png">
  <p>
   from the edit properties dialog you see there are 5 attributes with values defined:
  </p>
   <ul>
-  <li> The component name <tt>name=m1</tt>.</li>
-  <li> The spice model to be used in simulation <tt>model=nmos</tt>.</li>
-  <li> The transistor width <tt>w=5u</tt>.</li>
-  <li> The transistor channel length <tt>l=0.18u</tt>.</li>
-  <li> The number of parallel transistors (multiplicity) <tt>m=1</tt>.</li>
+  <li> The component name <kbd>name=m1</kbd>.</li>
+  <li> The spice model to be used in simulation <kbd>model=nmos</kbd>.</li>
+  <li> The transistor width <kbd>w=5u</kbd>.</li>
+  <li> The transistor channel length <kbd>l=0.18u</kbd>.</li>
+  <li> The number of parallel transistors (multiplicity) <kbd>m=1</kbd>.</li>
   </ul>
   <p>
   We have never defined a value for these properties. These are the default values defined in the
-  <tt>template</tt> attribute in the global <tt>nmos4.sym</tt> property string.
+  <kbd>template</kbd> attribute in the global <kbd>nmos4.sym</kbd> property string.
  </p>
  <img src="nmos_properties2.png">
  <p>
-  We may want to change the dimensions of the transistor; simply change the <tt>w</tt> and
-  <tt>l</tt> attribute values.<br>
+  We may want to change the dimensions of the transistor; simply change the <kbd>w</kbd> and
+  <kbd>l</kbd> attribute values.<br>
   Also the component name may be changed as long as it is unique in the current schematic window.
   All simulators require that components are unique, it is not permitted to have 2 components
   with identical name, so XSCHEM enforces this. 
@@ -112,53 +112,53 @@ p{padding: 15px  30px 10px;}
 
   <p>
   If a name is set that matches an existing component
-  xschem will rename it keeping the first letter (<tt>m</tt> in this example) and appending a number
-  (so you might end up in something like <tt>m23</tt> if there are many devices).
+  xschem will rename it keeping the first letter (<kbd>m</kbd> in this example) and appending a number
+  (so you might end up in something like <kbd>m23</kbd> if there are many devices).
  </p>
  <p class="important">
-  the <tt>name</tt> attribute is unique in the schematic window, and must be placed first in the
+  the <kbd>name</kbd> attribute is unique in the schematic window, and must be placed first in the
   property string. The name is also used by xschem to efficiently index it in the internal
   hash tables.
  </p><br>
  <h3>SPECIAL COMPONENTS</h3>  
  <p>General purpose</p>
  <ul>
-  <li><tt>devices/ipin.sym</tt>
-  <li><tt>devices/opin.sym</tt>
-  <li><tt>devices/iopin.sym</tt>
+  <li><kbd>devices/ipin.sym</kbd>
+  <li><kbd>devices/opin.sym</kbd>
+  <li><kbd>devices/iopin.sym</kbd>
   <p> 
    These components are used to name a net or a pin of another component. They do not have any other function
    other than giving an explicit name to a net.
   </p>
   <img src="special1.png">
-  <li><tt>devices/lab_pin.sym</tt>
-  <li><tt>devices/lab_wire.sym</tt>
-  <li><tt>devices/launcher.sym</tt>
-  <li><tt>devices/architecture.sym</tt>
+  <li><kbd>devices/lab_pin.sym</kbd>
+  <li><kbd>devices/lab_wire.sym</kbd>
+  <li><kbd>devices/launcher.sym</kbd>
+  <li><kbd>devices/architecture.sym</kbd>
  </ul>
  
  <p>Spice netlist special components</p>
  <ul>
-  <li><tt>devices/netlist.sym</tt>
-  <li><tt>devices/netlist_not_shown.sym</tt>
+  <li><kbd>devices/netlist.sym</kbd>
+  <li><kbd>devices/netlist_not_shown.sym</kbd>
  </ul>
 
  <p>Verilog netlist special components</p>
  <ul>
-  <li><tt>devices/verilog_timescale.sym</tt>
+  <li><kbd>devices/verilog_timescale.sym</kbd>
  </ul>
 
 
  <p>VHDL netlist special components</p>
  <ul>
-  <li><tt>devices/use.sym</tt>
-  <li><tt>devices/package.sym</tt>
-  <li><tt>devices/package_not_shown.sym</tt>
-  <li><tt>devices/arch_declarations.sym</tt>
-  <li><tt>devices/attributes.sym</tt>
-  <li><tt>devices/port_attributes.sym</tt>
-  <li><tt>devices/generic_pin.sym</tt>
-  <li><tt>devices/generic.sym</tt>
+  <li><kbd>devices/use.sym</kbd>
+  <li><kbd>devices/package.sym</kbd>
+  <li><kbd>devices/package_not_shown.sym</kbd>
+  <li><kbd>devices/arch_declarations.sym</kbd>
+  <li><kbd>devices/attributes.sym</kbd>
+  <li><kbd>devices/port_attributes.sym</kbd>
+  <li><kbd>devices/generic_pin.sym</kbd>
+  <li><kbd>devices/generic.sym</kbd>
  </ul><br>
  <!-- end of slide -->
  <div class="filler"></div>

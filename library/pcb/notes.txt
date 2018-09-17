@@ -1,3 +1,23 @@
+Igor2
+simplest approach I can think of: 
+have an user configurable search list of directories, and insert the File's path in front of it after load 
+(File being the file the user wanted to open) 
+that way any relative reference embedded in the File is always relative to wherever the File was on the filesystem when you loaded it 
+so if you copied the File together with the stuff it referenced to, keeping whatever dir structure that worked on one system, will automatically work on the other 
+plus, because of the search path list, you can keep the /lib approach for the system installed central xschem libs 
+plus as an user I can build my own, non-project, user-level, shared library somewhere and put it on the search path list too 
+(almost every gschem user I've ever met does this) 
+so if File references to /home/foo/bar, that's an absolute path starting with / meaning you wouldn't apply any search path, just open the path as is 
+if it doesn't start with /, e.g. it is ../foo/bar, you'd just take each item from the search path list, in order, and glue the reference path at the end of the search path item and try that 
+e.g. if you search path list is /home/foo (the File's path you inserted on load), /home/user/libs (the lib the user configured) and /usr/share/xschem/lib (the system installed lib) 
+stefan_xschem
+ok got it 
+Igor2
+then you'd try to open /home/foo/../foo/bar, if that fail go on and try /home/user/libs/../foo/bar, etc 
+I think this would be very flexible yet pertty much compatible with the current setup 
+(but I don't insist doing it this way, it's just an idea) 
+
+
 tEDAx v1
 begin netlist v1 linear_stab
 	conn gnd U1 2

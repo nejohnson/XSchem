@@ -485,7 +485,7 @@ void draw_symbol_outline(int what,int c, int n,int layer,int tmp_flip, int rot,
         x[k]+= x0;
         y[k] += y0;
       }
-      drawpolygon(c, NOW, x, y, polygon.points);
+      drawpolygon(c, NOW, x, y, polygon.points, polygon.fill); // 20180914 added fill
     }
 
   }
@@ -496,7 +496,7 @@ void draw_symbol_outline(int what,int c, int n,int layer,int tmp_flip, int rot,
     ROTATION(0.0,0.0,box.x2,box.y2,x2,y2);
     RECTORDER(x1,y1,x2,y2); 
     drawrect(c,what, x0+x1, y0+y1, x0+x2, y0+y2);
-    filledrect(c,what, x0+x1, y0+y1, x0+x2, y0+y2); // 20070323 added fill check
+    filledrect(c,what, x0+x1, y0+y1, x0+x2, y0+y2);
   }
   if( (layer==TEXTWIRELAYER && !(inst_ptr[n].flags&2) ) || 
       (sym_txt && (layer==TEXTLAYER) && (inst_ptr[n].flags&2) ) ) {
@@ -891,7 +891,8 @@ void polygon_bbox(double *x, double *y, int points, double *bx1, double *by1, do
 
 // Convex Nonconvex Complex
 #define Polygontype Nonconvex
-void drawpolygon(int c, int what, double *x, double *y, int points)
+// 20180914 added fill param
+void drawpolygon(int c, int what, double *x, double *y, int points, int poly_fill)
 {
   double x1,y1,x2,y2;
   XPoint p[points];
@@ -915,9 +916,11 @@ void drawpolygon(int c, int what, double *x, double *y, int points)
   if(draw_pixmap)
     XDrawLines(display, save_pixmap, gc[c], p, points, CoordModeOrigin);
   if(!fill || !fill_type[c]) return;
-  XFillPolygon(display, window, gcstipple[c], p, points, Polygontype, CoordModeOrigin);
-  if(draw_pixmap)
-     XFillPolygon(display, save_pixmap, gcstipple[c], p, points, Polygontype, CoordModeOrigin);
+  if(poly_fill) { // 20180914
+    XFillPolygon(display, window, gcstipple[c], p, points, Polygontype, CoordModeOrigin);
+    if(draw_pixmap)
+       XFillPolygon(display, save_pixmap, gcstipple[c], p, points, Polygontype, CoordModeOrigin);
+  }
 }
 
 void drawtemppolygon(GC gc, int what, double *x, double *y, int points)
@@ -1175,7 +1178,6 @@ void draw(void)
           } else {
             for(i=0;i<lastwire;i++)
             {
-              // if(get_tok_value(wire[i].prop_ptr,"bus",0)[0]) {	// 26122004
               if(wire[i].bus) {
                 drawline(WIRELAYER, THICK, wire[i].x1,wire[i].y1,wire[i].x2,wire[i].y2);
               }
@@ -1212,7 +1214,8 @@ void draw(void)
             filledrect(c, ADD, rect[c][i].x1, rect[c][i].y1, rect[c][i].x2, rect[c][i].y2);
           }
           for(i=0;i<lastpolygon[c];i++) {
-            drawpolygon(c, NOW, polygon[c][i].x, polygon[c][i].y, polygon[c][i].points);
+            // 20180914 added fill
+            drawpolygon(c, NOW, polygon[c][i].x, polygon[c][i].y, polygon[c][i].points, polygon[c][i].fill);
           }
 
 

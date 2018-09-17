@@ -672,7 +672,7 @@ int callback(int event, int mx, int my, KeySym key,
     break;
    }
 
-   if(key=='S' && (state == ShiftMask) )	// save 20121201
+   if(key=='s' && (state == ControlMask) )	// save 20121201
    {
      if(semaphore==2) break;
      if(!strcmp(schematic[currentsch],"")) { // 20170622 check if unnamed schematic, use saveas in this case...
@@ -682,14 +682,14 @@ int callback(int event, int mx, int my, KeySym key,
      }
      break;
    }
-   if(key=='S' && state == (ShiftMask | ControlMask)) // save as symbol 20121201
+   if(key=='s' && state == (ControlMask | Mod1Mask) )		// save as symbol
    {
      if(semaphore==2) break;
      current_type=SYMBOL;
      saveas();
      break;
    }
-   if(key=='s' && state == 0)		// save as
+   if(key=='S' && state == (ShiftMask | ControlMask)) // save as schematic
    {
      if(semaphore==2) break;
      saveas();
@@ -718,6 +718,7 @@ int callback(int event, int mx, int my, KeySym key,
 
    if(key=='a' && state == 0) 	// make symbol
    {
+    if(semaphore==2) break; // 20180914
     tkeval("tk_messageBox -type okcancel -message {do you want to make symbol view ?}");
     if(strcmp(Tcl_GetStringResult(interp),"ok")==0) 
       if(current_type==SCHEMATIC)
@@ -848,13 +849,13 @@ int callback(int event, int mx, int my, KeySym key,
      }
      break;
    }
-   if(key=='L' && state == ShiftMask)   // load
+   if(key=='o' && state == ControlMask)   // load
    {
     if(semaphore==2) break;
     ask_new_file();
     break;
    }
-   if(key=='s' && state == ControlMask)   // change element order
+   if(key=='S' && state == ShiftMask)   // change element order
    {
     change_elem_order();
     break;
@@ -938,8 +939,8 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='u' && state==ControlMask)			// testmode
    {
-    XCopyArea(display, save_pixmap, window, gctiled, 0, 0, xrect[0].width, xrect[0].height, 0, 0);
-    fprintf(errfp, "testmode: painting window with save pixmap\n");
+    XDrawArc(display, window, gc[5], 100,100,200, 400, -64*90, 64*180);
+    // XCopyArea(display, save_pixmap, window, gctiled, 0, 0, xrect[0].width, xrect[0].height, 0, 0);
     break;
    }
    if(key=='u' && state==0)				// undo
@@ -1175,7 +1176,7 @@ int callback(int event, int mx, int my, KeySym key,
     zoom_full(1);
     break;
    }
-   if(key=='o' || (key=='z' && state==ControlMask))  	                // zoom out
+   if((key=='z' && state==ControlMask))  	                // zoom out
    {
      view_zoom(0.0); 
      break;
@@ -1190,22 +1191,22 @@ int callback(int event, int mx, int my, KeySym key,
   break;
   case ButtonPress:			// end operation
    if(debug_var>=1) fprintf(errfp, "callback(): ButtonPress  ui_state=%ld state=%d\n",ui_state,state);
-   if(button==Button4 && state == 0 ) view_zoom(CADZOOMSTEP);
-   else if(button==Button5 && state == 0 ) view_unzoom(CADZOOMSTEP);
+   if(button==Button5 && state == 0 ) view_zoom(CADZOOMSTEP);
+   else if(button==Button4 && state == 0 ) view_unzoom(CADZOOMSTEP);
    // 20111114
-   else if(button==Button5 && (state & ShiftMask) && !(state & Button2Mask)) {
+   else if(button==Button4 && (state & ShiftMask) && !(state & Button2Mask)) {
     xorigin+=-CADMOVESTEP*zoom/2.;
     draw();
    }
-   else if(button==Button4 && (state & ShiftMask) && !(state & Button2Mask)) {
+   else if(button==Button5 && (state & ShiftMask) && !(state & Button2Mask)) {
     xorigin-=-CADMOVESTEP*zoom/2.;
     draw();
    }
-   else if(button==Button5 && (state & ControlMask) && !(state & Button2Mask)) {
+   else if(button==Button4 && (state & ControlMask) && !(state & Button2Mask)) {
     yorigin+=-CADMOVESTEP*zoom/2.;
     draw();
    }
-   else if(button==Button4 && (state & ControlMask) && !(state & Button2Mask)) {
+   else if(button==Button5 && (state & ControlMask) && !(state & Button2Mask)) {
     yorigin-=-CADMOVESTEP*zoom/2.;
     draw();
    }
@@ -1376,7 +1377,7 @@ int callback(int event, int mx, int my, KeySym key,
        break;
      } else {
        // 20150927 filter out button4 and button5 events
-       if(!(state&(Button5Mask|Button4Mask) ) ) select_rect(END,-1);
+       if(!(state&(Button4Mask|Button5Mask) ) ) select_rect(END,-1);
      }
    }
    break;

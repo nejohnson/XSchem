@@ -1,5 +1,6 @@
 G {type=netlist_commands
 template="name=s1 only_toplevel=false value=blabla"
+tedax_ignore=true
 format="
 @value
 "} 

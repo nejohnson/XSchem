@@ -159,6 +159,8 @@ void store_polygon(int pos, double *x, double *y, int points, unsigned int rectc
   }
   polygon[rectcolor][n].points = points;
   polygon[rectcolor][n].sel = sel;
+  polygon[rectcolor][n].fill = 0; // 20180914
+
   lastpolygon[rectcolor]++;
   modified=1;
 }

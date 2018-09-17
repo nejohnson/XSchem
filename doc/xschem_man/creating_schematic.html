@@ -21,29 +21,29 @@ p{padding: 15px  30px 10px;}
  <!-- slide title -->
  <h1>CREATING A CIRCUIT SCHEMATIC</h1><br>
  <p>
-  To create a new circuit start from an empty window, run xschem and select <tt>New Schematic</tt>
-  in the <tt>File</tt> menu.
+  To create a new circuit start from an empty window, run xschem and select <kbd>New Schematic</kbd>
+  in the <kbd>File</kbd> menu.
   Suppose we want co create a NAND gate, with two inputs, A and B and one output, Z.
-  Lets start placing the input and output schematic pins; use the <tt>Insert</tt> key and locate the
-  <tt>devices/ipin.sym</tt> symbol. After placing it change its lab attribute to <tt>'A'</tt>
+  Lets start placing the input and output schematic pins; use the <kbd>Insert</kbd> key and locate the
+  <kbd>devices/ipin.sym</kbd> symbol. After placing it change its lab attribute to <kbd>'A'</kbd>
  </p>
  <img src="creating_schematic1.png"> 
  <p>
-  Copy another instance of it and set its lab attribute to <tt>B</tt>. Next place an output pin 
-  <tt>devices/opin.sym</tt> and set its lab to <tt>Z</tt>. The result will be as follows:
+  Copy another instance of it and set its lab attribute to <kbd>B</kbd>. Next place an output pin 
+  <kbd>devices/opin.sym</kbd> and set its lab to <kbd>Z</kbd>. The result will be as follows:
  </p>
  <img src="creating_schematic2.png"> 
  <p>
   Now we need to build the actual circuit. Since we plan to do it in CMOS technology we need 
-  nmos and pmos transistors. Place one nmos from <tt>devices/nmos4.sym</tt> and one
-  pmos from <tt>devices/pmos4.sym</tt> By selecting them with the mouse, moving (<tt>m</tt> bindkey),
-  copying (<tt>'c'</tt> bindkey) place 4 transistors in the following way (the upper ones are pmos4, 
+  nmos and pmos transistors. Place one nmos from <kbd>devices/nmos4.sym</kbd> and one
+  pmos from <kbd>devices/pmos4.sym</kbd> By selecting them with the mouse, moving (<kbd>m</kbd> bindkey),
+  copying (<kbd>'c'</kbd> bindkey) place 4 transistors in the following way (the upper ones are pmos4, 
   the lower ones nmos4):
  </p>
  <img src="creating_schematic3.png"> 
  <p>
   now draw wires to connect together the transistor to form a NAND gate; in the picture i have highlighted
-  2 electrical nodes by selecting one wire segment of each and pressing the <tt>'k'</tt> bindkey.
+  2 electrical nodes by selecting one wire segment of each and pressing the <kbd>'k'</kbd> bindkey.
  </p>
  <img src="creating_schematic4.png"> 
  <p>
@@ -51,8 +51,8 @@ p{padding: 15px  30px 10px;}
   SPICE semantics are like global variables in C programs, they are available everywhere, we do not
   need to propagate global nodes with pins. We could equally well use regular pins , as used for the
   A and B inputs, I am just showing different design styles.
-  Use the <tt>Insert</tt> key and place both <tt>devices/vdd.sym</tt> and <tt>devices/gnd.sym</tt>
-  Since the default names are respectively VDD and GND use the edit property bindkey <tt>'q'</tt>
+  Use the <kbd>Insert</kbd> key and place both <kbd>devices/vdd.sym</kbd> and <kbd>devices/gnd.sym</kbd>
+  Since the default names are respectively VDD and GND use the edit property bindkey <kbd>'q'</kbd>
   to change these to VCC and VSS.
  </p>
  <img src="creating_schematic5.png"> 
@@ -60,21 +60,21 @@ p{padding: 15px  30px 10px;}
   we still need to connect the body terminals of the mos transistors. One possibility is to 
   hookup the two upper pmos transistor terminals to VCC with wires, and the two bottom nmos 
   terminals to VSS with wires, but just to show different design styles i am planning to use
-  ''by name'' connection with labels. So place a wire label <tt>devices/lab_pin.sym</tt> and 
+  ''by name'' connection with labels. So place a wire label <kbd>devices/lab_pin.sym</kbd> and 
   use 4 instances of it to name the 4 body terminals. Remember, while moving (select and press
-  the <tt>'m'</tt> key) you can flip/rotate using the <tt>R</tt>/<tt>F</tt> keys.
+  the <kbd>'m'</kbd> key) you can flip/rotate using the <kbd>R</kbd>/<kbd>F</kbd> keys.
  </p>
  <img src="creating_schematic6.png"> 
  <p>
   Finally we must connect the input and output port connectors, and to complete the gate schematic
   we decide to use W=8u for the pmos transistors. Select both the pmos devices and press the 
-  edit proprty <tt>'q'</tt> key; modify from 5u (default) to 8u.
+  edit proprty <kbd>'q'</kbd> key; modify from 5u (default) to 8u.
  </p>
  <img src="creating_schematic7.png"> 
  <p>
-  Now do a Save as operation, save it for example in <tt>mylib/nand2.sch</tt>.<br>
+  Now do a Save as operation, save it for example in <kbd>mylib/nand2.sch</kbd>.<br>
   To make the schematic nicer we also add the title component. This component is not netlisted but is
-  useful, it reports the modification date and the author. Place the <tt>devices/title.sym</tt>
+  useful, it reports the modification date and the author. Place the <kbd>devices/title.sym</kbd>
   component. The NAND gate is completed! (below picture also with grid, normally disabled in pictures
   to make image sizes smaller).
  </p>
@@ -86,37 +86,37 @@ p{padding: 15px  30px 10px;}
  <h3>Automatic symbol creation</h3>
  <p>
   XSCHEM has the ability to automatically generate a symbol view given the schematic view. Just press
-  the <tt>'a'</tt> bindkey in the drawing area of the nand2 gate.
+  the <kbd>'a'</kbd> bindkey in the drawing area of the nand2 gate.
  </p>
  <img src="creating_schematic9.png"> 
  <p>
-  After pressing 'OK' a <tt>mylib/nand2.sym</tt> file is generated. try opening it 
-  (<tt>File-&gt;Open</tt>):
+  After pressing 'OK' a <kbd>mylib/nand2.sym</kbd> file is generated. try opening it 
+  (<kbd>File-&gt;Open</kbd>):
  </p>
  <img src="creating_schematic10.png"> 
  <p>
   As you can see a symbolic view of the gate has been automatically created using the information
   in the schematic view (specifically, the input/output pins). Now, this graphic is not really 
   looking like a nand gate, so we may wish to edit it to make it look better. Delete (by selecting 
-  and pressing the <tt>Delete</tt> key) all the green lines, keep the red pins, the pin labels and the 
+  and pressing the <kbd>Delete</kbd> key) all the green lines, keep the red pins, the pin labels and the 
   @symname and @name texts, then draw a nand shape like in the following picture. 
   To allow you to draw small 
-  segments you may need to reduce the snap factor (menu <tt>View-&gt;Half snap thresholf</tt>)
+  segments you may need to reduce the snap factor (menu <kbd>View-&gt;Half snap thresholf</kbd>)
   remember to reset the snap factor to its default setting when done.
  </p>
  <img src="creating_schematic11.png"> 
  <p>
   This completes the nand2 component. It is now ready to be placed in a schematic. Open a test schematic 
-  (for example <tt>mylib/test.sch</tt> (remember to save the nand2.sym you have just created),
-  press the <tt>Insert</tt> key and locate the <tt>mylib/nand2.sym</tt> symbol.
-  Then insert <tt>devices/lab_pin.sym</tt> components and place wires to connect some nodes to the 
+  (for example <kbd>mylib/test.sch</kbd> (remember to save the nand2.sym you have just created),
+  press the <kbd>Insert</kbd> key and locate the <kbd>mylib/nand2.sym</kbd> symbol.
+  Then insert <kbd>devices/lab_pin.sym</kbd> components and place wires to connect some nodes to the 
   newly instantiated nand2 component: 
  </p>
  <img src="creating_schematic12.png"> 
  <p> 
   This is now a valid circuit. Let's test it by extracting the SPICE netlist. Enable the showing
-  of netlist window (<tt>Options -&gt; Show netlist win</tt>, or <tt>'A'</tt> key).
-  Now extract the netlist (<tt>Netlist</tt> button on the right side of the menu bar, or <tt>'N'</tt>
+  of netlist window (<kbd>Options -&gt; Show netlist win</kbd>, or <kbd>'A'</kbd> key).
+  Now extract the netlist (<kbd>Netlist</kbd> button on the right side of the menu bar, or <kbd>'N'</kbd>
   key). the SPICE netlist will be shown.
  </p>
  <pre class="code">
@@ -149,9 +149,9 @@ m4 net1 B VSS VSS nmos w=5u l=0.18u m=1
  </p>
  <img src="creating_schematic13.png"> 
  <p>
-  By selecting one of the nand2 gates and pressing the <tt>'e'</tt> key or menu 
-  <tt>Edit -&gt; Push schematic</tt> we can 'descend' into it and navigate through the various 
-  hierarchies. Pressing <tt>&lt;ctrl&gt;e</tt> returns back to the upper level.
+  By selecting one of the nand2 gates and pressing the <kbd>'e'</kbd> key or menu 
+  <kbd>Edit -&gt; Push schematic</kbd> we can 'descend' into it and navigate through the various 
+  hierarchies. Pressing <kbd>&lt;ctrl&gt;e</kbd> returns back to the upper level.
  </p>
  <img src="creating_schematic14.png"> 
  <p> 
@@ -191,16 +191,16 @@ m4 net1 B VSS VSS nmos w=5u l=0.18u m=1
  <p>
   When a new symbol is placed there is a function to connect its pins to auto-named nets:
   select the symbol, then
-  Press the <tt>'H'</tt> key or the <tt>Symbol-&gt;Attach pins to component instance</tt> menu entry.
+  Press the <kbd>'H'</kbd> key or the <kbd>Symbol-&gt;Attach pins to component instance</kbd> menu entry.
  </p>
  <img src="auto_wiring1.png"> 
   <p>
-  The <tt>use prefix</tt> will prepend the shown prefix to the wire names to be attached to the component.
+  The <kbd>use prefix</kbd> will prepend the shown prefix to the wire names to be attached to the component.
   The default value for the prefix is the instance name followed by an underscore.<br>
-  The <tt>use wire labels</tt> will use wire labels instead of pin labels. Wire labels have the text name field
+  The <kbd>use wire labels</kbd> will use wire labels instead of pin labels. Wire labels have the text name field
   offset vertically to allow a wire to pass through without crossing the wire name. in the picture below,
-  the first component is wired with <tt>use prefix</tt> selected and <tt>use wire labels</tt> not selected,
-  the second example with <tt>use prefix</tt> not selected and <tt>use wire labels</tt> selected. As you
+  the first component is wired with <kbd>use prefix</kbd> selected and <kbd>use wire labels</kbd> not selected,
+  the second example with <kbd>use prefix</kbd> not selected and <kbd>use wire labels</kbd> selected. As you
   can see in the second example you may draw wires without overstriking the labels.
  </p>
  <img src="auto_wiring2.png"> 

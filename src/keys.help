@@ -57,6 +57,7 @@ ctrl        'b'         Toggle show text in symbol
 -           'c'         Copy selected obj. 
 ctrl        'c'         Save to clipboard
 shift       'C'         Toggle Light / Dark colorscheme
+alt         'C'         Toggle dim/brite background with rest of layers
 ctrl        'd'         Exit
 ctrl        'e'         Back to parent schematic
 -           'e'         Descend to schematic
@@ -87,11 +88,11 @@ shift       'K'         Unhilight all nets
 ctrl        'k'         Unhilight selected nets
 -           'l'         Start line
 ctrl        'l'         Make schematic view from selected symbol
-shift       'L'         Load schematic
+ctrl        'o'         Load schematic
 -           'm'         Move selected obj.
 shift       'N'         Hierarchical netlist
 -           'n'         Netlist
--           'o'         Zoom out
+ctrl        'o'         Load schematic
 -           'p'         Pan
 shift       'P'         Pan, other way to.
 alt         'q'         Edit schematic file (dangerous!)
@@ -101,11 +102,11 @@ ctrl        'q'         View prop
 alt         'r'         Rotate objects around their anchor points
 shift       'R'         Rotate
 -           'r'         Start rect
-ctrl        's'         Change element order
-ctr+shift   'S'         Save  as symbol
-shift       'S'         Save schematic
+shift       'S'         Change element order
+ctrl+shift  'S'         Save  as schematic
+ctrl        's'         Save schematic
 alt         's'         Reload current schematic from disk
--           's'         Save-as schematic
+ctrl+alt    's'         Save-as symbol
 -           't'         Place text
 alt         'u'         Align to current grid selected objects
 shift       'U'         Redo

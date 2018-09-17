@@ -35,6 +35,41 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.4.9:
+- ability to swap mouse buttons using tcl key_binding proc
+  NOTE: it is not possible to replace Button1 since it is sent in Motion events as well.
+- clear_drawing() did not delete spatial hash tables leading to segfaults when doing File-> New schematic
+- swapped Button4/5 (wheel zoom)
+- changed some key bindings to more standard values:
+  - ctrl-shift-s --> Save As
+  - ctrl-s --> Save
+  - ctrl-o --> Open
+  - ctrl-alt-s --> save as symbol
+  - shift-s --> change element ordering
+- fill=true property for polygons to indicate fill is wanted
+  default polygons are not filled.
+- tcl key_binding procedure allows to change/swap mouse buttons
+- save.c: removed code duplication by creating a 'read_xschem_file() function that read files.
+- removed some dead /commented old code
+- get_tok_value(inst_ptr....prop_ptr, "name"...) replaced with inst_ptr[..].instname (20180911)
+- fix crashing bug in hilight.c when instances with empty property string are traversed during a search
+  20180906
+- new '@#n format allowed for referencing a net attached to a pin in symbol format strings.
+  This pattern can be used in 'format, 'vhdl_format', 'verilog_format', 'tedax_format'
+  global attributes of symbols.
+  This pattern is faster than the traditional '@@pin_name' syntax since xschem does not need to
+  search all pins in symbol for a name matching 'pin_name'
+  Example: verilog_format="assign @#2 = @#0 ;"
+    in this case @#2 expands to the net name attached to pin stored at position 2 (starting from 0) in xschem,
+    (that is the third symbol pin), @#0 expands to net name attached to first pin of the symbol
+- do not print escaping backslashes in print_verilog_primitive, print_verilog_primitive, (20180911)
+- new '#@n:pin_attr' format allowed in text objects placed in symbols, this will expand
+  to the value of attribute 'pin_attr' stored in the property string of the 'n-th' pin of symbol.
+  Example: @#0:pinnumber
+  if pinnumber of pin 0 is defined as 'pinnumber=1:4:9:12' and symbol instance name is 'U1:4'
+  xschem will resolve slot information (4) and replace the '@#0:pinnumber' with '12'.
+  this is used to correctly draw correct pin numbers for slotted devices.
+
 2.4.8:
 - added (experimental for now) tEDAx netlist export, this is a netlist format that
   the pcb-rnd printed board editor understands.

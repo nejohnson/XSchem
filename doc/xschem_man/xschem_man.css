@@ -1,30 +1,30 @@
 /* stefan 20121120 */
 
 *{
- max-height: 999999px;  /* get rid of mobile browser font boosting */
+ /* get rid of mobile font bosting, hopefully */
+ max-height: 1000000em;
+ -moz-text-size-adjust: none; /* Firefox Mobile */
+ text-size-adjust: none;
+
+
  margin-top:0;
  margin-bottom:0;
  border: none;
- /*
- padding-top: 0;
- padding-bottom: 0;
- */
 }
 
 html, body{ 
   min-height: 100%;
   height: 100%;
   margin:0 auto 0;
-  font-size: 1.0em;
 }
 
 .indexdiv{
   background-color: #cccccc;
 }
 
-tt{
-  white-space: nowrap;
+kbd{
   color: #993333;
+  text-align: left;
 }
 
 li{
@@ -92,7 +92,6 @@ p{
   background-color: #888888; 
   box-shadow: 10px 10px 10px #48b;
   text-align: center;
-  font-size: 120%;
   position: fixed ; 
   left: 0px;
 }
@@ -101,7 +100,6 @@ p{
   background-color: #888888; 
   box-shadow: 10px 10px 10px #48b;
   text-align: center;
-  font-size: 120%;
   position: fixed ; 
   left:14%
 }
@@ -110,7 +108,6 @@ p{
   background-color: #888888; 
   box-shadow: 10px 10px 10px #48b;
   text-align: center;
-  font-size: 120%;
   position: fixed ; 
   left:28%
 }
@@ -129,14 +126,12 @@ span{
   white-space: nowrap;
 }
 
-ol{
-  font-size:180%;
+ol,ul{
   margin-left: 20px;
   margin-right: 20px;
 }  
 h1{
   margin-top: 40px;
-  font-size:220%;
   text-align:center;
   text-shadow: 10px 10px 9px #48b;
 }
@@ -171,7 +166,6 @@ h3{
 .code{
   box-shadow: 10px 10px 9px #48b;
   background: white;
-  font-size:100%;
   overflow: auto;
   width: 90%;
   margin: auto;
@@ -180,51 +174,51 @@ h3{
 
 /* mobile rendering  */
 @media all and (-webkit-min-device-pixel-ratio: 2) and (min-resolution: 192dpi)  and (orientation : portrait){ 
-  html, body{
-    font-size: 1.5em;
+  * {
+    font-size:40px;
   }
-  h1{
-    margin-top: 60px;
+  .prev {
+    width: 10%;
+    font-size: 90%;
+    position: fixed ;
+    left: 0px;
   }
-  img{
-    margin-left: 2%;
-    width: 96%;
+  .home {
+    width: 10%;
+    font-size: 90%;
+    position: fixed ;
+    left:12%
   }
-  ol{
-    margin-left:45px;
+  .next {
+    width: 10%;
+    font-size: 90%;
+    position: fixed ;
+    left:24%
   }
 }
 @media all and (-webkit-min-device-pixel-ratio: 2) and (min-resolution: 192dpi)  and (orientation : landscape){ 
-  html, body{
-    font-size: 1.3em;
+  * {
+    font-size:30px;
   }
-  h1{
-    margin-top: 44px;
-  }
-  img{
-    margin-left: 3%;
-    width: 94%;
-  }
-  ol{
-    margin-left:30px;
+
+  li{
   }
   .prev {
     width: 8%;
-    font-size: 100%;
+    font-size: 80%;
     position: fixed ;
     left: 0px;
   }
   .home {
     width: 8%;
-    font-size: 100%;
+    font-size: 80%;
     position: fixed ;
     left:10%
   }
   .next {
     width: 8%;
-    font-size: 100%;
+    font-size: 80%;
     position: fixed ;
     left:20%
   }
 }
-

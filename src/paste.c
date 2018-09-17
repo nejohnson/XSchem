@@ -244,7 +244,7 @@ void merge_file(int selection_load, char ext[])
     int k=0, old;
     int endfile=0;
     static char *name=NULL; // 20161122 overflow safe
-    char name1[1024]; // overflow safe
+    char name1[4096]; // overflow safe
     char tmp[80]; // 20161122 overflow safe
     static char *aux_ptr=NULL;
 
@@ -282,10 +282,16 @@ void merge_file(int selection_load, char ext[])
      old=lastinst;
      while(!endfile)
      {
-      if(fscanf(fd,"%1023s",name1)==EOF) break;
+      if(fscanf(fd,"%4095s",name1)==EOF) break;
       switch(name1[0])
       {
        case 'V':
+        load_ascii_string(&aux_ptr, fd);
+        break;
+       case 'E': // 20180912
+        load_ascii_string(&aux_ptr, fd);
+        break;
+       case 'S':
         load_ascii_string(&aux_ptr, fd);
         break;
        case 'G':

@@ -37,21 +37,23 @@ p{line-height:1.4;padding: 20px  20px 0;text-align: justify;}
   has been created a circuit netlist can be generated for simulation. Currently XSCHEM supports three 
   netlist formats:
  </p>
- <ul>
+ <ol>
    <li> SPICE netlist
    <li> VHDL netlist
    <li> VERILOG netlist
- </ul><p>
+   <li> tEDAx netlist for Printed board editing software like <a href="http://repo.hu/projects/pcb-rnd">pcb-rnd</a>.
+ </ol><p>
   XSCHEM is NOT a tool for creating printed circuit boards (PCB) and it is not targeted (although useable for that task) 
-  to board level electronic system design.
+  to board level electronic system design. The recently added tEDAx netlist format is indeed used to export XCHEM schematics
+  to pcb-rnd or other tEDAx-aware PCB editors.
   XSCHEM is primarily designed for Integrated Circuit (IC) design and to generate netlists for Very Large Scale digital, 
   analog or mixed mode simulations. While the user interface looks very simple, the netlisting and rendering
   engine in XSCHEM are designed from the ground-up to handle in the most efficient way very large designs.
   Also the user interaction has no bells and whistles but is the result of doing actual work on big projects
   in the most efficient way. This is why for example most of the work is done with bind keys, instead of
-  using context menus or elaborate graphical actions, simply these thinks will slow your work if most of
+  using context menus or elaborate graphical actions, simply these things will slow your work if most of
   your schematics have 5-8 levels of hierarchy and 1000K+ transistors.<br>
-  Here under a picture of a VLSI SOC (System On Chip) imported in XSCHEM. As you can see the ability of XSCHEM os to handle 
+  Here under a picture of a VLSI SOC (System On Chip) imported in XSCHEM. As you can see the ability of XSCHEM is to handle 
   really big designs. This has been the primary goal during the whole development of the program.
   the sample design showed has more than 10 levels of hierarchy and really big schematics. For each hierarchy level one
   component is expanded until the leaf of the tree is reached. :-)

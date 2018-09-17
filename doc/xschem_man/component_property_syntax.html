@@ -21,13 +21,13 @@ p{padding: 15px  30px 10px;}
  <!-- slide title -->
  <h1>COMPONENT PROPERTY SYNTAX</h1><br>
  <p>
-  Component property strings can be set in the usual way with the <tt>'q'</tt> on a selected
-  component instance or by menu <tt>Properties&nbsp;--&gt;&nbsp;Edit</tt>
+  Component property strings can be set in the usual way with the <kbd>'q'</kbd> on a selected
+  component instance or by menu <kbd>Properties&nbsp;--&gt;&nbsp;Edit</kbd>
  </p> 
  <img src="component_properties.png">
  <p>
   The dialog box allows to change the property string as well as the symbol reference. The property string
-  is essentially a list of <tt>attribute=value</tt> items. As with symbol properties if a <tt>value</tt>
+  is essentially a list of <kbd>attribute=value</kbd> items. As with symbol properties if a <kbd>value</kbd>
   has white space it should be double-quoted.
   The following property definitions are identical:
  </p>
@@ -38,7 +38,7 @@ name=mchanged_name model=nmos w=20u l=3u m=10
 name="mchanged_name" model="nmos" w="20u" l="3u" m="10"
  </pre><br>
  <p> 
-  Given the role of the <tt>"</tt> character, if quoted values are needed escapes must be used, like in 
+  Given the role of the <kbd>"</kbd> character, if quoted values are needed escapes must be used, like in 
   the following example where the model name will be with quotes in netlist:
  </p>
  <pre class=code>
@@ -50,97 +50,97 @@ name="mchanged_name" model=\"nmos\" w="20u" l="3u" m="10"
  </pre>
  <p>
   the resulting SPICE netlist will be:<br>
-  <tt>mchanged_name DRAIN GATE SOURCE BODY "nmos" w=20u l=3u m=10</tt>
+  <kbd>mchanged_name DRAIN GATE SOURCE BODY "nmos" w=20u l=3u m=10</kbd>
  </p>
  <p> 
-  There is no limit on the number of <tt>attribute=value</tt> items, each attribute should have a corresponding 
-  <tt>@attribute</tt> in the symbol definition format, but this is not a requirement. There are a number
+  There is no limit on the number of <kbd>attribute=value</kbd> items, each attribute should have a corresponding 
+  <kbd>@attribute</kbd> in the symbol definition format, but this is not a requirement. There are a number
   of special attributes as we will see later.
  </p>
  <p class="important"> 
-  Important: a <tt>name=&lt;inst_name&gt;</tt> item is mandatory and must be placed before any other attributes 
-  in component property string. The <tt>name</tt> attribute is used by XSCHEM -among other things- for
-  fast indexing the component. If <tt>&lt;inst_name&gt;</tt> is already used in another component XSCHEM will
+  Important: a <kbd>name=&lt;inst_name&gt;</kbd> item is mandatory and must be placed before any other attributes 
+  in component property string. The <kbd>name</kbd> attribute is used by XSCHEM -among other things- for
+  fast indexing the component. If <kbd>&lt;inst_name&gt;</kbd> is already used in another component XSCHEM will
   auto-rename it to a unique name preserving the first letter (which ts a device type indicator
   for SPICE like netlists).
  </p>
  <h3>PREDEFINED COMPONENT ATTRIBUTES</h3>
  <ul>
-  <li><tt>name</tt></li>
-  <p> This defines the name of the instance. Must be the first <tt>attribute=value</tt> in the 
+  <li><kbd>name</kbd></li>
+  <p> This defines the name of the instance. Must be the first <kbd>attribute=value</kbd> in the 
     component property string. Names are unique, so if for example multiple MOS components are
-    placed in the design one should be named <tt>m1</tt> and the second <tt>m2</tt> or anything 
+    placed in the design one should be named <kbd>m1</kbd> and the second <kbd>m2</kbd> or anything 
     else, provided the names are different. XSCHEM enforces this, if a name is given that already
     exist in the current schematic it will be renamed. Normally the template string defines a default
     name for a given component, and expecially for SPICE compatibility, the first character must NOT 
-    be changed. For example, the default name for a MOS transistor is <tt>m1</tt>, it can be renamed
-    for example to <tt>mcurr_source</tt> but not for example to <tt>dcurr_source</tt>. XSCHEM 
+    be changed. For example, the default name for a MOS transistor is <kbd>m1</kbd>, it can be renamed
+    for example to <kbd>mcurr_source</kbd> but not for example to <kbd>dcurr_source</kbd>. XSCHEM 
     does not enforce that the first character is preserved, it's up to the designer to keep it 
     consistent with the component type.</p>
-  <li><tt>url</tt></li>
+  <li><kbd>url</kbd></li>
   <p> This attribute defines a location (web page, file) that can be viewed when hitting the
-    <tt>&lt;shift&gt;H</tt> key (or <tt>&lt;Alt&gt; left mouse buttoni</tt>) on a selected component. 
+    <kbd>&lt;shift&gt;H</kbd> key (or <kbd>&lt;Alt&gt; left mouse buttoni</kbd>) on a selected component. 
     This is very useful to link a datasheet to a
-    component, for example. The default program used to open the url is <tt>xdg-open</tt>. 
-    this can be changed in the <tt>~/.xschem</tt> configuration file with the <tt>launcher_default_program</tt>
+    component, for example. The default program used to open the url is <kbd>xdg-open</kbd>. 
+    this can be changed in the <kbd>~/.xschem</kbd> configuration file with the <kbd>launcher_default_program</kbd>
     variable.
-    <tt>url</tt> can be an http link or a local file that has a default association known to xdg-open.</p>
-  <li><tt>program</tt></li>
-  <p> this attribute can be used to specify an application to be used to open the <tt>url</tt> link,
+    <kbd>url</kbd> can be an http link or a local file that has a default association known to xdg-open.</p>
+  <li><kbd>program</kbd></li>
+  <p> this attribute can be used to specify an application to be used to open the <kbd>url</kbd> link,
       if the default application has to be changed or the file type is unknown.
-      for example <tt>program=evince</tt> may be given to specify an application for a pdf file
-      specified with <tt>url</tt></p>
-  <li><tt>tclcommand</tt></li>
+      for example <kbd>program=evince</kbd> may be given to specify an application for a pdf file
+      specified with <kbd>url</kbd></p>
+  <li><kbd>tclcommand</kbd></li>
   <p> this can be any tcl statement (or group of statements separated by semicolons) including all xschem-specific
-      commands, the statement will be executed when pressing the <tt>&lt;shift&gt;H</tt> key 
-      (or <tt>&lt;Alt&gt; left mouse button</tt>) on the selected instance.
-      <br>The <tt>tclcommand</tt> and <tt>url</tt> properties are mutually exclusive.</p>
+      commands, the statement will be executed when pressing the <kbd>&lt;shift&gt;H</kbd> key 
+      (or <kbd>&lt;Alt&gt; left mouse button</kbd>) on the selected instance.
+      <br>The <kbd>tclcommand</kbd> and <kbd>url</kbd> properties are mutually exclusive.</p>
   <img src="component_properties3.png">
-  <li><tt>only_toplevel</tt></li>
-  <p>this attribute is valid only on <tt>netlist_commands</tt> type symbols and specifies that the 
+  <li><kbd>only_toplevel</kbd></li>
+  <p>this attribute is valid only on <kbd>netlist_commands</kbd> type symbols and specifies that the 
     symbol should be netlisted only if it is instantiated in the top-most hierarchy. This is very usefull
-    for spice commands. Spice commands are placed in a special <tt>netlist</tt> component as we will see
+    for spice commands. Spice commands are placed in a special <kbd>netlist</kbd> component as we will see
     and are meaningfull only when simulating the block, but should be skipped if the component
     is simulated as part of a bigger system which has its own (at higher hierarchy level)
-    <tt>netlist</tt>component for Spice commands.</p>
+    <kbd>netlist</kbd>component for Spice commands.</p>
   <img src="component_properties0.png">
-  <li><tt>place</tt></li>
+  <li><kbd>place</kbd></li>
   <p> This 
-    <tt>place=end</tt> attribute is only valid only for <tt>netlist_commands</tt> type symbols, and tells
+    <kbd>place=end</kbd> attribute is only valid only for <kbd>netlist_commands</kbd> type symbols, and tells
     XSCHEM that this component must be netlisted last. This is necessary for some spice commands 
     that need to be placed <b>after</b> the rest of the netlist.</p>
-  <li><tt>spice_ignore</tt></li>
+  <li><kbd>spice_ignore</kbd></li>
   <p> This tells XSCHEM that for SPICE netlist this component will be <b>completely</b> ignored.</p>
-  <li><tt>verilog_ignore</tt></li>
+  <li><kbd>verilog_ignore</kbd></li>
   <p> This tells XSCHEM that for Verilog netlist this component will be <b>completely</b> ignored.</p>
-  <li><tt>vhdl_ignore</tt></li>
+  <li><kbd>vhdl_ignore</kbd></li>
   <p> This tells XSCHEM that for VHDL netlist this component will be <b>completely</b> ignored.</p>
-  <li><tt>sig_type</tt></li>
+  <li><kbd>sig_type</kbd></li>
   <p> For VHDL type netlist, this tells that the current label names a signal (or constant) of
-    type <tt>sig_type</tt>. For example a label can be placed with name <tt>TEST</tt> and 
-    <tt>sig_type=BIT</tt>. The default type for VHDL if this property is missing  is <tt>std_logic</tt>.
-    The following picture shows the usage of <tt>sig_type</tt> and the resulting VHDL netlist.
-    This property is applicable only to <tt>label</tt> type components: <tt>ipin.sym</tt>, 
-    <tt>iopin.sym</tt>, <tt>opin.sym</tt>, <tt>lab_pin.sym</tt>, <tt>lab_wire.sym</tt>.
+    type <kbd>sig_type</kbd>. For example a label can be placed with name <kbd>TEST</kbd> and 
+    <kbd>sig_type=BIT</kbd>. The default type for VHDL if this property is missing  is <kbd>std_logic</kbd>.
+    The following picture shows the usage of <kbd>sig_type</kbd> and the resulting VHDL netlist.
+    This property is applicable only to <kbd>label</kbd> type components: <kbd>ipin.sym</kbd>, 
+    <kbd>iopin.sym</kbd>, <kbd>opin.sym</kbd>, <kbd>lab_pin.sym</kbd>, <kbd>lab_wire.sym</kbd>.
   </p>
   <img src="component_properties1.png">
-  <li><tt>verilog_type</tt></li>
-  <p>This is the same as sig_type but for verilog netlisting: can be used to declare a <tt>wire</tt>
-     or a <tt>reg</tt> or any other datatype supported by the verilog language.
+  <li><kbd>verilog_type</kbd></li>
+  <p>This is the same as sig_type but for verilog netlisting: can be used to declare a <kbd>wire</kbd>
+     or a <kbd>reg</kbd> or any other datatype supported by the verilog language.
   </p>
-  <li><tt>generic_type</tt></li>
-  <p><tt>generic_type</tt> defines the type of parameters passed to VHDL components.
-    Consider the following examples of placement of <tt>generic_pin</tt> components in a 
+  <li><kbd>generic_type</kbd></li>
+  <p><kbd>generic_type</kbd> defines the type of parameters passed to VHDL components.
+    Consider the following examples of placement of <kbd>generic_pin</kbd> components in a 
     VHDL design: 
   </p>
   <img src="component_properties2.png">
   <p> As you will see in the <a href="parameters.html">parameters</a> slide, generics (they are just
     parameters passed to components) can be passed also via property strings in addition to using 
-    <tt>generic_pin</tt> components.</p>
+    <kbd>generic_pin</kbd> components.</p>
    
-  <li><tt>class</tt></li>
-  <p>The <tt>class</tt> attribute is used to declare the class of a VHDL signal, most used classes are
-    <tt>signal</tt> and <tt>constant</tt>. Default if missing is <tt>signal</tt>.</p>
+  <li><kbd>class</kbd></li>
+  <p>The <kbd>class</kbd> attribute is used to declare the class of a VHDL signal, most used classes are
+    <kbd>signal</kbd> and <kbd>constant</kbd>. Default if missing is <kbd>signal</kbd>.</p>
  </ul><br>
  <!-- end of slide -->
  <div class="filler"></div>

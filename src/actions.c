@@ -309,7 +309,7 @@ void ask_new_file(void)
     if(!has_x) return;
 
     if(modified) { // 20161209
-      if(save(1)) return;
+      if(save(1)) return; // user cancels save, so do nothing.
     }
 
     tkeval("loadfile .sch");
@@ -428,6 +428,8 @@ void remove_symbols(void)
 void clear_drawing(void)
 {
  int i,j;
+ del_object_table(); // 20180917
+ del_wire_table();   // 20180917
  if(schtedaxprop!=NULL) {my_free(schtedaxprop);schtedaxprop=NULL;}
  if(schprop!=NULL) {my_free(schprop);schprop=NULL;}
  if(schvhdlprop!=NULL) {my_free(schvhdlprop);schvhdlprop=NULL;}
@@ -1395,7 +1397,7 @@ void new_polygon(int what) // 20171115
        store_polygon(-1, x, y, points, rectcolor, 0, NULL);
        //fprintf(errfp, "new_poly: finish: points=%d\n", points);
        ui_state &= ~STARTPOLYGON;
-       drawpolygon(rectcolor, NOW, x, y, points);
+       drawpolygon(rectcolor, NOW, x, y, points, 0); // 20180914 added fill param
      }
    }
    if(what & RUBBER)

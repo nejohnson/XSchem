@@ -26,7 +26,7 @@ p{padding: 15px  30px 10px;}
   <p>
    Wires in XSCHEM are the equivalent of copper traces in printed circuit boards or electrical conductors.
    wires are drawn as lines but the electrical connectivity graph is built by XSCHEM.
-   To draw a wire segment point the mouse somewhere in the drawing window and press the <tt>'w'</tt> key. 
+   To draw a wire segment point the mouse somewhere in the drawing window and press the <kbd>'w'</kbd> key. 
    A rubber wire is shown with one end following the mouse. Clicking the left mouse button
    finishes the placement. The following picture shows a set of connected wires. There are many 
    wire segments but only 3 electrical nodes. XSCHEM recognizes connection of wires and uses this 
@@ -41,7 +41,7 @@ p{padding: 15px  30px 10px;}
    Lines are just segments that are used for drawing. Lines do not have any electrical meaning, in fact
    when building the circuit netlist lines are completely ignored. XSCHEM uses different layers to draw 
    lines. Each layer has its own color, allowing to draw with different colors. Lines are placed like
-   wires, but using the <tt>'l'</tt> key. The 'Layers' menu allows to select various different layers (colors) 
+   wires, but using the <kbd>'l'</kbd> key. The 'Layers' menu allows to select various different layers (colors) 
    for the line.
   </p>
   <img src="xschem_lines.png">
@@ -50,27 +50,27 @@ p{padding: 15px  30px 10px;}
    Rectangles like Lines are drawable on multiple layers, and also do not carry any electrical information.
    A specific 'PIN' layer is used to make pins that are used to interconnect wires and components.
    Different fill styles (or no fill) can be defined for each layer. Rectangles are placed with the 
-   <tt>'r'</tt> bindkey
+   <kbd>'r'</kbd> bindkey
   </p>
   <img src="xschem_rectangles.png">
   <h3> POLYGONS </h3>
   <p>
-   Polygons are closed paths that can be drawn on any layer. Placements begins with the <tt>'ctrl-w'</tt> key
+   Polygons are closed paths that can be drawn on any layer. Placements begins with the <kbd>'ctrl-w'</kbd> key
    and continues as long as the user clicks points on the drawing area. Placement ends when the last point
-   is coincident with the first point or by hitting the <tt>'Return</tt> key, in this case the polygon is 
+   is coincident with the first point or by hitting the <kbd>'Return</kbd> key, in this case the polygon is 
    closed automatically.
   </p>
   <img src="xschem_polygons.png">
   <h3> TEXT </h3>
   <p>
-   Text can be placed with the <tt>'t'</tt> bindkey. 
+   Text can be placed with the <kbd>'t'</kbd> bindkey. 
    A dialog box appears where the user inputs the text and text size. 
   </p>
   <img src="xschem_texts.png">
   <p>
-   The <tt>layer</tt> property can be used
-   to draw text on a different layer, for example, setting <tt>layer=6</tt> will draw on cyan color. 
-   A <tt>font</tt> property is defined to change the default font. Use only Monospaced fonts because 
+   The <kbd>layer</kbd> property can be used
+   to draw text on a different layer, for example, setting <kbd>layer=6</kbd> will draw on cyan color. 
+   A <kbd>font</kbd> property is defined to change the default font. Use only Monospaced fonts because 
    bounding box is not correctly calculated by XSCHEM for proportional typefaces. You wil learn in the 
    <a href="xschem_properties.html">xschem properties chapter</a> how to set, edit and change object
    properties.
@@ -117,8 +117,8 @@ flash_cell.sym             nmos3.sym              spice_probe_vdiff.sym
 generic_pin.sym            nmos4.sym              switch_hsp_pwl.sym
    </pre>
   <p>
-   To place a symbol in the schematic window press the <tt>'Insert'</tt> key. A file chooser pops up, 
-   go to the xschem design root directory (<tt>${HOME}/xschem_library</tt> in the distribution
+   To place a symbol in the schematic window press the <kbd>'Insert'</kbd> key. A file chooser pops up, 
+   go to the xschem design root directory (<kbd>${HOME}/xschem_library</kbd> in the distribution
    by default), descend in one of the xschem design directories (devices for example)
    and select a symbol (res.sym for example)
    The selected symbol will be instantiated as a component in the schematic at the mouse

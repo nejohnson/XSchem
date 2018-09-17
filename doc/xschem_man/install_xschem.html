@@ -29,10 +29,10 @@ p{padding: 15px  30px 10px;}
   user:~$ make install
  </pre>
  <p>
-  This will install all the runtime needed files into the locations defined in the <tt>Makefile</tt>.
-  Before being able to run xschem you must setup a configuration file, <tt><b>.xschem</b></tt>, into your 
+  This will install all the runtime needed files into the locations defined in the <kbd>Makefile</kbd>.
+  Before being able to run xschem you must setup a configuration file, <kbd><b>.xschem</b></kbd>, into your 
   home directory. This file will tell XSCHEM where to look for schematic and component libraries.
-  XSCHEM will look for this file in the current directory or in the user's <tt>${HOME}</tt> directory.
+  XSCHEM will look for this file in the current directory or in the user's <kbd>${HOME}</kbd> directory.
 
  </p>
  <pre class="code" style="height: 300px;">
@@ -117,20 +117,20 @@ set hspicerf_path $env(HOME)/hspice_2013/bin/hspicerf64
 set cscope_path $env(HOME)/cosmoscope/amd64/ai_bin/cscope
 </pre>
  <p>
-  The <tt>XSCHEM_HOME_DIR</tt> tells XSCHEM where the runtime support 
-  files and scripts are located; given the <tt>prefix</tt> variable
-  set in the Makefile, <tt>XSCHWEM_HOME_DIR</tt> should be 
-  <tt>${prefix}/share/xschem</tt>. So, if installation directory specified with <tt>prefix</tt> was
-  the user's home directory you should put '<tt>set XSCHEM_HOME_DIR=$env(HOME)/share/xschem</tt>' in .xschem.
-  Note that <tt>.xschem</tt> is a TCL file, so use the TCL syntax for setting
+  The <kbd>XSCHEM_HOME_DIR</kbd> tells XSCHEM where the runtime support 
+  files and scripts are located; given the <kbd>prefix</kbd> variable
+  set in the Makefile, <kbd>XSCHEM_HOME_DIR</kbd> should be 
+  <kbd>${prefix}/share/xschem</kbd>. So, if installation directory specified with <kbd>prefix</kbd> was
+  the user's home directory you should put '<kbd>set XSCHEM_HOME_DIR=$env(HOME)/share/xschem</kbd>' in .xschem.
+  Note that <kbd>.xschem</kbd> is a TCL file, so use the TCL syntax for setting
   variables and accessing environment variables.
   It is also mandatory to setup a design root directory (indicated by TCL variable
-  <tt>XSCHEM_DESIGN_DIR</tt>) containing all the design libraries 
+  <kbd>XSCHEM_DESIGN_DIR</kbd>) containing all the design libraries 
   (components, schematics).  A Sample design root library is provided and installed in the path 
-  specified by the <tt>Makefile</tt>'s variable <tt>library_prefix</tt>, you can use it 
+  specified by the <kbd>Makefile</kbd>'s variable <kbd>library_prefix</kbd>, you can use it 
   as a starting point.<br>
-  To complete the setup of XSCHEM create a <tt>.xschem</tt> file in your <tt>$HOME</tt> directory using
-  a sample <tt>.xschem</tt> file that is provided in the distribution sources.
+  To complete the setup of XSCHEM create a <kbd>.xschem</kbd> file in your <kbd>$HOME</kbd> directory using
+  a sample <kbd>.xschem</kbd> file that is provided in the distribution sources.
   Change it to fit your needs.
  </p> 
  <pre class="code">

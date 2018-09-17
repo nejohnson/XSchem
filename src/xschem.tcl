@@ -190,6 +190,7 @@ proc key_binding {  s  d } {
 # example format for s, d: Control-Alt-Key-asterisk
 #                          Control-Shift-Key-A
 #                          Alt-Key-c
+#                          ButtonPress-4
 #
   regsub {.*-} $d {} key
   set state 0
@@ -197,12 +198,20 @@ proc key_binding {  s  d } {
   if { [regexp {(Mod1|Alt)-} $d] } { set state [expr $state +8] }
   if { [regexp Control- $d] } { set state [expr $state +4] }
   if { [regexp Shift- $d] } { set state [expr $state +1] }
+  if { [regexp ButtonPress-1 $d] } { set state [expr $state +0x100] }
+  if { [regexp ButtonPress-2 $d] } { set state [expr $state +0x200] }
+  if { [regexp ButtonPress-3 $d] } { set state [expr $state +0x400] }
   # puts "$state $key <${s}>"
-  if {$d eq {} } {
-    bind .drw "<${s}>" {}
+  if {[regexp ButtonPress- $d]} {
+    bind .drw "<${s}>" "xschem callback %T %x %y 0 $key 0 $state"
   } else {
-    bind .drw  "<${s}>" "xschem callback %T %x %y [scan "$key" %c] 0 0 $state"
+    if {$d eq {} } {
+      bind .drw "<${s}>" {}
+    } else {
+      bind .drw  "<${s}>" "xschem callback %T %x %y [scan "$key" %c] 0 0 $state"
+    }
   }
+
 }
 
 proc edit_file {filename} {
@@ -391,7 +400,7 @@ proc edit_netlist {schname } {
 # }
 
 # 20161207
-proc fileload { msg {initialfile {}} {confirm 0}  } {
+proc fileload { msg {initialfile {}} } {
   global FILESELECT_CURR_DIR XSCHEM_DESIGN_DIR  entry1 tcl_version
   while {1} {
     set r [tk_getOpenFile  -title $msg -initialfile $initialfile -initialdir $FILESELECT_CURR_DIR ]
@@ -2378,6 +2387,8 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
 ###
 ### Tk event handling
 ###
+### bind .drv <event> {xschem callback <type> <x> <y> <keysym> <button of w> <h> <state>}
+###
    bind .drw <Double-Button-1> {xschem callback -3 %x %y 0 %b 0 %s}
    bind .drw <Double-Button-2> {xschem callback -3 %x %y 0 %b 0 %s}
    bind .drw <Double-Button-3> {xschem callback -3 %x %y 0 %b 0 %s}
@@ -2387,15 +2398,9 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    bind .drw <ButtonRelease> {xschem callback %T %x %y 0 %b 0 %s}
    bind .drw <KeyPress> {xschem callback %T %x %y %N 0 0 %s}
    bind .drw <KeyRelease> {xschem callback %T %x %y %N 0 0 %s} ;# 20161118
-
    bind .drw <Motion> {xschem callback %T %x %y 0 0 0 %s}
-   #bind .drw <Motion> {puts  "xschem.tcl: Motion %T %x %y 0 0 %s"}
-   #bind .drw <KeyPress> {puts "xschem.tcl: KeyPress %T %x %y %N 0 %s"}
-   bind .drw  <Enter> {
-    xschem callback %T %x %y 0 0 0 0
-   }
-   bind .drw <Leave> {
-   }
+   bind .drw  <Enter> { xschem callback %T %x %y 0 0 0 0 }
+   bind .drw <Leave> {}
    bind .drw <Unmap> {
     wm withdraw .infotext
     set show_infowindow 0

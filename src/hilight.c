@@ -326,7 +326,7 @@ void search_inst(char *tok, char *val, int sub, int sel, int what)
        if(debug_var>=1) fprintf(errfp, "search_inst(): doing substr search on bus sig:%s inst=%d tok=%s val=%s\n", str,i,tok,val);
        str=expandlabel(str,&tmp);
       }
-      //if( (!strcmp(str,val)  && !sub) || 
+      if(!str) str=empty_string; // 20180906
       if( (!regexec(&re, str,0 , NULL, 0) && !sub) || 		// 20071120 regex instead of strcmp
           (strstr(str,val) && sub) ) 
       {
@@ -342,9 +342,7 @@ void search_inst(char *tok, char *val, int sub, int sel, int what)
           inst_ptr[i].flags |= 4;
           if(what==NOW) for(c=0;c<cadlayers;c++)
             draw_symbol_outline(NOW,col%(cadlayers-7)+7, i,c,0,0,0.0,0.0);  // 20150804
-
         }
-
 
         if(sel==1) {
           select_element(i, SELECTED, 1);

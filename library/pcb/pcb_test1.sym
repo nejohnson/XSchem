@@ -4,8 +4,9 @@ verilog_stop=true
 template="name=x1"
 
 } 
-V {} 
-S {} 
+V {}
+S {}
+E {}
 L 4 -130 -10 130 -10 {} 
 L 4 -130 10 130 10 {} 
 L 4 -130 -10 -130 10 {} 

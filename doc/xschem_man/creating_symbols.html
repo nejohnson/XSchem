@@ -22,21 +22,21 @@ p{padding: 15px  30px 10px;}
  <h1>CREATING SYMBOLS</h1><br>
  <p>
   An easy way to create a new symbol and instantiate the new component in the schematic is
-  to press the <tt>&lt;shift&gt;j</tt> key. This will bring up a symbol creation dialog box:
+  to press the <kbd>&lt;shift&gt;j</kbd> key. This will bring up a symbol creation dialog box:
  </p>
  <img src="symbol_generation1.png">
  <p>
   After setting the name of the symbol (do not forget this and be careful not to overwrite existing 
-  symbols), the set of input, output or input-output pins (inout) press the <tt>CREATE</tt> button.
+  symbols), the set of input, output or input-output pins (inout) press the <kbd>CREATE</kbd> button.
   The symbol will be created together with the corresponding schematic representation. The 
   schematic will be empty and contains only the interface pins.
  </p>
  <img src="symbol_generation2.png">
  <p>
-  if the <tt>&lt;shift&gt;j</tt> keybind is pressed after selecting an existing symbol, its name and
+  if the <kbd>&lt;shift&gt;j</kbd> keybind is pressed after selecting an existing symbol, its name and
   interface pins will be populated into the dialog box text fields, allowing to make changes: in 
-  the example picture we are creating a <tt>register2</tt> component which has also a <tt>SET</tt> 
-  pin in addition to the <tt>register</tt> component interface: 
+  the example picture we are creating a <kbd>register2</kbd> component which has also a <kbd>SET</kbd> 
+  pin in addition to the <kbd>register</kbd> component interface: 
  </p>
  <img src="symbol_generation3.png">
  <br>
@@ -47,9 +47,9 @@ p{padding: 15px  30px 10px;}
   pins.
  </p>
  <p> 
- the <tt>LOAD</tt> button allows to load the interface pins from a symbol not present in the
- schematic: write the library and symbol in the top text field and press <tt>LOAD</tt>.
- The <tt> Do not clone schematic</tt> checkbox tells XSCHEM not to copy the schematic view from
+ the <kbd>LOAD</kbd> button allows to load the interface pins from a symbol not present in the
+ schematic: write the library and symbol in the top text field and press <kbd>LOAD</kbd>.
+ The <kbd> Do not clone schematic</kbd> checkbox tells XSCHEM not to copy the schematic view from
  the previously selected component, but instead to create a new (empty) schematic with only 
  the interface pins. If this checkbox is not enabled XSCHEM tries its best to copy the schematic
  from the selected component into the new component, adding or removing the changed pins.
@@ -58,12 +58,12 @@ p{padding: 15px  30px 10px;}
  <p>
   another useful approach to create a new component (both symbol and schematic view) is to 'clone' it
   from a similar existing component: after copying a component to a different place in the schematic,
-  press the edit property bindkey (<tt>q</tt> key) and set a new name for the symbol, set also the 
-  <tt>copy cell</tt> checkbox: 
+  press the edit property bindkey (<kbd>q</kbd> key) and set a new name for the symbol, set also the 
+  <kbd>copy cell</kbd> checkbox: 
  </p>
  <img src="symbol_generation5.png">
  <p>
-  After pressing <tt>OK</tt> a copy (both schematic and symbol views) of the previously selected
+  After pressing <kbd>OK</kbd> a copy (both schematic and symbol views) of the previously selected
   component will be created. After this clone operation modifications can be made on the newly 
   created schematic and symbol views without affecting the original component.
  </p>

@@ -17,36 +17,36 @@ p{padding: 15px  30px 10px;}
 <!-- navigation buttons -->
 <a href="net_probes.html" class="prev">PREV</a>
 <a href="xschem_man.html" class="home">UP</a>
-<a href="simulation.html" class="next">NEXT</a>
+<a href="developer_info.html" class="next">NEXT</a>
  <!-- slide title -->
  <h1>SIMULATION</h1><br>
  <p>
   One of the design goals of XSCHEM is the ability to launch a simulation without additional manual file editing. 
   For this purpose XSCHEM stores in a schematic not only the circuit but also the simulator
   settings and the additional files that are needed.
-  For example there is a <tt>devices/netlist.sym</tt> and <tt>devices/netlist_not_shown.sym</tt> symbol that
+  For example there is a <kbd>devices/netlist.sym</kbd> and <kbd>devices/netlist_not_shown.sym</kbd> symbol that
   can be placed in a schematic acting as a container of text files for all the needed SPICE models and any
   additional information to make the schematic ready for simulation.
  </p>
  <img src="simulation10.png">
  <p>
-  The <tt>devices/netlist_not_shown</tt> symbol shown in the picture (with name MODELS) for example contains
+  The <kbd>devices/netlist_not_shown</kbd> symbol shown in the picture (with name MODELS) for example contains
   all the spice models of the components used in the schematic, this makes
   the schematic self contained, no additional files are needed to run a simulation.
   After generating the netlist (for example poweramp.spice) the resulting SPICE netlist can be sent directly for
-  simulation (for example <tt>hspice -i poweramp.spice</tt> for the  Hspice(TM) simulator). 
+  simulation (for example <kbd>hspice -i poweramp.spice</kbd> for the  Hspice(TM) simulator). 
  </p>
 
  <h3> VERILOG SIMULATION</h3>
  <p> This is a tutorial showing how to run a simulation with XSCHEM. The first important thing to
   note is that XSCHEM is just a schematic editor, so we need to setup valid bindings to
-  simulators in the <tt>~/.xschem</tt> file. For this tutorial we plan to do a <tt>Verilog</tt>
+  simulators in the <kbd>~/.xschem</kbd> file. For this tutorial we plan to do a <kbd>Verilog</kbd>
   simulation since there is a very good open source simulator available, called
   <a href="http://iverilog.icarus.com">Icarus Verilog</a>.
   There is also a good waveform viewer called 
   <a href="https://sourceforge.net/projects/gtkwave">gtkwave</a>
   that is able to show simulator results. Install these two valuable tools and setup
-  installation paths in <tt>.xschem</tt>: 
+  installation paths in <kbd>.xschem</kbd>: 
  </p>
  <pre class="code">
 ...
@@ -60,7 +60,7 @@ set gtkwave_path $env(HOME)/gtkwave/bin/gtkwave
 ...
  </pre>
  <p>
-  In the XSCHEM distribution there is one example design, <tt>examples/greycnt.sch</tt>.<br>
+  In the XSCHEM distribution there is one example design, <kbd>examples/greycnt.sch</kbd>.<br>
   Load this design: 
  </p>
  <pre class="code">
@@ -72,8 +72,8 @@ user:~$ xschem examples/greycnt
   B[7:0] is a grey coded vector, this mean that if A[7:0] is incremented as a binary number
   B[7:0] will increment by changing only one bit at a time. The C[7:0] vector is the reverse transformation
   from grey-code to binary, so at the end if simulation goes well C[7:0] == A[7:0].
-  In this schematic there are some components, the first one is the <tt>xnor</tt> gate, the second one is
-  the <tt>assign</tt> element. The 'xnor' performs the logical 'Not-Xor' of its inputs, while 'assign'
+  In this schematic there are some components, the first one is the <kbd>xnor</kbd> gate, the second one is
+  the <kbd>assign</kbd> element. The 'xnor' performs the logical 'Not-Xor' of its inputs, while 'assign'
   just propagates the input unchanged to the output, optionally with some delay.
   This is useful if we want to change the name of a net
   (putting two labels with different names on the same net is not allowed, since this is normally an error, 
@@ -81,28 +81,28 @@ user:~$ xschem examples/greycnt
  </p>
  <p>
   An Ex-Nor gate can be represented as a verilog primitive, so for the xnor gate we just need to setup 
-  a <tt>verilog_format</tt> attribute in the global property string of the <tt>xnor.sym</tt> gate: 
+  a <kbd>verilog_format</kbd> attribute in the global property string of the <kbd>xnor.sym</kbd> gate: 
  </p>
  <img src="simulation2.png">
  <p>
   the 'assign' symbol is much simpler, in this property string you see the definition for SPICE
-  (<tt>format</tt> attribute), Verilog (<tt>verilog_format</tt>) and VHDL (<tt>vhdl_format</tt>).
+  (<kbd>format</kbd> attribute), Verilog (<kbd>verilog_format</kbd>) and VHDL (<kbd>vhdl_format</kbd>).
    This shows how a single symbol can be used for different netlist formats.
  </p>
  <img src="simulation3.png">
  <p>
-  While showing the top-level testbench <tt>greycnt</tt> set XSCHEM in Verilog mode
-  (menu <tt>Options-&gt;Verilog</tt> radio button, or <tt>&lt;Shift&gt;V</tt> key) and press
-  the edit property <tt>'q'</tt> key, you will see some verilog code:
+  While showing the top-level testbench <kbd>greycnt</kbd> set XSCHEM in Verilog mode
+  (menu <kbd>Options-&gt;Verilog</kbd> radio button, or <kbd>&lt;Shift&gt;V</kbd> key) and press
+  the edit property <kbd>'q'</kbd> key, you will see some verilog code:
  </p>
  <img src="simulation4.png">
  <p> 
   This is the testbench behavioral code that generates stimuli for the simulation and gives
   instructions on where to save simulation results. If you generate the verilog netlist with 
-  the <tt>Netlist</tt> button on the right side of the menu bar (or <tt>&lt;Shift&gt;N</tt>
-  key) a <tt>greycnt.v</tt> file will be generated in the simulation directory
-  (<tt>${HOME}/xschem_library/simulations</tt> is the default path in the XSCHEM distribution, but
-  can be changed with the <tt>set netlist_dir $env(HOME)/simulations</tt> in ~/.xschem file):
+  the <kbd>Netlist</kbd> button on the right side of the menu bar (or <kbd>&lt;Shift&gt;N</kbd>
+  key) a <kbd>greycnt.v</kbd> file will be generated in the simulation directory
+  (<kbd>${HOME}/xschem_library/simulations</kbd> is the default path in the XSCHEM distribution, but
+  can be changed with the <kbd>set netlist_dir $env(HOME)/simulations</kbd> in ~/.xschem file):
  </p>
  <pre class="code">
 `timescale 1ps/1ps
@@ -146,14 +146,14 @@ endmodule
  <p>
   you will recognize the behavioral code right after the netlist specifying the connection of
   nets to the xnor and assign gates and all the necessary verilog declarations.
-  If you press the <tt>Simulation</tt> button the <tt>Icarus Verilog</tt> simulator will be executed
+  If you press the <kbd>Simulation</kbd> button the <kbd>Icarus Verilog</kbd> simulator will be executed
   to compile (iverilog) and run (vvp) the simulation, a terminal window will show the simulation output,
   in this case the input vector A[7:0] and the grey coded B[7:0] vectors are shown. You can quit the
-  simulator log window by pressing <tt>'q'</tt>.
+  simulator log window by pressing <kbd>'q'</kbd>.
  </p>
  <img src="simulation5.png">
  <p>
-  If simulation completes with no errors waveforms can be viewed. Press the <tt>Waves</tt> button
+  If simulation completes with no errors waveforms can be viewed. Press the <kbd>Waves</kbd> button
   in the top-right of the menu bar, you may add waveforms in the gtkwave window:
  </p>
  <img src="simulation6.png">
@@ -163,14 +163,14 @@ endmodule
  </p>
  <img src="simulation7.png">
  <p>
-  To facilitate the debug you may wish to edit the netlist (<tt>Simulation-&gt;Edit Netlist</tt>)
+  To facilitate the debug you may wish to edit the netlist (<kbd>Simulation-&gt;Edit Netlist</kbd>)
   to locate the error, in the picture below i inserted deliberately a random string to
   trigger the failure:
  </p>
  <img src="simulation8.png">
  <p>
   As you can see the error is in the behavioral code of the top level greycnt schematic, so edit the 
-  global property (<tt>'q'</tt> key with no component selected) and fix the error.
+  global property (<kbd>'q'</kbd> key with no component selected) and fix the error.
  </p>
  <img src="simulation9.png">
 

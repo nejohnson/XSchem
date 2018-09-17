@@ -811,9 +811,35 @@ void edit_property(int x)
    tkeval("text_line {Input property:} 0");
    if(strcmp(Tcl_GetVar(interp, "rcode", TCL_GLOBAL_ONLY),"") )
    {
+    int old_fill; // 20180914
+    int k;
+    double x1=0., y1=0., x2=0., y2=0.;
+    int c, i;
+
+    c = selectedgroup[0].col;
+    i = selectedgroup[0].n;
     modified=1; push_undo(); // 20150327
-    my_strdup(&polygon[selectedgroup[0].col][selectedgroup[0].n].prop_ptr,
+    my_strdup(&polygon[c][i].prop_ptr,
         (char *) Tcl_GetVar(interp, "entry1", TCL_GLOBAL_ONLY));
+    // 20180914
+    old_fill = polygon[c][i].fill;
+    if( !strcmp(get_tok_value(polygon[c][i].prop_ptr,"fill",0),"true") )
+      polygon[c][i].fill =1;
+    else 
+      polygon[c][i].fill =0;
+    if(old_fill != polygon[c][i].fill) {
+      bbox(BEGIN,0.0,0.0,0.0,0.0);
+      for(k=0; k<polygon[c][i].points; k++) {
+        if(k==0 || polygon[c][i].x[k] < x1) x1 = polygon[c][i].x[k];
+        if(k==0 || polygon[c][i].y[k] < y1) y1 = polygon[c][i].y[k];
+        if(k==0 || polygon[c][i].x[k] > x2) x2 = polygon[c][i].x[k];
+        if(k==0 || polygon[c][i].y[k] > y2) y2 = polygon[c][i].y[k];
+      }
+      bbox(ADD, x1, y1, x2, y2);
+      bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
+      draw();
+      bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
+    }
    }
    break;
 

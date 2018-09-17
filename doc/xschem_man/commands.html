@@ -29,13 +29,13 @@ p{padding: 15px  30px 10px;}
   The basic principle in XSCHEM is that first you select something in the circuit then you
   decide what to do with the selection.
   For example, if you need to change an object property you first select it (mouse click) and then
-  you press the edit property (<tt>'q'</tt>) key.
+  you press the edit property (<kbd>'q'</kbd>) key.
   It you need to move together multiple objects you select them (by area or using multiple mouse
-  clicks with the <tt>Shift</tt> key), then you press the move (<tt>'m'</tt>) key.
+  clicks with the <kbd>Shift</kbd> key), then you press the move (<kbd>'m'</kbd>) key.
  </p>
  <h3> EDITOR COMMAND CHEATSHEET</h3>
  <p>
-  This list is available in XSCHEM in the <tt>Help</tt> menu
+  This list is available in XSCHEM in the <kbd>Help</kbd> menu
  </p>
  <pre class="code" style="height: 600px;">
 
@@ -178,7 +178,7 @@ ctrl        '+'         Test mode: change line width
 
  <h3>KEYBIND CUSTOMIZATION</h3>
  <p>
-  changes to default keybindings may be placed in the <tt>~/.xschem</tt> file as in the following examples:
+  changes to default keybindings may be placed in the <kbd>~/.xschem</kbd> file as in the following examples:
  </p>
  <pre class="code">
 ## replace Ctrl-d with Escape (so you won't kill the program :-))
@@ -191,33 +191,33 @@ set replace_key(w) Shift-W
 
  <h3>STRETCH OPERATIONS</h3>
  <p>
-  An important operation that deserves a special paragraph is the <tt>Stretch</tt> operation.
+  An important operation that deserves a special paragraph is the <kbd>Stretch</kbd> operation.
   There is frequently the need to move part of the circuit without breaking connections, for 
   example to create more room for other circuitry or just to make it look better.
   The first thing to do is to drag a selection rectangle with the mouse holding down the
-  <tt>Ctrl</tt> key, cutting wires we need to stretch:
+  <kbd>Ctrl</kbd> key, cutting wires we need to stretch:
  </p>
  <img src="commands1.png">
  <p>
-  After selection is done hit the move (<tt>'m'</tt>) key. You will be able to move the selected part
+  After selection is done hit the move (<kbd>'m'</kbd>) key. You will be able to move the selected part
   of the schematic keeping connected the wires crossing the selection rectangle:
  </p>
  <img src="commands2.png">
  <p>
   In our example we needed to move up part of the circuit, the end result is shown in next picture. 
-  Multiple stretch rectangles can be set using the <tt>Shift</tt> key in addition to the 
-  <tt>Ctrl</tt> key after setting the first stretch area.
+  Multiple stretch rectangles can be set using the <kbd>Shift</kbd> key in addition to the 
+  <kbd>Ctrl</kbd> key after setting the first stretch area.
  </p>
  <img src="commands3.png">
 
  <h3>PLACE WIRES SNAPPING TO CLOSEST PIN OT NET ENDPOINT</h3>
  <p>
-  The (uppercase) <tt>'W'</tt> bindkey allows to place a wire putting start (and end point, later) to the 
+  The (uppercase) <kbd>'W'</kbd> bindkey allows to place a wire putting start (and end point, later) to the 
   closest pin or wire endpoint, this will make it easier to connect precisely without the need to zoom in all times.
  </p><br>
  <h3>CONSTRAINED MOVE</h3>
  <p>
-  while creating wires, lines, and moving, stretching, copying objects, pressing the <tt>'h'</tt> or <tt>'v'</tt> keys 
+  while creating wires, lines, and moving, stretching, copying objects, pressing the <kbd>'h'</kbd> or <kbd>'v'</kbd> keys 
   will constrain the movement to a horizontal or vertical direction, respectively.
  </p> 
  <img src="commands4.png" style="margin-bottom: 0px;" >

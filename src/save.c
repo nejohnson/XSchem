@@ -36,6 +36,56 @@ inline void updatebbox(int count, Box *boundbox, Box *tmp)
  }
 }    
 
+
+void read_xschem_file(FILE *fd) // 20180912
+{
+    int endfile=0;
+    char c[4096];
+
+    while(!endfile)
+    {
+      if(fscanf(fd,"%255s",c)==EOF) break;
+      switch(c[0])
+      {
+       case 'E':
+        load_ascii_string(&schtedaxprop,fd); //20100217
+        break;
+       case 'S':
+        load_ascii_string(&schprop,fd); //20100217
+        break;
+       case 'V':
+        load_ascii_string(&schverilogprop,fd); //09112003
+         break;
+       case 'G':
+        load_ascii_string(&schvhdlprop,fd);
+        if(debug_var>=2) fprintf(errfp, "read_xschem_file(): schematic property:%s\n",schvhdlprop?schvhdlprop:"<NULL>");
+        break;
+       case 'L':
+        load_line(fd);
+        break;
+       case 'P':
+        load_polygon(fd);
+        break;
+       case 'B':
+        load_box(fd);
+        break;
+       case 'T':
+        load_text(fd);
+        break;
+       case 'N':
+        load_wire(fd);
+        break;
+       case 'C':
+        load_inst(fd);
+        break;
+       default:
+        if(debug_var>=2) fprintf(errfp, "read_xschem_file(): end file reached\n");
+        endfile=1;
+        break;
+      }
+    }
+}
+
 void load_ascii_string(char **ptr, FILE *fd)
 {
  int c, escape=0;
@@ -260,6 +310,12 @@ void load_polygon(FILE *fd)
       fscanf(fd, "%lf %lf ",&(ptr[i].x[j]), &(ptr[i].y[j]));
     }
     load_ascii_string( &ptr[i].prop_ptr, fd);
+    // 20180914
+    if( !strcmp(get_tok_value(ptr[i].prop_ptr,"fill",0),"true") )
+      ptr[i].fill =1;
+    else
+      ptr[i].fill =0;
+
     lastpolygon[c]++;
 }
 
@@ -377,6 +433,7 @@ int save_symbol(char *schname) // 20171020 aded return value
   fputc('\n', fd);
   fprintf(fd, "V {}\n");
   fprintf(fd, "S {}\n");
+  fprintf(fd, "E {}\n"); // 20180912
   save_line(fd);
   save_box(fd);
   save_text(fd);
@@ -474,39 +531,6 @@ int save_schematic(char *schname) // 20171020 added return value
     return 0;
 }
 
-char *get_sym_type(char *name)
-{
- int endfile=0;
- FILE *fd;
- char c[256], fullname[4096]; // overflow safe 20161126
- static char *prop=NULL;
- static char *type=NULL;
-
- my_snprintf(fullname, S(fullname), "%s/%s.sym", Tcl_GetVar(interp,"XSCHEM_DESIGN_DIR", TCL_GLOBAL_ONLY),
-    name);
- if( (fd=fopen(fullname,"r"))!= NULL)
- {
-        while(!endfile)
-        {
-         if(fscanf(fd,"%255s",c)==EOF) break;
-         switch(c[0])
-         {
-          case 'G':
-           load_ascii_string(&prop,fd);
-           break;
-
-          default:
-           endfile=1;
-           break;
-         }
-        }
-        fclose(fd);
-        my_strdup(&type, get_tok_value(prop,"type",0));
-        return type;
- }
- return NULL;
-}
-
 void link_symbols_to_instances(void) // 20150326 separated from load_schematic()
 {
   int i,symbol, missing;
@@ -518,9 +542,6 @@ void link_symbols_to_instances(void) // 20150326 separated from load_schematic()
   for(i=0;i<lastinst;i++)
   {
      symfilename=inst_ptr[i].name; //05112003
-
-     //type=get_sym_type(symfilename); // 20150403 not used anymore for vhdl_block_netlist()
-                                       // ************* huge execution time hog !!!! ********
 
      if(debug_var>=1) fprintf(errfp, "link_symbols_to_instances(): inst=%d\n", i);
      if(debug_var>=1) fprintf(errfp, "link_symbols_to_instances(): matching inst %d name=%s \n",i, inst_ptr[i].name);
@@ -569,8 +590,6 @@ void link_symbols_to_instances(void) // 20150326 separated from load_schematic()
 
 void load_schematic(int load_symbols, char *abs_name, int reset_undo) // 20150327 added reset_undo
 {
-  char c[256]; // overflow safe 20161122
-  int endfile=0;
   FILE *fd;
   char name[4096];   // overflow safe 20161122
 
@@ -596,48 +615,7 @@ void load_schematic(int load_symbols, char *abs_name, int reset_undo) // 2015032
   unselect_all();
   if( (fd=fopen(name,"r"))!= NULL)
   {
-    while(!endfile)
-    {
-      if(fscanf(fd,"%255s",c)==EOF) break;
-      switch(c[0])
-      {
-       case 'E':
-        load_ascii_string(&schtedaxprop,fd); //20100217
-        break;
-       case 'S':
-        load_ascii_string(&schprop,fd); //20100217
-        break;
-       case 'V':
-        load_ascii_string(&schverilogprop,fd); //09112003
-         break;
-       case 'G':
-        load_ascii_string(&schvhdlprop,fd);
-        if(debug_var>=2) fprintf(errfp, "load_schematic(): schematic property:%s\n",schvhdlprop?schvhdlprop:"<NULL>");
-        break;
-       case 'L':
-        load_line(fd);
-        break;
-       case 'P':
-        load_polygon(fd);
-        break;
-       case 'B':
-        load_box(fd);
-        break;
-       case 'T':
-        load_text(fd);
-        break;
-       case 'N':
-        load_wire(fd);
-        break;
-       case 'C':
-        load_inst(fd);
-        break;
-       default:
-        if(debug_var>=2) fprintf(errfp, "load_schematic(): end file reached\n");
-        endfile=1;
-        break;
-      }
-    }
+    read_xschem_file(fd);
     fclose(fd); // 20150326 moved before load symbols
 
     if(debug_var>=2) fprintf(errfp, "load_schematic(): loaded file:wire=%d inst=%d\n",lastwire , lastinst);
@@ -737,8 +715,6 @@ void push_undo(void) // 20150327
 
 void pop_undo(int redo)  // 20150327
 {
-  char c[256]; // overflow safe 20161122
-  int endfile=0;
   FILE *fd, *diff_fd;
   int pd[2];
   char diff_name[4096];
@@ -792,49 +768,7 @@ void pop_undo(int redo)  // 20150327
   close(pd[1]);                                       // close write side of pipe
 
   fd=fdopen(pd[0],"r");
-
-  while(!endfile)
-  {
-    if(fscanf(fd,"%255s",c)==EOF) break;
-    switch(c[0])
-    {
-     case 'S':
-      load_ascii_string(&schprop,fd); //20100217
-      break;
-     case 'E':
-      load_ascii_string(&schtedaxprop,fd); //20100217
-      break;
-     case 'V':
-      load_ascii_string(&schverilogprop,fd); //09112003
-       break;
-     case 'G':
-      load_ascii_string(&schvhdlprop,fd);
-      if(debug_var>=2) fprintf(errfp, "load_schematic(): schematic property:%s\n",schvhdlprop?schvhdlprop:"<NULL>");
-      break;
-     case 'L':
-      load_line(fd);
-      break;
-     case 'P':
-      load_polygon(fd);
-      break;
-     case 'B':
-      load_box(fd);
-      break;
-     case 'T':
-      load_text(fd);
-      break;
-     case 'N':
-      load_wire(fd);
-      break;
-     case 'C':
-      load_inst(fd);
-      break;
-     default:
-      if(debug_var>=2) fprintf(errfp, "load_schematic(): end file reached\n");
-      endfile=1;
-      break;
-    }
-  }
+  read_xschem_file(fd);
   fclose(fd); // 20150326 moved before load symbols
 
   if(debug_var>=2) fprintf(errfp, "load_schematic(): loaded file:wire=%d inst=%d\n",lastwire , lastinst);
@@ -859,7 +793,7 @@ int load_symbol_definition(char *name)
   static char *aux_ptr=NULL;
   double aux_double;
   int aux_int;
-  char aux_str[256]; // overflow safe 20161122
+  char aux_str[4096]; // overflow safe 20161122
   int lastl[cadlayers], lastr[cadlayers], lastp[cadlayers], lastt; // 20171115 lastp
   Line *ll[cadlayers];
   Box *bb[cadlayers];
@@ -901,7 +835,7 @@ int load_symbol_definition(char *name)
 
    while(!endfile)
    {
-    if(fscanf(fd,"%255s",aux_str)==EOF) break;
+    if(fscanf(fd,"%4095s",aux_str)==EOF) break;
     switch(aux_str[0])
     {
      case 'E':
@@ -955,7 +889,13 @@ int load_symbol_definition(char *name)
       }
       pp[c][i].prop_ptr=NULL;
       load_ascii_string( &pp[c][i].prop_ptr, fd);
-       if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): loaded polygon: ptr=%lu\n", (unsigned long)pp[c]);
+      // 20180914
+      if( !strcmp(get_tok_value(pp[c][i].prop_ptr,"fill",0),"true") )
+        pp[c][i].fill =1;
+      else
+        pp[c][i].fill =0;
+
+      if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): loaded polygon: ptr=%lu\n", (unsigned long)pp[c]);
       lastp[c]++;
       break;
 
@@ -972,7 +912,7 @@ int load_symbol_definition(char *name)
       RECTORDER(bb[c][i].x1, bb[c][i].y1, bb[c][i].x2, bb[c][i].y2); // 20180108
       bb[c][i].prop_ptr=NULL;
       load_ascii_string( &bb[c][i].prop_ptr, fd);
-       if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): loaded rect: ptr=%lu\n", (unsigned long)bb[c]);
+      if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): loaded rect: ptr=%lu\n", (unsigned long)bb[c]);
       lastr[c]++;
       break;
      case 'T':
@@ -1127,6 +1067,8 @@ void create_sch_from_sym(void)
     fputc('\n', fd);
     fprintf(fd, "V {}");
     fputc('\n', fd);
+    fprintf(fd, "E {}"); // 20180912
+    fputc('\n', fd);
     fprintf(fd, "S {}");
     fputc('\n', fd);
     ptr = inst_ptr[selectedgroup[0].n].ptr+instdef;
@@ -1180,7 +1122,6 @@ void edit_symbol(void)
 {
   static char *str=NULL;
   FILE *fd;
-  int endfile=0;
   char name[4096];   // overflow safe 20161122
   char name2[4096];   // overflow safe 20161122
   // char s[1024]; // 20121121 overflow safe 20161122 // commented out 20161210
@@ -1190,10 +1131,15 @@ void edit_symbol(void)
    if(modified) { // 20161209
      if(save(1)) return;
    }
-   my_strdup( &str,
-       get_tok_value(inst_ptr[selectedgroup[0].n].prop_ptr,"name",0)  // moved before ask_save 20121129
-								      // because save_schematic clears selection
-   );
+
+   //// 20180911
+   my_strdup( &str, inst_ptr[selectedgroup[0].n].instname);  // 20180911
+   // my_strdup( &str,
+   //     get_tok_value(inst_ptr[selectedgroup[0].n].prop_ptr,"name",0)  // moved before ask_save 20121129
+   // 								      // because save_schematic clears selection
+   // );
+   //// /20180911
+
    my_snprintf(name, S(name), "%s", inst_ptr[selectedgroup[0].n].name);
    // dont allow descend in the default missing symbol
    if(!strcmp( 
@@ -1202,28 +1148,7 @@ void edit_symbol(void)
       )
      ) return;
   }
-  else
-  {
-   return; // 20161210 safer not to allow descend into unplaced symbol; 
-           // problems if this is done *from* a symbol view, when popping back
-           // it will return in schematic view(.sch) not into the original .sym view.
-           // so code below is commented out.
-   /* 
-   if(modified) { // 20161209
-     if(save(1)) return;
-   }
-   my_strdup( &str, "nopath" );		 // set some fictious path if entering an unplaced symbol 20121201
-   tkeval("loadfile .sym");
-   my_snprintf(s, S(s), "get_cell {%s}", Tcl_GetStringResult(interp));  // 20121121 remove .sym
-   tkeval(s);					 // 20121121
-
-   if(strcmp(Tcl_GetStringResult(interp),"")==0) {
-     if(debug_var>=1) fprintf(errfp, " edit_symbol(): cancel button pressed\n");
-     return;
-   }
-   my_snprintf(name, S(name), "%s",  Tcl_GetStringResult(interp));
-   */
-  }
+  else return;
 
   // build up current hierarchy path
   my_strdup(&sch_prefix[currentsch+1], sch_prefix[currentsch]);
@@ -1256,48 +1181,7 @@ void edit_symbol(void)
   prepared_hash_objects=0; // 20171224
   prepared_hash_wires=0; // 20171224
   // delete_netlist_structs(); // 20161222
-  while(!endfile)
-  {
-   if(fscanf(fd,"%4095s",name)==EOF) break;
-   switch(name[0])
-   {
-    case 'S':
-     load_ascii_string(&schprop,fd); //20100217
-     break;
-    case 'E':
-     load_ascii_string(&schtedaxprop,fd); //20100217
-     break;
-    case 'V':
-     load_ascii_string(&schverilogprop,fd); //09112003
-     break;
-    case 'G':
-     load_ascii_string(&schvhdlprop,fd);
-     if(debug_var>=2) fprintf(errfp, "load_schematic(): schematic property:%s\n",schvhdlprop);
-     break;
-    case 'L':
-     load_line(fd);
-     break;
-    case 'P':
-     load_polygon(fd);
-     break;
-    case 'B':
-     load_box(fd);
-     break;
-    case 'T':
-     load_text(fd);
-     break;
-    case 'N':
-     load_wire(fd);
-     break;
-    case 'C':
-     load_inst(fd);
-     break;
-    default:
-     if(debug_var>=1) fprintf(errfp, "edit_symbol(): unknown line, assuming EOF\n");
-     endfile=1;
-     break;
-   }
-  }
+  read_xschem_file(fd);
   fclose(fd);
   Tcl_Eval(interp, "wm title . [file tail [xschem get schpath]]"); // 20150417 set window and icon title
   Tcl_Eval(interp, "wm iconname . [file tail [xschem get schpath]]");
@@ -1309,7 +1193,6 @@ void edit_symbol(void)
 void load_symbol(char *abs_name)
 {
   FILE *fd;
-  int endfile=0;
   char name[4096];   // overflow safe 20161122
   current_type=SYMBOL;
   if(strcmp(schematic[currentsch], "")==0)
@@ -1330,48 +1213,7 @@ void load_symbol(char *abs_name)
   if( (fd=fopen(name,"r"))!= NULL)
   {
     // delete_netlist_structs(); // 20161222
-    while(!endfile)
-    {
-     if(fscanf(fd,"%4095s",name)==EOF) break;
-     switch(name[0])
-     {
-      case 'V':
-       load_ascii_string(&schverilogprop,fd); //09112003
-       break;
-      case 'S':
-       load_ascii_string(&schprop,fd); //20100217
-       break;
-      case 'E':
-       load_ascii_string(&schtedaxprop,fd); //20100217
-       break;
-      case 'G':
-       load_ascii_string(&schvhdlprop,fd);
-       if(debug_var>=2) fprintf(errfp, "load_symbol(): schematic property:%s\n",schvhdlprop);
-       break;
-      case 'P':
-       load_polygon(fd);
-       break;
-      case 'L':
-       load_line(fd);
-       break;
-      case 'B':
-       load_box(fd);
-       break;
-      case 'T':
-       load_text(fd);
-       break;
-      case 'N':
-       load_wire(fd);
-       break;
-      case 'C':
-       load_inst(fd);
-       break;
-      default:
-       if(debug_var>=1) fprintf(errfp, "edit_symbol(): unknown line, assuming EOF\n");
-       endfile=1;
-       break;
-     }
-    }
+    read_xschem_file(fd);
     fclose(fd);
     //zoom_full(1);
     Tcl_Eval(interp, "wm title . [file tail [xschem get schpath]]"); // 20150417 set window and icon title

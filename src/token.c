@@ -1058,6 +1058,7 @@ void print_spice_element(FILE *fd, int inst)
  char *str_ptr=NULL; 
  register int c, state=XBEGIN, space;
  static char *template=NULL,*format=NULL,*s, *value=NULL, *name=NULL, *lab=NULL, *token=NULL;
+ int pin_number; // 20180911
  int sizetok=0;
  int token_pos=0, escape=0;
  int no_of_pins=0;
@@ -1160,6 +1161,14 @@ void print_spice_element(FILE *fd, int inst)
      }
     }
    }
+   // reference by pin number instead of pin name, allows faster lookup of the attached net name 20180911
+   else if(token[0]=='@' && token[1]=='#') {
+       pin_number = atoi(token+2); 
+       if(pin_number < no_of_pins) {
+         str_ptr =  pin_node(inst,pin_number, &mult, 0);
+         fprintf(fd, "@%d %s ", mult, str_ptr);
+       }
+   }
    else if(!strncmp(token,"@tcleval", 8)) { // 20171029
      char tclcmd[strlen(token)+100] ;
      
@@ -1200,6 +1209,7 @@ void print_tedax_element(FILE *fd, int inst)
  static char *template=NULL,*format=NULL,*s, *value=NULL, *name=NULL, *token=NULL;
  static char *pinnumber=NULL, *pinname=NULL, *extra=NULL, *extra_pinnumber=NULL;
  static char *numslots=NULL;
+ int pin_number; // 20180911
  char *extra_token, *extra_ptr, *extra_token_val;
  char *extra_pinnumber_token, *extra_pinnumber_ptr;
  char *saveptr1, *saveptr2;
@@ -1332,10 +1342,18 @@ void print_tedax_element(FILE *fd, int inst)
           )
         ) {
         str_ptr =  pin_node(inst,i, &mult, 0);
-        fprintf(fd, "@%d %s ", mult, str_ptr);
+        fprintf(fd, "%s", str_ptr);
         break; // 20171029
       }
      }
+    }
+    // reference by pin number instead of pin name, allows faster lookup of the attached net name 20180911
+    else if(token[0]=='@' && token[1]=='#') {
+        pin_number = atoi(token+2);
+        if(pin_number < no_of_pins) {
+          str_ptr =  pin_node(inst,pin_number, &mult, 0);
+          fprintf(fd, "%s", str_ptr);
+        }
     }
     else if(!strncmp(token,"@tcleval", 8)) { // 20171029
       char tclcmd[strlen(token)+100] ;
@@ -1583,6 +1601,7 @@ void print_vhdl_primitive(FILE *fd, int inst) // netlist  primitives, 20071217
  char *str_ptr;
  register int c, state=XBEGIN, space;
  static char *template=NULL,*format=NULL,*s, *value, *name=NULL, *lab=NULL, *token=NULL;
+ int pin_number; // 20180911
  int sizetok=0;
  int token_pos=0, escape=0;
  int no_of_pins=0;
@@ -1695,6 +1714,14 @@ void print_vhdl_primitive(FILE *fd, int inst) // netlist  primitives, 20071217
      }
     }
    }
+   // reference by pin number instead of pin name, allows faster lookup of the attached net name 20180911
+   else if(token[0]=='@' && token[1]=='#') {
+       pin_number = atoi(token+2);
+       if(pin_number < no_of_pins) {
+         str_ptr =  pin_node(inst,pin_number, &mult, 0);
+         fprintf(fd, "----pin(%s) ", str_ptr);
+       }
+   }
    else if(!strncmp(token,"@tcleval", 8)) { // 20171029
      char tclcmd[strlen(token)+100] ;
      
@@ -1704,10 +1731,13 @@ void print_vhdl_primitive(FILE *fd, int inst) // netlist  primitives, 20071217
      fprintf(fd, "%s", Tcl_GetStringResult(interp));
    }
 
-   if(c!='\0') fputc(c,fd);
+                 // 20180911 dont print escaping backslashes
+   if(c!='\0' && (c!='\\'  || escape) ) fputc(c,fd);
    state=XBEGIN;
   }
-  else if(state==XBEGIN && c!='\0')  fputc(c,fd);
+                 // 20180911 dont print escaping backslashes
+  else if(state==XBEGIN && c!='\0' && (c!='\\' || escape))  fputc(c,fd);
+
   if(c=='\0') 
   {
    fputc('\n',fd);
@@ -1731,6 +1761,7 @@ void print_verilog_primitive(FILE *fd, int inst) // netlist switch level primiti
  char *str_ptr;
  register int c, state=XBEGIN, space;
  static char *template=NULL,*format=NULL,*s=NULL, *value=NULL, *name=NULL, *lab=NULL, *token=NULL;
+ int pin_number; // 20180911
  int sizetok=0;
  int token_pos=0, escape=0;
  int no_of_pins=0;
@@ -1844,6 +1875,14 @@ void print_verilog_primitive(FILE *fd, int inst) // netlist switch level primiti
      }
     }
    }
+   // reference by pin number instead of pin name, allows faster lookup of the attached net name 20180911
+   else if(token[0]=='@' && token[1]=='#') {
+       pin_number = atoi(token+2);
+       if(pin_number < no_of_pins) {
+         str_ptr =  pin_node(inst,pin_number, &mult, 0);
+         fprintf(fd, "----pin(%s) ", str_ptr);
+       }
+   }
    else if(!strncmp(token,"@tcleval", 8)) { // 20171029
      char tclcmd[strlen(token)+100] ;
      
@@ -1852,13 +1891,13 @@ void print_verilog_primitive(FILE *fd, int inst) // netlist switch level primiti
      Tcl_EvalEx(interp, tclcmd, -1, TCL_EVAL_GLOBAL);
      fprintf(fd, "%s", Tcl_GetStringResult(interp));
    }
+                 // 20180911 dont print escaping backslashes
+   if(c!='\0' && (c!='\\'  || escape) ) fputc(c,fd);
 
-
-
-   if(c!='\0') fputc(c,fd);
    state=XBEGIN;
   }
-  else if(state==XBEGIN && c!='\0')  fputc(c,fd);
+                 // 20180911 dont print escaping backslashes
+  else if(state==XBEGIN && c!='\0' && (c!='\\' || escape))  fputc(c,fd);
   if(c=='\0') 
   {
    fputc('\n',fd);
@@ -1874,6 +1913,32 @@ void print_verilog_primitive(FILE *fd, int inst) // netlist switch level primiti
    escape=0;
 
  }
+}
+
+
+// 20180911
+char *find_nth(char *str, char sep, int n)
+{
+  static char *ss=NULL;
+  static char empty[]="";
+  int i;
+  char *ptr;
+  int count;
+
+  my_strdup(&ss, str);
+  if(!ss) return empty;
+  for(i=0, count=1, ptr=ss; ss[i] != 0; i++) {
+    if(ss[i]==sep) {
+      ss[i]=0;
+      if(count==n) {
+        return ptr;
+      }
+      ptr=ss+i+1;
+      count++;
+    }
+  }
+  if(count==n) return ptr;
+  else return empty;
 }
 
 // substitute given tokens in a string with their corresponding values
@@ -1958,6 +2023,26 @@ char *translate(int inst, char* s)
     }
     strcpy(result+result_pos,tmp_sym_name);
     result_pos+=tmp;
+   } else if(token[0]=='@' && token[1]=='#') {  // 20180911
+     int n; 
+     char subtok[sizetok];
+     sscanf(token+2, "%d:%s", &n, subtok);
+     value = get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr,subtok,0);
+     if(value[0] != 0) {
+       char *ss;
+       int slot;
+       if( (ss=strchr(inst_ptr[inst].instname, ':')) ) {
+         sscanf(ss+1, "%d", &slot);
+         value = find_nth(value, ':', slot);
+       }
+       tmp=strlen(value);
+       if(result_pos + tmp>=size) {
+         size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
+         my_realloc(&result,size);
+       }
+       strcpy(result+result_pos, value);
+       result_pos+=tmp;
+     }
    } else if(strcmp(token,"@sch_last_modified")==0) {
      my_snprintf(file_name, S(file_name), "%s/%s.sch",Tcl_GetVar(interp,"XSCHEM_DESIGN_DIR", TCL_GLOBAL_ONLY),
        inst_ptr[inst].name);

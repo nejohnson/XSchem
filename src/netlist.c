@@ -231,7 +231,7 @@ static struct wireentry *delwireentry(struct wireentry *t)
  return NULL;
 }
 
-static void del_wire_table(void)
+void del_wire_table(void)
 {
  int i,j;
 

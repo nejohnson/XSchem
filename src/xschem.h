@@ -260,6 +260,7 @@ typedef struct // 20171115
   unsigned short *selected_point;
   unsigned short sel;
   char *prop_ptr;
+  int fill; // 20180914
 } Polygon; 
 
 typedef struct
@@ -607,7 +608,7 @@ extern void drawgrid(void);
 extern void drawtemprect(GC gc, int what, double rectx1,double recty1,
             double rectx2,double recty2);
 extern void drawtemppolygon(GC gc, int what, double *x, double *y, int points);
-extern void drawpolygon(int c, int what, double *x, double *y, int points);
+extern void drawpolygon(int c, int what, double *x, double *y, int points, int poly_fill);
 extern void draw_temp_symbol_outline(int what, GC gc, int n,int layer,
             int tmp_flip, int tmp_rot, double xoffset, double yoffset);
 extern void draw_temp_string(GC gc,int what, char *str, int flip, int rot, 
@@ -668,6 +669,7 @@ extern void load_text(FILE *fd);
 extern void load_wire(FILE *fd);
 extern void load_inst(FILE *fd);
 extern void load_box(FILE *fd);
+extern void read_xschem_file(FILE *fd); // 20180912
 extern void load_polygon(FILE *fd); // 20171115
 extern void load_line(FILE *fd);
 extern void create_sch_from_sym(void);
@@ -783,6 +785,9 @@ extern void tclexit(ClientData s);
 extern int build_colors(int skip_background, double dim); // reparse the TCL 'colors' list and reassign colors 20171113
 extern void drill_hilight(void);
 extern void get_square(double x, double y, int *xx, int *yy);
+extern void del_wire_table(void); // 20180917
+extern void del_object_table(void); // 20180917
+
 #ifdef HAS_CAIRO // 20171105
 #include <cairo.h>
 #include <cairo-xlib.h>

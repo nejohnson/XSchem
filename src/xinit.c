@@ -666,7 +666,6 @@ int Tcl_AppInit(Tcl_Interp *inter)
 
  XSetErrorHandler(err);
 
- initfile_found=0; // 20170330
  interp=inter;
  Tcl_Init(interp);
  if(has_x) Tk_Init(interp);
@@ -674,6 +673,11 @@ int Tcl_AppInit(Tcl_Interp *inter)
 
  Tcl_CreateExitHandler(tclexit, 0);
 
+//
+//  START LOOKING FOR .xschem
+//
+
+ initfile_found=0; // 20170330
  if( getenv("PWD") ) { // 20161204
    my_strdup(&name, getenv("PWD") );
    my_strcat(&name, "/.xschem");
@@ -693,6 +697,9 @@ int Tcl_AppInit(Tcl_Interp *inter)
  }
 
  if(initfile_found) {  // file exists 20121110 // used initfile_found, 20170330
+   //
+   //  EXECUTE .xschem *****
+   //
    if(Tcl_EvalFile(interp, name)==TCL_ERROR) { // source ~/.xschem 20121110
      fprintf(errfp, "Tcl_AppInit() err 1: can not execute .xschem, please fix:\n");
      fprintf(errfp, Tcl_GetStringResult(interp));
@@ -709,27 +716,45 @@ int Tcl_AppInit(Tcl_Interp *inter)
    }
  }
 
+ //
+ //  END LOOKING FOR .xschem
+ //
+
  if(rainbow_colors) Tcl_SetVar(interp, "rainbow_colors", "1", TCL_GLOBAL_ONLY); // 20171013
  
+ //
+ //  START LOOKING FOR xschem.tcl
+ //
 
- if(Tcl_GetVar(interp, "XSCHEM_HOME_DIR",TCL_GLOBAL_ONLY)) {
- } else if(getenv("XSCHEM_HOME_DIR")) { // 20121111
-   Tcl_SetVar(interp, "XSCHEM_HOME_DIR", getenv("XSCHEM_HOME_DIR"), TCL_GLOBAL_ONLY);
- } else if( !stat("/opt/xschem", &buf) ) { 
-   Tcl_SetVar(interp, "XSCHEM_HOME_DIR", "/opt/xschem", TCL_GLOBAL_ONLY);
- } else if( !stat("/usr/share/xschem", &buf) ) { 
-   Tcl_SetVar(interp, "XSCHEM_HOME_DIR", "/usr/share/xschem", TCL_GLOBAL_ONLY);
- } else {			// if XSCHEM_HOME_DIR is not defined we must guve up... 20121110
-   fprintf(errfp, "Tcl_AppInit() err 3: cannot execute xschem.tcl\n");
-   if(has_x) {
-     Tcl_Eval(interp,
-       "tk_messageBox -icon error -type ok -message \"Tcl_AppInit() err 3: xschem.tcl not found, \
-         you are probably missing XSCHEM_HOME_DIR\"");
+ // XSCHEM_HOME_DIR TCL var not defined...
+ if(!Tcl_GetVar(interp, "XSCHEM_HOME_DIR",TCL_GLOBAL_ONLY)) { 
+   // ... try getting it from the environment...
+   if(getenv("XSCHEM_HOME_DIR")) { // 20121111
+     Tcl_SetVar(interp, "XSCHEM_HOME_DIR", getenv("XSCHEM_HOME_DIR"), TCL_GLOBAL_ONLY);
+   // ... or try /opt/XSCHEM ...
+   } else if( !stat("/opt/xschem", &buf) ) { 
+     Tcl_SetVar(interp, "XSCHEM_HOME_DIR", "/opt/xschem", TCL_GLOBAL_ONLY);
+   // ... or try /usr/share/xschem ...
+   } else if( !stat("/usr/share/xschem", &buf) ) { 
+     Tcl_SetVar(interp, "XSCHEM_HOME_DIR", "/usr/share/xschem", TCL_GLOBAL_ONLY);
+   // ... else give up.
+   } else {			// if XSCHEM_HOME_DIR is not defined we must give up... 20121110
+     fprintf(errfp, "Tcl_AppInit() err 3: cannot execute xschem.tcl\n");
+     if(has_x) {
+       Tcl_Eval(interp,
+         "tk_messageBox -icon error -type ok -message \"Tcl_AppInit() err 3: xschem.tcl not found, \
+           you are probably missing XSCHEM_HOME_DIR\"");
+     }
+     Tcl_ResetResult(interp);
+     Tcl_AppendResult(interp, "Tcl_AppInit() err 3: xschem.tcl not found, you are probably missing XSCHEM_HOME_DIR",NULL);
+     return TCL_ERROR; // 20121110
    }
-   Tcl_ResetResult(interp);
-   Tcl_AppendResult(interp, "Tcl_AppInit() err 3: xschem.tcl not found, you are probably missing XSCHEM_HOME_DIR",NULL);
-   return TCL_ERROR; // 20121110
  }
+
+ //
+ //  END LOOKING FOR xschem.tcl
+ //
+
  if(getenv("XSCHEM_DESIGN_DIR") != NULL) {   // great cleanup done here 20121110
    Tcl_SetVar(interp, "XSCHEM_DESIGN_DIR", getenv("XSCHEM_DESIGN_DIR"), TCL_GLOBAL_ONLY);
  }
@@ -756,7 +781,9 @@ int Tcl_AppInit(Tcl_Interp *inter)
    return TCL_ERROR; // 20121110
  }
  
-
+//
+//  EXECUTE xschem.tcl
+//
  if(Tcl_EvalFile(interp, name)==TCL_ERROR) {
      fprintf(errfp, "Tcl_AppInit() err 5: cannot execute %s, probably due to a syntax error\n", name);
      fprintf(errfp, "\n%s\n", Tcl_GetStringResult(interp));
@@ -772,7 +799,11 @@ int Tcl_AppInit(Tcl_Interp *inter)
      return TCL_ERROR; // 20121110
  }
 
-// set global variables fetching data from tcl code 25122002
+ //
+ //  END EXECUTE xschem.tcl
+ //
+
+ // set global variables fetching data from tcl code 25122002
  if(netlist_type==-1) {
   if(!strcmp(Tcl_GetVar(interp, "netlist_type", TCL_GLOBAL_ONLY),"vhdl") ) netlist_type=CAD_VHDL_NETLIST;
   else if(!strcmp(Tcl_GetVar(interp, "netlist_type", TCL_GLOBAL_ONLY),"verilog") ) netlist_type=CAD_VERILOG_NETLIST;
@@ -808,7 +839,10 @@ int Tcl_AppInit(Tcl_Interp *inter)
  cadlayers=atoi(Tcl_GetVar(interp, "cadlayers", TCL_GLOBAL_ONLY));
  if(debug_var==-10) debug_var=0;
 
-// [m]allocate dynamic memory
+ //
+ //  [m]allocate dynamic memory
+ //
+
  alloc_data();
 
  // 20150327 create undo directory
@@ -840,7 +874,10 @@ int Tcl_AppInit(Tcl_Interp *inter)
 
  compile_font();
 
-//  ************ X INITIALIZATION *******************
+ //
+ //  X INITIALIZATION
+ //
+
  if( has_x ) {
     mainwindow=Tk_MainWindow(interp);
     if(!mainwindow) {
@@ -992,13 +1029,17 @@ int Tcl_AppInit(Tcl_Interp *inter)
 
  } // if(has_x)
  x_initialized=1;
-//  ************ END X INITIALIZATION *******************
 
+ // 
+ //  END X INITIALIZATION
+ //
 
-// we look here at user options, and act accordingly before going to interactive mode
  init_done=1;  // 20171008 moved before option processing, otherwise xwin_exit will not be invoked
                // leaving undo buffer and other garbage around.
 
+ //
+ //  START PROCESSING USER OPTIONS
+ //
 
  if(filename) {
     char str[1024];  // 20161122 overflow safe
@@ -1066,7 +1107,9 @@ int Tcl_AppInit(Tcl_Interp *inter)
    Tcl_Eval(interp, "exit");
  }
 
-// end processing user options
+ //
+ //  END PROCESSING USER OPTIONS
+ //
 
  if(!no_readline) {
    Tcl_Eval(interp, " package require tclreadline ; ::tclreadline::Loop " ) ;

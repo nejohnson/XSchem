@@ -540,7 +540,7 @@ void copy_objects(int what)
             y[j] = polygon[c][n].y[j];
           }
         }
-        drawpolygon(k,  NOW, x, y, polygon[c][n].points);
+        drawpolygon(k,  NOW, x, y, polygon[c][n].points, polygon[c][n].fill); // 20180914 added fill
         selectedgroup[i].n=lastpolygon[c];
         store_polygon(-1, x, y, polygon[c][n].points, c, polygon[c][n].sel, polygon[c][n].prop_ptr);
         polygon[c][n].sel=0;
@@ -857,7 +857,8 @@ void move_objects(int what, int merge, double dx, double dy)
         }
         bbox(ADD, bx1, by1, bx2, by2);
       }
-      drawpolygon(k,  NOW, polygon[c][n].x, polygon[c][n].y, polygon[c][n].points);
+      // 20180914 added fill
+      drawpolygon(k,  NOW, polygon[c][n].x, polygon[c][n].y, polygon[c][n].points, polygon[c][n].fill);
       break;
 
      case RECT:

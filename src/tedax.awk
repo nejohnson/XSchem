@@ -75,6 +75,8 @@ $1=="device"||$1=="footprint"{
   pin_name = $4
   net_name=$3
   slotted=nn>1? 1:0
+  # even for unsed slots initialize the arr[] array.
+  # conn lines need not to be printed but pinslot and pinidx lines do.
   for(i=1; i<=numslots;i++) {
     curr_pin = (nn>1) ? pinlist_arr[i]: pinlist_arr[1]
     if(!(inst_name, curr_pin) in arr || arr[inst_name, curr_pin]=="" || arr[inst_name, curr_pin] ~/^--UNCONN--/) {
@@ -83,7 +85,10 @@ $1=="device"||$1=="footprint"{
       } else {
         arr[inst_name, curr_pin]="--UNCONN--" " " pin_index " " pin_name " " i " " slotted
       }
+    # hidden connections (VCC, VSS on slotted devices, usually) specified on instance have higher
+    # precedence w.r.t. default specified in symbol.
     } else if($0 ~ /# instance_based/ && curr_pin==pin_number) {
+      # overwrite with instance specified net name.
       arr[inst_name, curr_pin]=net_name " " pin_index " " pin_name " " i " " slotted
     }
   }

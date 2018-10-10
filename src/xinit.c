@@ -21,6 +21,7 @@
  */
 
 #include "xschem.h"
+#include <pwd.h> /* getpwuid */
 
 static int init_done=0; // 20150409 to avoid double call by Xwindows close and TclExitHandler
 
@@ -160,7 +161,7 @@ void windowid()
 
     mainwindow=Tk_MainWindow(interp);
     display = Tk_Display(mainwindow);
-    Tcl_Eval(interp, "winfo id .");
+    tcleval( "winfo id .");
     sscanf(Tcl_GetStringResult(interp), "0x%x", (unsigned int *) &ww);
     framewin = ww;
     XQueryTree(display, framewin, &rootwindow, &parent_of_topwindow, &framewin_child_ptr, &framweindow_nchildren);
@@ -216,52 +217,52 @@ void xwin_exit(void)
  if(debug_var>=1) fprintf(errfp, "xwin_exit(): clearing drawing data structures\n"); 
  clear_drawing();
  if(debug_var>=1) fprintf(errfp, "xwin_exit(): freeing graphic primitive arrays\n"); 
- my_free(wire);
+ my_free(&wire);
  if(debug_var>=1) fprintf(errfp, "xwin_exit(): wire\n"); 
- my_free(gridpoint);
+ my_free(&gridpoint);
  if(debug_var>=1) fprintf(errfp, "xwin_exit(): gridpoint\n"); 
- my_free(textelement);
+ my_free(&textelement);
  if(debug_var>=1) fprintf(errfp, "xwin_exit(): textelement\n"); 
  for(i=0;i<cadlayers;i++) {
-      my_free(color_array[i]);
-      my_free(pixdata[i]);
-      my_free(rect[i]);
-      my_free(line[i]);
+      my_free(&color_array[i]);
+      my_free(&pixdata[i]);
+      my_free(&rect[i]);
+      my_free(&line[i]);
  }
  if(debug_var>=1) fprintf(errfp, "xwin_exit(): freeing instances\n");
- my_free(inst_ptr);
+ my_free(&inst_ptr);
  if(debug_var>=1) fprintf(errfp, "xwin_exit(): freeing selected group array\n");
-  my_free(selectedgroup);
+  my_free(&selectedgroup);
  if(debug_var>=1) fprintf(errfp, "xwin_exit(): removing symbols\n");
  remove_symbols();
  for(i=0;i<max_symbols;i++) {
-    my_free(instdef[i].lineptr);
-    my_free(instdef[i].boxptr);
-    my_free(instdef[i].lines);
-    my_free(instdef[i].polygons); // 20171115
-    my_free(instdef[i].rects);
+    my_free(&instdef[i].lineptr);
+    my_free(&instdef[i].boxptr);
+    my_free(&instdef[i].lines);
+    my_free(&instdef[i].polygons); // 20171115
+    my_free(&instdef[i].rects);
  }
- my_free(instdef);
- my_free(rect);
- my_free(line);
- my_free(fill_type);
- my_free(pixdata);
- my_free(lastrect);
- my_free(polygon); // 20171115
- my_free(lastpolygon); // 20171115
- my_free(lastline);
- my_free(max_rects);
- my_free(max_polygons); // 20171115
- my_free(max_lines);
- my_free(pixmap);
- my_free(gc);
- my_free(gcstipple);
- my_free(color_array);
+ my_free(&instdef);
+ my_free(&rect);
+ my_free(&line);
+ my_free(&fill_type);
+ my_free(&pixdata);
+ my_free(&lastrect);
+ my_free(&polygon); // 20171115
+ my_free(&lastpolygon); // 20171115
+ my_free(&lastline);
+ my_free(&max_rects);
+ my_free(&max_polygons); // 20171115
+ my_free(&max_lines);
+ my_free(&pixmap);
+ my_free(&gc);
+ my_free(&gcstipple);
+ my_free(&color_array);
  if(debug_var>=1) fprintf(errfp, "xwin_exit(): removing font\n");
- for(i=0;i<127;i++) my_free(character[i]);
+ for(i=0;i<127;i++) my_free(&character[i]);
 
  if(debug_var>=1) fprintf(errfp, "xwin_exit(): closed display\n");
- my_free(filename);
+ my_free(&filename);
  delete_undo(); // 20150327
  if(debug_var>=1) fprintf(errfp, "xwin_exit(): deleted undo buffer\n");
  if(errfp!=stderr) fclose(errfp);
@@ -333,12 +334,12 @@ void init_color_array(int skip_background, double dim)
 {
  char s[256]; // overflow safe 20161122
  int i;
- int r, g, b; // 20171123
+ unsigned int r, g, b; // 20171123
  double rr, gg, bb; // 20171123
  for(i=0;i<cadlayers;i++) {
    my_snprintf(s, S(s), "lindex $colors %d",i);
-   Tcl_EvalEx(interp, s, -1, TCL_EVAL_GLOBAL);
-   if(debug_var>=1) fprintf(errfp, "init_color_array(): color:%s\n",Tcl_GetStringResult(interp));
+   tcleval(s);
+   if(debug_var>=2) fprintf(errfp, "init_color_array(): color:%s\n",Tcl_GetStringResult(interp));
 
    sscanf(Tcl_GetStringResult(interp), "#%02x%02x%02x", &r, &g, &b);// 20171123
    rr=r; gg=g; bb=b;
@@ -404,77 +405,77 @@ void alloc_data()
  max_selected=MAXGROUP;
  textelement=my_calloc(max_texts,sizeof(Text));
  if(textelement==NULL){
-   fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+   fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
  wire=my_calloc(max_wires,sizeof(Wire));
  if(wire==NULL){
-   fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+   fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
  gridpoint=(XPoint*)my_calloc(CADMAXGRIDPOINTS,sizeof(XPoint));
  if(gridpoint==NULL){
-   fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+   fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
  inst_ptr=my_calloc(max_instances , sizeof(Instance) );
  if(inst_ptr==NULL){
-   fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+   fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
  instdef=my_calloc(max_symbols , sizeof(Instdef) );
  if(instdef==NULL){
-   fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+   fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
  for(i=0;i<max_symbols;i++) {
    instdef[i].lineptr=my_calloc(cadlayers, sizeof(Line *));
    if(instdef[i].lineptr==NULL){
-     fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+     fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
    }
 
    instdef[i].polygonptr=my_calloc(cadlayers, sizeof(Polygon *));
    if(instdef[i].polygonptr==NULL){
-     fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+     fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
    }
 
    instdef[i].boxptr=my_calloc(cadlayers, sizeof(Line *));
    if(instdef[i].boxptr==NULL){
-     fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+     fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
    }
 
    instdef[i].lines=my_calloc(cadlayers, sizeof(int));
    if(instdef[i].lines==NULL){
-     fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+     fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
    }
 
    instdef[i].rects=my_calloc(cadlayers, sizeof(int));
    if(instdef[i].rects==NULL){
-     fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+     fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
    }
    instdef[i].polygons=my_calloc(cadlayers, sizeof(int)); // 20171115
    if(instdef[i].polygons==NULL){
-     fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+     fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
    }
  }
 
  selectedgroup=my_calloc(max_selected, sizeof(Selected));
  if(selectedgroup==NULL){
-   fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+   fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
  max_rects=my_calloc(cadlayers, sizeof(int));
  if(max_rects==NULL){
-   fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+   fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
  max_polygons=my_calloc(cadlayers, sizeof(int)); // 20171115
  if(max_polygons==NULL){
-   fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+   fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
  max_lines=my_calloc(cadlayers, sizeof(int));
  if(max_lines==NULL){
-   fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+   fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
  for(i=0;i<cadlayers;i++)
@@ -486,17 +487,17 @@ void alloc_data()
 
  rect=my_calloc(cadlayers, sizeof(Box *));
  if(rect==NULL){
-   fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+   fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
  line=my_calloc(cadlayers, sizeof(Line *));
  if(rect==NULL){
-   fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+   fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
  polygon=my_calloc(cadlayers, sizeof(Polygon *));
  if(polygon==NULL){
-   fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+   fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
 
@@ -504,70 +505,70 @@ void alloc_data()
  {
   rect[i]=my_calloc(max_rects[i],sizeof(Box));
   if(rect[i]==NULL){
-    fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
   }
 
   polygon[i]=my_calloc(max_polygons[i],sizeof(Polygon));
   if(polygon[i]==NULL){
-    fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
   }
 
   line[i]=my_calloc(max_lines[i],sizeof(Line));
   if(line[i]==NULL){
-    fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
   }
  }
 
  lastrect=my_calloc(cadlayers, sizeof(int));
  if(lastrect==NULL){
-   fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+   fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
  lastpolygon=my_calloc(cadlayers, sizeof(int)); // 20171115
  if(lastpolygon==NULL){
-   fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+   fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
  lastline=my_calloc(cadlayers, sizeof(int));
  if(lastline==NULL){
-   fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+   fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
  pixmap=my_calloc(cadlayers, sizeof(Pixmap));
  if(pixmap==NULL){
-   fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+   fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
  color_array=my_calloc(cadlayers, sizeof(char*));
  if(color_array==NULL){
-   fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+   fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
  gc=my_calloc(cadlayers, sizeof(GC));
  if(gc==NULL){
-   fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+   fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
  gcstipple=my_calloc(cadlayers, sizeof(GC));
  if(gcstipple==NULL){
-   fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+   fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
  fill_type=my_calloc(cadlayers, sizeof(int));
  if(fill_type==NULL){
-   fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+   fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
  pixdata=my_calloc(cadlayers, sizeof(char*));
  if(pixdata==NULL){
-   fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+   fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
  for(i=0;i<cadlayers;i++)
  {
    pixdata[i]=my_calloc(32, sizeof(char));
    if(pixdata[i]==NULL){
-     fprintf(errfp, "Tcl_AppInit(): calloc error\n");Tcl_Eval(interp, "exit");
+     fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
    }
  }
 }
@@ -577,17 +578,17 @@ int build_colors(int skip_background, double dim) // 20171113
 {
     int i;
     if(dark_colorscheme) {
-      Tcl_EvalEx(interp, "llength $dark_colors", -1, TCL_EVAL_GLOBAL);
+      tcleval("llength $dark_colors");
       if(atoi(Tcl_GetStringResult(interp))>=cadlayers){
-        Tcl_EvalEx(interp, "set colors $dark_colors", -1, TCL_EVAL_GLOBAL);
+        tcleval("set colors $dark_colors");
       }
     } else {
-      Tcl_EvalEx(interp, "llength $light_colors", -1, TCL_EVAL_GLOBAL);
+      tcleval("llength $light_colors");
       if(atoi(Tcl_GetStringResult(interp)) >=cadlayers){
-        Tcl_EvalEx(interp, "set colors $light_colors", -1, TCL_EVAL_GLOBAL);
+        tcleval("set colors $light_colors");
       }
     }
-    Tcl_EvalEx(interp, "llength $colors", -1, TCL_EVAL_GLOBAL);
+    tcleval("llength $colors");
     if(atoi(Tcl_GetStringResult(interp))<cadlayers){
       fprintf(errfp,"Tcl var colors not set correctly\n");
       return -1; // fail
@@ -608,7 +609,7 @@ int build_colors(int skip_background, double dim) // 20171113
       XLookupColor(display, colormap, color_array[i], &xcolor_exact, &xcolor);
       xcolor_array[i] = xcolor;
     }
-    Tcl_EvalEx(interp, "reconfigure_layers_menu", -1, TCL_EVAL_GLOBAL);
+    tcleval("reconfigure_layers_menu");
     if(!skip_background) {
       XSetWindowBackground(display, window, color_index[0]); // 20171124
     }
@@ -619,7 +620,7 @@ int build_colors(int skip_background, double dim) // 20171113
 void tclexit(ClientData s)
 {
   if(debug_var>=1) fprintf(errfp, "tclexit() INVOKED\n");
-  xwin_exit();
+  if(init_done) xwin_exit();
 }
 
 #if HAS_XCB==1
@@ -628,7 +629,6 @@ static xcb_visualtype_t *find_visual(xcb_connection_t *xcbconn, xcb_visualid_t v
 {
     xcb_screen_iterator_t screen_iter = xcb_setup_roots_iterator(xcb_get_setup(xcbconn));
 
-    printf("\n");
     for (; screen_iter.rem; xcb_screen_next(&screen_iter)) {
         xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(screen_iter.data);
         for (; depth_iter.rem; xcb_depth_next(&depth_iter)) {
@@ -645,13 +645,42 @@ static xcb_visualtype_t *find_visual(xcb_connection_t *xcbconn, xcb_visualid_t v
 }
 #endif //HAS_XCB
 
+
+int source_tcl_file(char *s)
+{
+  char tmp[1024];
+  if(Tcl_EvalFile(interp, s)==TCL_ERROR) { 
+    fprintf(errfp, "Tcl_AppInit() error: can not execute %s, please fix:\n", s);
+    fprintf(errfp, Tcl_GetStringResult(interp));
+    fprintf(errfp, "\n");
+    my_snprintf(tmp, S(tmp), "tk_messageBox -icon error -type ok -message \
+       {Tcl_AppInit() err 1: can not execute %s, please fix:\n %s}",
+       s, Tcl_GetStringResult(interp));
+    if(has_x) {
+      tcleval( "wm withdraw ."); // 20161217
+      tcleval( tmp); // 20161217
+      Tcl_Exit(EXIT_FAILURE);
+    }
+    return TCL_ERROR;
+  }
+  return TCL_OK;
+}
+
 int Tcl_AppInit(Tcl_Interp *inter)
 {
- static char *name=NULL; // overflow safe 20161122
- char tmp[1024]; // 20161122 overflow safe
+ char name[PATH_MAX]; // overflow safe 20161122
+ char tmp[PATH_MAX+100]; // 20161122 overflow safe
  int i;
  int initfile_found; // 20170330
  struct stat buf;
+ const char *home_buff;
+
+ /* get PWD and HOME */
+ getcwd(pwd_dir, PATH_MAX);
+ if ((home_buff = getenv("HOME")) == NULL) {
+   home_buff = getpwuid(getuid())->pw_dir;
+ }
+ my_strncpy(home_dir, home_buff, S(home_dir));
 
  #if HAS_XCB==1
  xcb_render_query_pict_formats_reply_t *formats_reply;
@@ -669,135 +698,138 @@ int Tcl_AppInit(Tcl_Interp *inter)
  interp=inter;
  Tcl_Init(interp);
  if(has_x) Tk_Init(interp);
- if(!has_x)  Tcl_SetVar(interp, "no_x", "1", TCL_GLOBAL_ONLY);
+ if(!has_x)  tclsetvar("no_x","1");
 
  Tcl_CreateExitHandler(tclexit, 0);
+
+ 
+ tclsetvar("XSCHEM_DESIGN_PATH", ""); /* avoid errors if uninitialized and used in .xschem */
+
+
+
+ // ... try getting XSCHEM_HOME_DIR from the environment...
+ if(getenv("XSCHEM_HOME_DIR")) { // 20121111
+   tclsetvar("XSCHEM_HOME_DIR",getenv("XSCHEM_HOME_DIR"));
+ // try current dir
+ } else if( !stat("../src/xschem.tcl", &buf)  && !stat("../xschem_library", &buf)) {
+   tclsetvar("XSCHEM_HOME_DIR",pwd_dir); /* for testing xschem builds in src dir*/
+   my_snprintf(tmp, S(tmp), "file normalize %s/../xschem_library", pwd_dir);
+   tcleval(tmp);
+   tclsetvar("XSCHEM_DESIGN_PATH", Tcl_GetStringResult(interp));
+ } else if( !stat(PREFIX "/share/xschem", &buf) ) {  // 20180918
+   tclsetvar("XSCHEM_HOME_DIR",PREFIX "/share/xschem");
+ // ... else give up searching, may set XSCHEM_DESIGN_PATH later after loading xschemrc and .xschem
+ }
+
 
 //
 //  START LOOKING FOR .xschem
 //
 
+
+
+ //
+ //  EXECUTE system xschemrc *****
+ //
+ if(tclgetvar("XSCHEM_HOME_DIR")) {
+   my_snprintf(name, S(name), "%s/%s",tclgetvar("XSCHEM_HOME_DIR"), "xschemrc" );
+   if(!stat(name, &buf)) {
+     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): sourcing %s\n", name);
+     source_tcl_file(name);
+   }
+ }
+
+
  initfile_found=0; // 20170330
- if( getenv("PWD") ) { // 20161204
-   my_strdup(&name, getenv("PWD") );
-   my_strcat(&name, "/.xschem");
-   if(!stat(name, &buf)) initfile_found=1; // 20170330
- }
- if(!getenv("HOME")) {
-   fprintf(errfp, "Tcl_AppInit() err 2: HOME env var not set\n");
-   if(has_x) {
-     Tcl_Eval(interp,
-       "tk_messageBox -icon error -type ok -message \"Tcl_AppInit() err 2: HOME env variable not set, please fix it\"");
-   }
-   return TCL_ERROR;
- } else if( !initfile_found ) {
-   my_strdup(&name, getenv("HOME") );
-   my_strcat(&name, "/.xschem");
+ my_snprintf(name, S(name), "%s/.xschem", pwd_dir);
+ if(!stat(name, &buf)) initfile_found=1; // 20170330
+ if( !initfile_found ) {
+   my_snprintf(name, S(name), "%s/.xschem", home_dir);
    if(!stat(name, &buf)) initfile_found=1; // 20170330
  }
 
+ //
+ //  EXECUTE .xschem *****
+ //
  if(initfile_found) {  // file exists 20121110 // used initfile_found, 20170330
-   //
-   //  EXECUTE .xschem *****
-   //
-   if(Tcl_EvalFile(interp, name)==TCL_ERROR) { // source ~/.xschem 20121110
-     fprintf(errfp, "Tcl_AppInit() err 1: can not execute .xschem, please fix:\n");
-     fprintf(errfp, Tcl_GetStringResult(interp));
-     fprintf(errfp, "\n");
-     my_snprintf(tmp, S(tmp), "tk_messageBox -icon error -type ok -message \
-        {Tcl_AppInit() err 1: can not execute .xschem, please fix:\n %s}",
-        Tcl_GetStringResult(interp));
-     if(has_x) {
-       Tcl_Eval(interp, "wm withdraw ."); // 20161217
-       Tcl_Eval(interp, tmp); // 20161217
-       Tcl_Eval(interp, "exit");
-     }
-     return TCL_ERROR;
-   }
+   if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): sourcing %s\n", name);
+   source_tcl_file(name);
  }
-
  //
  //  END LOOKING FOR .xschem
  //
 
- if(rainbow_colors) Tcl_SetVar(interp, "rainbow_colors", "1", TCL_GLOBAL_ONLY); // 20171013
+ if(rainbow_colors) tclsetvar("rainbow_colors","1"); // 20171013
  
+ // check old XSCHEM_DESIGN_DIR for compatibility
+ if(tclgetvar("XSCHEM_DESIGN_DIR") ) {
+   tclsetvar("XSCHEM_DESIGN_PATH", tclgetvar("XSCHEM_DESIGN_DIR"));
+ }
+
  //
  //  START LOOKING FOR xschem.tcl
  //
-
- // XSCHEM_HOME_DIR TCL var not defined...
- if(!Tcl_GetVar(interp, "XSCHEM_HOME_DIR",TCL_GLOBAL_ONLY)) { 
-   // ... try getting it from the environment...
-   if(getenv("XSCHEM_HOME_DIR")) { // 20121111
-     Tcl_SetVar(interp, "XSCHEM_HOME_DIR", getenv("XSCHEM_HOME_DIR"), TCL_GLOBAL_ONLY);
-   // ... or try /opt/XSCHEM ...
-   } else if( !stat("/opt/xschem", &buf) ) { 
-     Tcl_SetVar(interp, "XSCHEM_HOME_DIR", "/opt/xschem", TCL_GLOBAL_ONLY);
-   // ... or try /usr/share/xschem ...
-   } else if( !stat("/usr/share/xschem", &buf) ) { 
-     Tcl_SetVar(interp, "XSCHEM_HOME_DIR", "/usr/share/xschem", TCL_GLOBAL_ONLY);
-   // ... else give up.
-   } else {			// if XSCHEM_HOME_DIR is not defined we must give up... 20121110
-     fprintf(errfp, "Tcl_AppInit() err 3: cannot execute xschem.tcl\n");
-     if(has_x) {
-       Tcl_Eval(interp,
-         "tk_messageBox -icon error -type ok -message \"Tcl_AppInit() err 3: xschem.tcl not found, \
-           you are probably missing XSCHEM_HOME_DIR\"");
-     }
-     Tcl_ResetResult(interp);
-     Tcl_AppendResult(interp, "Tcl_AppInit() err 3: xschem.tcl not found, you are probably missing XSCHEM_HOME_DIR",NULL);
-     return TCL_ERROR; // 20121110
+ if(!tclgetvar("XSCHEM_HOME_DIR")) {
+   fprintf(errfp, "Tcl_AppInit() err 3: cannot find xschem.tcl\n");
+   if(has_x) {
+     tcleval( "wm withdraw ."); // 20161217
+     tcleval(
+       "tk_messageBox -icon error -type ok -message \"Tcl_AppInit() err 3: xschem.tcl not found, "
+       "you are probably missing XSCHEM_HOME_DIR\"");
    }
+   Tcl_ResetResult(interp);
+   Tcl_AppendResult(interp, "Tcl_AppInit() err 3: xschem.tcl not found, "
+                            "you are probably missing XSCHEM_HOME_DIR",NULL);
+   Tcl_Exit(EXIT_FAILURE);
+   return TCL_ERROR; // 20121110
  }
 
  //
  //  END LOOKING FOR xschem.tcl
  //
 
- if(getenv("XSCHEM_DESIGN_DIR") != NULL) {   // great cleanup done here 20121110
-   Tcl_SetVar(interp, "XSCHEM_DESIGN_DIR", getenv("XSCHEM_DESIGN_DIR"), TCL_GLOBAL_ONLY);
+ if(getenv("XSCHEM_DESIGN_PATH")) { // 20121111
+   tclsetvar("XSCHEM_DESIGN_PATH",getenv("XSCHEM_DESIGN_PATH"));
  }
 
- if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): XSCHEM_HOME_DIR=%s  XSCHEM_DESIGN_DIR=%s\n",
-       Tcl_GetVar(interp, "XSCHEM_HOME_DIR", TCL_GLOBAL_ONLY), 
-       Tcl_GetVar(interp, "XSCHEM_DESIGN_DIR", TCL_GLOBAL_ONLY) 
+ if( !tclgetvar("XSCHEM_DESIGN_PATH") ) {
+   tclsetvar("XSCHEM_DESIGN_PATH", XSCHEM_LIBRARY_PATH);
+ }
+
+ if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): XSCHEM_HOME_DIR=%s  XSCHEM_DESIGN_PATH=%s\n",
+       tclgetvar("XSCHEM_HOME_DIR"), 
+       tclgetvar("XSCHEM_DESIGN_PATH") ? tclgetvar("XSCHEM_DESIGN_PATH") : "NULL"
  );
  if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done step a of xinit()\n");
+
+ //
+ // CREATE XSCHEM 'xschem' COMMAND
+ //
  Tcl_CreateCommand(interp, "xschem",   (myproc *) xschem, NULL, NULL);
+
  if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done step a1 of xinit()\n");
-
- my_strdup(&name,Tcl_GetVar(interp, "XSCHEM_HOME_DIR", TCL_GLOBAL_ONLY));
- my_strcat(&name,"/xschem.tcl");
-
+ 
+ //
+ //  EXECUTE xschem.tcl
+ //
+ my_snprintf(name, S(name), "%s/%s", tclgetvar("XSCHEM_HOME_DIR"), "xschem.tcl");
  if(stat(name, &buf) ) {
    fprintf(errfp, "Tcl_AppInit() err 4: cannot find %s\n", name);
    if(has_x) {
-     Tcl_Eval(interp,
-       "tk_messageBox -icon error -type ok -message \"Tcl_AppInit() err 4: xschem.tcl not found, installation problem or undefined  XSCHEM_HOME_DIR\"");
+     tcleval( "wm withdraw ."); // 20161217
+     tcleval(
+       "tk_messageBox -icon error -type ok -message \"Tcl_AppInit() err 4: xschem.tcl not found, "
+         "installation problem or undefined  XSCHEM_HOME_DIR\"");
    }
    Tcl_ResetResult(interp);
-   Tcl_AppendResult(interp, "Tcl_AppInit() err 4: xschem.tcl not found, you are probably missing XSCHEM_HOME_DIR\n",NULL);
+   Tcl_AppendResult(interp, "Tcl_AppInit() err 4: xschem.tcl not found, "
+                            "you are probably missing XSCHEM_HOME_DIR\n",NULL);
+   Tcl_Exit(EXIT_FAILURE);
    return TCL_ERROR; // 20121110
  }
- 
-//
-//  EXECUTE xschem.tcl
-//
- if(Tcl_EvalFile(interp, name)==TCL_ERROR) {
-     fprintf(errfp, "Tcl_AppInit() err 5: cannot execute %s, probably due to a syntax error\n", name);
-     fprintf(errfp, "\n%s\n", Tcl_GetStringResult(interp));
-     if(has_x) {
-       my_snprintf(tmp, S(tmp), "tk_messageBox -icon error -type ok -message \
-          {Tcl_AppInit() err 5: can not execute xschem.tcl, please fix:\n %s}",
-          Tcl_GetStringResult(interp));
-       Tcl_Eval(interp, "wm withdraw ."); // 20161217
-       Tcl_Eval(interp, tmp); // 20161217
-       Tcl_Eval(interp, "exit");
-     }
-     Tcl_AppendResult(interp, "\nTcl_AppInit() err 5: can not execute xschem.tcl, probaby due to a syntax error\n",NULL);
-     return TCL_ERROR; // 20121110
- }
+ if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): sourcing %s\n", name);
+ source_tcl_file(name);
+ if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done executing xschem.tcl\n");
 
  //
  //  END EXECUTE xschem.tcl
@@ -805,38 +837,39 @@ int Tcl_AppInit(Tcl_Interp *inter)
 
  // set global variables fetching data from tcl code 25122002
  if(netlist_type==-1) {
-  if(!strcmp(Tcl_GetVar(interp, "netlist_type", TCL_GLOBAL_ONLY),"vhdl") ) netlist_type=CAD_VHDL_NETLIST;
-  else if(!strcmp(Tcl_GetVar(interp, "netlist_type", TCL_GLOBAL_ONLY),"verilog") ) netlist_type=CAD_VERILOG_NETLIST;
-  else if(!strcmp(Tcl_GetVar(interp, "netlist_type", TCL_GLOBAL_ONLY),"tedax") ) netlist_type=CAD_TEDAX_NETLIST;
+  if(!strcmp(tclgetvar("netlist_type"),"vhdl") ) netlist_type=CAD_VHDL_NETLIST;
+  else if(!strcmp(tclgetvar("netlist_type"),"verilog") ) netlist_type=CAD_VERILOG_NETLIST;
+  else if(!strcmp(tclgetvar("netlist_type"),"tedax") ) netlist_type=CAD_TEDAX_NETLIST;
   else netlist_type=CAD_SPICE_NETLIST;
  } else {
-  if(netlist_type==CAD_VHDL_NETLIST)  Tcl_SetVar(interp,"netlist_type","vhdl",TCL_GLOBAL_ONLY);
-  else if(netlist_type==CAD_VERILOG_NETLIST)  Tcl_SetVar(interp,"netlist_type","verilog",TCL_GLOBAL_ONLY);
-  else if(netlist_type==CAD_TEDAX_NETLIST)  Tcl_SetVar(interp,"netlist_type","tedax",TCL_GLOBAL_ONLY);
-  else Tcl_SetVar(interp,"netlist_type","spice",TCL_GLOBAL_ONLY);
+  if(netlist_type==CAD_VHDL_NETLIST)  tclsetvar("netlist_type","vhdl");
+  else if(netlist_type==CAD_VERILOG_NETLIST)  tclsetvar("netlist_type","verilog");
+  else if(netlist_type==CAD_TEDAX_NETLIST)  tclsetvar("netlist_type","tedax");
+  else tclsetvar("netlist_type","spice");
  }
 
- split_files=atoi(Tcl_GetVar(interp, "split_files", TCL_GLOBAL_ONLY));
- hspice_netlist=atoi(Tcl_GetVar(interp, "hspice_netlist", TCL_GLOBAL_ONLY));
- netlist_show=atoi(Tcl_GetVar(interp, "netlist_show", TCL_GLOBAL_ONLY));
- fullscreen=atoi(Tcl_GetVar(interp, "fullscreen", TCL_GLOBAL_ONLY));
+ split_files=atoi(tclgetvar("split_files"));
+ hspice_netlist=atoi(tclgetvar("hspice_netlist"));
+ netlist_show=atoi(tclgetvar("netlist_show"));
+ fullscreen=atoi(tclgetvar("fullscreen"));
  if(color_ps==-1) 
-   color_ps=atoi(Tcl_GetVar(interp, "color_ps", TCL_GLOBAL_ONLY));
+   color_ps=atoi(tclgetvar("color_ps"));
  else  {
    my_snprintf(tmp, S(tmp), "%d",color_ps);
-   Tcl_SetVar(interp,"color_ps",tmp,TCL_GLOBAL_ONLY);
+   tclsetvar("color_ps",tmp);
  }
- change_lw=atoi(Tcl_GetVar(interp, "change_lw", TCL_GLOBAL_ONLY));
- incr_hilight=atoi(Tcl_GetVar(interp, "incr_hilight", TCL_GLOBAL_ONLY));
+ change_lw=atoi(tclgetvar("change_lw"));
+ draw_window=atoi(tclgetvar("draw_window"));
+ incr_hilight=atoi(tclgetvar("incr_hilight"));
  if(a3page==-1) 
-   a3page=atoi(Tcl_GetVar(interp, "a3page", TCL_GLOBAL_ONLY));
+   a3page=atoi(tclgetvar("a3page"));
  else  {
    my_snprintf(tmp, S(tmp), "%d",a3page);
-   Tcl_SetVar(interp,"a3page",tmp,TCL_GLOBAL_ONLY);
+   tclsetvar("a3page",tmp);
  }
- enable_stretch=atoi(Tcl_GetVar(interp, "enable_stretch", TCL_GLOBAL_ONLY));
- draw_grid=atoi(Tcl_GetVar(interp, "draw_grid", TCL_GLOBAL_ONLY));
- cadlayers=atoi(Tcl_GetVar(interp, "cadlayers", TCL_GLOBAL_ONLY));
+ enable_stretch=atoi(tclgetvar("enable_stretch"));
+ draw_grid=atoi(tclgetvar("draw_grid"));
+ cadlayers=atoi(tclgetvar("cadlayers"));
  if(debug_var==-10) debug_var=0;
 
  //
@@ -846,19 +879,18 @@ int Tcl_AppInit(Tcl_Interp *inter)
  alloc_data();
 
  // 20150327 create undo directory
- my_strdup(&undo_dirname, getenv("HOME"));
- my_strcat(&undo_dirname, "/xschem_undo_XXXXXX");
-
- if( !mkdtemp(undo_dirname) ) {
-   if(debug_var>=1) fprintf(errfp, "xinit(): problems creating tmp undo dir\n");
-   Tcl_Eval(interp, "exit");
+ // 20180923 no more mkdtemp (portability issues)
+ if( !my_strdup(&undo_dirname, create_tmpdir("xschem_undo_") )) {
+   fprintf(errfp, "xinit(): problems creating tmp undo dir\n");
+   tcleval( "exit");
  }
+ if(debug_var>=1) fprintf(errfp, "undo_dirname=%s\n", undo_dirname);
 
  init_pixdata();
  init_color_array(0, 0.0);
  my_snprintf(tmp, S(tmp), "%d",debug_var);
- Tcl_SetVar(interp,"tcl_debug",tmp ,TCL_GLOBAL_ONLY);
- if(flat_netlist) Tcl_SetVar(interp,"flat_netlist","1",TCL_GLOBAL_ONLY);
+ tclsetvar("tcl_debug",tmp );
+ if(flat_netlist) tclsetvar("flat_netlist","1");
 
  lw=1;
  areaw = CADWIDTH+4*lw;  // clip area extends 1 pixel beyond physical window area
@@ -873,6 +905,12 @@ int Tcl_AppInit(Tcl_Interp *inter)
  xrect[0].height = CADHEIGHT;
 
  compile_font();
+
+
+ // my_snprintf(tmp, S(tmp), "cd {%s}", pwd_dir);
+ // tcleval(tmp); /* change TCL current dir to pwd after loading font 
+ //                * (load_schematic changes pwd to schematic dir) */
+
 
  //
  //  X INITIALIZATION
@@ -927,7 +965,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
                 formats[i].direct.alpha_shift == 24)
                     format_rgba = formats[i];
     }
-    free(formats_reply);
+    my_free(&formats_reply);
     ///----------------------------------------------------
     // /20171125
     #endif //HAS_XCB
@@ -993,8 +1031,8 @@ int Tcl_AppInit(Tcl_Interp *inter)
       save_ctx = cairo_create(save_sfc);
 
       // load font from tcl 20171112
-      Tcl_EvalEx(interp,"xschem set cairo_font_name $cairo_font_name", -1, TCL_EVAL_GLOBAL);
-      Tcl_SetVar(interp, "has_cairo", "1", TCL_GLOBAL_ONLY);
+      tcleval("xschem set cairo_font_name $cairo_font_name");
+      tclsetvar("has_cairo","1");
       cairo_select_font_face (ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
       cairo_set_font_size (ctx, 20);
       cairo_select_font_face (save_ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
@@ -1013,7 +1051,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
 
     set_linewidth();
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done xinit()\n");
-    winattr.backing_store = WhenMapped; //<<<
+    winattr.backing_store = WhenMapped;
     //winattr.backing_store = NotUseful;
     Tk_ChangeWindowAttributes(tkwindow, CWBackingStore, &winattr);
    
@@ -1022,13 +1060,14 @@ int Tcl_AppInit(Tcl_Interp *inter)
              (unsigned long) sizeof(Instance),(unsigned long) sizeof(Instdef)); 
     
     // 20121111
-    Tcl_Eval(interp,"xschem line_width $line_width");
+    tcleval("xschem line_width $line_width");
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): xserver max request size: %d\n", 
                              (int)XMaxRequestSize(display));
 
 
  } // if(has_x)
  x_initialized=1;
+ if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done X init\n");
 
  // 
  //  END X INITIALIZATION
@@ -1042,21 +1081,17 @@ int Tcl_AppInit(Tcl_Interp *inter)
  //
 
  if(filename) {
-    char str[1024];  // 20161122 overflow safe
-    my_snprintf(str, S(str), "get_cell {%s}", filename);
-    tkeval(str);
-    my_strncpy(schematic[currentsch], Tcl_GetStringResult(interp), S(schematic[currentsch]));
+    if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): filename %s given, removing symbols\n", filename);
     remove_symbols();
-    if(strstr(filename,".sym")) load_symbol( NULL);
-    else load_schematic(1, NULL,1);
+    
+    if(strstr(filename,".sym")) load_symbol( filename); /* 20180925.1 */
+    else load_schematic(1, filename, 1); /* 20180925.1 */
  }
  else { 
    char * tmp; // 20121110
-   tmp = (char *) Tcl_GetVar(interp, "XSCHEM_START_WINDOW", TCL_GLOBAL_ONLY); // 20121110
-   if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): tmp=%s\n", tmp);
-
-   if(tmp && tmp[0]) my_strncpy(schematic[currentsch],tmp, S(schematic[currentsch])); // 20070323
-   load_schematic(1, NULL,1);					// 20121110
+   tmp = (char *) tclgetvar("XSCHEM_START_WINDOW"); // 20121110
+   if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): tmp=%s\n", tmp? tmp: "NULL");
+   load_schematic(1, tmp, 1);
  }
  zoom_full(/*no draw */ 0);				// Necessary to tell xschem the 
 							// initial area to display
@@ -1068,7 +1103,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
   }
   if(!filename) {
     fprintf(errfp, "xschem: cant do a netlist without a filename\n");
-    Tcl_Eval(interp, "exit");
+    tcleval( "exit");
   }
   if(netlist_type == CAD_SPICE_NETLIST)
     global_spice_netlist(1);                  // 1 means global netlist
@@ -1082,7 +1117,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
  if(do_print) {
    if(!filename) {
      fprintf(errfp, "xschem: can't do a print without a filename\n");
-     Tcl_Eval(interp, "exit");
+     tcleval( "exit");
    }
    ps_draw();
  }
@@ -1090,21 +1125,21 @@ int Tcl_AppInit(Tcl_Interp *inter)
  if(do_simulation) {
    if(!filename) {
      fprintf(errfp, "xschem: can't do a simulation without a filename\n");
-     Tcl_Eval(interp, "exit");
+     tcleval( "exit");
    }
-   Tcl_Eval(interp, "xschem simulate");
+   tcleval( "xschem simulate");
  }
 
  if(do_waves) {
    if(!filename) {
      fprintf(errfp, "xschem: can't show simulation waves without a filename\n");
-     Tcl_Eval(interp, "exit");
+     tcleval( "exit");
    }
-   Tcl_Eval(interp, "waves [file tail [xschem get schname]]");
+   tcleval( "waves [file tail [xschem get schname]]");
  }
 
  if(quit) {
-   Tcl_Eval(interp, "exit");
+   tcleval( "exit");
  }
 
  //
@@ -1112,7 +1147,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
  //
 
  if(!no_readline) {
-   Tcl_Eval(interp, " package require tclreadline ; ::tclreadline::Loop " ) ;
+   tcleval( "if {![catch {package require tclreadline}]} { ::tclreadline::Loop }" ) ;
  }
 
  if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): returning TCL_OK\n");

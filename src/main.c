@@ -21,95 +21,57 @@
  */
 
 #include "xschem.h"
-#define __USE_GNU
-#include <fenv.h>
 #include <sys/wait.h>
 
-
-void clean_up_child_process(int signal_num)
-{
-  /* remove child process */
-  // int status;
- 
-  //// putting a wait here is dangerous, in some cases
-  //// the program may deadlock....
-  ////
-  if(debug_var>=1) fprintf(errfp, "clean_up_child_process()\n");
-  // wait (&status);
-}
-
 void sig_handler(int s){
-  char emergency_dir[4096];
+  char emergency_prefix[PATH_MAX];
+  const char *emergency_dir;
 
-  // 20150410
+  /* 20150410 */
   if(s==SIGINT) {
     fprintf(errfp, "Use 'exit' to close the program\n");
     return;
   }
-  if(s==SIGCHLD) {
-    fprintf(errfp, "SIGCHLD received\n");
-    return;
-  }
-  my_snprintf(emergency_dir, S(emergency_dir), "%s/xschem_emergencysave_%s_XXXXXX", 
-           getenv("HOME"),
+  /* 20180923 no more mkdtemp */
+  my_snprintf(emergency_prefix, S(emergency_prefix), "xschem_emergencysave_%s_", 
            skip_dir(schematic[currentsch]));
-  if( !mkdtemp(emergency_dir) ) {
-    if(debug_var>=1) fprintf(errfp, "xinit(): problems creating emergency save dir\n");
-    Tcl_Eval(interp, "exit");
+  if( !(emergency_dir = create_tmpdir(emergency_prefix)) ) {
+    fprintf(errfp, "xinit(): problems creating emergency save dir\n");
+    /* tcleval( "exit"); */
+    tcleval("exit");
   }
 
-  rename(undo_dirname, emergency_dir);
+  if(rename(undo_dirname, emergency_dir)) {
+    fprintf(errfp, "rename dir %s to %s failed\n", undo_dirname, emergency_dir);
+  }
   fprintf(errfp, "\nFATAL: signal %d\n", s);
   fprintf(errfp, "while editing: %s\n", skip_dir(schematic[currentsch]));
   fprintf(errfp, "EMERGENCY SAVE DIR: %s\n", emergency_dir);
-  // /20150410
-  // Tcl_Eval(interp, "exit");
-  Tcl_EvalEx(interp, "exit", -1, TCL_EVAL_GLOBAL);
-  // exit(EXIT_FAILURE);
+  /* /20150410 */
+  /* tcleval( "exit"); */
+  /* tcleval("exit"); */
+  exit(EXIT_FAILURE);
 }
+
+void child_handler(int signum) 
+{ 
+    // fprintf(errfp, "SIGCHLD received\n");
+    wait(NULL); 
+} 
 
 int main(int argc, char **argv)
 {
+  signal(SIGINT, sig_handler);
+  signal(SIGSEGV, sig_handler);
+  signal(SIGILL, sig_handler);
+  signal(SIGTERM, sig_handler);
+  signal(SIGFPE, sig_handler);
+  /* signal(SIGCHLD, child_handler); */  /* avoid zombies 20180925 --> conflicts with tcl exec */
 
-  // sig handler that traps CTRL-C
-  struct sigaction sigIntHandler;
-
-  sigIntHandler.sa_handler = sig_handler;
-  sigemptyset(&sigIntHandler.sa_mask);
-  sigIntHandler.sa_flags = 0;
-  // sigIntHandler.sa_flags = SA_NOCLDWAIT;
-  
-  // trap signals // 20150410
-  sigaction(SIGINT, &sigIntHandler, NULL);  // ctrl-C
-  sigaction(SIGFPE, &sigIntHandler, NULL);
-  sigaction(SIGILL, &sigIntHandler, NULL);
-  sigaction(SIGSEGV, &sigIntHandler, NULL);
-  sigaction(SIGTERM, &sigIntHandler, NULL);
-
-  sigIntHandler.sa_handler = clean_up_child_process;
-  sigaction(SIGCHLD, &sigIntHandler, NULL);
-
-  //// enable all fpe exceptions
-  // feenableexcept(FE_ALL_EXCEPT); // enable FPE exceptions
-  feenableexcept( FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW ); // 20150410 enable FPE exceptions
-
-
-/*
-   // 20090916
-   //// avoid zombies, set SA_NOCLDWAIT flag
-   struct sigaction act;
-
-   act.sa_handler = SIG_DFL;
-   sigemptyset(&act.sa_mask);
-   act.sa_flags = SA_NOCLDWAIT;
-    sigaction(SIGCHLD, &act, NULL);
-   // /20090916
-*/
-
-   errfp=stderr; 
-   process_options(argc, argv);
-   if(has_x) Tk_Main(1, argv, Tcl_AppInit);
-   else     Tcl_Main(1, argv, Tcl_AppInit);
-   return 0;
+  errfp=stderr; 
+  process_options(argc, argv);
+  if(has_x) Tk_Main(1, argv, Tcl_AppInit);
+  else     Tcl_Main(1, argv, Tcl_AppInit);
+  return 0;
 }
 

@@ -27,6 +27,8 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+
 typedef struct          // used in expandlabel.y
 {
  char *str;             // label name
@@ -79,39 +81,54 @@ static char *my_strcat2(char *s1, char c, char *s2)
 
  if(s1!=NULL) l1=strlen(s1);
  if(s1!=NULL) l2=strlen(s2);
- res=my_malloc(l1+l2+2); // 2 strings plus spc and '\0'
- *res='\0';
- if(l1) strcpy(res, s1);
- res[l1]=c;
- if(l2) strcpy(res+l1+1, s2);
+ res=my_malloc(l1+l2+2); // 2 strings plus 'c' and '\0'
+ 
+ // 20180923
+ memcpy(res, s1, l1);
+ res[l1] = c;
+ memcpy(res + l1 + 1, s2, l2+1);
+ // *res='\0';
+ // if(l1) strcpy(res, s1);
+ // res[l1]=c;
+ // if(l2) strcpy(res+l1+1, s2);
  return res;
-}
 
+}
+//
+// example:
+// if n==3 and s="a,b,c" return "a,a,a,b,b,b,c,c,c"
+//
 static char *my_strmult2(int n, char *s)
 // if n==0 returns "\0"
 {
  register int i, len;
  register char *pos,*prev;
- char *str;
+ char *str, *ss;
 
  if(n==0) return expandlabel_strdup("");
  len=strlen(s);
  prev=s;
- str=my_malloc( (len+1)*n);
+ ss = str=my_malloc( (len+1)*n);
  str[0]='\0';
  for(pos=s;pos<=s+len;pos++) {
    if(*pos==',' || pos==s+len) {
      for(i=1;i<=n;i++) {
-       strncat(str,prev,pos-prev);
-       if(i<n) strcat(str,",");
+       // strncat(str,prev,pos-prev);
+       memcpy(ss, prev, pos-prev+1); // 20180923
+       //if(i<n) strcat(str,",");
+       ss += pos-prev+1; // 20180923
      }
-     if(*pos==',') strcat(str,",");
+     // if(*pos==',') strcat(str,",");
      prev=pos+1;
    }
  }
  return str;
 }
 
+//
+// example:
+// if n==3 and s="a,b,c" return "a,b,c,a,b,c,a,b,c"
+//
 static char *my_strmult(int n, char *s)
 // if n==0 returns "\0"
 {
@@ -124,7 +141,8 @@ static char *my_strmult(int n, char *s)
  str=pos=my_malloc( (len+1)*n);
  for(i=1;i<=n;i++)
  {
-  strcpy(pos,s);
+  // strcpy(pos,s);
+  memcpy(pos, s, len); // 20180923
   pos[len]=',';
   pos+=len+1;
  } 
@@ -135,6 +153,7 @@ static char *my_strmult(int n, char *s)
 static char *my_strbus(char *s, int *n)
 {
  int i,l;
+ int tmplen;
  char *res=NULL;
  static char *tmp=NULL;
  my_realloc(&res, n[0]*(strlen(s)+20));
@@ -142,9 +161,10 @@ static char *my_strbus(char *s, int *n)
  l=0;
  for(i=1;i<n[0];i++)
  {
-  sprintf(tmp, "%s[%d],", s, n[i]);
-  strcpy(res+l,tmp);
-  l+=strlen(tmp);
+  tmplen = sprintf(tmp, "%s[%d],", s, n[i]);
+  // strcpy(res+l,tmp);
+  memcpy(res+l,tmp, tmplen+1); // 20180923
+  l+=tmplen;
  }
  sprintf(res+l, "%s[%d]", s, n[i]);
  return res;
@@ -193,21 +213,21 @@ input:    /* empty string. allows ctrl-D as input */
 ;
 line:	  list   	{
                          my_strdup( &(dest_string.str),$1.str); //19102004
-                         my_free($1.str); //19102004
+                         my_free(&$1.str); //19102004
                          dest_string.m=$1.m;
 			}
 ;
 list:     B_NAME	{ 
 			 if(debug_var>=3) fprintf(errfp, "yyparse(): B_NAME (%lu) \n", (unsigned long) $1);
 			 $$.str = expandlabel_strdup($1); // 19102004 prima era =$1
-                         my_free($1);  //191020004
+                         my_free(&$1);  //191020004
                          $1=NULL; //191020004
 			 $$.m = 1;
 			}
 	| B_LINE	{
 			 if(debug_var>=3) fprintf(errfp, "yyparse(): B_LINE\n");
 			 $$.str = expandlabel_strdup($1); // 19102004 prima era =$1
-                         my_free($1);  //191020004
+                         my_free(&$1);  //191020004
                          $1=NULL; //191020004
 			 $$.m = 1;
 			}
@@ -217,21 +237,21 @@ list:     B_NAME	{
 			 $$.str=my_strmult2($3,$1.str);
                          if(debug_var>=3) fprintf(errfp, "yyparse(): |%s|\n",$$.str);
 			 $$.m = $3 * $1.m;
-			 my_free($1.str);
+			                   my_free(&$1.str);
                          $1.str=NULL;  // 19102004
 			}
 	| B_NUM '*' list{
 			 if(debug_var>=3) fprintf(errfp, "yyparse(): B_NUM * list\n");
 			 $$.str=my_strmult($1,$3.str);
 			 $$.m = $1 * $3.m;
-			 my_free($3.str);
+			                   my_free(&$3.str);
                          $3.str=NULL; // 19102004
 			}
 	| list ',' list	{ 
 			 if(debug_var>=3) fprintf(errfp, "yyparse(): list , list\n");
 			 $$.str=my_strcat2($1.str, ',', $3.str);
 			 $$.m = $1.m + $3.m;
-			 my_free($1.str), my_free($3.str);
+			 my_free(&$1.str), my_free(&$3.str);
                          $1.str=NULL; // 19102004
                          $3.str=NULL; // 19102004
 			}
@@ -240,7 +260,7 @@ list:     B_NAME	{
 			 if(debug_var>=3) fprintf(errfp, "yyparse(): list B_CAR list\n");
 			 $$.str=my_strcat2($1.str, $2, $3.str);
 			 $$.m = $1.m + $3.m;
-			 my_free($1.str), my_free($3.str);
+			 my_free(&$1.str), my_free(&$3.str);
                          $1.str=NULL; // 19102004
                          $3.str=NULL; // 19102004
 			}
@@ -251,11 +271,11 @@ list:     B_NAME	{
 	| B_NAME  '[' index  ']' 
 			{
 			 if(debug_var>=3) fprintf(errfp, "yyparse(): making bus: n=%d\n",$3[0]);
-			 $$.str=my_strbus($1,$3); my_free($1); 
+			 $$.str=my_strbus($1,$3); my_free(&$1); 
                          $1=NULL; //19102004
 			 if(debug_var>=3) fprintf(errfp, "yyparse(): done making bus: n=%d\n",$3[0]);
 			 $$.m=$3[0];
-			 my_free($3); //19102004
+			 my_free(&$3); //19102004
 			 $3=NULL; //19102004
 			 idxsize=INITIALIDXSIZE;
 			}

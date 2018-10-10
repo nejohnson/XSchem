@@ -326,13 +326,13 @@ static void svg_draw_symbol_outline(int n,int layer,int tmp_flip, int rot,
 static void fill_svg_colors()
 {
  char s[200]; // overflow safe 20161122
- int i,c;
+ unsigned int i,c;
  if(debug_var>=1) {
-   Tcl_Eval(interp, "puts $svg_colors"); 
+   tcleval( "puts $svg_colors"); 
  }
  for(i=0;i<cadlayers;i++) {
    my_snprintf(s, S(s), "lindex $svg_colors %d", i);
-   Tcl_Eval(interp, s);
+   tcleval( s);
    sscanf(Tcl_GetStringResult(interp),"%x", &c);
    svg_colors[i].red   = (c & 0xff0000) >> 16;
    svg_colors[i].green = (c & 0x00ff00) >> 8;
@@ -356,7 +356,7 @@ void svg_draw(void)
 
  svg_colors=my_calloc(cadlayers, sizeof(Svg_color));
  if(svg_colors==NULL){
-   fprintf(errfp, "svg_draw(): calloc error\n");Tcl_Eval(interp, "exit");
+   fprintf(errfp, "svg_draw(): calloc error\n");tcleval( "exit");
  } 
  
  fill_svg_colors();
@@ -458,7 +458,7 @@ void svg_draw(void)
  fprintf(fd, "\"/>\n</svg>\n");
  fclose(fd);
  draw_grid=old_grid;
- my_free(svg_colors);
+ my_free(&svg_colors);
 
  pop_undo(0); // 20161121
  modified=modified_save;  // 20161121

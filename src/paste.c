@@ -244,21 +244,17 @@ void merge_file(int selection_load, char ext[])
     int k=0, old;
     int endfile=0;
     static char *name=NULL; // 20161122 overflow safe
-    char name1[4096]; // overflow safe
-    char tmp[80]; // 20161122 overflow safe
+    char name1[PATH_MAX]; // overflow safe
+    char tmp[256]; // 20161122 overflow safe
     static char *aux_ptr=NULL;
 
     if(selection_load==0)
     {
      if(!strcmp(ext,"")) {	// 20071215
-       // Tcl_SetVar(interp,"entry1","",TCL_GLOBAL_ONLY);
-       // tkeval("text_line {merge_file(): filename?} 0");
-       my_snprintf(tmp, S(tmp), "loadfile {%s}", ext);
-       tkeval(tmp);
+       my_snprintf(tmp, S(tmp), "load_file_dialog {Merge file} {.sch.sym} INITIALLOADDIR", ext);
+       tcleval(tmp);
        if(!strcmp(Tcl_GetStringResult(interp),"")) return;
-       my_strdup(&name,Tcl_GetVar(interp,"XSCHEM_DESIGN_DIR", TCL_GLOBAL_ONLY));
-       my_strcat(&name,"/");
-       my_strcat(&name, (char *)Tcl_GetStringResult(interp));
+       my_strdup(&name, (char *)Tcl_GetStringResult(interp)); /* 20180925 */
      } 
      else {			// 20071215
        my_strdup(&name,ext);
@@ -267,13 +263,13 @@ void merge_file(int selection_load, char ext[])
     }
     else if(selection_load==1)
     {
-     my_strdup(&name, getenv("HOME"));
-     my_strcat(&name,"/.selection.sch"); // 20160502 changed PWD to HOME
+     my_strdup(&name, home_dir);
+     my_strcat(&name,"/.xschem_selection.sch"); // 20160502 changed PWD to HOME
     }
     else    // clipboard load
     {
-      my_strdup(&name, getenv("HOME"));
-      my_strcat(&name,"/.clipboard.sch");
+      my_strdup(&name, home_dir);
+      my_strcat(&name,"/.xschem_clipboard.sch");
     }
     if( (fd=fopen(name,"r"))!= NULL)
     {

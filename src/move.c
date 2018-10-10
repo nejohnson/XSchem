@@ -381,6 +381,7 @@ void copy_objects(int what)
  // 20171112
  #ifdef HAS_CAIRO
  char *textfont;
+ int customfont; // 20181009
  #endif
 
  if(what & BEGIN)
@@ -400,8 +401,8 @@ void copy_objects(int what)
   draw_selection(gctiled,0);
   rot=flip=deltax=deltay=0;
   ui_state&=~STARTCOPY;
-  my_strdup(&str, getenv("HOME"));
-  my_strcat(&str, "/.selection.sch");
+  my_strdup(&str, home_dir);
+  my_strcat(&str, "/.xschem_selection.sch");
   unlink(str);
 
  }
@@ -426,7 +427,11 @@ void copy_objects(int what)
  }
  if(what & END)					// copy selected objects
  {
+  int save_draw; // 20181009
+  save_draw = draw_window;
+  draw_window=1; // temporarily re-enable draw to window together with pixmap
   draw_selection(gctiled,0);
+  bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0); // 20181009
   tmp=0;
   modified=1; push_undo(); // 20150327 push_undo
   prepared_hash_objects=0; // 20171224
@@ -447,6 +452,10 @@ void copy_objects(int what)
      case WIRE:
       if(k!=WIRELAYER) break;
       check_wire_storage();
+      if(wire[n].bus) // 20181009
+        bbox(ADD, wire[n].x1-BUS_WIDTH, wire[n].y1-BUS_WIDTH , wire[n].x2+BUS_WIDTH , wire[n].y2+BUS_WIDTH );
+      else
+        bbox(ADD, wire[n].x1, wire[n].y1, wire[n].x2, wire[n].y2);
       if(rotatelocal) {
         ROTATION(wire[n].x1, wire[n].y1, wire[n].x1, wire[n].y1, rx1,ry1);
         ROTATION(wire[n].x1, wire[n].y1, wire[n].x2, wire[n].y2, rx2,ry2);
@@ -484,6 +493,7 @@ void copy_objects(int what)
       break;
      case LINE:
       if(c!=k) break; 
+      bbox(ADD, line[c][n].x1, line[c][n].y1, line[c][n].x2, line[c][n].y2); // 20181009
       if(rotatelocal) {
         ROTATION(line[c][n].x1, line[c][n].y1, line[c][n].x1, line[c][n].y1, rx1,ry1);
         ROTATION(line[c][n].x1, line[c][n].y1, line[c][n].x2, line[c][n].y2, rx2,ry2);
@@ -539,6 +549,7 @@ void copy_objects(int what)
             x[j] = polygon[c][n].x[j];
             y[j] = polygon[c][n].y[j];
           }
+          bbox(ADD, bx1, by1, bx2, by2); // 20181009
         }
         drawpolygon(k,  NOW, x, y, polygon[c][n].points, polygon[c][n].fill); // 20180914 added fill
         selectedgroup[i].n=lastpolygon[c];
@@ -547,9 +558,41 @@ void copy_objects(int what)
       }
       break;
 
+     case RECT:
+      if(c!=k) break;
+      bbox(ADD, rect[c][n].x1, rect[c][n].y1, rect[c][n].x2, rect[c][n].y2); // 20181009
+      if(rotatelocal) {
+        ROTATION(rect[c][n].x1, rect[c][n].y1, rect[c][n].x1, rect[c][n].y1, rx1,ry1);
+        ROTATION(rect[c][n].x1, rect[c][n].y1, rect[c][n].x2, rect[c][n].y2, rx2,ry2);
+      } else {
+        ROTATION(x1, y_1, rect[c][n].x1, rect[c][n].y1, rx1,ry1);
+        ROTATION(x1, y_1, rect[c][n].x2, rect[c][n].y2, rx2,ry2);
+      }
+      RECTORDER(rx1,ry1,rx2,ry2);
+      rect[c][n].sel=0;
+      drawrect(k, ADD, rx1+deltax, ry1+deltay, rx2+deltax, ry2+deltay);
+      filledrect(k, ADD, rx1+deltax, ry1+deltay, rx2+deltax, ry2+deltay);
+      selectedgroup[i].n=lastrect[c];
+      storeobject(-1, rx1+deltax, ry1+deltay, 
+                 rx2+deltax, ry2+deltay,RECT, c, SELECTED, rect[c][n].prop_ptr);
+      break;
+
      case TEXT:
       if(k!=TEXTLAYER) break;
       check_text_storage();
+      // 20181009
+      #ifdef HAS_CAIRO
+      customfont = set_text_custom_font(&textelement[n]);
+      #endif
+      text_bbox(textelement[n].txt_ptr, textelement[n].xscale,
+             textelement[n].yscale, textelement[n].rot,textelement[n].flip,
+                textelement[n].x0, textelement[n].y0,
+                &rx1,&ry1, &rx2,&ry2);
+      #ifdef HAS_CAIRO
+      if(customfont) cairo_restore(ctx);
+      #endif
+      bbox(ADD, rx1, ry1, rx2, ry2 );
+
       if(rotatelocal) {
         ROTATION(textelement[n].x0, textelement[n].y0, textelement[n].x0, textelement[n].y0, rx1,ry1);
       } else {
@@ -605,27 +648,13 @@ void copy_objects(int what)
       lasttext++;
        if(debug_var>=2) fprintf(errfp, "copy_objects(): done copy string\n");
       break;
-     case RECT:
-      if(c!=k) break;
-      if(rotatelocal) {
-        ROTATION(rect[c][n].x1, rect[c][n].y1, rect[c][n].x1, rect[c][n].y1, rx1,ry1);
-        ROTATION(rect[c][n].x1, rect[c][n].y1, rect[c][n].x2, rect[c][n].y2, rx2,ry2);
-      } else {
-        ROTATION(x1, y_1, rect[c][n].x1, rect[c][n].y1, rx1,ry1);
-        ROTATION(x1, y_1, rect[c][n].x2, rect[c][n].y2, rx2,ry2);
-      }
-      RECTORDER(rx1,ry1,rx2,ry2);
-      rect[c][n].sel=0;
-      drawrect(k, ADD, rx1+deltax, ry1+deltay, rx2+deltax, ry2+deltay);
-      filledrect(k, ADD, rx1+deltax, ry1+deltay, rx2+deltax, ry2+deltay);
-      selectedgroup[i].n=lastrect[c];
-      storeobject(-1, rx1+deltax, ry1+deltay, 
-                 rx2+deltax, ry2+deltay,RECT, c, SELECTED, rect[c][n].prop_ptr);
-      break;
      case ELEMENT:
-      if(k==0)
-      {
+      if(k==0) {
        check_inst_storage();
+       // 20181009
+       symbol_bbox(n, &inst_ptr[n].x1, &inst_ptr[n].y1, &inst_ptr[n].x2, &inst_ptr[n].y2 ); // 20171201
+       bbox(ADD, inst_ptr[n].x1, inst_ptr[n].y1, inst_ptr[n].x2, inst_ptr[n].y2 );
+
        if(rotatelocal) {
          ROTATION(inst_ptr[n].x0, inst_ptr[n].y0, inst_ptr[n].x0, inst_ptr[n].y0, rx1,ry1);
        } else {
@@ -669,8 +698,16 @@ void copy_objects(int what)
   ui_state &= ~STARTCOPY;
   check_collapsing_objects();
   x1=y_1=x2=y_2=rot=flip=deltax=deltay=0;
+  bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
+  draw();
+  if(!draw_window) { // 20181009
+    XCopyArea(display, save_pixmap, window, gctiled,
+       xrect[0].x, xrect[0].y, xrect[0].width, xrect[0].height, xrect[0].x, xrect[0].y); // 20181009
+  }
+  bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
   need_rebuild_selected_array=1;
   rotatelocal=0;
+  draw_window = save_draw;
  }
  draw_selection(gc[SELLAYER], 0);
 }
@@ -728,6 +765,9 @@ void move_objects(int what, int merge, double dx, double dy)
  }
  if(what & END)					// move selected objects
  {
+  int save_draw; // 20181009
+  save_draw = draw_window;
+  draw_window=1; // temporarily re-enable draw to window together with pixmap
   draw_selection(gctiled,0);
   bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0);
   modified=1; 
@@ -1024,9 +1064,14 @@ void move_objects(int what, int merge, double dx, double dy)
   x1=y_1=x2=y_2=rot=flip=deltax=deltay=0;
   bbox(SET , 0.0 , 0.0 , 0.0 , 0.0); 
   draw();
+  if(!draw_window) {
+    XCopyArea(display, save_pixmap, window, gctiled,
+       xrect[0].x, xrect[0].y, xrect[0].width, xrect[0].height, xrect[0].x, xrect[0].y); // 20181009
+  }
   bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
   need_rebuild_selected_array=1;
   rotatelocal=0;
+  draw_window =save_draw;
  }
  draw_selection(gc[SELLAYER], 0);
 }

@@ -1,8 +1,18 @@
 
 ## set prefix for installation
-## XSCHEM will install in ${prefix}/bin, ${prefix}/share/xschem and ${prefix}/share/doc/xschem
+## XSCHEM will install in ${prefix}/bin, ${prefix}/share/xschem 
+## and ${prefix}/share/doc/xschem
 prefix=$(HOME)
-library_prefix=$(HOME)/xschem_library
+
+## specify user schematic/symbol libraries; 
+## you may redefine it later in .xschem or xschemrc startup files
+user_library_dir=$(HOME)/xschem_library
+
+## specify system-wide symbol libraries;
+## you may redefine it later in .xschem or xschemrc startup files
+system_library_dir=${prefix}/share/xschem/xschem_library
+
+xschem_library_path=$(user_library_dir):$(system_library_dir)
 
 OBJ = icon.o callback.o actions.o move.o check.o clip.o draw.o \
       globals.o main.o netlist.o \
@@ -19,6 +29,7 @@ TCLVER=8.6
 ## set to 1 for CAIRO antialiased fonts
 HAS_CAIRO=1
 
+## set to 0 these 2 variables on old machines.
 HAS_XCB=1
 HAS_XRENDER=1
 
@@ -39,16 +50,19 @@ else
 endif
 
 ## use the MOREFLAGS below if debugging stuff is needed
-## -g -pg -no-pie
+## -g -pg -no-pie 
 ## recent gcc generates Position Independent Executable (pie), this breaks
 ## gprof, so use -no-pie together with -pg when profiling code.
 ## for cairo: $(pkg-config cairo  --cflags --libs)
 
 ## to fix rendering problems due to bugs in the exceed turboX server
 ## add -DTURBOX_FIX
-MOREFLAGS=  -g
+MOREFLAGS= -g -std=c99 -pedantic
 
-CFLAGS  = -Wall  $(MOREFLAGS)  -I/usr/include/tcl${TCLVER} $(CAIRO_INCLUDES) -I/home/sschippe/include
+CFLAGS  = -Wall  $(MOREFLAGS)  -I/usr/include/tcl${TCLVER} $(CAIRO_INCLUDES) -I/home/sschippe/include \
+           -DPREFIX='"${prefix}"' \
+           -DXSCHEM_LIBRARY_PATH='"${xschem_library_path}"'
+
 LDFLAGS = -L/usr/X11R6/lib -L/home/sschippe/lib $(MOREFLAGS) -lX11 -lm -lXpm -ltcl${TCLVER} -ltk${TCLVER} \
            -lfl $(CAIRO_LIBS)
 
@@ -56,7 +70,7 @@ xschem: 	$(OBJ)
 	$(CC) -o $@   $^ $(LDFLAGS)
 
 parselabel.c: parselabel.l expandlabel.h
-	flex -o$@  $<
+	flex -l -o$@  $<
 
 expandlabel.c expandlabel.h: expandlabel.y
 	bison -d -o expandlabel.c  $<
@@ -74,8 +88,9 @@ install: xschem
 	mkdir -p $(prefix)/bin
 	mkdir -p $(prefix)/share/xschem
 	mkdir -p $(prefix)/share/doc/xschem
-	mkdir -p $(library_prefix)
-	mkdir -p $(library_prefix)/simulations
+	mkdir -p $(system_library_dir)
+	mkdir -p $(user_library_dir)
+	mkdir -p $(user_library_dir)/simulations
 	cp xschem $(prefix)/bin
 	cp xschem $(prefix)/share/xschem
 	cp keys.help  $(prefix)/share/xschem
@@ -91,13 +106,14 @@ install: xschem
 	cp spice.awk $(prefix)/share/xschem
 	cp tedax.awk $(prefix)/share/xschem
 	cp verilog.awk $(prefix)/share/xschem
+	cp ../xschemrc $(prefix)/share/xschem
 	cp vhdl.awk $(prefix)/share/xschem
 	cp -r ../doc/* $(prefix)/share/doc/xschem/
 	cp -r ../utile $(prefix)/share/xschem
-	cp -ru ../library/mylib $(library_prefix)
-	cp -ru ../library/devices $(library_prefix)
-	cp -ru ../library/examples $(library_prefix)
-	cp -ru ../library/pcb $(library_prefix)
+	cp -ru ../xschem_library/mylib $(user_library_dir)
+	cp -ru ../xschem_library/devices $(system_library_dir)
+	cp -ru ../xschem_library/examples $(user_library_dir)
+	cp -ru ../xschem_library/pcb $(system_library_dir)
 
 .PHONY: uninstall
 uninstall:

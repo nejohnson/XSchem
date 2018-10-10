@@ -26,9 +26,9 @@ void global_tedax_netlist(int global)  // netlister driver
 {
  FILE *fd;
  int i;
- char netl[4096]; // overflow safe 20161122
- char netl2[4096]; // 20081211 overflow safe 20161122
- char netl3[4096]; // 20081211 overflow safe 20161122
+ char netl[PATH_MAX]; // overflow safe 20161122
+ char netl2[PATH_MAX]; // 20081211 overflow safe 20161122
+ char netl3[PATH_MAX]; // 20081211 overflow safe 20161122
 
 
  if(current_type==SYMBOL) return;
@@ -37,9 +37,9 @@ void global_tedax_netlist(int global)  // netlister driver
  if(!strcmp(schematic[currentsch],""))
  {
    char name[1024];
-   my_snprintf(name, S(name), "savefile %s.sch .sch",schematic[currentsch]);
+   my_snprintf(name, S(name), "savefile {%s.sch} .sch",schematic[currentsch]);
    if(debug_var>=1) fprintf(errfp, "global_tedax_netlist(): saving: %s\n",name);
-   tkeval(name);
+   tcleval(name);
    my_strncpy(schematic[currentsch], Tcl_GetStringResult(interp), S(schematic[currentsch]));
    if(!strcmp(schematic[currentsch],"")) return;
    save_schematic(schematic[currentsch]);
@@ -66,12 +66,12 @@ void global_tedax_netlist(int global)  // netlister driver
  //// /20100217
 
  fprintf(fd, "end netlist\n");
- if(modified) save_schematic(NULL);
+ if(modified) save_schematic(schematic[currentsch]);
 
  if(0) // was if(global) ... 20180901 no hierarchical tEDAx netlist for now
  {
    remove_symbols(); // 20161205 ensure all unused symbols purged before descending hierarchy
-   load_schematic(1,NULL,0);
+   load_schematic(1, schematic[currentsch], 0); // 20180927
 
    currentsch++;
     if(debug_var>=2) fprintf(errfp, "global_tedax_netlist(): last defined symbol=%d\n",lastinstdef);
@@ -89,7 +89,7 @@ void global_tedax_netlist(int global)  // netlister driver
    my_strncpy(schematic[currentsch] , "", S(schematic[currentsch]));
    currentsch--;
    remove_symbols();
-   load_schematic(1,NULL,0);
+   load_schematic(1, schematic[currentsch], 0); // 20180927
  }
 
  // print globals nodes found in netlist 28032003
@@ -99,12 +99,12 @@ void global_tedax_netlist(int global)  // netlister driver
 
  fclose(fd);
  if(netlist_show) {
-  my_snprintf(netl2, S(netl2), "netlist %s show %s.tdx", netl3, netl3);
-  tkeval(netl2);
+  my_snprintf(netl2, S(netl2), "netlist {%s} show {%s.tdx}", netl3, netl3);
+  tcleval(netl2);
  }
  else {
-  my_snprintf(netl2, S(netl2), "netlist %s noshow %s.tdx", netl3, netl3);
-  tkeval(netl2);
+  my_snprintf(netl2, S(netl2), "netlist {%s} noshow {%s.tdx}", netl3, netl3);
+  tcleval(netl2);
  }
  if(!debug_var) unlink(netl);
 }
@@ -114,10 +114,10 @@ void tedax_block_netlist(FILE *fd, int i)  //20081223
 {
  int j;
  int tedax_stop=0; // 20111113
- char netl[4096];
- char netl2[4096];  // 20081202
- char netl3[4096];  // 20081202
- char *str_tmp;
+ char netl[PATH_MAX];
+ char netl2[PATH_MAX];  // 20081202
+ char netl3[PATH_MAX];  // 20081202
+ const char *str_tmp;
  int mult;
  static char *extra=NULL;
 
@@ -149,8 +149,7 @@ void tedax_block_netlist(FILE *fd, int i)  //20081223
      fprintf(fd, "\n");
   
      //clear_drawing();
-     my_strncpy(schematic[currentsch],instdef[i].name, S(schematic[currentsch]));
-     load_schematic(1,NULL,0);
+     load_schematic(1,instdef[i].name,0);
      tedax_netlist(fd, tedax_stop);  // 20111113 added tedax_stop
      netlist_count++;
 
@@ -163,8 +162,8 @@ void tedax_block_netlist(FILE *fd, int i)  //20081223
      fprintf(fd, ".ends\n\n");
      if(split_files) { // 20081204
        fclose(fd);
-       my_snprintf(netl2, S(netl2), "netlist %s noshow %s.tdx", netl3, netl3);
-       tkeval(netl2);
+       my_snprintf(netl2, S(netl2), "netlist {%s} noshow {%s.tdx}", netl3, netl3);
+       tcleval(netl2);
        if(debug_var==0) unlink(netl);
      }
 
@@ -218,7 +217,7 @@ void tedax_netlist(FILE *fd, int tedax_stop )
     }
    }
  }
- if(!netlist_count) draw_hilight_net();
+ if(!netlist_count) draw_hilight_net(1);
  //delete_netlist_structs(); // 20161222 done in prepare_netlist_structs() when needed
 
 }

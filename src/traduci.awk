@@ -13,9 +13,13 @@ FNR == 1 {
 END  { endfile(_filename_) }
 
 ###### begin user code ########################
-/{devices\/netlist_not_shown}/{
+
+
+# Tcl_Eval(interp
+
+/entry1/{
  found=1
- sub(/{devices\/netlist_not_shown}/,"{devices/code}")
+ gsub(/\<entry1\>/, "retval")
 }
 ###### end  user code  ########################
 

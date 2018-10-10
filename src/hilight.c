@@ -63,10 +63,10 @@ static struct hilight_hashentry *free_hilight_entry(struct hilight_hashentry *en
 {
  if(entry)
  {
-  entry->next = free_hilight_entry( entry->next );
-    my_free(entry->token);
-    my_free(entry->path);
-  my_free(entry);
+   entry->next = free_hilight_entry( entry->next );
+   my_free(&entry->token);
+   my_free(&entry->path);
+   my_free(&entry);
  }
  return NULL;
 }
@@ -135,9 +135,9 @@ struct hilight_hashentry *hilight_lookup(char *token, int value, int remove)
    if(remove==1)                // remove token from the hash table ...
    {
     saveptr=entry->next;
-    my_free(entry->token);
-    my_free(entry->path);
-    my_free(entry);
+    my_free(&entry->token);
+    my_free(&entry->path);
+    my_free(&entry);
     *preventry=saveptr;
     return NULL;
    }
@@ -157,7 +157,7 @@ struct hilight_hashentry *hilight_lookup(char *token, int value, int remove)
 }
 
 // warning, in case of buses return only pointer to first bus element
-struct hilight_hashentry *bus_hilight_lookup(char *token, int value, int remove)
+struct hilight_hashentry *bus_hilight_lookup(const char *token, int value, int remove)
 {
  char *start, *string_ptr, c;
  static char *string=NULL;
@@ -287,8 +287,8 @@ int bus_search(char*s)
 void search_inst(char *tok, char *val, int sub, int sel, int what)
 {
  int i,c, col,tmp,bus=0;
- char *str;
- char empty_string[] = "";
+ const char *str;
+ const char empty_string[] = "";
  static char *tmpname=NULL;
  regex_t re;
 
@@ -383,7 +383,7 @@ void search_inst(char *tok, char *val, int sub, int sel, int what)
    if(x_initialized) drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
    if(x_initialized) drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
  }
- else if(what==END) draw_hilight_net();
+ else if(what==END) draw_hilight_net(1);
 
  regfree(&re);
 }
@@ -434,62 +434,6 @@ void drill_hilight(void)
     if(!found) break;
   } // while(1)
 }
-
-/*
-void traverse_schematic()
-{
-  int i;
-  char *str;
-
-  for(i=0;i<lastinst; i++) {
-    if(                   // do not descend if not subcircuit
-      strcmp(
-       // get_tok_value( (inst_ptr[selectedgroup[0].n].ptr+instdef)->prop_ptr, "type",0), // 20150409
-       (inst_ptr[i].ptr+instdef)->type, // 20150409
-        "subcircuit"
-      ) &&
-      strcmp(
-       // get_tok_value( (inst_ptr[selectedgroup[0].n].ptr+instdef)->prop_ptr, "type",0), // 20150409
-       (inst_ptr[i].ptr+instdef)->type, // 20150409
-        "primitive"
-      )
-      ) continue;
-    fprintf(errfp, "traverse_schematic(): processing inst %d\n", i);
-    if(modified)
-    {
-      if(save(1)) return; // 20161209
-    }
-    // build up current hierarchy path
-    str=inst_ptr[i].instname; // 20150409
-    my_strdup(&sch_prefix[currentsch+1], sch_prefix[currentsch]);
-    my_strcat(&sch_prefix[currentsch+1], str);
-    my_strcat(&sch_prefix[currentsch+1], ".");
-    my_strncpy(schematic[currentsch+1],inst_ptr[i].name, S(schematic[currentsch+1]);
-    previous_instance[currentsch]=i;
-    zoom_array[currentsch].x=xorigin;
-    zoom_array[currentsch].y=yorigin;
-    zoom_array[currentsch].zoom=zoom;
-    hilight_child_pins(previous_instance[currentsch]);
-    currentsch++;
-    unselect_all();
-    remove_symbols();
-    load_schematic(1,NULL,1);
-    if(hilight_nets)
-    {
-      drill_hilight();
-    }
-    my_strncpy(schematic[currentsch] , "", S(schematic[currentsch]);
-    currentsch--;
-    remove_symbols();
-    load_schematic(1,NULL,1);
-    hilight_parent_pins();
-    xorigin=zoom_array[currentsch].x;
-    yorigin=zoom_array[currentsch].y;
-    zoom=zoom_array[currentsch].zoom;
-    mooz=1/zoom;
-  }
-}
-*/
 
 
 void hilight_net(void)
@@ -601,9 +545,10 @@ void unhilight_net(void)
 }
 
 
-void draw_hilight_net(void)
+void draw_hilight_net(int on_window)
 {
  char *str;
+ int save_draw;
  static int *inst_color=NULL;
  char *type=NULL;
  int i,c;
@@ -612,6 +557,8 @@ void draw_hilight_net(void)
  Instdef *symptr; // 20160414
 
   if(!hilight_nets) return;
+  save_draw = draw_window; // 20181009
+  draw_window = on_window;
   for(i=0;i<lastwire;i++)
   {
     // 20150409
@@ -698,13 +645,15 @@ void draw_hilight_net(void)
     }
   }
  }
+ draw_window = save_draw;
 }
 
 
 
-void undraw_hilight_net(void) // 20160413
+void undraw_hilight_net(int on_window) // 20160413
 {
  char *str;
+ int save_draw; // 20181009
  static int *inst_color=NULL;
  char *type=NULL;
  int i,c;
@@ -712,6 +661,8 @@ void undraw_hilight_net(void) // 20160413
  register double x1,y1,x2,y2; // 20150409
  Instdef *symptr; // 20160414
 
+ save_draw = draw_window; // 20181009
+ draw_window = on_window;
 
  for(i=0;i<lastwire;i++)
  {
@@ -791,6 +742,7 @@ void undraw_hilight_net(void) // 20160413
   filledrect(c, END, 0.0, 0.0, 0.0, 0.0);
  }
  if(ui_state & SELECTION) draw_selection(gc[SELLAYER], 0); // 20171211
+ draw_window = save_draw;
 }
 
 // show == 0   ==> create pins from highlight nets
@@ -806,31 +758,41 @@ void print_hilight_net(int show)
  char a[] = "create_pins";
  char b[] = "add_lab_prefix";
  char b1[] = "add_lab_no_prefix";
- char filetmp1[] = "tmp1XXXXXX";
- char filetmp2[] = "tmp2XXXXXX";
+ static char *filetmp1 = NULL;
+ static char *filetmp2 = NULL;
+ char *filename_ptr;
 
 
  // 20111116 20111201
  prepare_netlist_structs(0); // use full prepare_netlist_structs(0)  to recognize pin direction
                              // when creating pins from hilight nets 20171221
 
-// 20111106
- mkstemp(filetmp1);
- mkstemp(filetmp2);
+ // 20180924
+ if(!(fd = open_tmpfile("hilight_", &filename_ptr)) ) {
+   fprintf(errfp, "print_hilight_net(): can not create tmpfile %s\n", filename_ptr);
+   return;
+ }
+ my_strdup(&filetmp2, filename_ptr);
+ fclose(fd);
+ if(!(fd = open_tmpfile("hilight_", &filename_ptr))) {
+   fprintf(errfp, "print_hilight_net(): can not create tmpfile %s\n", filename_ptr);
+   return;
+ }
+ my_strdup(&filetmp1, filename_ptr);
 
  if(show == 3) {
-   Tcl_SetVar(interp,"filetmp2",filetmp1,TCL_GLOBAL_ONLY);
+   tclsetvar("filetmp2",filetmp1);
  } else {
-   Tcl_SetVar(interp,"filetmp2",filetmp2,TCL_GLOBAL_ONLY);
+   tclsetvar("filetmp2",filetmp2);
  }
- Tcl_SetVar(interp,"filetmp1",filetmp1,TCL_GLOBAL_ONLY);
+ tclsetvar("filetmp1",filetmp1);
 
  if(  filetmp1[0] == 0 || filetmp2[0] == 0 ) {
    if(debug_var>=1) fprintf(errfp, "print_hilight_net(): problems creating tmpfiles\n");
    return;
  }
  // /20111106
- my_strdup(&cmd, Tcl_GetVar(interp,"XSCHEM_HOME_DIR", TCL_GLOBAL_ONLY));
+ my_strdup(&cmd, tclgetvar("XSCHEM_HOME_DIR"));
  my_strcat(&cmd, "/order_labels.awk");
  my_strdup(&cmd2, cmd);
  my_strcat(&cmd2," ");
@@ -839,11 +801,11 @@ void print_hilight_net(int show)
  my_strcat(&cmd2,filetmp2);
 
  // 20111106
- my_strdup(&cmd3, Tcl_GetVar(interp,"XSCHEM_HOME_DIR", TCL_GLOBAL_ONLY));
+ my_strdup(&cmd3, tclgetvar("XSCHEM_HOME_DIR"));
  my_strcat(&cmd3, "/sort_labels.awk ");
  my_strcat(&cmd3, filetmp1);
 
- fd=fopen(filetmp1, "w");
+ //fd=fopen(filetmp1, "w");
  if(fd==NULL){ 
     if(debug_var>=1) fprintf(errfp, "print_hilight_net(): problems opening netlist file\n");
     return;
@@ -878,28 +840,28 @@ void print_hilight_net(int show)
  fclose(fd);
  system(cmd2);
  if(show==2) {
-   tkeval(b);
+   tcleval(b);
  }
  if(show==4) { // 20120913 create labels from hilight pins without 'i' prefix
-   tkeval(b1);
+   tcleval(b1);
  }
  if(show==1) {
-   my_strdup(&cmd, "set ::entry1 [ read_data_nonewline ");
+   my_strdup(&cmd, "set ::retval [ read_data_nonewline ");
    my_strcat(&cmd, filetmp2);
    my_strcat(&cmd, " ]");
-   tkeval(cmd);
-   tkeval("viewdata $::entry1");
+   tcleval(cmd);
+   tcleval("viewdata $::retval");
  }
  if(show==3) {
    system(cmd3);
-   my_strdup(&cmd, "set ::entry1 [ read_data_nonewline ");
+   my_strdup(&cmd, "set ::retval [ read_data_nonewline ");
    my_strcat(&cmd, filetmp1);
    my_strcat(&cmd, " ]");
-   tkeval(cmd);
-   tkeval("viewdata $::entry1");
+   tcleval(cmd);
+   tcleval("viewdata $::retval");
  }
  if(show==0)  {
-   tkeval(a);
+   tcleval(a);
  }
  unlink(filetmp2);
  unlink(filetmp1);

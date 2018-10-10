@@ -264,9 +264,9 @@ void delete(void)
    if(j)
    {
     my_strdup(&polygon[c][i-j].prop_ptr, NULL);
-    my_free(polygon[c][i-j].x); polygon[c][i-j].x=NULL;
-    my_free(polygon[c][i-j].y); polygon[c][i-j].y=NULL;
-    my_free(polygon[c][i-j].selected_point); polygon[c][i-j].selected_point=NULL;
+    my_free(&polygon[c][i-j].x);
+    my_free(&polygon[c][i-j].y);
+    my_free(&polygon[c][i-j].selected_point);
     polygon[c][i-j] = polygon[c][i];
     polygon[c][i].prop_ptr=NULL;
     polygon[c][i].x=NULL;
@@ -280,6 +280,11 @@ void delete(void)
  lastselected = 0;
  bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
  draw();
+ if(!draw_window) {
+   XCopyArea(display, save_pixmap, window, gctiled, 
+      xrect[0].x, xrect[0].y, xrect[0].width, xrect[0].height, xrect[0].x, xrect[0].y); // 20181009
+ }
+
  bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
  ui_state &= ~SELECTION;
 }
@@ -355,9 +360,9 @@ void delete_only_rect_and_line_and_poly(void)
    if(j)
    {
     my_strdup(&polygon[c][i-j].prop_ptr, NULL);
-    my_free(polygon[c][i-j].x); polygon[c][i-j].x=NULL;
-    my_free(polygon[c][i-j].y); polygon[c][i-j].y=NULL;
-    my_free(polygon[c][i-j].selected_point); polygon[c][i-j].selected_point=NULL;
+    my_free(&polygon[c][i-j].x);
+    my_free(&polygon[c][i-j].y);
+    my_free(&polygon[c][i-j].selected_point);
     polygon[c][i-j] = polygon[c][i];
     polygon[c][i].prop_ptr=NULL;
     polygon[c][i].x=NULL;
@@ -391,7 +396,7 @@ void bbox(int what,double x1,double y1, double x2, double y2)
   case BEGIN:
    if(semaphore==1) {
      fprintf(errfp, "ERROR: rentrant bbox() call\n"); 
-     tkeval("alert_ {ERROR: reentrant bbox() call} {}");//20171215
+     tcleval("alert_ {ERROR: reentrant bbox() call} {}");//20171215
    }
    bbx1 = 300000000;
    bbx2 = 0;
@@ -408,7 +413,7 @@ void bbox(int what,double x1,double y1, double x2, double y2)
   case ADD:
    if(semaphore==0) {
      fprintf(errfp, "ERROR: bbox(ADD) call before bbox(BEGIN)\n"); 
-     tkeval("alert_ {ERROR: bbox(ADD) call before bbox(BEGIN)} {}");//20171215
+     tcleval("alert_ {ERROR: bbox(ADD) call before bbox(BEGIN)} {}");//20171215
    }
    x1=(x1+xorigin)/zoom;
    y1=(y1+yorigin)/zoom;
@@ -453,7 +458,7 @@ void bbox(int what,double x1,double y1, double x2, double y2)
   case SET:
    if(semaphore==0) {
      fprintf(errfp, "ERROR: bbox(SET) call before bbox(BEGIN)\n"); 
-     tkeval("alert_ {ERROR: bbox(SET) call before bbox(BEGIN)} {}");//20171215
+     tcleval("alert_ {ERROR: bbox(SET) call before bbox(BEGIN)} {}");//20171215
    }
    areax1 = bbx1-2*lw;
    areax2 = bbx2+2*lw;
@@ -487,7 +492,7 @@ void bbox(int what,double x1,double y1, double x2, double y2)
 void unselect_all(void)
 {
  int i,c;
- char str[4096];
+ char str[PATH_MAX];
  #ifdef HAS_CAIRO
  int customfont;
  #endif
@@ -572,7 +577,7 @@ void unselect_all(void)
     if(x_initialized) drawtemprect(gctiled, END, 0.0, 0.0, 0.0, 0.0); 
     ui_state &= ~SELECTION;
     //\statusmsg("",2);
-    my_snprintf(str, S(str), "%s/%s",getenv("HOME"), ".selection.sch"); // 20161115  PWD->HOME
+    my_snprintf(str, S(str), "%s/%s", home_dir, ".xschem_selection.sch"); // 20161115  PWD->HOME
     unlink(str);
 }
 
@@ -582,12 +587,12 @@ void select_wire(int i,unsigned short select_mode, int fast)
   //my_strncpy(s,wire[i].prop_ptr!=NULL?wire[i].prop_ptr:"<NULL>",256);
   if( !fast )
   {
-    snprintf(str, S(str), "selected wire: n=%d end1=%d end2=%d\nnode=%s",i,
+    my_snprintf(str, S(str), "selected wire: n=%d end1=%d end2=%d\nnode=%s",i,
            wire[i].end1, wire[i].end2, 
            wire[i].prop_ptr? wire[i].prop_ptr: "(null)");
     statusmsg(str,2);
    // 20070323
-   snprintf(str, S(str), "x = %.16g  y = %.16g  w = %.16g h = %.16g",wire[i].x1, wire[i].y1,
+   my_snprintf(str, S(str), "x = %.16g  y = %.16g  w = %.16g h = %.16g",wire[i].x1, wire[i].y1,
       wire[i].x2-wire[i].x1, wire[i].y2-wire[i].y1
    );
    statusmsg(str,1);
@@ -619,26 +624,26 @@ void select_element(int i,unsigned short select_mode, int fast)
   int c, j;
   char str[1024]; 	// overflow safe
   char s[256];		// overflow safe
-  my_strncpy(s,inst_ptr[i].prop_ptr!=NULL?inst_ptr[i].prop_ptr:"<NULL>",256);
+  my_strncpy(s,inst_ptr[i].prop_ptr!=NULL?inst_ptr[i].prop_ptr:"<NULL>",S(s));
   if( !fast )
   {
-   snprintf(str, S(str), "selected element %d: %s properties: %s", i, inst_ptr[i].name,s);
+   my_snprintf(str, S(str), "selected element %d: %s properties: %s", i, inst_ptr[i].name,s);
    statusmsg(str,2);
-   snprintf(str, S(str), "symbol .name=%s", inst_ptr[i].name==NULL?"(null)":inst_ptr[i].name);
+   my_snprintf(str, S(str), "symbol .name=%s", inst_ptr[i].name==NULL?"(null)":inst_ptr[i].name);
    statusmsg(str,2);
    for(j=0;j< (inst_ptr[i].ptr+instdef)->rects[PINLAYER] ;j++) 
    {
     //                                         --------20170323 check prop_ptr----------------------------
     if(inst_ptr[i].node && inst_ptr[i].node[j] && (inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][j].prop_ptr)
     {
-     snprintf(str, S(str), "pin:%s -> %s", 
+     my_snprintf(str, S(str), "pin:%s -> %s", 
        get_tok_value(
           (inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][j].prop_ptr,"name",0) ,
        inst_ptr[i].node[j]);
      statusmsg(str,2);
     }
    }
-   snprintf(str, S(str), "x = %.16g  y = %.16g  w = %.16g h = %.16g",inst_ptr[i].xx1, inst_ptr[i].yy1,
+   my_snprintf(str, S(str), "x = %.16g  y = %.16g  w = %.16g h = %.16g",inst_ptr[i].xx1, inst_ptr[i].yy1,
       inst_ptr[i].xx2-inst_ptr[i].xx1, inst_ptr[i].yy2-inst_ptr[i].yy1
    );
    statusmsg(str,1);
@@ -662,8 +667,8 @@ void select_text(int i,unsigned short select_mode, int fast)
   char str[1024]; 	// overflow safe
   char s[256];		// overflow safe
   if(!fast) {
-    my_strncpy(s,textelement[i].prop_ptr!=NULL?textelement[i].prop_ptr:"<NULL>",256);
-    snprintf(str, S(str), "selected text %d: properties: %s", i,s);
+    my_strncpy(s,textelement[i].prop_ptr!=NULL?textelement[i].prop_ptr:"<NULL>",S(s));
+    my_snprintf(str, S(str), "selected text %d: properties: %s", i,s);
     statusmsg(str,2);
   }
   #ifdef HAS_CAIRO
@@ -697,11 +702,11 @@ void select_box(int c, int i, unsigned short select_mode, int fast)
   char s[256];		// overflow safe
   if(!fast)
   {
-   my_strncpy(s,rect[c][i].prop_ptr!=NULL?rect[c][i].prop_ptr:"<NULL>",256);
-   snprintf(str, S(str), "selected box : layer=%d, n=%d properties: %s",c-4,i,s);
+   my_strncpy(s,rect[c][i].prop_ptr!=NULL?rect[c][i].prop_ptr:"<NULL>",S(s));
+   my_snprintf(str, S(str), "selected box : layer=%d, n=%d properties: %s",c-4,i,s);
    statusmsg(str,2);
    // 20070323
-   snprintf(str, S(str), "x = %.16g  y = %.16g  w = %.16g h = %.16g",rect[c][i].x1, rect[c][i].y1,
+   my_snprintf(str, S(str), "x = %.16g  y = %.16g  w = %.16g h = %.16g",rect[c][i].x1, rect[c][i].y1,
       rect[c][i].x2-rect[c][i].x1, rect[c][i].y2-rect[c][i].y1
    );
    statusmsg(str,1);
@@ -730,11 +735,11 @@ void select_polygon(int c, int i, unsigned short select_mode, int fast )
   char s[256];          // overflow safe
   if(!fast)
   {
-   my_strncpy(s,polygon[c][i].prop_ptr!=NULL?polygon[c][i].prop_ptr:"<NULL>",256);
-   snprintf(str, S(str), "selected polygon: layer=%d, n=%d properties: %s",c-4,i,s);
+   my_strncpy(s,polygon[c][i].prop_ptr!=NULL?polygon[c][i].prop_ptr:"<NULL>",S(s));
+   my_snprintf(str, S(str), "selected polygon: layer=%d, n=%d properties: %s",c-4,i,s);
    statusmsg(str,2);
    // 20070323
-   snprintf(str, S(str), "x0 = %.16g  y0 = %.16g ...",polygon[c][i].x[0], polygon[c][i].y[0]);
+   my_snprintf(str, S(str), "x0 = %.16g  y0 = %.16g ...",polygon[c][i].x[0], polygon[c][i].y[0]);
    statusmsg(str,1);
   }
   polygon[c][i].sel = select_mode;
@@ -752,11 +757,11 @@ void select_line(int c, int i, unsigned short select_mode, int fast )
   char s[256];		// overflow safe
   if(!fast)
   {
-   my_strncpy(s,line[c][i].prop_ptr!=NULL?line[c][i].prop_ptr:"<NULL>",256);
-   snprintf(str, S(str), "selected line: layer=%d, n=%d properties: %s",c-4,i,s);
+   my_strncpy(s,line[c][i].prop_ptr!=NULL?line[c][i].prop_ptr:"<NULL>",S(s));
+   my_snprintf(str, S(str), "selected line: layer=%d, n=%d properties: %s",c-4,i,s);
    statusmsg(str,2);
    // 20070323
-   snprintf(str, S(str), "x = %.16g  y = %.16g  w = %.16g h = %.16g",line[c][i].x1, line[c][i].y1,
+   my_snprintf(str, S(str), "x = %.16g  y = %.16g  w = %.16g h = %.16g",line[c][i].x1, line[c][i].y1,
       line[c][i].x2-line[c][i].x1, line[c][i].y2-line[c][i].y1
    );
    statusmsg(str,1);
@@ -827,7 +832,7 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) // 201509
  {
   if(RECTINSIDE(wire[i].x1,wire[i].y1,wire[i].x2,wire[i].y2, x1,y1,x2,y2))
   {
-   ui_state |= SELECTION; // <<< set ui_state to SELECTION also if unselecting by area ????
+   ui_state |= SELECTION; // set ui_state to SELECTION also if unselecting by area ????
    sel ? select_wire(i,SELECTED, 1): select_wire(i,0, 1);
   } 
   else if( sel && enable_stretch && POINTINSIDE(wire[i].x1,wire[i].y1, x1,y1,x2,y2) )
@@ -857,7 +862,7 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) // 201509
   #endif
   if(RECTINSIDE(xx1,yy1, xx2, yy2,x1,y1,x2,y2))
   {
-   ui_state |= SELECTION; // <<< set ui_state to SELECTION also if unselecting by area ????
+   ui_state |= SELECTION; // set ui_state to SELECTION also if unselecting by area ????
    sel ? select_text(i, SELECTED, 1): select_text(i, 0, 1);
   }
  }                       
@@ -865,7 +870,7 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) // 201509
  {
   if(RECTINSIDE(inst_ptr[i].xx1, inst_ptr[i].yy1, inst_ptr[i].xx2, inst_ptr[i].yy2, x1,y1,x2,y2))
   {
-   ui_state |= SELECTION; // <<< set ui_state to SELECTION also if unselecting by area ????
+   ui_state |= SELECTION; // set ui_state to SELECTION also if unselecting by area ????
    sel ? select_element(i,SELECTED,1): select_element(i,0,1);
   }
  }
@@ -901,7 +906,7 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) // 201509
    }
    else if( sel && enable_stretch && POINTINSIDE(line[c][i].x1,line[c][i].y1, x1,y1,x2,y2) )
    {
-    ui_state |= SELECTION; // <<< set ui_state to SELECTION also if unselecting by area ????
+    ui_state |= SELECTION; // set ui_state to SELECTION also if unselecting by area ????
     select_line(c, i,SELECTED1,1);
    }
    else if( sel && enable_stretch && POINTINSIDE(line[c][i].x2,line[c][i].y2, x1,y1,x2,y2) )
@@ -916,7 +921,7 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) // 201509
   {
    if(RECTINSIDE(rect[c][i].x1,rect[c][i].y1,rect[c][i].x2,rect[c][i].y2, x1,y1,x2,y2))
    {
-    ui_state |= SELECTION; // <<< set ui_state to SELECTION also if unselecting by area ????
+    ui_state |= SELECTION; // set ui_state to SELECTION also if unselecting by area ????
     sel? select_box(c,i, SELECTED, 1): select_box(c,i, 0, 1);
    }
    else { 

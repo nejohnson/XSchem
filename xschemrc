@@ -1,0 +1,127 @@
+####
+#### xschemrc system configuration file
+#### values may be overridden by user's ~/.xschem configuration file
+####
+
+
+#### xschem installation directory
+#### normally there is no reason to set this variable if using standard installation.
+#### location of files is set at compile time but may be overridden with following line
+# set XSCHEM_HOME_DIR $env(HOME)/share/xschem
+
+#### xschem system-wide design library paths
+#### if unset xschem starts with following default:
+#### XSCHEM_DESIGN_PATH $env(HOME/xschem_library):${XSCHEM_HOME_DIR}/xschem_library
+#### you may overide the default system-wide library here and append in user's .xschem
+#### the user's libraries.
+set XSCHEM_DESIGN_PATH ${XSCHEM_HOME_DIR}/xschem_library
+
+#### directory where simulations, netlist and simulator outputs are placed
+#### if unset xschem asks user to choose one when doing a netlist
+# set netlist_dir $env(HOME)/xschem_library/simulations
+
+#### some default behavior
+set netlist_type spice ;# allowed : spice, verilog, vhdl, tedax
+set hspice_netlist 1
+set verilog_2001 1
+# set line_width 2
+set change_lw 1
+set color_ps 1
+set initial_geometry {800x600}
+
+#### Custom colors  may be defined here
+#  set cadlayers 22
+#  set light_colors {
+#   "#ffffff" "#0044ee" "#aaaaaa" "#222222" "#229900"
+#   "#bb2200" "#00ccee" "#ff0000" "#888800" "#00aaaa"
+#   "#880088" "#00ff00" "#0000cc" "#666600" "#557755"
+#   "#aa2222" "#7ccc40" "#00ffcc" "#ce0097" "#d2d46b"
+#   "#ef6158" "#fdb200" }
+#
+#  set dark_colors {
+#   "#000000" "#00ccee" "#3f3f3f" "#cccccc" "#88dd00"
+#   "#bb2200" "#00ccee" "#ff0000" "#ffff00" "#ffffff"
+#   "#ff00ff" "#00ff00" "#0000cc" "#aaaa00" "#aaccaa"
+#   "#ff7777" "#bfff81" "#00ffcc" "#ce0097" "#d2d46b"
+#   "#ef6158" "#fdb200" }
+
+#### CAIRO STUFF
+#### scale all fonts by this number
+# set cairo_font_scale 1.0
+#### scale line spacing by this number
+# set cairo_font_line_spacing 1.0
+#### specify a font
+set cairo_font_name {Arial}
+#### lift up text by some zoom-corrected pixels for
+#### better compatibility wrt no cairo version.
+#### Useful values in the range [-1, 3]
+set cairo_vert_correct 1
+
+#### KEYBINDINGS
+#### general format for specifying a replacement for a keybind
+#### replace Ctrl-d with Escape (so you wont kill the program)
+# set replace_key(Control-d) Escape
+#### swap w and W keybinds; Always specify Shift for capital letters
+# set replace_key(Shift-W) w
+# set replace_key(w) Shift-W
+
+set terminal {xterm -geometry 100x35 -fn 9x15 -bg black -fg white -cr white -ms white }
+# set terminal lxterminal
+
+# editor must not detach from launching shell (-f mandatory for gvim)
+set editor {gvim -f -geometry 90x28}
+
+#### alternatives: hspice, hspicerf, finesim
+set spice_simulator hspice
+set finesim_opts {}
+
+#### alternatives: iverilog, modelsim
+set verilog_simulator iverilog
+
+#### alternatives: ghdl, modelsim
+set vhdl_simulator ghdl
+
+#### command to translate xpm to png (assumes command takes source 
+#### and dest file as arguments, example: gm convert plot.xpm plot.png)
+set to_png {gm convert}
+
+#### computer farm redirector
+#### RTDA NC
+# set computerfarm {nc run -Il}
+#### LSF BSUB
+# set computerfarm {bsub -Is}
+
+#### icarus verilog (open source verilog simulator)
+set iverilog_path $env(HOME)/verilog/bin/iverilog
+set vvp_path $env(HOME)/verilog/bin/vvp
+set iverilog_opts {-g2012}
+
+#### default analog wiewer (cosmoscope, waveview) 
+set analog_viewer waveview
+
+#### waveview
+# set waveview_path $env(HOME)/waveview/bin/wv
+set waveview_path $env(HOME)/waveview_2013/bin/wv
+
+#### utile (stefan's spice stimuli editor)
+set utile_gui_path ${XSCHEM_HOME_DIR}/utile/utile3
+set utile_cmd_path ${XSCHEM_HOME_DIR}/utile/utile
+
+#### gtkwave (open source digital wave viewer)
+set gtkwave_path $env(HOME)/gtkwave/bin/gtkwave
+
+#### modelsim
+set modelsim_path $env(HOME)/modelsim/modeltech/bin
+
+#### ghdl (open source vhdl simulator)
+set ghdl_path $env(HOME)/ghdl/bin/ghdl
+set ghdl_elaborate_opts {--ieee=synopsys -fexplicit}
+set ghdl_run_opts {}
+
+
+#### hspice  and modelsim license files (sample syntax)
+# set env(LM_LICENSE_FILE) $env(HOME)/modelsim/license.dat:$env(HOME)/hspice_2008/license.dat:$env(HOME)/hspice_2013/lic.dat
+
+set hspice_path "$env(HOME)/hspice_2013/bin/hspice64 -mt 8"
+set hspicerf_path $env(HOME)/hspice_2013/bin/hspicerf64
+set cscope_path $env(HOME)/cosmoscope/amd64/ai_bin/cscope

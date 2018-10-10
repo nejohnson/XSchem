@@ -1,81 +1,83 @@
-G {} 
-V {} 
-S {} 
-L 18 795 -500 830 -500 {} 
-L 18 795 -500 795 -420 {} 
-L 18 795 -420 830 -420 {} 
-L 18 830 -420 850 -370 {} 
-L 18 850 -370 860 -370 {} 
-L 18 860 -550 860 -370 {} 
-L 18 850 -550 860 -550 {} 
-L 18 830 -500 850 -550 {} 
-L 18 830 -500 830 -420 {} 
-L 18 850 -550 850 -370 {} 
-N 110 -1190 110 -1170 {lab=#net1} 
-N 110 -1050 110 -1030 {lab=#net2} 
-N 230 -1110 290 -1110 {lab=VSS} 
-N 660 -670 810 -670 {lab=OUTM} 
-N 460 -1140 530 -1140 {lab=VSS} 
-N 530 -1140 530 -1130 {lab=VSS} 
-N 530 -1130 570 -1130 {lab=VSS} 
-N 500 -1180 530 -1180 {lab=IN} 
-N 570 -1190 660 -1190 {lab=REFP} 
-N 230 -1120 230 -1110 {lab=VSS} 
-N 230 -1190 230 -1180 {lab=VPP} 
-N 220 -1040 220 -1030 {lab=VNN} 
-N 220 -1110 220 -1100 {lab=VSS} 
-N 110 -1030 140 -1030 {lab=#net2} 
-N 220 -1030 290 -1030 {lab=VNN} 
-N 110 -1190 140 -1190 {lab=#net1} 
-N 230 -1190 290 -1190 {lab=VPP} 
-N 220 -1110 230 -1110 {lab=VSS} 
-N 200 -1190 230 -1190 {lab=VPP} 
-N 200 -1030 220 -1030 {lab=VNN} 
-N 110 -1110 220 -1110 {lab=VSS} 
-N 500 -920 660 -920 {lab=OUTM} 
-N 350 -860 500 -860 {lab=FBN} 
-N 500 -740 500 -720 {lab=IN} 
-N 300 -860 300 -670 {lab=FBN} 
-N 660 -920 660 -670 {lab=OUTM} 
-N 660 -210 810 -210 {lab=OUTP} 
-N 210 -190 300 -190 {lab=INX} 
-N 500 -460 660 -460 {lab=OUTP} 
-N 350 -400 500 -400 {lab=FB} 
-N 300 -400 300 -210 {lab=FB} 
-N 660 -460 660 -210 {lab=OUTP} 
-N 190 -340 190 -320 {lab=VPP} 
-N 190 -260 190 -190 {lab=INX} 
-N 210 -190 210 -150 {lab=INX} 
-N 210 -100 210 -80 {lab=VSS} 
-N 460 -1060 530 -1060 {lab=VSS} 
-N 500 -1100 530 -1100 {lab=IN} 
-N 570 -1110 660 -1110 {lab=REFM} 
-N 150 -190 190 -190 {lab=INX} 
-N 500 -280 500 -260 {lab=VSS} 
-N 600 -670 660 -670 {lab=OUTM} 
-N 600 -210 660 -210 {lab=OUTP} 
-N 190 -190 210 -190 {lab=INX} 
-N 210 -650 300 -650 {lab=VSSX} 
-N 190 -800 190 -780 {lab=VPP} 
-N 190 -720 190 -650 {lab=VSSX} 
-N 210 -650 210 -610 {lab=VSSX} 
-N 210 -560 210 -540 {lab=VSS} 
-N 190 -650 210 -650 {lab=VSSX} 
-N 130 -650 190 -650 {lab=VSSX} 
-N 830 -1190 850 -1190 {lab=#net3} 
-N 830 -1190 830 -1160 {lab=#net3} 
-N 350 -970 350 -950 {lab=VPP} 
-N 350 -890 350 -860 {lab=FBN} 
-N 350 -510 350 -490 {lab=VPP} 
-N 350 -430 350 -400 {lab=FB} 
-N 810 -670 810 -490 {lab=OUTM} 
-N 810 -430 810 -210 {lab=OUTP} 
-N 300 -860 350 -860 {lab=FBN} 
-N 300 -400 350 -400 {lab=FB} 
-N 530 -1050 570 -1050 {lab=VSS} 
-N 530 -1060 530 -1050 {lab=VSS} 
-C {devices/code} 1000 -510 0 0 {name=STIMULI
+G {}
+V {}
+S {}
+E {}
+L 18 845 -530 880 -530 {}
+L 18 845 -530 845 -450 {}
+L 18 845 -450 880 -450 {}
+L 18 880 -450 900 -400 {}
+L 18 900 -400 910 -400 {}
+L 18 910 -580 910 -400 {}
+L 18 900 -580 910 -580 {}
+L 18 880 -530 900 -580 {}
+L 18 880 -530 880 -450 {}
+L 18 900 -580 900 -400 {}
+N 160 -1250 160 -1230 {lab=#net1}
+N 160 -1110 160 -1090 {lab=#net2}
+N 280 -1170 340 -1170 {lab=VSS}
+N 710 -700 860 -700 {lab=OUTM}
+N 510 -1200 580 -1200 {lab=VSS}
+N 580 -1200 580 -1190 {lab=VSS}
+N 580 -1190 620 -1190 {lab=VSS}
+N 550 -1240 580 -1240 {lab=IN}
+N 620 -1250 710 -1250 {lab=REFP}
+N 280 -1180 280 -1170 {lab=VSS}
+N 280 -1250 280 -1240 {lab=VPP}
+N 270 -1100 270 -1090 {lab=VNN}
+N 270 -1170 270 -1160 {lab=VSS}
+N 160 -1090 190 -1090 {lab=#net2}
+N 270 -1090 340 -1090 {lab=VNN}
+N 160 -1250 190 -1250 {lab=#net1}
+N 280 -1250 340 -1250 {lab=VPP}
+N 270 -1170 280 -1170 {lab=VSS}
+N 250 -1250 280 -1250 {lab=VPP}
+N 250 -1090 270 -1090 {lab=VNN}
+N 160 -1170 270 -1170 {lab=VSS}
+N 550 -950 710 -950 {lab=OUTM}
+N 400 -890 550 -890 {lab=FBN}
+N 550 -770 550 -750 {lab=IN}
+N 350 -890 350 -700 {lab=FBN}
+N 710 -950 710 -700 {lab=OUTM}
+N 710 -240 860 -240 {lab=OUTP}
+N 260 -220 350 -220 {lab=INX}
+N 550 -490 710 -490 {lab=OUTP}
+N 400 -430 550 -430 {lab=FB}
+N 350 -430 350 -240 {lab=FB}
+N 710 -490 710 -240 {lab=OUTP}
+N 240 -370 240 -350 {lab=VPP}
+N 240 -290 240 -220 {lab=INX}
+N 260 -220 260 -180 {lab=INX}
+N 260 -130 260 -110 {lab=VSS}
+N 510 -1120 580 -1120 {lab=VSS}
+N 550 -1160 580 -1160 {lab=IN}
+N 620 -1170 710 -1170 {lab=REFM}
+N 200 -220 240 -220 {lab=INX}
+N 550 -310 550 -290 {lab=VSS}
+N 650 -700 710 -700 {lab=OUTM}
+N 650 -240 710 -240 {lab=OUTP}
+N 240 -220 260 -220 {lab=INX}
+N 260 -680 350 -680 {lab=VSSX}
+N 240 -830 240 -810 {lab=VPP}
+N 240 -750 240 -680 {lab=VSSX}
+N 260 -680 260 -640 {lab=VSSX}
+N 260 -590 260 -570 {lab=VSS}
+N 240 -680 260 -680 {lab=VSSX}
+N 180 -680 240 -680 {lab=VSSX}
+N 880 -1250 900 -1250 {lab=#net3}
+N 880 -1250 880 -1220 {lab=#net3}
+N 400 -1000 400 -980 {lab=VPP}
+N 400 -920 400 -890 {lab=FBN}
+N 400 -540 400 -520 {lab=VPP}
+N 400 -460 400 -430 {lab=FB}
+N 860 -700 860 -520 {lab=OUTM}
+N 860 -460 860 -240 {lab=OUTP}
+N 350 -890 400 -890 {lab=FBN}
+N 350 -430 400 -430 {lab=FB}
+N 580 -1110 620 -1110 {lab=VSS}
+N 580 -1120 580 -1110 {lab=VSS}
+C {devices/code} 1050 -540 0 0 {name=STIMULI
 only_toplevel=true
+tclcommand="xschem edit_vi_prop"
 value=".option PARHIER=LOCAL RUNLVL=6 post MODMONTE=1 warn maxwarns=400
 .option sampling_method = SRS 
 .option method=gear
@@ -83,12 +85,13 @@ vvss vss 0 dc 0
 .temp 30
 
 .param freq=20k
-.param gain=45
+.param gain=48
 .tran '0.2m/freq' '3m + 80/freq'
 .FOUR 20k v(outm,outp)
 .probe i(*) 
-.probe p(r*) p(v*)"} 
-C {devices/code} 1000 -660 0 0 {name=MODELS 
+.probe p(r*) p(v*)
+"}
+C {devices/code} 1050 -690 0 0 {name=MODELS 
 only_toplevel=true
 value=".MODEL bd139_2 npn
 +IS=1e-09 BF=222.664 NF=0.85 VAF=36.4079
@@ -917,90 +920,107 @@ R28 7 4 7K
 D1 8 7 D2
 D2 8 6 DN
 V1 18 19 1.25
-.ENDS"} 
-C {devices/launcher} 1070 -770 0 0 {name=h2 
+.ENDS" tclcommand="xschem edit_vi_prop"}
+C {devices/launcher} 1120 -800 0 0 {name=h2 
 descr="BJT MODELS" 
-url="http://www.zen22142.zen.co.uk/ltspice/standard.bjt"} 
-C {devices/launcher} 1070 -720 0 0 {name=h1 
+url="http://www.zen22142.zen.co.uk/ltspice/standard.bjt"}
+C {devices/launcher} 1120 -750 0 0 {name=h1 
 descr="NPN MODELS" 
-url="http://web.mit.edu/Magic/Public/ckt/npn.mod"} 
-C {devices/launcher} 1070 -820 0 0 {name=h4 
+url="http://web.mit.edu/Magic/Public/ckt/npn.mod"}
+C {devices/launcher} 1120 -850 0 0 {name=h3 
+descr="COIL CALCULATION" 
+url="http://hamwaves.com/antennas/inductance.html"}
+C {devices/launcher} 1120 -900 0 0 {name=h4 
 descr="ltwiki BJT MODELS" 
-url="http://ltwiki.org/?title=Standard.bjt"} 
-C {devices/vsource} 110 -1140 0 0 {name=v1 value=50
-} 
-C {devices/vsource} 110 -1080 0 0 {name=v2 value=50
-} 
-C {devices/lab_pin} 290 -1190 0 1 {name=p5 lab=VPP} 
-C {devices/lab_pin} 290 -1030 0 1 {name=p6 lab=VNN} 
-C {devices/lab_pin} 290 -1110 0 1 {name=p3 lab=VSS} 
-C {devices/lab_pin} 810 -210 0 1 {name=p14 lab=OUTP} 
-C {devices/res} 810 -460 0 1 {name=r1 m=1 value=8} 
-C {devices/lab_pin} 460 -1140 0 0 {name=p26 lab=VSS} 
-C {devices/lab_pin} 500 -1180 0 0 {name=p31 lab=IN} 
-C {devices/vcvs} 570 -1160 0 0 {name=E3 value='gain*0.99'} 
-C {devices/lab_pin} 660 -1190 0 1 {name=p32 lab=REFP} 
-C {devices/capa} 230 -1150 0 0 {name=c2 m=1 value=100u} 
-C {devices/capa} 220 -1070 0 0 {name=c3 m=1 value=100u} 
-C {devices/res} 170 -1190 1 1 {name=r11 m=1 value=0.3} 
-C {devices/res} 170 -1030 1 1 {name=r9 m=1 value=0.3} 
-C {devices/res} 500 -890 0 1 {name=r19 m=1 value='100k'} 
-C {devices/res} 500 -830 0 1 {name=r0 m=1 value="'100k/gain'"} 
-C {devices/lab_pin} 500 -720 0 0 {name=p108 lab=IN} 
-C {examples/mos_power_ampli} 450 -630 0 0 {name=x1} 
-C {devices/lab_pin} 300 -610 0 0 {name=p2 lab=VPP} 
-C {devices/lab_pin} 300 -590 0 0 {name=p4 lab=VNN} 
-C {devices/lab_pin} 810 -670 0 1 {name=p9 lab=OUTM} 
-C {examples/mos_power_ampli} 450 -170 0 0 {name=x0} 
-C {devices/lab_pin} 300 -150 0 0 {name=p12 lab=VPP} 
-C {devices/lab_pin} 300 -130 0 0 {name=p13 lab=VNN} 
-C {devices/res} 190 -290 0 1 {name=r6 m=1 value=100k} 
-C {devices/lab_pin} 190 -340 0 0 {name=p7 lab=VPP} 
-C {devices/res} 210 -130 0 1 {name=r7 m=1 value=100k} 
-C {devices/lab_pin} 210 -80 0 0 {name=p15 lab=VSS} 
-C {devices/lab_pin} 460 -1060 0 0 {name=p20 lab=VSS} 
-C {devices/lab_pin} 500 -1100 0 0 {name=p21 lab=IN} 
-C {devices/vcvs} 570 -1080 0 0 {name=E0 value='-gain*0.99'} 
-C {devices/lab_pin} 660 -1110 0 1 {name=p23 lab=REFM} 
-C {devices/lab_pin} 190 -220 0 0 {name=p8 lab=INX} 
-C {devices/lab_pin} 830 -1040 0 0 {name=p126 lab=VSS} 
-C {devices/lab_pin} 910 -1190 0 1 {name=p127 lab=IN} 
-C {devices/capa} 500 -770 0 0 {name=c5 m=1 value=50u} 
-C {devices/lab_pin} 500 -260 0 0 {name=p11 lab=VSS} 
-C {devices/capa} 500 -310 0 0 {name=c6 m=1 value=50u} 
-C {devices/lab_pin} 300 -170 0 0 {name=p28 lab=VSS} 
-C {devices/lab_pin} 300 -630 0 0 {name=p1 lab=VSS} 
-C {devices/res} 500 -430 0 1 {name=r2 m=1 value='100k'} 
-C {devices/res} 500 -370 0 1 {name=r3 m=1 value="'100k/(gain-2)'"} 
-C {devices/vsource} 830 -1130 0 0 {name=v3 
+url="http://ltwiki.org/?title=Standard.bjt"}
+C {devices/launcher} 1120 -400 0 0 {name=h5 
+descr="hspice manual" 
+program=evince
+url="/home/schippes/hspice_2013/docs_help/hspice_sa.pdf"
+}
+C {devices/launcher} 1120 -350 0 0 {name=h6 
+descr="hspice cmdref" 
+program=evince
+url="/home/schippes/hspice_2013/docs_help/hspice_cmdref.pdf"
+}
+C {devices/launcher} 1120 -300 0 0 {name=h7 
+descr="hspice aasa" 
+program=evince
+url="/home/schippes/hspice_2013/docs_help/hspice_aasa.pdf"
+}
+C {devices/vsource} 160 -1200 0 0 {name=v1 value=50}
+C {devices/vsource} 160 -1140 0 0 {name=v0 value=50}
+C {devices/lab_pin} 340 -1250 0 1 {name=p5 lab=VPP}
+C {devices/lab_pin} 340 -1090 0 1 {name=p6 lab=VNN}
+C {devices/lab_pin} 340 -1170 0 1 {name=p3 lab=VSS}
+C {devices/launcher} 1120 -950 0 0 {name=h8 
+descr="DIODE LIB" 
+url="/home/schippes/simulations/diode.lib"
+}
+C {devices/lab_pin} 860 -240 0 1 {name=p14 lab=OUTP}
+C {devices/res} 860 -490 0 1 {name=r1 m=1 value=8}
+C {devices/lab_pin} 510 -1200 0 0 {name=p26 lab=VSS}
+C {devices/lab_pin} 550 -1240 0 0 {name=p31 lab=IN}
+C {devices/vcvs} 620 -1220 0 0 {name=E3 value='gain*0.99'}
+C {devices/lab_pin} 710 -1250 0 1 {name=p32 lab=REFP}
+C {devices/capa} 280 -1210 0 0 {name=c2 m=1 value=100u}
+C {devices/capa} 270 -1130 0 0 {name=c3 m=1 value=100u}
+C {devices/res} 220 -1250 1 1 {name=r11 m=1 value=0.3}
+C {devices/res} 220 -1090 1 1 {name=r9 m=1 value=0.3}
+C {devices/res} 550 -920 0 1 {name=r19 m=1 value='100k'}
+C {devices/res} 550 -860 0 1 {name=r0 m=1 value="'100k/gain'"}
+C {devices/lab_pin} 550 -750 0 0 {name=p108 lab=IN}
+C {examples/mos_power_ampli} 500 -660 0 0 {name=x1}
+C {devices/lab_pin} 350 -640 0 0 {name=p2 lab=VPP}
+C {devices/lab_pin} 350 -620 0 0 {name=p4 lab=VNN}
+C {devices/lab_pin} 860 -700 0 1 {name=p9 lab=OUTM}
+C {examples/mos_power_ampli} 500 -200 0 0 {name=x0}
+C {devices/lab_pin} 350 -180 0 0 {name=p12 lab=VPP}
+C {devices/lab_pin} 350 -160 0 0 {name=p13 lab=VNN}
+C {devices/res} 240 -320 0 1 {name=r6 m=1 value=100k}
+C {devices/lab_pin} 240 -370 0 0 {name=p7 lab=VPP}
+C {devices/res} 260 -160 0 1 {name=r7 m=1 value=100k}
+C {devices/lab_pin} 260 -110 0 0 {name=p15 lab=VSS}
+C {devices/lab_pin} 510 -1120 0 0 {name=p20 lab=VSS}
+C {devices/lab_pin} 550 -1160 0 0 {name=p21 lab=IN}
+C {devices/vcvs} 620 -1140 0 0 {name=E0 value='-gain*0.99'}
+C {devices/lab_pin} 710 -1170 0 1 {name=p23 lab=REFM}
+C {devices/lab_pin} 240 -250 0 0 {name=p8 lab=INX}
+C {devices/lab_pin} 880 -1100 0 0 {name=p126 lab=VSS}
+C {devices/lab_pin} 960 -1250 0 1 {name=p127 lab=IN}
+C {devices/capa} 550 -800 0 0 {name=c5 m=1 value=50u}
+C {devices/lab_pin} 550 -290 0 0 {name=p11 lab=VSS}
+C {devices/capa} 550 -340 0 0 {name=c6 m=1 value=50u}
+C {devices/lab_pin} 350 -200 0 0 {name=p28 lab=VSS}
+C {devices/lab_pin} 350 -660 0 0 {name=p1 lab=VSS}
+C {devices/res} 550 -460 0 1 {name=r2 m=1 value='100k'}
+C {devices/res} 550 -400 0 1 {name=r3 m=1 value="'100k/(gain-2)'"}
+C {devices/vsource} 880 -1190 0 0 {name=v3 
 xvalue="pulse -.1 .1 1m .1u .1u 10.1u 20u" 
 value="sin 0 1 freq 1m"
-} 
-C {devices/res} 190 -750 0 1 {name=r4 m=1 value=100k} 
-C {devices/lab_pin} 190 -800 0 0 {name=p18 lab=VPP} 
-C {devices/res} 210 -590 0 1 {name=r5 m=1 value=100k} 
-C {devices/lab_pin} 210 -540 0 0 {name=p10 lab=VSS} 
-C {devices/res} 350 -920 0 1 {name=r8 m=1 value=100k} 
-C {devices/capa} 120 -190 1 0 {name=c4 m=1 value=50u} 
-C {devices/lab_pin} 90 -190 0 0 {name=p0 lab=IN} 
-C {devices/capa} 100 -650 1 0 {name=c1 m=1 value=50u} 
-C {devices/lab_pin} 70 -650 0 0 {name=p17 lab=VSS} 
-C {devices/lab_pin} 190 -680 0 0 {name=p22 lab=VSSX} 
-C {devices/res} 880 -1190 1 1 {name=r10 m=1 value=200} 
-C {devices/lab_pin} 350 -970 0 0 {name=p24 lab=VPP} 
-C {devices/res} 350 -460 0 1 {name=r13 m=1 value=100k} 
-C {devices/lab_pin} 350 -510 0 0 {name=p16 lab=VPP} 
-C {devices/launcher} 1070 -880 0 0 {name=h9 
+}
+C {devices/res} 240 -780 0 1 {name=r4 m=1 value=100k}
+C {devices/lab_pin} 240 -830 0 0 {name=p18 lab=VPP}
+C {devices/res} 260 -620 0 1 {name=r5 m=1 value=100k}
+C {devices/lab_pin} 260 -570 0 0 {name=p10 lab=VSS}
+C {devices/res} 400 -950 0 1 {name=r8 m=1 value=100k}
+C {devices/capa} 170 -220 1 0 {name=c4 m=1 value=50u}
+C {devices/lab_pin} 140 -220 0 0 {name=p0 lab=IN}
+C {devices/capa} 150 -680 1 0 {name=c1 m=1 value=50u}
+C {devices/lab_pin} 120 -680 0 0 {name=p17 lab=VSS}
+C {devices/lab_pin} 240 -710 0 0 {name=p22 lab=VSSX}
+C {devices/res} 930 -1250 1 1 {name=r10 m=1 value=200}
+C {devices/lab_pin} 400 -1000 0 0 {name=p24 lab=VPP}
+C {devices/res} 400 -490 0 1 {name=r13 m=1 value=100k}
+C {devices/lab_pin} 400 -540 0 0 {name=p16 lab=VPP}
+C {devices/launcher} 1120 -1000 0 0 {name=h9 
 descr="REGULATORS LIB" 
 url="http://ltwiki.org/files/LTspiceIV/lib/sub/regulators.lib"
-} 
-C {devices/lab_pin} 210 -80 0 0 {name=p30 lab=VSS} 
-C {devices/lab_pin} 210 -80 0 0 {name=p33 lab=VSS} 
-C {devices/vsource} 830 -1070 0 0 {name=v4 value=0 xvalue="pwl 0 .1 1m .1 1.01m 0"
-} 
-C {devices/lab_pin} 300 -240 0 0 {name=p19 lab=FB} 
-C {devices/lab_pin} 300 -700 0 0 {name=p25 lab=FBN} 
-C {devices/title} 160 -30 0 0 {name=l1 author="Stefan Schippers"} 
-C {devices/launcher} 1070 -950 0 0 {name=h3 
-descr="GENERATE NETLIST" 
-tclcommand="xschem netlist"} 
+program=firefox}
+C {devices/lab_pin} 260 -110 0 0 {name=p30 lab=VSS}
+C {devices/lab_pin} 260 -110 0 0 {name=p33 lab=VSS}
+C {devices/vsource} 880 -1130 0 0 {name=v4 value=0 xvalue="pwl 0 .1 1m .1 1.01m 0"
+}
+C {devices/lab_pin} 350 -270 0 0 {name=p19 lab=FB}
+C {devices/lab_pin} 350 -730 0 0 {name=p25 lab=FBN}
+C {devices/title} 160 -30 0 0 {name=l2 author="Stefan Schippers"}

@@ -21,8 +21,92 @@
  */
 
 #include "xschem.h"
-#include <sys/wait.h>
+#include <sys/wait.h>  /* waitpid */
 
+//
+// 20180923
+// return "/<prefix><random string of random_size characters>"
+// example: "/xschem_undo_dj5hcG38T2"
+//
+const char *random_string(const char *prefix)
+{
+  static const char charset[]="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  static int random_size=10;
+  static char *str=NULL;
+  int prefix_size;
+  static unsigned short once=1;
+  int i;
+  int idx;
+  if(once) {
+    srand((unsigned short) time(NULL));
+    once=0;
+  }
+  prefix_size = strlen(prefix);
+  my_realloc(&str, prefix_size + random_size + 2); // include leading '/' and trailing '\0'
+  str[0]='/';
+  memcpy(str+1, prefix, prefix_size);
+  for(i=prefix_size+1; i < prefix_size + random_size+1; i++) {
+    idx = rand()%(sizeof(charset)-1);
+    str[i] = charset[idx];
+  }
+  str[i] ='\0';
+  return str;
+}
+
+
+//
+// 20180923
+// try to create a tmp directory in $HOME
+// ${HOME}/<prefix><trailing random chars>
+// after 5 unsuccessfull attemps give up
+// and return NULL
+//
+const char *create_tmpdir(char *prefix)
+{
+  static char *str=NULL;
+  int i;
+  struct stat buf;
+  for(i=0; i<5;i++) {
+    my_strdup(&str, tclgetvar("XSCHEM_TMP_DIR"));
+    my_strcat(&str, random_string(prefix));
+    if(stat(str, &buf) && !mkdir(str, 0700) ) { // dir must not exist
+      if(debug_var>=1) fprintf(errfp, "created dir: %s\n", str);
+      return str;
+      break;
+    }
+    if(debug_var>=1) fprintf(errfp, "failed to create %s\n", str);
+  }
+  fprintf(errfp, "create_tmpdir(): failed to create %s, aborting\n", str);
+  return NULL; // failed to create random dir 5 times
+}
+
+//
+// 20180924
+// try to create a tmp file in $HOME
+// ${HOME}/<prefix><trailing random chars>
+// after 5 unsuccessfull attemps give up
+// and return NULL
+//
+FILE *open_tmpfile(char *prefix, char **filename)
+{
+  static char *str=NULL;
+  int i;
+  FILE *fd;
+  struct stat buf;
+  for(i=0; i<5;i++) {
+    my_strdup(&str, tclgetvar("XSCHEM_TMP_DIR"));
+    my_strcat(&str, random_string(prefix));
+    *filename = str;
+    if(stat(str, &buf) && (fd = fopen(str, "w")) ) { // file must not exist
+      if(debug_var>=1) fprintf(errfp, "created file: %s\n", str);
+      return fd;
+      break;
+    }
+    if(debug_var>=1) fprintf(errfp, "failed to create %s\n", str);
+  }
+  fprintf(errfp, "open_tmpfile(): failed to create %s, aborting\n", str);
+  return NULL; // failed to create random filename 5 times
+}
 
 inline void updatebbox(int count, Box *boundbox, Box *tmp)
 {
@@ -36,11 +120,10 @@ inline void updatebbox(int count, Box *boundbox, Box *tmp)
  }
 }    
 
-
 void read_xschem_file(FILE *fd) // 20180912
 {
     int endfile=0;
-    char c[4096];
+    char c[PATH_MAX];
 
     while(!endfile)
     {
@@ -128,7 +211,6 @@ void save_ascii_string(char *ptr, FILE *fd)
   fputc(c,fd);
  }
  fputc('}',fd);
- fputc(' ',fd); // add space to separate from next field
 }
 
 
@@ -141,7 +223,7 @@ void save_text(FILE *fd)
  {
   fprintf(fd, "T ");
   save_ascii_string(ptr[i].txt_ptr,fd);
-  fprintf(fd, "%.16g %.16g %d %d %.16g %.16g ",
+  fprintf(fd, " %.16g %.16g %d %d %.16g %.16g ",
    ptr[i].x0, ptr[i].y0, ptr[i].rot, ptr[i].flip, ptr[i].xscale,
     ptr[i].yscale);
   save_ascii_string(ptr[i].prop_ptr,fd);
@@ -210,8 +292,8 @@ void save_inst(FILE *fd)
  {
   fprintf(fd, "C ");
   
-  save_ascii_string(ptr[i].name,fd);
-  fprintf(fd, "%.16g %.16g %d %d ",ptr[i].x0, ptr[i].y0, ptr[i].rot, ptr[i].flip ); 
+  save_ascii_string(ptr[i].name, fd);
+  fprintf(fd, " %.16g %.16g %d %d ",ptr[i].x0, ptr[i].y0, ptr[i].rot, ptr[i].flip ); 
   save_ascii_string(ptr[i].prop_ptr,fd);
   fputc('\n' ,fd);
  }
@@ -223,13 +305,15 @@ void save_inst(FILE *fd)
 void load_inst(FILE *fd)
 {
     int i;
-
+    static char *n=NULL;
     Instance *ptr;
     i=lastinst;
     check_inst_storage();
     ptr=inst_ptr;
     ptr[i].name=NULL;
-    load_ascii_string(&ptr[i].name,fd);
+    load_ascii_string(&n,fd);
+    my_strdup(&ptr[i].name, n);  // 20181009 rel_sym_path(n)?  perf. issue on big schematics
+    my_free(&n);
     fscanf(fd, "%lf %lf %d %d",&ptr[i].x0, &ptr[i].y0,&ptr[i].rot,
      &ptr[i].flip);
     ptr[i].flags=0;
@@ -292,7 +376,7 @@ void load_polygon(FILE *fd)
     fscanf(fd, "%d %d",&c, &points);
     if(c>=cadlayers) {
       fprintf(errfp,"FATAL: polygon layer > defined cadlayers, increase cadlayers\n"); 
-      Tcl_Eval(interp, "exit");
+      tcleval( "exit");
     } // 20150408
     check_polygon_storage(c);
     i=lastpolygon[c];
@@ -328,7 +412,7 @@ void load_box(FILE *fd)
     fscanf(fd, "%d",&c);
     if(c>=cadlayers) {
       fprintf(errfp,"FATAL: box layer > defined cadlayers, increase cadlayers\n");
-      Tcl_Eval(interp, "exit");
+      tcleval( "exit");
     } // 20150408
     check_box_storage(c);
     i=lastrect[c];
@@ -366,7 +450,7 @@ void load_line(FILE *fd)
     Line *ptr;
 
     fscanf(fd, "%d",&c);
-    if(c>=cadlayers) {fprintf(errfp,"FATAL: line layer > defined cadlayers, increase cadlayers\n"); Tcl_Eval(interp, "exit");} // 20150408
+    if(c>=cadlayers) {fprintf(errfp,"FATAL: line layer > defined cadlayers, increase cadlayers\n"); tcleval( "exit");} // 20150408
     check_line_storage(c);
     i=lastline[c];
     ptr=line[c];
@@ -385,32 +469,33 @@ void make_symbol(void)
 
  if( strcmp(schematic[currentsch],"") )
  {
-  my_snprintf(name, S(name), "make_symbol %s", schematic[currentsch] );
+  my_snprintf(name, S(name), "make_symbol {%s}", schematic[currentsch] );
   if(debug_var>=1) fprintf(errfp, "make_symbol(): making symbol: name=%s\n", name);
-  tkeval(name);
+  tcleval(name);
  }
          
 }
 
 
-int save_symbol(char *schname) // 20171020 aded return value
+int save_symbol(char *schname) // 20171020 added return value
 {
   FILE *fd;
   int i;
   int symbol;
-  char name[4096];  // overflow safe 20161122
-  if(schname!=NULL) 
-  {
-   if(strcmp(schname,"") ) my_strncpy(schematic[currentsch], schname, S(schematic[currentsch]));
-   else return -1;
+  char name[PATH_MAX];  // overflow safe 20161122
+
+  if(strcmp(schname,"") ) my_strncpy(schematic[currentsch], schname, S(schematic[currentsch]));
+  else return -1;
+  if(debug_var>=1) fprintf(errfp, "save_symbol(): currentsch=%d name=%s\n",currentsch, schname);
+
+  my_strncpy(name, abs_sym_path(schematic[currentsch], ".sym"), S(name));
+  if(has_x) {
+    tcleval( "wm title . [file tail [xschem get schpath]]");    // 20161207
+    tcleval( "wm iconname . [file tail [xschem get schpath]]"); // 20161207
   }
-  if(!strcmp(schematic[currentsch],"")) return -1;
-  my_snprintf(name, S(name), "%s/%s.sym",Tcl_GetVar(interp,"XSCHEM_DESIGN_DIR", TCL_GLOBAL_ONLY),
-   schematic[currentsch]);
-   if(debug_var>=2) fprintf(errfp, "save_symbol(): currentsch=%d name=%s\n",currentsch, 
-          schematic[currentsch]);
   if(!(fd=fopen(name,"w")) ) {
-     tkeval("alert_ {file opening for write failed!} {}"); // 20171020
+     fprintf(errfp, "save_symbol(): problems opening file %s \n", name);
+     tcleval("alert_ {file opening for write failed!} {}"); // 20171020
      return -1;
   }
   unselect_all();
@@ -457,49 +542,25 @@ int save_symbol(char *schname) // 20171020 aded return value
   return 0;
 }
 
-
-
 int save_schematic(char *schname) // 20171020 added return value
 {
     FILE *fd;
-    char name[4096]; // overflow safe 20161122
-    if(schname!=NULL)
-    {
-      if( strcmp(schname,"") ) my_strncpy(schematic[currentsch], schname, S(schematic[currentsch]));
-      else return -1;
-    }
+    char name[PATH_MAX]; // overflow safe 20161122
 
-    //// useless 20171119 if no correct filename given enforce a correct one or Cancel the save
-    // my_snprintf(name, S(name), "check_valid_filename %s", schematic[currentsch]); // 20121111
-    // Tcl_Eval(interp, name); 
-    // if( strcmp(Tcl_GetStringResult(interp), "ok") ) { 
-    //      return -1 ; // 20170622
-    // }
-
-    if(!strcmp(schematic[currentsch],"")) {
-      if(debug_var>=1) fprintf(errfp, "save_schematic(): no name specified , cant save\n");
-
-      // 20121111
-      if(has_x) {
-        Tcl_Eval(interp,
-          "tk_messageBox -icon error -type ok -message \"save_schematic(): no name specified , cant save\"");
-      }
-
-      return -1;
-    }
-    if(schname !=NULL)
+    if( strcmp(schname,"") ) my_strncpy(schematic[currentsch], schname, S(schematic[currentsch]));
+    else return -1;
     if(debug_var>=1) fprintf(errfp, "save_schematic(): currentsch=%d name=%s\n",currentsch, schname);
-    my_snprintf(name, S(name), "%s/%s.sch",Tcl_GetVar(interp,"XSCHEM_DESIGN_DIR", TCL_GLOBAL_ONLY),
-     schematic[currentsch]);
+
+    my_strncpy(name, abs_sym_path(schematic[currentsch], ".sch"), S(name));
     if(has_x) {
-      Tcl_Eval(interp, "wm title . [file tail [xschem get schpath]]");    // 20161207
-      Tcl_Eval(interp, "wm iconname . [file tail [xschem get schpath]]"); // 20161207
+      tcleval( "wm title . [file tail [xschem get schpath]]");    // 20161207
+      tcleval( "wm iconname . [file tail [xschem get schpath]]"); // 20161207
     }
 
     if(!(fd=fopen(name,"w")))
     {
-      if(debug_var>=1) fprintf(errfp, "save_schematic(): problems opening file %s \n",name);
-      tkeval("alert_ {file opening for write failed!} {}"); // 20171020
+      fprintf(errfp, "save_schematic(): problems opening file %s \n",name);
+      tcleval("alert_ {file opening for write failed!} {}"); // 20171020
       return -1;
     }
     unselect_all();
@@ -588,64 +649,64 @@ void link_symbols_to_instances(void) // 20150326 separated from load_schematic()
 
 }
 
-void load_schematic(int load_symbols, char *abs_name, int reset_undo) // 20150327 added reset_undo
+void load_schematic(int load_symbols, const char *abs_name, int reset_undo) // 20150327 added reset_undo
 {
   FILE *fd;
-  char name[4096];   // overflow safe 20161122
+  char name[PATH_MAX];
+  // char cmd[PATH_MAX+200];
 
   current_type=SCHEMATIC;
-  if(reset_undo) clear_undo();
-  if(strcmp(schematic[currentsch], "")==0)
-  {
-   if(debug_var>=1) fprintf(errfp, "load_schematic(): Error: schematic[currentsch] not set\n");
-   if(debug_var>=1) fprintf(errfp, "load_schematic():        nothing loaded\n");
-   unselect_all();
-   clear_drawing();
-   return;
-  }
-  if(!abs_name) {
-    my_snprintf(name, S(name), "%s/%s.sch", Tcl_GetVar(interp,"XSCHEM_DESIGN_DIR", TCL_GLOBAL_ONLY), schematic[currentsch]);
-  } else {
-    my_snprintf(name, S(name), "%s", abs_name);
-  }
-  if(debug_var>=2) fprintf(errfp, "load_schematic(): opening file for loading:%s\n",name);
-
-  clear_drawing();
-  //free_hash();  // delete whole hash table
-  unselect_all();
-  if( (fd=fopen(name,"r"))!= NULL)
-  {
-    read_xschem_file(fd);
-    fclose(fd); // 20150326 moved before load symbols
-
-    if(debug_var>=2) fprintf(errfp, "load_schematic(): loaded file:wire=%d inst=%d\n",lastwire , lastinst);
-    if(load_symbols) link_symbols_to_instances();
-
-  }  // end if(fd=fopen(name,"r"))!= NULL)
   prepared_hilight_structs=0; // 20171212
   prepared_netlist_structs=0; // 20171212
   prepared_hash_objects=0; // 20171224
   prepared_hash_wires=0; // 20171224
   modified=0;
+  if(reset_undo) clear_undo();
 
-  if(has_x) { // 20161207 moved after if( (fd=..)) 
-    Tcl_Eval(interp, "wm title . [file tail [xschem get schpath]]"); // 20150417 set window and icon title
-    Tcl_Eval(interp, "wm iconname . [file tail [xschem get schpath]]");
+  if(abs_name && abs_name[0]) {
+
+    my_strncpy(name, abs_sym_path(abs_name, ".sch"), S(name));
+    // my_snprintf(cmd, S(cmd), "cd [file dirname {%s}]", name);
+    // tcleval(cmd); /* change dir to schematic dir so relative references of symbols will be correct */
+    my_strncpy(schematic[currentsch], rel_sym_path(name), S(schematic[currentsch]));
+    clear_drawing();
+  
+    if(debug_var>=1) fprintf(errfp, "load_schematic(): opening file for loading:%s\n",name);
+  
+    if(!name[0]) return;
+    if( (fd=fopen(name,"r"))== NULL) {
+      fprintf(errfp, "load_schematic(): unable to open file: %s, abs_name=%s\n", 
+          name, abs_name ? abs_name : "(null)");
+      return;
+    }
+    if(debug_var>=1) fprintf(errfp, "load_schematic(): reading file: %s\n", name);
+
+    read_xschem_file(fd);
+    fclose(fd); // 20150326 moved before load symbols
+    if(debug_var>=2) fprintf(errfp, "load_schematic(): loaded file:wire=%d inst=%d\n",lastwire , lastinst);
+    if(load_symbols) link_symbols_to_instances();
+    if(debug_var>=1) fprintf(errfp, "load_schematic(): %s, returning\n", schematic[currentsch]);
+  } else {
+    clear_drawing();
+    my_strncpy(schematic[currentsch], "", S(schematic[currentsch]));
   }
-  if(debug_var>=1) fprintf(errfp, "load_schematic(): returning\n");
+  if(has_x) { // 20161207 moved after if( (fd=..)) 
+    tcleval( "wm title . [file tail [xschem get schpath]]"); // 20150417 set window and icon title
+    tcleval( "wm iconname . [file tail [xschem get schpath]]");
+  }
 }
 
 void delete_undo(void)  // 20150327
 {
   int i;
-  char diff_name[4096]; // overflow safe 20161122
+  char diff_name[PATH_MAX]; // overflow safe 20161122
 
   for(i=0; i<max_undo; i++) {
     my_snprintf(diff_name, S(diff_name), "%s/undo%d",undo_dirname, i);
     unlink(diff_name);
   }
   rmdir(undo_dirname);
-  my_free(undo_dirname);
+  my_free(&undo_dirname);
 }
     
 void clear_undo(void) // 20150327
@@ -657,34 +718,20 @@ void clear_undo(void) // 20150327
 
 void push_undo(void) // 20150327
 {
-    FILE *fd, *diff_fd;
-    int pd[2];
-    char diff_name[4096]; // overflow safe 20161122
-    pid_t pid;
+    FILE *fd;
+    char diff_name[PATH_MAX+10]; // overflow safe 20161122
 
     if(no_undo)return;
     if(debug_var>=1) fprintf(errfp, "push_undo(): cur_undo_ptr=%d tail_undo_ptr=%d head_undo_ptr=%d\n", 
        cur_undo_ptr, tail_undo_ptr, head_undo_ptr);
-    my_snprintf(diff_name, S(diff_name), "%s/undo%d", undo_dirname, cur_undo_ptr%max_undo);
+    my_snprintf(diff_name, S(diff_name), "gzip --fast -c > %s/undo%d", undo_dirname, cur_undo_ptr%max_undo);
 
-    pipe(pd); 
-
-    if((pid = fork()) ==0) {                        		// child process
-      close(pd[1]);                        		// close write side of pipe
-      if(!(diff_fd=freopen(diff_name,"w", stdout)))	// redirect stdout to file diff_name
-      {
-        if(debug_var>=1) fprintf(errfp, "push_undo(): problems opening file %s \n",diff_name);
-        Tcl_Eval(interp, "exit");
-      }
-      dup2(pd[0],0);                       		// connect read side of pipe to stdin
-      execlp("gzip", "gzip", "-c", NULL);	// replace current process with comand
-      // never gets here
-      if(debug_var>=1) fprintf(errfp, "push_undo(): problems with execlp\n");
-      Tcl_Eval(interp, "exit");
+    fd = popen(diff_name,"w");
+    if(!fd) {
+      fprintf(errfp, "push_undo(): failed to open write pipe %s\n", diff_name);
+      no_undo=1;
+      return;
     }
-    close(pd[0]);                        		// close read side of pipe
-   
-    fd=fdopen(pd[1],"w");
 
     // unselect_all();
     fprintf(fd, "G ");
@@ -705,20 +752,16 @@ void push_undo(void) // 20150327
     save_text(fd);
     save_wire(fd);
     save_inst(fd);
-    fclose(fd);
     cur_undo_ptr++;
     head_undo_ptr = cur_undo_ptr;
     tail_undo_ptr = head_undo_ptr <= max_undo? 0: head_undo_ptr-max_undo;
-    waitpid(pid, NULL,0);
-
+    pclose(fd);
 }
 
 void pop_undo(int redo)  // 20150327
 {
-  FILE *fd, *diff_fd;
-  int pd[2];
-  char diff_name[4096];
-  pid_t pid;
+  FILE *fd;
+  char diff_name[PATH_MAX+12];
 
   if(no_undo)return;
   if(redo) { 
@@ -741,59 +784,37 @@ void pop_undo(int redo)  // 20150327
     if(cur_undo_ptr<=0) return; // check undo tail
     cur_undo_ptr--;
   }
-
-  my_snprintf(diff_name, S(diff_name), "%s/undo%d", undo_dirname, cur_undo_ptr%max_undo);
-
-  // current_type=SCHEMATIC; // removed 20151104
-
+  my_snprintf(diff_name, S(diff_name), "gunzip -c %s/undo%d", undo_dirname, cur_undo_ptr%max_undo);
   clear_drawing();
-  //free_hash();  // delete whole hash table
   unselect_all();
-
-  pipe(pd);
-
-  if((pid = fork())==0) {                                     // child process
-    close(pd[0]);                                     // close read side of pipe
-    if(!(diff_fd=freopen(diff_name,"r", stdin)))     // redirect stdin from file name
-    {
-      if(debug_var>=1) fprintf(errfp, "pop_undo(): problems opening file %s \n",diff_name);
-      Tcl_Eval(interp, "exit");
-    }
-    dup2(pd[1],1);                                    // connect write side of pipe to stdout
-    execlp("gunzip", "gunzip", "-c", NULL);       // replace current process with command
-    // never gets here
-    if(debug_var>=1) fprintf(errfp, "pop_undo(): problems with execlp\n");
-    Tcl_Eval(interp, "exit");
+  fd=popen(diff_name, "r");
+  if(!fd) {
+    fprintf(errfp, "pop_undo(): failed to open read pipe %s\n", diff_name);
+    no_undo=1;
+    return;
   }
-  close(pd[1]);                                       // close write side of pipe
-
-  fd=fdopen(pd[0],"r");
   read_xschem_file(fd);
-  fclose(fd); // 20150326 moved before load symbols
-
-  if(debug_var>=2) fprintf(errfp, "load_schematic(): loaded file:wire=%d inst=%d\n",lastwire , lastinst);
+  pclose(fd); // 20150326 moved before load symbols
+  if(debug_var>=2) fprintf(errfp, "pop_undo(): loaded file:wire=%d inst=%d\n",lastwire , lastinst);
   link_symbols_to_instances();
   modified=1;
   prepared_hash_objects=0; // 20171224
   prepared_hash_wires=0; // 20171224
   prepared_netlist_structs=0; // 20171224
   prepared_hilight_structs=0; // 20171224
-  if(debug_var>=2) fprintf(errfp, "load_schematic(): returning\n");
-  waitpid(pid, NULL, 0);
+  if(debug_var>=2) fprintf(errfp, "pop_undo(): returning\n");
 }
-
-
 
 int load_symbol_definition(char *name)
 {
   FILE *fd;
-  char name3[4096];  // 20161122 overflow safe
+  char name3[PATH_MAX];  // 20161122 overflow safe
   Box tmp,boundbox;
   int i,c,count=0, k, poly_points; // 20171115 polygon stuff
   static char *aux_ptr=NULL;
   double aux_double;
   int aux_int;
-  char aux_str[4096]; // overflow safe 20161122
+  char aux_str[PATH_MAX]; // overflow safe 20161122
   int lastl[cadlayers], lastr[cadlayers], lastp[cadlayers], lastt; // 20171115 lastp
   Line *ll[cadlayers];
   Box *bb[cadlayers];
@@ -803,19 +824,18 @@ int load_symbol_definition(char *name)
   char *strlayer;
 
   if(debug_var>=1) fprintf(errfp, "load_symbol_definition(): name=%s\n", name);
-  my_snprintf(name3, S(name3), "%s/%s.sym", Tcl_GetVar(interp,"XSCHEM_DESIGN_DIR", TCL_GLOBAL_ONLY),
-    name);
-   if(debug_var>=1) fprintf(errfp, "load_symbol_definition(): trying: %s\n",name3);
+
+  my_strncpy(name3, abs_sym_path(name, ".sym"), S(name3));
+  if(debug_var>=1) fprintf(errfp, "load_symbol_definition(): trying: %s\n",name3);
   if((fd=fopen(name3,"r"))==NULL)
   {
      if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): Symbol not found: %s\n",name3);
     //return -1;
-    my_snprintf(name3, S(name3), "%s/%s.sym", Tcl_GetVar(interp,"XSCHEM_HOME_DIR", TCL_GLOBAL_ONLY),
-    "systemlib/missing");
+    my_snprintf(name3, S(name3), "%s/%s.sym", tclgetvar("XSCHEM_HOME_DIR"), "systemlib/missing");
     if((fd=fopen(name3,"r"))==NULL) 
     { 
-     if(debug_var>=1) fprintf(errfp, "load_symbol_definition(): systemlib/missing.sym missing, I give up\n");
-     Tcl_Eval(interp, "exit");
+     fprintf(errfp, "load_symbol_definition(): systemlib/missing.sym missing, I give up\n");
+     tcleval( "exit");
     }
   }
 
@@ -858,7 +878,7 @@ int load_symbol_definition(char *name)
       fscanf(fd, "%d",&c);
       if(c>=cadlayers) {
         fprintf(errfp,"FATAL: line layer > defined cadlayers, increase cadlayers\n");
-        Tcl_Eval(interp, "exit");
+        tcleval( "exit");
       } // 20150408
       i=lastl[c];
       my_realloc(&ll[c],(i+1)*sizeof(Line));
@@ -873,10 +893,9 @@ int load_symbol_definition(char *name)
       break;
      case 'P': // 20171115
       fscanf(fd, "%d %d",&c, &poly_points);
-      // fprintf(errfp, "load_symbol_definition(): polygon, points=%d\n", poly_points);
       if(c>=cadlayers) {
         fprintf(errfp,"FATAL: line layer > defined cadlayers, increase cadlayers\n");
-        Tcl_Eval(interp, "exit");
+        tcleval( "exit");
       } // 20150408
       i=lastp[c];
       my_realloc(&pp[c],(i+1)*sizeof(Polygon));
@@ -903,7 +922,7 @@ int load_symbol_definition(char *name)
       fscanf(fd, "%d",&c);
       if(c>=cadlayers) {
         fprintf(errfp,"FATAL: box layer > defined cadlayers, increase cadlayers\n");
-        Tcl_Eval(interp, "exit");
+        tcleval( "exit");
       } // 20150408
       i=lastr[c];
       my_realloc(&bb[c],(i+1)*sizeof(Box));
@@ -945,16 +964,14 @@ int load_symbol_definition(char *name)
       load_ascii_string(&aux_ptr,fd);
       break;
      default:
-      if(debug_var>=1) fprintf(errfp, "load_schematic(): unknown line, assuming EOF\n");
+      if(debug_var>=1) fprintf(errfp, "load_symbol_definition(): unknown line, assuming EOF\n");
       endfile=1;
       break;
     }
    }
    fclose(fd);
 
-
-
-    if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): finished parsing file\n");
+   if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): finished parsing file\n");
    for(c=0;c<cadlayers;c++)
    {
     instdef[lastinstdef].lines[c] = lastl[c];
@@ -999,18 +1016,20 @@ int load_symbol_definition(char *name)
       updatebbox(count,&boundbox,&tmp);
     }
    }
-//   do not include symbol text in bounding box, since text length
-//   is variable from one instance to another.
-
-//   for(i=0;i<lastt;i++)
-//   { 
-//    count++;
-//    rot=tt[i].rot;flip=tt[i].flip;
-//    text_bbox(tt[i].txt_ptr, tt[i].xscale, tt[i].yscale, rot, flip,
-//    tt[i].x0, tt[i].y0, &rx1,&ry1,&rx2,&ry2);
-//    tmp.x1=rx1;tmp.y1=ry1;tmp.x2=rx2;tmp.y2=ry2;
-//    updatebbox(count,&boundbox,&tmp);
-//   }
+/*
+ *   do not include symbol text in bounding box, since text length
+ *   is variable from one instance to another.
+ *
+ *   for(i=0;i<lastt;i++)
+ *   { 
+ *    count++;
+ *    rot=tt[i].rot;flip=tt[i].flip;
+ *    text_bbox(tt[i].txt_ptr, tt[i].xscale, tt[i].yscale, rot, flip,
+ *    tt[i].x0, tt[i].y0, &rx1,&ry1,&rx2,&ry2);
+ *    tmp.x1=rx1;tmp.y1=ry1;tmp.x2=rx2;tmp.y2=ry2;
+ *    updatebbox(count,&boundbox,&tmp);
+ *  }
+ */
    instdef[lastinstdef].minx = boundbox.x1;
    instdef[lastinstdef].maxx = boundbox.x2;
    instdef[lastinstdef].miny = boundbox.y1;
@@ -1036,31 +1055,31 @@ void create_sch_from_sym(void)
   char *pinname[3] = {"devices/ipin", "devices/opin", "devices/iopin"};
   static char *dir = NULL;
   static char *prop = NULL;
-  char schname[4096];
+  char schname[PATH_MAX];
   static char *savecmd=NULL;
   char *sub_prop;
   static char *sub2_prop=NULL;
   static char *str=NULL;
   struct stat buf;
+  int ln;
 
   rebuild_selected_array();
   if(lastselected > 1)  return;
   if(lastselected==1 && selectedgroup[0].type==ELEMENT)
   {
-    my_snprintf(schname, S(schname), "%s/%s.sch", 
-                Tcl_GetVar(interp, "XSCHEM_DESIGN_DIR", TCL_GLOBAL_ONLY), 
-                inst_ptr[selectedgroup[0].n].name);
+    my_snprintf(schname, S(schname), "%s", 
+                abs_sym_path(inst_ptr[selectedgroup[0].n].name, ".sch"));
     if( !stat(schname, &buf) ) {
       my_strdup(&savecmd, "ask_save \" create schematic file: ");
       my_strcat(&savecmd, schname);
       my_strcat(&savecmd, " ?\nWARNING: This schematic file already exists, it will be overwritten\"");
-      tkeval(savecmd);
+      tcleval(savecmd);
       if(strcmp(Tcl_GetStringResult(interp), "yes") ) return;
     }
     if(!(fd=fopen(schname,"w")))
     {
-      if(debug_var>=1) fprintf(errfp, "create_sch_from_sym(): problems opening file %s \n",schname);
-      tkeval("alert_ {file opening for write failed!} {}"); // 20171020
+      fprintf(errfp, "create_sch_from_sym(): problems opening file %s \n",schname);
+      tcleval("alert_ {file opening for write failed!} {}"); // 20171020
       return;
     }
     fprintf(fd, "G {}");
@@ -1081,8 +1100,9 @@ void create_sch_from_sym(void)
       sub_prop=strstr(prop,"name=")+5;
       if(!sub_prop) continue;
       x=-120.0;
-      my_realloc(&str, 100+strlen(sub_prop));
-      sprintf(str, "name=g%d lab=%s", p++, sub_prop);
+      ln = 100+strlen(sub_prop);
+      my_realloc(&str, ln);
+      my_snprintf(str, ln, "name=g%d lab=%s", p++, sub_prop);
       fprintf(fd, "C {devices/generic_pin} %.16g %.16g %.16g %.16g ", x, 20.0*(ypos++), 0.0, 0.0 );
       save_ascii_string(str, fd);
       fputc('\n' ,fd);
@@ -1106,8 +1126,9 @@ void create_sch_from_sym(void)
         if(!dir) continue;
         if(j==0) x=-120.0; else x=120.0;
         if(!strcmp(dir, pindir[j])) { 
-          my_realloc(&str, 100+strlen(sub2_prop));
-          sprintf(str, "name=g%d lab=%s", p++, sub2_prop);
+          ln = 100+strlen(sub2_prop);
+          my_realloc(&str, ln);
+          my_snprintf(str, ln, "name=g%d lab=%s", p++, sub2_prop);
           fprintf(fd, "C {%s} %.16g %.16g %.16g %.16g ", pinname[j], x, 20.0*(ypos++), 0.0, 0.0);
           save_ascii_string(str, fd);
           fputc('\n' ,fd);
@@ -1118,12 +1139,10 @@ void create_sch_from_sym(void)
   } // if(lastselected...)
 }
 
-void edit_symbol(void)
+void descend_symbol(void)
 {
   static char *str=NULL;
-  FILE *fd;
-  char name[4096];   // overflow safe 20161122
-  char name2[4096];   // overflow safe 20161122
+  char name[PATH_MAX];   // overflow safe 20161122
   // char s[1024]; // 20121121 overflow safe 20161122 // commented out 20161210
   rebuild_selected_array();
   if(lastselected > 1)  return; //20121122
@@ -1158,77 +1177,52 @@ void edit_symbol(void)
   zoom_array[currentsch].x=xorigin;
   zoom_array[currentsch].y=yorigin;
   zoom_array[currentsch].zoom=zoom;
- 
-  unselect_all();
-  // porzione (XX) spostata sopra 01112002
   ++currentsch;
-
-  current_type=SYMBOL; 	// 20070823  change current type only if we really are editing a symbol
-			// previously this line was at the beginning of the function, changing
-  clear_drawing();	// the current type also if user cancels the operation.
-  my_strncpy(schematic[currentsch], name, S(schematic[currentsch]));
-  my_snprintf(name2, S(name2), "%s/%s.sym",Tcl_GetVar(interp,"XSCHEM_DESIGN_DIR", TCL_GLOBAL_ONLY),
-   name);
-  if(debug_var>=1) fprintf(errfp, "edit_symbol(): filename choosen: %s\n", name2); // 20121121
-  if( (fd=fopen(name2,"r"))== NULL) // ok if file is not existing we are making a new symbol 20121122
-  {                                 // we are done.
-   zoom_full(1); //20121122
-   return ;      //20121122
-  }
-  modified=0;
-  prepared_hilight_structs=0; // 20171212
-  prepared_netlist_structs=0; // 20171212
-  prepared_hash_objects=0; // 20171224
-  prepared_hash_wires=0; // 20171224
-  // delete_netlist_structs(); // 20161222
-  read_xschem_file(fd);
-  fclose(fd);
-  Tcl_Eval(interp, "wm title . [file tail [xschem get schpath]]"); // 20150417 set window and icon title
-  Tcl_Eval(interp, "wm iconname . [file tail [xschem get schpath]]");
-
+  load_symbol(name);
   zoom_full(1);
 }
 
 
-void load_symbol(char *abs_name)
+void load_symbol(const char *abs_name) /* function called when opening a symbol */
 {
   FILE *fd;
-  char name[4096];   // overflow safe 20161122
+  char name[PATH_MAX];   // overflow safe 20161122
+  // char cmd[PATH_MAX+200];
+
   current_type=SYMBOL;
-  if(strcmp(schematic[currentsch], "")==0)
-  {
-   if(debug_var>=1) fprintf(errfp, "load_symbol(): Error: schematic[currentsch] not set\n");
-   if(debug_var>=1) fprintf(errfp, "load_symbol():        nothing loaded\n");
-   unselect_all();
-   clear_drawing();
-   return;
-  }
-  if(!abs_name)
-    my_snprintf(name, S(name), "%s/%s.sym", Tcl_GetVar(interp,"XSCHEM_DESIGN_DIR", TCL_GLOBAL_ONLY), schematic[currentsch]);
-  else
-    my_snprintf(name, S(name), "%s", abs_name);
-  if(debug_var>=2) fprintf(errfp, "load_symbol(): opening file for loading:%s\n",name);
-  clear_drawing();
+  clear_undo();
+
+  my_snprintf(name, S(name), "%s", abs_sym_path(abs_name, ".sym"));
+  // my_snprintf(cmd, S(cmd), "cd [file dirname {%s}]", name);
+  // tcleval(cmd); /* change dir to schematic dir so relative references of symbols will be correct */
+  my_strncpy(schematic[currentsch], rel_sym_path(abs_name), S(schematic[currentsch]));
+
+  if(debug_var>=1) fprintf(errfp, "load_symbol(): opening file for loading:%s\n",name);
+
   unselect_all();
-  if( (fd=fopen(name,"r"))!= NULL)
-  {
-    // delete_netlist_structs(); // 20161222
-    read_xschem_file(fd);
-    fclose(fd);
-    //zoom_full(1);
-    Tcl_Eval(interp, "wm title . [file tail [xschem get schpath]]"); // 20150417 set window and icon title
-    Tcl_Eval(interp, "wm iconname . [file tail [xschem get schpath]]");
-  }
-  modified=0;
+  clear_drawing();
   prepared_hash_objects=0; // 20171224
   prepared_hilight_structs=0; // 20171212
   prepared_netlist_structs=0; // 20171212
   prepared_hash_wires=0; // 20171224
+  modified=0;
+  if(has_x) {
+    tcleval( "wm title . [file tail [xschem get schpath]]"); // 20150417 set window and icon title
+    tcleval( "wm iconname . [file tail [xschem get schpath]]");
+  }
+  if(!name[0]) return;
+  if( (fd=fopen(name,"r"))== NULL) {
+    fprintf(errfp, "load_symbol(): can not open file: %s\n", name);
+    return;
+  }
+  read_xschem_file(fd);
+  fclose(fd);
+  link_symbols_to_instances(); // 20180921
 }
 
 
 // 20111023 align selected object to current grid setting
-#define SNAP_TO_GRID(a)  a=rint(( a)/cadsnap)*cadsnap 
+#define SNAP_TO_GRID(a)  (a=round(( a)/cadsnap)*cadsnap )
 void round_schematic_to_grid(double cadsnap)
 {
  int i, c, n;
@@ -1287,17 +1281,17 @@ void save_selection(int what)
 {
  FILE *fd;
  int i, c, n, k;
- char name[4096];
+ char name[PATH_MAX];
 
  if(what==1)
-   my_snprintf(name, S(name), "%s/%s.sch",getenv("HOME"), ".selection"); // 20150502 changed PWD to HOME
+   my_snprintf(name, S(name), "%s/%s.sch",home_dir , ".xschem_selection"); // 20150502 changed PWD to HOME
  else // what=2
-   my_snprintf(name, S(name), "%s/%s.sch",getenv("HOME"), ".clipboard"); // 20150502 changed PWD to HOME
+   my_snprintf(name, S(name), "%s/%s.sch",home_dir , ".xschem_clipboard"); // 20150502 changed PWD to HOME
 
  if(!(fd=fopen(name,"w")))
  {
-    if(debug_var>=1) fprintf(errfp, "save_selection(): problems opening file  \n");
-    tkeval("alert_ {file opening for write failed!} {}"); // 20171020
+    fprintf(errfp, "save_selection(): problems opening file %s \n", name);
+    tcleval("alert_ {file opening for write failed!} {}"); // 20171020
     return;
  }
  fprintf(fd, "G { %.16g %.16g }\n", mousex_snap, mousey_snap);
@@ -1309,7 +1303,7 @@ void save_selection(int what)
      case TEXT:
       fprintf(fd, "T ");
       save_ascii_string(textelement[n].txt_ptr,fd);
-      fprintf(fd, "%.16g %.16g %d %d %.16g %.16g ",
+      fprintf(fd, " %.16g %.16g %d %d %.16g %.16g ",
        textelement[n].x0, textelement[n].y0, textelement[n].rot, textelement[n].flip, 
        textelement[n].xscale, textelement[n].yscale);
       save_ascii_string(textelement[n].prop_ptr,fd);
@@ -1348,7 +1342,7 @@ void save_selection(int what)
      case ELEMENT:
       fprintf(fd, "C ");
       save_ascii_string(inst_ptr[n].name,fd);
-      fprintf(fd, "%.16g %.16g %d %d ",inst_ptr[n].x0, inst_ptr[n].y0, inst_ptr[n].rot, inst_ptr[n].flip ); 
+      fprintf(fd, " %.16g %.16g %d %d ",inst_ptr[n].x0, inst_ptr[n].y0, inst_ptr[n].rot, inst_ptr[n].flip ); 
       save_ascii_string(inst_ptr[n].prop_ptr,fd);
       fputc('\n' ,fd);
      break;

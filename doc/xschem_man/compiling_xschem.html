@@ -52,26 +52,35 @@ p{padding: 15px  30px 10px;}
  </pre>
  <p>
 
- edit the <kbd>prefix</kbd> and <kbd>library_prefix</kbd> variables in the <kbd>Makefile</kbd>; 
+ Edit the <kbd>prefix</kbd>, the <kbd>user_library_dir</kbd>  and <kbd>system_library_dir</kbd> 
+ variables in the <kbd>Makefile</kbd>; 
  <kbd>prefix</kbd> specifies the root directory where 
  the xschem binary will be installed (<kbd>${prefix}/bin</kbd>) and its support files 
- (<kbd>${prefix}/share/xschem</kbd>, <kbd>${prefix}/share/doc/xschem</kbd>). 
- The <kbd>library_prefix</kbd> variable specifies where xschem 
- design libraries and example files are stored. 
- This is usually placed somewhere in the HOME user directory 
- (<kbd>${HOME}/xschem_library</kbd>, just to give an example).
+ (<kbd>${prefix}/share/xschem</kbd>) and docs (<kbd>${prefix}/share/doc/xschem</kbd>).
+ The <kbd>user_library_dir</kbd> variable specifies where xschem 
+ design example files are stored. This dir should be placed somewhere under the user's home.
+ The <kbd>system_library_dir</kbd> variable specifies where xschem 
+ system-wide symbols files are stored. The xschem package provides some sample
+ libraries and examples. These paths can be (should be) changed by the user in 
+ the xschem startup files.<br>
  Next, edit the rest of the <kbd>Makefile</kbd> and check if paths for libraries 
  match with your system. In particular you should set the TCLVER 
  variable to the correct TCL-TK version installed on the system. 
  </p>
  <pre class="code">
- ## set prefix for installation
- prefix=/usr/local
- library_prefix=$(HOME)/xschem_library
- ...
- ## Set the TCL-TK version on the system
- TCLVER=8.6
- ...
+## set prefix for installation
+## XSCHEM will install in ${prefix}/bin, ${prefix}/share/xschem 
+## and ${prefix}/share/doc/xschem
+prefix=$(HOME)
+
+## specify user schematic/symbol libraries; 
+## you may redefine it later in .xschem or xschemrc startup files
+user_library_dir=$(HOME)/xschem_library
+
+## specify system-wide symbol libraries;
+## you may redefine it later in .xschem or xschemrc startup files
+system_library_dir=${prefix}/share/xschem/xschem_library
+
  </pre>
  <p>
  now you are ready to compile the program: 

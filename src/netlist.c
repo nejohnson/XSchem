@@ -41,7 +41,7 @@ struct objectentry *delobjectentry(struct objectentry *t)
  if(t)
  {
   t->next = delobjectentry(t->next);
-  my_free(t);
+  my_free(&t);
  }
  return NULL;
 }
@@ -194,7 +194,7 @@ struct instpinentry *delinstpinentry(struct instpinentry *t)
  if(t)
  {
   t->next = delinstpinentry(t->next);
-  my_free(t);
+  my_free(&t);
  } 
  return NULL;
 }
@@ -226,7 +226,7 @@ static struct wireentry *delwireentry(struct wireentry *t)
  if(t)
  {
   t->next = delwireentry(t->next);
-  my_free(t);
+  my_free(&t);
  } 
  return NULL;
 }
@@ -347,13 +347,13 @@ int check_lib(char *s)
  char str[200]; // overflow safe 20161122
  
  found=0;
- Tcl_EvalEx(interp, "llength $xschem_libs", -1, TCL_EVAL_GLOBAL);
+ tcleval("llength $xschem_libs");
  range = atoi(Tcl_GetStringResult(interp));
  if(debug_var>=1) fprintf(errfp, "check_lib(): %s, range=%d\n", s, range);
 
  for(i=0;i<range;i++){
   my_snprintf(str, S(str), "lindex $xschem_libs %d",i);
-  Tcl_EvalEx(interp, str, -1, TCL_EVAL_GLOBAL);
+  tcleval(str);
   if(debug_var>=1) fprintf(errfp, "check_lib(): xschem_libs=%s\n", Tcl_GetStringResult(interp));
   if( strstr(s,Tcl_GetStringResult(interp))) found=1;
  }
@@ -495,7 +495,7 @@ int get_unnamed_node(int what, int mult,int node)
  if(what==0)  // initialize unnamed node data structures
  {
   new_node=0;
-  if(node_mult) my_free(node_mult); 
+  if(node_mult) my_free(&node_mult); 
   node_mult=my_malloc(sizeof(int)*CADCHUNKALLOC);
   for(i=0;i<CADCHUNKALLOC;i++) node_mult[i]=0; 
   node_mult_size=CADCHUNKALLOC;
@@ -553,10 +553,9 @@ void record_global_node(int what, FILE *fp, char *node)
  } else if(what==0) {
     for(i=0;i<max_globals;i++) {
        fprintf(fp, ".GLOBAL %s\n", globals[i]);
-       my_free(globals[i]);
+       my_free(&globals[i]);
     }
-    my_free(globals);
-    globals=NULL;
+    my_free(&globals);
     size_globals=max_globals=0;
  } 
    
@@ -942,7 +941,7 @@ void prepare_netlist_structs(int for_hilight_only)
       if(debug_var>=2) fprintf(errfp, "prepare_netlist_structs():           naming the other pins\n");
      if(!touches)
      {
-      if( !touches && !(CAD_VHDL_NETLIST && !touches_unnamed))
+      if( !(CAD_VHDL_NETLIST && !touches_unnamed))
       {
         expandlabel(get_tok_value(
            (inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][j].prop_ptr,"name",0), &pin_mult);
@@ -982,8 +981,7 @@ void delete_inst_node(int i)
    {
      for(j=0;j< rects ;j++)
        my_strdup( &inst_ptr[i].node[j], NULL );
-     my_free( inst_ptr[i].node );
-     inst_ptr[i].node = NULL;
+     my_free(& inst_ptr[i].node );
    }
 }
 

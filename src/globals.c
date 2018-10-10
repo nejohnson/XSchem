@@ -32,6 +32,8 @@ int sym_txt=1;
 int rainbow_colors=0;
 FILE *errfp; 
 char *filename=NULL; // filename given on cmdline
+char home_dir[PATH_MAX]; /* home dir obtained via getpwuid */
+char pwd_dir[PATH_MAX];  /* obtained via getcwd() */
 int quit=0;  // set from process_options (ex netlist from cmdline and quit)
 int debug_var=-10;  // will be set to 0 in xinit.c
 int do_print=0;
@@ -42,6 +44,7 @@ int lw=0; // line width
 double lw_double=0.0; // line width
 int fill=1; // filled rectangles
 int draw_pixmap=1; // use pixmap for double buffer
+int draw_window=0; /* 20181009 */
 int draw_grid=1;
 int current_type=SCHEMATIC;
 int change_lw=0; // allow change linewidth
@@ -199,7 +202,7 @@ Line **line;
 int *lastline;
 Text *textelement;
 int lasttext=0;
-char schematic[CADMAXHIER][256];
+char schematic[CADMAXHIER][PATH_MAX];
 int currentsch = 0;
 char *schprop=NULL;  // spice
 char *schtedaxprop=NULL;  // tEDAx
@@ -230,6 +233,7 @@ int enable_drill=0; // 20171211 pass net hilights through components with 'propa
 struct instpinentry *instpintable[NBOXES][NBOXES];
 struct wireentry *wiretable[NBOXES][NBOXES];
 struct objectentry *objecttable[NBOXES][NBOXES];
+size_t get_tok_value_size;
 
 
 #ifdef HAS_CAIRO

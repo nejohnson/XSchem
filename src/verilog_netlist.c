@@ -30,9 +30,9 @@ void global_verilog_netlist(int global)  // netlister driver
  static char *port_value = NULL;
  static char *tmp_string=NULL;
  int i, tmp;
- char netl[1024];  // overflow safe 20161122
- char netl2[1024]; // 20081203  overflow safe 20161122
- char netl3[1024]; // 20081203  overflow safe 20161122
+ char netl[PATH_MAX];  // overflow safe 20161122
+ char netl2[PATH_MAX]; // 20081203  overflow safe 20161122
+ char netl3[PATH_MAX]; // 20081203  overflow safe 20161122
  static char *type=NULL;
 
  if(current_type==SYMBOL) return;
@@ -43,10 +43,10 @@ void global_verilog_netlist(int global)  // netlister driver
 
  if(!strcmp(schematic[currentsch],""))
  {
-   char name[1024];
-   my_snprintf(name, S(name), "savefile %s.sch .sch",schematic[currentsch]);
+   char name[PATH_MAX];
+   my_snprintf(name, S(name), "savefile {%s.sch} .sch",schematic[currentsch]);
    if(debug_var>=1) fprintf(errfp, "global_spice_netlist(): saving: %s\n",name);
-   tkeval(name);
+   tcleval(name);
    my_strncpy(schematic[currentsch], Tcl_GetStringResult(interp), S(schematic[currentsch]));
    if(!strcmp(schematic[currentsch],"")) return;
    save_schematic(schematic[currentsch]);
@@ -88,9 +88,9 @@ void global_verilog_netlist(int global)  // netlister driver
  if(debug_var>=1) fprintf(errfp, "global_verilog_netlist(): printing top level entity\n");
  fprintf(fd,"module %s (\n", skip_dir( schematic[currentsch]) );
  // flush data structures (remove unused symbols)
- if(modified) save_schematic(NULL);
+ if(modified) save_schematic(schematic[currentsch]);
  remove_symbols();  // removed 25122002, readded 04112003
- load_schematic(1,NULL,0); 
+ load_schematic(1,schematic[currentsch],0);  // 20180927
 
 
  // print top subckt port directions
@@ -155,7 +155,6 @@ void global_verilog_netlist(int global)  // netlister driver
  load_symbol_definition( schematic[currentsch] );
  print_verilog_param(fd,lastinstdef-1);  // added print top level params
  remove_symbol();
- // load_schematic(1,NULL,0); 
  // 20071006 end
 
 
@@ -255,19 +254,19 @@ void global_verilog_netlist(int global)  // netlister driver
 
  if(split_files) { // 20081205
    fclose(fd);
-   my_snprintf(netl2, S(netl2), "netlist %s noshow %s.v", netl3, netl3);
-   tkeval(netl2);
+   my_snprintf(netl2, S(netl2), "netlist {%s} noshow {%s.v}", netl3, netl3);
+   tcleval(netl2);
    if(debug_var==0) unlink(netl);
  }
 
 
  if(global)
  {
-   if(modified) save_schematic(NULL); // 20160302 prepare_netlist_structs (called above from verilog_netlist() 
+   if(modified) save_schematic(schematic[currentsch]); // 20160302 prepare_netlist_structs (called above from verilog_netlist() 
                                  // may change wire node labels, so save.
 
    remove_symbols(); // 20161205 ensure all unused symbols purged before descending hierarchy
-   load_schematic(1,NULL,0);
+   load_schematic(1,schematic[currentsch],0); // 20180927
 
    currentsch++;
    if(debug_var>=2) fprintf(errfp, "global_verilog_netlist(): last defined symbol=%d\n",lastinstdef);
@@ -289,19 +288,19 @@ void global_verilog_netlist(int global)  // netlister driver
    my_strncpy(schematic[currentsch] , "", S(schematic[currentsch]));
    currentsch--;
    remove_symbols();
-   load_schematic(1,NULL,0);
+   load_schematic(1,schematic[currentsch],0);
  }
 
  if(debug_var>=1) fprintf(errfp, "global_verilog_netlist(): starting awk on netlist!\n");
  if(!split_files) {
    fclose(fd);
    if(netlist_show) {
-    my_snprintf(netl2, S(netl2), "netlist %s show %s.v", netl3, netl3);
-    tkeval(netl2);
+    my_snprintf(netl2, S(netl2), "netlist {%s} show {%s.v}", netl3, netl3);
+    tcleval(netl2);
    }
    else {
-    my_snprintf(netl2, S(netl2), "netlist %s noshow %s.v", netl3, netl3);
-    tkeval(netl2);
+    my_snprintf(netl2, S(netl2), "netlist {%s} noshow {%s.v}", netl3, netl3);
+    tcleval(netl2);
    }
    if(debug_var == 0 ) unlink(netl);
  }
@@ -316,9 +315,9 @@ void verilog_block_netlist(FILE *fd, int i)  //20081205
  static char *sig_type = NULL;
  static char *port_value = NULL;
  static char *type = NULL; // 20180124
- char netl[1024];
- char netl2[1024];  // 20081202
- char netl3[1024];  // 20081202
+ char netl[PATH_MAX];
+ char netl2[PATH_MAX];  // 20081202
+ char netl3[PATH_MAX];  // 20081202
  char *str_tmp;
 
      if(!strcmp( get_tok_value(instdef[i].prop_ptr,"verilog_stop",0),"true") ) 
@@ -339,8 +338,7 @@ void verilog_block_netlist(FILE *fd, int i)  //20081205
      fprintf(fd, "\n// expanding   symbol:  %s # of pins=%d\n\n", 
            instdef[i].name,instdef[i].rects[PINLAYER] );
 
-     my_strncpy(schematic[currentsch],instdef[i].name, S(schematic[currentsch]));
-     verilog_stop? load_schematic(0,NULL,0) :  load_schematic(1,NULL,0);
+     verilog_stop? load_schematic(0,instdef[i].name,0) :  load_schematic(1,instdef[i].name,0);
 
      fprintf(fd, "module %s (\n", skip_dir(instdef[i].name));
      //print_generic(fd, "entity", i); //02112003
@@ -421,8 +419,8 @@ void verilog_block_netlist(FILE *fd, int i)  //20081205
      fprintf(fd, "endmodule\n");
      if(split_files) { // 20081204
        fclose(fd);
-       my_snprintf(netl2, S(netl2), "netlist %s noshow %s.v", netl3, netl3);
-       tkeval(netl2);
+       my_snprintf(netl2, S(netl2), "netlist {%s} noshow {%s.v}", netl3, netl3);
+       tcleval(netl2);
        if(debug_var==0) unlink(netl);
      }
 
@@ -481,7 +479,7 @@ void verilog_netlist(FILE *fd , int verilog_stop)
    }
  }
  if(debug_var>=1) fprintf(errfp, "verilog_netlist():       end\n");
- if(!netlist_count) draw_hilight_net();
+ if(!netlist_count) draw_hilight_net(1);
  //delete_netlist_structs(); // 20161222 done in prepare_netlist_structs() when needed
 
 }

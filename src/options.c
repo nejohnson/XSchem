@@ -116,7 +116,7 @@ void
              break;
  
          case '?':
-             printf("what ???????\n");
+             printf ("??\n");
              break;
  
          default:

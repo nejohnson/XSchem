@@ -35,6 +35,222 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.6.0: 
+- Documentation updates
+- Makefile passes PREFIX and XSCHEM_DESIGN_PATH cpp variables to xschem
+  for default path setting
+- small bug fixes on the new drawing mode: 
+  pixmap -> 'XCopyArea' -> screen
+- xinit.c sets empty XSCHEM_DESIGN_PATH before reading startup files (xschemrc and .xschem) 
+  so variable can be appended without complains from the tcl interpreter
+  (variable non existing)
+- allow direct execution of xschem from within the src/ directory for testing purposes.
+  removed special startup handling if xschem run from the parent of src/ dir.
+
+---
+
+- xschem now understands a list of directories for symbol files, this list is set
+  as a colon separated list of paths in XSCHEM_DESIGN_PATH.
+  this tcl variable may be set in the .xschem or system xschemrc files, or via env variable.
+  if no setting is done then xschem uses the compile time default, unless it is started
+  from a  source build directort (see below).
+  the old XSCHEM_DESIGN_DIR (now deprecated) is still understood by xschem, this variable
+  may specify only one directory.
+
+- reverted previous change 'tcl current working dir changed to directory of
+  loaded schematic', not necessary and dangerous as it makes xschem
+  behaviour unpredictable.
+
+- Makefile variables passed to XSCHEM:
+    PREFIX: root directory of xschem installation
+      (example: /usr ,  /home/user)
+    SYSTEM_LIBRARY_PATH: system-wide directory of xschem symbols / schematics
+      (example: $PREFIX/share/xschem/xschem_library )
+    USER_LIBRARY_PATH: directory of user schematic / symbol files
+      (example: $HOME/xschem_library)
+
+- xschem reads first xschemrc file in system xschem directory (.../share/xschem/xschemrc)
+  and then .xschem in current directory or in home directory.
+
+- *NEW* drawing model (enabled by default) that avoid drawing to window, draws only to save
+  pixmap, using XCopyArea to paint the screen. This avoids flickering when moving/zooming
+  or panning the schematic. Previous drawing model (still available via menu) used
+  to draw both in window and save pixmap. Depending on X server performance choose the
+  method that runs best.
+- bug fixes in 'create symbol from schematic'
+
+- startup sequence of xschem:
+ * look for XSCHEM_HOME_DIR from environment variables.
+
+ * else if there is ../src/xchem.tcl with respect to current dir and
+   ../xschem_library then we are starting
+   from a build directory, set XSCHEM_HOME_DIR to `pwd` and
+   also set XSCHEM_DESIGN_PATH to `pwd`/../xschem_library.
+
+ * else if there is a PREFIX/share/xschem directory then set XSCHEM_HOME_DIR
+   to PREFIX/share/xschem.
+
+ * source XSCHEM_HOME_DIR/xschemrc if existing.
+
+ * source `pwd`/.xschem or $HOME/.xschem if existing.
+
+ * if XSCHEM_HOME_DIR not defined --&gt; error and quit.
+
+ * look for XSCHEM_DESIGN_PATH from environment variables. This will override any
+   value given in  xschemrc and .xschem startup files.
+
+ * if XSCHEM_DESIGN_PATH undefined set it to compile time default provided by Makefile:
+   xschem_library_path.
+
+ * source $XSCHEM_HOME_DIR/xschem.tcl.
+
+ * start loading user provided schematic file or start with empty window  (or filename
+   specified in XSCHEM_START_WINDOW tcl variable).
+
+--- 
+
+- all string args passed from C to tcl encloded in {} braces to allow spaces
+  in file and library names
+- tcl current working dir changed to directory of loaded schematic to make relative symbol
+  resolution work the same regardless of the directory xschem was started from.
+
+--- 
+
+- all path manipulation goes through tcl functions resolve_filename and abs_path_of_symbol,
+  no direct manipulation of XSCHEM_DESIGN_PATH in .c or .tcl files.
+  This is in preparation of multiple path list in XSCHEM_DESIGN_PATH, requiring
+  changes only in those 2 functions.
+- temp files for editing attributes with editor now in XSCHEM_TMP_DIR instead of XSCHEM_DESIGN_PATH
+
+--- 
+
+- new_window(): if opening a schematic in a new window change .sym extension
+  to .sch extension, 20181006
+- get_resolved_symbol(): recognize parent dir and replace absolute path to parent dir with ../
+- load_inst() use get_resolved_symbol() to remove absolute paths when possible, 20181006
+
+--- 
+
+- XSCHEM_DESIGN_DIR renamed to XSCHEM_DESIGN_PATH as it should be a list of multiple 
+  library paths to search for.
+- created a small function, source_tcl_file() for sourcing tcl files and do error checking.
+  used to load  xschemrc / .xschem / xschem.tcl files
+
+- look for xschemrc in {PREFIX}/share/xschem for system wide options, before looking in $pwd/.xschem
+  or $HOME/.xschem for user options.
+
+- look for xschem.tcl in $PWD or  XSCHEM_HOME_DIR if this tcl var is defined (or env var defined)
+  otherwise source from {PREFIX}/share/xschem.
+
+- library directory renamed to xschem_library
+
+- if no .xschem is found and no XSCHEM_DESIGN_PATH defined set xschem symbol library to 'xschem_library'
+  in current working directory. (good for testing xschem builds before install) or in ../xschem_library
+
+--- 
+
+- fixed an off-by-one error in selecting a random char from charset[] in random_string(), leading
+  to terminating \0 sometimes chosen as part of the random string.
+
+--- 
+
+- tclsetvar() wrapper for all Tcl_SetVar() calls.
+- ask_new_file() calls get_resolved_symbol(fullname) to reduce 
+  filename to library/symbol if located in standard xschem library
+  or just symbol.sym if in current directory, in order to avoid
+  as long as possible absolute paths.
+- xschem .selection and .clipboard files renamed to ~/.xschem_selection 
+  and ~/.xschem_clipboard
+- TCL XSCHEM_TMP_DIR created to indicate tmp directory (default /tmp) 
+  this can be set in user's .xschem.
+- store_polygon() was not propagating the .fill member from 'fill' property
+  this resulted in no fill pattern on polygons with fill=true property set
+  when changing polygon layer.
+  (store.c, 20181002)
+- removed all strcpy() calls, use my_strncpy()
+
+--- 
+
+- all Tcl_Eval(), Tcl_EvalEx() called with tcleval() that does error checking.
+- all Tcl_GetVar replaced with tclgetvar.
+- my_free() now frees the memory and sets ptr to NULL, called with &ptr.
+- removed all sprintf, replaced with my_snprintf.
+- remaining malloc()s replaced with my_malloc().
+- undo/redo handling now done with popen()/pclose() instead of pipe(), fork(),
+  dup2(), fdopen(), freopen(), waitpid(), for better portability.
+- @#n:property syntax is accepted in print_tedax_element() for format string, 
+  this allow to print in netlist attribute values specified on pins
+  @#3:pinnumber --> print 'pinnumber' attribute set for pin #3 of symbol.
+- removed some variable length arrays in token.c
+- tcl make_symbol fixed t work on schematics located anywhere in the filesystem
+
+--- 
+
+- many static (char *name) pointers in functions replaced with 
+  scoped arrays (char name[]) for efficiency reasons
+  path arrays are of type 'char filename[PATH_MAX]'
+- added ability to load schematics and components located anywhere in the filesystem
+  for components the (libname/symbolname) is still supported but new syntax is 
+  to specify relative or absolute names ([/][..../..../]symbol.sym) 
+  if specified symbol is in the standard xschem libraries (XSCHEM_DESIGN_DIR)
+  it is converted to library/symbol:
+  Example: 
+    /home/schippes/xschem_library/devices/npn.sym --> devices/npn
+  If a symbol located in the current directory  is placed into the xschem window
+  all its path components will be stripped off: 
+  Example:
+    /home/schippes/xschem-code/test.sym --> test.sym (if CWD is /home/schippes/xschem-code).
+  next feature (still tbd) will be to search a list of paths for sym libraries.
+- more reliable detection of PWD and HOME (getcwd, getenv, getpwuid)
+- cleanup in tcl save & load dialogs, now we only have save_file_dialog and load_file_dialog.
+
+--- 
+
+- draw(): don't use spatial hash table for small schematics (<2000 instances, <2000nets).
+- xschem now loads filenames with absolute paths, so any schematic (even outside
+  XSCHEM_DESIGN_DIR) can be given.
+- less usage of strlen() reusing size information already available
+- get_tok_value() sets get_tok_value_size to the size of the returned token value.
+
+--- 
+
+- xschem now compiles with -std=c99 and 
+- double fork method to spawn a new xschem instance to avoid zombies
+- all snprintf calls wrapped in my_snprintf
+- rint() replaced with round()
+- some // comments changed in /* ... */
+- my_strdup() returns size of dup'd string instead of void
+- all strdup() calls wrapped into my_strdup() which in turn uses malloc() + memcpy()
+- all strndup() replaced with my_strndup() which in turn uses malloc() + memcpy()
+- all strcat() replaced with my_strcat() which uses realloc() and memcpy()
+- all strcpy() replaced with memcpy() since size of src string is known.
+- Corrected a long standing typo: FONTDESCENT+1i, where 1i is considered as imaginary number
+  Thanks to Ian Van der Neut for pointing out the problem.
+- removed mkstemp, mkdtemp, replaced with self made create_tmpfile and create_tmpdir
+- added '%option never-interactive' in parselabel.l so it avoids usig fileno()
+  which is not needed and creates portability issues
+- cleanups in save/load/merge procedures
+
+--- 
+
+- flatten.awk changed to awk hasbang script instead of sh --> awk 
+
+--- 
+
+- pass PREFIX and LIBRARY_PREFIX from Makefile prefix and library_prefix variables
+- check if symbol pointer is set in spatial hash table drawing (draw.c, tag 20180921)
+- added some const type declarators: 
+   *bus_hilight_lookup(const char *token...)
+    const char *expandlabel(const char *s, int *m)
+  and other const declarations here and there 
+- save_ascii_string(): no trailing space added.
+- load_symbol(): if symbol definition contains components link them with corresponding symbols
+  (although a symbol should not contain nets / components), tag 20180921
+- some comments / cleanups in xinit.c
+- fixed menu accelerators shown in 'File' menu to reflect recent keybinding changes
+
+--- 
+
 2.4.9:
 - ability to swap mouse buttons using tcl key_binding proc
   NOTE: it is not possible to replace Button1 since it is sent in Motion events as well.

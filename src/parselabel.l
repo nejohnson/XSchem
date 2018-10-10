@@ -20,10 +20,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+
+%option never-interactive
 %{
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 extern int debug_var;
 extern FILE *errfp;
 extern void my_strdup(char **dest, char *src);
@@ -43,11 +46,11 @@ Stringptr dest_string={NULL,0};  //19102004;
 static int bracket=0;
 extern int yyparse(void) ;
 
-char *expandlabel(char *s, int *m)
+const char *expandlabel(const char *s, int *m)
 {
  YY_BUFFER_STATE buf;
 
- my_free(dest_string.str); 	// 30102004  delete 'memory' of previous execution
+ my_free(&dest_string.str); 	// 30102004  delete 'memory' of previous execution
  dest_string.str=NULL; 		// 30102004
 
  if(debug_var >=3) fprintf(errfp, "expandlabel(): entering\n");
@@ -79,11 +82,8 @@ char *expandlabel(char *s, int *m)
 
 %%
 ^(alias|ipin|opin)[+ \n]+[^+\n ]+/[\n +]+ { 
-			 /* the third field is a label, what is before
-			     is returned as a single LINE token. */
-			 // yylval.ptr.str=strdup(yytext); //19102004
 			 yylval.ptr.str=NULL; //19102004
-                         my_strdup(&yylval.ptr.str, yytext); //19102004
+       my_strdup(&yylval.ptr.str, yytext); /* these things are freed after use in expandlabel.y */
  			 BEGIN(next_to_alias);
 			 return B_LINE;
 			}
@@ -100,9 +100,8 @@ char *expandlabel(char *s, int *m)
 				       // so go and process it.
 			}
 ^\*.*			{              // a comment, return as LINE token
-			 //yylval.ptr.str=strdup(yytext);
-                         yylval.ptr.str=NULL; //19102004
-                         my_strdup(&yylval.ptr.str, yytext); //19102004
+       yylval.ptr.str=NULL; //19102004
+       my_strdup(&yylval.ptr.str, yytext); /* these things are freed after use in expandlabel.y */
 			 return B_LINE;
 			}
 <label>{
@@ -119,10 +118,9 @@ char *expandlabel(char *s, int *m)
 			 else return B_NUM;
 			}
 [.=_a-zA-Z][:.=_a-zA-Z0-9]*	{
-			 //yylval.ptr.str=strdup(yytext);
-                         yylval.ptr.str=NULL; //19102004
-                         my_strdup(&yylval.ptr.str, yytext); //19102004
-                         if(debug_var>=3) fprintf(errfp, "parselabel(): B_NAME (%lu) \n", (unsigned long)yylval.ptr.str);
+       yylval.ptr.str=NULL; //19102004
+       my_strdup(&yylval.ptr.str, yytext); /* these things are freed after use in expandlabel.y */
+       if(debug_var>=3) fprintf(errfp, "parselabel(): B_NAME (%lu) \n", (unsigned long)yylval.ptr.str);
 			 return B_NAME;
 			}
 \[			{
@@ -141,9 +139,8 @@ char *expandlabel(char *s, int *m)
 <rest>{			/* treat rest of line as a single LINE token */
 (.|\n)*			{
 			 if(debug_var>=3) fprintf(errfp, "yylex(): doing the rest\n");
-			 //yylval.ptr.str=strdup(yytext);
-                         yylval.ptr.str=NULL; //19102004
-                         my_strdup(&yylval.ptr.str, yytext); //19102004
+       yylval.ptr.str=NULL; //19102004
+       my_strdup(&yylval.ptr.str, yytext); /* these things are freed after use in expandlabel.y */
 			 BEGIN(INITIAL);
 			 return B_LINE;
 			}

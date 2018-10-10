@@ -116,7 +116,7 @@ void print_image()
   XpmWriteFileFromPixmap(display, "plot.xpm", save_pixmap,0, NULL ); // .gz ????
   if(debug_var>=1) fprintf(errfp, "print_image(): Window image saved\n");
 
-  Tcl_Eval(interp, "convert_to_png plot.xpm"); // 20161121
+  tcleval( "convert_to_png plot.xpm"); // 20161121
   pop_undo(0); // 20161121 restore state
   modified=modified_save;  // 20161121
 
@@ -278,7 +278,7 @@ void cairo_draw_string_line(cairo_t *ctx, char *s,
 */
   cairo_save(ctx);
   cairo_translate(ctx, ix, iy);
-  cairo_rotate(ctx, M_PI/2*rot1);
+  cairo_rotate(ctx, XSCH_PI/2*rot1);
 
   // fprintf(errfp, "string_line: |%s|, y_bearing: %f descent: %f ascent: %f height: %f\n",
   //     s, ext.y_bearing, fontdescent, fontascent, fontheight);
@@ -329,9 +329,9 @@ void draw_string(int layer, int what, char *s, int rot, int flip, double x, doub
     if(c=='\n' || c==0) {
       *ss='\0';
       //fprintf(errfp, "cairo_draw_string(): tt=%s, longest line: %d\n", tt, cairo_longest_line);
-      cairo_draw_string_line(ctx, tt, x, y, size, rot, flip, 
+      if(draw_window) cairo_draw_string_line(ctx, tt, x, y, size, rot, flip, 
          lineno, fext.height, fext.ascent, fext.descent, llength);
-      cairo_draw_string_line(save_ctx, tt, x, y, size, rot, flip, 
+      if(draw_pixmap) cairo_draw_string_line(save_ctx, tt, x, y, size, rot, flip, 
          lineno, fext.height, fext.ascent, fext.descent, llength);
       lineno++;
       if(c==0) break;
@@ -645,13 +645,13 @@ void drawgrid()
  x = xorigin*mooz;y = yorigin*mooz;
  if(y>areay1 && y<areay2)
  {
-  XDrawLine(display, window, gc[SELLAYER],areax1+1,(int)y, areax2-1, (int)y);
+  if(draw_window) XDrawLine(display, window, gc[SELLAYER],areax1+1,(int)y, areax2-1, (int)y);
   if(draw_pixmap)
     XDrawLine(display, save_pixmap, gc[SELLAYER],areax1+1,(int)y, areax2-1, (int)y);
  }
  if(x>areax1 && x<areax2)
  {
-  XDrawLine(display, window, gc[SELLAYER],(int)x,areay1+1, (int)x, areay2-1);
+  if(draw_window) XDrawLine(display, window, gc[SELLAYER],(int)x,areay1+1, (int)x, areay2-1);
   if(draw_pixmap)
     XDrawLine(display, save_pixmap, gc[SELLAYER],(int)x,areay1+1, (int)x, areay2-1);
  }
@@ -662,7 +662,7 @@ void drawgrid()
   {
    if(i>=CADMAXGRIDPOINTS)
    {
-    XDrawPoints(display,window,gc[GRIDLAYER],gridpoint,i,CoordModeOrigin);
+    if(draw_window) XDrawPoints(display,window,gc[GRIDLAYER],gridpoint,i,CoordModeOrigin);
     if(draw_pixmap)
       XDrawPoints(display,save_pixmap,gc[GRIDLAYER],gridpoint,i,CoordModeOrigin);
     i=0;
@@ -671,7 +671,7 @@ void drawgrid()
   }
  }
 
- XDrawPoints(display,window,gc[GRIDLAYER],gridpoint,i,CoordModeOrigin);
+ if(draw_window) XDrawPoints(display,window,gc[GRIDLAYER],gridpoint,i,CoordModeOrigin);
  if(draw_pixmap)
    XDrawPoints(display,save_pixmap,gc[GRIDLAYER],gridpoint,i,CoordModeOrigin);
 // debug ...
@@ -692,7 +692,7 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
  {
   if(i>=CADDRAWBUFFERSIZE)
   {
-   XDrawSegments(display, window, gc[c], rr,i);
+   if(draw_window) XDrawSegments(display, window, gc[c], rr,i);
    if(draw_pixmap)
      XDrawSegments(display, save_pixmap, gc[c], rr,i);
    i=0;
@@ -720,7 +720,7 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
   if(!only_probes && (x2-x1)< 0.3 && fabs(y2-y1)< 0.3) return; // 20171206
   if( clip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
-   XDrawLine(display, window, gc[c], x1, y1, x2, y2);
+   if(draw_window) XDrawLine(display, window, gc[c], x1, y1, x2, y2);
    if(draw_pixmap) 
     XDrawLine(display, save_pixmap, gc[c], x1, y1, x2, y2);
   }
@@ -737,7 +737,7 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
   {
    XSetLineAttributes (display, gc[c], BUS_WIDTH , LineSolid, CapRound , JoinRound);
 
-   XDrawLine(display, window, gc[c], x1, y1, x2, y2);
+   if(draw_window) XDrawLine(display, window, gc[c], x1, y1, x2, y2);
    if(draw_pixmap) XDrawLine(display, save_pixmap, gc[c], x1, y1, x2, y2);
    XSetLineAttributes (display, gc[c], lw==1? 0:lw, LineSolid, CapRound , JoinRound);
   }
@@ -745,7 +745,7 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
  else if(what==BEGIN) i=0;
  else if(what==END && i)
  {
-  XDrawSegments(display, window, gc[c], rr,i);
+  if(draw_window) XDrawSegments(display, window, gc[c], rr,i);
   if(draw_pixmap) XDrawSegments(display, save_pixmap, gc[c], rr,i);
   i=0;
  }
@@ -836,7 +836,7 @@ void filledrect(int c, int what, double rectx1,double recty1,double rectx2,doubl
   if(!only_probes && (x2-x1)< 2 && (y2-y1)< 2) return; // 20171206
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
-   XFillRectangle(display, window, gcstipple[c], (int)x1, (int)y1, 
+   if(draw_window) XFillRectangle(display, window, gcstipple[c], (int)x1, (int)y1, 
     (unsigned int)x2 - (unsigned int)x1,
     (unsigned int)y2 - (unsigned int)y1);
    if(draw_pixmap)
@@ -850,7 +850,7 @@ void filledrect(int c, int what, double rectx1,double recty1,double rectx2,doubl
  {
   if(i>=CADDRAWBUFFERSIZE)
   {
-   XFillRectangles(display, window, gcstipple[c], r,i);
+   if(draw_window) XFillRectangles(display, window, gcstipple[c], r,i);
    if(draw_pixmap)
      XFillRectangles(display, save_pixmap, gcstipple[c], r,i);
    i=0;
@@ -871,7 +871,7 @@ void filledrect(int c, int what, double rectx1,double recty1,double rectx2,doubl
  }
  else if(what==END && i)
  {
-  XFillRectangles(display, window, gcstipple[c], r,i);
+  if(draw_window) XFillRectangles(display, window, gcstipple[c], r,i);
   if(draw_pixmap) XFillRectangles(display, save_pixmap, gcstipple[c], r,i);
   i=0;
  }
@@ -912,12 +912,12 @@ void drawpolygon(int c, int what, double *x, double *y, int points, int poly_fil
     p[i].x = (x[i] + xorigin)*mooz;
     p[i].y = (y[i] + yorigin)*mooz;
   }
-  XDrawLines(display, window, gc[c], p, points, CoordModeOrigin);
+  if(draw_window) XDrawLines(display, window, gc[c], p, points, CoordModeOrigin);
   if(draw_pixmap)
     XDrawLines(display, save_pixmap, gc[c], p, points, CoordModeOrigin);
   if(!fill || !fill_type[c]) return;
   if(poly_fill) { // 20180914
-    XFillPolygon(display, window, gcstipple[c], p, points, Polygontype, CoordModeOrigin);
+    if(draw_window) XFillPolygon(display, window, gcstipple[c], p, points, Polygontype, CoordModeOrigin);
     if(draw_pixmap)
        XFillPolygon(display, save_pixmap, gcstipple[c], p, points, Polygontype, CoordModeOrigin);
   }
@@ -960,7 +960,7 @@ void drawrect(int c, int what, double rectx1,double recty1,double rectx2,double 
   if(!only_probes && (x2-x1)< 0.3 && (y2-y1)< 0.3) return; // 20171206
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
-   XDrawRectangle(display, window, gc[c], (int)x1, (int)y1,
+   if(draw_window) XDrawRectangle(display, window, gc[c], (int)x1, (int)y1,
     (unsigned int)x2 - (unsigned int)x1,	// buggy, 23102001
     (unsigned int)y2 - (unsigned int)y1);	// buggy, 23102001
 //    (unsigned int)(x2 - x1),			//23102001
@@ -980,7 +980,7 @@ void drawrect(int c, int what, double rectx1,double recty1,double rectx2,double 
  {
   if(i>=CADDRAWBUFFERSIZE)
   {
-   XDrawRectangles(display, window, gc[c], r,i);
+   if(draw_window) XDrawRectangles(display, window, gc[c], r,i);
    if(draw_pixmap)
      XDrawRectangles(display, save_pixmap, gc[c], r,i);
    i=0;
@@ -1004,7 +1004,7 @@ void drawrect(int c, int what, double rectx1,double recty1,double rectx2,double 
  }
  else if(what==END && i)
  {
-  XDrawRectangles(display, window, gc[c], r,i);
+  if(draw_window) XDrawRectangles(display, window, gc[c], r,i);
   if(draw_pixmap) XDrawRectangles(display, save_pixmap, gc[c], r,i);
   i=0;
  }
@@ -1089,17 +1089,15 @@ void draw(void)
  rebuild_selected_array();
  if(has_x) {
     if(ui_state & SELECTION) draw_dots=0; // 20171114
-    if(draw_pixmap) {
-      XFillRectangle(display, save_pixmap, gc[BACKLAYER], 
-             areax1, areay1, areaw, areah);
-    }
+    if(draw_pixmap)
+      XFillRectangle(display, save_pixmap, gc[BACKLAYER], areax1, areay1, areaw, areah);
     // XClearArea seems not be clipped by XSetClipRectangles.--> do not use
     // XClearArea(display, window, areax1, areay1, areaw, areah, 0); // 20171124 faster???
 
     // fprintf(errfp, "draw(): areax: %d %d %d %d, xrect: %d %d %d %d\n", 
     //               areax1, areay1,areaw, areah,xrect[0].x, xrect[0].y, xrect[0].width, xrect[0].height);
 
-    XFillRectangle(display, window, gc[BACKLAYER], areax1, areay1, areaw, areah);
+    if(draw_window) XFillRectangle(display, window, gc[BACKLAYER], areax1, areay1, areaw, areah);
     if(debug_var>=2) fprintf(errfp, "draw(): window: %d %d %d %d\n",areax1, areay1, areax2, areay2);
     drawgrid();
         
@@ -1108,7 +1106,7 @@ void draw(void)
     y1 = areay1*zoom -yorigin;
     x2 = areax2*zoom -xorigin;
     y2 = areay2*zoom -yorigin;
-    if( x2 - x1  < ITERATOR_THRESHOLD) {
+    if( (lastwire> 2000 || lastinst > 2000) &&  (x2 - x1  < ITERATOR_THRESHOLD) ) {
       hash_objects();
       hash_wires();
       if(debug_var>=2) fprintf(errfp, "draw(): window: %g %g %g %g\n",x1, y1, x2, y2);
@@ -1137,7 +1135,7 @@ void draw(void)
 
 
 
-          if( x2 - x1  < ITERATOR_THRESHOLD) {
+          if( (lastwire > 2000) && (x2 - x1  < ITERATOR_THRESHOLD) ) {
             if(debug_var>2) fprintf(errfp, "using spatial hash table iterator\n");
             //loop thru all squares that intersect drawing area
             firsti=1;
@@ -1156,6 +1154,7 @@ void draw(void)
               wireptr=wiretable[tmpi][tmpj];
               while(wireptr) {
                 ii=wireptr->n;
+                if(debug_var>0) fprintf(errfp, "drawing wire %d in square: %d %d\n", ii, tmpi, tmpj);
                 if( !int_hash_lookup(wirehash, ii, 0)) {
                   if(wire[ii].bus) {
                     drawline(WIRELAYER, THICK, wire[ii].x1,wire[ii].y1,wire[ii].x2,wire[ii].y2);
@@ -1197,8 +1196,6 @@ void draw(void)
           filledrect(WIRELAYER, END, 0.0, 0.0, 0.0, 0.0);
         }
      
-
-        free_int_hash(insthash); // 20180104
         for(c=0;c<cadlayers;c++)
         {
           if(draw_single_layer!=-1 && c != draw_single_layer) continue; // 20151117
@@ -1218,9 +1215,9 @@ void draw(void)
             drawpolygon(c, NOW, polygon[c][i].x, polygon[c][i].y, polygon[c][i].points, polygon[c][i].fill);
           }
 
+          if( (lastinst > 2000) && (x2 - x1  < ITERATOR_THRESHOLD) ) {
+            free_int_hash(insthash); /* 20180926 moved inside for(c..) loop, smaller hash size*/
 
-
-          if( x2 - x1  < ITERATOR_THRESHOLD) {
             // --------------------------------- inst_ptr iterator 20171224
             //loop thru all squares that intersect drawing area
             firsti=1;
@@ -1237,24 +1234,29 @@ void draw(void)
               firstj=0;
               instanceptr=objecttable[tmpi][tmpj];
               while(instanceptr) {
-               if(debug_var>0) fprintf(errfp, "drawing instance %d in square: %d %d\n", instanceptr->n, tmpi, tmpj);
-               if( !int_hash_lookup(insthash, instanceptr->n*cadlayers+c, 0)) {
-                 symptr = (inst_ptr[instanceptr->n].ptr+instdef);
-                 if( c==0 || //20150408 draw_symbol_outline call is needed on layer 0 to avoid redundant work (outside check)
-                     symptr->lines[c] ||  // 20150408
-                     symptr->rects[c] ||   // 20150408
-                     symptr->polygons[c] ||   // 20150408
-                     ((c==TEXTWIRELAYER || c==TEXTLAYER) && symptr->texts)) {  // 20150408
-
-                   type = (inst_ptr[instanceptr->n].ptr+instdef)->type;
-                   if( (!hilight_nets ||
-                     !type  ||
-                     (strcmp(type,"label") && strcmp(type,"ipin") && strcmp(type,"iopin") && strcmp(type,"opin")) ||
-                     !bus_hilight_lookup( get_tok_value(inst_ptr[instanceptr->n].prop_ptr,"lab",0) , 0, 2 ) )
-                   ) {
-                     draw_symbol_outline(ADD, c, instanceptr->n,c,0,0,0.0,0.0);
-                   }
-                 }  // 20150408
+               if(debug_var>0) fprintf(errfp, "drawing instance %d, layer %d in square: %d %d\n", instanceptr->n, c, tmpi, tmpj);
+               /* if( !int_hash_lookup(insthash, instanceptr->n*cadlayers+c, 0)) { */
+               if( !int_hash_lookup(insthash, instanceptr->n, 0)) { // 20180926  
+                 int ptr;
+                 ptr = inst_ptr[instanceptr->n].ptr;
+                 if( ptr !=-1) { // 20180921
+                   symptr = ptr+instdef;
+                   if( c==0 || //20150408 draw_symbol_outline call is needed on layer 0 to avoid redundant work (outside check)
+                       symptr->lines[c] ||  // 20150408
+                       symptr->rects[c] ||   // 20150408
+                       symptr->polygons[c] ||   // 20150408
+                       ((c==TEXTWIRELAYER || c==TEXTLAYER) && symptr->texts)) {  // 20150408
+  
+                     type = symptr->type;
+                     if( (!hilight_nets ||
+                       !type  ||
+                       (strcmp(type,"label") && strcmp(type,"ipin") && strcmp(type,"iopin") && strcmp(type,"opin")) ||
+                       !bus_hilight_lookup( get_tok_value(inst_ptr[instanceptr->n].prop_ptr,"lab",0) , 0, 2 ) )
+                     ) {
+                       draw_symbol_outline(ADD, c, instanceptr->n,c,0,0,0.0,0.0);
+                     }
+                   }  // 20150408
+                 } //if( ptr !=-1) 
                }
                instanceptr=instanceptr->next;
               }
@@ -1324,9 +1326,13 @@ void draw(void)
           drawrect(TEXTLAYER, END, 0.0, 0.0, 0.0, 0.0);
           #endif
         }
-        draw_selection(gc[SELLAYER], 0);
     } // !only_probes, 20110112
-    draw_hilight_net();
+    draw_hilight_net(0);
+    if(!draw_window) {
+      XCopyArea(display, save_pixmap, window, gctiled, xrect[0].x, xrect[0].y, 
+         xrect[0].width, xrect[0].height, xrect[0].x, xrect[0].y); // 20181009
+    }
+    draw_selection(gc[SELLAYER], 0); /* 20181009 moved outside of cadlayers loop */
     if(debug_var>=1) fprintf(errfp, "draw(): lw=%d\n",lw);
  } // if(has_x)
 }

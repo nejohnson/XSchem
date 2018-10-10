@@ -1,4 +1,4 @@
-#!/bin/sh 
+#!/usr/bin/awk -f
 #
 #  File: flatten.awk
 #  
@@ -35,7 +35,6 @@
 #      30-03-2003       do not expand subcircuit if no .subckt present in netlist
 
 
-awk '
 BEGIN{
  # topcell=toupper(ARGV[2])
  # ARGC=2
@@ -216,4 +215,3 @@ function general_sub(string,name,pathnode,portarray,       nod,sss)
  sss=sss string
  return sss
 }                                      
-' $@

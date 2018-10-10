@@ -31,9 +31,9 @@ void global_vhdl_netlist(int global)  // netlister driver
  static char *sig_type = NULL;
  static char *port_value = NULL;
  int i,j, tmp;
- char netl[1024];   // overflow safe 20161122
- char netl2[1024];  // 20081202 overflow safe 20161122
- char netl3[1024];  // 20081202 overflow safe 20161122
+ char netl[PATH_MAX];   // overflow safe 20161122
+ char netl2[PATH_MAX];  // 20081202 overflow safe 20161122
+ char netl3[PATH_MAX];  // 20081202 overflow safe 20161122
  static char *type=NULL;
 
  statusmsg("",2);  // clear infowindow
@@ -44,10 +44,10 @@ void global_vhdl_netlist(int global)  // netlister driver
  netlist_count=0;
  if(!strcmp(schematic[currentsch],""))
  {
-   char name[1024];
-   my_snprintf(name, S(name), "savefile %s.sch .sch",schematic[currentsch]);
+   char name[PATH_MAX];
+   my_snprintf(name, S(name), "savefile {%s.sch} .sch",schematic[currentsch]);
    if(debug_var>=1) fprintf(errfp, "global_spice_netlist(): saving: %s\n",name);
-   tkeval(name);
+   tcleval(name);
    my_strncpy(schematic[currentsch], Tcl_GetStringResult(interp), S(schematic[currentsch]));
    if(!strcmp(schematic[currentsch],"")) return;
    save_schematic(schematic[currentsch]);
@@ -105,16 +105,15 @@ void global_vhdl_netlist(int global)  // netlister driver
  // 20071015 end
 
  // flush data structures (remove unused symbols)
- if(modified) save_schematic(NULL); // save and flush unused symbols
+ if(modified) save_schematic(schematic[currentsch]); // save and flush unused symbols
  remove_symbols();  // removed 25122002, readded 04112003.. this removes unused symbols
- load_schematic(1,NULL,0); 
+ load_schematic(1,schematic[currentsch],0);  // 20180927
 
 
  // 20071009 print top level generics if defined in symbol
  load_symbol_definition( schematic[currentsch] );
  print_generic(fd,"entity", lastinstdef-1);  // added print top level params
  remove_symbol();
- // load_schematic(1,NULL,0); 
  // 20071009 end
 
 
@@ -293,19 +292,19 @@ void global_vhdl_netlist(int global)  // netlister driver
 
  if(split_files) { // 20081204
    fclose(fd);
-   my_snprintf(netl2, S(netl2), "netlist %s noshow %s.vhdl", netl3, netl3);
-   tkeval(netl2);
+   my_snprintf(netl2, S(netl2), "netlist {%s} noshow {%s.vhdl}", netl3, netl3);
+   tcleval(netl2);
    if(debug_var==0) unlink(netl);
  }
  netlist_count++;
 
  if(global)
  {
-   if(modified) save_schematic(NULL); // 20160302 prepare_netlist_structs (called above from verilog_netlist() 
+   if(modified) save_schematic(schematic[currentsch]); // 20160302 prepare_netlist_structs (called above from verilog_netlist() 
                                  // may change wire node labels, so save.
 
    remove_symbols(); // 20161205 ensure all unused symbols purged before descending hierarchy
-   load_schematic(1,NULL,0);
+   load_schematic(1,schematic[currentsch],0); // 20180927
 
    currentsch++;
     if(debug_var>=2) fprintf(errfp, "global_vhdl_netlist(): last defined symbol=%d\n",lastinstdef);
@@ -326,18 +325,18 @@ void global_vhdl_netlist(int global)  // netlister driver
    my_strncpy(schematic[currentsch] , "", S(schematic[currentsch]));
    currentsch--;
    remove_symbols();
-   load_schematic(1,NULL,0);
+   load_schematic(1,schematic[currentsch],0); // 20180927
  }
  if(debug_var>=1) fprintf(errfp, "global_vhdl_netlist(): starting awk on netlist!\n");
  if(!split_files) {
    fclose(fd);
    if(netlist_show) {
-    my_snprintf(netl2, S(netl2), "netlist %s show %s.vhdl", netl3, netl3);
-    tkeval(netl2); // 20081202
+    my_snprintf(netl2, S(netl2), "netlist {%s} show {%s.vhdl}", netl3, netl3);
+    tcleval(netl2); // 20081202
    }
    else {
-    my_snprintf(netl2, S(netl2), "netlist %s noshow %s.vhdl", netl3, netl3);
-    tkeval(netl2); // 20081202
+    my_snprintf(netl2, S(netl2), "netlist {%s} noshow {%s.vhdl}", netl3, netl3);
+    tcleval(netl2); // 20081202
    }
    if(!debug_var) unlink(netl);
  }
@@ -352,9 +351,9 @@ void  vhdl_block_netlist(FILE *fd, int i)  //20081204
  static char *sig_type = NULL;
  static char *port_value = NULL;
  static char *type=NULL;
- char netl[1024];
- char netl2[1024];  // 20081202
- char netl3[1024];  // 20081202
+ char netl[PATH_MAX];
+ char netl2[PATH_MAX];  // 20081202
+ char netl3[PATH_MAX];  // 20081202
  char *str_tmp;
 
      if(!strcmp( get_tok_value(instdef[i].prop_ptr,"vhdl_stop",0),"true") ) 
@@ -372,20 +371,7 @@ void  vhdl_block_netlist(FILE *fd, int i)  //20081204
      if(debug_var>=1) fprintf(errfp, "vhdl_block_netlist(): expanding %s\n",  instdef[i].name);
      fprintf(fd, "\n-- expanding   symbol:  %s # of pins=%d\n\n", 
            instdef[i].name,instdef[i].rects[PINLAYER] );
-     my_strncpy(schematic[currentsch],instdef[i].name, S(schematic[currentsch]));
-     // load symbol schematic in order to print use/package before declaring entity
-
-
-
-
-
-     //// 20150403  I dont see any difference just using the original unconditioned load_schematic()
-     ////           below line introduces **HUGE** performance issues in 
-     ////           load_schematic-> link_symbols_to_instances-> type=get_sym_type(symfilename) executed 
-     ////           within a for(;i<lastinst;) loop
-     ////
-     // vhdl_stop? load_schematic(2,NULL,0) :  load_schematic(1,NULL,0);  // mmmmh lets try it out 04112003
-     load_schematic(1,NULL,0); // !stop_vhdl does not print use/packages !!!!!! 27052002
+     load_schematic(1,instdef[i].name,0); // !stop_vhdl does not print use/packages !!!!!! 27052002
 
 
      if(debug_var>=1) fprintf(errfp, "vhdl_block_netlist():       packages\n");
@@ -537,8 +523,8 @@ void  vhdl_block_netlist(FILE *fd, int i)  //20081204
      fprintf(fd, "end arch_%s ;\n\n", skip_dir( schematic[currentsch]) );
      if(split_files) { // 20081204
        fclose(fd);
-       my_snprintf(netl2, S(netl2), "netlist %s noshow %s.vhdl", netl3, netl3);
-       tkeval(netl2);
+       my_snprintf(netl2, S(netl2), "netlist {%s} noshow {%s.vhdl}", netl3, netl3);
+       tcleval(netl2);
        if(debug_var==0) unlink(netl);
      }
      netlist_count++;
@@ -628,7 +614,7 @@ void vhdl_netlist(FILE *fd , int vhdl_stop)
    }
  }
  if(debug_var>=1) fprintf(errfp, "vhdl_netlist():       end\n");
- if(!netlist_count) draw_hilight_net();
+ if(!netlist_count) draw_hilight_net(1);
  //delete_netlist_structs(); // 20161222 done in prepare_netlist_structs() when needed
 
 }

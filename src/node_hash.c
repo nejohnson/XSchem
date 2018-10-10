@@ -307,13 +307,13 @@ struct node_hashentry *node_hash_lookup(char *token, char *dir,int remove,int po
    if(remove==1) 		// remove token from the hash table ...
    {
     saveptr=entry->next;
-    if(entry->token) my_free( entry->token);
-    if(entry->verilog_type) my_free( entry->verilog_type); // 09112003
-    if(entry->sig_type) my_free( entry->sig_type); // 24092001
-    if(entry->class) my_free( entry->class); // 07102001
-    if(entry->orig_tok) my_free( entry->orig_tok); // 07102001
-    if(entry->value) my_free( entry->value); // 27092001
-    my_free(entry);
+    if(entry->token) my_free(& entry->token);
+    if(entry->verilog_type) my_free(& entry->verilog_type); // 09112003
+    if(entry->sig_type) my_free(& entry->sig_type); // 24092001
+    if(entry->class) my_free(& entry->class); // 07102001
+    if(entry->orig_tok) my_free(& entry->orig_tok); // 07102001
+    if(entry->value) my_free(& entry->value); // 27092001
+    my_free(&entry);
     *preventry=saveptr;
     return NULL;
    }
@@ -382,35 +382,35 @@ void traverse_node_hash()
   {
    if(entry->d.out + entry->d.inout + entry->d.in == 1)
    {
-     snprintf(str, S(str), "open net: %s", entry->token);
+     my_snprintf(str, S(str), "open net: %s", entry->token);
      if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color,0);
      if(incr_hilight) hilight_color++;
      statusmsg(str,2);
    }
    else if(entry->d.out ==0  && entry->d.inout == 0) 
    {
-     snprintf(str, S(str), "undriven node: %s", entry->token);
+     my_snprintf(str, S(str), "undriven node: %s", entry->token);
      if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color,0);
      if(incr_hilight) hilight_color++;
      statusmsg(str,2);
    }
    else if(entry->d.out >=2 && entry->d.port>=0)  //  era d.port>=2   03102001
    {
-     snprintf(str, S(str), "shorted output node: %s", entry->token);
+     my_snprintf(str, S(str), "shorted output node: %s", entry->token);
      if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color,0);
      if(incr_hilight) hilight_color++;
      statusmsg(str,2);
    }
    else if(entry->d.in ==0 && entry->d.inout == 0) 
    {
-     snprintf(str, S(str), "node: %s goes nowhere", entry->token);
+     my_snprintf(str, S(str), "node: %s goes nowhere", entry->token);
      if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color,0);
      if(incr_hilight) hilight_color++;
      statusmsg(str,2);
    }
    else if(entry->d.out >=2 && entry->d.inout == 0 && entry->d.port>=0)  //  era d.port>=2   03102001
    {
-     snprintf(str, S(str), "shorted output node: %s", entry->token);
+     my_snprintf(str, S(str), "shorted output node: %s", entry->token);
      if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color,0);
      if(incr_hilight) hilight_color++;
      statusmsg(str,2);
@@ -432,13 +432,13 @@ static struct node_hashentry *free_hash_entry(struct node_hashentry *entry)
  {
   n_elements++; collisions++;
   entry->next = free_hash_entry( entry->next );
-    if(entry->token) my_free( entry->token);
-    if(entry->verilog_type) my_free( entry->verilog_type); // 09112003
-    if(entry->sig_type) my_free( entry->sig_type); // 24092001
-    if(entry->class) my_free( entry->class); // 07102001
-    if(entry->orig_tok) my_free( entry->orig_tok); // 07102001
-    if(entry->value) my_free( entry->value); // 27092001
-    my_free(entry);
+    if(entry->token) my_free(& entry->token);
+    if(entry->verilog_type) my_free(& entry->verilog_type); // 09112003
+    if(entry->sig_type) my_free(& entry->sig_type); // 24092001
+    if(entry->class) my_free(& entry->class); // 07102001
+    if(entry->orig_tok) my_free(& entry->orig_tok); // 07102001
+    if(entry->value) my_free(& entry->value); // 27092001
+    my_free(&entry);
  }
  return NULL;
 }

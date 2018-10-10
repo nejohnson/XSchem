@@ -62,31 +62,31 @@ void check_symbol_storage(void)
   for(i=lastinstdef;i<max_symbols;i++) {
     instdef[i].polygonptr=my_calloc(cadlayers, sizeof(Polygon *));
     if(instdef[i].polygonptr==NULL){
-       fprintf(errfp, "check_symbol_storage(): calloc error\n");Tcl_Eval(interp, "exit");
+       fprintf(errfp, "check_symbol_storage(): calloc error\n");tcleval( "exit");
     }
   
     instdef[i].lineptr=my_calloc(cadlayers, sizeof(Line *));
     if(instdef[i].lineptr==NULL){
-       fprintf(errfp, "check_symbol_storage(): calloc error\n");Tcl_Eval(interp, "exit");
+       fprintf(errfp, "check_symbol_storage(): calloc error\n");tcleval( "exit");
     }
   
     instdef[i].boxptr=my_calloc(cadlayers, sizeof(Line *));
     if(instdef[i].boxptr==NULL){
-      fprintf(errfp, "check_symbol_storage(): calloc error\n");Tcl_Eval(interp, "exit");
+      fprintf(errfp, "check_symbol_storage(): calloc error\n");tcleval( "exit");
     }
    
     instdef[i].lines=my_calloc(cadlayers, sizeof(int));
     if(instdef[i].lines==NULL){
-      fprintf(errfp, "check_symbol_storage(): calloc error\n");Tcl_Eval(interp, "exit");
+      fprintf(errfp, "check_symbol_storage(): calloc error\n");tcleval( "exit");
     }
    
     instdef[i].rects=my_calloc(cadlayers, sizeof(int));
     if(instdef[i].rects==NULL){
-      fprintf(errfp, "check_symbol_storage(): calloc error\n");Tcl_Eval(interp, "exit");
+      fprintf(errfp, "check_symbol_storage(): calloc error\n");tcleval( "exit");
     }
     instdef[i].polygons=my_calloc(cadlayers, sizeof(int)); // 20171115
     if(instdef[i].polygons==NULL){
-      fprintf(errfp, "check_symbol_storage(): calloc error\n");Tcl_Eval(interp, "exit");
+      fprintf(errfp, "check_symbol_storage(): calloc error\n");tcleval( "exit");
     }
   }
  }
@@ -159,7 +159,13 @@ void store_polygon(int pos, double *x, double *y, int points, unsigned int rectc
   }
   polygon[rectcolor][n].points = points;
   polygon[rectcolor][n].sel = sel;
-  polygon[rectcolor][n].fill = 0; // 20180914
+
+  /* 20181002 */
+  if( !strcmp(get_tok_value(polygon[rectcolor][n].prop_ptr,"fill",0),"true") )
+    polygon[rectcolor][n].fill =1;
+  else
+    polygon[rectcolor][n].fill =0;
+
 
   lastpolygon[rectcolor]++;
   modified=1;

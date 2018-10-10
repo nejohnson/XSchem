@@ -25,17 +25,24 @@
 
 static int rot = 0, flip = 0;          
 
-void my_strdup(char **dest, const char *src) // empty source string --> dest=NULL
+size_t my_strdup(char **dest, const char *src) // empty source string --> dest=NULL
 {
+ size_t len;
  if(*dest!=NULL) { 
-   if(debug_var>=3) fprintf(errfp,"  my_strdup:  calling my_free\n");
-   my_free(*dest); *dest=NULL;
+   if(debug_var>=3) fprintf(errfp,"  my_strdup:  calling my_free %lx\n", (unsigned long)*dest);
+   my_free(dest);
  }
  if(src!=NULL && src[0]!='\0')  
  {
-  *dest=strdup(src);
-  if(debug_var>=3) fprintf(errfp,"my_strdup(): duplicated %lu string %s\n",(unsigned long)*dest, src);
+  // 20180923
+  len = strlen(src)+1;
+  *dest = my_malloc(len);
+  memcpy(*dest, src, len);
+  // *dest=strdup(src);
+  if(debug_var>=3) fprintf(errfp,"my_strdup(): duplicated %lx string %s\n",(unsigned long)*dest, src);
+  return len-1;
  }
+ return 0;
 }
 
 // 20171004 copy at most n chars, adding a null char at end
@@ -43,13 +50,22 @@ void my_strndup(char **dest, const char *src, int n) // empty source string --> 
 
 {
  if(*dest!=NULL) {
-   if(debug_var>=3) fprintf(errfp,"  my_strdup:  calling my_free\n");
-   my_free(*dest); *dest=NULL;
+   if(debug_var>=3) fprintf(errfp,"  my_strdup:  calling my_free %lx\n", (unsigned long)*dest);
+   my_free(dest);
  }
  if(src!=NULL && src[0]!='\0')
  {
-  *dest=strndup(src, n);
-  if(debug_var>=3) fprintf(errfp,"my_strndup(): duplicated %lu string %s\n",(unsigned long)*dest, src);
+  // 20180924 replace strndup()
+  char *p = memchr(src, '\0', n);
+  if(p) n = p - src;
+  *dest = my_malloc(n+1);
+  if(*dest) {
+    memcpy(*dest, src, n);
+    (*dest)[n] = '\0';
+  }
+  // *dest=strndup(src, n);
+
+  if(debug_var>=3) fprintf(errfp,"my_strndup(): duplicated %lx string %s\n",(unsigned long)*dest, src);
  }
 }
 
@@ -66,44 +82,56 @@ int my_snprintf(char *str, int size, const char *fmt, ...) // 20161124
   if(has_x && size_of_print >=size) { // output was truncated 
     snprintf(s, S(s), "alert_ { Warning: overflow in my_snprintf print size=%d, buffer size=%d} {}",
              size_of_print, size);
-    tkeval(s);
+    tcleval(s);
   }
   va_end(args);
   return size_of_print;
 }
 
 
-void my_strdup2(char **dest, const char *src) // 20150409 duplicates also empty string 
+size_t my_strdup2(char **dest, const char *src) // 20150409 duplicates also empty string 
 {
+ size_t len;
  if(*dest!=NULL) {
-   if(debug_var>=3) fprintf(errfp,"  my_strdup:  calling my_free\n");
-   my_free(*dest); *dest=NULL;
+   if(debug_var>=3) fprintf(errfp,"  my_strdup:  calling my_free %lx\n", (unsigned long)*dest);
+   my_free(dest);
  }
  if(src!=NULL)
  {
-  *dest=strdup(src);
-  if(debug_var>=3) fprintf(errfp,"my_strdup2(): duplicated %lu string %s\n",(unsigned long)*dest, src);
+  // 20180923
+  len = strlen(src)+1;
+  *dest = my_malloc(len);
+  memcpy(*dest, src, len);
+  // *dest=strdup(src);
+  if(debug_var>=3) fprintf(errfp,"my_strdup2(): duplicated %lx string %s\n",(unsigned long)*dest, src);
+  return len-1;
  }
+ return 0;
 }
 
-void my_strcat(char **str, char *append_str)
+size_t my_strcat(char **str, const char *append_str)
 {
- int l;
+ size_t s, a;
  if(debug_var>=3) fprintf(errfp,"my_strcat(): str=%s  append_str=%s\n", *str, append_str);
- if(append_str == NULL) return;
  if( *str != NULL)
  {
-  l = strlen(*str) + strlen(append_str) + 1;
-  my_realloc(str, l );
-  strcat( *str , append_str); // overflow safe
+  s = strlen(*str);
+  if(append_str == NULL || append_str[0]=='\0') return s;
+  a = strlen(append_str)+1;
+  my_realloc(str, s + a );
+  memcpy(*str+s, append_str, a); // 20180923
+  if(debug_var>=3) fprintf(errfp,"my_strcat(): reallocated %lx, string %s\n",(unsigned long)*str, *str);
+  return s + a -1;
  }
  else
  {
-  l = strlen(append_str) + 1;
-  *str = my_malloc( l );
-  strcpy( *str , append_str); // overflow safe
+  if(append_str == NULL || append_str[0]=='\0') return 0;
+  a = strlen(append_str) + 1;
+  *str = my_malloc( a );
+  memcpy(*str, append_str, a); // 20180923
+  if(debug_var>=3) fprintf(errfp,"my_strcat(): allocated %lx, string %s\n",(unsigned long)*str, *str);
+  return a -1;
  }
- if(debug_var>=3) fprintf(errfp,"my_strcat(): done\n");
 }
 
 
@@ -113,7 +141,7 @@ void *my_calloc(size_t nmemb, size_t size)
    if(size*nmemb > 0) {
      ptr=calloc(nmemb, size);
      if(debug_var>=3) 
-       fprintf(errfp, "my_calloc(): allocating %lu ,  %lu bytes\n",
+       fprintf(errfp, "my_calloc(): allocating %lx ,  %lu bytes\n",
                (unsigned long)ptr, (unsigned long) (size*nmemb));
    }
    else ptr = NULL;
@@ -125,7 +153,7 @@ void *my_malloc(size_t size)
  void *ptr;
  if(size>0) {
    ptr=malloc(size);
-   if(debug_var>=3) fprintf(errfp, "my_malloc(): allocating %lu , %lu bytes\n",
+   if(debug_var>=3) fprintf(errfp, "my_malloc(): allocating %lx , %lu bytes\n",
      (unsigned long)ptr, (unsigned long) size);
  }
  else ptr=NULL;
@@ -138,15 +166,16 @@ void my_realloc(void *ptr,size_t size)
  a = (unsigned long) *(void **)ptr;
  *(void **)ptr=realloc(*(void **)ptr,size);
  if(debug_var>=3) 
-   fprintf(errfp, "my_realloc(): reallocating %lu --> %lu to %lu bytes\n",
+   fprintf(errfp, "my_realloc(): reallocating %lx --> %lx to %lu bytes\n",
            a, (unsigned long) *(void **)ptr,(unsigned long) size);
 
 } 
 
 void my_free(void *ptr)
 {
- if(debug_var>=3) fprintf(errfp, "my_free():  freeing %lu\n",(unsigned long)ptr);
- free(ptr);
+ if(debug_var>=3) fprintf(errfp, "my_free():  freeing %lx\n",(unsigned long)*(void **)ptr);
+ free(*(void **)ptr);
+ *(void **)ptr=NULL;
 }
 
 void my_strncpy(char *d, const char *s, int n)
@@ -228,26 +257,26 @@ void edit_text_property(int x)
    if(debug_var>=1) fprintf(errfp, "edit_text_property(): entering\n");
    sel = selectedgroup[0].n;
    if(textelement[sel].prop_ptr !=NULL)
-      Tcl_SetVar(interp,"props",textelement[sel].prop_ptr,TCL_GLOBAL_ONLY); 
+      tclsetvar("props",textelement[sel].prop_ptr); 
    else
-      Tcl_SetVar(interp,"props","",TCL_GLOBAL_ONLY); // 20171112
+      tclsetvar("props",""); // 20171112
 
-   Tcl_SetVar(interp,"txt",textelement[sel].txt_ptr,TCL_GLOBAL_ONLY);
-   Tcl_SetVar(interp,"entry1",textelement[sel].txt_ptr,TCL_GLOBAL_ONLY); // for viewdata
+   tclsetvar("txt",textelement[sel].txt_ptr);
+   tclsetvar("retval",textelement[sel].txt_ptr); // for viewdata
    my_snprintf(property, S(property), "%.16g",textelement[sel].yscale); 
-   Tcl_SetVar(interp,"vsize",property,TCL_GLOBAL_ONLY);
+   tclsetvar("vsize",property);
    my_snprintf(property, S(property), "%.16g",textelement[sel].xscale); 
-   Tcl_SetVar(interp,"hsize",property,TCL_GLOBAL_ONLY);
-   if(x==0) tkeval("enter_text {text:}");
-   else if(x==2) tkeval("viewdata $::entry1");
-   else if(x==1) tkeval("edit_vi_prop {Text:}");
+   tclsetvar("hsize",property);
+   if(x==0) tcleval("enter_text {text:}");
+   else if(x==2) tcleval("viewdata $::retval");
+   else if(x==1) tcleval("edit_vi_prop {Text:}");
    else {
      fprintf(errfp, "edit_text_property() : unknown parameter x=%d\n",x); exit(EXIT_FAILURE);
    }
 
    text_changed=0;
    if(x==0) {
-     if( strcmp(textelement[sel].txt_ptr, Tcl_GetVar(interp,"txt",TCL_GLOBAL_ONLY) ) ) {
+     if( strcmp(textelement[sel].txt_ptr, tclgetvar("txt") ) ) {
        if(debug_var>=1) fprintf(errfp, "edit_text_property(): x=0, text_changed=1\n");
        text_changed=1;
      } else {
@@ -257,7 +286,7 @@ void edit_text_property(int x)
    } else if(x==1) {
 
    // 20080804
-     if( strcmp(textelement[sel].txt_ptr, Tcl_GetVar(interp,"entry1",TCL_GLOBAL_ONLY) ) ) {
+     if( strcmp(textelement[sel].txt_ptr, tclgetvar("retval") ) ) {
        if(debug_var>=1) fprintf(errfp, "edit_text_property(): x=1, text_changed=1\n");
        text_changed=1;
      } else {
@@ -265,7 +294,7 @@ void edit_text_property(int x)
        text_changed=0;
      }
    }
-   if(strcmp(Tcl_GetVar(interp, "rcode", TCL_GLOBAL_ONLY),"") )
+   if(strcmp(tclgetvar("rcode"),"") )
    {
      if(debug_var>=1) fprintf(errfp, "edit_text_property(): rcode !=\"\"\n");
      modified=1; push_undo(); // 20150327
@@ -291,8 +320,8 @@ void edit_text_property(int x)
        bbox(ADD, xx1, yy1, xx2, yy2 );        
     
        if(debug_var>=1) fprintf(errfp, "edit_property(): text props: props=%s  text=%s\n",
-         Tcl_GetVar(interp,"props",TCL_GLOBAL_ONLY),
-         Tcl_GetVar(interp,"txt",TCL_GLOBAL_ONLY) );
+         tclgetvar("props"),
+         tclgetvar("txt") );
        if(text_changed) {
          if(current_type==SYMBOL) {
            c = lastrect[PINLAYER];
@@ -324,29 +353,29 @@ void edit_text_property(int x)
                  if(x==0)  // 20080804
                    my_strdup(&rect[PINLAYER][l].prop_ptr, 
                      subst_token(rect[PINLAYER][l].prop_ptr, "name", 
-                     (char *) Tcl_GetVar(interp, "txt", TCL_GLOBAL_ONLY)) );
+                     (char *) tclgetvar("txt")) );
                  else
                    my_strdup(&rect[PINLAYER][l].prop_ptr, 
                      subst_token(rect[PINLAYER][l].prop_ptr, "name", 
-                     (char *) Tcl_GetVar(interp, "entry1", TCL_GLOBAL_ONLY)) );
+                     (char *) tclgetvar("retval")) );
                }
              }
            } 
          }
          if(x==0)  // 20080804
-           my_strdup(&textelement[sel].txt_ptr, (char *) Tcl_GetVar(interp,"txt",TCL_GLOBAL_ONLY));
+           my_strdup(&textelement[sel].txt_ptr, (char *) tclgetvar("txt"));
          else // 20080804
-           my_strdup(&textelement[sel].txt_ptr, (char *) Tcl_GetVar(interp,"entry1",TCL_GLOBAL_ONLY));
+           my_strdup(&textelement[sel].txt_ptr, (char *) tclgetvar("retval"));
          
        }
        if(x==0) {
-       my_strdup(&textelement[sel].prop_ptr,(char *) Tcl_GetVar(interp,"props",TCL_GLOBAL_ONLY));
+       my_strdup(&textelement[sel].prop_ptr,(char *) tclgetvar("props"));
        my_strdup(&textelement[sel].font, get_tok_value(textelement[sel].prop_ptr, "font", 0));//20171206
        strlayer = get_tok_value(textelement[sel].prop_ptr, "layer", 0); // 20171206
        if(strlayer[0]) textelement[sel].layer = atoi(strlayer);
        else textelement[sel].layer=-1;
-       textelement[sel].xscale=atof(Tcl_GetVar(interp,"hsize",TCL_GLOBAL_ONLY));
-       textelement[sel].yscale=atof(Tcl_GetVar(interp,"vsize",TCL_GLOBAL_ONLY));
+       textelement[sel].xscale=atof(tclgetvar("hsize"));
+       textelement[sel].yscale=atof(tclgetvar("vsize"));
        }
     
        				// calculate bbox, some cleanup needed here
@@ -389,13 +418,13 @@ void edit_symbol_property(int x)
    fill_symbol_editprop_form( x);
 
    if(x==0) {
-     tkeval("edit_prop {Input property:}");
+     tcleval("edit_prop {Input property:}");
      my_strdup(&result, Tcl_GetStringResult(interp));
    }
    else {
-     if(netlist_commands && x==1)    tkeval("edit_vi_netlist_prop {Input property:}");
-     else if(x==1)    tkeval("edit_vi_prop {Input property:}");
-     else if(x==2)    tkeval("viewdata $::entry1");
+     if(netlist_commands && x==1)    tcleval("edit_vi_netlist_prop {Input property:}");
+     else if(x==1)    tcleval("edit_vi_prop {Input property:}");
+     else if(x==2)    tcleval("viewdata $::retval");
      my_strdup(&result, Tcl_GetStringResult(interp));
    }
    if(debug_var>=1) fprintf(errfp, "edit_symbol_property(): before update_symbol, modified=%d\n", modified);
@@ -414,7 +443,8 @@ void update_symbol(char *result, int x)
  int only_different=0;
  int copy_cell=0; // 20150911
  int prefix=0;
- static char *name=NULL,*ptr=NULL, *symbol=NULL, *template=NULL;
+ static char *name=NULL,*ptr=NULL, *template=NULL;
+ char symbol[PATH_MAX];
  static char *new_prop=NULL;
  char *type;
  int cond;
@@ -430,18 +460,18 @@ void update_symbol(char *result, int x)
    if(netlist_commands && x==1) {
    // 20070318
      my_strdup( &new_prop,
-       subst_token(old_prop, "value", (char *) Tcl_GetVar(interp,"entry1",TCL_GLOBAL_ONLY) )
+       subst_token(old_prop, "value", (char *) tclgetvar("retval") )
      );
    }
    else {
-     my_strdup(&new_prop, (char *) Tcl_GetVar(interp,"entry1",TCL_GLOBAL_ONLY));
+     my_strdup(&new_prop, (char *) tclgetvar("retval"));
      if(debug_var>=1) fprintf(errfp, "update_symbol(): new_prop=%s\n", new_prop);
    }
 
-   my_strdup(&symbol, (char *) Tcl_GetVar(interp,"symbol",TCL_GLOBAL_ONLY) );
-   no_change_props=atoi(Tcl_GetVar(interp,"rbutton1",TCL_GLOBAL_ONLY) );
-   only_different=atoi(Tcl_GetVar(interp,"rbutton2",TCL_GLOBAL_ONLY) );
-   copy_cell=atoi(Tcl_GetVar(interp,"user_wants_copy_cell",TCL_GLOBAL_ONLY) ); // 20150911
+   my_strncpy(symbol, (char *) tclgetvar("symbol") , S(symbol));
+   no_change_props=atoi(tclgetvar("rbutton1") );
+   only_different=atoi(tclgetvar("rbutton2") );
+   copy_cell=atoi(tclgetvar("user_wants_copy_cell") ); // 20150911
 
 
   if(copy_cell) { // 20150911
@@ -453,10 +483,13 @@ void update_symbol(char *result, int x)
 
    // 20150911
    //   |
-   if(copy_cell || (symbol && strcmp(symbol, inst_ptr[i].name)) ) // user wants to change symbol ; added strcmp 30102003
+   if(copy_cell || (strcmp(symbol, inst_ptr[i].name)) ) // user wants to change symbol ; added strcmp 30102003
    {
     if(debug_var>=1) fprintf(errfp, "update_symbol(): changing symbol: %s --> %s\n", symbol, inst_ptr[i].name);
 
+     my_strncpy(symbol, rel_sym_path(symbol), S(symbol));
+
+     
     // 20150911
     //     |
     if(strcmp(symbol, inst_ptr[i].name)) {
@@ -570,7 +603,7 @@ void update_symbol(char *result, int x)
    //// 20160308 added if(), leave edited objects selected after updating properties
    //// unless i am clicking another element with edit property dialog box open
    //// in this latter case the last pointed element remains selected.
-   if( !strcmp(Tcl_GetVar(interp,"editprop_semaphore",TCL_GLOBAL_ONLY), "2")) {
+   if( !strcmp(tclgetvar("editprop_semaphore"), "2")) {
      unselect_all();
      select_object(mousex,mousey,SELECTED);
    }
@@ -600,9 +633,9 @@ void fill_symbol_editprop_form(int x)
  
     if(netlist_commands && x==1) {
     // 20070318
-      Tcl_SetVar(interp,"entry1",get_tok_value( inst_ptr[i].prop_ptr,"value",0)   ,TCL_GLOBAL_ONLY);
+      tclsetvar("retval",get_tok_value( inst_ptr[i].prop_ptr,"value",0));
     } else {
-      Tcl_SetVar(interp,"entry1",inst_ptr[i].prop_ptr,TCL_GLOBAL_ONLY);
+      tclsetvar("retval",inst_ptr[i].prop_ptr);
     }
    }
    else
@@ -611,16 +644,16 @@ void fill_symbol_editprop_form(int x)
      if(inst_ptr[i].prop_ptr!=NULL) {
       if(netlist_commands && x==1) {
       // 20070318
-        Tcl_SetVar(interp,"entry1",get_tok_value( inst_ptr[i].prop_ptr,"value",0)   ,TCL_GLOBAL_ONLY);
+        tclsetvar("retval",get_tok_value( inst_ptr[i].prop_ptr,"value",0));
       } else {
-        Tcl_SetVar(interp,"entry1",inst_ptr[i].prop_ptr,TCL_GLOBAL_ONLY);
+        tclsetvar("retval",inst_ptr[i].prop_ptr);
       }
      } else {
       if(netlist_commands && x==1) {
       // 20070318
-        Tcl_SetVar(interp,"entry1","",TCL_GLOBAL_ONLY);
+        tclsetvar("retval","");
       } else {
-        Tcl_SetVar(interp,"entry1","",TCL_GLOBAL_ONLY);
+        tclsetvar("retval","");
       }
      }
    }
@@ -629,13 +662,13 @@ void fill_symbol_editprop_form(int x)
    if(netlist_commands && x==1) {
      my_strdup(&old_prop, inst_ptr[i].prop_ptr);
    } else {
-     my_strdup(&old_prop, (char *) Tcl_GetVar(interp,"entry1",TCL_GLOBAL_ONLY));
+     my_strdup(&old_prop, (char *) tclgetvar("retval"));
    }
    // /20110413
 
 
-   // tkeval("puts \"entry1= $entry1\"");  // ??????
-   Tcl_SetVar(interp,"symbol", inst_ptr[i].name, TCL_GLOBAL_ONLY);
+   // tcleval("puts \"retval= $retval\"");  // ??????
+   tclsetvar("symbol",inst_ptr[i].name);
 }
 
 void change_elem_order(void)
@@ -649,9 +682,9 @@ void change_elem_order(void)
     if(lastselected==1)
     {
      my_snprintf(tmp_txt, S(tmp_txt), "%d",selectedgroup[0].n);
-     Tcl_SetVar(interp,"entry1",tmp_txt,TCL_GLOBAL_ONLY);
-     tkeval("text_line {Input number} 0");
-     if(strcmp(Tcl_GetVar(interp, "rcode", TCL_GLOBAL_ONLY),"") )
+     tclsetvar("retval",tmp_txt);
+     tcleval("text_line {Input number} 0");
+     if(strcmp(tclgetvar("rcode"),"") )
      {
       push_undo(); // 20150327
       modified=1;
@@ -659,7 +692,7 @@ void change_elem_order(void)
       prepared_netlist_structs=0;
       prepared_hilight_structs=0;
      }
-     sscanf(Tcl_GetVar(interp, "entry1", TCL_GLOBAL_ONLY), "%d",&new_n);
+     sscanf(tclgetvar("retval"), "%d",&new_n);
 
      if(selectedgroup[0].type==ELEMENT)
      {
@@ -691,62 +724,62 @@ void edit_property(int x)
  {
    if(netlist_type==CAD_VERILOG_NETLIST && current_type==SCHEMATIC) {
     if(schverilogprop!=NULL)	//09112003
-      Tcl_SetVar(interp,"entry1",schverilogprop,TCL_GLOBAL_ONLY);
+      tclsetvar("retval",schverilogprop);
     else
-      Tcl_SetVar(interp,"entry1","",TCL_GLOBAL_ONLY);
+      tclsetvar("retval","");
    }
    else if(netlist_type==CAD_SPICE_NETLIST && current_type==SCHEMATIC) { // 20100217
     if(schprop!=NULL) 
-      Tcl_SetVar(interp,"entry1",schprop,TCL_GLOBAL_ONLY);
+      tclsetvar("retval",schprop);
     else
-      Tcl_SetVar(interp,"entry1","",TCL_GLOBAL_ONLY);
+      tclsetvar("retval","");
    }
    else if(netlist_type==CAD_TEDAX_NETLIST && current_type==SCHEMATIC) { // 20100217
     if(schtedaxprop!=NULL) 
-      Tcl_SetVar(interp,"entry1",schtedaxprop,TCL_GLOBAL_ONLY);
+      tclsetvar("retval",schtedaxprop);
     else
-      Tcl_SetVar(interp,"entry1","",TCL_GLOBAL_ONLY);
+      tclsetvar("retval","");
    }
    else { // this is used for symbol global props also
     if(schvhdlprop!=NULL)
-      Tcl_SetVar(interp,"entry1",schvhdlprop,TCL_GLOBAL_ONLY);
+      tclsetvar("retval",schvhdlprop);
     else
-      Tcl_SetVar(interp,"entry1","",TCL_GLOBAL_ONLY);
+      tclsetvar("retval","");
    }
 
-   if(x==0)         tkeval("text_line {Global schematic property:} 0");          
+   if(x==0)         tcleval("text_line {Global schematic property:} 0");          
    else if(x==1) {
       if(debug_var>=1) fprintf(errfp, "edit_property(): executing edit_vi_prop\n");
-      tkeval("edit_vi_prop {Global schematic property:}");
+      tcleval("edit_vi_prop {Global schematic property:}");
    }
-   else if(x==2)    tkeval("viewdata $::entry1");
+   else if(x==2)    tcleval("viewdata $::retval");
    if(debug_var>=1) fprintf(errfp, "edit_property(): done executing edit_vi_prop, result=%s\n",Tcl_GetStringResult(interp));
-   if(debug_var>=1) fprintf(errfp, "edit_property(): rcode=%s\n",Tcl_GetVar(interp, "rcode", TCL_GLOBAL_ONLY) );
-   if(strcmp(Tcl_GetVar(interp, "rcode", TCL_GLOBAL_ONLY),"") )
+   if(debug_var>=1) fprintf(errfp, "edit_property(): rcode=%s\n",tclgetvar("rcode") );
+   if(strcmp(tclgetvar("rcode"),"") )
    {
      if(current_type==SYMBOL && // 20120404 added case for symbol editing, use schvhdlprop regardless of netlisting mode
-        (!schvhdlprop || strcmp(schvhdlprop, Tcl_GetVar(interp, "entry1", TCL_GLOBAL_ONLY) ) ) ) { // symbol edit
+        (!schvhdlprop || strcmp(schvhdlprop, tclgetvar("retval") ) ) ) { // symbol edit
         modified=1; push_undo(); // 20150327
-        my_strdup(&schvhdlprop, (char *) Tcl_GetVar(interp, "entry1", TCL_GLOBAL_ONLY));
+        my_strdup(&schvhdlprop, (char *) tclgetvar("retval"));
      } else if(netlist_type==CAD_VERILOG_NETLIST && current_type==SCHEMATIC && // 20120228 check if schverilogprop NULL
-        (!schverilogprop || strcmp(schverilogprop, Tcl_GetVar(interp, "entry1", TCL_GLOBAL_ONLY) ) ) ) { // 20120209
+        (!schverilogprop || strcmp(schverilogprop, tclgetvar("retval") ) ) ) { // 20120209
         modified=1; push_undo(); // 20150327
-        my_strdup(&schverilogprop, (char *) Tcl_GetVar(interp, "entry1", TCL_GLOBAL_ONLY)); //09112003
+        my_strdup(&schverilogprop, (char *) tclgetvar("retval")); //09112003
     
      } else if(netlist_type==CAD_SPICE_NETLIST && current_type==SCHEMATIC && // 20120228 check if schprop NULL
-        (!schprop || strcmp(schprop, Tcl_GetVar(interp, "entry1", TCL_GLOBAL_ONLY) ) ) ) { // 20120209
+        (!schprop || strcmp(schprop, tclgetvar("retval") ) ) ) { // 20120209
         modified=1; push_undo(); // 20150327
-        my_strdup(&schprop, (char *) Tcl_GetVar(interp, "entry1", TCL_GLOBAL_ONLY)); //09112003 
+        my_strdup(&schprop, (char *) tclgetvar("retval")); //09112003 
 
      } else if(netlist_type==CAD_TEDAX_NETLIST && current_type==SCHEMATIC && // 20120228 check if schprop NULL
-        (!schtedaxprop || strcmp(schtedaxprop, Tcl_GetVar(interp, "entry1", TCL_GLOBAL_ONLY) ) ) ) { // 20120209
+        (!schtedaxprop || strcmp(schtedaxprop, tclgetvar("retval") ) ) ) { // 20120209
         modified=1; push_undo(); // 20150327
-        my_strdup(&schtedaxprop, (char *) Tcl_GetVar(interp, "entry1", TCL_GLOBAL_ONLY)); //09112003 
+        my_strdup(&schtedaxprop, (char *) tclgetvar("retval")); //09112003 
 
      } else if(netlist_type==CAD_VHDL_NETLIST && current_type==SCHEMATIC && // 20120228 check if schvhdlprop NULL
-        (!schvhdlprop || strcmp(schvhdlprop, Tcl_GetVar(interp, "entry1", TCL_GLOBAL_ONLY) ) ) ) { // netlist_type==CAD_VHDL_NETLIST // 20120209
+        (!schvhdlprop || strcmp(schvhdlprop, tclgetvar("retval") ) ) ) { // netlist_type==CAD_VHDL_NETLIST // 20120209
         modified=1; push_undo(); // 20150327
-        my_strdup(&schvhdlprop, (char *) Tcl_GetVar(interp, "entry1", TCL_GLOBAL_ONLY));
+        my_strdup(&schvhdlprop, (char *) tclgetvar("retval"));
      }
    }
 
@@ -773,30 +806,30 @@ void edit_property(int x)
   case RECT:
    if(debug_var>=1) fprintf(errfp, "edit_property(), modified=%d\n", modified);
    if(rect[selectedgroup[0].col][selectedgroup[0].n].prop_ptr!=NULL) {
-     Tcl_SetVar(interp,"entry1",rect[selectedgroup[0].col][selectedgroup[0].n].prop_ptr,TCL_GLOBAL_ONLY);
+     tclsetvar("retval",rect[selectedgroup[0].col][selectedgroup[0].n].prop_ptr);
    } else { // 20161208
-     Tcl_SetVar(interp,"entry1","", TCL_GLOBAL_ONLY);
+     tclsetvar("retval","");
    }
-   tkeval("text_line {Input property:} 0");
-   if(strcmp(Tcl_GetVar(interp, "rcode", TCL_GLOBAL_ONLY),"") )
+   tcleval("text_line {Input property:} 0");
+   if(strcmp(tclgetvar("rcode"),"") )
    {
     modified=1; push_undo(); // 20150327
     my_strdup(&rect[selectedgroup[0].col][selectedgroup[0].n].prop_ptr,
-	(char *) Tcl_GetVar(interp, "entry1", TCL_GLOBAL_ONLY));
+	(char *) tclgetvar("retval"));
    }
    break;
   case WIRE:
    if(debug_var>=1) fprintf(errfp, "edit_property(): input property:\n");
    if(wire[selectedgroup[0].n].prop_ptr!=NULL) {
-     Tcl_SetVar(interp,"entry1",wire[selectedgroup[0].n].prop_ptr,TCL_GLOBAL_ONLY);
+     tclsetvar("retval",wire[selectedgroup[0].n].prop_ptr);
    } else { // 20161208
-     Tcl_SetVar(interp,"entry1","", TCL_GLOBAL_ONLY);
+     tclsetvar("retval","");
    }
-   tkeval("text_line {Input property:} 0");
-   if(strcmp(Tcl_GetVar(interp, "rcode", TCL_GLOBAL_ONLY),"") )
+   tcleval("text_line {Input property:} 0");
+   if(strcmp(tclgetvar("rcode"),"") )
    {
     modified=1; push_undo(); // 20150327
-    my_strdup(&wire[selectedgroup[0].n].prop_ptr,(char *) Tcl_GetVar(interp, "entry1", TCL_GLOBAL_ONLY));
+    my_strdup(&wire[selectedgroup[0].n].prop_ptr,(char *) tclgetvar("retval"));
     if(get_tok_value(wire[selectedgroup[0].n].prop_ptr,"bus",0)[0]) wire[selectedgroup[0].n].bus=1; // 20171201
     else wire[selectedgroup[0].n].bus=0;
    }
@@ -804,12 +837,12 @@ void edit_property(int x)
   case POLYGON: // 20171115
    if(debug_var>=1) fprintf(errfp, "edit_property(): input property:\n");
    if(polygon[selectedgroup[0].col][selectedgroup[0].n].prop_ptr!=NULL) {
-     Tcl_SetVar(interp,"entry1",polygon[selectedgroup[0].col][selectedgroup[0].n].prop_ptr,TCL_GLOBAL_ONLY);
+     tclsetvar("retval",polygon[selectedgroup[0].col][selectedgroup[0].n].prop_ptr);
    } else { // 20161208
-     Tcl_SetVar(interp,"entry1","", TCL_GLOBAL_ONLY);
+     tclsetvar("retval","");
    }
-   tkeval("text_line {Input property:} 0");
-   if(strcmp(Tcl_GetVar(interp, "rcode", TCL_GLOBAL_ONLY),"") )
+   tcleval("text_line {Input property:} 0");
+   if(strcmp(tclgetvar("rcode"),"") )
    {
     int old_fill; // 20180914
     int k;
@@ -820,7 +853,7 @@ void edit_property(int x)
     i = selectedgroup[0].n;
     modified=1; push_undo(); // 20150327
     my_strdup(&polygon[c][i].prop_ptr,
-        (char *) Tcl_GetVar(interp, "entry1", TCL_GLOBAL_ONLY));
+        (char *) tclgetvar("retval"));
     // 20180914
     old_fill = polygon[c][i].fill;
     if( !strcmp(get_tok_value(polygon[c][i].prop_ptr,"fill",0),"true") )
@@ -846,16 +879,15 @@ void edit_property(int x)
   case LINE:
    if(debug_var>=1) fprintf(errfp, "edit_property(): input property:\n");
    if(line[selectedgroup[0].col][selectedgroup[0].n].prop_ptr!=NULL) {
-     Tcl_SetVar(interp,"entry1",line[selectedgroup[0].col][selectedgroup[0].n].prop_ptr,TCL_GLOBAL_ONLY);
+     tclsetvar("retval",line[selectedgroup[0].col][selectedgroup[0].n].prop_ptr);
    } else { // 20161208
-     Tcl_SetVar(interp,"entry1","", TCL_GLOBAL_ONLY);
+     tclsetvar("retval","");
    }
-   tkeval("text_line {Input property:} 0");
-   if(strcmp(Tcl_GetVar(interp, "rcode", TCL_GLOBAL_ONLY),"") )
+   tcleval("text_line {Input property:} 0");
+   if(strcmp(tclgetvar("rcode"),"") )
    {
     modified=1; push_undo(); // 20150327
-    my_strdup(&line[selectedgroup[0].col][selectedgroup[0].n].prop_ptr,
-	(char *) Tcl_GetVar(interp, "entry1", TCL_GLOBAL_ONLY));
+    my_strdup(&line[selectedgroup[0].col][selectedgroup[0].n].prop_ptr, (char *) tclgetvar("retval"));
    }
    break;
   case TEXT:

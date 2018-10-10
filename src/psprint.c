@@ -317,13 +317,13 @@ static void ps_draw_symbol_outline(int n,int layer,int tmp_flip, int rot,
 static void fill_ps_colors()
 {
  char s[200]; // overflow safe 20161122
- int i,c;
+ unsigned int i,c;
  if(debug_var>=1) {
-   Tcl_Eval(interp, "puts $ps_colors"); 
+   tcleval( "puts $ps_colors"); 
  }
  for(i=0;i<cadlayers;i++) {
    my_snprintf(s, S(s), "lindex $ps_colors %d", i);
-   Tcl_Eval(interp, s);
+   tcleval( s);
    sscanf(Tcl_GetStringResult(interp),"%x", &c);
    ps_colors[i].red   = (c & 0xff0000) >> 16;
    ps_colors[i].green = (c & 0x00ff00) >> 8;
@@ -347,7 +347,7 @@ void ps_draw(void)
  collapse_wires();    // 20161121 add connection boxes on wires but undo at end
  ps_colors=my_calloc(cadlayers, sizeof(Ps_color));
  if(ps_colors==NULL){
-   fprintf(errfp, "ps_draw(): calloc error\n");Tcl_Eval(interp, "exit");
+   fprintf(errfp, "ps_draw(): calloc error\n");tcleval( "exit");
  } 
  
  fill_ps_colors();
@@ -457,11 +457,10 @@ void ps_draw(void)
  fprintf(fd, "%%%%EOF\n");
  fclose(fd);
  draw_grid=old_grid;
- my_free(ps_colors);
+ my_free(&ps_colors);
  my_strdup(&tmp, "convert_to_pdf plot.ps"); // 20161121
- Tcl_Eval(interp, tmp);
- my_free(tmp);
- tmp=NULL;
+ tcleval( tmp);
+ my_free(&tmp);
  pop_undo(0); // 20161121
  modified=modified_save;  // 20161121
 }

@@ -31,8 +31,6 @@ proc set_ne { var val } {
     }
 }
 
-
-
 ###
 ### Tk procedures
 ###
@@ -88,9 +86,8 @@ proc set_ne { var val } {
     return $data
   }
 
-
 proc netlist {source_file show netlist_file} {
- global XSCHEM_HOME_DIR XSCHEM_DESIGN_DIR env flat_netlist hspice_netlist netlist_dir
+ global XSCHEM_HOME_DIR flat_netlist hspice_netlist netlist_dir
  global verilog_2001
 
 
@@ -216,13 +213,13 @@ proc key_binding {  s  d } {
 
 proc edit_file {filename} {
  
- global XSCHEM_HOME_DIR entry1 XSCHEM_DESIGN_DIR env netlist_type editor
+ global editor
  eval exec $editor  $filename & ;# 20161119
  return {}
 }
 
 proc simulate {filename} {
- global XSCHEM_HOME_DIR entry1 XSCHEM_DESIGN_DIR env netlist_dir netlist_type
+ global XSCHEM_HOME_DIR retval env netlist_dir netlist_type
  global task_output task_error
  global iverilog_path vvp_path hspice_path hspicerf_path spice_simulator 
  global modelsim_path verilog_simulator
@@ -279,7 +276,6 @@ proc simulate {filename} {
    } elseif { $netlist_type=="vhdl" } { 
      set schname [ file tail [ file rootname $filename] ]
      if { $vhdl_simulator == "modelsim" } { 
-       set old $env(PWD)
        task "${modelsim_path}/vsim -i" $netlist_dir bg
      #20170921 added ghdl
      } elseif { $vhdl_simulator == "ghdl" } { 
@@ -296,51 +292,50 @@ proc simulate {filename} {
 }
 
 proc modelsim {schname} {
-  global XSCHEM_HOME_DIR entry1 XSCHEM_DESIGN_DIR env netlist_dir netlist_type
+  global XSCHEM_HOME_DIR retval netlist_dir netlist_type
   global iverilog_path vvp_path hspice_path modelsim_path
   task "${modelsim_path}/vsim -i" $netlist_dir bg
 }
 
 proc utile_translate {schname} { 
-  global XSCHEM_HOME_DIR entry1 XSCHEM_DESIGN_DIR env netlist_dir netlist_type tcl_debug
+  global XSCHEM_HOME_DIR retval netlist_dir netlist_type tcl_debug
   global utile_gui_path utile_cmd_path
   task "$utile_cmd_path stimuli.$schname" $netlist_dir fg
 }
 
 proc utile_gui {schname} { 
-  global XSCHEM_HOME_DIR entry1 XSCHEM_DESIGN_DIR env netlist_dir netlist_type tcl_debug
+  global XSCHEM_HOME_DIR retval netlist_dir netlist_type tcl_debug
   global utile_gui_path utile_cmd_path
   task "$utile_gui_path stimuli.$schname" $netlist_dir bg
 }
 
 proc utile_edit {schname} { 
-  global XSCHEM_HOME_DIR entry1 XSCHEM_DESIGN_DIR env netlist_dir netlist_type tcl_debug editor
+  global XSCHEM_HOME_DIR retval netlist_dir netlist_type tcl_debug editor
   global utile_gui_path utile_cmd_path 
   task "sh -c \"$editor stimuli.$schname ; $utile_cmd_path stimuli.$schname\"" $netlist_dir bg 
 }
 
 proc waveview {schname} {
-  global XSCHEM_HOME_DIR entry1 XSCHEM_DESIGN_DIR env netlist_dir netlist_type tcl_debug
+  global XSCHEM_HOME_DIR retval netlist_dir netlist_type tcl_debug
   global waveview_path
-  task "$waveview_path -k -x $schname.sx" $netlist_dir tk_exec
+  task "$waveview_path -k -x $schname.sx" $netlist_dir bg
 }
 
 proc cosmoscope { schname } {
-  global XSCHEM_HOME_DIR entry1 XSCHEM_DESIGN_DIR env netlist_dir netlist_type tcl_debug
+  global XSCHEM_HOME_DIR retval netlist_dir netlist_type tcl_debug
   global cscope_path
   task "$cscope_path" $netlist_dir bg
 }
 
 
 proc gtkwave {schname} {
-  global XSCHEM_HOME_DIR entry1 XSCHEM_DESIGN_DIR env netlist_dir netlist_type tcl_debug
+  global XSCHEM_HOME_DIR retval netlist_dir netlist_type tcl_debug
   global gtkwave_path
   task "$gtkwave_path 2>/dev/null" $netlist_dir bg
 }
 
 proc waves {schname} {
-
- global XSCHEM_HOME_DIR entry1 XSCHEM_DESIGN_DIR env netlist_dir netlist_type tcl_debug
+ global XSCHEM_HOME_DIR retval netlist_dir netlist_type tcl_debug
  global cscope_path gtkwave_path analog_viewer waveview_path
 
  if { [xschem set_netlist_dir 0] ne "" } {
@@ -359,20 +354,19 @@ proc waves {schname} {
    } elseif { $netlist_type=="vhdl" } { 
      task "$gtkwave_path ${schname}.ghw $schname.sav 2>/dev/null" $netlist_dir bg
    }
-
  }
  return {}
 }
 
 proc get_shell { curpath } {
- global XSCHEM_HOME_DIR entry1 XSCHEM_DESIGN_DIR env netlist_dir netlist_type tcl_debug
+ global XSCHEM_HOME_DIR retval netlist_dir netlist_type tcl_debug
  global cscope_path gtkwave_path analog_viewer waveview_path terminal
 
  task "$terminal" $curpath bg
 }
 
 proc edit_netlist {schname } {
- global XSCHEM_HOME_DIR entry1 XSCHEM_DESIGN_DIR env netlist_dir netlist_type tcl_debug
+ global XSCHEM_HOME_DIR retval netlist_dir netlist_type tcl_debug
  global cscope_path gtkwave_path analog_viewer waveview_path editor terminal
 
  if { [regexp vim $editor] } { set ftype "-c \":set filetype=$netlist_type\"" } else { set ftype {} }
@@ -391,102 +385,69 @@ proc edit_netlist {schname } {
  return {}
 }
 
-## useless 20171119
-# proc check_valid_filename { s} { 
-#   global XSCHEM_DESIGN_DIR
-#   set ppp [file dirname $XSCHEM_DESIGN_DIR/$s]
-#   if { [regexp "$XSCHEM_DESIGN_DIR/.+" $ppp] } { return ok }
-#   return {}
-# }
 
-# 20161207
-proc fileload { msg {initialfile {}} } {
-  global FILESELECT_CURR_DIR XSCHEM_DESIGN_DIR  entry1 tcl_version
-  while {1} {
-    set r [tk_getOpenFile  -title $msg -initialfile $initialfile -initialdir $FILESELECT_CURR_DIR ]
-    set dir [file dirname $r]
-    set entry1 [ file extension $r]
-    set a [ get_cell $r]$entry1
-    if { ![string compare $r {} ] } { break }
-    # 20170921 resolve symlinks
-    set designdir $XSCHEM_DESIGN_DIR
-    if { [ file type $XSCHEM_DESIGN_DIR ] == "link" } { 
-      set designdir [ file readlink $XSCHEM_DESIGN_DIR ] 
-    }
-    if { [regexp "${designdir}/.+" $dir] } { break }
+# 20180926
+# global_initdir should be set to:
+#   INITIALLOADDIR  for load
+#   INITIALINSTDIR  for instance placement
+# ext:  .sch or .sym or .sch.sym or .sym.sch
+#
+proc save_file_dialog { msg ext global_initdir {initialfile {}} } {
+  global tcl_version
+  upvar #0 $global_initdir initdir
+
+  set initialdir [file dirname $initialfile]
+  set initialfile [file tail $initialfile]
+  set types(.sym) { {{Symbol files} {.sym}} }
+  set types(.sch) { {{Schematic files} {.sch}} }
+  set types(.sch.sym) { {{Schematic files} {.sch}} {{Symbol files} {.sym}} }
+  set types(.sym.sch) { {{Symbol files} {.sym}} {{Schematic files} {.sch}} }
+  if {$tcl_version > 8.5} {
+    set r [tk_getSaveFile -title $msg -initialfile $initialfile -filetypes $types($ext) -initialdir $initialdir -confirmoverwrite 1]
+  } else {
+    set r [tk_getSaveFile -title $msg -initialfile $initialfile -filetypes $types($ext) -initialdir $initialdir]
   }
-  return $a
-
+  set dir [file dirname $r]
+  set initdir $dir
+  return [file normalize $r]
 }
 
-proc savefile {name ext} {
- global XSCHEM_HOME_DIR XSCHEM_DESIGN_DIR INITIALDIR FILESELECT_CURR_DIR entry1
- set nn [file tail $name]
- set FILESELECT_CURR_DIR $XSCHEM_DESIGN_DIR/[file dirname $name]
- set a [filesave {SAVE FILE} $nn 1]
- set entry1 [ file extension $a] 
- return [file rootname $a]
-}
-
-# 20121111
-proc filesave { msg {initialfile {}} {confirm 0}  } {
-  global FILESELECT_CURR_DIR XSCHEM_DESIGN_DIR  entry1 tcl_version
-  while {1} {
-    if {$tcl_version > 8.5} {
-      set r [tk_getSaveFile  -title $msg -initialfile $initialfile -initialdir $FILESELECT_CURR_DIR -confirmoverwrite $confirm]
-    } else {
-      set r [tk_getSaveFile  -title $msg -initialfile $initialfile -initialdir $FILESELECT_CURR_DIR ]
-    }
-    set dir [file normalize [file dirname $r]]
-    set a [ get_cell $r]
-    set xschem_des_dir [file normalize $XSCHEM_DESIGN_DIR]
-    if { ![string compare $r {} ] } { break } 
-    
-    # fix save to XSCHEM_DESIGN_DIR for libraries defined by a link 20171119
-    set dir1 [file normalize "$XSCHEM_DESIGN_DIR/[file tail $dir]"]
-    if { "$dir" eq "$dir1" } break
-  }
-  return $a
-  
+# 20180924
+# global_initdir should be set to:
+#   INITIALLOADDIR  for load
+#   INITIALINSTDIR  for instance placement
+# ext:  .sch or .sym or .sch.sym
+#
+proc load_file_dialog { msg ext global_initdir} {
+  upvar #0 $global_initdir initdir
+  set types(.sym) { {{Symbol files} {.sym}} }
+  set types(.sch) { {{Schematic files} {.sch}} }
+  set types(.sch.sym) { {{Schematic files} {.sch}} {{Symbol files} {.sym}} }
+  set types(.sym.sch) { {{Symbol files} {.sym}} {{Schematic files} {.sch}} }
+  set r [tk_getOpenFile  -title $msg -initialdir $initdir -filetypes $types($ext)]
+  set dir [file dirname $r]
+  set initdir $dir
+  return [file normalize $r]
 }
 
 # used in scheduler.c  20121111
 # get last 2 path components: example /aaa/bbb/ccc/ddd.sch -> ccc/ddd
-proc get_cell {s} {
+# optionally with extension if present and $ext==1
+proc get_cell {s {ext 0} } {
   set slist [file split $s]
   if { [llength $slist] >1 } {
-    return [lindex $slist end-1]/[file rootname [lindex $slist end]]
+    if {$ext} {
+      return [lindex $slist end-1]/[lindex $slist end]
+    } else {
+      return [lindex $slist end-1]/[file rootname [lindex $slist end]]
+    }
   } else {
-    return [file rootname [lindex $slist end]]
+    if {$ext} {
+      return [lindex $slist end]
+    } else {
+      return [file rootname [lindex $slist end]]
+    }
   }
-}
-
-
-proc loadinst {ext} {
- global XSCHEM_HOME_DIR XSCHEM_DESIGN_DIR INITIALINSTDIR FILESELECT_CURR_DIR tcl_debug
- set FILESELECT_CURR_DIR $INITIALINSTDIR
- set a [file rootname [fileload {LOAD INSTANCE}]].sym
-  if $tcl_debug<=-1 then {puts "a=$a"}
- if { [string compare $a ""] && [file exists $XSCHEM_DESIGN_DIR/$a] } {
-  set INITIALINSTDIR $XSCHEM_DESIGN_DIR/[file dirname $a]
-  if $tcl_debug<=-1 then {puts "INITIALINSTDIR=$INITIALINSTDIR"}
- } else {return {} }
- return  [file rootname $a]
-}
-
-proc loadfile {ext} {
- global XSCHEM_HOME_DIR XSCHEM_DESIGN_DIR INITIALLOADDIR FILESELECT_CURR_DIR
- set FILESELECT_CURR_DIR $INITIALLOADDIR
- set a [fileload {LOAD FILE}]
- if { $a == [file rootname $a] } { set a $a$ext }
- if { [string compare $a ""] } {
-   if { [file exists $XSCHEM_DESIGN_DIR/$a] } {
-     set INITIALLOADDIR $XSCHEM_DESIGN_DIR/[file dirname $a]
-   }
- } else {
-   return {}
- }
- return $a
 }
 
 proc delete_files { dir } { 
@@ -501,15 +462,15 @@ proc delete_files { dir } {
 }
 
 proc create_pins {} {
-  global env entry1 
+  global env retval 
   global filetmp1 filetmp2
 
-  set entry1 [ read_data_nonewline $filetmp2 ]
-  regsub -all {<} $entry1 {[} entry1 
-  regsub -all {>} $entry1 {]} entry1 
-  set lines [split $entry1 \n]
+  set retval [ read_data_nonewline $filetmp2 ]
+  regsub -all {<} $retval {[} retval 
+  regsub -all {>} $retval {]} retval 
+  set lines [split $retval \n]
 
-  # viewdata $entry1
+  # viewdata $retval
   set pcnt 0
   set y 0
   set fd [open $env(HOME)/.clipboard.sch "w"]
@@ -596,14 +557,14 @@ proc schpins_to_sympins {} {
 
 # 20120913
 proc add_lab_no_prefix {} { 
-  global env entry1
+  global env retval
   global filetmp1 filetmp2
 
-  set entry1 [ read_data_nonewline $filetmp2 ]
-  regsub -all {<} $entry1 {[} entry1
-  regsub -all {>} $entry1 {]} entry1
-  set lines [split $entry1 \n]
-  # viewdata $entry1
+  set retval [ read_data_nonewline $filetmp2 ]
+  regsub -all {<} $retval {[} retval
+  regsub -all {>} $retval {]} retval
+  set lines [split $retval \n]
+  # viewdata $retval
   set pcnt 0
   set y 0
   set fd [open $env(HOME)/.clipboard.sch "w"]
@@ -616,14 +577,14 @@ proc add_lab_no_prefix {} {
 
 
 proc add_lab_prefix {} {
-  global env entry1
+  global env retval
   global filetmp1 filetmp2
 
-  set entry1 [ read_data_nonewline $filetmp2 ]
-  regsub -all {<} $entry1 {[} entry1
-  regsub -all {>} $entry1 {]} entry1
-  set lines [split $entry1 \n]
-  # viewdata $entry1
+  set retval [ read_data_nonewline $filetmp2 ]
+  regsub -all {<} $retval {[} retval
+  regsub -all {>} $retval {]} retval
+  set lines [split $retval \n]
+  # viewdata $retval
   set pcnt 0
   set y 0
   set fd [open $env(HOME)/.clipboard.sch "w"]
@@ -636,8 +597,10 @@ proc add_lab_prefix {} {
 
 
 proc make_symbol {name} {
- global XSCHEM_HOME_DIR XSCHEM_DESIGN_DIR symbol_width
- eval exec "${XSCHEM_HOME_DIR}/make_sym.awk $symbol_width ${XSCHEM_DESIGN_DIR}/${name}.sch"
+ global XSCHEM_HOME_DIR symbol_width
+ set name [abs_sym_path $name .sch]
+ # puts "make_symbol{}, executing: ${XSCHEM_HOME_DIR}/make_sym.awk $symbol_width ${name}"
+ eval exec "${XSCHEM_HOME_DIR}/make_sym.awk $symbol_width {$name}"
  return {}
 }
 
@@ -754,7 +717,7 @@ proc enter_text {textlabel} {
 # evaluate a tcl command from GUI
 proc tclcmd {} {
   global tclcmd_txt
-  catch [destroy .tclcmd]
+  catch {destroy .tclcmd}
   toplevel .tclcmd -class dialog
   label .tclcmd.txtlab -text {Enter TCL expression:}
   label .tclcmd.result -text {Result:}
@@ -973,7 +936,7 @@ proc ask_save { {ask {save file?}} } {
 
 
 proc edit_vi_prop {txtlabel} {
- global XSCHEM_DESIGN_DIR entry1 symbol prev_symbol rcode rbutton1 rbutton2 tcl_debug netlist_type editor
+ global XSCHEM_TMP_DIR retval symbol prev_symbol rcode rbutton1 rbutton2 tcl_debug netlist_type editor
 
  # 20150914
  global user_wants_copy_cell
@@ -982,20 +945,20 @@ proc edit_vi_prop {txtlabel} {
  set rcode {}
 # set rbutton1 0  ## 20090518 commented...
 # set rbutton2 0
- set filename .edit_file.[pid]
+ set filename .xschem_edit_file.[pid]
  if ![string compare $netlist_type "vhdl"] { set suffix vhd } else { set suffix v }
  set filename $filename.$suffix
 
- write_data $entry1 $XSCHEM_DESIGN_DIR/$filename
- eval tk_exec $editor $XSCHEM_DESIGN_DIR/$filename ;# 20161119
+ write_data $retval $XSCHEM_TMP_DIR/$filename
+ eval tk_exec $editor $XSCHEM_TMP_DIR/$filename ;# 20161119
 
- if $tcl_debug<=-1 then {puts "edit_vi_prop{}:\n--------\nentry1=$entry1\n---------\n"}
+ if $tcl_debug<=-1 then {puts "edit_vi_prop{}:\n--------\nretval=$retval\n---------\n"}
  if $tcl_debug<=-1 then {puts "edit_vi_prop{}:\n--------\nsymbol=$symbol\n---------\n"}
- set tmp [read_data $XSCHEM_DESIGN_DIR/$filename]
- file delete $XSCHEM_DESIGN_DIR/$filename
+ set tmp [read_data $XSCHEM_TMP_DIR/$filename]
+ file delete $XSCHEM_TMP_DIR/$filename
  if $tcl_debug<=-1 then {puts "edit_vi_prop{}:\n--------\n$tmp\n---------\n"}
- if [string compare $tmp $entry1] {
-        set entry1 $tmp
+ if [string compare $tmp $retval] {
+        set retval $tmp
         if $tcl_debug<=-1 then {puts "modified"}
         set rcode ok
         return  $rcode
@@ -1008,7 +971,7 @@ proc edit_vi_prop {txtlabel} {
 
 
 proc edit_vi_netlist_prop {txtlabel} {
- global XSCHEM_DESIGN_DIR entry1 rcode rbutton1 rbutton2 tcl_debug netlist_type editor
+ global XSCHEM_TMP_DIR retval rcode rbutton1 rbutton2 tcl_debug netlist_type editor
 
 
  # 20150914
@@ -1017,26 +980,26 @@ proc edit_vi_netlist_prop {txtlabel} {
 
  # set rbutton1 0 ;# commented 20121206
  # set rbutton2 0 ;# commented 20121206
- set filename .edit_file.[pid]
+ set filename .xschem_edit_file.[pid]
  if ![string compare $netlist_type "vhdl"] { set suffix vhd } else { set suffix v }
  set filename $filename.$suffix
  
- regsub -all {\\?"} $entry1 {"} entry1
- write_data $entry1 $XSCHEM_DESIGN_DIR/$filename
+ regsub -all {\\?"} $retval {"} retval
+ write_data $retval $XSCHEM_TMP_DIR/$filename
  if { [regexp vim $editor] } { set ftype "\{-c :set filetype=$netlist_type\}" } else { set ftype {} }
- eval tk_exec $editor  $ftype $XSCHEM_DESIGN_DIR/$filename
+ eval tk_exec $editor  $ftype $XSCHEM_TMP_DIR/$filename
 
- if $tcl_debug<=-1 then {puts "edit_vi_prop{}:\n--------\n$entry1\n---------\n"}
+ if $tcl_debug<=-1 then {puts "edit_vi_prop{}:\n--------\n$retval\n---------\n"}
 
- set tmp [read_data $XSCHEM_DESIGN_DIR/$filename] ;# 20161204 dont remove newline even if it is last char
- # set tmp [read_data_nonewline $XSCHEM_DESIGN_DIR/$filename]
- file delete $XSCHEM_DESIGN_DIR/$filename
+ set tmp [read_data $XSCHEM_TMP_DIR/$filename] ;# 20161204 dont remove newline even if it is last char
+ # set tmp [read_data_nonewline $XSCHEM_TMP_DIR/$filename]
+ file delete $XSCHEM_TMP_DIR/$filename
  if $tcl_debug<=-1 then {puts "edit_vi_prop{}:\n--------\n$tmp\n---------\n"}
- if [string compare $tmp $entry1] {
-        set entry1 $tmp
+ if [string compare $tmp $retval] {
+        set retval $tmp
 
-        regsub -all {\\?"} $entry1 {\\"} entry1
-        set entry1 "\"${entry1}\"" 
+        regsub -all {\\?"} $retval {\\"} retval
+        set retval "\"${retval}\"" 
         if $tcl_debug<=-1 then {puts "modified"}
         set rcode ok
         return  $rcode
@@ -1050,12 +1013,12 @@ proc edit_vi_netlist_prop {txtlabel} {
 
 proc edit_prop {txtlabel} {
    global edit_prop_default_geometry
-   global prev_symbol entry1 symbol rcode rbutton1 rbutton2 copy_cell tcl_debug editprop_semaphore
+   global prev_symbol retval symbol rcode rbutton1 rbutton2 copy_cell tcl_debug editprop_semaphore
    global user_wants_copy_cell
    set user_wants_copy_cell 0
    set rcode {}
    set editprop_semaphore 1
-   if $tcl_debug<=-1 then {puts " edit_prop{}: entry1=$entry1"}
+   if $tcl_debug<=-1 then {puts " edit_prop{}: retval=$retval"}
    toplevel .ent2  -class Dialog 
    wm title .ent2 {Edit Properties}
    set X [expr [winfo pointerx .ent2] - 60]
@@ -1085,7 +1048,7 @@ proc edit_prop {txtlabel} {
    text .ent2.e1   -yscrollcommand ".ent2.yscroll set" -setgrid 1 \
                    -xscrollcommand ".ent2.xscroll set" -wrap none
      .ent2.e1 delete 1.0 end
-     .ent2.e1 insert 1.0 $entry1
+     .ent2.e1 insert 1.0 $retval
 
    scrollbar .ent2.yscroll -command  ".ent2.e1 yview"
    scrollbar .ent2.xscroll -command ".ent2.e1 xview" -orient horiz
@@ -1095,25 +1058,28 @@ proc edit_prop {txtlabel} {
    entry .ent2.f1.e2 -width 30
    .ent2.f1.e2 insert 0 $symbol
    button .ent2.f1.b1 -text "OK" -command   {
-     set entry1 [.ent2.e1 get 1.0 {end - 1 chars}] 
+     set retval [.ent2.e1 get 1.0 {end - 1 chars}] 
      set symbol [ .ent2.f1.e2 get]
      set rcode {ok}
      set editprop_semaphore 0
      set user_wants_copy_cell $copy_cell
      if { ($symbol ne $prev_symbol) && $copy_cell } {
-
-       if { [file exists "${XSCHEM_DESIGN_DIR}/${prev_symbol}.sch"] } {
-         if { ! [file exists "${XSCHEM_DESIGN_DIR}/${symbol}.sch"] } {
-           file copy "${XSCHEM_DESIGN_DIR}/${prev_symbol}.sch" "${XSCHEM_DESIGN_DIR}/${symbol}.sch"
+       set symbol [abs_sym_path $symbol .sym]
+       set prev_symbol [abs_sym_path $prev_symbol .sym]
+       if { [file exists "[file rootname $prev_symbol].sch"] } {
+         if { ! [file exists "[file rootname ${symbol}].sch"] } {
+           file copy "[file rootname $prev_symbol].sch" "[file rootname $symbol].sch"
+           # puts "file copy [file rootname $prev_symbol].sch [file rootname $symbol].sch"
          }
        }
-
-       if { [file exists "${XSCHEM_DESIGN_DIR}/${prev_symbol}.sym"] } {
-         if { ! [file exists "${XSCHEM_DESIGN_DIR}/${symbol}.sym"] } {
-           file copy "${XSCHEM_DESIGN_DIR}/${prev_symbol}.sym" "${XSCHEM_DESIGN_DIR}/${symbol}.sym"
+       if { [file exists "$prev_symbol"] } {
+         if { ! [file exists "$symbol"] } {
+           file copy "[file rootname $prev_symbol].sym" "[file rootname $symbol].sym"
+           # puts "file copy [file rootname $prev_symbol].sym [file rootname $symbol].sym"
          }
        }
      }
+     # puts "symbol: $symbol , prev_symbol: $prev_symbol"
      set copy_cell 0 ;# 20120919
    }
    button .ent2.f1.b2 -text "Cancel" -command  {
@@ -1146,7 +1112,7 @@ proc edit_prop {txtlabel} {
    pack .ent2.e1  -fill both -expand yes
    bind .ent2 <Control-Return> {.ent2.f1.b1 invoke}
    bind .ent2 <Escape> {
-     if { ![string compare $entry1 [.ent2.e1 get 1.0 {end - 1 chars}]] && \
+     if { ![string compare $retval [.ent2.e1 get 1.0 {end - 1 chars}]] && \
           ![string compare $symbol [ .ent2.f1.e2 get]] } {
        .ent2.f1.b2 invoke
      }
@@ -1158,7 +1124,7 @@ proc edit_prop {txtlabel} {
    while {1} {
      tkwait  variable editprop_semaphore
      if { $editprop_semaphore == 2 } {
-       set entry1 [.ent2.e1 get 1.0 {end - 1 chars}] 
+       set retval [.ent2.e1 get 1.0 {end - 1 chars}] 
        set symbol [ .ent2.f1.e2 get]
        xschem update_symbol ok 
        set editprop_semaphore 1
@@ -1173,7 +1139,7 @@ proc edit_prop {txtlabel} {
        ## set symbol [ .ent2.f1.e2 get]
 
        .ent2.e1 delete 1.0 end
-       .ent2.e1 insert 1.0 $entry1
+       .ent2.e1 insert 1.0 $retval
        .ent2.f1.e2  delete 0 end
        .ent2.f1.e2 insert 0 $symbol
      } else {
@@ -1218,10 +1184,10 @@ proc write_data {data f} {
 
 proc text_line {txtlabel clear} {
    global text_line_default_geometry
-   global entry1 rcode tcl_debug
-   if $clear==1 then {set entry1 ""}
+   global retval rcode tcl_debug
+   if $clear==1 then {set retval ""}
    if $tcl_debug<=-1 then {puts " text_line{}: clear=$clear"}
-   if $tcl_debug<=-1 then {puts " text_line{}: entry1=$entry1"}
+   if $tcl_debug<=-1 then {puts " text_line{}: retval=$retval"}
    toplevel .ent2  -class Dialog
    wm title .ent2 {Text input}
    set X [expr [winfo pointerx .ent2] - 60]
@@ -1230,7 +1196,12 @@ proc text_line {txtlabel clear} {
    ## not honored by fvwm ... 20110322
    # wm attributes .ent2 -topmost 1
    ## ... use alternate method instead 20110322
-   bind .ent2 <Visibility> { if { [regexp Obscured %s] } {raise .ent2; if { $tcl_version > 8.4 } {wm attributes  .ent2 -topmost 1} } }
+   bind .ent2 <Visibility> { 
+     if { [regexp Obscured %s] } {
+       raise .ent2
+       if { $tcl_version > 8.4 } {wm attributes  .ent2 -topmost 1}
+     } 
+   }
    ## 
 
    # 20160325 change and remember widget size
@@ -1253,16 +1224,16 @@ proc text_line {txtlabel clear} {
    scrollbar .ent2.yscroll -command  ".ent2.e1 yview"
    scrollbar .ent2.xscroll -command ".ent2.e1 xview" -orient horiz
    .ent2.e1 delete 1.0 end
-   .ent2.e1 insert 1.0 $entry1
+   .ent2.e1 insert 1.0 $retval
    button .ent2.f1.b1 -text "OK" -command  \
    {
-     set entry1 [.ent2.e1 get 1.0 {end - 1 chars}] 
+     set retval [.ent2.e1 get 1.0 {end - 1 chars}] 
      destroy .ent2
      set rcode {ok}
    }
    button .ent2.f1.b2 -text "Cancel" -command  \
    {
-     set entry1 [.ent2.e1 get 1.0 {end - 1 chars}]
+     set retval [.ent2.e1 get 1.0 {end - 1 chars}]
      set rcode {}
      destroy .ent2
    }
@@ -1291,7 +1262,7 @@ proc text_line {txtlabel clear} {
    pack .ent2.xscroll -side bottom -fill x
    pack .ent2.e1   -expand yes -fill both
    bind .ent2 <Escape> {
-     if ![string compare $entry1 [.ent2.e1 get 1.0 {end - 1 chars}]] {
+     if ![string compare $retval [.ent2.e1 get 1.0 {end - 1 chars}]] {
        .ent2.f1.b2 invoke
      }
    }
@@ -1377,7 +1348,7 @@ proc textwindow {filename} {
    global w
    set wcounter [expr $wcounter+1]
    set w .win$wcounter
-   catch [destroy $w]
+   catch {destroy $w}
 
 
    global fff
@@ -1422,7 +1393,7 @@ proc viewdata {data} {
    set wcounter [expr $wcounter+1]
    set rcode {}
    set w .win$wcounter
-   catch [destroy $w]
+   catch {destroy $w}
    toplevel $w
    wm title $w {Wiew data}
    frame $w.buttons
@@ -1453,12 +1424,89 @@ proc viewdata {data} {
    return $rcode
 }
 
+proc rel_sym_path {symbol} {
+  global pathlist
+
+  set symbol_orig [file rootname $symbol]
+  set ext [file extension $symbol]
+  set symbol [file rootname [file normalize $symbol]]
+  set lib_cell [get_cell $symbol]
+  set cell [file rootname [file tail $symbol]]
+  set name {}
+  foreach path_elem $pathlist {
+    # libname/symname[.ext] and libname in $path_elem 
+    # --> libname/symname
+    if { [file exists [file dirname "${path_elem}/${lib_cell}"]] && 
+       ($symbol_orig eq $lib_cell) } {
+      set name ${lib_cell}
+    # /.../path/.../libname/cellname[.ext] and libname in $path_elem 
+    # --> libname/cellname
+    } elseif { ($symbol eq [file normalize "${path_elem}/${lib_cell}"]) 
+             && [file exists [file dirname "${path_elem}/${lib_cell}"]] } {
+      set name ${lib_cell}
+    } 
+    # symname[.ext]
+    # --> symname.ext
+    if { [file exists "${path_elem}/${cell}${ext}"] && 
+       ($symbol_orig eq $cell) } {
+      set name ${cell}${ext}
+    # /.../path/.../libname/cellname[.ext] and libname in XSCHEM_LIBRARY_PATH 
+    # --> cellname.ext
+    } elseif { ($symbol eq [file normalize "${path_elem}/${cell}"]) 
+             && [file exists "${path_elem}/${cell}${ext}"] } {
+      set name ${cell}${ext}
+    } 
+  }
+  if { $name eq {} } {
+    # no known lib, so return full path
+    set name ${symbol}$ext
+  }
+  return $name
+}
+
+
+# given a library/symbol return its absolute path
+proc abs_sym_path {fname {required_ext {}} } {
+  global pathlist
+
+  set name {}
+  # fname is of type libname/cellname[.ext] but not ./cellname[.ext] or
+  # ../cellname[.ext] and has a slash, so no cellname[.ext] 
+  if {[file rootname $fname] eq [get_cell $fname]  &&
+     ![regexp {^\.\.\/} $fname] 
+  } { ;# filter out ../cellname
+    foreach path_elem $pathlist {
+      # libname/cellname[.ext] and libname is in pathlist
+      # --> normalized $pathlist/libname/cellname$required_ext
+      # cellname[.ext] and $pathlist/cellname$required_ext exists
+      # --> normalized $pathlist/cellname.$required_ext
+      if { ([file exists "${path_elem}/[file dirname $fname]"] ) &&
+        [regexp {\/} $fname] 
+      } {
+        #puts here1
+        set name  [file normalize "$path_elem/[get_cell $fname]$required_ext"]
+      }
+      if { [file exists "${path_elem}/[file rootname ${fname}]${required_ext}"] &&
+        ![regexp {\/} $fname] 
+      } {
+        #puts here2
+        set name  [file normalize "$path_elem/[get_cell $fname]$required_ext"]
+      }
+    }
+  }
+  if { $name eq {} } {
+    #puts here3
+    set name [file rootname [file normalize $fname]]$required_ext
+  }
+  return $name
+}
+
 ################## GENSCH procedure  #########################
 
 # gensch bonelli/0_top hiace5/hmicro_rom_ptrif
 
 proc gensch {cell {selected {}} } {
-  global gensch_res gensch_body gensch_aggressive cellname
+  global gensch_res gensch_body gensch_aggressive gensch_cellname
   global gensch_i_pin gensch_o_pin gensch_io_pin 
   global gensch_pinarray gensch_names gensch_coord
 
@@ -1477,7 +1525,6 @@ proc gensch {cell {selected {}} } {
   #bind .gensch <Visibility> { if { [regexp Obscured %s] } {raise .gensch; wm attributes  .gensch -topmost 1} }
   ## 
 
-
   frame .gensch.but 
   frame .gensch.ipin
   frame .gensch.opin
@@ -1491,8 +1538,8 @@ proc gensch {cell {selected {}} } {
   entry .gensch.iopin.iopin -width 60
   regsub  {\/.*} $cell {/} cell
   if { [ string compare $selected {} ] } { 
-    .gensch.name insert 0 $selected
-    load_sym
+    .gensch.name insert 0 [file rootname $selected]
+    gensch_load_sym
   } else {
     .gensch.name insert 0 ${cell}xxxx
   }
@@ -1500,10 +1547,10 @@ proc gensch {cell {selected {}} } {
     set gensch_i_pin [.gensch.ipin.ipin get] 
     set gensch_o_pin [.gensch.opin.opin get] 
     set gensch_io_pin [.gensch.iopin.iopin get] 
-    set cellname [.gensch.name get]
-    create_sym
+    set gensch_cellname [.gensch.name get]
+    gensch_create_sym
   }
-  button .gensch.but.load -text LOAD -command load_sym
+  button .gensch.but.load -text LOAD -command gensch_load_sym
   button .gensch.but.canc -text Cancel -command { set gensch_res {}; destroy .gensch; }
   checkbutton .gensch.but.aggr -text {Do not clone schematic}  -variable gensch_aggressive
   pack .gensch.name
@@ -1520,14 +1567,21 @@ proc gensch {cell {selected {}} } {
   pack .gensch.but 
   bind .gensch <Escape> {.gensch.but.canc  invoke}
   tkwait window .gensch
-  return $gensch_res
 
+  if { $gensch_res ne {} } {
+    if {![regexp {\.sch$} $gensch_res] } {
+      append gensch_res .sch
+    }
+    return [rel_sym_path $gensch_res]
+  } else {
+    return {}
+  }
 }
 
 #C {devices/ipin} 190 80 0 0 {name=p29 sig_type=std_logic lab=ADD_P1[9:0] }
-proc load_sym {} {
-  global  XSCHEM_DESIGN_DIR gensch_res gensch_pinarray gensch_body gensch_names gensch_coord
-  set cellname [.gensch.name get]
+proc gensch_load_sym {} {
+  global gensch_pinarray gensch_body gensch_names gensch_coord
+  set gensch_cellname [.gensch.name get]
   set gensch_body {}
   .gensch.ipin.ipin delete 0 end
   .gensch.opin.opin delete 0 end
@@ -1535,7 +1589,8 @@ proc load_sym {} {
   array unset gensch_pinarray
   array unset gensch_names
   array unset gensch_coord
-  set fname "$XSCHEM_DESIGN_DIR/${cellname}.sch"
+  
+  set fname [abs_sym_path $gensch_cellname .sch]
   if { [ file exists $fname] } {
     set data  [read_data_nonewline $fname]
     set lines [split $data \n]
@@ -1549,8 +1604,6 @@ proc load_sym {} {
         array set gensch_coord [list [join [lrange $linelist 2 3]] 1]
         # puts "---> [lrange $line 2 3]"
       }
-
-
       if { [regexp "^C \{devices/(i|o|io)pin\}.* lab=(\[^ \}\]*)\[ \}\]" $line allmatch type lab] } {
         array set gensch_pinarray [list $lab $line]
         if { ![string compare $type i] } {
@@ -1575,17 +1628,18 @@ proc load_sym {} {
   }
 }
 
-proc create_sym {} {
-  global  XSCHEM_DESIGN_DIR gensch_res gensch_pinarray gensch_body gensch_names gensch_coord
-  global gensch_aggressive cellname create_sym_interactive
+proc gensch_create_sym {} {
+  global gensch_res gensch_pinarray gensch_body gensch_names gensch_coord
+  global gensch_aggressive gensch_cellname gensch_create_sym_interactive
   global gensch_i_pin gensch_o_pin gensch_io_pin 
   set gensch_i [llength $gensch_i_pin ]
   set gensch_o [llength $gensch_o_pin ]
   set gensch_io [llength $gensch_io_pin ]
-  set gensch_res $cellname
-  set fname "$XSCHEM_DESIGN_DIR/${cellname}.sch"
-  set symfname "$XSCHEM_DESIGN_DIR/${cellname}.sym"
-  if { $create_sym_interactive && ([file exists $fname] || [file exists $symfname]) }  {
+  set gensch_res $gensch_cellname
+
+  set fname [abs_sym_path $gensch_cellname .sch]
+  set symfname [abs_sym_path $gensch_cellname .sym]
+  if { $gensch_create_sym_interactive && ([file exists $fname] || [file exists $symfname]) }  {
    set ask_s [ask_save "File exists: overwrite ? "]
    if { [string compare $ask_s yes] } {
      set gensch_res {}
@@ -1707,7 +1761,6 @@ proc input_number {txt cmd} {
 ## 20161102
 proc launcher {} {
   global launcher_var launcher_default_program launcher_program 
-  global XSCHEM_HOME_DIR XSCHEM_DESIGN_DIR env
   
   ## puts ">>> $launcher_program $launcher_var &"
   # 20170413
@@ -1743,36 +1796,22 @@ proc reconfigure_layers_menu {} {
 }
 
 
-
 ### 
 ###   MAIN PROGRAM
 ###
 
-# tcl variable XSCHEM_DESIGN_DIR  should already be set in ~/.xschem,    20121110
-# if this is not the case try to get it from the environment ...
-#
-
-
-  
-
-
-if { ![info exists XSCHEM_DESIGN_DIR] } {
-   if { [info exists env(XSCHEM_DESIGN_DIR)] } {
-     set XSCHEM_DESIGN_DIR $env(XSCHEM_DESIGN_DIR)
-   }
-}
-
-# ... if still undefined then its time to complain and give up           20121110
-if { ![info exists XSCHEM_DESIGN_DIR] } {
-  puts {FATAL: XSCHEM_DESIGN_DIR not defined, set it into ~/.xschem}
-  if { ![info exists no_x] } {
-    tk_messageBox -icon error -type ok -message {FATAL: XSCHEM_DESIGN_DIR not defined, set it into ~/.xschem}
+# tcl variable XSCHEM_DESIGN_PATH  should already be set in ~/.xschem,    20121110
+# if not try to evaluate the old (deprecated now) XSCHEM_DESIGN_DIR tcl var.
+set pathlist {}
+if { [info exists XSCHEM_DESIGN_PATH] } {
+  set pathlist_orig [split $XSCHEM_DESIGN_PATH :]
+  foreach i $pathlist_orig {
+    lappend pathlist [string replace [file normalize ${i}/__xxx__] end-7 end {}]
   }
-  exit
+} elseif { [info exists XSCHEM_DESIGN_DIR] } {
+  set XSCHEM_DESIGN_PATH $XSCHEM_DESIGN_DIR
+  set pathlist [string replace [file normalize ${XSCHEM_DESIGN_DIR}/__xxx__] end-7 end {}]
 }
-
-
-
 
 if { [xschem get help ]} {
   set fd [open ${XSCHEM_HOME_DIR}/xschem.help r]
@@ -1782,14 +1821,15 @@ if { [xschem get help ]} {
   exit
 }
 
-set env(XSCHEM_HOME_DIR) ${XSCHEM_HOME_DIR} ;# 20161204
+set_ne XSCHEM_TMP_DIR {/tmp}
 
+# used in C code
 set_ne xschem_libs {}
 set_ne tcl_debug 0
 # used to activate debug from menu
 set_ne menu_tcl_debug 0
 set wcounter 1
-set entry1 ""
+set retval ""
 set prev_symbol ""
 set symbol ""
 
@@ -1818,6 +1858,7 @@ set_ne only_probes 0  ; # 20110112
 set_ne a3page 0
 set_ne fullscreen 0
 set_ne change_lw 0
+set_ne draw_window 0
 set_ne line_width 0
 set_ne incr_hilight 1
 set_ne enable_stretch 0
@@ -1829,7 +1870,7 @@ set_ne show_infowindow 0
 set_ne symbol_width 150
 set_ne editprop_semaphore 0
 set_ne editor {gvim -f}
-set_ne create_sym_interactive 1
+set_ne gensch_create_sym_interactive 1
 set_ne rainbow_colors 0
 set_ne initial_geometry {700x448+10+10}
 #20161102
@@ -1881,8 +1922,10 @@ set_ne cscope_path $env(HOME)/cosmoscope/linux/ai_bin/cscope
 ## cairo stuff 20171112
 set_ne cairo_font_scale 1.0
 set_ne cairo_font_line_spacing 1.0
-set_ne cairo_font_name {Monospace}
-set_ne cairo_vert_correct 0.0
+
+# Arial, Monospace
+set_ne cairo_font_name {Arial}
+set_ne cairo_vert_correct 1.0
 # has_cairo set by c program if cairo enabled
 set has_cairo 0 
 set rotated_text {} ;#20171208
@@ -1981,10 +2024,6 @@ set filetmp1 $env(PWD)/.tmp1
 set filetmp2 $env(PWD)/.tmp2
 # /20111106
 
-
-# if set to 0 create_sym does not ask confirmation when overwriting a symbol file
-# used by import_opus_symbols.awk
-
 # flag bound to a checkbutton in symbol editprop form
 # if set cell is copied when renaming it
 set_ne copy_cell 0
@@ -2005,11 +2044,9 @@ set_ne XSCHEM_START_WINDOW {}
 #   source $env(HOME)/.xschem
 # }
 
-set INITIALDIR $XSCHEM_DESIGN_DIR
-set INITIALLOADDIR $XSCHEM_DESIGN_DIR
-set INITIALINSTDIR $XSCHEM_DESIGN_DIR
-set INITIALPROPDIR $XSCHEM_DESIGN_DIR
-set FILESELECT_CURR_DIR $XSCHEM_DESIGN_DIR
+set INITIALLOADDIR [lindex $pathlist 0]
+set INITIALINSTDIR [lindex $pathlist 0]
+set INITIALPROPDIR [lindex $pathlist 0]
 set txt ""
 #. configure -cursor left_ptr
 # used in the tools-search menu
@@ -2067,9 +2104,8 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
      -command {
        xschem clear SYMBOL
      }
-   .menubar.file.menu add command -label "Open" -command "xschem load" -accelerator L
-   .menubar.file.menu add command -label "Save" -command "xschem save" -accelerator S
-   .menubar.file.menu add command -label "Save" -command "xschem saveas" -accelerator s
+   .menubar.file.menu add command -label "Open" -command "xschem load" -accelerator {C-o}
+   .menubar.file.menu add command -label "Save" -command "xschem save" -accelerator {C-s}
    .menubar.file.menu add command -label "Merge" -command "xschem merge" -accelerator b
    .menubar.file.menu add command -label "Reload" -accelerator A-s \
      -command {
@@ -2077,7 +2113,8 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
               xschem reload
          }
      }
-   .menubar.file.menu add command -label "Save as" -command "xschem saveas" -accelerator s
+   .menubar.file.menu add command -label "Save as" -command "xschem saveas" -accelerator {C-S-s}
+   .menubar.file.menu add command -label "Save as symbol" -command "xschem set current_type SYMBOL; xschem saveas" -accelerator {C-A-s}
    # added svg, png 20171022
    .menubar.file.menu add command -label "PDF Print" -command "xschem print pdf" -accelerator {*}
    .menubar.file.menu add command -label "PNG Print" -command "xschem print png" -accelerator {C-*}
@@ -2186,7 +2223,7 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    .menubar.edit.menu add command -label "Paste" -command "xschem paste" -accelerator C-v
    .menubar.edit.menu add command -label "Delete" -command "xschem delete" -accelerator Del
    .menubar.edit.menu add command -label "Select all" -command "xschem select_all" -accelerator C-a
-   .menubar.edit.menu add command -label "edit selected element" -command "xschem edit_in_new_window" -accelerator A-e
+   .menubar.edit.menu add command -label "edit selected element" -command "xschem schematic_in_new_window" -accelerator A-e
    .menubar.edit.menu add command -label "edit selected symbol" -command "xschem symbol_in_new_window" -accelerator A-i
    .menubar.edit.menu add command -label "Duplicate objects" -command "xschem copy_objects" -accelerator c
    .menubar.edit.menu add command -label "Move objects" -command "xschem move_objects" -accelerator m
@@ -2247,29 +2284,31 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    menu .menubar.zoom.menu -tearoff 0
    .menubar.zoom.menu add command -label "Redraw" -command "xschem redraw" -accelerator Esc
    .menubar.zoom.menu add command -label "Full" -command "xschem zoom_full" -accelerator f
+
+
    .menubar.zoom.menu add command -label "In" -command "xschem zoom_in" -accelerator Z
    .menubar.zoom.menu add command -label "Out" -command "xschem zoom_out" -accelerator o
    .menubar.zoom.menu add command -label "Zoom box" -command "xschem zoom_box" -accelerator z
    .menubar.zoom.menu add command -label "Half Snap Threshold" -accelerator g -command {
-     xschem set cadsnap [expr [xschem get cadsnap] / 2.0 ]
-   }
+          xschem set cadsnap [expr [xschem get cadsnap] / 2.0 ]
+        }
    .menubar.zoom.menu add command -label "Double Snap Threshold" -accelerator G -command {
-     xschem set cadsnap [expr [xschem get cadsnap] * 2.0 ]
-   }
+          xschem set cadsnap [expr [xschem get cadsnap] * 2.0 ]
+        }
    .menubar.zoom.menu add command -label "Set snap value" \
-      -command {
-       input_number "Enter snap value ( default: [xschem get cadsnap_default] current: [xschem get cadsnap])" \
-         "xschem set cadsnap_noalert"
+          -command {
+          input_number "Enter snap value ( default: [xschem get cadsnap_default] current: [xschem get cadsnap])" \
+          "xschem set cadsnap_noalert"
 	}
-# 20110112
    .menubar.zoom.menu add checkbutton -label "View only Probes" -variable only_probes \
-      -accelerator {5} \
-      -command {
-         xschem only_probes
-      }
-# /20110112
+          -accelerator {5} \
+          -command { xschem only_probes }
    .menubar.zoom.menu add command -label "Toggle colorscheme" -command "xschem toggle_colorscheme" -accelerator {C}
-
+   .menubar.zoom.menu add checkbutton -label "no XCopyArea drawing model" -variable draw_window \
+          -accelerator {C-$-toggle} \
+          -command {
+           if { $draw_window == 1} { xschem set draw_window 1} else { xschem set draw_window 0}
+        }
    menubutton .menubar.prop -text "Properties" -menu .menubar.prop.menu
    menu .menubar.prop.menu -tearoff 0
    .menubar.prop.menu add command -label "edit" -command "xschem edit_prop" -accelerator q
@@ -2329,7 +2368,7 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    .menubar.simulation.menu add command -label {Utile Stimuli Translate)} -command {utile_translate [file tail [xschem get schname]]}
    .menubar.simulation.menu add command -label {Modelsim} -command {modelsim [file tail [xschem get schname]]}
    .menubar.simulation.menu add command -label {Shell [current schematic library path]} \
-      -command {get_shell [file dirname $XSCHEM_DESIGN_DIR/[xschem get schpath]]}
+      -command {get_shell [file dirname [abs_sym_path [xschem get schpath]]]}
    .menubar.simulation.menu add command -label {Shell [simulation path]} \
       -command {
          if { [xschem set_netlist_dir 0] ne "" } {

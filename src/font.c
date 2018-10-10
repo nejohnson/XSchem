@@ -28,17 +28,15 @@ void compile_font(void)
  static char *name=NULL; // 20161122 overflow safe
 
  currentsch = 0;
- clear_drawing();
- my_strncpy(schematic[currentsch] , "system/font", S(schematic[currentsch]));
- remove_symbols();
- my_strdup(&name, Tcl_GetVar(interp, "XSCHEM_HOME_DIR", TCL_GLOBAL_ONLY));
+ my_strdup(&name, tclgetvar("XSCHEM_HOME_DIR"));
  my_strcat(&name, "/systemlib/font.sch");
+ remove_symbols();
  load_schematic(1,name,1);
  for(code=0;code<127;code++)
  {
   unselect_all();
   select_inside(code*FONTOFFSET-1,-FONTHEIGHT-1,
-                 code*FONTOFFSET+FONTWIDTH+1,FONTDESCENT+1i, 1);
+                 code*FONTOFFSET+FONTWIDTH+1,FONTDESCENT+1, 1);
   rebuild_selected_array();
   character[code] = my_calloc(lastselected*4+1, sizeof(double));
   character[code][0] = (double)lastselected;

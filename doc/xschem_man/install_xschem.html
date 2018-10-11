@@ -30,8 +30,9 @@ p{padding: 15px  30px 10px;}
  </pre>
  <p>
   This will install all the runtime needed files into the locations defined in the <kbd>Makefile</kbd>.
-  Before being able to run xschem you must setup a configuration file, <kbd><b>.xschem</b></kbd>, into your 
+  It is possible to setup a configuration file, <kbd><b>.xschem</b></kbd>, into your 
   home directory. This file will tell XSCHEM where to look for schematic and component libraries.
+  this is neded if you decide to add or change the library locations specified at compile time.
   XSCHEM will look for this file in the current directory or in the user's <kbd>${HOME}</kbd> directory.
 
  </p>
@@ -88,7 +89,7 @@ set XSCHEM_START_WINDOW {mylib/0_top}
   
   
   <br><br>
-  To complete the setup of XSCHEM create a <kbd>.xschem</kbd> file in your <kbd>$HOME</kbd> directory using
+  If you need a <kbd>.xschem</kbd> file in your <kbd>$HOME</kbd> directory you may start from 
   a sample <kbd>.xschem</kbd> file that is provided in the distribution sources.
   Change it to fit your needs.
  </p> 

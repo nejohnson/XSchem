@@ -408,7 +408,7 @@ proc save_file_dialog { msg ext global_initdir {initialfile {}} } {
     set r [tk_getSaveFile -title $msg -initialfile $initialfile -filetypes $types($ext) -initialdir $initialdir]
   }
   set dir [file dirname $r]
-  set initdir $dir
+  if { $r ne {} } { set initdir $dir }
   return [file normalize $r]
 }
 
@@ -426,7 +426,7 @@ proc load_file_dialog { msg ext global_initdir} {
   set types(.sym.sch) { {{Symbol files} {.sym}} {{Schematic files} {.sch}} }
   set r [tk_getOpenFile  -title $msg -initialdir $initdir -filetypes $types($ext)]
   set dir [file dirname $r]
-  set initdir $dir
+  if { $r ne {} } { set initdir $dir }
   return [file normalize $r]
 }
 

@@ -792,7 +792,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
    tclsetvar("XSCHEM_DESIGN_PATH",getenv("XSCHEM_DESIGN_PATH"));
  }
 
- if( !tclgetvar("XSCHEM_DESIGN_PATH") ) {
+ if( !tclgetvar("XSCHEM_DESIGN_PATH")  || !tclgetvar("XSCHEM_DESIGN_PATH")[0]) {
    tclsetvar("XSCHEM_DESIGN_PATH", XSCHEM_LIBRARY_PATH);
  }
 

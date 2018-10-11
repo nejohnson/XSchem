@@ -35,7 +35,15 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.6.1:
+- remove copying .xschem into home directory from the Makefile, this was 
+  only for testing and if not properly configured will cause xschem 
+  to look in the wrong places for schematics
+
 2.6.0: 
+- small change in Makefile: when doing 'make install' copy also sample .xschem in $HOME/
+  so installation will be ready to use without user having to manually setup the .xschem
+  file.
 - Documentation updates
 - Makefile passes PREFIX and XSCHEM_DESIGN_PATH cpp variables to xschem
   for default path setting

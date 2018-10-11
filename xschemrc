@@ -14,7 +14,7 @@
 #### XSCHEM_DESIGN_PATH $env(HOME/xschem_library):${XSCHEM_HOME_DIR}/xschem_library
 #### you may overide the default system-wide library here and append in user's .xschem
 #### the user's libraries.
-set XSCHEM_DESIGN_PATH ${XSCHEM_HOME_DIR}/xschem_library
+# set XSCHEM_DESIGN_PATH ${XSCHEM_HOME_DIR}/xschem_library
 
 #### directory where simulations, netlist and simulator outputs are placed
 #### if unset xschem asks user to choose one when doing a netlist

@@ -107,7 +107,6 @@ install: xschem
 	cp tedax.awk $(prefix)/share/xschem
 	cp verilog.awk $(prefix)/share/xschem
 	cp ../xschemrc $(prefix)/share/xschem
-	cp ../.xschem $(HOME)/.xschem
 	cp vhdl.awk $(prefix)/share/xschem
 	cp -r ../doc/* $(prefix)/share/doc/xschem/
 	cp -r ../utile $(prefix)/share/xschem

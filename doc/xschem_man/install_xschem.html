@@ -108,14 +108,15 @@ set XSCHEM_START_WINDOW {mylib/0_top}
      <kbd>../xschem_library</kbd> then we are starting
      from a build directory, set <kbd>XSCHEM_HOME_DIR</kbd> to <kbd>`pwd`</kbd> and
      also set <kbd>XSCHEM_DESIGN_PATH</kbd> to <kbd>`pwd`/../xschem_library</kbd>.</li>
- <li>else if there is a <kbd>PREFIX/share/xschem</kbd> directory then set <kbd>XSCHEM_HOME_DIR</kbd>
-     to <kbd>PREFIX/share/xschem</kbd>.</li>
+ <li>else if there is a <kbd>PREFIX/share/xschem</kbd> directory then set <kbd>XSCHEM_HOME_DIR</kbd>,
+     to <kbd>PREFIX/share/xschem</kbd>.<br>
+     <kbd>PREFIX</kbd> is a preprocessor macro passed at compile time by setting the Makefile <kbd>prefix</kbd> variable.</li>
  <li>source <kbd>XSCHEM_HOME_DIR/xschemrc</kbd> if existing.</li>
  <li>source <kbd>`pwd`/.xschem</kbd> or <kbd>$HOME/.xschem</kbd> if existing.</li>
  <li>if <kbd>XSCHEM_HOME_DIR</kbd> not defined --&gt; error and quit.</li>
  <li>look for <kbd>XSCHEM_DESIGN_PATH</kbd> from environment variables. This will override any
      value given in  xschemrc and .xschem startup files.</li>
- <li>if <kbd>XSCHEM_DESIGN_PATH</kbd> undefined set it to compile time default provided by Makefile:
+ <li>if <kbd>XSCHEM_DESIGN_PATH</kbd> undefined set it to compile time default provided by Makefile variable
      <kbd>xschem_library_path</kbd>.</li>
  <li>source <kbd>$XSCHEM_HOME_DIR/xschem.tcl</kbd>.</li>
  <li>start loading user provided schematic file or start with empty window  (or filename

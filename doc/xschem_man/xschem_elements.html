@@ -55,10 +55,14 @@ p{padding: 15px  30px 10px;}
   <img src="xschem_rectangles.png">
   <h3> POLYGONS </h3>
   <p>
-   Polygons are closed paths that can be drawn on any layer. Placements begins with the <kbd>'ctrl-w'</kbd> key
-   and continues as long as the user clicks points on the drawing area. Placement ends when the last point
-   is coincident with the first point or by hitting the <kbd>'Return</kbd> key, in this case the polygon is 
-   closed automatically.
+   Polygons are paths that can be drawn on any layer. Placements begins with the <kbd>'ctrl-w'</kbd> key
+   and continues as long as the user clicks points on the drawing area. Placement ends when:
+   <ul>
+   <li> the last point is coincident to the first point.</li>
+   <li>  or by clicking the <kbd>right mouse button</kbd>,  for an open polygon. </li>
+   <li>  or by hitting the <kbd>Return</kbd> key, for a closed polygon. 
+         (this can be done also by clicking the last point coincident to the first polygon point).</li>
+   </ul>
   </p>
   <img src="xschem_polygons.png">
   <h3> TEXT </h3>

@@ -115,6 +115,10 @@ void merge_polygon(FILE *fd)
       fscanf(fd, "%lf %lf ",&(ptr[i].x[j]), &(ptr[i].y[j]));
     }
     load_ascii_string( &ptr[i].prop_ptr, fd);
+    if( !strcmp(get_tok_value(ptr[i].prop_ptr,"fill",0),"true") ) // 20181011
+      ptr[i].fill =1;
+    else
+      ptr[i].fill =0;
     select_polygon(c,i, SELECTED, 1);
     lastpolygon[c]++;
     modified=1;

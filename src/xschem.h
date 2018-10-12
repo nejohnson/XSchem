@@ -149,8 +149,8 @@
 #define POLYGON 32 /*  20171115 */
 
 /*  for netlist.c */
-#define BOXSIZE 500
-#define NBOXES 100
+#define BOXSIZE 1000
+#define NBOXES 50
 
 
 /*    some useful primes */
@@ -270,6 +270,18 @@ typedef struct /*  20171115 */
   int fill; /*  20180914 */
 } Polygon; 
 
+typedef struct // 20181012
+{
+  double x;
+  double y;
+  double r;
+  double a; /* start angle */
+  double b; /* arc angle */
+  unsigned short sel;
+  char *prop_ptr;
+  int fill;
+} Arc;
+
 typedef struct
 {
   char *txt_ptr;
@@ -294,10 +306,12 @@ typedef struct
    Line **lineptr;  /*  array of [cadlayers] pointers to Line */
    Box  **boxptr;
    Polygon **polygonptr; /* 20171115 */
+   Arc **Arcptr; // 20181012
    Text  *txtptr;
    int *lines;     /*  array of [cadlayers] integers */
    int *rects;
    int *polygons; /* 20171115 */
+   int *arcs; /* 20181012 */
    int texts;
    char *prop_ptr;
    char *type; /*  20150409 */
@@ -436,6 +450,7 @@ extern unsigned int state; /*  status of shift,ctrl etc.. */
 extern Wire *wire;
 extern Box  **rect;
 extern Polygon **polygon; /*  20171115 */
+extern Arc **arc; /*  20181012 */
 extern Line **line;
 extern XPoint *gridpoint;
 extern XRectangle *rectangle;
@@ -444,6 +459,7 @@ extern int lastwire;
 extern int lastselected;
 extern int *lastrect;
 extern int *lastpolygon; /*  20171115 */
+extern int *lastarc; /*  20181012 */
 extern int *lastline;
 extern int lastinst ;
 extern int lastinstdef ;
@@ -464,6 +480,7 @@ extern int max_symbols;
 extern int max_selected;
 extern int *max_rects;
 extern int *max_polygons; /*  20171115 */
+extern int *max_arcs; /*  20181012 */
 extern int *max_lines;
 extern int previous_instance[];
 extern int split_files;

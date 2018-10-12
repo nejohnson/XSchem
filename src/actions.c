@@ -1396,33 +1396,42 @@ void new_polygon(int what) /*  20171115 */
      my_realloc(&x, sizeof(double)*maxpoints);
      my_realloc(&y, sizeof(double)*maxpoints);
    }
-
    if( what & PLACE )
    {
      /* fprintf(errfp, "new_poly: PLACE, points=%d\n", points); */
      y[points]=mousey_snap;
      x[points]=mousex_snap;
      points++;
-     x[points]=x[points-1];
+     x[points]=x[points-1]; /* prepare next point for rubber */
      y[points] = y[points-1];
      /* fprintf(errfp, "added point: %.16g %.16g\n", x[points-1], y[points-1]); */
      ui_state |= STARTPOLYGON;
    }
    if( what & ADD)
-   {
+   {  
+     if(what & SET) { /* 20181011 open poly */
+       x[points] = mousex_snap;
+       y[points] = mousey_snap;
+     }
+
      if(what & END) {
+       drawtemppolygon(gctiled, NOW, x, y, points+1);
        x[points] = x[0]; 
        y[points] = y[0]; /*  close the polygon path by user request */
        drawtemppolygon(gc[rectcolor], NOW, x, y, points+1);
      } else {
-       x[points] = mousex_snap;
-       y[points] = mousey_snap;
+       if( mousex_snap != x[points-1] || mousey_snap != y[points-1] ) {
+         x[points] = mousex_snap;
+         y[points] = mousey_snap;
+       } else {
+         return; /* do not allow coincident ponts */
+       }
      }
      points++;
      /* fprintf(errfp, "added point: %.16g %.16g\n", x[points-1], y[points-1]); */
      x[points]=x[points-1];y[points]=y[points-1]; /*  prepare next point for rubber */
      /* fprintf(errfp, "new_poly: ADD, points=%d\n", points); */
-     if( x[points-1] == x[0] && y[points-1] == y[0]) { /*  closed polygon --> END */
+     if( (what & SET) || (x[points-1] == x[0] && y[points-1] == y[0]) ) { /*  closed polygon --> END */
        push_undo();
        store_polygon(-1, x, y, points, rectcolor, 0, NULL);
        /* fprintf(errfp, "new_poly: finish: points=%d\n", points); */

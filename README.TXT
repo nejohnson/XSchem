@@ -35,6 +35,20 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.6.2:
+- Open polygons are now supported
+- Button3 for terminating an open Polygon placement
+- Return key for terminating a close polygon placement 
+  (this can be done also by clicking the last point on the first polygon point).
+- some drawing fixes when highlight nets are shown.
+- Waves, Simulate and Netlist menu buttons with borders so they look different
+  from menu entries.
+- Merge schematic (copying across different xschem instances) was not cacihng correctly
+  the 'fill attribute for polyons.
+- save/load widgets: no change initial dir if user cancells action
+- 'button' look for 'Netlist', 'Waves' and 'Simulate' menu buttons.
+Stefan, 20181012
+
 2.6.1:
 - remove copying .xschem into home directory from the Makefile, this was 
   only for testing and if not properly configured will cause xschem 

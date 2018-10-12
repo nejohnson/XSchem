@@ -172,6 +172,7 @@ Tcl_Interp *interp;
  int max_selected;
  int *max_rects;
  int *max_polygons; // 20171115
+ int *max_arcs; // 20181012
  int *max_lines;     
 
 int do_netlist=0;  // set by process_options if user wants netllist from cmdline
@@ -195,9 +196,11 @@ int lastinst = 0;
 Instdef *instdef;	     // Pointer to element definition
 int lastinstdef = 0;
 Box  **rect;
-Polygon **polygon; // 20171115
 int *lastrect;
+Polygon **polygon; // 20171115
 int *lastpolygon; // 20171115
+Arc **arc;
+int *lastarc;
 Line **line;
 int *lastline;
 Text *textelement;

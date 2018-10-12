@@ -538,11 +538,11 @@ int callback(int event, int mx, int my, KeySym key,
      new_wire(PLACE,mousex_snap, mousey_snap); 
     break;
    }
-   if(key == XK_Return && ui_state & STARTPOLYGON) { /* quick way to finish a polygon placement */
+   if(key == XK_Return && (state == 0 ) && ui_state & STARTPOLYGON) { /* close polygon */
     new_polygon(ADD|END);
     break;
    }
-   if(key == XK_Escape)			/* abort & redraw */
+   if(key == XK_Escape )			/* abort & redraw */
    {
     tcleval("set vertical_move 0; set horizontal_move 0" );
 
@@ -948,6 +948,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='u' && state==ControlMask)			/* testmode */
    {
+    XFillArc(display, window, gc[6], 100,100,200, 400, -64*90, 64*180);
     XDrawArc(display, window, gc[5], 100,100,200, 400, -64*90, 64*180);
     /* XCopyArea(display, save_pixmap, window, gctiled, 0, 0, xrect[0].width, xrect[0].height, 0, 0); */
     break;
@@ -1227,16 +1228,23 @@ int callback(int event, int mx, int my, KeySym key,
     draw();
    }
    else if(button==Button3) {
-     mx_save = mx; my_save = my;	/* 20171218 */
-     mx_double_save=mousex_snap;
-     my_double_save=mousey_snap;
-     if(state==0) {
-       if(semaphore<2) { /* 20160425 */
-         rebuild_selected_array();
-         if(lastselected==0) ui_state &=~SELECTION;
+
+
+     if( ui_state & STARTPOLYGON) { /* open polygon */
+      new_polygon(ADD|SET);
+      break;
+     } else {
+       mx_save = mx; my_save = my;	/* 20171218 */
+       mx_double_save=mousex_snap;
+       my_double_save=mousey_snap;
+       if(state==0) {
+         if(semaphore<2) { /* 20160425 */
+           rebuild_selected_array();
+           if(lastselected==0) ui_state &=~SELECTION;
+         }
+         pan2(BEGIN, mx, my);
+         ui_state |= STARTPAN2;
        }
-       pan2(BEGIN, mx, my);
-       ui_state |= STARTPAN2;
      }
    }
    else if(semaphore==2) {
@@ -1330,11 +1338,7 @@ int callback(int event, int mx, int my, KeySym key,
      if(ui_state & STARTPOLYGON) { /* 20171115 */
        if(horizontal_move) mousey_snap = my_double_save;
        if(vertical_move) mousex_snap = mx_double_save;
-       if( mousex_snap == mx_save && mousey_snap == my_save) {
-         new_polygon(PLACE);
-       } else {
-         new_polygon(ADD);
-       }
+       new_polygon(ADD);
        mx_double_save=mousex_snap;
        my_double_save=mousey_snap;
        horizontal_move = vertical_move=0; /* 20171023 */
@@ -1403,7 +1407,7 @@ int callback(int event, int mx, int my, KeySym key,
   case -3:  /* double click  : edit prop */
    if(semaphore==2) break;
    if(debug_var>=1) fprintf(errfp, "callback(): DoubleClick  ui_state=%ld state=%d\n",ui_state,state);
-   if(button==Button1 && !(state & ShiftMask)) {
+   if(button==Button1 && !(state & ShiftMask) && !(ui_state & STARTPOLYGON)) {
      unselect_all();
      select_object(mousex,mousey,SELECTED);
      edit_property(0);

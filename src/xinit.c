@@ -240,6 +240,7 @@ void xwin_exit(void)
     my_free(&instdef[i].boxptr);
     my_free(&instdef[i].lines);
     my_free(&instdef[i].polygons); // 20171115
+    my_free(&instdef[i].arcs); // 20181012
     my_free(&instdef[i].rects);
  }
  my_free(&instdef);
@@ -249,10 +250,13 @@ void xwin_exit(void)
  my_free(&pixdata);
  my_free(&lastrect);
  my_free(&polygon); // 20171115
+ my_free(&arc); // 20171115
  my_free(&lastpolygon); // 20171115
+ my_free(&lastarc); // 20171115
  my_free(&lastline);
  my_free(&max_rects);
  my_free(&max_polygons); // 20171115
+ my_free(&max_arcs); // 20171115
  my_free(&max_lines);
  my_free(&pixmap);
  my_free(&gc);

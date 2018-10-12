@@ -700,10 +700,6 @@ void copy_objects(int what)
   x1=y_1=x2=y_2=rot=flip=deltax=deltay=0;
   bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
   draw();
-  if(!draw_window) { // 20181009
-    XCopyArea(display, save_pixmap, window, gctiled,
-       xrect[0].x, xrect[0].y, xrect[0].width, xrect[0].height, xrect[0].x, xrect[0].y); // 20181009
-  }
   bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
   need_rebuild_selected_array=1;
   rotatelocal=0;
@@ -1063,11 +1059,8 @@ void move_objects(int what, int merge, double dx, double dy)
   check_collapsing_objects();
   x1=y_1=x2=y_2=rot=flip=deltax=deltay=0;
   bbox(SET , 0.0 , 0.0 , 0.0 , 0.0); 
+  if(debug_var>=1) fprintf(errfp, "move_objects(): bbox= %d %d %d %d\n", areax1, areay1, areaw, areah);
   draw();
-  if(!draw_window) {
-    XCopyArea(display, save_pixmap, window, gctiled,
-       xrect[0].x, xrect[0].y, xrect[0].width, xrect[0].height, xrect[0].x, xrect[0].y); // 20181009
-  }
   bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
   need_rebuild_selected_array=1;
   rotatelocal=0;

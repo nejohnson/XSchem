@@ -916,7 +916,7 @@ void drawpolygon(int c, int what, double *x, double *y, int points, int poly_fil
   if(draw_pixmap)
     XDrawLines(display, save_pixmap, gc[c], p, points, CoordModeOrigin);
   if(!fill || !fill_type[c]) return;
-  if(poly_fill) { // 20180914
+  if(poly_fill && (x[0] == x[points-1]) && (y[0] == y[points-1])) { // 20180914
     if(draw_window) XFillPolygon(display, window, gcstipple[c], p, points, Polygontype, CoordModeOrigin);
     if(draw_pixmap)
        XFillPolygon(display, save_pixmap, gcstipple[c], p, points, Polygontype, CoordModeOrigin);
@@ -1327,12 +1327,13 @@ void draw(void)
           #endif
         }
     } // !only_probes, 20110112
-    draw_hilight_net(0);
+    draw_hilight_net(draw_window);
     if(!draw_window) {
       XCopyArea(display, save_pixmap, window, gctiled, xrect[0].x, xrect[0].y, 
          xrect[0].width, xrect[0].height, xrect[0].x, xrect[0].y); // 20181009
     }
     draw_selection(gc[SELLAYER], 0); /* 20181009 moved outside of cadlayers loop */
+
     if(debug_var>=1) fprintf(errfp, "draw(): lw=%d\n",lw);
  } // if(has_x)
 }

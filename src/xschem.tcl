@@ -408,6 +408,7 @@ proc save_file_dialog { msg ext global_initdir {initialfile {}} } {
     set r [tk_getSaveFile -title $msg -initialfile $initialfile -filetypes $types($ext) -initialdir $initialdir]
   }
   set dir [file dirname $r]
+  # 20181011 no change initdir if operation cancelled by user
   if { $r ne {} } { set initdir $dir }
   return [file normalize $r]
 }
@@ -426,6 +427,7 @@ proc load_file_dialog { msg ext global_initdir} {
   set types(.sym.sch) { {{Symbol files} {.sym}} {{Schematic files} {.sch}} }
   set r [tk_getOpenFile  -title $msg -initialdir $initdir -filetypes $types($ext)]
   set dir [file dirname $r]
+  # 20181011 no change initdir if operation cancelled by user
   if { $r ne {} } { set initdir $dir }
   return [file normalize $r]
 }
@@ -2237,11 +2239,11 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    .menubar.edit.menu add command -label "Push schematic" -command "xschem descend" -accelerator e
    .menubar.edit.menu add command -label "Push symbol" -command "xschem edit_symbol" -accelerator i
    .menubar.edit.menu add command -label "Pop" -command "xschem go_back" -accelerator C-e
-   button .menubar.netlist -text "Netlist"  -bd 0 -activebackground red  -takefocus 0\
+   button .menubar.netlist -text "Netlist"  -activebackground red  -takefocus 0\
      -command {
        xschem netlist
       }
-   button .menubar.simulate -text "Simulate"  -bd 0 -activebackground red  -takefocus 0\
+   button .menubar.simulate -text "Simulate"  -activebackground red  -takefocus 0\
      -command {
        set oldbg [.menubar.simulate cget -bg]
        .menubar.simulate configure -bg red
@@ -2250,7 +2252,7 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
        xschem set semaphore [expr [xschem get semaphore] -1]
        .menubar.simulate configure -bg $oldbg
       }
-   button .menubar.waves -text "Waves"  -bd 0 -activebackground red  -takefocus 0\
+   button .menubar.waves -text "Waves"  -activebackground red  -takefocus 0\
      -command {
        waves [file tail [xschem get schname]]
       }

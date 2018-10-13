@@ -1023,6 +1023,7 @@ void drawtemprect(GC gc, int what, double rectx1,double recty1,double rectx2,dou
   y1=(recty1+yorigin)*mooz;
   x2=(rectx2+xorigin)*mooz;
   y2=(recty2+yorigin)*mooz;
+  if( (x2-x1)< 0.3 && (y2-y1)< 0.3) return; // 20171206
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
    XDrawRectangle(display, window, gc, (int)x1, (int)y1, 
@@ -1044,6 +1045,7 @@ void drawtemprect(GC gc, int what, double rectx1,double recty1,double rectx2,dou
   y1=(recty1+yorigin)*mooz;
   x2=(rectx2+xorigin)*mooz;
   y2=(recty2+yorigin)*mooz;
+  if( (x2-x1)< 0.3 && (y2-y1)< 0.3) return; // 20171206
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
    r[i].x=(short)x1; 

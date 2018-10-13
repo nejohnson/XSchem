@@ -692,8 +692,6 @@ int Tcl_AppInit(Tcl_Interp *inter)
  xcb_render_query_pict_formats_cookie_t formats_cookie;
  #endif
 
- if(!getenv("DISPLAY")) has_x=0;
- if(debug_var>=1 && !has_x) fprintf(errfp, "Tcl_AppInit(): no DISPLAY environment var, assuming no X available\n");
  for(i=0;i<CADMAXHIER;i++) sch_prefix[i]=NULL;
  my_strdup(&sch_prefix[0],".");
 
@@ -1155,7 +1153,6 @@ int Tcl_AppInit(Tcl_Interp *inter)
  }
 
  if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): returning TCL_OK\n");
-
  return TCL_OK;
 }
 

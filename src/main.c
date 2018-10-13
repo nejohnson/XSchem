@@ -69,7 +69,12 @@ int main(int argc, char **argv)
   /* signal(SIGCHLD, child_handler); */  /* avoid zombies 20180925 --> conflicts with tcl exec */
 
   errfp=stderr; 
+  /* 20181013 check for empty or non existing DISPLAY *before* calling Tk_Main or Tcl_Main */
+  if(!getenv("DISPLAY") || !getenv("DISPLAY")[0]) has_x=0;
   process_options(argc, argv);
+  if(debug_var>=1 && !has_x) 
+    fprintf(errfp, "main(): no DISPLAY set, assuming no X available\n");
+
   if(has_x) Tk_Main(1, argv, Tcl_AppInit);
   else     Tcl_Main(1, argv, Tcl_AppInit);
   return 0;

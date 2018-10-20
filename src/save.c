@@ -23,6 +23,23 @@
 #include "xschem.h"
 #include <sys/wait.h>  /* waitpid */
 
+// skip one line of text from file, stopping at first '\n' or EOF
+// return NULL if eof encountered
+char *read_line(FILE *fp)
+{
+  static char s[100];
+  char *a;
+  size_t l;
+  while( (a=fgets(s, 100, fp)) ) {
+    l = strlen(s);
+    if(s[l-1]=='\n') {
+      break;
+    }
+  }
+  return a;
+}
+
+
 //
 // 20180923
 // return "/<prefix><random string of random_size characters>"
@@ -149,6 +166,9 @@ void read_xschem_file(FILE *fd) // 20180912
        case 'P':
         load_polygon(fd);
         break;
+       case 'A':
+        load_arc(fd);
+        break;
        case 'B':
         load_box(fd);
         break;
@@ -162,8 +182,9 @@ void read_xschem_file(FILE *fd) // 20180912
         load_inst(fd);
         break;
        default:
-        if(debug_var>=2) fprintf(errfp, "read_xschem_file(): end file reached\n");
-        endfile=1;
+        //if(debug_var>=2) fprintf(errfp, "read_xschem_file(): end file reached\n");
+        //endfile=1;
+        read_line(fd); /* read rest of line and discard */
         break;
       }
     }
@@ -335,7 +356,7 @@ void load_inst(FILE *fd)
 void save_box(FILE *fd)
 {
     int c, i;
-    Box *ptr; 
+    Box *ptr;
     for(c=0;c<cadlayers;c++)
     {
      ptr=rect[c];
@@ -343,6 +364,23 @@ void save_box(FILE *fd)
      {
       fprintf(fd, "B %d %.16g %.16g %.16g %.16g ", c,ptr[i].x1, ptr[i].y1,ptr[i].x2,
        ptr[i].y2);
+      save_ascii_string(ptr[i].prop_ptr,fd);
+      fputc('\n' ,fd);
+     }
+    }
+}
+
+void save_arc(FILE *fd)
+{
+    int c, i;
+    Arc *ptr;
+    for(c=0;c<cadlayers;c++)
+    {
+     ptr=arc[c];
+     for(i=0;i<lastarc[c];i++)
+     {
+      fprintf(fd, "A %d %.16g %.16g %.16g %.16g %.16g ", c,ptr[i].x, ptr[i].y,ptr[i].r,
+       ptr[i].a, ptr[i].b);
       save_ascii_string(ptr[i].prop_ptr,fd);
       fputc('\n' ,fd);
      }
@@ -403,6 +441,26 @@ void load_polygon(FILE *fd)
     lastpolygon[c]++;
 }
 
+void load_arc(FILE *fd)
+{
+    int i,c;
+    Arc *ptr;
+
+    fscanf(fd, "%d",&c);
+    if(c>=cadlayers) {
+      fprintf(errfp,"FATAL: arc layer > defined cadlayers, increase cadlayers\n");
+      tcleval( "exit");
+    } // 20150408
+    check_arc_storage(c);
+    i=lastarc[c];
+    ptr=arc[c];
+    fscanf(fd, "%lf %lf %lf %lf %lf ",&ptr[i].x, &ptr[i].y,
+           &ptr[i].r, &ptr[i].a, &ptr[i].b);
+    ptr[i].prop_ptr=NULL;
+    ptr[i].sel=0;
+    load_ascii_string(&ptr[i].prop_ptr, fd);
+    lastarc[c]++;
+}
 
 void load_box(FILE *fd)
 {
@@ -521,6 +579,7 @@ int save_symbol(char *schname) // 20171020 added return value
   fprintf(fd, "E {}\n"); // 20180912
   save_line(fd);
   save_box(fd);
+  save_arc(fd);
   save_text(fd);
   save_polygon(fd);
   save_wire(fd);
@@ -578,6 +637,7 @@ int save_schematic(char *schname) // 20171020 added return value
     fputc('\n', fd);
     save_line(fd);
     save_box(fd);
+    save_arc(fd);
     save_polygon(fd);
     save_text(fd);
     save_wire(fd);
@@ -749,6 +809,7 @@ void push_undo(void) // 20150327
     save_line(fd);
     save_polygon(fd);
     save_box(fd);
+    save_arc(fd);
     save_text(fd);
     save_wire(fd);
     save_inst(fd);
@@ -816,8 +877,10 @@ int load_symbol_definition(char *name)
   int aux_int;
   char aux_str[PATH_MAX]; // overflow safe 20161122
   int lastl[cadlayers], lastr[cadlayers], lastp[cadlayers], lastt; // 20171115 lastp
+  int lasta[cadlayers];
   Line *ll[cadlayers];
   Box *bb[cadlayers];
+  Arc *aa[cadlayers];
   Polygon *pp[cadlayers]; // 20171115
   Text *tt;
   int endfile=0;
@@ -841,10 +904,11 @@ int load_symbol_definition(char *name)
 
   for(c=0;c<cadlayers;c++) 
   {
-   lastl[c]=lastr[c]=lastp[c]=0; // 20171115 lastp
+   lasta[c]=lastl[c]=lastr[c]=lastp[c]=0; // 20171115 lastp
    ll[c]=NULL;
    bb[c]=NULL;
    pp[c]=NULL;
+   aa[c]=NULL;
   }
   lastt=0;
   tt=NULL;
@@ -917,7 +981,21 @@ int load_symbol_definition(char *name)
       if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): loaded polygon: ptr=%lu\n", (unsigned long)pp[c]);
       lastp[c]++;
       break;
-
+     case 'A':
+      fscanf(fd, "%d",&c);
+      if(c>=cadlayers) {
+        fprintf(errfp,"FATAL: arc layer > defined cadlayers, increase cadlayers\n");
+        tcleval( "exit");
+      } // 20150408
+      i=lasta[c];
+      my_realloc(&aa[c],(i+1)*sizeof(Arc));
+      fscanf(fd, "%lf %lf %lf %lf %lf ",&aa[c][i].x, &aa[c][i].y,
+         &aa[c][i].r, &aa[c][i].a, &aa[c][i].b);
+      aa[c][i].prop_ptr=NULL;
+      load_ascii_string( &aa[c][i].prop_ptr, fd);
+      if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): loaded arc: ptr=%lu\n", (unsigned long)aa[c]);
+      lasta[c]++;
+      break;
      case 'B':
       fscanf(fd, "%d",&c);
       if(c>=cadlayers) {
@@ -950,7 +1028,6 @@ int load_symbol_definition(char *name)
       strlayer = get_tok_value(tt[i].prop_ptr, "layer", 0); //20171206
       if(strlayer[0]) tt[i].layer = atoi(strlayer);
       else tt[i].layer = -1;
-
       lastt++;
       break;
      case 'N':
@@ -964,8 +1041,9 @@ int load_symbol_definition(char *name)
       load_ascii_string(&aux_ptr,fd);
       break;
      default:
-      if(debug_var>=1) fprintf(errfp, "load_symbol_definition(): unknown line, assuming EOF\n");
-      endfile=1;
+      // if(debug_var>=1) fprintf(errfp, "load_symbol_definition(): unknown line, assuming EOF\n");
+      // endfile=1;
+      read_line(fd); /* read rest of line and discard */
       break;
     }
    }
@@ -974,9 +1052,11 @@ int load_symbol_definition(char *name)
    if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): finished parsing file\n");
    for(c=0;c<cadlayers;c++)
    {
+    instdef[lastinstdef].arcs[c] = lasta[c];
     instdef[lastinstdef].lines[c] = lastl[c];
     instdef[lastinstdef].rects[c] = lastr[c];
     instdef[lastinstdef].polygons[c] = lastp[c];
+    instdef[lastinstdef].arcptr[c] = aa[c];
     instdef[lastinstdef].lineptr[c] = ll[c];
     instdef[lastinstdef].polygonptr[c] = pp[c];
     instdef[lastinstdef].boxptr[c] = bb[c];
@@ -992,6 +1072,14 @@ int load_symbol_definition(char *name)
     {
      count++;
      tmp.x1=ll[c][i].x1;tmp.y1=ll[c][i].y1;tmp.x2=ll[c][i].x2;tmp.y2=ll[c][i].y2;
+     updatebbox(count,&boundbox,&tmp);
+    }
+    for(i=0;i<lasta[c];i++)
+    {
+     count++;
+     arc_bbox(aa[c][i].x, aa[c][i].y, aa[c][i].r, aa[c][i].a, aa[c][i].b, 
+              &tmp.x1, &tmp.y1, &tmp.x2, &tmp.y2);
+     // printf("arc bbox: %g %g %g %g\n", tmp.x1, tmp.y1, tmp.x2, tmp.y2);
      updatebbox(count,&boundbox,&tmp);
     }
     for(i=0;i<lastr[c];i++)
@@ -1310,6 +1398,13 @@ void save_selection(int what)
       fputc('\n' ,fd);
      break;
     
+     case ARC:
+      fprintf(fd, "A %d %.16g %.16g %.16g %.16g %.16g ", c, arc[c][n].x, arc[c][n].y, arc[c][n].r,
+       arc[c][n].a, arc[c][n].b);
+      save_ascii_string(arc[c][n].prop_ptr,fd);
+      fputc('\n' ,fd);
+     break;
+
      case RECT:
       fprintf(fd, "B %d %.16g %.16g %.16g %.16g ", c,rect[c][n].x1, rect[c][n].y1,rect[c][n].x2,
        rect[c][n].y2);

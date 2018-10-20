@@ -82,17 +82,17 @@ static void ps_drawpolygon(int c, int what, double *x, double *y, int points)
   double xx, yy;
   int i;
   polygon_bbox(x, y, points, &x1,&y1,&x2,&y2);
-  x1=(x1+xorigin)*mooz;
-  y1=(y1+yorigin)*mooz;
-  x2=(x2+xorigin)*mooz;
-  y2=(y2+yorigin)*mooz;
+  x1=X_TO_SCREEN(x1);
+  y1=Y_TO_SCREEN(y1);
+  x2=X_TO_SCREEN(x2);
+  y2=Y_TO_SCREEN(y2);
   if( !rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) ) {
     return;
   }
 
   for(i=0;i<points; i++) {
-    xx = (x[i] + xorigin)*mooz;
-    yy = (y[i] + yorigin)*mooz;
+    xx = X_TO_SCREEN(x[i]);
+    yy = Y_TO_SCREEN(y[i]);
     if(i==0) fprintf(fd, "%.16g %.16g MT\n", xx, yy);
     else fprintf(fd, "%.16g %.16g LT\n", xx, yy);
   }
@@ -108,10 +108,10 @@ static void ps_filledrect(int gc, double rectx1,double recty1,double rectx2,doub
 {
  double x1,y1,x2,y2;
 
-  x1=(rectx1+xorigin)/zoom;
-  y1=(recty1+yorigin)/zoom;
-  x2=(rectx2+xorigin)/zoom;
-  y2=(recty2+yorigin)/zoom;
+  x1=X_TO_SCREEN(rectx1);
+  y1=Y_TO_SCREEN(recty1);
+  x2=X_TO_SCREEN(rectx2);
+  y2=Y_TO_SCREEN(recty2);
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
    ps_xfillrectange(gc, x1,y1,x2,y2);
@@ -122,10 +122,10 @@ static void ps_drawline(int gc, double linex1,double liney1,double linex2,double
 {
  double x1,y1,x2,y2;
 
-  x1=(linex1+xorigin)/zoom;
-  y1=(liney1+yorigin)/zoom;
-  x2=(linex2+xorigin)/zoom;
-  y2=(liney2+yorigin)/zoom;
+  x1=X_TO_SCREEN(linex1);
+  y1=Y_TO_SCREEN(liney1);
+  x2=X_TO_SCREEN(linex2);
+  y2=Y_TO_SCREEN(liney2);
   if( clip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
    ps_xdrawline(gc, x1, y1, x2, y2);
@@ -143,7 +143,7 @@ static void ps_draw_string(int gctext,  char *str,
  int i; 
 
 if(str==NULL) return;
-// if(xscale*FONTWIDTH/zoom<1)
+// if(xscale*FONTWIDTH* mooz<1)
 // {
 //   if(debug_var>=2) fprintf(errfp, "ps_draw_string(): xscale=%.16g zoom=%.16g \n",xscale,zoom);
 //  //ps_drawrect(gctext, rx1,ry1,rx2,ry2);
@@ -193,9 +193,9 @@ static void ps_drawgrid()
  double x,y;
  double delta,tmp;
  if(!draw_grid) return;
- delta=CADGRID/zoom;
+ delta=CADGRID* mooz;
  while(delta<CADGRIDTHRESHOLD) delta*=CADGRIDMULTIPLY;	// <-- to be improved,but works
- x = xorigin/zoom;y = yorigin/zoom;
+ x = xorigin* mooz;y = yorigin* mooz;
  set_ps_colors(SELLAYER);
  if(y>areay1 && y<areay2)
  {
@@ -206,8 +206,8 @@ static void ps_drawgrid()
   ps_xdrawline(SELLAYER,(int)x,areay1+1, (int)x, areay2-1);
  }
  set_ps_colors(GRIDLAYER);
- tmp = floor((areay1+1)/delta)*delta-fmod(-yorigin/zoom,delta);
- for(x=floor((areax1+1)/delta)*delta-fmod(-xorigin/zoom,delta);x<areax2;x+=delta)
+ tmp = floor((areay1+1)/delta)*delta-fmod(-yorigin* mooz,delta);
+ for(x=floor((areax1+1)/delta)*delta-fmod(-xorigin* mooz,delta);x<areax2;x+=delta)
  {
   for(y=tmp;y<areay2;y+=delta)
   {
@@ -233,10 +233,10 @@ static void ps_draw_symbol_outline(int n,int layer,int tmp_flip, int rot,
 
   if(layer==0)
   {
-   x1=(inst_ptr[n].x1+xorigin)/zoom;
-   x2=(inst_ptr[n].x2+xorigin)/zoom;
-   y1=(inst_ptr[n].y1+yorigin)/zoom;
-   y2=(inst_ptr[n].y2+yorigin)/zoom;
+   x1=X_TO_SCREEN(inst_ptr[n].x1);
+   x2=X_TO_SCREEN(inst_ptr[n].x2);
+   y1=Y_TO_SCREEN(inst_ptr[n].y1);
+   y2=Y_TO_SCREEN(inst_ptr[n].y2);
    if(OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2))
    {
     inst_ptr[n].flags|=1;
@@ -298,7 +298,7 @@ static void ps_draw_symbol_outline(int n,int layer,int tmp_flip, int rot,
     for(j=0;j< (inst_ptr[n].ptr+instdef)->texts;j++)
     {
      text = (inst_ptr[n].ptr+instdef)->txtptr[j];
-     // if(text.xscale*FONTWIDTH/zoom<1) continue;
+     // if(text.xscale*FONTWIDTH* mooz<1) continue;
      text.txt_ptr= 
        translate(n, text.txt_ptr);
      ROTATION(0.0,0.0,text.x0,text.y0,x1,y1);

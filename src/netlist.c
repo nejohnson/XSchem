@@ -72,10 +72,10 @@ void object_iterator(int k)	// 20171203
   y2=inst_ptr[k].y2;
   */
 
-  x1 = areax1*zoom -xorigin;
-  y1 = areay1*zoom -yorigin;
-  x2 = areax2*zoom -xorigin;
-  y2 = areay2*zoom -yorigin;
+  x1 = X_TO_XSCHEM(areax1);
+  y1 = Y_TO_XSCHEM(areay1);
+  x2 = X_TO_XSCHEM(areax2);
+  y2 = Y_TO_XSCHEM(areay2);
 
 // ordered bbox
   if( x2 < x1) { tmpd=x2;x2=x1;x1=tmpd;}

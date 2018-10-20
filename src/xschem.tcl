@@ -1768,7 +1768,7 @@ proc launcher {} {
   # 20170413
   if { $launcher_program eq {} } { set launcher_program $launcher_default_program}
 
-  eval exec  $launcher_program $launcher_var &
+  eval exec  $launcher_program {$launcher_var} &
 }
 
 

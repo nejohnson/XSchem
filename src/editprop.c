@@ -803,6 +803,22 @@ void edit_property(int x)
   case ELEMENT:
    edit_symbol_property(x);
    break;
+  case ARC:
+   if(debug_var>=1) fprintf(errfp, "edit_property(), modified=%d\n", modified);
+   if(arc[selectedgroup[0].col][selectedgroup[0].n].prop_ptr!=NULL) {
+     tclsetvar("retval",arc[selectedgroup[0].col][selectedgroup[0].n].prop_ptr);
+   } else { // 20161208
+     tclsetvar("retval","");
+   }
+   tcleval("text_line {Input property:} 0");
+   if(strcmp(tclgetvar("rcode"),"") )
+   {
+    modified=1; push_undo(); // 20150327
+    my_strdup(&arc[selectedgroup[0].col][selectedgroup[0].n].prop_ptr,
+     (char *) tclgetvar("retval"));
+   }
+   break;
+
   case RECT:
    if(debug_var>=1) fprintf(errfp, "edit_property(), modified=%d\n", modified);
    if(rect[selectedgroup[0].col][selectedgroup[0].n].prop_ptr!=NULL) {
@@ -815,7 +831,7 @@ void edit_property(int x)
    {
     modified=1; push_undo(); // 20150327
     my_strdup(&rect[selectedgroup[0].col][selectedgroup[0].n].prop_ptr,
-	(char *) tclgetvar("retval"));
+	   (char *) tclgetvar("retval"));
    }
    break;
   case WIRE:

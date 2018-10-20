@@ -92,9 +92,114 @@ void symbol_bbox(int i, double *x1,double *y1, double *x2, double *y2)
    }
 }
 
+
+static void del_rect_line_arc_poly(void)
+{
+ Box tmp;
+ int c, j, i;
+
+ for(c=0;c<cadlayers;c++)
+ {
+  j = 0; 
+  for(i=0;i<lastrect[c];i++)
+  {
+   if(rect[c][i].sel == SELECTED)
+   {
+    j++; 
+    bbox(ADD, rect[c][i].x1, rect[c][i].y1, rect[c][i].x2, rect[c][i].y2);
+    modified=1;
+    continue;
+   }
+   if(j) 
+   {
+    my_strdup(&rect[c][i-j].prop_ptr, NULL);
+    rect[c][i-j] = rect[c][i];
+    rect[c][i].prop_ptr=NULL;
+   }
+  }
+  lastrect[c] -= j; 
+  j = 0;
+  for(i=0;i<lastline[c];i++)
+  {
+   if(line[c][i].sel == SELECTED)
+   {
+    j++;
+    bbox(ADD, line[c][i].x1, line[c][i].y1, line[c][i].x2, line[c][i].y2);
+    modified=1;
+    continue;
+   }
+   if(j) 
+   {
+    my_strdup(&line[c][i-j].prop_ptr, NULL);
+    line[c][i-j] = line[c][i];
+    line[c][i].prop_ptr=NULL;
+   }
+  }
+  lastline[c] -= j;
+
+  j = 0;
+  for(i=0;i<lastarc[c];i++)
+  {
+   if(arc[c][i].sel == SELECTED)
+   {
+    j++;
+    arc_bbox(arc[c][i].x, arc[c][i].y, arc[c][i].r, arc[c][i].a, arc[c][i].b,
+             &tmp.x1, &tmp.y1, &tmp.x2, &tmp.y2);
+    bbox(ADD, tmp.x1, tmp.y1, tmp.x2, tmp.y2);
+    modified=1;
+    continue;
+   }
+   if(j)
+   {
+    my_strdup(&arc[c][i-j].prop_ptr, NULL);
+    arc[c][i-j] = arc[c][i];
+    arc[c][i].prop_ptr=NULL;
+   }
+  }
+  lastarc[c] -= j;
+
+
+  // 20171115
+  j = 0;
+  for(i=0;i<lastpolygon[c];i++)
+  {
+   if(polygon[c][i].sel == SELECTED)
+   { 
+    int k;
+    double x1=0., y1=0., x2=0., y2=0.;
+    for(k=0; k<polygon[c][i].points; k++) {
+      if(k==0 || polygon[c][i].x[k] < x1) x1 = polygon[c][i].x[k];
+      if(k==0 || polygon[c][i].y[k] < y1) y1 = polygon[c][i].y[k];
+      if(k==0 || polygon[c][i].x[k] > x2) x2 = polygon[c][i].x[k];
+      if(k==0 || polygon[c][i].y[k] > y2) y2 = polygon[c][i].y[k];
+    }
+    //fprintf(errfp, "bbox: %.16g %.16g %.16g %.16g\n", x1, y1, x2, y2);
+    j++;
+    bbox(ADD, x1, y1, x2, y2);
+    modified=1;
+    continue;
+   }
+   if(j)
+   {
+    my_strdup(&polygon[c][i-j].prop_ptr, NULL);
+    my_free(&polygon[c][i-j].x);
+    my_free(&polygon[c][i-j].y);
+    my_free(&polygon[c][i-j].selected_point);
+    polygon[c][i-j] = polygon[c][i];
+    polygon[c][i].prop_ptr=NULL;
+    polygon[c][i].x=NULL;
+    polygon[c][i].y=NULL;
+    polygon[c][i].selected_point=NULL;
+   }
+  }
+  lastpolygon[c] -= j;
+ }
+}
+
+
 void delete(void)
 {
- int i,c,j;
+ int i,j;
  #ifdef HAS_CAIRO
  int customfont;
  #endif
@@ -202,81 +307,7 @@ void delete(void)
   }
   lastwire -= j; 
 
- for(c=0;c<cadlayers;c++)
- {
-  j = 0; 
-  for(i=0;i<lastrect[c];i++)
-  {
-   if(rect[c][i].sel == SELECTED)
-   {
-    j++; 
-    bbox(ADD, rect[c][i].x1, rect[c][i].y1, rect[c][i].x2, rect[c][i].y2);
-    modified=1;
-    continue;
-   }
-   if(j) 
-   {
-    my_strdup(&rect[c][i-j].prop_ptr, NULL);
-    rect[c][i-j] = rect[c][i];
-    rect[c][i].prop_ptr=NULL;
-   }
-  }
-  lastrect[c] -= j; 
-  j = 0;
-  for(i=0;i<lastline[c];i++)
-  {
-   if(line[c][i].sel == SELECTED)
-   {
-    j++;
-    bbox(ADD, line[c][i].x1, line[c][i].y1, line[c][i].x2, line[c][i].y2);
-    modified=1;
-    continue;
-   }
-   if(j) 
-   {
-    my_strdup(&line[c][i-j].prop_ptr, NULL);
-    line[c][i-j] = line[c][i];
-    line[c][i].prop_ptr=NULL;
-   }
-  }
-  lastline[c] -= j;
-
-  // 20171115
-  j = 0;
-  for(i=0;i<lastpolygon[c];i++)
-  {
-   if(polygon[c][i].sel == SELECTED)
-   { 
-    int k;
-    double x1=0., y1=0., x2=0., y2=0.;
-    for(k=0; k<polygon[c][i].points; k++) {
-      if(k==0 || polygon[c][i].x[k] < x1) x1 = polygon[c][i].x[k];
-      if(k==0 || polygon[c][i].y[k] < y1) y1 = polygon[c][i].y[k];
-      if(k==0 || polygon[c][i].x[k] > x2) x2 = polygon[c][i].x[k];
-      if(k==0 || polygon[c][i].y[k] > y2) y2 = polygon[c][i].y[k];
-    }
-    //fprintf(errfp, "bbox: %.16g %.16g %.16g %.16g\n", x1, y1, x2, y2);
-    j++;
-    bbox(ADD, x1, y1, x2, y2);
-    modified=1;
-    continue;
-   }
-   if(j)
-   {
-    my_strdup(&polygon[c][i-j].prop_ptr, NULL);
-    my_free(&polygon[c][i-j].x);
-    my_free(&polygon[c][i-j].y);
-    my_free(&polygon[c][i-j].selected_point);
-    polygon[c][i-j] = polygon[c][i];
-    polygon[c][i].prop_ptr=NULL;
-    polygon[c][i].x=NULL;
-    polygon[c][i].y=NULL;
-    polygon[c][i].selected_point=NULL;
-   }
-  }
-  lastpolygon[c] -= j;
-
- }
+ del_rect_line_arc_poly();
  lastselected = 0;
  bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
  draw();
@@ -290,91 +321,10 @@ void delete(void)
 }
 
 
-void delete_only_rect_and_line_and_poly(void)
+void delete_only_rect_line_arc_poly(void)
 {
- int i,c,j;
-
- j = 0;
  bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0);
-
-
- for(c=0;c<cadlayers;c++)
- {
-  j = 0; 
-  for(i=0;i<lastrect[c];i++)
-  {
-   if(rect[c][i].sel==SELECTED )
-   {
-    j++; 
-    bbox(ADD, rect[c][i].x1, rect[c][i].y1, rect[c][i].x2, rect[c][i].y2);
-    modified=1;
-    continue;
-   }
-   if(j) 
-   {
-    my_strdup(&rect[c][i-j].prop_ptr, NULL);
-    rect[c][i-j] = rect[c][i];
-    rect[c][i].prop_ptr=NULL;
-   }
-  }
-  lastrect[c] -= j; 
-  j = 0;
-  for(i=0;i<lastline[c];i++)
-  {
-   if(line[c][i].sel == SELECTED)
-   {
-    j++;
-    bbox(ADD, line[c][i].x1, line[c][i].y1, line[c][i].x2, line[c][i].y2);
-    modified=1;
-    continue;
-   }
-   if(j) 
-   {
-    my_strdup(&line[c][i-j].prop_ptr, NULL);
-    line[c][i-j] = line[c][i];
-    line[c][i].prop_ptr=NULL;
-   }
-  }
-  lastline[c] -= j;
-
-  // 20171115
-  j = 0;
-  for(i=0;i<lastpolygon[c];i++)
-  {
-   if(polygon[c][i].sel == SELECTED)
-   {
-    int k;
-    double x1=0., y1=0., x2=0., y2=0.;
-    for(k=0; k<polygon[c][i].points; k++) {
-      if(k==0 || polygon[c][i].x[k] < x1) x1 = polygon[c][i].x[k];
-      if(k==0 || polygon[c][i].y[k] < y1) y1 = polygon[c][i].y[k];
-      if(k==0 || polygon[c][i].x[k] > x2) x2 = polygon[c][i].x[k];
-      if(k==0 || polygon[c][i].y[k] > y2) y2 = polygon[c][i].y[k];
-    }
-    //fprintf(errfp, "bbox: %.16g %.16g %.16g %.16g\n", x1, y1, x2, y2);
-    j++;
-    bbox(ADD, x1, y1, x2, y2);
-    modified=1;
-    continue;
-   }
-   if(j)
-   {
-    my_strdup(&polygon[c][i-j].prop_ptr, NULL);
-    my_free(&polygon[c][i-j].x);
-    my_free(&polygon[c][i-j].y);
-    my_free(&polygon[c][i-j].selected_point);
-    polygon[c][i-j] = polygon[c][i];
-    polygon[c][i].prop_ptr=NULL;
-    polygon[c][i].x=NULL;
-    polygon[c][i].y=NULL;
-    polygon[c][i].selected_point=NULL;
-   }
-  }
-  lastpolygon[c] -= j;
-
- }
-
-
+ del_rect_line_arc_poly();
  lastselected = 0;
  bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
  draw();
@@ -415,10 +365,10 @@ void bbox(int what,double x1,double y1, double x2, double y2)
      fprintf(errfp, "ERROR: bbox(ADD) call before bbox(BEGIN)\n"); 
      tcleval("alert_ {ERROR: bbox(ADD) call before bbox(BEGIN)} {}");//20171215
    }
-   x1=(x1+xorigin)/zoom;
-   y1=(y1+yorigin)/zoom;
-   x2=(x2+xorigin)/zoom;
-   y2=(y2+yorigin)/zoom;
+   x1=X_TO_SCREEN(x1);
+   y1=Y_TO_SCREEN(y1);
+   x2=X_TO_SCREEN(x2);
+   y2=Y_TO_SCREEN(y2);
    x1=CLIP(x1,savex1,savex2);
    x2=CLIP(x2,savex1,savex2);
    y1=CLIP(y1,savey1,savey2);
@@ -499,15 +449,16 @@ void unselect_all(void)
     ui_state = 0; 
     lastselected = 0;
    
-    if(x_initialized) drawtempline(gctiled,BEGIN, 0.0, 0.0, 0.0, 0.0);
-    if(x_initialized) drawtemprect(gctiled, BEGIN, 0.0, 0.0, 0.0, 0.0); 
+    drawtemparc(gctiled,BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
+    drawtempline(gctiled,BEGIN, 0.0, 0.0, 0.0, 0.0);
+    drawtemprect(gctiled, BEGIN, 0.0, 0.0, 0.0, 0.0); 
    
      for(i=0;i<lastwire;i++)
      {
       if(wire[i].sel)
       {
        wire[i].sel = 0;
-       if(x_initialized) {
+       {
          // if(get_tok_value(wire[i].prop_ptr,"bus",0)[0])        // 26122004
          if(wire[i].bus) // 20171201
            drawtempline(gctiled, THICK, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
@@ -523,7 +474,7 @@ void unselect_all(void)
      if(inst_ptr[i].sel == SELECTED)
      {
       inst_ptr[i].sel = 0;
-      if(x_initialized) for(c=0;c<cadlayers;c++)
+      for(c=0;c<cadlayers;c++)
         draw_temp_symbol_outline(ADD, gctiled, i, c,0,0,0.0,0.0);
      }
     }
@@ -535,7 +486,7 @@ void unselect_all(void)
       #ifdef HAS_CAIRO
       customfont = set_text_custom_font(& textelement[i]); // needed for bbox calculation
       #endif
-      if(x_initialized) draw_temp_string(gctiled,ADD, textelement[i].txt_ptr,
+      draw_temp_string(gctiled,ADD, textelement[i].txt_ptr,
        textelement[i].rot, textelement[i].flip,
        textelement[i].x0, textelement[i].y0,
        textelement[i].xscale, textelement[i].yscale);
@@ -546,12 +497,20 @@ void unselect_all(void)
     }          
     for(c=0;c<cadlayers;c++)
     {
+     for(i=0;i<lastarc[c];i++)
+     {
+      if(arc[c][i].sel) 
+      {
+       arc[c][i].sel = 0;
+       drawtemparc(gctiled, ADD, arc[c][i].x, arc[c][i].y, arc[c][i].r, arc[c][i].a, arc[c][i].b);
+      }
+     }
      for(i=0;i<lastrect[c];i++)
      {
       if(rect[c][i].sel) 
       {
        rect[c][i].sel = 0;
-       if(x_initialized) drawtemprect(gctiled, ADD, rect[c][i].x1, rect[c][i].y1, rect[c][i].x2, rect[c][i].y2);
+       drawtemprect(gctiled, ADD, rect[c][i].x1, rect[c][i].y1, rect[c][i].x2, rect[c][i].y2);
       }
      }
      for(i=0;i<lastline[c];i++)
@@ -559,7 +518,7 @@ void unselect_all(void)
       if(line[c][i].sel)
       {
        line[c][i].sel = 0;
-       if(x_initialized) drawtempline(gctiled, ADD, line[c][i].x1, line[c][i].y1, line[c][i].x2, line[c][i].y2);
+       drawtempline(gctiled, ADD, line[c][i].x1, line[c][i].y1, line[c][i].x2, line[c][i].y2);
       }
      }
      for(i=0;i<lastpolygon[c];i++)
@@ -569,12 +528,13 @@ void unselect_all(void)
        int k;
        for(k=0;k<polygon[c][i].points; k++) polygon[c][i].selected_point[k] = 0;
        polygon[c][i].sel = 0;
-       if(x_initialized) drawtemppolygon(gctiled, NOW, polygon[c][i].x, polygon[c][i].y, polygon[c][i].points);
+       drawtemppolygon(gctiled, NOW, polygon[c][i].x, polygon[c][i].y, polygon[c][i].points);
       }
      }
     } 
-    if(x_initialized) drawtempline(gctiled,END, 0.0, 0.0, 0.0, 0.0);
-    if(x_initialized) drawtemprect(gctiled, END, 0.0, 0.0, 0.0, 0.0); 
+    drawtempline(gctiled,END, 0.0, 0.0, 0.0, 0.0);
+    drawtemprect(gctiled, END, 0.0, 0.0, 0.0, 0.0); 
+    drawtemparc(gctiled, END, 0.0, 0.0, 0.0, 0.0, 0.0); 
     ui_state &= ~SELECTION;
     //\statusmsg("",2);
     my_snprintf(str, S(str), "%s/%s", home_dir, ".xschem_selection.sch"); // 20161115  PWD->HOME
@@ -717,10 +677,10 @@ void select_box(int c, int i, unsigned short select_mode, int fast)
     } else {
       rect[c][i].sel |= select_mode; //20070202
     }
-    if(x_initialized) drawtemprect(gc[SELLAYER], ADD, rect[c][i].x1, rect[c][i].y1, rect[c][i].x2, rect[c][i].y2);
+    drawtemprect(gc[SELLAYER], ADD, rect[c][i].x1, rect[c][i].y1, rect[c][i].x2, rect[c][i].y2);
   } else {
     rect[c][i].sel = 0; //20070202
-    if(x_initialized) drawtemprect(gctiled, NOW, rect[c][i].x1, rect[c][i].y1, rect[c][i].x2, rect[c][i].y2);
+    drawtemprect(gctiled, NOW, rect[c][i].x1, rect[c][i].y1, rect[c][i].x2, rect[c][i].y2);
   }
 
   if( rect[c][i].sel == (SELECTED1|SELECTED2|SELECTED3|SELECTED4)) rect[c][i].sel = SELECTED;
@@ -728,6 +688,37 @@ void select_box(int c, int i, unsigned short select_mode, int fast)
   need_rebuild_selected_array=1;
   // fprintf(errfp, "select_box(): select_mode=%d, box#=%d, rect[].sel=%d\n", select_mode, i, rect[c][i].sel);
 }
+
+
+
+void select_arc(int c, int i, unsigned short select_mode, int fast)
+{
+  char str[1024];   // overflow safe
+  char s[256];    // overflow safe
+  if(!fast)
+  {
+   my_strncpy(s,rect[c][i].prop_ptr!=NULL?rect[c][i].prop_ptr:"<NULL>",S(s));
+   my_snprintf(str, S(str), "selected arc : layer=%d, n=%d properties: %s",c-4,i,s);
+   statusmsg(str,2);
+   // 20070323
+   my_snprintf(str, S(str), "x = %.16g  y = %.16g  r = %.16g a = %.16g b = %.16g",
+      arc[c][i].x, arc[c][i].y, arc[c][i].r, arc[c][i].a, arc[c][i].b);
+   statusmsg(str,1);
+  }
+  if(select_mode) {
+    arc[c][i].sel = select_mode;
+    drawtemparc(gc[SELLAYER], ADD, arc[c][i].x, arc[c][i].y, arc[c][i].r, arc[c][i].a, arc[c][i].b);
+  } else {
+    arc[c][i].sel = 0; //20070202
+    drawtemparc(gctiled, NOW, arc[c][i].x, arc[c][i].y, arc[c][i].r, arc[c][i].a, arc[c][i].b);
+  }
+
+  //if( arc[c][i].sel == (SELECTED1|SELECTED2|SELECTED3|SELECTED4)) arc[c][i].sel = SELECTED;
+
+  need_rebuild_selected_array=1;
+}
+
+
 
 void select_polygon(int c, int i, unsigned short select_mode, int fast )
 {
@@ -744,10 +735,10 @@ void select_polygon(int c, int i, unsigned short select_mode, int fast )
   }
   polygon[c][i].sel = select_mode;
   if(select_mode) {
-   if(x_initialized) drawtemppolygon(gc[SELLAYER], NOW, polygon[c][i].x, polygon[c][i].y, polygon[c][i].points);
+   drawtemppolygon(gc[SELLAYER], NOW, polygon[c][i].x, polygon[c][i].y, polygon[c][i].points);
   }
   else
-   if(x_initialized) drawtemppolygon(gctiled, NOW, polygon[c][i].x, polygon[c][i].y, polygon[c][i].points);
+   drawtemppolygon(gctiled, NOW, polygon[c][i].x, polygon[c][i].y, polygon[c][i].points);
   need_rebuild_selected_array=1;
 }
 
@@ -772,10 +763,10 @@ void select_line(int c, int i, unsigned short select_mode, int fast )
   else 
    line[c][i].sel = select_mode;
   if(select_mode) {
-   if(x_initialized) drawtempline(gc[SELLAYER], ADD, line[c][i].x1, line[c][i].y1, line[c][i].x2, line[c][i].y2);
+   drawtempline(gc[SELLAYER], ADD, line[c][i].x1, line[c][i].y1, line[c][i].x2, line[c][i].y2);
   }
   else
-   if(x_initialized) drawtempline(gctiled, NOW, line[c][i].x1, line[c][i].y1, line[c][i].x2, line[c][i].y2);
+   drawtempline(gctiled, NOW, line[c][i].x1, line[c][i].y1, line[c][i].x2, line[c][i].y2);
   need_rebuild_selected_array=1;
 }
 
@@ -785,8 +776,9 @@ unsigned short select_object(double mousex,double mousey, unsigned short select_
    Selected sel;
    sel = find_closest_obj(mousex,mousey);
 
-   if(x_initialized) drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
-   if(x_initialized) drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
+   drawtemparc(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
+   drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
+   drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
 
    switch(sel.type)
    {
@@ -805,6 +797,9 @@ unsigned short select_object(double mousex,double mousey, unsigned short select_
     case RECT:
      select_box(sel.col,sel.n, select_mode,0);
      break;
+    case ARC:
+     select_arc(sel.col,sel.n, select_mode,0);
+     break;
     case ELEMENT:
      select_element(sel.n,select_mode,0);
      break;
@@ -812,8 +807,9 @@ unsigned short select_object(double mousex,double mousey, unsigned short select_
      break;
    } //end switch
 
-   if(x_initialized) drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
-   if(x_initialized) drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0); 
+   drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
+   drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0); 
+   drawtemparc(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0, 0.0);
 
    if(sel.type)  ui_state |= SELECTION;
    return sel.type;
@@ -822,11 +818,14 @@ unsigned short select_object(double mousex,double mousey, unsigned short select_
 void select_inside(double x1,double y1, double x2, double y2, int sel) // 20150927 added unselect (sel param)
 {
  int c,i;
+ double x, y, r, a, b, xa, ya, xb, yb; // arc
+ Box tmp;
  #ifdef HAS_CAIRO
  int customfont;
  #endif
- if(x_initialized) drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
- if(x_initialized) drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0); 
+ drawtemparc(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
+ drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
+ drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0); 
 
  for(i=0;i<lastwire;i++)
  {
@@ -916,6 +915,38 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) // 201509
    }
   }
 
+  for(i=0;i<lastarc[c];i++) {
+    x = arc[c][i].x;
+    y = arc[c][i].y;
+    a = arc[c][i].a;
+    b = arc[c][i].b;
+    r = arc[c][i].r;
+    xa = x + r * cos(a * XSCH_PI/180.);
+    ya = y - r * sin(a * XSCH_PI/180.);
+    xb = x + r * cos((a+b) * XSCH_PI/180.);
+    yb = y - r * sin((a+b) * XSCH_PI/180.);
+    arc_bbox(x, y, r, a, b, &tmp.x1, &tmp.y1, &tmp.x2, &tmp.y2);
+    if(RECTINSIDE(tmp.x1, tmp.y1, tmp.x2, tmp.y2, x1,y1,x2,y2)) {
+      ui_state |= SELECTION; // set ui_state to SELECTION also if unselecting by area ????
+      sel? select_arc(c, i, SELECTED,1): select_arc(c, i, 0,1);
+    }
+    else if( sel && enable_stretch && POINTINSIDE(x, y, x1, y1, x2, y2) )
+    {
+     ui_state |= SELECTION; // set ui_state to SELECTION also if unselecting by area ????
+     select_arc(c, i,SELECTED1,1);
+    }
+    else if( sel && enable_stretch && POINTINSIDE(xb, yb, x1, y1, x2, y2) )
+    {
+     ui_state |= SELECTION; // set ui_state to SELECTION also if unselecting by area ????
+     select_arc(c, i,SELECTED3,1);
+    }
+    else if( sel && enable_stretch && POINTINSIDE(xa, ya, x1, y1, x2, y2) )
+    {
+     ui_state |= SELECTION; // set ui_state to SELECTION also if unselecting by area ????
+     select_arc(c, i,SELECTED2,1);
+    }
+
+  }
 
   for(i=0;i<lastrect[c];i++)
   {
@@ -949,8 +980,9 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) // 201509
 
   } // end for i
  } // end for c
- if(x_initialized) drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
- if(x_initialized) drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0); 
+ drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
+ drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0); 
+ drawtemparc(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0, 0.0); 
 }
 
 
@@ -959,8 +991,9 @@ void select_all(void)
 {
  int c,i;
 
- if(x_initialized) drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
- if(x_initialized) drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0); 
+ drawtemparc(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
+ drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
+ drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0); 
 
  ui_state |= SELECTION;
 
@@ -986,13 +1019,18 @@ void select_all(void)
   {
     select_line(c,i,SELECTED,1);
   }
+  for(i=0;i<lastarc[c];i++)
+  {
+    select_arc(c,i, SELECTED, 1);
+  }
   for(i=0;i<lastrect[c];i++)
   {
     select_box(c,i, SELECTED, 1);
   }
  } // end for c
- if(x_initialized) drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
- if(x_initialized) drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0); 
+ drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
+ drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0); 
+ drawtemparc(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0, 0.0); 
 }
 
 

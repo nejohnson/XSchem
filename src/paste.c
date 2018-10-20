@@ -88,6 +88,29 @@ void merge_box(FILE *fd)
     modified=1;
 }
 
+void merge_arc(FILE *fd)
+{
+    int i,c;
+    Arc *ptr;
+
+    fscanf(fd, "%d",&c);
+    if(c>=cadlayers) {
+      fprintf(errfp,"arc layer > defined cadlayers, increase cadlayers\n");
+      c=cadlayers-1;
+    } // 20150408
+    check_arc_storage(c);
+    i=lastarc[c];
+    ptr=arc[c];
+    fscanf(fd, "%lf %lf %lf %lf %lf ",&ptr[i].x, &ptr[i].y,
+           &ptr[i].r, &ptr[i].a, &ptr[i].b);
+    ptr[i].prop_ptr=NULL;
+    ptr[i].sel=0;
+    load_ascii_string(&ptr[i].prop_ptr, fd);
+    select_arc(c,i, SELECTED, 1);
+    lastarc[c]++;
+    modified=1;
+}
+
 
 void merge_polygon(FILE *fd)
 {
@@ -307,6 +330,9 @@ void merge_file(int selection_load, char ext[])
        case 'B':
         merge_box(fd);
         break;
+       case 'A':
+        merge_arc(fd);
+        break;
        case 'P':
         merge_polygon(fd);
         break;
@@ -320,8 +346,9 @@ void merge_file(int selection_load, char ext[])
         merge_inst(k++,fd);
         break;
        default:
-        if(debug_var>=1) fprintf(errfp, "merge_file(): unknown line, assuming EOF\n");
-        endfile=1;
+        // if(debug_var>=1) fprintf(errfp, "merge_file(): unknown line, assuming EOF\n");
+        // endfile=1;
+        read_line(fd); /* read rest of line and discard */
         break;
       }
      }

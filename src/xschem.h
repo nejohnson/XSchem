@@ -133,6 +133,8 @@
 #define MENUSTARTSNAPWIRE 65536   /*  start wire invoked from menu, snap to pin variant 20171022 */
 #define STARTPOLYGON 131072   /*  20171115 */
 #define MENUSTARTPOLYGON 262144   /*  20171117 */
+#define STARTARC 524288
+#define MENUSTARTARC 1048576
 
 #define SELECTED 1          /*  used in the .sel field for selected objs. */
 #define SELECTED1 2	    /*  first point selected... */
@@ -147,6 +149,7 @@
 #define ELEMENT 8
 #define TEXT 16
 #define POLYGON 32 /*  20171115 */
+#define ARC 64
 
 /*  for netlist.c */
 #define BOXSIZE 1000
@@ -211,9 +214,17 @@ if(y2 < y1) { xxtmp=y1;y1=y2;y2=xxtmp;}
 #define OUTSIDE(xa,ya,xb,yb,x1,y1,x2,y2) \
  (xa>=x2 || xb<=x1 ||  ya>=y2 || yb<=y1 )
 
+#define LINE_OUTSIDE(xa,ya,xb,yb,x1,y1,x2,y2) \
+ (xa>=x2 || xb<=x1 ||  ( (ya<yb)? (ya>=y2 || yb<=y1) : (yb>=y2 || ya<=y1) ) )
+
 #define CLIP(x,a,b) (x<a?a:x>b?b:x)
 
 #define MINOR(a,b) ( (a) <= (b) ? (a) : (b) )
+
+#define X_TO_SCREEN(x) ( floor((x+xorigin)* mooz) )
+#define Y_TO_SCREEN(y) ( floor((y+yorigin)* mooz) )
+#define X_TO_XSCHEM(x) ((x)*zoom -xorigin)
+#define Y_TO_XSCHEM(y) ((y)*zoom -yorigin)
 
 typedef struct
 {
@@ -279,7 +290,6 @@ typedef struct // 20181012
   double b; /* arc angle */
   unsigned short sel;
   char *prop_ptr;
-  int fill;
 } Arc;
 
 typedef struct
@@ -306,7 +316,7 @@ typedef struct
    Line **lineptr;  /*  array of [cadlayers] pointers to Line */
    Box  **boxptr;
    Polygon **polygonptr; /* 20171115 */
-   Arc **Arcptr; // 20181012
+   Arc **arcptr; // 20181012
    Text  *txtptr;
    int *lines;     /*  array of [cadlayers] integers */
    int *rects;
@@ -414,7 +424,6 @@ extern int prepared_netlist_structs;
 extern int prepared_hilight_structs;
 extern int prepared_hash_objects;
 extern int prepared_hash_wires;
-extern int x_initialized;
 extern int has_x; 
 extern int sym_txt;
 extern int rainbow_colors; 
@@ -585,8 +594,9 @@ extern void updatebbox(int count,Box *boundbox,Box *tmp);
 extern void set_linewidth();
 extern void draw_selection(GC g, int interruptable);
 extern void delete(void);
-extern void delete_only_rect_and_line_and_poly(void);
+extern void delete_only_rect_line_arc_poly(void);
 extern void polygon_bbox(double *x, double *y, int points, double *bx1, double *by1, double *bx2, double *by2);
+extern void arc_bbox(double x, double y, double r, double a, double b, double *bx1, double *by1, double *bx2, double *by2);
 extern void bbox(int what,double x1,double y1, double x2, double y2);
 extern int set_text_custom_font(Text *txt);
 extern int text_bbox(char * str,double xscale, double yscale,
@@ -619,6 +629,7 @@ extern int callback(int event, int mx, int my, KeySym key,
 extern void resetwin(void);
 extern void find_closest_net(double mx,double my);
 extern void find_closest_box(double mx,double my);
+extern void find_closest_arc(double mx,double my);
 extern void find_closest_element(double mx,double my);
 extern void find_closest_line(double mx,double my);
 extern void find_closest_polygon(double mx,double my);/* 20171115 */
@@ -641,6 +652,8 @@ extern void drawtempline(GC gc, int what, double x1,double y1,double x2,double y
 extern void drawgrid(void);
 extern void drawtemprect(GC gc, int what, double rectx1,double recty1,
             double rectx2,double recty2);
+extern void drawtemparc(GC gc, int what, double x, double y, double r, double a, double b);
+extern void drawarc(int c, int what, double x, double y, double r, double a, double b);
 extern void drawtemppolygon(GC gc, int what, double *x, double *y, int points);
 extern void drawpolygon(int c, int what, double *x, double *y, int points, int poly_fill);
 extern void draw_temp_symbol_outline(int what, GC gc, int n,int layer,
@@ -667,6 +680,9 @@ extern void storeobject(int pos, double x1,double y1,double x2,double y2,
 		        unsigned short sel, char *prop_ptr);
 extern void store_polygon(int pos, double *x, double *y, int points,  /*  20171115 */
            unsigned int rectcolor, unsigned short sel, char *prop_ptr);
+extern void store_arc(int pos, double x, double y, double r, double a, double b,
+               unsigned int rectcolor, unsigned short sel, char *prop_ptr);
+
 extern void freenet_nocheck(int i);
 extern void spice_netlist(FILE *fd, int spice_stop);
 extern void tedax_netlist(FILE *fd, int spice_stop);
@@ -703,7 +719,9 @@ extern void load_text(FILE *fd);
 extern void load_wire(FILE *fd);
 extern void load_inst(FILE *fd);
 extern void load_box(FILE *fd);
+extern void load_arc(FILE *fd);
 extern void read_xschem_file(FILE *fd); /*  20180912 */
+extern char *read_line(FILE *fp);
 extern void load_polygon(FILE *fd); /*  20171115 */
 extern void load_line(FILE *fd);
 extern void create_sch_from_sym(void);
@@ -714,6 +732,9 @@ extern void view_zoom(double z);
 extern void draw_stuff(void);
 extern void new_wire(int what, double mx_snap, double my_snap);
 extern void new_line(int what);
+extern void new_arc(int what, double sweep);
+extern void arc_3_points(double x1, double y1, double x2, double y2, double x3, double y3,
+         double *x, double *y, double *r, double *a, double *b);
 extern void move_objects(int what,int merge, double dx, double dy);
 extern void copy_objects(int what);
 extern void pan(int what);
@@ -765,6 +786,7 @@ extern void check_inst_storage(void);
 extern void check_symbol_storage(void);
 extern void check_selected_storage(void);
 extern void check_box_storage(int c);
+extern void check_arc_storage(int c);
 extern void check_line_storage(int c);
 extern void check_polygon_storage(int c); /*  20171115 */
 extern const char *expandlabel(const char *s, int *m);
@@ -774,6 +796,7 @@ extern void select_wire(int i, unsigned short select_mode, int fast);
 extern void select_element(int i, unsigned short select_mode, int fast);
 extern void select_text(int i, unsigned short select_mode, int fast);
 extern void select_box(int c, int i, unsigned short select_mode, int fast);
+extern void select_arc(int c, int i, unsigned short select_mode, int fast);
 extern void select_line(int c, int i, unsigned short select_mode, int fast);
 extern void select_polygon(int c, int i, unsigned short select_mode, int fast );
 extern const char *pin_node(int i, int j, int *mult, int hash_prefix_unnamed_net);

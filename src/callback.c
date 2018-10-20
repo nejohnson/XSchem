@@ -28,6 +28,7 @@ int callback(int event, int mx, int my, KeySym key,
                  int button, int aux, int state)  
 {
  static int mx_save, my_save;
+ static double sweep; // arc sweep
  char str[PATH_MAX];/* overflow safe 20161122 */
  FILE *fp;
  unsigned short sel;
@@ -44,8 +45,8 @@ int callback(int event, int mx, int my, KeySym key,
    /* return 0; */
  }
  semaphore++;		/* used to debug Tcl-Tk frontend */
- mousex=mx*zoom - xorigin;
- mousey=my*zoom - yorigin;
+ mousex=X_TO_XSCHEM(mx);
+ mousey=Y_TO_XSCHEM(my);
  mousex_snap=round(( mousex)/cadsnap)*cadsnap;
  mousey_snap=round(( mousey)/cadsnap)*cadsnap;
  my_snprintf(str, S(str), "mouse = %.16g %.16g - %s  selected: %d", 
@@ -127,6 +128,11 @@ int callback(int event, int mx, int my, KeySym key,
       if(vertical_move) mousex_snap = mx_double_save;
       new_wire(RUBBER, mousex_snap, mousey_snap);
     }
+    if(ui_state & STARTARC) {
+      if(horizontal_move) mousey_snap = my_double_save; /* 20171023 */
+      if(vertical_move) mousex_snap = mx_double_save;
+      new_arc(RUBBER, sweep);
+    }
     if(ui_state & STARTLINE) {
       if(horizontal_move) mousey_snap = my_double_save; /* 20171023 */
       if(vertical_move) mousex_snap = mx_double_save;
@@ -179,7 +185,7 @@ int callback(int event, int mx, int my, KeySym key,
           select_rect(BEGIN,1);
         }
         if(abs(mx-mx_save) > 8 || abs(my-my_save) > 8 ) {  /* 20121130 set some reasonable threshold before unselecting */
-          select_object(mx_save*zoom-xorigin, my_save*zoom -yorigin, 0); /* 20121130 remove near object if dragging */
+          select_object(X_TO_XSCHEM(mx_save), Y_TO_XSCHEM(my_save), 0); /* 20121130 remove near object if dragging */
         }
       }
     }
@@ -501,11 +507,11 @@ int callback(int event, int mx, int my, KeySym key,
      int xx, yy;
      if(!(ui_state & STARTWIRE)){
        find_closest_net_or_symbol_pin(mousex, mousey, &x, &y);
-       xx = (x+xorigin)*mooz;
-       yy = (y+yorigin)*mooz;
+       xx = X_TO_SCREEN(x);
+       yy = Y_TO_SCREEN(y);
        mx_save = xx; my_save = yy; /* 20070323 */
-       mx_double_save=round(( xx*zoom - xorigin)/cadsnap)*cadsnap;
-       my_double_save=round(( yy*zoom - yorigin)/cadsnap)*cadsnap;
+       mx_double_save=round( X_TO_XSCHEM(xx)/cadsnap)*cadsnap;
+       my_double_save=round( Y_TO_XSCHEM(yy)/cadsnap)*cadsnap;
        new_wire(PLACE, x, y);
      }
      else {
@@ -785,7 +791,25 @@ int callback(int event, int mx, int my, KeySym key,
      skip_dim_background = !skip_dim_background;
      break;
    }
-   if(key=='C' && state == ShiftMask)   /* Toggle light/dark colorscheme 20171113 */
+   if(key=='C' && state == ShiftMask)   /* place arc */
+   {
+     mx_save = mx; my_save = my;
+     mx_double_save=mousex_snap;
+     my_double_save=mousey_snap;
+     sweep=180.;
+     new_arc(PLACE, sweep);
+     break;
+   }
+   if(key=='C' && state == (ControlMask|ShiftMask))   /* place circle */
+   {
+     mx_save = mx; my_save = my;
+     mx_double_save=mousex_snap;
+     my_double_save=mousey_snap;
+     sweep=360.;
+     new_arc(PLACE, sweep);
+     break;
+   }
+   if(key=='O' && state == ShiftMask)   /* Toggle light/dark colorscheme 20171113 */
    {
      dark_colorscheme=!dark_colorscheme;
      color_dim=0.0;
@@ -948,9 +972,34 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='u' && state==ControlMask)			/* testmode */
    {
-    XFillArc(display, window, gc[6], 100,100,200, 400, -64*90, 64*180);
-    XDrawArc(display, window, gc[5], 100,100,200, 400, -64*90, 64*180);
-    /* XCopyArea(display, save_pixmap, window, gctiled, 0, 0, xrect[0].width, xrect[0].height, 0, 0); */
+    double x1, y1, x2, y2;
+    double x, y, a, b, r;
+    static int toggle=1;
+ 
+    x = 300.;
+    y = -3300.;
+    r = 120.;
+    a = 270.;
+    b = 180.; // sweep of arc
+
+    arc_bbox(x, y, r, a, b, &x1,&y1,&x2,&y2);
+
+    if(toggle) {
+      drawrect(2, NOW,  x1, y1, x2, y2);
+      drawarc(6, BEGIN, 0,0,0,0,0);
+      drawarc(6, ADD, x,y,r,a,b);
+      drawarc(6, ADD, y,x,r,a,b);
+      drawarc(6, END, 0,0,0,0,0);
+    } else {
+      drawtemprect(gctiled, NOW,  x1, y1, x2, y2);
+      drawtemparc(gctiled, NOW, x,y,r,a,b);
+    }
+
+    toggle=!toggle;
+
+
+
+
     break;
    }
    if(key=='u' && state==0)				/* undo */
@@ -1228,9 +1277,12 @@ int callback(int event, int mx, int my, KeySym key,
     draw();
    }
    else if(button==Button3) {
-
-
-     if( ui_state & STARTPOLYGON) { /* open polygon */
+     /* open polygon excluding current mouse pos */
+     if( (ui_state & STARTPOLYGON) && (state & ShiftMask) ) {
+      new_polygon(SET);
+      break;
+     /* open polygon including current mouse pos*/
+     } else if ( ui_state & STARTPOLYGON && state==0) {
       new_polygon(ADD|SET);
       break;
      } else {
@@ -1277,11 +1329,11 @@ int callback(int event, int mx, int my, KeySym key,
        int xx, yy;
        
        find_closest_net_or_symbol_pin(mousex, mousey, &x, &y);
-       xx = (x+xorigin)*mooz;
-       yy = (y+yorigin)*mooz;
+       xx = X_TO_SCREEN(x);
+       yy = Y_TO_SCREEN(y);
        mx_save = xx; my_save = yy; /* 20070323 */
-       mx_double_save=round(( xx*zoom - xorigin)/cadsnap)*cadsnap;
-       my_double_save=round(( yy*zoom - yorigin)/cadsnap)*cadsnap;
+       mx_double_save=round( X_TO_XSCHEM(xx)/cadsnap )*cadsnap;
+       my_double_save=round( Y_TO_XSCHEM(yy)/cadsnap )*cadsnap;
        new_wire(PLACE, x, y);
        ui_state &=~MENUSTARTSNAPWIRE;
        break;
@@ -1325,6 +1377,10 @@ int callback(int event, int mx, int my, KeySym key,
      }
      if(ui_state & STARTWIRE) {
        new_wire(PLACE|END, mousex_snap, mousey_snap);
+       break;
+     }
+     if(ui_state & STARTARC) {
+       new_arc(SET, sweep);
        break;
      }
      if(ui_state & STARTLINE) {

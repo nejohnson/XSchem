@@ -228,6 +228,8 @@ void xwin_exit(void)
       my_free(&pixdata[i]);
       my_free(&rect[i]);
       my_free(&line[i]);
+      my_free(&polygon[i]);
+      my_free(&arc[i]);
  }
  if(debug_var>=1) fprintf(errfp, "xwin_exit(): freeing instances\n");
  my_free(&inst_ptr);
@@ -442,7 +444,12 @@ void alloc_data()
      fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
    }
 
-   instdef[i].boxptr=my_calloc(cadlayers, sizeof(Line *));
+   instdef[i].arcptr=my_calloc(cadlayers, sizeof(Arc *));
+   if(instdef[i].arcptr==NULL){
+     fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
+   }
+
+   instdef[i].boxptr=my_calloc(cadlayers, sizeof(Box *));
    if(instdef[i].boxptr==NULL){
      fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
    }
@@ -454,6 +461,10 @@ void alloc_data()
 
    instdef[i].rects=my_calloc(cadlayers, sizeof(int));
    if(instdef[i].rects==NULL){
+     fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
+   }
+   instdef[i].arcs=my_calloc(cadlayers, sizeof(int));
+   if(instdef[i].arcs==NULL){
      fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
    }
    instdef[i].polygons=my_calloc(cadlayers, sizeof(int)); // 20171115
@@ -472,6 +483,11 @@ void alloc_data()
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
+ max_arcs=my_calloc(cadlayers, sizeof(int));
+ if(max_arcs==NULL){
+   fprintf(errfp, "Tcl_AppInit(): max_arcscalloc error\n");tcleval( "exit");
+ }
+
  max_polygons=my_calloc(cadlayers, sizeof(int)); // 20171115
  if(max_polygons==NULL){
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
@@ -487,6 +503,7 @@ void alloc_data()
   max_rects[i]=CADMAXOBJECTS;
   max_polygons[i]=CADMAXOBJECTS; // 20171115
   max_lines[i]=CADMAXOBJECTS;
+  max_arcs[i]=CADMAXOBJECTS;
  }
 
  rect=my_calloc(cadlayers, sizeof(Box *));
@@ -504,12 +521,21 @@ void alloc_data()
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
+ arc=my_calloc(cadlayers, sizeof(Arc *));
+ if(arc==NULL){
+   fprintf(errfp, "Tcl_AppInit(): arc calloc error\n");tcleval( "exit");
+ }
 
  for(i=0;i<cadlayers;i++)
  {
   rect[i]=my_calloc(max_rects[i],sizeof(Box));
   if(rect[i]==NULL){
     fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
+  }
+
+  arc[i]=my_calloc(max_arcs[i],sizeof(Arc));
+  if(arc[i]==NULL){
+    fprintf(errfp, "Tcl_AppInit(): arc[] calloc error\n");tcleval( "exit");
   }
 
   polygon[i]=my_calloc(max_polygons[i],sizeof(Polygon));
@@ -530,6 +556,11 @@ void alloc_data()
 
  lastpolygon=my_calloc(cadlayers, sizeof(int)); // 20171115
  if(lastpolygon==NULL){
+   fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
+ }
+
+ lastarc=my_calloc(cadlayers, sizeof(int)); // 20171115
+ if(lastarc==NULL){
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
@@ -1068,7 +1099,6 @@ int Tcl_AppInit(Tcl_Interp *inter)
 
 
  } // if(has_x)
- x_initialized=1;
  if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done X init\n");
 
  // 

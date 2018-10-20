@@ -168,6 +168,54 @@ void find_closest_net_or_symbol_pin(double mx,double my, double *x, double *y)
   *y = min_dist_y;
 }
 
+void find_closest_arc(double mx,double my)
+{
+ static double threshold = 0.2;
+ double dist, angle, angle1, angle2;
+ int i,c,r=-1;
+ int match;
+
+ for(c=0;c<cadlayers;c++)
+ {
+  for(i=0;i<lastarc[c];i++)
+  {
+    dist = fabs(pow(mx-arc[c][i].x,2) + pow(my-arc[c][i].y,2) - pow(arc[c][i].r,2));
+    angle = fmod(atan2(arc[c][i].y-my, mx-arc[c][i].x)*180./XSCH_PI, 360.);
+    if(angle<0.) angle +=360.;
+    angle1 = arc[c][i].a;
+    angle2 = fmod(arc[c][i].a + arc[c][i].b, 360.);
+
+    match=0;
+    if(dist < distance) {
+      if(arc[c][i].b==360.) match=1;
+      if(angle2<angle1) {
+        if(angle >= angle1 || angle<= angle2) {
+          match=1;
+        }
+      } else {
+        if(angle >= angle1 && angle <= angle2) {
+          match =1;
+        }
+      }
+    }
+    if(debug_var>=1) fprintf(errfp, "find_closest_arc(): dist = %g, angle = %g\n", dist, angle);
+    if(debug_var>=1) fprintf(errfp, "find_closest_arc(): center=%g,%g: mouse: %g:%g\n", 
+                             arc[c][i].x, arc[c][i].y, mx, my);
+    if(match ) {
+      if(debug_var>=1) fprintf(errfp, "find_closest_arc(): i = %d\n", i);
+      r = i; 
+      distance = dist;
+      sel.col = c;
+    }
+  } // end for i
+ } // end for c
+ if( r!=-1 && distance <= threshold* pow(arc[sel.col][r].r,2))
+ {
+  sel.n = r; sel.type = ARC;
+ }
+}
+
+
 void find_closest_box(double mx,double my)
 {
  double tmp;
@@ -258,6 +306,7 @@ Selected find_closest_obj(double mx,double my)
  find_closest_line(mx,my);
  find_closest_polygon(mx,my);
  find_closest_box(mx,my);
+ find_closest_arc(mx,my);
  find_closest_text(mx,my);
  find_closest_net(mx,my);
  find_closest_element(mx,my);

@@ -394,6 +394,13 @@ void remove_symbol(void)
      my_free(&instdef[j].lineptr[c][i].prop_ptr);
     }
    }
+   for(i=0;i<instdef[j].arcs[c];i++)
+   {
+    if(instdef[j].arcptr[c][i].prop_ptr != NULL)
+    {
+     my_free(&instdef[j].arcptr[c][i].prop_ptr);
+    }
+   }
    if(instdef[j].lineptr[c]) my_free(&instdef[j].lineptr[c]);
    for(i=0;i<instdef[j].rects[c];i++)
    {
@@ -476,6 +483,10 @@ void clear_drawing(void)
   {
    if(rect[i][j].prop_ptr!=NULL) my_free(&rect[i][j].prop_ptr);
   }
+  for(j=0;j<lastarc[i];j++)
+  {
+   if(arc[i][j].prop_ptr!=NULL) my_free(&arc[i][j].prop_ptr);
+  }
   for(j=0;j<lastpolygon[i]; j++) {/*  20171115 */
     if(polygon[i][j].x!=NULL) my_free(&polygon[i][j].x);
     if(polygon[i][j].y!=NULL) my_free(&polygon[i][j].y);
@@ -483,6 +494,7 @@ void clear_drawing(void)
     if(polygon[i][j].selected_point!=NULL)  my_free(&polygon[i][j].selected_point); 
   }
   lastline[i] = 0;
+  lastarc[i] = 0;
   lastrect[i] = 0;
   lastpolygon[i] = 0;/*  20171115 */
  }
@@ -739,11 +751,11 @@ void place_symbol(int pos,char *symbol_name, double x, double y, int rot, int fl
     bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
   }
   /*   hilight new element 24122002 */
-  if(x_initialized) drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
-  if(x_initialized) drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
+  drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
+  drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
   select_element(n, SELECTED,0);
-  if(x_initialized) drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
-  if(x_initialized) drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
+  drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
+  drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
 
  }
 }
@@ -801,6 +813,7 @@ void launcher(void) /*  20161102 */
     n=selectedgroup[0].n;
     my_strncpy(program, get_tok_value(inst_ptr[n].prop_ptr,"program",2), S(program)); /*  20170414 handle backslashes */
     str = get_tok_value(inst_ptr[n].prop_ptr,"url",2); /*  20170414 handle backslashes */
+    if(debug_var>=1) fprintf(errfp, "launcher(): str=%s\n", str);
     if(str[0] || (program[0])) {
       tclsetvar("launcher_var",str);
       if(program[0]) { /*  20170413 leave launcher_program empty if unspecified */
@@ -1023,6 +1036,14 @@ void calc_drawing_bbox(Box *boundbox)
       if(k==0 || polygon[c][i].y[k] > y2) y2 = polygon[c][i].y[k];
     }
     tmp.x1=x1;tmp.y1=y1;tmp.x2=x2;tmp.y2=y2;
+    updatebbox(count,boundbox,&tmp);
+  }
+
+  for(i=0;i<lastarc[c];i++)
+  {
+    arc_bbox(arc[c][i].x, arc[c][i].y, arc[c][i].r, arc[c][i].a, arc[c][i].b,
+             &tmp.x1, &tmp.y1, &tmp.x2, &tmp.y2);
+    count++;
     updatebbox(count,boundbox,&tmp);
   }
 
@@ -1279,7 +1300,7 @@ void new_wire(int what, double mx_snap, double my_snap)
 void change_layer()
 {
   int k, n, type, c;
-  double x1,y1,x2,y2;
+  double x1,y1,x2,y2, a, b, r;
 
 
    if(lastselected) push_undo(); /*  20151204 */
@@ -1295,6 +1316,14 @@ void change_layer()
        y2 = line[c][n].y2;
        storeobject(-1, x1,y1,x2,y2,LINE,rectcolor, 0, line[c][n].prop_ptr);
      }
+     if(type==ARC && arc[c][n].sel==SELECTED) {
+       x1 = arc[c][n].x;
+       y1 = arc[c][n].y;
+       r = arc[c][n].r;
+       a = arc[c][n].a;
+       b = arc[c][n].b;
+       store_arc(-1, x1, y1, r, a, b, rectcolor, 0, arc[c][n].prop_ptr);
+     }
      if(type==POLYGON && polygon[c][n].sel==SELECTED) {
         store_polygon(-1, polygon[c][n].x, polygon[c][n].y, polygon[c][n].points, rectcolor, 0, polygon[c][n].prop_ptr);
      }
@@ -1306,8 +1335,134 @@ void change_layer()
        storeobject(-1, x1,y1,x2,y2,RECT,rectcolor, 0, rect[c][n].prop_ptr);
      }
    }
-   if(lastselected) delete_only_rect_and_line_and_poly();
+   if(lastselected) delete_only_rect_line_arc_poly();
    unselect_all();
+}
+
+void new_arc(int what, double sweep)
+{
+  static double x, y, r, a, b;
+  static double x1, y1, x2, y2, x3, y3;
+  static double xx1, yy1, xx2, yy2;
+  static int state;
+  if(what & PLACE) {
+    state=0;
+    r = -1.;
+    xx1 = xx2 = x1 = x2 = x3 = mousex_snap;
+    yy1 = yy2 = y1 = y2 = y3 = mousey_snap;
+    ui_state |= STARTARC;
+  }
+  if(what & SET) {
+    if(state==0) {
+      x2 = mousex_snap;
+      y2 = mousey_snap;
+      drawtempline(gctiled, NOW, xx1,yy1,xx2,yy2);
+      state=1;
+    } else if(state==1) {
+      x3 = mousex_snap;
+      y3 = mousey_snap;
+      arc_3_points(x1, y1, x2, y2, x3, y3, &x, &y, &r, &a, &b);
+      if(sweep==360.) b=360.;
+      if(r>0.) {
+        push_undo();
+        drawarc(rectcolor, NOW, x, y, r, a, b);
+        store_arc(-1, x, y, r, a, b, rectcolor, 0, NULL);
+      }
+      ui_state &= ~STARTARC;
+      state=0;
+    }
+  }
+  if(what & RUBBER) {
+    if(state==0) {
+      drawtempline(gctiled, NOW, xx1,yy1,xx2,yy2);
+      xx2 = mousex_snap;
+      yy2 = mousey_snap;
+      xx1 = x1;yy1 = y1;
+      ORDER(xx1,yy1,xx2,yy2);
+      drawtempline(gc[SELLAYER], NOW, xx1,yy1,xx2,yy2);
+    }
+    else if(state==1) {
+      x3 = mousex_snap;
+      y3 = mousey_snap;
+      if(r>0.) drawtemparc(gctiled, NOW, x, y, r, a, b);
+      arc_3_points(x1, y1, x2, y2, x3, y3, &x, &y, &r, &a, &b);
+      if(sweep==360.) b=360.;
+      if(r>0.) drawtemparc(gc[rectcolor], NOW, x, y, r, a, b);
+    }
+  }
+}
+
+void xnew_arc(int what, double sweep)
+{
+ static double x,y,r, xx, yy;
+ 
+
+   if( what & PLACE )
+   {
+    if( r>0  && (ui_state & STARTARC) )
+    {
+     push_undo();
+     if(fabs(xx-x) > fabs(yy-y)) {
+       if(xx > x) {
+         drawarc(rectcolor, NOW, x, y, r, 270., sweep);
+         store_arc(-1, x, y, r, 270., sweep, rectcolor, 0, NULL);
+       } else {
+         drawarc(rectcolor, NOW, x, y, r, 90., sweep);
+         store_arc(-1, x, y, r, 90., sweep, rectcolor, 0, NULL);
+       }
+     } else {
+       if(yy > y) {
+         drawarc(rectcolor, NOW, x, y, r, 180., sweep);
+         store_arc(-1, x, y, r, 180., sweep, rectcolor, 0, NULL);
+       } else {
+         drawarc(rectcolor, NOW, x, y, r,   0., sweep);
+         store_arc(-1, x, y, r,   0., sweep, rectcolor, 0, NULL);
+       }
+     }
+    }
+    x = xx = mousex_snap;
+    y = yy = mousey_snap;
+    r = 0;
+    ui_state |= STARTARC;
+   }
+   if( what & END)
+   {
+    ui_state &= ~STARTARC;
+   }
+
+   if(what & RUBBER)
+   {
+    if(fabs(xx-x) > fabs(yy-y)) {
+      if(xx>x) {
+        drawtemparc(gctiled, NOW, x,y,r, 270., sweep);
+      } else {
+        drawtemparc(gctiled, NOW, x,y,r,  90., sweep);
+      }
+    } else {
+      if(yy>y) {
+        drawtemparc(gctiled, NOW, x,y,r, 180., sweep);
+      } else {
+        drawtemparc(gctiled, NOW, x,y,r,   0., sweep);
+      }
+    }
+    xx = mousex_snap;
+    yy = mousey_snap;
+    if(fabs(xx-x) > fabs(yy-y)) {
+      r = sqrt(pow(xx-x,2));
+      if(xx > x) {
+        drawtemparc(gc[rectcolor], NOW, x, y, r, 270., sweep);
+      } else {
+        drawtemparc(gc[rectcolor], NOW, x, y, r,  90., sweep);
+      }
+    } else {
+      r = sqrt(pow(yy-y,2));
+      if(yy > y) {
+        drawtemparc(gc[rectcolor], NOW, x, y, r, 180., sweep);
+      } else {
+        drawtemparc(gc[rectcolor], NOW, x, y, r,   0., sweep);
+      }
+    }
+   }
 }
 
 void new_line(int what)
@@ -1409,35 +1564,34 @@ void new_polygon(int what) /*  20171115 */
    }
    if( what & ADD)
    {  
-     if(what & SET) { /* 20181011 open poly */
-       x[points] = mousex_snap;
-       y[points] = mousey_snap;
-     }
-
+     /* closed poly */
      if(what & END) {
+       /* delete last rubber */
        drawtemppolygon(gctiled, NOW, x, y, points+1);
        x[points] = x[0]; 
-       y[points] = y[0]; /*  close the polygon path by user request */
-       drawtemppolygon(gc[rectcolor], NOW, x, y, points+1);
+       y[points] = y[0];
+     /* add point */
+     } else if(x[points] != x[points-1] || y[points] != y[points-1]) {
+       x[points] = mousex_snap;
+       y[points] = mousey_snap;
      } else {
-       if( mousex_snap != x[points-1] || mousey_snap != y[points-1] ) {
-         x[points] = mousex_snap;
-         y[points] = mousey_snap;
-       } else {
-         return; /* do not allow coincident ponts */
-       }
+       return;
      }
      points++;
-     /* fprintf(errfp, "added point: %.16g %.16g\n", x[points-1], y[points-1]); */
-     x[points]=x[points-1];y[points]=y[points-1]; /*  prepare next point for rubber */
-     /* fprintf(errfp, "new_poly: ADD, points=%d\n", points); */
-     if( (what & SET) || (x[points-1] == x[0] && y[points-1] == y[0]) ) { /*  closed polygon --> END */
-       push_undo();
-       store_polygon(-1, x, y, points, rectcolor, 0, NULL);
-       /* fprintf(errfp, "new_poly: finish: points=%d\n", points); */
-       ui_state &= ~STARTPOLYGON;
-       drawpolygon(rectcolor, NOW, x, y, points, 0); /*  20180914 added fill param */
-     }
+     /* prepare next point for rubber */
+     x[points]=x[points-1];y[points]=y[points-1];
+   }
+   /* end open or closed poly  by user request */
+   if((what&SET || (what&END)) ||
+        /* closed poly end by clicking on first point */
+        ((what & ADD) && x[points-1] == x[0] && y[points-1] == y[0]) ) {
+     push_undo();
+     drawtemppolygon(gctiled, NOW, x, y, points+1);
+     store_polygon(-1, x, y, points, rectcolor, 0, NULL);
+     /* fprintf(errfp, "new_poly: finish: points=%d\n", points); */
+     drawtemppolygon(gc[rectcolor], NOW, x, y, points);
+     ui_state &= ~STARTPOLYGON;
+     drawpolygon(rectcolor, NOW, x, y, points, 0); /*  20180914 added fill param */
    }
    if(what & RUBBER)
    {
@@ -1615,11 +1769,11 @@ void place_text(int draw_text, double mx, double my)
     cairo_restore(save_ctx);
   }
   #endif
-  if(x_initialized) drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
-  if(x_initialized) drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
+  drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
+  drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
   select_text(lasttext, SELECTED, 0);
-  if(x_initialized) drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
-  if(x_initialized) drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
+  drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
+  drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
   lasttext++;
   modified=1;
 }

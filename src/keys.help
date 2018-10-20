@@ -56,7 +56,8 @@ shift       'A'         Toggle show netlist
 ctrl        'b'         Toggle show text in symbol
 -           'c'         Copy selected obj. 
 ctrl        'c'         Save to clipboard
-shift       'C'         Toggle Light / Dark colorscheme
+shift       'C'         Start arc placement
+shift+ctrl  'C'         Start circle placement
 alt         'C'         Toggle dim/brite background with rest of layers
 ctrl        'd'         Exit
 ctrl        'e'         Back to parent schematic
@@ -92,6 +93,7 @@ ctrl        'o'         Load schematic
 -           'm'         Move selected obj.
 shift       'N'         Hierarchical netlist
 -           'n'         Netlist
+shift       'O'         Toggle Light / Dark colorscheme
 ctrl        'o'         Load schematic
 -           'p'         Pan
 shift       'P'         Pan, other way to.

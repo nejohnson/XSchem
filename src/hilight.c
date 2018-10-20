@@ -295,8 +295,8 @@ void search_inst(char *tok, char *val, int sub, int sel, int what)
  if(regcomp(&re, val , REG_EXTENDED)) return;
  if(debug_var>=1) fprintf(errfp, "search_inst():val=%s\n", val);
  if(sel==1) {
-   if(x_initialized) drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
-   if(x_initialized) drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
+   drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
+   drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
  }
  if(what==ADD || what==NOW) {
    
@@ -380,8 +380,8 @@ void search_inst(char *tok, char *val, int sub, int sel, int what)
     // delete_netlist_structs(); // 20161222
  }
  if(sel) {
-   if(x_initialized) drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
-   if(x_initialized) drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
+   drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
+   drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
  }
  else if(what==END) draw_hilight_net(1);
 
@@ -562,11 +562,13 @@ void draw_hilight_net(int on_window)
   for(i=0;i<lastwire;i++)
   {
     // 20150409
-    x1=(wire[i].x1+xorigin)*mooz;
-    x2=(wire[i].x2+xorigin)*mooz;
-    y1=(wire[i].y1+yorigin)*mooz;
-    y2=(wire[i].y2+yorigin)*mooz;
-    if( OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2)) continue;
+    x1=X_TO_SCREEN(wire[i].x1);
+    x2=X_TO_SCREEN(wire[i].x2);
+    y1=Y_TO_SCREEN(wire[i].y1);
+    y2=Y_TO_SCREEN(wire[i].y2);
+    if( LINE_OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2)) {
+      continue;
+    }
     // /20150409
 
     str = get_tok_value(wire[i].prop_ptr, "lab",0);
@@ -589,10 +591,10 @@ void draw_hilight_net(int on_window)
  for(i=0;i<lastinst;i++)
  {
    // 20150409
-   x1=(inst_ptr[i].x1+xorigin)*mooz;
-   x2=(inst_ptr[i].x2+xorigin)*mooz;
-   y1=(inst_ptr[i].y1+yorigin)*mooz;
-   y2=(inst_ptr[i].y2+yorigin)*mooz;
+   x1=X_TO_SCREEN(inst_ptr[i].x1);
+   x2=X_TO_SCREEN(inst_ptr[i].x2);
+   y1=Y_TO_SCREEN(inst_ptr[i].y1);
+   y2=Y_TO_SCREEN(inst_ptr[i].y2);
    inst_color[i]=0;
    if(OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2)) continue;
    // /20150409
@@ -622,10 +624,10 @@ void draw_hilight_net(int on_window)
     if(inst_color[i] )
     {
      // 20150409
-     x1=(inst_ptr[i].x1+xorigin)*mooz;
-     x2=(inst_ptr[i].x2+xorigin)*mooz;
-     y1=(inst_ptr[i].y1+yorigin)*mooz;
-     y2=(inst_ptr[i].y2+yorigin)*mooz;
+     x1=X_TO_SCREEN(inst_ptr[i].x1);
+     x2=X_TO_SCREEN(inst_ptr[i].x2);
+     y1=Y_TO_SCREEN(inst_ptr[i].y1);
+     y2=Y_TO_SCREEN(inst_ptr[i].y2);
      if(OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2)) continue;
      if(debug_var>=1) fprintf(errfp, "draw_hilight_net(): instance:%d\n",i);
      drawline(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0);
@@ -667,10 +669,10 @@ void undraw_hilight_net(int on_window) // 20160413
  for(i=0;i<lastwire;i++)
  {
    // 20150409
-   x1=(wire[i].x1+xorigin)*mooz;
-   x2=(wire[i].x2+xorigin)*mooz;
-   y1=(wire[i].y1+yorigin)*mooz;
-   y2=(wire[i].y2+yorigin)*mooz;
+   x1=X_TO_SCREEN(wire[i].x1);
+   x2=X_TO_SCREEN(wire[i].x2);
+   y1=Y_TO_SCREEN(wire[i].y1);
+   y2=Y_TO_SCREEN(wire[i].y2);
    if( OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2)) continue;
    // /20150409
 
@@ -693,10 +695,10 @@ void undraw_hilight_net(int on_window) // 20160413
  for(i=0;i<lastinst;i++)
  {
    // 20150409
-   x1=(inst_ptr[i].x1+xorigin)*mooz;
-   x2=(inst_ptr[i].x2+xorigin)*mooz;
-   y1=(inst_ptr[i].y1+yorigin)*mooz;
-   y2=(inst_ptr[i].y2+yorigin)*mooz;
+   x1=X_TO_SCREEN(inst_ptr[i].x1);
+   x2=X_TO_SCREEN(inst_ptr[i].x2);
+   y1=Y_TO_SCREEN(inst_ptr[i].y1);
+   y2=Y_TO_SCREEN(inst_ptr[i].y2);
    inst_color[i]=0;
    if(OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2)) continue;
    // /20150409

@@ -37,7 +37,6 @@ char pwd_dir[PATH_MAX];  /* obtained via getcwd() */
 int quit=0;  // set from process_options (ex netlist from cmdline and quit)
 int debug_var=-10;  // will be set to 0 in xinit.c
 int do_print=0;
-int x_initialized=0;
 int no_readline=0;
 Colormap colormap;
 int lw=0; // line width

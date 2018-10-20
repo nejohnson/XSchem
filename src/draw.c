@@ -30,13 +30,12 @@ int textclip(int x1,int y1,int x2,int y2,
 // coordinates should be ordered, x1<x2,ya<yb and so on...
 {
  if(debug_var>=2) fprintf(errfp, "textclip(): %.16g %.16g %.16g %.16g - %d %d %d %d\n",
- (xa+xorigin*mooz),(ya+yorigin*mooz),
- (xb+xorigin*mooz),(yb+yorigin*mooz),x1,y1,x2,y2);
+ X_TO_SCREEN(xa),Y_TO_SCREEN(ya), X_TO_SCREEN(xb),Y_TO_SCREEN(yb),x1,y1,x2,y2);
  // drawtemprect(gc[WIRELAYER],xa,ya,xb,yb);
- if          ((xa+xorigin)*mooz>x2) return 0;
- else if     ((ya+yorigin)*mooz>y2) return 0;
- else if     ((xb+xorigin)*mooz<x1) return 0;
- else if     ((yb+yorigin)*mooz<y1) return 0;
+ if          (X_TO_SCREEN(xa)>x2) return 0;
+ else if     (Y_TO_SCREEN(ya)>y2) return 0;
+ else if     (X_TO_SCREEN(xb)<x1) return 0;
+ else if     (Y_TO_SCREEN(yb)<y1) return 0;
  return 1;
 }           
 
@@ -226,8 +225,8 @@ void cairo_draw_string_line(cairo_t *ctx, char *s,
   // 20171215 NO! will skip drawing of long strings
   // if(xadvance>14000) return; // too big: close to short overflow
 
-  ix=(x+xorigin)*mooz;
-  iy=(y+yorigin)*mooz;
+  ix=X_TO_SCREEN(x);
+  iy=Y_TO_SCREEN(y);
   if(rot&1) {
     rot1=3;
   } else rot1=0;
@@ -425,10 +424,12 @@ void draw_symbol_outline(int what,int c, int n,int layer,int tmp_flip, int rot,
  int flip;
  Line line;
  Box box;
+ Arc arc;
  Polygon polygon; // 20171115
  Text text;
  register Instdef *symptr; //20150408
  int textlayer;
+ double angle;
 
  // 20171112
  #ifdef HAS_CAIRO
@@ -436,10 +437,10 @@ void draw_symbol_outline(int what,int c, int n,int layer,int tmp_flip, int rot,
  #endif
   if(!has_x) return;
   if(layer==0) {
-   x1=(inst_ptr[n].x1+xoffset+xorigin)*mooz;  // 20150729 added xoffset, yoffset
-   x2=(inst_ptr[n].x2+xoffset+xorigin)*mooz;
-   y1=(inst_ptr[n].y1+yoffset+yorigin)*mooz;
-   y2=(inst_ptr[n].y2+yoffset+yorigin)*mooz;
+   x1=X_TO_SCREEN(inst_ptr[n].x1+xoffset);  // 20150729 added xoffset, yoffset
+   x2=X_TO_SCREEN(inst_ptr[n].x2+xoffset);
+   y1=Y_TO_SCREEN(inst_ptr[n].y1+yoffset);
+   y2=Y_TO_SCREEN(inst_ptr[n].y2+yoffset);
    if(!only_probes && (x2-x1)< 0.3 && (y2-y1)< 0.3) {
      inst_ptr[n].flags|=1;
      return; // 20171210
@@ -489,6 +490,21 @@ void draw_symbol_outline(int what,int c, int n,int layer,int tmp_flip, int rot,
     }
 
   }
+  for(j=0;j< symptr->arcs[layer];j++)
+  { 
+    
+    arc = (symptr->arcptr[layer])[j];
+    if(flip) {
+      angle = 270.*rot+180.-arc.b-arc.a;
+    } else {
+      angle = arc.a+rot*270.;
+    }
+    angle = fmod(angle, 360.);
+    if(angle<0.) angle+=360.;
+    ROTATION(0.0,0.0,arc.x,arc.y,x1,y1);
+    drawarc(c,what, x0+x1, y0+y1, arc.r, angle, arc.b);
+  }
+
   for(j=0;j< symptr->rects[layer];j++)
   {
     box = (symptr->boxptr[layer])[j];
@@ -543,18 +559,21 @@ void draw_temp_symbol_outline(int what, GC gc, int n,int layer,int tmp_flip, int
  Line line;
  Polygon polygon;
  Box box;
+ Arc arc;
  Text text;
  register Instdef *symptr; //20150408
+ double angle;
+
  #ifdef HAS_CAIRO
  int customfont;
  #endif
 
  if(!has_x) return;
  if(layer==0) { // 20150424
-   x1=(inst_ptr[n].x1+xoffset+xorigin)*mooz;  // 20150729 added xoffset, yoffset
-   x2=(inst_ptr[n].x2+xoffset+xorigin)*mooz;
-   y1=(inst_ptr[n].y1+yoffset+yorigin)*mooz;
-   y2=(inst_ptr[n].y2+yoffset+yorigin)*mooz;
+   x1=X_TO_SCREEN(inst_ptr[n].x1+xoffset); // 20150729 added xoffset, yoffset
+   x2=X_TO_SCREEN(inst_ptr[n].x2+xoffset);
+   y1=Y_TO_SCREEN(inst_ptr[n].y1+yoffset);
+   y2=Y_TO_SCREEN(inst_ptr[n].y2+yoffset);
    if(OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2))
    {
     inst_ptr[n].flags|=1;
@@ -595,12 +614,11 @@ void draw_temp_symbol_outline(int what, GC gc, int n,int layer,int tmp_flip, int
      double y[polygon.points];
      for(k=0;k<polygon.points;k++) {
        ROTATION(0.0,0.0,polygon.x[k],polygon.y[k],x[k],y[k]);
-       x[k]+= x0;
+       x[k] += x0;
        y[k] += y0;
      }
      drawtemppolygon(gc, NOW, x, y, polygon.points);
     }
-
  }
  
  for(j=0;j< symptr->rects[layer];j++)
@@ -611,6 +629,20 @@ void draw_temp_symbol_outline(int what, GC gc, int n,int layer,int tmp_flip, int
   RECTORDER(x1,y1,x2,y2);
   drawtemprect(gc,what, x0+x1, y0+y1, x0+x2, y0+y2);
  }
+ for(j=0;j< symptr->arcs[layer];j++)
+ {
+   arc = (symptr->arcptr[layer])[j];
+   if(flip) {
+     angle = 270.*rot+180.-arc.b-arc.a;
+   } else {
+     angle = arc.a+rot*270.;
+   }
+   angle = fmod(angle, 360.);
+   if(angle<0.) angle+=360.;
+   ROTATION(0.0,0.0,arc.x,arc.y,x1,y1);
+   drawtemparc(gc, what, x0+x1, y0+y1, arc.r, angle, arc.b);
+ }
+
  if(layer==PROPERTYLAYER && sym_txt)
  {
   for(j=0;j< symptr->texts;j++)
@@ -697,10 +729,10 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
      XDrawSegments(display, save_pixmap, gc[c], rr,i);
    i=0;
   }
-  x1=(linex1+xorigin)*mooz;
-  y1=(liney1+yorigin)*mooz;
-  x2=(linex2+xorigin)*mooz;
-  y2=(liney2+yorigin)*mooz;
+  x1=X_TO_SCREEN(linex1);
+  y1=Y_TO_SCREEN(liney1);
+  x2=X_TO_SCREEN(linex2);
+  y2=Y_TO_SCREEN(liney2);
   if(!only_probes && (x2-x1)< 0.3 && fabs(y2-y1) < 0.3) return; // 20171206
   if( clip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
@@ -713,10 +745,10 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
  }
  else if(what==NOW)
  {
-  x1=(linex1+xorigin)*mooz;
-  y1=(liney1+yorigin)*mooz;
-  x2=(linex2+xorigin)*mooz;
-  y2=(liney2+yorigin)*mooz;
+  x1=X_TO_SCREEN(linex1);
+  y1=Y_TO_SCREEN(liney1);
+  x2=X_TO_SCREEN(linex2);
+  y2=Y_TO_SCREEN(liney2);
   if(!only_probes && (x2-x1)< 0.3 && fabs(y2-y1)< 0.3) return; // 20171206
   if( clip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
@@ -728,10 +760,10 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
 
  else if(what==THICK)		// 26122004
  { 
-  x1=(linex1+xorigin)*mooz;
-  y1=(liney1+yorigin)*mooz;
-  x2=(linex2+xorigin)*mooz;
-  y2=(liney2+yorigin)*mooz;
+  x1=X_TO_SCREEN(linex1);
+  y1=Y_TO_SCREEN(liney1);
+  x2=X_TO_SCREEN(linex2);
+  y2=Y_TO_SCREEN(liney2);
   if(!only_probes && (x2-x1)< 0.3 && fabs(y2-y1)< 0.3) return; // 20171206
   if( clip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
@@ -765,10 +797,10 @@ void drawtempline(GC gc, int what, double linex1,double liney1,double linex2,dou
    XDrawSegments(display, window, gc, r,i);
    i=0;
   }
-  x1=(linex1+xorigin)*mooz;
-  y1=(liney1+yorigin)*mooz;
-  x2=(linex2+xorigin)*mooz;
-  y2=(liney2+yorigin)*mooz;
+  x1=X_TO_SCREEN(linex1);
+  y1=Y_TO_SCREEN(liney1);
+  x2=X_TO_SCREEN(linex2);
+  y2=Y_TO_SCREEN(liney2);
   if( clip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
    r[i].x1=(short)x1;
@@ -780,10 +812,10 @@ void drawtempline(GC gc, int what, double linex1,double liney1,double linex2,dou
  }
  else if(what==NOW)
  {
-  x1=(linex1+xorigin)*mooz;
-  y1=(liney1+yorigin)*mooz;
-  x2=(linex2+xorigin)*mooz;
-  y2=(liney2+yorigin)*mooz;
+  x1=X_TO_SCREEN(linex1);
+  y1=Y_TO_SCREEN(liney1);
+  x2=X_TO_SCREEN(linex2);
+  y2=Y_TO_SCREEN(liney2);
   if( clip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
    XDrawLine(display, window, gc, x1, y1, x2, y2);
@@ -791,10 +823,10 @@ void drawtempline(GC gc, int what, double linex1,double liney1,double linex2,dou
  } 
  else if(what==THICK)           // 26122004
  {
-  x1=(linex1+xorigin)*mooz;
-  y1=(liney1+yorigin)*mooz;
-  x2=(linex2+xorigin)*mooz;
-  y2=(liney2+yorigin)*mooz;
+  x1=X_TO_SCREEN(linex1);
+  y1=Y_TO_SCREEN(liney1);
+  x2=X_TO_SCREEN(linex2);
+  y2=Y_TO_SCREEN(liney2);
   if( clip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
    // XSetLineAttributes (display, gc, (unsigned int)(5*(lw_double+1.0)), LineSolid, CapRound , JoinRound); // 20150410
@@ -816,7 +848,161 @@ void drawtempline(GC gc, int what, double linex1,double liney1,double linex2,dou
  }
 }
 
+void drawtemparc(GC gc, int what, double x, double y, double r, double a, double b)
+{
+ static int i=0;
+ static XArc arc[CADDRAWBUFFERSIZE];
+ double x1, y1, x2, y2; // arc bbox
+ double xx1, yy1, xx2, yy2; // complete circle bbox in screen coords
 
+ if(!has_x) return;
+ if(what==ADD)
+ {
+  if(i>=CADDRAWBUFFERSIZE)
+  {
+   XDrawArcs(display, window, gc, arc,i);
+   i=0;
+  }
+  xx1=X_TO_SCREEN(x-r);
+  yy1=Y_TO_SCREEN(y-r);
+  xx2=X_TO_SCREEN(x+r);
+  yy2=Y_TO_SCREEN(y+r);
+  arc_bbox(x, y, r, a, b, &x1,&y1,&x2,&y2);
+  x1=X_TO_SCREEN(x1);
+  y1=Y_TO_SCREEN(y1);
+  x2=X_TO_SCREEN(x2);
+  y2=Y_TO_SCREEN(y2);
+  if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
+  {
+   arc[i].x=(short)xx1;
+   arc[i].y=(short)yy1;
+   arc[i].width= (unsigned short)(xx2 - xx1);
+   arc[i].height=(unsigned short)(yy2 - yy1);
+   arc[i].angle1 = a*64;
+   arc[i].angle2 = b*64;
+   i++;
+  }
+ }
+ else if(what==NOW)
+ {
+  xx1=X_TO_SCREEN(x-r);
+  yy1=Y_TO_SCREEN(y-r);
+  xx2=X_TO_SCREEN(x+r);
+  yy2=Y_TO_SCREEN(y+r);
+  arc_bbox(x, y, r, a, b, &x1,&y1,&x2,&y2);
+  x1=X_TO_SCREEN(x1);
+  y1=Y_TO_SCREEN(y1);
+  x2=X_TO_SCREEN(x2);
+  y2=Y_TO_SCREEN(y2);
+  if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
+  {
+   XDrawArc(display, window, gc, xx1, yy1, xx2-xx1, yy2-yy1, a*64, b*64);
+  }
+ }
+ else if(what==BEGIN) i=0;
+ else if(what==END && i)
+ {
+  XDrawArcs(display, window, gc, arc,i);
+  i=0;
+ }
+}
+
+/* x1,y1: start; x2,y2: end; x3,y3: way point */
+void arc_3_points(double x1, double y1, double x2, double y2, double x3, double y3,
+         double *x, double *y, double *r, double *a, double *b)
+{ 
+  double A, B, C;
+  double c, s;
+  
+  /* s = signed_area, if > 0 : clockwise in xorg coordinate space */
+  s = x3*y2-x2*y3 + x2*y1 -x1*y2 + x1*y3-x3*y1;
+  A = x1*(y2-y3) - y1*(x2-x3) + x2*y3 - x3*y2;
+  B = (x1*x1+y1*y1)*(y3-y2)+(x2*x2+y2*y2)*(y1-y3) + (x3*x3+y3*y3)*(y2-y1);
+  C = (x1*x1+y1*y1)*(x2-x3)+(x2*x2+y2*y2)*(x3-x1) + (x3*x3+y3*y3)*(x1-x2);
+  // printf("s=%g\n", s);
+  *x = -B/2./A;
+  *y = -C/2./A;
+  *r = sqrt( (*x-x1)*(*x-x1) + (*y-y1)*(*y-y1) ); 
+  *a = fmod(atan2(*y-y1 ,x1-*x )*180./XSCH_PI, 360.);
+  if(*a<0.) *a+=360.;
+  *b = fmod(atan2(*y-y2 ,x2-*x )*180./XSCH_PI, 360.);
+  if(*b<0.) *b+=360.;
+  if(s<0.) {  /* counter clockwise, P1, P3, P2 */
+    *b = fmod(*b-*a, 360.);
+    if(*b<0) *b+=360.;
+    if(*b==0) *b=360.;
+  } else if(s>0.) { /* clockwise, P2, P3, P1 */
+    c = fmod(*a-*b, 360.);
+    if(c<0) c+=360.;
+    if(*b==0) *b=360.;
+    *a = *b;
+    *b = c;
+  } else {
+    *r = -1.0; /* no circle thru aligned points */
+  }
+}
+
+void drawarc(int c, int what, double x, double y, double r, double a, double b)
+{
+ static int i=0;
+ static XArc arc[CADDRAWBUFFERSIZE];
+ double x1, y1, x2, y2; // arc bbox
+ double xx1, yy1, xx2, yy2; // complete circle bbox in screen coords
+
+ if(!has_x) return;
+ if(what==ADD)
+ {
+  if(i>=CADDRAWBUFFERSIZE)
+  {
+   if(draw_window) XDrawArcs(display, window, gc[c], arc,i);
+   if(draw_pixmap) XDrawArcs(display, save_pixmap, gc[c], arc,i);
+   i=0;
+  }
+  xx1=X_TO_SCREEN(x-r);
+  yy1=Y_TO_SCREEN(y-r);
+  xx2=X_TO_SCREEN(x+r);
+  yy2=Y_TO_SCREEN(y+r);
+  arc_bbox(x, y, r, a, b, &x1,&y1,&x2,&y2);
+  x1=X_TO_SCREEN(x1);
+  y1=Y_TO_SCREEN(y1);
+  x2=X_TO_SCREEN(x2);
+  y2=Y_TO_SCREEN(y2);
+  if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
+  {
+   arc[i].x=(short)xx1;
+   arc[i].y=(short)yy1;
+   arc[i].width =(unsigned short)(xx2 - xx1);
+   arc[i].height=(unsigned short)(yy2 - yy1);
+   arc[i].angle1 = a*64;
+   arc[i].angle2 = b*64;
+   i++;
+  }
+ }
+ else if(what==NOW)
+ {
+  xx1=X_TO_SCREEN(x-r);
+  yy1=Y_TO_SCREEN(y-r);
+  xx2=X_TO_SCREEN(x+r);
+  yy2=Y_TO_SCREEN(y+r);
+  arc_bbox(x, y, r, a, b, &x1,&y1,&x2,&y2);
+  x1=X_TO_SCREEN(x1);
+  y1=Y_TO_SCREEN(y1);
+  x2=X_TO_SCREEN(x2);
+  y2=Y_TO_SCREEN(y2);
+  if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
+  {
+   if(draw_window) XDrawArc(display, window, gc[c], xx1, yy1, xx2-xx1, yy2-yy1, a*64, b*64);
+   if(draw_pixmap) XDrawArc(display, save_pixmap, gc[c], xx1, yy1, xx2-xx1, yy2-yy1, a*64, b*64);
+  }
+ }
+ else if(what==BEGIN) i=0;
+ else if(what==END && i)
+ {
+  if(draw_window) XDrawArcs(display, window, gc[c], arc,i);
+  if(draw_pixmap) XDrawArcs(display, save_pixmap, gc[c], arc,i);
+  i=0;
+ }
+}
 
 
 void filledrect(int c, int what, double rectx1,double recty1,double rectx2,double recty2)
@@ -829,10 +1015,10 @@ void filledrect(int c, int what, double rectx1,double recty1,double rectx2,doubl
  if(!fill || !fill_type[c]) return;
  if(what==NOW)
  {
-  x1=(rectx1+xorigin)*mooz;
-  y1=(recty1+yorigin)*mooz;
-  x2=(rectx2+xorigin)*mooz;
-  y2=(recty2+yorigin)*mooz;
+  x1=X_TO_SCREEN(rectx1);
+  y1=Y_TO_SCREEN(recty1);
+  x2=X_TO_SCREEN(rectx2);
+  y2=Y_TO_SCREEN(recty2);
   if(!only_probes && (x2-x1)< 2 && (y2-y1)< 2) return; // 20171206
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
@@ -855,10 +1041,10 @@ void filledrect(int c, int what, double rectx1,double recty1,double rectx2,doubl
      XFillRectangles(display, save_pixmap, gcstipple[c], r,i);
    i=0;
   }
-  x1=(rectx1+xorigin)*mooz;
-  y1=(recty1+yorigin)*mooz;
-  x2=(rectx2+xorigin)*mooz;
-  y2=(recty2+yorigin)*mooz;
+  x1=X_TO_SCREEN(rectx1);
+  y1=Y_TO_SCREEN(recty1);
+  x2=X_TO_SCREEN(rectx2);
+  y2=Y_TO_SCREEN(recty2);
   if(!only_probes && (x2-x1)< 2 && (y2-y1)< 2) return; // 20171206
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
@@ -889,6 +1075,52 @@ void polygon_bbox(double *x, double *y, int points, double *bx1, double *by1, do
 }
 
 
+void arc_bbox(double x, double y, double r, double a, double b, 
+              double *bx1, double *by1, double *bx2, double *by2)
+{
+  double x2, y2, x3, y3;
+  int aa, bb, i;
+  a = fmod(a, 360.);
+  if(a<0) a+=360.;
+  aa = (int)(ceil(a/90.))*90;
+  bb = (int)(floor((a+b)/90.))*90;
+
+  // printf("arc_bbox(): aa=%d bb=%d\n", aa, bb);
+  x2 = x + r * cos(a * XSCH_PI/180.);
+  y2 = y - r * sin(a * XSCH_PI/180.);
+  x3 = x + r * cos((a+b) * XSCH_PI/180.);
+  y3 = y - r * sin((a+b) * XSCH_PI/180.);
+
+  // *bx1  = (x2 < x  ) ? x2 : x;
+  *bx1 = x2;
+  if(x3 < *bx1) *bx1 = x3;
+  // *bx2  = (x2 > x  ) ? x2 : x;
+  *bx2 = x2;
+  if(x3 > *bx2) *bx2 = x3;
+  // *by1  = (y2 < y  ) ? y2 : y;
+  *by1  = y2;
+  if(y3 < *by1) *by1 = y3;
+  // *by2  = (y2 > y  ) ? y2 : y;
+  *by2  = y2;
+  if(y3 > *by2) *by2 = y3;
+
+  for(i=aa; i<=bb; i++) {
+    if(i%360==0) {
+      *bx2 = x + r;
+    }
+    if(i%360==90) {
+      *by1 = y - r;
+    }
+    if(i%360==180) {
+      *bx1 = x - r;
+    }
+    if(i%360==270) {
+      *by2 = y + r;
+    }
+  }
+  // printf("arc_bbox(): bx1=%g by1=%g bx2=%g by2=%g\n", *bx1, *by1, *bx2, *by2);
+}
+
 // Convex Nonconvex Complex
 #define Polygontype Nonconvex
 // 20180914 added fill param
@@ -899,18 +1131,18 @@ void drawpolygon(int c, int what, double *x, double *y, int points, int poly_fil
   int i;
   if(!has_x) return;
   polygon_bbox(x, y, points, &x1,&y1,&x2,&y2);
-  x1=(x1+xorigin)*mooz;
-  y1=(y1+yorigin)*mooz;
-  x2=(x2+xorigin)*mooz;
-  y2=(y2+yorigin)*mooz;
+  x1=X_TO_SCREEN(x1);
+  y1=Y_TO_SCREEN(y1);
+  x2=X_TO_SCREEN(x2);
+  y2=Y_TO_SCREEN(y2);
   if( !rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) ) {
     return;
   }
   if( !only_probes && (x2-x1)<0.3 && (y2-y1)<0.3) return; // 20171206
 
   for(i=0;i<points; i++) {
-    p[i].x = (x[i] + xorigin)*mooz;
-    p[i].y = (y[i] + yorigin)*mooz;
+    p[i].x = X_TO_SCREEN(x[i]);
+    p[i].y = Y_TO_SCREEN(y[i]);
   }
   if(draw_window) XDrawLines(display, window, gc[c], p, points, CoordModeOrigin);
   if(draw_pixmap)
@@ -930,16 +1162,16 @@ void drawtemppolygon(GC gc, int what, double *x, double *y, int points)
   int i;
   if(!has_x) return;
   polygon_bbox(x, y, points, &x1,&y1,&x2,&y2);
-  x1=(x1+xorigin)*mooz;
-  y1=(y1+yorigin)*mooz;
-  x2=(x2+xorigin)*mooz;
-  y2=(y2+yorigin)*mooz;
+  x1=X_TO_SCREEN(x1);
+  y1=Y_TO_SCREEN(y1);
+  x2=X_TO_SCREEN(x2);
+  y2=Y_TO_SCREEN(y2);
   if( !rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) ) {
     return;
   }
   for(i=0;i<points; i++) {
-    p[i].x = (x[i] + xorigin)*mooz;
-    p[i].y = (y[i] + yorigin)*mooz;
+    p[i].x = X_TO_SCREEN(x[i]);
+    p[i].y = Y_TO_SCREEN(y[i]);
   }
   XDrawLines(display, window, gc, p, points, CoordModeOrigin);
 }
@@ -953,25 +1185,21 @@ void drawrect(int c, int what, double rectx1,double recty1,double rectx2,double 
  if(!has_x) return;
  if(what==NOW)
  {
-  x1=(rectx1+xorigin)*mooz;
-  y1=(recty1+yorigin)*mooz;
-  x2=(rectx2+xorigin)*mooz;
-  y2=(recty2+yorigin)*mooz;
+  x1=X_TO_SCREEN(rectx1);
+  y1=Y_TO_SCREEN(recty1);
+  x2=X_TO_SCREEN(rectx2);
+  y2=Y_TO_SCREEN(recty2);
   if(!only_probes && (x2-x1)< 0.3 && (y2-y1)< 0.3) return; // 20171206
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
    if(draw_window) XDrawRectangle(display, window, gc[c], (int)x1, (int)y1,
-    (unsigned int)x2 - (unsigned int)x1,	// buggy, 23102001
-    (unsigned int)y2 - (unsigned int)y1);	// buggy, 23102001
-//    (unsigned int)(x2 - x1),			//23102001
-//    (unsigned int)(y2 - y1) );			//23102001
+    (unsigned int)x2 - (unsigned int)x1,
+    (unsigned int)y2 - (unsigned int)y1);
    if(draw_pixmap)
    {
     XDrawRectangle(display, save_pixmap, gc[c], (int)x1, (int)y1,
-    (unsigned int)x2 - (unsigned int)x1,	// buggy, 23102001
-    (unsigned int)y2 - (unsigned int)y1);	// buggy, 23102001
-//    (unsigned int)(x2 - x1),			//23102001
-//    (unsigned int)(y2 - y1) );			//23102001
+    (unsigned int)x2 - (unsigned int)x1,
+    (unsigned int)y2 - (unsigned int)y1);
    }
   }
  }
@@ -985,20 +1213,17 @@ void drawrect(int c, int what, double rectx1,double recty1,double rectx2,double 
      XDrawRectangles(display, save_pixmap, gc[c], r,i);
    i=0;
   }
-  x1=(rectx1+xorigin)*mooz;
-  y1=(recty1+yorigin)*mooz;
-  x2=(rectx2+xorigin)*mooz;
-  y2=(recty2+yorigin)*mooz;
+  x1=X_TO_SCREEN(rectx1);
+  y1=Y_TO_SCREEN(recty1);
+  x2=X_TO_SCREEN(rectx2);
+  y2=Y_TO_SCREEN(recty2);
   if(!only_probes && (x2-x1)< 0.3 && (y2-y1)< 0.3) return; // 20171206
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
    r[i].x=(short)x1; 
    r[i].y=(short)y1;
-   r[i].width=(unsigned short)x2-r[i].x;	//buggy, 23102001
-   r[i].height=(unsigned short)y2-r[i].y;	//buggy, 23102001
-   //r[i].width=(unsigned short)(x2-x1);		//23102001
-   //r[i].height=(unsigned short)(y2-y1);		//23102001
-   
+   r[i].width=(unsigned short)x2-r[i].x;
+   r[i].height=(unsigned short)y2-r[i].y;
    i++;
   }
  }
@@ -1019,18 +1244,16 @@ void drawtemprect(GC gc, int what, double rectx1,double recty1,double rectx2,dou
  if(!has_x) return;
  if(what==NOW)
  {
-  x1=(rectx1+xorigin)*mooz;
-  y1=(recty1+yorigin)*mooz;
-  x2=(rectx2+xorigin)*mooz;
-  y2=(recty2+yorigin)*mooz;
+  x1=X_TO_SCREEN(rectx1);
+  y1=Y_TO_SCREEN(recty1);
+  x2=X_TO_SCREEN(rectx2);
+  y2=Y_TO_SCREEN(recty2);
   if( (x2-x1)< 0.3 && (y2-y1)< 0.3) return; // 20171206
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
    XDrawRectangle(display, window, gc, (int)x1, (int)y1, 
-    (unsigned int)x2 - (unsigned int)x1,	// buggy, 23102001
-    (unsigned int)y2 - (unsigned int)y1);	// buggy, 23102001
-//    (unsigned int)(x2 - x1),			//23102001
-//    (unsigned int)(y2 - y1) );			//23102001
+    (unsigned int)x2 - (unsigned int)x1,
+    (unsigned int)y2 - (unsigned int)y1);
   }
  }
  else if(what==BEGIN) i=0;
@@ -1041,19 +1264,17 @@ void drawtemprect(GC gc, int what, double rectx1,double recty1,double rectx2,dou
    XDrawRectangles(display, window, gc, r,i);
    i=0;
   }
-  x1=(rectx1+xorigin)*mooz;
-  y1=(recty1+yorigin)*mooz;
-  x2=(rectx2+xorigin)*mooz;
-  y2=(recty2+yorigin)*mooz;
+  x1=X_TO_SCREEN(rectx1);
+  y1=Y_TO_SCREEN(recty1);
+  x2=X_TO_SCREEN(rectx2);
+  y2=Y_TO_SCREEN(recty2);
   if( (x2-x1)< 0.3 && (y2-y1)< 0.3) return; // 20171206
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
    r[i].x=(short)x1; 
    r[i].y=(short)y1;
-   r[i].width=(unsigned short)x2-r[i].x;	// buggy,23102001
-   r[i].height=(unsigned short)y2-r[i].y;	// buggy,23102001
-   //r[i].width=(unsigned short)(x2-x1);		//23102001
-   //r[i].height=(unsigned short)(y2-y1);		//23102001
+   r[i].width=(unsigned short)x2-r[i].x;
+   r[i].height=(unsigned short)y2-r[i].y;
    i++;
   }
  }
@@ -1104,10 +1325,10 @@ void draw(void)
     drawgrid();
         
     // --------------------------------- inst_ptr iterator 20171224
-    x1 = areax1*zoom -xorigin;
-    y1 = areay1*zoom -yorigin;
-    x2 = areax2*zoom -xorigin;
-    y2 = areay2*zoom -yorigin;
+    x1 = X_TO_XSCHEM(areax1);
+    y1 = Y_TO_XSCHEM(areay1);
+    x2 = X_TO_XSCHEM(areax2);
+    y2 = Y_TO_XSCHEM(areay2);
     if( (lastwire> 2000 || lastinst > 2000) &&  (x2 - x1  < ITERATOR_THRESHOLD) ) {
       hash_objects();
       hash_wires();
@@ -1203,6 +1424,7 @@ void draw(void)
           if(draw_single_layer!=-1 && c != draw_single_layer) continue; // 20151117
           drawline(c, BEGIN, 0.0, 0.0, 0.0, 0.0);
           drawrect(c, BEGIN, 0.0, 0.0, 0.0, 0.0);
+          drawarc(c, BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
           filledrect(c, BEGIN, 0.0, 0.0, 0.0, 0.0);
       
           for(i=0;i<lastline[c];i++) 
@@ -1211,6 +1433,10 @@ void draw(void)
           {
             drawrect(c, ADD, rect[c][i].x1, rect[c][i].y1, rect[c][i].x2, rect[c][i].y2);
             filledrect(c, ADD, rect[c][i].x1, rect[c][i].y1, rect[c][i].x2, rect[c][i].y2);
+          }
+          for(i=0;i<lastarc[c];i++) 
+          {
+            drawarc(c, ADD, arc[c][i].x, arc[c][i].y, arc[c][i].r, arc[c][i].a, arc[c][i].b);
           }
           for(i=0;i<lastpolygon[c];i++) {
             // 20180914 added fill
@@ -1237,7 +1463,6 @@ void draw(void)
               instanceptr=objecttable[tmpi][tmpj];
               while(instanceptr) {
                if(debug_var>0) fprintf(errfp, "drawing instance %d, layer %d in square: %d %d\n", instanceptr->n, c, tmpi, tmpj);
-               /* if( !int_hash_lookup(insthash, instanceptr->n*cadlayers+c, 0)) { */
                if( !int_hash_lookup(insthash, instanceptr->n, 0)) { // 20180926  
                  int ptr;
                  ptr = inst_ptr[instanceptr->n].ptr;
@@ -1245,6 +1470,7 @@ void draw(void)
                    symptr = ptr+instdef;
                    if( c==0 || //20150408 draw_symbol_outline call is needed on layer 0 to avoid redundant work (outside check)
                        symptr->lines[c] ||  // 20150408
+                       symptr->arcs[c] ||
                        symptr->rects[c] ||   // 20150408
                        symptr->polygons[c] ||   // 20150408
                        ((c==TEXTWIRELAYER || c==TEXTLAYER) && symptr->texts)) {  // 20150408
@@ -1270,6 +1496,7 @@ void draw(void)
               symptr = (inst_ptr[i].ptr+instdef);
               if( c==0 || //20150408 draw_symbol_outline call is needed on layer 0 to avoid redundant work (outside check)
                   symptr->lines[c] ||  // 20150408
+                  symptr->arcs[c] ||
                   symptr->rects[c] ||   // 20150408
                   symptr->polygons[c] ||   // 20150408
                   ((c==TEXTWIRELAYER || c==TEXTLAYER) && symptr->texts)) {  // 20150408
@@ -1289,6 +1516,7 @@ void draw(void)
       
           drawline(c, END, 0.0, 0.0, 0.0, 0.0);
           drawrect(c, END, 0.0, 0.0, 0.0, 0.0);
+          drawarc(c, END, 0.0, 0.0, 0.0, 0.0, 0.0);
           filledrect(c, END, 0.0, 0.0, 0.0, 0.0);
         }
 

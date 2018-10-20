@@ -194,6 +194,15 @@ in this case only the verilog-related global property has some definition. This 
   the x,y coordinates of the polygon points and the property string (empty in this example).
   The last point is coincident to the first point and closes the polygon.
  </p>
+ <h3>ARC OBJECT</h3>
+ <p>
+  Example: <kbd>A 3 450 -210 120 45 225 {}</kbd><br>
+  The Arc 'A' tag is followed by an integer specifying the layer number, followed by the arc x, y center coordinates,
+  the arc radius, the start angle (measured counterclockwise from the three o'clock direction), the arc sweep angle
+  (measured counterclockwise from the start angle) and the property string (empty in this example).
+  Angles are measured in degrees.<br>
+  <img src="developer_info_07.png">
+ </p>
  <h3>COMPONENT INSTANCE</h3>
  <p>
   Example: <kbd>C {pcb/capa} 890 -160 0 0 {name=C4 m=1 value=10u device="tantalium capacitor"}</kbd><br>

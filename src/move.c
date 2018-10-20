@@ -25,7 +25,7 @@ static double rx1, rx2, ry1, ry2;
 static int rot = 0;
 static int  flip = 0;
 static double x1=0.0, y_1=0.0, x2=0.0, y_2=0.0, deltax = 0.0, deltay = 0.0;
-static int i,c,n,k;
+// static int i,c,n,k;
 static int lastsel;
 static int rotatelocal=0; // 20171208
 
@@ -63,6 +63,14 @@ void rebuild_selected_array() // can be used only if new selected set is lower
   }
  for(c=0;c<cadlayers;c++)
  {
+  for(i=0;i<lastarc[c];i++)
+   if(arc[c][i].sel) 
+   {
+    check_selected_storage();
+    selectedgroup[lastselected].type = ARC;
+    selectedgroup[lastselected].n = i;
+    selectedgroup[lastselected++].col = c;
+   }
   for(i=0;i<lastrect[c];i++)
    if(rect[c][i].sel) 
    {
@@ -93,7 +101,7 @@ void rebuild_selected_array() // can be used only if new selected set is lower
 
 void check_collapsing_objects()
 {
-  int  j,i;
+  int  j,i, c;
   int found=0;
 
   j=0;
@@ -158,12 +166,18 @@ void check_collapsing_objects()
     lastrect[c] -= j;
    }  
 
-  if(found) rebuild_selected_array();
+  if(found) {
+    need_rebuild_selected_array=1;
+    rebuild_selected_array();
+  }
 }
 
 
 void draw_selection(GC g, int interruptable)
 {
+  int i, c, k, n;
+  double  angle; // arc
+  drawtemparc(g, BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
   drawtempline(g, BEGIN, 0.0, 0.0, 0.0, 0.0);
   drawtemprect(g, BEGIN, 0.0, 0.0, 0.0, 0.0);
   #ifdef HAS_CAIRO
@@ -264,7 +278,6 @@ void draw_selection(GC g, int interruptable)
      break;
     case POLYGON: // 20171115
      {
-      int k;
       double x[polygon[c][n].points];
       double y[polygon[c][n].points];
       if(polygon[c][n].sel==SELECTED || polygon[c][n].sel==SELECTED1) {
@@ -344,6 +357,37 @@ void draw_selection(GC g, int interruptable)
       drawtempline(g, ADD, rx1, ry1, rx2+deltax, ry2+deltay);
      }
      break;
+    case ARC:
+     if(rotatelocal) {
+       // rotate center wrt itself: do nothing
+       rx1 = arc[c][n].x; 
+       ry1 = arc[c][n].y;
+     } else {
+       ROTATION(x1, y_1, arc[c][n].x, arc[c][n].y, rx1,ry1);
+     }
+     angle = arc[c][n].a;
+     if(flip) {
+       angle = 270.*rot+180.-arc[c][n].b-arc[c][n].a;
+     } else {
+       angle = arc[c][n].a+rot*270.;
+     }
+     angle = fmod(angle, 360.);
+     if(angle<0.) angle+=360.;
+     if(arc[c][n].sel==SELECTED) {
+       drawtemparc(g, ADD, rx1+deltax, ry1+deltay, arc[c][n].r, angle, arc[c][n].b);
+     } else if(arc[c][n].sel==SELECTED1) {
+       drawtemparc(g, ADD, rx1, ry1, fabs(arc[c][n].r+deltax), angle, arc[c][n].b);
+     } else if(arc[c][n].sel==SELECTED3) {
+       angle = round(fmod(atan2(-deltay, deltax)*180./XSCH_PI+arc[c][n].b, 360.));
+       if(angle<0.) angle +=360.;
+       if(angle==0) angle=360.;
+       drawtemparc(g, ADD, rx1, ry1, arc[c][n].r, arc[c][n].a, angle);
+     } else if(arc[c][n].sel==SELECTED2) {
+       angle = round(fmod(atan2(-deltay, deltax)*180./XSCH_PI+angle, 360.));
+       if(angle<0.) angle +=360.;
+       drawtemparc(g, ADD, rx1, ry1, arc[c][n].r, angle, arc[c][n].b);
+     }
+     break;
     case ELEMENT:
      if(rotatelocal) {
        ROTATION(inst_ptr[n].x0, inst_ptr[n].y0, inst_ptr[n].x0, inst_ptr[n].y0, rx1,ry1);
@@ -360,19 +404,23 @@ void draw_selection(GC g, int interruptable)
    {
     drawtempline(g, END, 0.0, 0.0, 0.0, 0.0);
     drawtemprect(g, END, 0.0, 0.0, 0.0, 0.0);
+    drawtemparc(g, END, 0.0, 0.0, 0.0, 0.0, 0.0);
     lastsel = i+1;
     return;
    }
   }
   drawtempline(g, END, 0.0, 0.0, 0.0, 0.0);
   drawtemprect(g, END, 0.0, 0.0, 0.0, 0.0);
+  drawtemparc(g, END, 0.0, 0.0, 0.0, 0.0, 0.0);
   lastsel = i;
 }
 
 void copy_objects(int what)
 {
- int i;
- int tmp;
+ int c, i, n, k;
+ Box tmp;
+ double angle;
+ int newpropcnt;
  static char *str = NULL; // 20161122 overflow safe
  double tmpx, tmpy;
  int textlayer;
@@ -432,7 +480,7 @@ void copy_objects(int what)
   draw_window=1; // temporarily re-enable draw to window together with pixmap
   draw_selection(gctiled,0);
   bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0); // 20181009
-  tmp=0;
+  newpropcnt=0;
   modified=1; push_undo(); // 20150327 push_undo
   prepared_hash_objects=0; // 20171224
   prepared_hash_wires=0; // 20171224
@@ -441,6 +489,7 @@ void copy_objects(int what)
 
   for(k=0;k<cadlayers;k++)
   {
+   drawarc(k, BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
    drawline(k, BEGIN, 0.0, 0.0, 0.0, 0.0);
    drawrect(k, BEGIN, 0.0, 0.0, 0.0, 0.0);
    filledrect(k, BEGIN, 0.0, 0.0, 0.0, 0.0);
@@ -556,6 +605,36 @@ void copy_objects(int what)
         store_polygon(-1, x, y, polygon[c][n].points, c, polygon[c][n].sel, polygon[c][n].prop_ptr);
         polygon[c][n].sel=0;
       }
+      break;
+     case ARC:
+      if(c!=k) break;
+      arc_bbox(arc[c][n].x, arc[c][n].y, arc[c][n].r, arc[c][n].a, arc[c][n].b,
+               &tmp.x1, &tmp.y1, &tmp.x2, &tmp.y2);
+      bbox(ADD, tmp.x1, tmp.y1, tmp.x2, tmp.y2);
+
+      if(rotatelocal) {
+        // rotate center wrt itself: do nothing
+        rx1 = arc[c][n].x;
+        ry1 = arc[c][n].y;
+      } else {
+        ROTATION(x1, y_1, arc[c][n].x, arc[c][n].y, rx1,ry1);
+      }
+      angle = arc[c][n].a;
+      if(flip) {
+        angle = 270.*rot+180.-arc[c][n].b-arc[c][n].a;
+      } else {
+        angle = arc[c][n].a+rot*270.;
+      }
+      angle = fmod(angle, 360.);
+      if(angle<0.) angle+=360.;
+
+
+
+      arc[c][n].sel=0;
+      drawarc(k, ADD, rx1+deltax, ry1+deltay, arc[c][n].r, angle, arc[c][n].b);
+      selectedgroup[i].n=lastarc[c];
+      store_arc(-1, rx1+deltax, ry1+deltay,
+                 arc[c][n].r, angle, arc[c][n].b, c, SELECTED, arc[c][n].prop_ptr);
       break;
 
      case RECT:
@@ -675,9 +754,9 @@ void copy_objects(int what)
        inst_ptr[lastinst].rot = (inst_ptr[lastinst].rot + 
           ( (flip && (inst_ptr[lastinst].rot & 1) ) ? rot+2 : rot) ) & 0x3;
        inst_ptr[lastinst].flip = (flip? !inst_ptr[n].flip:inst_ptr[n].flip);
-       new_prop_string(&inst_ptr[lastinst].prop_ptr, inst_ptr[n].prop_ptr,tmp++);
+       new_prop_string(&inst_ptr[lastinst].prop_ptr, inst_ptr[n].prop_ptr,newpropcnt++);
        my_strdup2(&inst_ptr[lastinst].instname, get_tok_value(inst_ptr[lastinst].prop_ptr, "name", 0)); // 20150409
-       // the final tmp argument is zero for the 1st call and used in 
+       // the final newpropcnt argument is zero for the 1st call and used in 
        // new_prop_string() for cleaning some internal caches.
        hash_proplist(inst_ptr[lastinst].prop_ptr , 0);
        n=selectedgroup[i].n=lastinst;
@@ -693,6 +772,7 @@ void copy_objects(int what)
    drawline(k, END, 0.0, 0.0, 0.0, 0.0);
    drawrect(k, END, 0.0, 0.0, 0.0, 0.0);
    filledrect(k, END, 0.0, 0.0, 0.0, 0.0);
+   drawarc(k, END, 0.0, 0.0, 0.0, 0.0, 0.0);
    
   } // end for(k ...
   ui_state &= ~STARTCOPY;
@@ -711,7 +791,9 @@ void copy_objects(int what)
 
 void move_objects(int what, int merge, double dx, double dy)
 {
- int k;
+ int c, i, n, k;
+ Box tmp;
+ double angle;
  double tx1,ty1; // temporaries for swapping coordinates 20070302
  int textlayer;
  #ifdef HAS_CAIRO
@@ -730,7 +812,11 @@ void move_objects(int what, int merge, double dx, double dy)
   rebuild_selected_array();
   lastsel = lastselected;
    if(merge) x1=y_1=0.0;
-   else {x1=mousex_snap;y_1=mousey_snap;}
+   else if(lastselected==1 && selectedgroup[0].type==ARC &&
+           arc[c=selectedgroup[0].col][n=selectedgroup[0].n].sel!=SELECTED) {
+     x1 = arc[c][n].x;
+     y_1 = arc[c][n].y;
+   } else {x1=mousex_snap;y_1=mousey_snap;}
    flip = 0;rot = 0;
   ui_state|=STARTMOVE;
  }
@@ -780,6 +866,7 @@ void move_objects(int what, int merge, double dx, double dy)
   }
   for(k=0;k<cadlayers;k++)
   {
+   drawarc(k, BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
    drawline(k, BEGIN, 0.0, 0.0, 0.0, 0.0);
    drawrect(k, BEGIN, 0.0, 0.0, 0.0, 0.0);
    filledrect(k, BEGIN, 0.0, 0.0, 0.0, 0.0); 
@@ -895,6 +982,55 @@ void move_objects(int what, int merge, double dx, double dy)
       }
       // 20180914 added fill
       drawpolygon(k,  NOW, polygon[c][n].x, polygon[c][n].y, polygon[c][n].points, polygon[c][n].fill);
+      break;
+
+     case ARC:
+      if(c!=k) break;
+      arc_bbox(arc[c][n].x, arc[c][n].y, arc[c][n].r, arc[c][n].a, arc[c][n].b,
+               &tmp.x1, &tmp.y1, &tmp.x2, &tmp.y2);
+      if(debug_var>=1) fprintf(errfp, "move_objects(): arc_bbox: %g %g %g %g\n", tmp.x1, tmp.y1, tmp.x2, tmp.y2);
+      bbox(ADD, tmp.x1, tmp.y1, tmp.x2, tmp.y2);
+
+      if(rotatelocal) {
+        // rotate center wrt itself: do nothing
+        rx1 = arc[c][n].x;
+        ry1 = arc[c][n].y;
+      } else {
+        ROTATION(x1, y_1, arc[c][n].x, arc[c][n].y, rx1,ry1);
+      }
+      angle = arc[c][n].a;
+      if(flip) {
+        angle = 270.*rot+180.-arc[c][n].b-arc[c][n].a;
+      } else {
+        angle = arc[c][n].a+rot*270.;
+      }
+      angle = fmod(angle, 360.);
+      if(angle<0.) angle+=360.;
+
+      if(arc[c][n].sel == SELECTED) {
+        arc[c][n].x = rx1+deltax;
+        arc[c][n].y = ry1+deltay;
+        arc[c][n].a = angle;
+      } else if(arc[c][n].sel == SELECTED1) {
+        arc[c][n].x = rx1;
+        arc[c][n].y = ry1;
+        if(arc[c][n].r+deltax) arc[c][n].r = fabs(arc[c][n].r+deltax);
+        arc[c][n].a = angle;
+      } else if(arc[c][n].sel == SELECTED2) {
+        angle = round(fmod(atan2(-deltay, deltax)*180./XSCH_PI+angle, 360.));
+        if(angle<0.) angle +=360.;
+        arc[c][n].x = rx1;
+        arc[c][n].y = ry1;
+        arc[c][n].a = angle;
+      } else if(arc[c][n].sel==SELECTED3) {
+        angle = round(fmod(atan2(-deltay, deltax)*180./XSCH_PI+arc[c][n].b, 360.));
+        if(angle<0.) angle +=360.;
+        if(angle==0) angle=360.;
+        arc[c][n].x = rx1;
+        arc[c][n].y = ry1;
+        arc[c][n].b = angle;
+      }
+      drawarc(k, ADD, arc[c][n].x, arc[c][n].y, arc[c][n].r, arc[c][n].a, arc[c][n].b);
       break;
 
      case RECT:
@@ -1053,6 +1189,7 @@ void move_objects(int what, int merge, double dx, double dy)
    drawline(k, END, 0.0, 0.0, 0.0, 0.0);
    drawrect(k, END, 0.0, 0.0, 0.0, 0.0);
    filledrect(k, END, 0.0, 0.0, 0.0, 0.0); 
+   drawarc(k, END, 0.0, 0.0, 0.0, 0.0, 0.0);
   } //end for(k ...
   ui_state &= ~STARTMOVE;
   ui_state &= ~STARTMERGE;
@@ -1062,7 +1199,7 @@ void move_objects(int what, int merge, double dx, double dy)
   if(debug_var>=1) fprintf(errfp, "move_objects(): bbox= %d %d %d %d\n", areax1, areay1, areaw, areah);
   draw();
   bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
-  need_rebuild_selected_array=1;
+  // need_rebuild_selected_array=1; // why? <<<<
   rotatelocal=0;
   draw_window =save_draw;
  }

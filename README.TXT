@@ -35,6 +35,10 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.6.5:
+- Added arcs / circles.
+  Arcs are started with the 'Shift-C' key, while circles are entered with 'Ctrl-Shift-C'
+
 2.6.2:
 - Open polygons are now supported
 - Button3 for terminating an open Polygon placement

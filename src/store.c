@@ -102,6 +102,15 @@ void check_inst_storage(void)
  }
 }
 
+void check_arc_storage(int c)
+{
+ if(lastarc[c] >= max_arcs[c])
+ {
+  max_arcs[c]=(1 + lastarc[c] / CADMAXOBJECTS) * CADMAXOBJECTS;
+  my_realloc(&arc[c], sizeof(Arc)*max_arcs[c]);
+ }
+}
+
 void check_box_storage(int c)
 {
  if(lastrect[c] >= max_rects[c])
@@ -129,6 +138,31 @@ void check_polygon_storage(int c) //20171115
  }
 }
 
+void store_arc(int pos, double x, double y, double r, double a, double b, 
+               unsigned int rectcolor, unsigned short sel, char *prop_ptr)
+{
+  int n, j;
+  check_arc_storage(rectcolor);
+  if(pos==-1) n=lastarc[rectcolor];
+  else
+  {
+   for(j=lastarc[rectcolor];j>pos;j--)
+   {
+    arc[rectcolor][j]=arc[rectcolor][j-1];
+   }
+   n=pos;
+  }
+  arc[rectcolor][n].x = x;
+  arc[rectcolor][n].y = y;
+  arc[rectcolor][n].r = r;
+  arc[rectcolor][n].a = a;
+  arc[rectcolor][n].b = b;
+  arc[rectcolor][n].prop_ptr = NULL;
+  my_strdup(&arc[rectcolor][n].prop_ptr, prop_ptr);
+  arc[rectcolor][n].sel = sel;
+  lastarc[rectcolor]++;
+  modified=1;
+}
 
 void store_polygon(int pos, double *x, double *y, int points, unsigned int rectcolor, unsigned short sel, char *prop_ptr)
 {

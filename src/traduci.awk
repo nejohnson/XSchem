@@ -17,9 +17,13 @@ END  { endfile(_filename_) }
 
 # Tcl_Eval(interp
 
-/entry1/{
- found=1
- gsub(/\<entry1\>/, "retval")
+{
+ pattern="\\<semaphore\\>"
+
+ if($0 ~ pattern) {
+   found=0
+   print _filename_, $0
+ }
 }
 ###### end  user code  ########################
 

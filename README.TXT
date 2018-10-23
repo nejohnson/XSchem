@@ -35,6 +35,10 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.6.8:
+- Pressing 'space' while drawing a net or a line switches between horizontal-vertical
+  manhattan path, vertical-horizontal path or oblique path.
+
 2.6.7:
 - in 'persistent command' mode wire or line placement continues after a double click
   so it is possible to place multiple unconnected nets / lines

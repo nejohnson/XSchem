@@ -25,11 +25,11 @@
 int help=0; // help option set to global scope, printing help is deferred
             // when configuration ~/.schem has been read 20140406
 int fullscreen=0;
-int semaphore=0;
 int a3page=-1;
 int has_x=1;
 int sym_txt=1;
 int rainbow_colors=0;
+int manhattan_lines=0;
 FILE *errfp; 
 char *filename=NULL; // filename given on cmdline
 char home_dir[PATH_MAX]; /* home dir obtained via getpwuid */

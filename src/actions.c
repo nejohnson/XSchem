@@ -1272,13 +1272,40 @@ void new_wire(int what, double mx_snap, double my_snap)
 
    if( (what & PLACE) ) {
      if( (ui_state & STARTWIRE) && (x1!=x2 || y1!=y2) ) {
-       xx1=x1;yy1=y1;xx2=x2;yy2=y2;
-       ORDER(xx1,yy1,xx2,yy2);
        push_undo();
-       storeobject(-1, xx1,yy1,xx2,yy2,WIRE,0,0,NULL);
-       drawline(WIRELAYER,NOW, xx1,yy1,xx2,yy2);
+       if(manhattan_lines==1) {
+         if(xx2!=xx1) {
+           xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
+           ORDER(xx1,yy1,xx2,yy1);
+           storeobject(-1, xx1,yy1,xx2,yy1,WIRE,0,0,NULL);
+           drawline(WIRELAYER,NOW, xx1,yy1,xx2,yy1);
+         }
+         if(yy2!=yy1) {
+           xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
+           ORDER(xx2,yy1,xx2,yy2);
+           storeobject(-1, xx2,yy1,xx2,yy2,WIRE,0,0,NULL);
+           drawline(WIRELAYER,NOW, xx2,yy1,xx2,yy2);
+         }
+       } else if(manhattan_lines==2) {
+         if(yy2!=yy1) {
+           xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
+           ORDER(xx1,yy1,xx1,yy2);
+           storeobject(-1, xx1,yy1,xx1,yy2,WIRE,0,0,NULL);
+           drawline(WIRELAYER,NOW, xx1,yy1,xx1,yy2);
+         }
+         if(xx2!=xx1) {
+           xx1=x1;yy1=y1;xx2=x2;yy2=y2;
+           ORDER(xx1,yy2,xx2,yy2);
+           storeobject(-1, xx1,yy2,xx2,yy2,WIRE,0,0,NULL);
+           drawline(WIRELAYER,NOW, xx1,yy2,xx2,yy2);
+         }
+       } else {
+         xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
+         ORDER(xx1,yy1,xx2,yy2);
+         storeobject(-1, xx1,yy1,xx2,yy2,WIRE,0,0,NULL);
+         drawline(WIRELAYER,NOW, xx1,yy1,xx2,yy2);
+       }
      }
-
      if(! (what &END)) {
        x1=mx_snap;
        y1=my_snap;
@@ -1288,24 +1315,78 @@ void new_wire(int what, double mx_snap, double my_snap)
        yy1=y1;
        xx2=mousex_snap;
        yy2=mousey_snap;
-       ORDER(xx1,yy1,xx2,yy2);
-       drawtempline(gc[WIRELAYER], NOW, xx1,yy1,xx2,yy2);
+       if(manhattan_lines==1) {
+         x2 = mx_snap; y2 = my_snap;
+         xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
+         ORDER(xx1,yy1,xx2,yy1);
+         drawtempline(gc[WIRELAYER], NOW, xx1,yy1,xx2,yy1);
+         xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
+         ORDER(xx2,yy1,xx2,yy2);
+         drawtempline(gc[WIRELAYER], NOW, xx2,yy1,xx2,yy2);
+       } else if(manhattan_lines==2) {
+         x2 = mx_snap; y2 = my_snap;
+         xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
+         ORDER(xx1,yy1,xx1,yy2);
+         drawtempline(gc[WIRELAYER], NOW, xx1,yy1,xx1,yy2);
+         xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
+         ORDER(xx1,yy2,xx2,yy2);
+         drawtempline(gc[WIRELAYER], NOW, xx1,yy2,xx2,yy2);
+       } else {
+         x2 = mx_snap; y2 = my_snap;
+         xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
+         ORDER(xx1,yy1,xx2,yy2);
+         drawtempline(gc[WIRELAYER], NOW, xx1,yy1,xx2,yy2);
+       }
      }
-
      ui_state |= STARTWIRE;
    }
    if( what & END) {
      ui_state &= ~STARTWIRE;
    }
    if( (what & RUBBER)  ) {
-     xx1=x1;yy1=y1;xx2=x2;yy2=y2;
-     ORDER(xx1,yy1,xx2,yy2);
-     drawtempline(gctiled, NOW, xx1,yy1,xx2,yy2);
-     x2 = mx_snap; y2 = my_snap;
-     xx1 = x1; yy1 = y1;
-     xx2 = x2; yy2=y2;
-     ORDER(xx1,yy1,xx2,yy2);
-     drawtempline(gc[WIRELAYER], NOW, xx1,yy1,xx2,yy2);
+     if(manhattan_lines==1) {
+       xx1=x1;yy1=y1;xx2=x2;yy2=y2;
+       ORDER(xx1,yy1,xx2,yy1);
+       drawtempline(gctiled, NOW, xx1,yy1,xx2,yy1);
+       xx1=x1;yy1=y1;xx2=x2;yy2=y2;
+       ORDER(xx2,yy1,xx2,yy2);
+       drawtempline(gctiled, NOW, xx2,yy1,xx2,yy2);
+       x2 = mx_snap; y2 = my_snap;
+       if(!(what & CLEAR)) {
+         xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
+         ORDER(xx1,yy1,xx2,yy1);
+         drawtempline(gc[WIRELAYER], NOW, xx1,yy1,xx2,yy1);
+         xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
+         ORDER(xx2,yy1,xx2,yy2);
+         drawtempline(gc[WIRELAYER], NOW, xx2,yy1,xx2,yy2);
+       }
+     } else if(manhattan_lines==2) {
+       xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
+       ORDER(xx1,yy1,xx1,yy2);
+       drawtempline(gctiled, NOW, xx1,yy1,xx1,yy2);
+       xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
+       ORDER(xx1,yy2,xx2,yy2);
+       drawtempline(gctiled, NOW, xx1,yy2,xx2,yy2);
+       x2 = mx_snap; y2 = my_snap;
+       if(!(what & CLEAR)) {
+         xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
+         ORDER(xx1,yy1,xx1,yy2);
+         drawtempline(gc[WIRELAYER], NOW, xx1,yy1,xx1,yy2);
+         xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
+         ORDER(xx1,yy2,xx2,yy2);
+         drawtempline(gc[WIRELAYER], NOW, xx1,yy2,xx2,yy2);
+       }
+     } else {
+       xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
+       ORDER(xx1,yy1,xx2,yy2);
+       drawtempline(gctiled, NOW, xx1,yy1,xx2,yy2);
+       x2 = mx_snap; y2 = my_snap;
+       if(!(what & CLEAR)) {
+         xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
+         ORDER(xx1,yy1,xx2,yy2);
+         drawtempline(gc[WIRELAYER], NOW, xx1,yy1,xx2,yy2);
+       }
+     }
    }
 }
 
@@ -1413,16 +1494,44 @@ void new_line(int what)
 
    if( (what & PLACE) )
    {
-    if( (x1!=x2 || y1!=y2) && (ui_state & STARTLINE) )
-    {
-     xx1=x1;yy1=y1;xx2=x2;yy2=y2;
-     ORDER(xx1,yy1,xx2,yy2);
-     push_undo();
-     drawline(rectcolor, NOW, xx1,yy1,xx2,yy2);
-     storeobject(-1, xx1,yy1,xx2,yy2,LINE,rectcolor, 0, NULL);
-    }
-    x1=x2=mousex_snap;y1=y2=mousey_snap;
-    ui_state |= STARTLINE;
+     if( (x1!=x2 || y1!=y2) && (ui_state & STARTLINE) )
+     {
+       push_undo();
+       if(manhattan_lines==1) {
+         if(xx2!=xx1) {
+           xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
+           ORDER(xx1,yy1,xx2,yy1);
+           storeobject(-1, xx1,yy1,xx2,yy1,LINE,rectcolor,0,NULL);
+           drawline(rectcolor,NOW, xx1,yy1,xx2,yy1);
+         }
+         if(yy2!=yy1) {
+           xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
+           ORDER(xx2,yy1,xx2,yy2);
+           storeobject(-1, xx2,yy1,xx2,yy2,LINE,rectcolor,0,NULL);
+           drawline(rectcolor,NOW, xx2,yy1,xx2,yy2);
+         }
+       } else if(manhattan_lines==2) {
+         if(yy2!=yy1) {
+           xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
+           ORDER(xx1,yy1,xx1,yy2);
+           storeobject(-1, xx1,yy1,xx1,yy2,LINE,rectcolor,0,NULL);
+           drawline(rectcolor,NOW, xx1,yy1,xx1,yy2);
+         }
+         if(xx2!=xx1) {
+           xx1=x1;yy1=y1;xx2=x2;yy2=y2;
+           ORDER(xx1,yy2,xx2,yy2);
+           storeobject(-1, xx1,yy2,xx2,yy2,LINE,rectcolor,0,NULL);
+           drawline(rectcolor,NOW, xx1,yy2,xx2,yy2);
+         }
+       } else {
+         xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
+         ORDER(xx1,yy1,xx2,yy2);
+         storeobject(-1, xx1,yy1,xx2,yy2,LINE,rectcolor,0,NULL);
+         drawline(rectcolor,NOW, xx1,yy1,xx2,yy2);
+       }
+     }
+     x1=x2=mousex_snap;y1=y2=mousey_snap;
+     ui_state |= STARTLINE;
    }
    if( what & END)
    {
@@ -1431,13 +1540,49 @@ void new_line(int what)
 
    if(what & RUBBER)
    {
-    xx1=x1;yy1=y1;xx2=x2;yy2=y2;
-    ORDER(xx1,yy1,xx2,yy2);
-    drawtempline(gctiled, NOW, xx1,yy1,xx2,yy2);
-    x2=mousex_snap;y2=mousey_snap;
-    xx1=x1;yy1=y1;xx2=x2;yy2=y2;
-    ORDER(xx1,yy1,xx2,yy2);
-    drawtempline(gc[rectcolor], NOW, xx1,yy1,xx2,yy2);
+     if(manhattan_lines==1) {
+       xx1=x1;yy1=y1;xx2=x2;yy2=y2;
+       ORDER(xx1,yy1,xx2,yy1);
+       drawtempline(gctiled, NOW, xx1,yy1,xx2,yy1);
+       xx1=x1;yy1=y1;xx2=x2;yy2=y2;
+       ORDER(xx2,yy1,xx2,yy2);
+       drawtempline(gctiled, NOW, xx2,yy1,xx2,yy2);
+       x2 = mousex_snap; y2 = mousey_snap;
+       if(!(what & CLEAR)) {
+         xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
+         ORDER(xx1,yy1,xx2,yy1);
+         drawtempline(gc[rectcolor], NOW, xx1,yy1,xx2,yy1);
+         xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
+         ORDER(xx2,yy1,xx2,yy2);
+         drawtempline(gc[rectcolor], NOW, xx2,yy1,xx2,yy2);
+       }
+     } else if(manhattan_lines==2) {
+       xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
+       ORDER(xx1,yy1,xx1,yy2);
+       drawtempline(gctiled, NOW, xx1,yy1,xx1,yy2);
+       xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
+       ORDER(xx1,yy2,xx2,yy2);
+       drawtempline(gctiled, NOW, xx1,yy2,xx2,yy2);
+       x2 = mousex_snap; y2 = mousey_snap;
+       if(!(what & CLEAR)) {
+         xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
+         ORDER(xx1,yy1,xx1,yy2);
+         drawtempline(gc[rectcolor], NOW, xx1,yy1,xx1,yy2);
+         xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
+         ORDER(xx1,yy2,xx2,yy2);
+         drawtempline(gc[rectcolor], NOW, xx1,yy2,xx2,yy2);
+       }
+     } else {
+       xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
+       ORDER(xx1,yy1,xx2,yy2);
+       drawtempline(gctiled, NOW, xx1,yy1,xx2,yy2);
+       x2 = mousex_snap; y2 = mousey_snap;
+       if(!(what & CLEAR)) {
+         xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
+         ORDER(xx1,yy1,xx2,yy2);
+         drawtempline(gc[rectcolor], NOW, xx1,yy1,xx2,yy2);
+       }
+     }
    }
 }
 

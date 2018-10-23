@@ -27,8 +27,13 @@ void set_snap(double newsnap) /*  20161212 set new snap factor and just notify n
 {
     char str[256];
     cadsnap = newsnap;
-    my_snprintf(str, S(str), "alert_ {snap: %.16g, default: %.16g} {}", cadsnap, CADSNAP);
-    tcleval(str);
+    sprintf(str, "%.16g", newsnap);
+    if(newsnap == CADSNAP) {
+      tcleval(".statusbar.3 configure -background PaleGreen");
+    } else {
+      tcleval(".statusbar.3 configure -background OrangeRed");
+    }
+    tclsetvar("grid", str);
 }
 
 int set_netlist_dir(int force) /*  20081210 */

@@ -1097,7 +1097,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): xserver max request size: %d\n", 
                              (int)XMaxRequestSize(display));
 
-
+    set_snap(CADSNAP);
  } // if(has_x)
  if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done X init\n");
 

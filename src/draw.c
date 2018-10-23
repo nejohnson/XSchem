@@ -47,7 +47,7 @@ void print_image()
 
   modified_save=modified; // 20161121 save state
   push_undo(); // 20161121
-  collapse_wires();    // 20161121 add connection boxes on wires but undo at end
+  trim_wires();    // 20161121 add connection boxes on wires but undo at end
 
   XUnmapWindow(display, window);
 
@@ -734,7 +734,7 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
   x2=X_TO_SCREEN(linex2);
   y2=Y_TO_SCREEN(liney2);
   if(!only_probes && (x2-x1)< 0.3 && fabs(y2-y1) < 0.3) return; // 20171206
-  if( clip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
+  if( clip(&x1,&y1,&x2,&y2) )
   {
    rr[i].x1=(short)x1; 
    rr[i].y1=(short)y1;
@@ -750,7 +750,7 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
   x2=X_TO_SCREEN(linex2);
   y2=Y_TO_SCREEN(liney2);
   if(!only_probes && (x2-x1)< 0.3 && fabs(y2-y1)< 0.3) return; // 20171206
-  if( clip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
+  if( clip(&x1,&y1,&x2,&y2) )
   {
    if(draw_window) XDrawLine(display, window, gc[c], x1, y1, x2, y2);
    if(draw_pixmap) 
@@ -765,7 +765,7 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
   x2=X_TO_SCREEN(linex2);
   y2=Y_TO_SCREEN(liney2);
   if(!only_probes && (x2-x1)< 0.3 && fabs(y2-y1)< 0.3) return; // 20171206
-  if( clip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
+  if( clip(&x1,&y1,&x2,&y2) )
   {
    XSetLineAttributes (display, gc[c], BUS_WIDTH , LineSolid, CapRound , JoinRound);
 
@@ -801,7 +801,7 @@ void drawtempline(GC gc, int what, double linex1,double liney1,double linex2,dou
   y1=Y_TO_SCREEN(liney1);
   x2=X_TO_SCREEN(linex2);
   y2=Y_TO_SCREEN(liney2);
-  if( clip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
+  if( clip(&x1,&y1,&x2,&y2) )
   {
    r[i].x1=(short)x1;
    r[i].y1=(short)y1;
@@ -816,7 +816,7 @@ void drawtempline(GC gc, int what, double linex1,double liney1,double linex2,dou
   y1=Y_TO_SCREEN(liney1);
   x2=X_TO_SCREEN(linex2);
   y2=Y_TO_SCREEN(liney2);
-  if( clip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
+  if( clip(&x1,&y1,&x2,&y2) )
   {
    XDrawLine(display, window, gc, x1, y1, x2, y2);
   }
@@ -827,7 +827,7 @@ void drawtempline(GC gc, int what, double linex1,double liney1,double linex2,dou
   y1=Y_TO_SCREEN(liney1);
   x2=X_TO_SCREEN(linex2);
   y2=Y_TO_SCREEN(liney2);
-  if( clip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
+  if( clip(&x1,&y1,&x2,&y2) )
   {
    // XSetLineAttributes (display, gc, (unsigned int)(5*(lw_double+1.0)), LineSolid, CapRound , JoinRound); // 20150410
    XSetLineAttributes (display, gc, BUS_WIDTH, LineSolid, CapRound , JoinRound); // 20150410
@@ -941,6 +941,7 @@ void arc_3_points(double x1, double y1, double x2, double y2, double x3, double 
     *r = -1.0; /* no circle thru aligned points */
   }
 }
+
 
 void drawarc(int c, int what, double x, double y, double r, double a, double b)
 {
@@ -1155,7 +1156,7 @@ void drawpolygon(int c, int what, double *x, double *y, int points, int poly_fil
   }
 }
 
-void drawtemppolygon(GC gc, int what, double *x, double *y, int points)
+void drawtemppolygon(GC g, int what, double *x, double *y, int points)
 {
   double x1,y1,x2,y2;
   XPoint p[points];
@@ -1166,14 +1167,13 @@ void drawtemppolygon(GC gc, int what, double *x, double *y, int points)
   y1=Y_TO_SCREEN(y1);
   x2=X_TO_SCREEN(x2);
   y2=Y_TO_SCREEN(y2);
-  if( !rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) ) {
-    return;
+  if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) ) {
+    for(i=0;i<points; i++) {
+      p[i].x = X_TO_SCREEN(x[i]);
+      p[i].y = Y_TO_SCREEN(y[i]);
+    }
+    XDrawLines(display, window, g, p, points, CoordModeOrigin);
   }
-  for(i=0;i<points; i++) {
-    p[i].x = X_TO_SCREEN(x[i]);
-    p[i].y = Y_TO_SCREEN(y[i]);
-  }
-  XDrawLines(display, window, gc, p, points, CoordModeOrigin);
 }
 
 void drawrect(int c, int what, double rectx1,double recty1,double rectx2,double recty2)

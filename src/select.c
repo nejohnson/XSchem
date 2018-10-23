@@ -875,22 +875,32 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) // 201509
  }
  for(c=0;c<cadlayers;c++)
  {
-
-
   for(i=0;i<lastpolygon[c]; i++) {  // 20171115
-    int k=0, selected_points=0;
+    int k, selected_points, flag;
+
+
+    polygon_bbox(polygon[c][i].x, polygon[c][i].y, polygon[c][i].points, &xa, &ya, &xb, &b);
+    if(RECTOUTSIDE(xa, ya, xb, yb, x1, y1, x2, y2)) continue;
+    selected_points = 0;
+    flag=0;
     for(k=0; k<polygon[c][i].points; k++) {
+      if(polygon[c][i].sel==SELECTED) polygon[c][i].selected_point[k] = 1;
       if( POINTINSIDE(polygon[c][i].x[k],polygon[c][i].y[k], x1,y1,x2,y2)) {
+        flag=1;
         polygon[c][i].selected_point[k] = sel;
       }
       if(polygon[c][i].selected_point[k]) selected_points++;
     }
-    if(selected_points==0) select_polygon(c, i, 0, 1);
-    if(selected_points==polygon[c][i].points) {
-      ui_state |= SELECTION;
-      sel ? select_polygon(c, i, SELECTED, 1): select_polygon(c, i, 0, 1);
-    } else if(selected_points) {
-      if(sel && enable_stretch) select_polygon(c, i, SELECTED1,1); // for polygon, SELECTED1 means partial selection
+    if(flag) {
+      if(selected_points==0) {
+        select_polygon(c, i, 0, 1);
+      }
+      if(selected_points==polygon[c][i].points) {
+        ui_state |= SELECTION;
+        select_polygon(c, i, SELECTED, 1);
+      } else if(selected_points) {
+        if(sel && enable_stretch) select_polygon(c, i, SELECTED1,1); // for polygon, SELECTED1 means partial selection
+      }
     }
     
   }

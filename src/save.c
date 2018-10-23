@@ -1313,7 +1313,7 @@ void load_symbol(const char *abs_name) /* function called when opening a symbol 
 #define SNAP_TO_GRID(a)  (a=round(( a)/cadsnap)*cadsnap )
 void round_schematic_to_grid(double cadsnap)
 {
- int i, c, n;
+ int i, c, n, p;
 
  rebuild_selected_array();
  for(i=0;i<lastselected;i++)
@@ -1345,6 +1345,18 @@ void round_schematic_to_grid(double cadsnap)
        SNAP_TO_GRID(line[c][n].y1);
        SNAP_TO_GRID(line[c][n].x2);
        SNAP_TO_GRID(line[c][n].y2);
+     break;
+
+     case ARC:
+       SNAP_TO_GRID(arc[c][n].x);
+       SNAP_TO_GRID(arc[c][n].y);
+     break;
+     
+     case POLYGON:
+       for(p=0;p<polygon[c][n].points; p++) {
+         SNAP_TO_GRID(polygon[c][n].x[p]);
+         SNAP_TO_GRID(polygon[c][n].y[p]);
+       }
      break;
 
      case ELEMENT:

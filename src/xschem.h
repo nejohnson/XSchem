@@ -183,6 +183,7 @@
 #define ABORT  512 /*  used in move/copy_objects for aborting without unselecting */
 #define THICK 1024 /*  used to draw thick lines (buses) */
 #define ROTATELOCAL 2048 /*  rotate each selected object around its own anchor point 20171208 */
+#define CLEAR 4096 /* used in new_wire to clear previous rubber when switching manhattan_lines */
 
 #define FONTWIDTH 20
 #define FONTOFFSET 40
@@ -419,8 +420,8 @@ struct objectentry {
 
 extern int help; /* 20140406 */
 extern char *cad_icon[];
-extern int semaphore;
 extern int a3page;
+extern int manhattan_lines;
 extern int cadlayers;
 extern  int hilight_color;
 extern int do_print;

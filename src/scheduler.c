@@ -437,11 +437,6 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
         my_snprintf(s, S(s), "%d",debug_var);
         Tcl_AppendResult(interp, s,NULL);
   }
-  else if(!strcmp(argv[2],"semaphore"))  {
-        char s[30]; // overflow safe 20161122
-        my_snprintf(s, S(s), "%d",semaphore);
-        Tcl_AppendResult(interp, s,NULL);
-  }
   else if(!strcmp(argv[2],"change_lw"))  {
         char s[30]; // overflow safe 20161122
         my_snprintf(s, S(s), "%d",change_lw);
@@ -560,9 +555,6 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
   }
   else if(!strcmp(argv[2],"netlist_show"))  {
         netlist_show=atoi(argv[3]);
-  }
-  else if(!strcmp(argv[2],"semaphore"))  {
-        semaphore=atoi(argv[3]);
   }
   else if(!strcmp(argv[2],"cadsnap"))  { // 20161212
         set_snap( atof(argv[3]) );

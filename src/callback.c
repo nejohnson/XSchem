@@ -74,6 +74,7 @@ int callback(int event, int mx, int my, KeySym key,
                  int button, int aux, int state)  
 {
  char str[PATH_MAX];/* overflow safe 20161122 */
+ static int semaphore=0;
  FILE *fp;
  unsigned short sel;
 
@@ -244,14 +245,22 @@ int callback(int event, int mx, int my, KeySym key,
   break;
   case KeyPress: /* 20161118 */
    if(key==' ') {
-     if(semaphore<2) { /* 20160425 */
-       rebuild_selected_array();
-       if(lastselected==0) ui_state &=~SELECTION;
+     if(ui_state==STARTWIRE) {
+       new_wire(RUBBER|CLEAR, mousex_snap, mousey_snap);
+       manhattan_lines++;
+       manhattan_lines %=3;
+     } else if(ui_state==STARTLINE) {
+       new_line(RUBBER|CLEAR);
+       manhattan_lines++;
+       manhattan_lines %=3;
+     } else {
+       if(semaphore<2) { /* 20160425 */
+         rebuild_selected_array();
+         if(lastselected==0) ui_state &=~SELECTION;
+       }
+       pan2(BEGIN, mx, my);
+       ui_state |= STARTPAN2;
      }
-     /* if(!ui_state) {   // 20121123     //20121127 to be validated : pan2 even when some other ui_state action in progress */
-     pan2(BEGIN, mx, my);
-     ui_state |= STARTPAN2;
-     /* }                               //20121127 */
      break;
    }
    if(key == '_' )		/* toggle change line width */

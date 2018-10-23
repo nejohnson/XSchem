@@ -21,13 +21,58 @@
  */
 
 #include "xschem.h"
+static int mx_save, my_save;
+static int last_command=0; 
 
+void start_line(double mx, double my)
+{
+    last_command = STARTLINE;
+    if(ui_state & STARTLINE) {
+      if(!vertical_move) {
+        mx_save = mx;
+        mx_double_save=mousex_snap;
+      }
+      if(!horizontal_move) {
+        my_save = my; /* 20070323 */
+        my_double_save=mousey_snap;
+      }
+      if(horizontal_move) mousey_snap = my_double_save; /* 20171023 */
+      if(vertical_move) mousex_snap = mx_double_save;
+    } else {
+      mx_save = mx; my_save = my; /* 20070323 */
+      mx_double_save=mousex_snap;
+      my_double_save=mousey_snap;
+    }
+    new_line(PLACE);
+}
+
+void start_wire(double mx, double my)
+{
+     last_command = STARTWIRE;
+     if(ui_state & STARTWIRE) {
+       if(!vertical_move) {
+         mx_save = mx;
+         mx_double_save=mousex_snap;
+       }
+       if(!horizontal_move) {
+         my_save = my;   /* 20070323 */
+         my_double_save=mousey_snap;
+       }
+       if(horizontal_move) mousey_snap = my_double_save; /* 20171023 */
+       if(vertical_move) mousex_snap = mx_double_save;
+     } else {
+       mx_save = mx; my_save = my;       /* 20070323 */
+       mx_double_save=mousex_snap;
+       my_double_save=mousey_snap;
+     }
+     new_wire(PLACE,mousex_snap, mousey_snap);
+
+}
 /* main window callback */
 /* mx and my are set to the mouse coord. relative to window  */
 int callback(int event, int mx, int my, KeySym key, 
                  int button, int aux, int state)  
 {
- static int mx_save, my_save;
  char str[PATH_MAX];/* overflow safe 20161122 */
  FILE *fp;
  unsigned short sel;
@@ -524,23 +569,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key == 'w'&& state==0)	/* place wire. */
    {
-     if(ui_state & STARTWIRE) {
-       if(!vertical_move) {
-         mx_save = mx;
-         mx_double_save=mousex_snap;
-       }
-       if(!horizontal_move) {
-         my_save = my;   /* 20070323 */
-         my_double_save=mousey_snap;
-       }
-       if(horizontal_move) mousey_snap = my_double_save; /* 20171023 */
-       if(vertical_move) mousex_snap = mx_double_save;
-     } else {
-       mx_save = mx; my_save = my;       /* 20070323 */
-       mx_double_save=mousex_snap;
-       my_double_save=mousey_snap;
-     }
-     new_wire(PLACE,mousex_snap, mousey_snap); 
+     start_wire(mx, my); 
     break;
    }
    if(key == XK_Return && (state == 0 ) && ui_state & STARTPOLYGON) { /* close polygon */
@@ -550,7 +579,7 @@ int callback(int event, int mx, int my, KeySym key,
    if(key == XK_Escape )			/* abort & redraw */
    {
     tcleval("set vertical_move 0; set horizontal_move 0" );
-
+    last_command=0;
     horizontal_move = vertical_move = 0; /* 20171023 */
     if(debug_var>=1) fprintf(errfp, "callback(): Escape: ui_state=%ld\n", ui_state);
     if(ui_state & STARTMOVE)
@@ -1025,23 +1054,8 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='l' && state == 0) /* start line */
    {
-    if(ui_state & STARTLINE) {
-      if(!vertical_move) {
-        mx_save = mx; 
-        mx_double_save=mousex_snap;
-      }
-      if(!horizontal_move) {
-        my_save = my;	/* 20070323 */
-        my_double_save=mousey_snap;
-      }
-      if(horizontal_move) mousey_snap = my_double_save; /* 20171023 */
-      if(vertical_move) mousex_snap = mx_double_save;
-    } else {
-      mx_save = mx; my_save = my;	/* 20070323 */
-      mx_double_save=mousex_snap;
-      my_double_save=mousey_snap;
-    }
-    new_line(PLACE); break;
+    start_line(mx, my);
+    break;
    }
    if(key=='F' && state==ShiftMask)			/* Flip */
    {
@@ -1318,6 +1332,10 @@ int callback(int event, int mx, int my, KeySym key,
    }
    else if(button==Button1)
    {
+     if(persistent_command && last_command) {
+       if(last_command == STARTLINE)  start_line(mx, my);
+       if(last_command == STARTWIRE)  start_wire(mx, my);
+     }
      if(!(ui_state & STARTPOLYGON) && !(ui_state & STARTWIRE) && !(ui_state & STARTLINE) ) {
        horizontal_move = vertical_move=0; /* 20171023 */
        tcleval("set vertical_move 0; set horizontal_move 0" );

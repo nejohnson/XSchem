@@ -35,6 +35,21 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.6.7:
+- in 'persistent command' mode wire or line placement continues after a double click
+  so it is possible to place multiple unconnected nets / lines
+- no more dialog on grid change. grid is shown in status bar
+
+2.6.6:
+- double click to terminate a polygon placement
+- unzoom and zoom now correctly unzoom/zoom around the mouse pointer with no drifts
+- ordered menu items in window so using keys switches menus in a predictable way
+- Double click no more brings up edit property dialog, control-double-click is needed.
+- 'persistent command' checkbox in Tools menu, if checked LINE and WIRE placement continues
+  until an Escape or a double click is given. Default value can be set in .xschem rc file.
+- line clipping now clips lines to window size and not to currently set bbox. This avoids
+  off by one pixel calculations leaving garbage on screen in some cases.
+
 2.6.5:
 - Added arcs / circles.
   Arcs are started with the 'Shift-C' key, while circles are entered with 'Ctrl-Shift-C'
@@ -51,7 +66,6 @@ CHANGELOG
   the 'fill attribute for polyons.
 - save/load widgets: no change initial dir if user cancells action
 - 'button' look for 'Netlist', 'Waves' and 'Simulate' menu buttons.
-Stefan, 20181012
 
 2.6.1:
 - remove copying .xschem into home directory from the Makefile, this was 

@@ -126,7 +126,7 @@ static void ps_drawline(int gc, double linex1,double liney1,double linex2,double
   y1=Y_TO_SCREEN(liney1);
   x2=X_TO_SCREEN(linex2);
   y2=Y_TO_SCREEN(liney2);
-  if( clip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
+  if( clip(&x1,&y1,&x2,&y2) )
   {
    ps_xdrawline(gc, x1, y1, x2, y2);
   }
@@ -344,7 +344,7 @@ void ps_draw(void)
 
  modified_save=modified;
  push_undo(); // 20161121
- collapse_wires();    // 20161121 add connection boxes on wires but undo at end
+ trim_wires();    // 20161121 add connection boxes on wires but undo at end
  ps_colors=my_calloc(cadlayers, sizeof(Ps_color));
  if(ps_colors==NULL){
    fprintf(errfp, "ps_draw(): calloc error\n");tcleval( "exit");

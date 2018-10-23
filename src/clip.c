@@ -28,24 +28,23 @@
 #define DOWN 4
 #define RIGHT 2
 #define LEFT 1
-static inline int outcode(double x,double y,int x1,int y1,int x2,int y2)
+static inline int outcode(double x,double y)
 {
  register int code=0;
- if(y > y2) code = UP;
- else if(y < y1) code = DOWN;
- if(x > x2) code |= RIGHT;
- else if(x < x1) code |= LEFT;
+ if(y > xschem_h) code = UP;
+ else if(y < 0) code = DOWN;
+ if(x > xschem_w) code |= RIGHT;
+ else if(x < 0) code |= LEFT;
  return code;
 }
 
-int clip( int x1, int y1, int x2, int y2,
-          double *xa,double *ya,double *xb,double *yb)
+int clip( double *xa,double *ya,double *xb,double *yb)
 {
  int outa, outb,outpoint;
  double x,y;
  
- outa=outcode(*xa, *ya,x1,y1,x2,y2);
- outb=outcode(*xb, *yb,x1,y1,x2,y2);
+ outa=outcode(*xa, *ya);
+ outb=outcode(*xb, *yb);
  while(1)
  {
   if(!(outa | outb)) return 1;  // line is all inside!
@@ -54,18 +53,18 @@ int clip( int x1, int y1, int x2, int y2,
   {
    outpoint=outa? outa:outb;
    if(UP & outpoint)
-     {x= *xa + (*xb-*xa) * (y2 - *ya) / (*yb - *ya); y = y2;}
+     {x= *xa + (*xb-*xa) * (xschem_h - *ya) / (*yb - *ya); y = xschem_h;}
    else if(DOWN & outpoint)
-     {x= *xa + (*xb-*xa) * (y1 - *ya) / (*yb - *ya); y = y1;}
+     {x= *xa + (*xb-*xa) * (0 - *ya) / (*yb - *ya); y = 0;}
    else if(RIGHT & outpoint)
-     {y= *ya + (*yb-*ya) * (x2 - *xa) / (*xb - *xa); x = x2;}
+     {y= *ya + (*yb-*ya) * (xschem_w - *xa) / (*xb - *xa); x = xschem_w;}
    // else if(LEFT & outpoint)
    else
-     {y= *ya + (*yb-*ya) * (x1 - *xa) / (*xb - *xa); x = x1;}
+     {y= *ya + (*yb-*ya) * (0 - *xa) / (*xb - *xa); x = 0;}
    if(outpoint == outa)
-     {*xa=x; *ya=y; outa=outcode(*xa, *ya,x1,y1,x2,y2);}
+     {*xa=x; *ya=y; outa=outcode(*xa, *ya);}
    else
-     {*xb=x; *yb=y; outb=outcode(*xb, *yb,x1,y1,x2,y2);}
+     {*xb=x; *yb=y; outb=outcode(*xb, *yb);}
   }
  }
 }

@@ -264,10 +264,10 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
   edit_property(1);
  }
 
- else if(!strcmp(argv[1],"collapse_wires")) // 20171022
+ else if(!strcmp(argv[1],"trim_wires")) // 20171022
  {
    push_undo();
-   collapse_wires();
+   trim_wires();
    draw();
  }
 
@@ -542,6 +542,13 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
       current_type=SCHEMATIC;
     }
   }
+  else if(!strcmp(argv[2],"persistent_command")) { // 20171025
+    if(!strcmp(argv[3],"1")) {
+      persistent_command=1;
+    } else {
+      persistent_command=0;
+    }
+  }
   else if(!strcmp(argv[2],"netlist_dir"))  {
         my_strdup(&netlist_dir, argv[3]);
   }
@@ -737,7 +744,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
 
  else if(!strcmp(argv[1],"zoom_out"))
  {
-    view_zoom(0.0);
+    view_unzoom(0.0);
  }
 
  else if(!strcmp(argv[1],"line_width") && argc==3)
@@ -758,7 +765,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
 
  else if(!strcmp(argv[1],"zoom_in"))
  {
-    view_unzoom(0.0);
+    view_zoom(0.0);
  }
 
  else if(!strcmp(argv[1],"copy_objects"))
@@ -939,6 +946,10 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
      place_symbol(-1, argv[2], atof(argv[3]), atof(argv[4]), atoi(argv[5]), atoi(argv[6]),NULL, 3, 1);
    if(argc==8)
      place_symbol(-1, argv[2], atof(argv[3]), atof(argv[4]), atoi(argv[5]), atoi(argv[6]), argv[7], 3, 1);
+ } else if(!strcmp(argv[1],"arc")) { // 20171022
+   ui_state |= MENUSTARTARC;
+ } else if(!strcmp(argv[1],"circle")) { // 20171022
+   ui_state |= MENUSTARTCIRCLE;
  } else if(!strcmp(argv[1],"snap_wire")) { // 20171022
    ui_state |= MENUSTARTSNAPWIRE;
  } else if(!strcmp(argv[1],"wire")) {   

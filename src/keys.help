@@ -23,17 +23,19 @@ Ctrl+LeftButton drag    to perform a subsequent   'stretch'  move operation
 
 Mouse Wheel             Zoom in / out
 
-MidButton               Unselect selected object
+MidButton drag          Pan viewable area
 
+RightButton             Unselect selected object
 shift+RightButton drag  Unselect objects by area
 
-RightButton drag        Pan viewable area
 
-LeftButton DoubleClick  Edit property of object under the mouse, 
-                        else edit global schematic / symbol property string
+Ctrl + LeftButton       Edit property of object under the mouse
+Double Click            else edit global schematic / symbol property string
 
-RightButton DoubleClick If component selected Descend into it else return  to 
-                        to parent schematic
+LeftButton Double click Terminate Polygon placement
+
+RightButton DoubleClick Descend into component under mouse else return  to 
+                        parent schematic
 
 
                         XSCHEM KEY BINDINGS

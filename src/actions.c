@@ -1128,7 +1128,7 @@ void zoom_full(int dr)
 }
 
 
-void view_unzoom(double z)
+void view_zoom(double z)
 {
     double factor;
     /*  int i; */
@@ -1142,7 +1142,7 @@ void view_unzoom(double z)
     draw();
 }
 
-void view_zoom(double z)
+void view_unzoom(double z)
 {
   double factor;
   /*  int i; */
@@ -1150,8 +1150,12 @@ void view_zoom(double z)
   if(zoom>CADMAXZOOM) return;
   zoom*= factor;
   mooz=1/zoom;
-  xorigin=xorigin+areaw*zoom*(1-1/factor)/2;
-  yorigin=yorigin+areah*zoom*(1-1/factor)/2;
+  //// 20181022 make unzoom and zoom symmetric 
+  //// keeping the mouse pointer as the origin
+  //xorigin=xorigin+areaw*zoom*(1-1/factor)/2;
+  //yorigin=yorigin+areah*zoom*(1-1/factor)/2;
+  xorigin=-mousex_snap+(mousex_snap+xorigin)*factor;
+  yorigin=-mousey_snap+(mousey_snap+yorigin)*factor;
   set_linewidth();
   /* // performance hit 20171130 */
   /*  for(i=0;i<lastinst;i++) { // 20171127 */
@@ -1214,6 +1218,8 @@ void draw_stuff(void)
 {
    double x1,y1,w,h, x2, y2;
    int i;
+   clear_drawing();
+   view_zoom(40);
    for(i=0;i<=210000;i++)
     {
      w=(float)(areaw*zoom/800) * rand() / (RAND_MAX+1.0);
@@ -1260,11 +1266,12 @@ void new_wire(int what, double mx_snap, double my_snap)
  static double xx1,yy1,xx2,yy2;
 
    if( (what & PLACE) ) {
-     if( (x1!=x2 || y1!=y2) && (ui_state & STARTWIRE) ) {
-       ORDER(x1,y1,x2,y2);
+     if( (ui_state & STARTWIRE) && (x1!=x2 || y1!=y2) ) {
+       xx1=x1;yy1=y1;xx2=x2;yy2=y2;
+       ORDER(xx1,yy1,xx2,yy2);
        push_undo();
-       storeobject(-1, x1,y1,x2,y2,WIRE,0,0,NULL);
-       drawline(WIRELAYER,NOW, x1,y1,x2,y2);
+       storeobject(-1, xx1,yy1,xx2,yy2,WIRE,0,0,NULL);
+       drawline(WIRELAYER,NOW, xx1,yy1,xx2,yy2);
      }
 
      if(! (what &END)) {
@@ -1345,9 +1352,11 @@ void new_arc(int what, double sweep)
   static double x1, y1, x2, y2, x3, y3;
   static double xx1, yy1, xx2, yy2;
   static int state;
+  static double sweep_angle;
   if(what & PLACE) {
     state=0;
     r = -1.;
+    sweep_angle=sweep;
     xx1 = xx2 = x1 = x2 = x3 = mousex_snap;
     yy1 = yy2 = y1 = y2 = y3 = mousey_snap;
     ui_state |= STARTARC;
@@ -1362,7 +1371,7 @@ void new_arc(int what, double sweep)
       x3 = mousex_snap;
       y3 = mousey_snap;
       arc_3_points(x1, y1, x2, y2, x3, y3, &x, &y, &r, &a, &b);
-      if(sweep==360.) b=360.;
+      if(sweep_angle==360.) b=360.;
       if(r>0.) {
         push_undo();
         drawarc(rectcolor, NOW, x, y, r, a, b);
@@ -1386,83 +1395,10 @@ void new_arc(int what, double sweep)
       y3 = mousey_snap;
       if(r>0.) drawtemparc(gctiled, NOW, x, y, r, a, b);
       arc_3_points(x1, y1, x2, y2, x3, y3, &x, &y, &r, &a, &b);
-      if(sweep==360.) b=360.;
+      if(sweep_angle==360.) b=360.;
       if(r>0.) drawtemparc(gc[rectcolor], NOW, x, y, r, a, b);
     }
   }
-}
-
-void xnew_arc(int what, double sweep)
-{
- static double x,y,r, xx, yy;
- 
-
-   if( what & PLACE )
-   {
-    if( r>0  && (ui_state & STARTARC) )
-    {
-     push_undo();
-     if(fabs(xx-x) > fabs(yy-y)) {
-       if(xx > x) {
-         drawarc(rectcolor, NOW, x, y, r, 270., sweep);
-         store_arc(-1, x, y, r, 270., sweep, rectcolor, 0, NULL);
-       } else {
-         drawarc(rectcolor, NOW, x, y, r, 90., sweep);
-         store_arc(-1, x, y, r, 90., sweep, rectcolor, 0, NULL);
-       }
-     } else {
-       if(yy > y) {
-         drawarc(rectcolor, NOW, x, y, r, 180., sweep);
-         store_arc(-1, x, y, r, 180., sweep, rectcolor, 0, NULL);
-       } else {
-         drawarc(rectcolor, NOW, x, y, r,   0., sweep);
-         store_arc(-1, x, y, r,   0., sweep, rectcolor, 0, NULL);
-       }
-     }
-    }
-    x = xx = mousex_snap;
-    y = yy = mousey_snap;
-    r = 0;
-    ui_state |= STARTARC;
-   }
-   if( what & END)
-   {
-    ui_state &= ~STARTARC;
-   }
-
-   if(what & RUBBER)
-   {
-    if(fabs(xx-x) > fabs(yy-y)) {
-      if(xx>x) {
-        drawtemparc(gctiled, NOW, x,y,r, 270., sweep);
-      } else {
-        drawtemparc(gctiled, NOW, x,y,r,  90., sweep);
-      }
-    } else {
-      if(yy>y) {
-        drawtemparc(gctiled, NOW, x,y,r, 180., sweep);
-      } else {
-        drawtemparc(gctiled, NOW, x,y,r,   0., sweep);
-      }
-    }
-    xx = mousex_snap;
-    yy = mousey_snap;
-    if(fabs(xx-x) > fabs(yy-y)) {
-      r = sqrt(pow(xx-x,2));
-      if(xx > x) {
-        drawtemparc(gc[rectcolor], NOW, x, y, r, 270., sweep);
-      } else {
-        drawtemparc(gc[rectcolor], NOW, x, y, r,  90., sweep);
-      }
-    } else {
-      r = sqrt(pow(yy-y,2));
-      if(yy > y) {
-        drawtemparc(gc[rectcolor], NOW, x, y, r, 180., sweep);
-      } else {
-        drawtemparc(gc[rectcolor], NOW, x, y, r,   0., sweep);
-      }
-    }
-   }
 }
 
 void new_line(int what)
@@ -1474,17 +1410,18 @@ void new_line(int what)
    {
     if( (x1!=x2 || y1!=y2) && (ui_state & STARTLINE) )
     {
-     ORDER(x1,y1,x2,y2);
+     xx1=x1;yy1=y1;xx2=x2;yy2=y2;
+     ORDER(xx1,yy1,xx2,yy2);
      push_undo();
-     drawline(rectcolor, NOW, x1,y1,x2,y2);
-     storeobject(-1, x1,y1,x2,y2,LINE,rectcolor, 0, NULL);
+     drawline(rectcolor, NOW, xx1,yy1,xx2,yy2);
+     storeobject(-1, xx1,yy1,xx2,yy2,LINE,rectcolor, 0, NULL);
     }
     x1=x2=mousex_snap;y1=y2=mousey_snap;
     ui_state |= STARTLINE;
    }
    if( what & END)
    {
-    ui_state &= ~STARTLINE;
+     ui_state &= ~STARTLINE;
    }
 
    if(what & RUBBER)

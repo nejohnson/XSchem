@@ -79,14 +79,16 @@ void check_touch(int i, int j,
   if(debug_var>=2) fprintf(errfp, "check_touch(): xt=%.16g, yt=%.16g\n",*xt, *yt);
 }
 
-void collapse_wires(void)
+void trim_wires(void)
 // wire coordinates must be ordered.
 {
  int j,i, changed;
  unsigned short parallel,breaks,broken,touches,included,includes;
  double xt=0,yt=0;
+ int loops=0;
 
  do { 
+   loops++;
    for(i=0;i<lastwire;i++)  wire[i].end1=wire[i].end2=0;
    changed=0;
    for(i=0;i<lastwire;i++)
@@ -214,6 +216,7 @@ void collapse_wires(void)
      prepared_hash_wires=0;
    }
   } while( changed ) ;
+  if(debug_var>=1) fprintf(errfp, "trim_wires:loops=%d\n", loops);
   draw_dots=1;
 }
  

@@ -134,7 +134,7 @@ static void svg_drawline(int gc, double linex1,double liney1,double linex2,doubl
   y1=Y_TO_SCREEN(liney1);
   x2=X_TO_SCREEN(linex2);
   y2=Y_TO_SCREEN(liney2);
-  if( clip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
+  if( clip(&x1,&y1,&x2,&y2) )
   {
    svg_xdrawline(gc, x1, y1, x2, y2);
   }
@@ -372,7 +372,7 @@ void svg_draw(void)
 
  modified_save=modified;
  push_undo(); // 20161121
- collapse_wires();    // 20161121 add connection boxes on wires but undo at end
+ trim_wires();    // 20161121 add connection boxes on wires but undo at end
  
   
  fd=fopen("plot.svg", "w");

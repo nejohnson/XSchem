@@ -1867,6 +1867,7 @@ set_ne enable_stretch 0
 set_ne horizontal_move 0 ; # 20171023
 set_ne vertical_move 0 ; # 20171023
 set_ne draw_grid 1
+set_ne persistent_command 0
 set_ne sym_txt 1
 set_ne show_infowindow 0 
 set_ne symbol_width 150
@@ -2090,14 +2091,32 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    #proc unknown  {comm args} { puts "unknown command-> \<$comm\> $args" }
    frame .menubar -relief raised -bd 2 
    
+   menubutton .menubar.file -text "File" -menu .menubar.file.menu
+   menu .menubar.file.menu -tearoff 0
+   menubutton .menubar.edit -text "Edit" -menu .menubar.edit.menu
+   menu .menubar.edit.menu -tearoff 0
+   menubutton .menubar.option -text "Options" -menu .menubar.option.menu
+   menu .menubar.option.menu -tearoff 0
+   menubutton .menubar.zoom -text "View" -menu .menubar.zoom.menu
+   menu .menubar.zoom.menu -tearoff 0
+   menubutton .menubar.prop -text "Properties" -menu .menubar.prop.menu
+   menu .menubar.prop.menu -tearoff 0
+   menubutton .menubar.layers -text "Layers" -menu .menubar.layers.menu \
+    -background [lindex $colors 4]
+   menubutton .menubar.tools -text "Tools" -menu .menubar.tools.menu
+   menu .menubar.tools.menu -tearoff 0
+   menubutton .menubar.sym -text "Symbol" -menu .menubar.sym.menu
+   menu .menubar.sym.menu -tearoff 0
+   menubutton .menubar.hilight -text "Hilight" -menu .menubar.hilight.menu
+   menu .menubar.hilight.menu -tearoff 0
+   menubutton .menubar.simulation -text "Simulation" -menu .menubar.simulation.menu
+   menu .menubar.simulation.menu -tearoff 0
    menubutton .menubar.help -text "Help" -menu .menubar.help.menu
    menu .menubar.help.menu -tearoff 0
    .menubar.help.menu add command -label "help" -command "textwindow ${XSCHEM_HOME_DIR}/xschem.help" \
 	-accelerator {?}
    .menubar.help.menu add command -label "keys" -command "textwindow ${XSCHEM_HOME_DIR}/keys.help"
    
-   menubutton .menubar.file -text "File" -menu .menubar.file.menu
-   menu .menubar.file.menu -tearoff 0
    .menubar.file.menu add command -label "New Schematic" \
      -command {
        xschem clear SCHEMATIC
@@ -2124,8 +2143,6 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    .menubar.file.menu add separator
    .menubar.file.menu add command -label "Exit" -command {exit} -accelerator C-d
    
-   menubutton .menubar.option -text "Options" -menu .menubar.option.menu
-   menu .menubar.option.menu -tearoff 0
    .menubar.option.menu add checkbutton -label "show info win" -variable show_infowindow \
      -command {
 	if { $show_infowindow != 0 } {wm deiconify .infotext
@@ -2216,8 +2233,6 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    .menubar.option.menu add radiobutton -label "tEDAx netlist" -variable netlist_type -value tedax \
         -accelerator {V-toggle} \
 	-command "xschem netlist_type tedax"
-   menubutton .menubar.edit -text "Edit" -menu .menubar.edit.menu
-   menu .menubar.edit.menu -tearoff 0
    .menubar.edit.menu add command -label "Undo" -state disabled -accelerator u
    .menubar.edit.menu add command -label "Redo" -state disabled -accelerator C-r
    .menubar.edit.menu add command -label "Copy" -command "xschem copy" -accelerator C-c
@@ -2239,9 +2254,9 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    .menubar.edit.menu add command -label "Push schematic" -command "xschem descend" -accelerator e
    .menubar.edit.menu add command -label "Push symbol" -command "xschem edit_symbol" -accelerator i
    .menubar.edit.menu add command -label "Pop" -command "xschem go_back" -accelerator C-e
-   button .menubar.netlist -text "Netlist"  -activebackground red  -takefocus 0\
+   button .menubar.waves -text "Waves"  -activebackground red  -takefocus 0\
      -command {
-       xschem netlist
+       waves [file tail [xschem get schname]]
       }
    button .menubar.simulate -text "Simulate"  -activebackground red  -takefocus 0\
      -command {
@@ -2252,12 +2267,10 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
        xschem set semaphore [expr [xschem get semaphore] -1]
        .menubar.simulate configure -bg $oldbg
       }
-   button .menubar.waves -text "Waves"  -activebackground red  -takefocus 0\
+   button .menubar.netlist -text "Netlist"  -activebackground red  -takefocus 0\
      -command {
-       waves [file tail [xschem get schname]]
+       xschem netlist
       }
-   menubutton .menubar.layers -text "Layers" -menu .menubar.layers.menu \
-    -background [lindex $colors 4]
    menu .menubar.layers.menu -tearoff 0
    set j 0
    foreach i $colors {
@@ -2282,8 +2295,6 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
      incr j
      
    }
-   menubutton .menubar.zoom -text "View" -menu .menubar.zoom.menu
-   menu .menubar.zoom.menu -tearoff 0
    .menubar.zoom.menu add command -label "Redraw" -command "xschem redraw" -accelerator Esc
    .menubar.zoom.menu add command -label "Full" -command "xschem zoom_full" -accelerator f
 
@@ -2311,22 +2322,21 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
           -command {
            if { $draw_window == 1} { xschem set draw_window 1} else { xschem set draw_window 0}
         }
-   menubutton .menubar.prop -text "Properties" -menu .menubar.prop.menu
-   menu .menubar.prop.menu -tearoff 0
    .menubar.prop.menu add command -label "edit" -command "xschem edit_prop" -accelerator q
    .menubar.prop.menu add command -label "edit with editor" -command "xschem edit_vi_prop" -accelerator Q
    .menubar.prop.menu add command -label "view" -command "xschem view_prop" -accelerator C-q
    .menubar.prop.menu add command -background red -label "edit file (danger!)" -command "xschem edit_file" -accelerator A-q
 
-   menubutton .menubar.sym -text "Symbol" -menu .menubar.sym.menu
-   menu .menubar.sym.menu -tearoff 0
    .menubar.sym.menu add command -label "Make symbol from schematic" -command "xschem make_symbol" -accelerator a
    .menubar.sym.menu add command -label "Make schematic from symbol" -command "xschem make_sch" -accelerator C-l
    .menubar.sym.menu add command -label "Attach pins to component instance" -command "xschem attach_pins" -accelerator H
    .menubar.sym.menu add command -label "Create Symbol pins from selected schematic pins" -command "schpins_to_sympins" -accelerator A-h
 
-   menubutton .menubar.tools -text "Tools" -menu .menubar.tools.menu
-   menu .menubar.tools.menu -tearoff 0
+   .menubar.tools.menu add checkbutton -label "Remember last command" -variable persistent_command \
+      -accelerator {tbd} \
+      -command {
+        if { $persistent_command == 1} { xschem set persistent_command 1} else { xschem set persistent_command 0}
+      }
    .menubar.tools.menu add command -label "Insert symbol" -command "xschem place_symbol" -accelerator Ins
    .menubar.tools.menu add command -label "Insert text" -command "xschem place_text" -accelerator t
    .menubar.tools.menu add command -label "Insert wire" -command "xschem wire" -accelerator w
@@ -2334,12 +2344,12 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    .menubar.tools.menu add command -label "Insert line" -command "xschem line" -accelerator l
    .menubar.tools.menu add command -label "Insert rect" -command "xschem rect" -accelerator r
    .menubar.tools.menu add command -label "Insert polygon" -command "xschem polygon" -accelerator C-w
+   .menubar.tools.menu add command -label "Insert arc" -command "xschem arc" -accelerator C
+   .menubar.tools.menu add command -label "Insert circle" -command "xschem circle" -accelerator C-C
    .menubar.tools.menu add command -label "Search" -accelerator C-f -command  property_search
    .menubar.tools.menu add command -label "Align to Grid" -accelerator A-u -command  "xschem align"
    .menubar.tools.menu add command -label "Execute TCL command" -command  "tclcmd"
 
-   menubutton .menubar.hilight -text "Hilight" -menu .menubar.hilight.menu
-   menu .menubar.hilight.menu -tearoff 0
    .menubar.hilight.menu add command -label {Hilight selected net/pins} -command "xschem hilight" -accelerator k
    .menubar.hilight.menu add command -label {Un-hilight all net/pins} \
 	-command "xschem delete_hilight_net" -accelerator K
@@ -2355,8 +2365,6 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
         }
       }
 
-   menubutton .menubar.simulation -text "Simulation" -menu .menubar.simulation.menu
-   menu .menubar.simulation.menu -tearoff 0
    .menubar.simulation.menu add command -label "Set netlist Dir" \
      -command {
            # xschem clear_netlist_dir

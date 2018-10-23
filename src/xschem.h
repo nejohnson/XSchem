@@ -135,6 +135,7 @@
 #define MENUSTARTPOLYGON 262144   /*  20171117 */
 #define STARTARC 524288
 #define MENUSTARTARC 1048576
+#define MENUSTARTCIRCLE 2097152
 
 #define SELECTED 1          /*  used in the .sel field for selected objs. */
 #define SELECTED1 2	    /*  first point selected... */
@@ -196,6 +197,9 @@
 
 #define RECTINSIDE(xa,ya,xb,yb,x1,y1,x2,y2)  \
  (xa>=x1 && xa<=x2 && xb>=x1 && xb<=x2 && ya>=y1 && ya<=y2 && yb>=y1 && yb<=y2 )
+
+#define RECTOUTSIDE(xa,ya,xb,yb,x1,y1,x2,y2)  \
+ (xb<x1 || xa>x2 || yb<y1 || ya>y2)
 
 #define ROTATION(x0, y0, x, y, rx, ry) \
 xxtmp = (flip ? 2 * x0 -x : x); \
@@ -432,6 +436,7 @@ extern int no_readline;
 extern char *filename;
 extern char home_dir[PATH_MAX]; /* home dir obtained via getpwuid */
 extern char pwd_dir[PATH_MAX]; /* obtained via getcwd() */
+extern int persistent_command;
 
 extern int debug_var; 
 extern char **color_array;
@@ -663,8 +668,7 @@ extern void draw_temp_string(GC gc,int what, char *str, int rot, int flip,
 
 
 extern void draw(void);
-extern int clip(int,int,int,int,
-           double*,double*,double*,double*);
+extern int clip( double*,double*,double*,double*);
 extern int textclip(int x1,int y1,int x2,int y2,
            double xa,double ya,double xb,double yb);
 extern double dist_from_rect(double mx, 
@@ -674,7 +678,13 @@ extern double rectdist(double x1,double y1,double x2,double y2,double xa,double 
 extern int touch(double,double,double,double,double,double);
 extern int rectclip(int,int,int,int,
            double*,double*,double*,double*);
-extern void collapse_wires(void);
+extern void trim_wires(void);
+extern void check_touch(int i, int j,
+         unsigned short *parallel,unsigned short *breaks,
+         unsigned short *broken,unsigned short *touches,
+         unsigned short *included, unsigned short *includes,
+         double *xt, double *yt);
+
 extern void storeobject(int pos, double x1,double y1,double x2,double y2,
                         unsigned short type,unsigned int rectcolor,
 		        unsigned short sel, char *prop_ptr);

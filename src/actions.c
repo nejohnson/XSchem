@@ -1224,7 +1224,7 @@ void draw_stuff(void)
    double x1,y1,w,h, x2, y2;
    int i;
    clear_drawing();
-   view_zoom(40);
+   view_unzoom(40);
    for(i=0;i<=210000;i++)
     {
      w=(float)(areaw*zoom/800) * rand() / (RAND_MAX+1.0);

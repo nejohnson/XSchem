@@ -249,10 +249,13 @@ int callback(int event, int mx, int my, KeySym key,
        new_wire(RUBBER|CLEAR, mousex_snap, mousey_snap);
        manhattan_lines++;
        manhattan_lines %=3;
+       new_wire(RUBBER, mousex_snap, mousey_snap);
+
      } else if(ui_state==STARTLINE) {
        new_line(RUBBER|CLEAR);
        manhattan_lines++;
        manhattan_lines %=3;
+       new_line(RUBBER);
      } else {
        if(semaphore<2) { /* 20160425 */
          rebuild_selected_array();

@@ -784,7 +784,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
  //
  //  EXECUTE .xschem *****
  //
- if(initfile_found) {  // file exists 20121110 // used initfile_found, 20170330
+ if(initfile_found && load_initfile) {  // file exists 20121110 // used initfile_found, 20170330
    if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): sourcing %s\n", name);
    source_tcl_file(name);
  }
@@ -1082,10 +1082,10 @@ int Tcl_AppInit(Tcl_Interp *inter)
     }
     #endif
 
-    set_linewidth();
+    change_linewidth(0.);
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done xinit()\n");
-    winattr.backing_store = WhenMapped;
-    //winattr.backing_store = NotUseful;
+    // winattr.backing_store = WhenMapped;
+    winattr.backing_store = NotUseful;
     Tk_ChangeWindowAttributes(tkwindow, CWBackingStore, &winattr);
    
     if(debug_var>=1) 

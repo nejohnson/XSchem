@@ -741,7 +741,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
 
  else if(!strcmp(argv[1],"line_width") && argc==3)
  {
-    change_linewidth(atof(argv[2]), 0);
+    change_linewidth(atof(argv[2]));
  }
 
  else if(!strcmp(argv[1],"sleep") && argc==3)

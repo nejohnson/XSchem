@@ -162,7 +162,8 @@ void toggle_only_probes()
    else {
        tclsetvar("only_probes","0");
    }
-   change_linewidth(lw_double, 1);
+   change_linewidth(lw_double);
+   draw();
 }
 
 void toggle_fullscreen()
@@ -193,31 +194,6 @@ void toggle_fullscreen()
       window_state(display , parent_of_topwindow,normal);
     }
     pending_fullzoom=1;
-}
-
-void change_linewidth(double w, int dr)
-{
-  int i,j;
-  j=lw=lw_double=w;
-  if(lw==0) lw=1;
-  if(has_x) {
-    for(i=0;i<cadlayers;i++) {
-        XSetLineAttributes (display, gc[i], j, LineSolid, CapRound , JoinRound);
-    }                                  /*  lw  20070307 */
-    /*  20101211 */
-    XSetLineAttributes (display, gctiled, j, LineSolid, CapRound , JoinRound);
-  }
-  areax1 = -2*lw;
-  areay1 = -2*lw;
-  areax2 = xrect[0].width+2*lw;
-  areay2 = xrect[0].height+2*lw;
-  areaw = areax2-areax1;
-  areah = areay2 - areay1;
-
-  if(dr) {
-    /*  resetwin(); */
-    draw();
-  }
 }
 
 
@@ -968,8 +944,7 @@ void go_back(int confirm) /*  20171006 add confirm */
   zoom=zoom_array[currentsch].zoom;
   mooz=1/zoom;
 
-  set_linewidth();
-  /*  resetwin(); */
+  change_linewidth(-1.);
   draw();
 
   current_type=SCHEMATIC;
@@ -977,29 +952,38 @@ void go_back(int confirm) /*  20171006 add confirm */
  }
 }
 
-void set_linewidth()
+void change_linewidth(double w)
 {
- int i,j;
-   if(change_lw)  {
-     lw_double=1/zoom*1.5;		/*  on some servers zero width */
-     /* if(lw_double > 50.) lw_double=50; // clamp max width? */
-   }
-    
-   lw=j=lw_double;			/*  draws fast but not good... */
-   if(lw==0) lw=1;			/*  lw used to calculate bound boxes */
-   if(debug_var>=1) fprintf(errfp, "set_linewidth(): lw=%d, lw_double=%.16g\n", lw, lw_double);
-   if(has_x) {
-      for(i=0;i<cadlayers;i++) {
-          XSetLineAttributes (display, gc[i], j, LineSolid, CapRound , JoinRound);
-      }
-      XSetLineAttributes (display, gctiled, j, LineSolid, CapRound , JoinRound); /*  j as linewidth 20171105 */
-   }
-   areax1 = -2*lw;
-   areay1 = -2*lw;
-   areax2 = xrect[0].width+2*lw;
-   areay2 = xrect[0].height+2*lw;
-   areaw = areax2-areax1;
-   areah = areay2 - areay1;
+  int i, changed;
+ 
+  changed=0;
+  /* choose line width automatically based on zoom */
+  if(w<0.) {
+    if(change_lw)  {
+      lw_double=1/zoom*1.5;
+      changed=1;
+    }
+  /* explicitly set line width */
+  } else {
+    lw_double=w;
+    changed=1;
+  }
+  if(!changed) return;
+  lw=lw_double;
+  if(lw==0) lw=1;     /*  on some servers zero width */
+                      /*  draws fast but not good... */
+  if(has_x) {
+    for(i=0;i<cadlayers;i++) {
+        XSetLineAttributes (display, gc[i], lw, LineSolid, CapRound , JoinRound);
+    }
+    XSetLineAttributes (display, gctiled, lw, LineSolid, CapRound , JoinRound);
+  }
+  areax1 = -2*lw;
+  areay1 = -2*lw;
+  areax2 = xrect[0].width+2*lw;
+  areay2 = xrect[0].height+2*lw;
+  areaw = areax2-areax1;
+  areah = areay2 - areay1;
 }
 
 void calc_drawing_bbox(Box *boundbox)
@@ -1126,9 +1110,8 @@ void zoom_full(int dr)
 
   if(dr)
   { 
-   if(change_lw) set_linewidth();
-
-   draw(); /*  20121111 */
+   change_linewidth(-1.);
+   draw();
   }
 }
 
@@ -1143,7 +1126,7 @@ void view_zoom(double z)
     mooz=1/zoom;
     xorigin=-mousex_snap+(mousex_snap+xorigin)/factor;
     yorigin=-mousey_snap+(mousey_snap+yorigin)/factor;
-    set_linewidth();
+    change_linewidth(-1.);
     draw();
 }
 
@@ -1161,14 +1144,7 @@ void view_unzoom(double z)
   //yorigin=yorigin+areah*zoom*(1-1/factor)/2;
   xorigin=-mousex_snap+(mousex_snap+xorigin)*factor;
   yorigin=-mousey_snap+(mousey_snap+yorigin)*factor;
-  set_linewidth();
-  /* // performance hit 20171130 */
-  /*  for(i=0;i<lastinst;i++) { // 20171127 */
-  /*    if(inst_ptr[i].ptr <0) continue; */
-  /*    symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1, */
-  /*                      &inst_ptr[i].x2, &inst_ptr[i].y2); */
-  /*  } */
-  /*  resetwin(); */
+  change_linewidth(-1.);
   draw();
 }
 
@@ -1192,8 +1168,7 @@ void zoom_box(int what)
     yy1=(y2-y1)/(areah-4*lw);
     if(yy1>zoom) zoom=yy1;
     mooz=1/zoom;
-    set_linewidth();
-    /*  resetwin(); */
+    change_linewidth(-1.);
     draw();
     if(debug_var>=1) fprintf(errfp, "zoom_box(): coord: %.16g %.16g %.16g %.16g zoom=%.16g\n",x1,y1,mousex_snap, mousey_snap,zoom);
   }

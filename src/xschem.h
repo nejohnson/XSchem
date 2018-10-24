@@ -184,7 +184,7 @@
 #define THICK 1024 /*  used to draw thick lines (buses) */
 #define ROTATELOCAL 2048 /*  rotate each selected object around its own anchor point 20171208 */
 #define CLEAR 4096 /* used in new_wire to clear previous rubber when switching manhattan_lines */
-
+#define DRAW 8192  /* used in bbox() to draw things by using XCopyArea after setting clip rectangle */
 #define FONTWIDTH 20
 #define FONTOFFSET 40
 #define FONTHEIGHT 40
@@ -437,6 +437,7 @@ extern int no_readline;
 extern char *filename;
 extern char home_dir[PATH_MAX]; /* home dir obtained via getpwuid */
 extern char pwd_dir[PATH_MAX]; /* obtained via getcwd() */
+extern int load_initfile;
 extern int persistent_command;
 
 extern int debug_var; 
@@ -572,7 +573,7 @@ extern size_t get_tok_value_size;
 extern int set_netlist_dir(int force);
 extern int  check_lib(char * s);
 extern void select_all(void);
-extern void change_linewidth(double w, int draw);
+extern void change_linewidth(double w);
 extern void set_fill(int n);
 extern void schematic_in_new_window(void);
 extern void symbol_in_new_window(void);
@@ -597,7 +598,6 @@ extern void make_symbol(void);
 extern char *get_sym_template(char *s, char *extra);
 extern void zoom_full(int draw);
 extern void updatebbox(int count,Box *boundbox,Box *tmp);
-extern void set_linewidth();
 extern void draw_selection(GC g, int interruptable);
 extern void delete(void);
 extern void delete_only_rect_line_arc_poly(void);

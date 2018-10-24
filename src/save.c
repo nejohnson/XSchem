@@ -1314,7 +1314,7 @@ void load_symbol(const char *abs_name) /* function called when opening a symbol 
 void round_schematic_to_grid(double cadsnap)
 {
  int i, c, n, p;
-
+ double savew, saveh;
  rebuild_selected_array();
  for(i=0;i<lastselected;i++)
  {
@@ -1327,10 +1327,12 @@ void round_schematic_to_grid(double cadsnap)
      break;
 
      case RECT:
+       savew = rect[c][n].x2-rect[c][n].x1;
+       saveh = rect[c][n].y2-rect[c][n].y1;
        SNAP_TO_GRID(rect[c][n].x1);
        SNAP_TO_GRID(rect[c][n].y1);
-       SNAP_TO_GRID(rect[c][n].x2);
-       SNAP_TO_GRID(rect[c][n].y2);
+       rect[c][n].x2 =rect[c][n].x1 + savew;
+       rect[c][n].y2 =rect[c][n].y1 + saveh;
      break;
 
      case WIRE:

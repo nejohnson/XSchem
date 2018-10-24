@@ -18,11 +18,14 @@ END  { endfile(_filename_) }
 # Tcl_Eval(interp
 
 {
- pattern="\\<semaphore\\>"
+ pattern="^B"
 
  if($0 ~ pattern) {
-   found=0
-   print _filename_, $0
+   found=1
+   $3*=2
+   $4*=2
+   $5*=2
+   $6*=2
  }
 }
 ###### end  user code  ########################

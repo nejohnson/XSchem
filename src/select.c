@@ -311,10 +311,11 @@ void delete(void)
  lastselected = 0;
  bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
  draw();
- if(!draw_window) {
-   XCopyArea(display, save_pixmap, window, gctiled, 
-      xrect[0].x, xrect[0].y, xrect[0].width, xrect[0].height, xrect[0].x, xrect[0].y); // 20181009
- }
+ 
+ // if(!draw_window) {
+ //   XCopyArea(display, save_pixmap, window, gctiled, 
+ //      xrect[0].x, xrect[0].y, xrect[0].width, xrect[0].height, xrect[0].x, xrect[0].y); // 20181009
+ // }
 
  bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
  ui_state &= ~SELECTION;
@@ -436,6 +437,11 @@ void bbox(int what,double x1,double y1, double x2, double y2)
    cairo_clip(save_ctx);
    #endif
    break;
+  case DRAW:
+   XCopyArea(display, save_pixmap, window, gctiled, xrect[0].x, xrect[0].y,
+       xrect[0].width, xrect[0].height, xrect[0].x, xrect[0].y); // 20181009
+
+  break;
  }
 }
 

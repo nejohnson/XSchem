@@ -771,7 +771,7 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
 
    if(draw_window) XDrawLine(display, window, gc[c], x1, y1, x2, y2);
    if(draw_pixmap) XDrawLine(display, save_pixmap, gc[c], x1, y1, x2, y2);
-   XSetLineAttributes (display, gc[c], lw==1? 0:lw, LineSolid, CapRound , JoinRound);
+   XSetLineAttributes (display, gc[c], lw, LineSolid, CapRound , JoinRound);
   }
  }
  else if(what==BEGIN) i=0;
@@ -836,7 +836,7 @@ void drawtempline(GC gc, int what, double linex1,double liney1,double linex2,dou
    if(gc==gctiled) 
      XSetLineAttributes (display, gc, lw, LineSolid, CapRound , JoinRound);
    else
-     XSetLineAttributes (display, gc, lw==1? 0:lw, LineSolid, CapRound , JoinRound);
+     XSetLineAttributes (display, gc, lw, LineSolid, CapRound , JoinRound);
   }
  }
 

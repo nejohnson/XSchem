@@ -26,7 +26,7 @@ void
      int c;
      
      while (1) {
-         c = getopt (argc, argv, "S3cpxzl:d:nfhrsvwtWq");
+         c = getopt (argc, argv, "S3icpxzl:d:nfhrsvwtWq");
          if (c == -1)
              break;
  
@@ -69,6 +69,10 @@ void
          case '3':
              if(debug_var>=1) fprintf(errfp, "process_options(): set A3 page size\n");
              a3page=1;
+             break;
+ 
+         case 'i':
+             load_initfile=0;
              break;
  
          case 'd':

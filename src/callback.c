@@ -487,7 +487,8 @@ int callback(int event, int mx, int my, KeySym key,
    if(key == '+'  && state&ControlMask)		/* change line width */
    {
     lw_double+=0.1;
-    change_linewidth(lw_double,1);
+    change_linewidth(lw_double);
+    draw();
     break;
    }
    if(key == '+'  && !(state&ControlMask))		/* brite colors */
@@ -511,7 +512,8 @@ int callback(int event, int mx, int my, KeySym key,
    if(key == '-'  && state&ControlMask)		/* change line width */
    {
     lw_double-=0.1;if(lw_double<0.0) lw_double=0.0;
-    change_linewidth(lw_double,1);
+    change_linewidth(lw_double);
+    draw();
     break;
    }
    if(key == 'X' && state == ShiftMask) /* highlight discrepanciens between selected instance pin and net names */

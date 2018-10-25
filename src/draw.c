@@ -1357,68 +1357,6 @@ void draw(void)
           filledrect(WIRELAYER, BEGIN, 0.0, 0.0, 0.0, 0.0);
 
 
-
-          if( (lastwire > 2000) && (x2 - x1  < ITERATOR_THRESHOLD) ) {
-            if(debug_var>2) fprintf(errfp, "using spatial hash table iterator\n");
-            //loop thru all squares that intersect drawing area
-            firsti=1;
-            free_int_hash(wirehash);
-            for(i=x1a; i<=x2a;i++)
-            {
-             tmpi=i%NBOXES; if(tmpi<0) tmpi+=NBOXES;
-             if(tmpi==x1b && !firsti) break;
-             firsti=0;
-             firstj=1;
-             for(j=y1a; j<=y2a;j++)
-             {
-              tmpj=j%NBOXES; if(tmpj<0) tmpj+=NBOXES;
-              if(tmpj==y1b && !firstj) break;
-              firstj=0;
-              wireptr=wiretable[tmpi][tmpj];
-              while(wireptr) {
-                ii=wireptr->n;
-                if(debug_var>0) fprintf(errfp, "drawing wire %d in square: %d %d\n", ii, tmpi, tmpj);
-                if( !int_hash_lookup(wirehash, ii, 0)) {
-                  if(wire[ii].bus) {
-                    drawline(WIRELAYER, THICK, wire[ii].x1,wire[ii].y1,wire[ii].x2,wire[ii].y2);
-                  }
-                  else
-                    drawline(WIRELAYER, ADD, wire[ii].x1,wire[ii].y1,wire[ii].x2,wire[ii].y2);
-                  if(draw_dots && wire[ii].end1 >1 && CADHALFDOTSIZE*mooz>=0.5) { // 20150331 draw_dots
-                     filledrect(WIRELAYER, ADD, wire[ii].x1-CADHALFDOTSIZE,wire[ii].y1-CADHALFDOTSIZE,
-                              wire[ii].x1+CADHALFDOTSIZE,wire[ii].y1+CADHALFDOTSIZE );
-                  }
-                  if(draw_dots && wire[ii].end2 >1 && CADHALFDOTSIZE*mooz>=0.5) { // 20150331 draw_dots
-                     filledrect(WIRELAYER, ADD, wire[ii].x2-CADHALFDOTSIZE,wire[ii].y2-CADHALFDOTSIZE,
-                              wire[ii].x2+CADHALFDOTSIZE,wire[ii].y2+CADHALFDOTSIZE );
-                  }
-                }
-                wireptr=wireptr->next;
-              }  // 20150408
-             }
-            }
-          } else {
-            for(i=0;i<lastwire;i++)
-            {
-              if(wire[i].bus) {
-                drawline(WIRELAYER, THICK, wire[i].x1,wire[i].y1,wire[i].x2,wire[i].y2);
-              }
-              else
-                drawline(WIRELAYER, ADD, wire[i].x1,wire[i].y1,wire[i].x2,wire[i].y2);
-              if(draw_dots && wire[i].end1 >1 && CADHALFDOTSIZE*mooz>=0.5) { // 20150331 draw_dots
-                 filledrect(WIRELAYER, ADD, wire[i].x1-CADHALFDOTSIZE,wire[i].y1-CADHALFDOTSIZE,
-                          wire[i].x1+CADHALFDOTSIZE,wire[i].y1+CADHALFDOTSIZE );
-              }
-              if(draw_dots && wire[i].end2 >1 && CADHALFDOTSIZE*mooz>=0.5) { // 20150331 draw_dots
-                 filledrect(WIRELAYER, ADD, wire[i].x2-CADHALFDOTSIZE,wire[i].y2-CADHALFDOTSIZE,
-                          wire[i].x2+CADHALFDOTSIZE,wire[i].y2+CADHALFDOTSIZE );
-              }
-            }
-          }
-          drawline(WIRELAYER, END, 0.0, 0.0, 0.0, 0.0);
-          filledrect(WIRELAYER, END, 0.0, 0.0, 0.0, 0.0);
-        }
-     
         for(c=0;c<cadlayers;c++)
         {
           if(draw_single_layer!=-1 && c != draw_single_layer) continue; // 20151117
@@ -1514,11 +1452,78 @@ void draw(void)
             }
           }
       
-          drawline(c, END, 0.0, 0.0, 0.0, 0.0);
-          drawrect(c, END, 0.0, 0.0, 0.0, 0.0);
-          drawarc(c, END, 0.0, 0.0, 0.0, 0.0, 0.0);
           filledrect(c, END, 0.0, 0.0, 0.0, 0.0);
+          drawarc(c, END, 0.0, 0.0, 0.0, 0.0, 0.0);
+          drawrect(c, END, 0.0, 0.0, 0.0, 0.0);
+          drawline(c, END, 0.0, 0.0, 0.0, 0.0);
         }
+
+
+
+
+          if( (lastwire > 2000) && (x2 - x1  < ITERATOR_THRESHOLD) ) {
+            if(debug_var>2) fprintf(errfp, "using spatial hash table iterator\n");
+            //loop thru all squares that intersect drawing area
+            firsti=1;
+            free_int_hash(wirehash);
+            for(i=x1a; i<=x2a;i++)
+            {
+             tmpi=i%NBOXES; if(tmpi<0) tmpi+=NBOXES;
+             if(tmpi==x1b && !firsti) break;
+             firsti=0;
+             firstj=1;
+             for(j=y1a; j<=y2a;j++)
+             {
+              tmpj=j%NBOXES; if(tmpj<0) tmpj+=NBOXES;
+              if(tmpj==y1b && !firstj) break;
+              firstj=0;
+              wireptr=wiretable[tmpi][tmpj];
+              while(wireptr) {
+                ii=wireptr->n;
+                if(debug_var>0) fprintf(errfp, "drawing wire %d in square: %d %d\n", ii, tmpi, tmpj);
+                if( !int_hash_lookup(wirehash, ii, 0)) {
+                  if(wire[ii].bus) {
+                    drawline(WIRELAYER, THICK, wire[ii].x1,wire[ii].y1,wire[ii].x2,wire[ii].y2);
+                  }
+                  else
+                    drawline(WIRELAYER, ADD, wire[ii].x1,wire[ii].y1,wire[ii].x2,wire[ii].y2);
+                  if(draw_dots && wire[ii].end1 >1 && CADHALFDOTSIZE*mooz>=0.5) { // 20150331 draw_dots
+                     filledrect(WIRELAYER, ADD, wire[ii].x1-CADHALFDOTSIZE,wire[ii].y1-CADHALFDOTSIZE,
+                              wire[ii].x1+CADHALFDOTSIZE,wire[ii].y1+CADHALFDOTSIZE );
+                  }
+                  if(draw_dots && wire[ii].end2 >1 && CADHALFDOTSIZE*mooz>=0.5) { // 20150331 draw_dots
+                     filledrect(WIRELAYER, ADD, wire[ii].x2-CADHALFDOTSIZE,wire[ii].y2-CADHALFDOTSIZE,
+                              wire[ii].x2+CADHALFDOTSIZE,wire[ii].y2+CADHALFDOTSIZE );
+                  }
+                }
+                wireptr=wireptr->next;
+              }  // 20150408
+             }
+            }
+          } else {
+            for(i=0;i<lastwire;i++)
+            {
+              if(wire[i].bus) {
+                drawline(WIRELAYER, THICK, wire[i].x1,wire[i].y1,wire[i].x2,wire[i].y2);
+              }
+              else
+                drawline(WIRELAYER, ADD, wire[i].x1,wire[i].y1,wire[i].x2,wire[i].y2);
+              if(draw_dots && wire[i].end1 >1 && CADHALFDOTSIZE*mooz>=0.5) { // 20150331 draw_dots
+                 filledrect(WIRELAYER, ADD, wire[i].x1-CADHALFDOTSIZE,wire[i].y1-CADHALFDOTSIZE,
+                          wire[i].x1+CADHALFDOTSIZE,wire[i].y1+CADHALFDOTSIZE );
+              }
+              if(draw_dots && wire[i].end2 >1 && CADHALFDOTSIZE*mooz>=0.5) { // 20150331 draw_dots
+                 filledrect(WIRELAYER, ADD, wire[i].x2-CADHALFDOTSIZE,wire[i].y2-CADHALFDOTSIZE,
+                          wire[i].x2+CADHALFDOTSIZE,wire[i].y2+CADHALFDOTSIZE );
+              }
+            }
+          }
+          drawline(WIRELAYER, END, 0.0, 0.0, 0.0, 0.0);
+          filledrect(WIRELAYER, END, 0.0, 0.0, 0.0, 0.0);
+        }
+     
+
+
 
         if(draw_single_layer ==-1 || draw_single_layer==TEXTLAYER) { // 20151117
           #ifndef HAS_CAIRO
@@ -1552,8 +1557,8 @@ void draw(void)
             #endif
           }
           #ifndef HAS_CAIRO
-          drawline(TEXTLAYER, END, 0.0, 0.0, 0.0, 0.0);
           drawrect(TEXTLAYER, END, 0.0, 0.0, 0.0, 0.0);
+          drawline(TEXTLAYER, END, 0.0, 0.0, 0.0, 0.0);
           #endif
         }
     } // !only_probes, 20110112

@@ -818,6 +818,9 @@ void edit_property(int x)
    tcleval("text_line {Input property:} 0");
    if(strcmp(tclgetvar("rcode"),"") )
    {
+    prepared_hash_wires=0; // 20181025
+    prepared_netlist_structs=0;
+    prepared_hilight_structs=0;
     modified=1; push_undo(); // 20150327
     my_strdup(&wire[selectedgroup[0].n].prop_ptr,(char *) tclgetvar("retval"));
     if(get_tok_value(wire[selectedgroup[0].n].prop_ptr,"bus",0)[0]) wire[selectedgroup[0].n].bus=1; // 20171201

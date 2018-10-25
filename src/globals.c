@@ -25,6 +25,7 @@
 int help=0; // help option set to global scope, printing help is deferred
             // when configuration ~/.schem has been read 20140406
 int fullscreen=0;
+int unzoom_nodrift=1;
 int a3page=-1;
 int has_x=1;
 int sym_txt=1;

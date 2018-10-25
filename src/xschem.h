@@ -555,6 +555,7 @@ extern int only_probes; /*  20110112 */
 extern Zoom zoom_array[];
 extern int pending_fullzoom;
 extern int fullscreen;
+extern int unzoom_nodrift;
 extern XColor xcolor_array[];/*  20171109 */
 extern Visual *visual;
 extern int dark_colorscheme; /*  20171113 */

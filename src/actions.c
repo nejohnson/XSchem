@@ -734,9 +734,11 @@ void place_symbol(int pos,char *symbol_name, double x, double y, int rot, int fl
   /*   hilight new element 24122002 */
   drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
   drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
+  drawtemparc(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
   select_element(n, SELECTED,0);
-  drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
+  drawtemparc(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0, 0.0);
   drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
+  drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
 
  }
 }
@@ -1140,10 +1142,13 @@ void view_unzoom(double z)
   mooz=1/zoom;
   //// 20181022 make unzoom and zoom symmetric 
   //// keeping the mouse pointer as the origin
-  //xorigin=xorigin+areaw*zoom*(1-1/factor)/2;
-  //yorigin=yorigin+areah*zoom*(1-1/factor)/2;
-  xorigin=-mousex_snap+(mousex_snap+xorigin)*factor;
-  yorigin=-mousey_snap+(mousey_snap+yorigin)*factor;
+  if(unzoom_nodrift) {
+    xorigin=-mousex_snap+(mousex_snap+xorigin)*factor;
+    yorigin=-mousey_snap+(mousey_snap+yorigin)*factor;
+  } else {
+    xorigin=xorigin+areaw*zoom*(1-1/factor)/2;
+    yorigin=yorigin+areah*zoom*(1-1/factor)/2;
+  }
   change_linewidth(-1.);
   draw();
 }
@@ -1834,8 +1839,8 @@ void place_text(int draw_text, double mx, double my)
   drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
   drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
   select_text(lasttext, SELECTED, 0);
-  drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
   drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
+  drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
   lasttext++;
   modified=1;
 }

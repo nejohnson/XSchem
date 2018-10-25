@@ -299,6 +299,7 @@ void load_wire(FILE *fd)
     static char *ptr=NULL;
     fscanf(fd, "%lf %lf %lf %lf",&x1, &y1, &x2, &y2 );
     load_ascii_string( &ptr, fd);
+    ORDER(x1, y1, x2, y2);
     storeobject(-1, x1,y1,x2,y2,WIRE,0,0,ptr);
     modified=0; // 20140116 storeobject sets modified flag , but we are loading here ...
 }

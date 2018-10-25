@@ -764,7 +764,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
  //
  //  EXECUTE system xschemrc *****
  //
- if(tclgetvar("XSCHEM_HOME_DIR")) {
+ if(load_initfile && tclgetvar("XSCHEM_HOME_DIR")) {
    my_snprintf(name, S(name), "%s/%s",tclgetvar("XSCHEM_HOME_DIR"), "xschemrc" );
    if(!stat(name, &buf)) {
      if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): sourcing %s\n", name);

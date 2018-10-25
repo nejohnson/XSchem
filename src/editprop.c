@@ -192,27 +192,9 @@ void my_strncpy(char *d, const char *s, int n)
 }
 
 void set_inst_prop(int i)
-{// find the last element of the same type and returns its prop string
- // if not found obtain it from the template string in the symbol prop list
- // int j; 
- char *ptr=NULL;
+{// set inst prop from symbol template string
+  char *ptr;
 
- // this code commented as it is annoying... 20171103 
- /*
- for(j=0;j<lastinst;j++)
- {
-  if(j==i)continue;  //don't look the element we are working on ...
-   if(debug_var>=2) fprintf(errfp, "set_inst_prop(): find other elem of same type %d\n", j);
-  // 20160423 check non NULL inst_ptr[j].name && inst_ptr[i].name
-
-  if(inst_ptr[j].name && inst_ptr[i].name && strcmp(inst_ptr[j].name, inst_ptr[i].name) == 0 )
-   ptr=inst_ptr[j].prop_ptr;
- }
- */
-
- if(ptr==NULL) 
- {
-  // my_strdup(&ptr,  get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr, "template",2) ); //20150409
   ptr = (inst_ptr[i].ptr+instdef)->templ; //20150409
 
   if(get_tok_value(ptr,"name",0)[0]==0)  // if does not have a name field just copy 
@@ -231,14 +213,6 @@ void set_inst_prop(int i)
     my_strdup( &inst_ptr[i].prop_ptr,NULL);
   }
   my_strdup2(&inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name",0)); // 20150409
-    //inst_ptr[i].prop_ptr=NULL;
-  // my_strdup(&ptr,NULL); // 20150409
- }
- else
- {
-  new_prop_string(&inst_ptr[i].prop_ptr, ptr,0);
-  my_strdup2(&inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name",0)); // 20150409
- }
 }
 
 // x=0 use text widget   x=1 use vim editor

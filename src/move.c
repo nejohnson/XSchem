@@ -402,16 +402,16 @@ void draw_selection(GC g, int interruptable)
    }
    if(XPending(display) && interruptable)
    {
-    drawtempline(g, END, 0.0, 0.0, 0.0, 0.0);
-    drawtemprect(g, END, 0.0, 0.0, 0.0, 0.0);
     drawtemparc(g, END, 0.0, 0.0, 0.0, 0.0, 0.0);
+    drawtemprect(g, END, 0.0, 0.0, 0.0, 0.0);
+    drawtempline(g, END, 0.0, 0.0, 0.0, 0.0);
     lastsel = i+1;
     return;
    }
   }
-  drawtempline(g, END, 0.0, 0.0, 0.0, 0.0);
-  drawtemprect(g, END, 0.0, 0.0, 0.0, 0.0);
   drawtemparc(g, END, 0.0, 0.0, 0.0, 0.0, 0.0);
+  drawtemprect(g, END, 0.0, 0.0, 0.0, 0.0);
+  drawtempline(g, END, 0.0, 0.0, 0.0, 0.0);
   lastsel = i;
 }
 
@@ -769,10 +769,10 @@ void copy_objects(int what)
       break;
     }
    }
-   drawline(k, END, 0.0, 0.0, 0.0, 0.0);
-   drawrect(k, END, 0.0, 0.0, 0.0, 0.0);
    filledrect(k, END, 0.0, 0.0, 0.0, 0.0);
    drawarc(k, END, 0.0, 0.0, 0.0, 0.0, 0.0);
+   drawrect(k, END, 0.0, 0.0, 0.0, 0.0);
+   drawline(k, END, 0.0, 0.0, 0.0, 0.0);
    
   } // end for(k ...
   ui_state &= ~STARTCOPY;
@@ -1186,10 +1186,10 @@ void move_objects(int what, int merge, double dx, double dy)
       break;
     }
    }
-   drawline(k, END, 0.0, 0.0, 0.0, 0.0);
-   drawrect(k, END, 0.0, 0.0, 0.0, 0.0);
    filledrect(k, END, 0.0, 0.0, 0.0, 0.0); 
    drawarc(k, END, 0.0, 0.0, 0.0, 0.0, 0.0);
+   drawrect(k, END, 0.0, 0.0, 0.0, 0.0);
+   drawline(k, END, 0.0, 0.0, 0.0, 0.0);
   } //end for(k ...
   ui_state &= ~STARTMOVE;
   ui_state &= ~STARTMERGE;

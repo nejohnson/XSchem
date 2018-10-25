@@ -538,9 +538,9 @@ void unselect_all(void)
       }
      }
     } 
-    drawtempline(gctiled,END, 0.0, 0.0, 0.0, 0.0);
-    drawtemprect(gctiled, END, 0.0, 0.0, 0.0, 0.0); 
     drawtemparc(gctiled, END, 0.0, 0.0, 0.0, 0.0, 0.0); 
+    drawtemprect(gctiled, END, 0.0, 0.0, 0.0, 0.0); 
+    drawtempline(gctiled,END, 0.0, 0.0, 0.0, 0.0);
     ui_state &= ~SELECTION;
     //\statusmsg("",2);
     my_snprintf(str, S(str), "%s/%s", home_dir, ".xschem_selection.sch"); // 20161115  PWD->HOME
@@ -813,9 +813,9 @@ unsigned short select_object(double mousex,double mousey, unsigned short select_
      break;
    } //end switch
 
-   drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
-   drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0); 
    drawtemparc(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0, 0.0);
+   drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0); 
+   drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
 
    if(sel.type)  ui_state |= SELECTION;
    return sel.type;
@@ -830,8 +830,8 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) // 201509
  int customfont;
  #endif
  drawtemparc(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
- drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
  drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0); 
+ drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
 
  for(i=0;i<lastwire;i++)
  {
@@ -996,9 +996,9 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) // 201509
 
   } // end for i
  } // end for c
- drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
- drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0); 
  drawtemparc(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0, 0.0); 
+ drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0); 
+ drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
 }
 
 
@@ -1044,9 +1044,9 @@ void select_all(void)
     select_box(c,i, SELECTED, 1);
   }
  } // end for c
- drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
- drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0); 
  drawtemparc(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0, 0.0); 
+ drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0); 
+ drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
 }
 
 

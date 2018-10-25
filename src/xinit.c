@@ -885,6 +885,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
  hspice_netlist=atoi(tclgetvar("hspice_netlist"));
  netlist_show=atoi(tclgetvar("netlist_show"));
  fullscreen=atoi(tclgetvar("fullscreen"));
+ unzoom_nodrift=atoi(tclgetvar("unzoom_nodrift"));
  if(color_ps==-1) 
    color_ps=atoi(tclgetvar("color_ps"));
  else  {

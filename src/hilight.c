@@ -286,17 +286,21 @@ int bus_search(char*s)
 
 void search_inst(char *tok, char *val, int sub, int sel, int what)
 {
+ int save_draw;
  int i,c, col,tmp,bus=0;
  const char *str;
  const char empty_string[] = "";
  static char *tmpname=NULL;
  regex_t re;
 
+ save_draw = draw_window;
+ draw_window=1;
  if(regcomp(&re, val , REG_EXTENDED)) return;
  if(debug_var>=1) fprintf(errfp, "search_inst():val=%s\n", val);
  if(sel==1) {
    drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
    drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
+   drawtemparc(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
  }
  if(what==ADD || what==NOW) {
    
@@ -380,12 +384,14 @@ void search_inst(char *tok, char *val, int sub, int sel, int what)
     // delete_netlist_structs(); // 20161222
  }
  if(sel) {
-   drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
+   drawtemparc(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0, 0.0);
    drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
+   drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
  }
  else if(what==END) draw_hilight_net(1);
 
  regfree(&re);
+ draw_window = save_draw;
 }
 
 
@@ -633,6 +639,7 @@ void draw_hilight_net(int on_window)
      drawline(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0);
      drawrect(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0);
      filledrect(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0);
+     drawarc(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
      // 20160414 from draw()
      symptr = (inst_ptr[i].ptr+instdef);
      if( c==0 || //draw_symbol_outline call is needed on layer 0 to avoid redundant work (outside check)
@@ -641,9 +648,10 @@ void draw_hilight_net(int on_window)
          ((c==TEXTWIRELAYER || c==TEXTLAYER) && symptr->texts)) {
        draw_symbol_outline(ADD, inst_color[i], i,c,0,0,0.0,0.0);
      }
-     drawline(inst_color[i], END, 0.0, 0.0, 0.0, 0.0);
-     drawrect(inst_color[i], END, 0.0, 0.0, 0.0, 0.0);
      filledrect(inst_color[i], END, 0.0, 0.0, 0.0, 0.0);
+     drawarc(inst_color[i], END, 0.0, 0.0, 0.0, 0.0, 0.0);
+     drawrect(inst_color[i], END, 0.0, 0.0, 0.0, 0.0);
+     drawline(inst_color[i], END, 0.0, 0.0, 0.0, 0.0);
     }
   }
  }
@@ -673,7 +681,7 @@ void undraw_hilight_net(int on_window) // 20160413
    x2=X_TO_SCREEN(wire[i].x2);
    y1=Y_TO_SCREEN(wire[i].y1);
    y2=Y_TO_SCREEN(wire[i].y2);
-   if( OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2)) continue;
+   if( LINE_OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2)) continue;
    // /20150409
 
    str = get_tok_value(wire[i].prop_ptr, "lab",0);
@@ -724,6 +732,7 @@ void undraw_hilight_net(int on_window) // 20160413
   drawline(c, BEGIN, 0.0, 0.0, 0.0, 0.0);
   drawrect(c, BEGIN, 0.0, 0.0, 0.0, 0.0);
   filledrect(c, BEGIN, 0.0, 0.0, 0.0, 0.0);
+  drawarc(c, BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
   for(i=0;i<lastinst;i++)
   {
     if(!inst_color[i] )
@@ -739,9 +748,10 @@ void undraw_hilight_net(int on_window) // 20160413
      }
     }
   }
-  drawline(c, END, 0.0, 0.0, 0.0, 0.0);
-  drawrect(c, END, 0.0, 0.0, 0.0, 0.0);
   filledrect(c, END, 0.0, 0.0, 0.0, 0.0);
+  drawarc(c, END, 0.0, 0.0, 0.0, 0.0, 0.0);
+  drawrect(c, END, 0.0, 0.0, 0.0, 0.0);
+  drawline(c, END, 0.0, 0.0, 0.0, 0.0);
  }
  if(ui_state & SELECTION) draw_selection(gc[SELLAYER], 0); // 20171211
  draw_window = save_draw;

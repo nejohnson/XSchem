@@ -866,6 +866,9 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
      bbox(ADD, inst_ptr[inst].x1, inst_ptr[inst].y1, inst_ptr[inst].x2, inst_ptr[inst].y2);
      push_undo();
      modified=1;
+     prepared_hash_objects=0;
+     prepared_netlist_structs=0;
+     prepared_hilight_structs=0;
      hash_proplist(inst_ptr[inst].prop_ptr , 1); // remove old props from hash table
      new_prop_string(&inst_ptr[inst].prop_ptr, subst_token(inst_ptr[inst].prop_ptr, argv[4], argv[5]),0); 
      my_strdup2(&inst_ptr[inst].instname, get_tok_value(inst_ptr[inst].prop_ptr, "name",0));

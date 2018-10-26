@@ -220,4 +220,59 @@ void trim_wires(void)
   draw_dots=1;
 }
  
+void break_wires_at_pins(void)
+{
+  int i, j, rects, rot, flip, sqx, sqy;
+  struct wireentry *wptr;
+  Box *rect;
+  double x0, y0, rx1, ry1;
 
+  delete_netlist_structs();
+  hash_wires();
+  for(i=0;i<lastinst;i++) {
+   if(inst_ptr[i].ptr<0) continue;
+   delete_inst_node(i);
+   rects=(inst_ptr[i].ptr+instdef)->rects[PINLAYER] +
+         (inst_ptr[i].ptr+instdef)->rects[GENERICLAYER];
+   if( rects > 0 ) {
+     for(j=0;j<rects;j++)
+     {
+       hash_inst_pin(i,j);
+     }
+   }
+  }
+  for(i=0;i<lastinst;i++) // ... assign node fields on all (non label) instances
+  {
+    if( (rects = (inst_ptr[i].ptr+instdef)->rects[PINLAYER]) > 0 )
+    {
+      for(j=0;j<rects;j++)
+      {
+        rect=(inst_ptr[i].ptr+instdef)->boxptr[PINLAYER];
+        x0=(rect[j].x1+rect[j].x2)/2;
+        y0=(rect[j].y1+rect[j].y2)/2;
+        rot=inst_ptr[i].rot;
+        flip=inst_ptr[i].flip;
+        ROTATION(0.0,0.0,x0,y0,rx1,ry1);
+        x0=inst_ptr[i].x0+rx1;
+        y0=inst_ptr[i].y0+ry1;
+        get_square(x0, y0, &sqx, &sqy);
+  
+        // name instance nodes that touch named nets
+        wptr=wiretable[sqx][sqy];
+        while(wptr) {
+          if( touch(wire[wptr->n].x1, wire[wptr->n].y1,
+                    wire[wptr->n].x2, wire[wptr->n].y2, x0,y0) )
+          {
+             if( (x0!=wire[wptr->n].x1 && x0!=wire[wptr->n].x2) ||
+                 (y0!=wire[wptr->n].y1 && y0!=wire[wptr->n].y2) ) {
+               // <<<<
+               drawtemprect(gc[7], NOW, x0-10, y0-10, x0+10, y0+10);
+             }
+             
+          }
+          wptr=wptr->next;
+        }
+      }
+    }
+  }
+}

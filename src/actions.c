@@ -1685,9 +1685,10 @@ int text_bbox(char *str, double xscale, double yscale,
   if(!has_x) return 0;
   if(!str) return 0;
   size = (xscale+yscale)*26.*cairo_font_scale;
-  if(size*mooz>800.) {
-    return 0;
-  }
+
+  //  if(size*mooz>800.) {
+  //    return 0;
+  //  }
   cairo_set_font_size (ctx, size*mooz);
   cairo_font_extents(ctx, &fext);
 

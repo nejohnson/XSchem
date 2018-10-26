@@ -2300,8 +2300,8 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    .menubar.zoom.menu add command -label "Full" -command "xschem zoom_full" -accelerator f
 
 
-   .menubar.zoom.menu add command -label "In" -command "xschem zoom_in" -accelerator Z
-   .menubar.zoom.menu add command -label "Out" -command "xschem zoom_out" -accelerator o
+   .menubar.zoom.menu add command -label "In" -command "xschem zoom_in" -accelerator s-Z
+   .menubar.zoom.menu add command -label "Out" -command "xschem zoom_out" -accelerator c-z 
    .menubar.zoom.menu add command -label "Zoom box" -command "xschem zoom_box" -accelerator z
    .menubar.zoom.menu add command -label "Half Snap Threshold" -accelerator g -command {
           xschem set cadsnap [expr [xschem get cadsnap] / 2.0 ]

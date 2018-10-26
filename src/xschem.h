@@ -429,6 +429,7 @@ extern int prepared_netlist_structs;
 extern int prepared_hilight_structs;
 extern int prepared_hash_objects;
 extern int prepared_hash_wires;
+extern void hash_inst_pin(int i, int j);
 extern int has_x; 
 extern int sym_txt;
 extern int rainbow_colors; 
@@ -681,6 +682,8 @@ extern int touch(double,double,double,double,double,double);
 extern int rectclip(int,int,int,int,
            double*,double*,double*,double*);
 extern void trim_wires(void);
+extern void break_wires_at_pins(void);
+
 extern void check_touch(int i, int j,
          unsigned short *parallel,unsigned short *breaks,
          unsigned short *broken,unsigned short *touches,

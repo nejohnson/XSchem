@@ -253,7 +253,7 @@ void get_square(double x, double y, int *xx, int *yy)
  *yy=yb;
 }
 
-static void hash_inst_pin(int i, int j)
+void hash_inst_pin(int i, int j)
 //                         inst   pin
 {
  Box *rect;

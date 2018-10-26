@@ -1012,34 +1012,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='u' && state==ControlMask)			/* testmode */
    {
-    double x1, y1, x2, y2;
-    double x, y, a, b, r;
-    static int toggle=1;
- 
-    x = 300.;
-    y = -3300.;
-    r = 120.;
-    a = 270.;
-    b = 180.; // sweep of arc
-
-    arc_bbox(x, y, r, a, b, &x1,&y1,&x2,&y2);
-
-    if(toggle) {
-      drawrect(2, NOW,  x1, y1, x2, y2);
-      drawarc(6, BEGIN, 0,0,0,0,0);
-      drawarc(6, ADD, x,y,r,a,b);
-      drawarc(6, ADD, y,x,r,a,b);
-      drawarc(6, END, 0,0,0,0,0);
-    } else {
-      drawtemprect(gctiled, NOW,  x1, y1, x2, y2);
-      drawtemparc(gctiled, NOW, x,y,r,a,b);
-    }
-
-    toggle=!toggle;
-
-
-
-
+    break_wires_at_pins();
     break;
    }
    if(key=='u' && state==0)				/* undo */

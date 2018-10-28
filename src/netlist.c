@@ -57,66 +57,6 @@ void del_object_table(void)
  if(debug_var>0) fprintf(errfp, "cleared object hash table\n");
 }
 
-void object_iterator(int k)	// 20171203
-{
- int tmpi,tmpj, firsti,firstj,i,j;
- double tmpd;
- double x1, y1, x2, y2;
- int x1a,x1b, x2a,x2b, y1a,y1b, y2a,y2b;
- struct objectentry *ptr2;
-
-  /*
-  x1=inst_ptr[k].x1;
-  x2=inst_ptr[k].x2;
-  y1=inst_ptr[k].y1;
-  y2=inst_ptr[k].y2;
-  */
-
-  x1 = X_TO_XSCHEM(areax1);
-  y1 = Y_TO_XSCHEM(areay1);
-  x2 = X_TO_XSCHEM(areax2);
-  y2 = Y_TO_XSCHEM(areay2);
-
-// ordered bbox
-  if( x2 < x1) { tmpd=x2;x2=x1;x1=tmpd;}
-  if( y2 < y1) { tmpd=y2;y2=y1;y1=tmpd;}
-
-// calculate square 4 1st bbox point of wire[k]
-  x1a=floor(x1/BOXSIZE) ;
-  x1b=x1a % NBOXES; if(x1b<0) x1b+=NBOXES;
- 
-  y1a=floor(y1/BOXSIZE) ;
-  y1b=y1a % NBOXES; if(y1b<0) y1b+=NBOXES;
-
-// calculate square 4 2nd bbox point of wire[k]
-  x2a=floor(x2/BOXSIZE);
-  x2b=x2a % NBOXES; if(x2b<0) x2b+=NBOXES;
- 
-  y2a=floor(y2/BOXSIZE);
-  y2b=y2a % NBOXES; if(y2b<0) y2b+=NBOXES;
-
-//loop thru all squares that intersect bbox of wire[k]
-  firsti=1;
-  for(i=x1a; i<=x2a;i++)
-  {
-   tmpi=i%NBOXES; if(tmpi<0) tmpi+=NBOXES;
-   if(tmpi==x1b && !firsti) break;
-   firsti=0;
-   firstj=1;
-   for(j=y1a; j<=y2a;j++)
-   {
-    tmpj=j%NBOXES; if(tmpj<0) tmpj+=NBOXES;
-    if(tmpj==y1b && !firstj) break;
-    firstj=0;
-    ptr2=objecttable[tmpi][tmpj]; 
-    while(ptr2) {
-     select_element(ptr2->n, SELECTED, 1);
-     ptr2=ptr2->next;
-    }
-   }
-  }
-}
-
 void hash_objects(void) // 20171203 insert object bbox in spatial hash table
 {
  int n;
@@ -254,7 +194,7 @@ void get_square(double x, double y, int *xx, int *yy)
 }
 
 void hash_inst_pin(int i, int j)
-//                         inst   pin
+//                  inst   pin
 {
  Box *rect;
  double x0, y0, rx1, ry1;
@@ -285,57 +225,62 @@ void hash_inst_pin(int i, int j)
 
 }
 
+void hash_wire(int n)
+{
+  int tmpi,tmpj, firsti,firstj,i,j;
+  double tmpd;
+  double x1, y1, x2, y2;
+  int x1a,x1b, x2a,x2b, y1a,y1b, y2a,y2b;
+  wire[n].node=NULL;
+  x1=wire[n].x1;
+  x2=wire[n].x2;
+  y1=wire[n].y1;
+  y2=wire[n].y2;
+  // ordered bbox
+  if( x2 < x1) { tmpd=x2;x2=x1;x1=tmpd;}
+  if( y2 < y1) { tmpd=y2;y2=y1;y1=tmpd;}
+
+  // calculate square 4 1st bbox point of wire[k]
+  x1a=floor(x1/BOXSIZE) ;
+  x1b=x1a % NBOXES; if(x1b<0) x1b+=NBOXES;
+  y1a=floor(y1/BOXSIZE) ;
+  y1b=y1a % NBOXES; if(y1b<0) y1b+=NBOXES;
+
+  // calculate square 4 2nd bbox point of wire[k]
+  x2a=floor(x2/BOXSIZE);
+  x2b=x2a % NBOXES; if(x2b<0) x2b+=NBOXES;
+  y2a=floor(y2/BOXSIZE);
+  y2b=y2a % NBOXES; if(y2b<0) y2b+=NBOXES;
+
+  //loop thru all squares that intersect bbox of wire[k]
+  firsti=1;
+  for(i=x1a; i<=x2a;i++)
+  {
+   tmpi=i%NBOXES; if(tmpi<0) tmpi+=NBOXES;
+   if(tmpi==x1b && !firsti) break;
+   firsti=0;
+   firstj=1;
+   for(j=y1a; j<=y2a;j++)
+   {
+    tmpj=j%NBOXES; if(tmpj<0) tmpj+=NBOXES;
+    if(tmpj==y1b && !firstj) break;
+    firstj=0;
+    // insert wire[n] in region [tmpi, tmpj]
+    wireinsert(n, tmpi, tmpj);
+     if(debug_var>=2) fprintf(errfp, "hash_wire(): %d/%d\n", tmpi,tmpj );
+   }
+    if(debug_var>=2) fprintf(errfp, "hash_wire(): \n");
+  }
+}
+
 void hash_wires(void)
 {
  int n;
- int tmpi,tmpj, firsti,firstj,i,j;
- double tmpd;
- double x1, y1, x2, y2;
- int x1a,x1b, x2a,x2b, y1a,y1b, y2a,y2b;
 
  if(prepared_hash_wires) return; 
  del_wire_table();
  for(n=0; n<lastwire; n++) {
-   wire[n].node=NULL;
-   x1=wire[n].x1;
-   x2=wire[n].x2;
-   y1=wire[n].y1;
-   y2=wire[n].y2;
-   // ordered bbox
-   if( x2 < x1) { tmpd=x2;x2=x1;x1=tmpd;}
-   if( y2 < y1) { tmpd=y2;y2=y1;y1=tmpd;}
-  
-   // calculate square 4 1st bbox point of wire[k]
-   x1a=floor(x1/BOXSIZE) ;
-   x1b=x1a % NBOXES; if(x1b<0) x1b+=NBOXES;
-   y1a=floor(y1/BOXSIZE) ;
-   y1b=y1a % NBOXES; if(y1b<0) y1b+=NBOXES;
-  
-   // calculate square 4 2nd bbox point of wire[k]
-   x2a=floor(x2/BOXSIZE);
-   x2b=x2a % NBOXES; if(x2b<0) x2b+=NBOXES;
-   y2a=floor(y2/BOXSIZE);
-   y2b=y2a % NBOXES; if(y2b<0) y2b+=NBOXES;
-  
-   //loop thru all squares that intersect bbox of wire[k]
-   firsti=1;
-   for(i=x1a; i<=x2a;i++)
-   {
-    tmpi=i%NBOXES; if(tmpi<0) tmpi+=NBOXES;
-    if(tmpi==x1b && !firsti) break;
-    firsti=0;
-    firstj=1;
-    for(j=y1a; j<=y2a;j++)
-    {
-     tmpj=j%NBOXES; if(tmpj<0) tmpj+=NBOXES;
-     if(tmpj==y1b && !firstj) break;
-     firstj=0;
-     // insert wire[n] in region [tmpi, tmpj]
-     wireinsert(n, tmpi, tmpj);
-      if(debug_var>=2) fprintf(errfp, "hash_wire(): %d/%d\n", tmpi,tmpj );
-    }
-     if(debug_var>=2) fprintf(errfp, "hash_wire(): \n");
-   }
+   hash_wire(n);
  }
  prepared_hash_wires=1;
 } 
@@ -408,7 +353,7 @@ static void signal_short( char *n1, char *n2)
  }
 }
 
-static void wirecheck(int k)	// recursive routine
+static void wirecheck(int k)    // recursive routine
 {
  int tmpi,tmpj, firsti,firstj,i,j;
  int touches;

@@ -1012,7 +1012,17 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='u' && state==ControlMask)			/* testmode */
    {
-    break_wires_at_pins();
+     double x1, y1, x2, y2;
+     struct objectentry *ptr;
+     x1 = X_TO_XSCHEM(areax1);
+     y1 = Y_TO_XSCHEM(areay1);
+     x2 = X_TO_XSCHEM(areax2);
+     y2 = Y_TO_XSCHEM(areay2);
+     hash_objects();
+     printf("screen: %g %g %g %g\n", x1, y1, x2, y2);
+     for(init_inst_iterator(x1, y1, x2, y2); ( ptr = inst_iterator_next() );) {
+       select_element(ptr->n,SELECTED,1);
+     }
     break;
    }
    if(key=='u' && state==0)				/* undo */
@@ -1272,9 +1282,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='!') 	                /* testmode */
    {
-     XFillRectangle(display, window, gcstipple[8], 0, 0, xrect[0].width, xrect[0].height);
-      /* if(has_x) XCopyArea(display, cad_icon_pixmap, window, gc[WIRELAYER], 0, 0, 60, 41,  100, 100); */
-      /* XIconifyWindow(display, topwindow, DefaultScreen(display) ); */
+     break_wires_at_pins();
      break;
    }
   break;

@@ -2431,7 +2431,8 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    frame .statusbar  
    label .statusbar.1   -text "STATUS BAR 1"  
    label .statusbar.2   -text "GRID:"
-   entry .statusbar.3 -textvariable grid -relief sunken -bg white -width 10
+   entry .statusbar.3 -textvariable grid -relief sunken -bg white \
+          -width 10 -state disabled -disabledforeground black 
    pack .statusbar.2 -side left 
    pack .statusbar.3 -side left 
    pack .statusbar.1 -side left -fill x

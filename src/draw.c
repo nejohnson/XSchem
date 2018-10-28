@@ -1289,14 +1289,10 @@ void draw(void)
 {
 
  // inst_ptr  and wire hash iterator 20171224
- int tmpi,tmpj, firsti,firstj,j;
  double x1, y1, x2, y2;
- int x1a,x1b, x2a,x2b, y1a,y1b, y2a,y2b;
- int ii;
  struct objectentry *instanceptr;
  struct wireentry *wireptr;
- static struct int_hashentry *insthash[INTHASHSIZE]; // 20180104
- static struct int_hashentry *wirehash[INTHASHSIZE]; // 20180104
+ int ii;
  char *type=NULL; // 20180109
 
  // /20171224
@@ -1323,40 +1319,17 @@ void draw(void)
     if(draw_window) XFillRectangle(display, window, gc[BACKLAYER], areax1, areay1, areaw, areah);
     if(debug_var>=2) fprintf(errfp, "draw(): window: %d %d %d %d\n",areax1, areay1, areax2, areay2);
     drawgrid();
-        
-    // --------------------------------- inst_ptr iterator 20171224
     x1 = X_TO_XSCHEM(areax1);
     y1 = Y_TO_XSCHEM(areay1);
     x2 = X_TO_XSCHEM(areax2);
     y2 = Y_TO_XSCHEM(areay2);
-    if( (lastwire> 2000 || lastinst > 2000) &&  (x2 - x1  < ITERATOR_THRESHOLD) ) {
+        
+    if( (lastwire> 2000 || lastinst > 2000 ) &&  (x2 - x1  < ITERATOR_THRESHOLD) ) {
       hash_objects();
       hash_wires();
-      if(debug_var>=2) fprintf(errfp, "draw(): window: %g %g %g %g\n",x1, y1, x2, y2);
-      
-      // calculate square 4 1st corner of drawing area
-      x1a=floor(x1/BOXSIZE) ;
-      x1b=x1a % NBOXES; if(x1b<0) x1b+=NBOXES;
-      
-      y1a=floor(y1/BOXSIZE) ;
-      y1b=y1a % NBOXES; if(y1b<0) y1b+=NBOXES;
-      
-      // calculate square 4 2nd corner of drawing area
-      x2a=floor(x2/BOXSIZE);
-      x2b=x2a % NBOXES; if(x2b<0) x2b+=NBOXES;
-      
-      y2a=floor(y2/BOXSIZE);
-      y2b=y2a % NBOXES; if(y2b<0) y2b+=NBOXES;
-      // --------------------------------- /20171224
     }
-
     if(!only_probes) { // 20110112
         
-        if(draw_single_layer==-1 || draw_single_layer==WIRELAYER){ // 20151117
-          drawline(WIRELAYER,BEGIN, 0.0, 0.0, 0.0, 0.0);
-          filledrect(WIRELAYER, BEGIN, 0.0, 0.0, 0.0, 0.0);
-
-
         for(c=0;c<cadlayers;c++)
         {
           if(draw_single_layer!=-1 && c != draw_single_layer) continue; // 20151117
@@ -1364,7 +1337,7 @@ void draw(void)
           drawrect(c, BEGIN, 0.0, 0.0, 0.0, 0.0);
           drawarc(c, BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
           filledrect(c, BEGIN, 0.0, 0.0, 0.0, 0.0);
-      
+        
           for(i=0;i<lastline[c];i++) 
             drawline(c, ADD, line[c][i].x1, line[c][i].y1, line[c][i].x2, line[c][i].y2);
           for(i=0;i<lastrect[c];i++) 
@@ -1380,54 +1353,37 @@ void draw(void)
             // 20180914 added fill
             drawpolygon(c, NOW, polygon[c][i].x, polygon[c][i].y, polygon[c][i].points, polygon[c][i].fill);
           }
-
+  
           if( (lastinst > 2000) && (x2 - x1  < ITERATOR_THRESHOLD) ) {
-            free_int_hash(insthash); /* 20180926 moved inside for(c..) loop, smaller hash size*/
-
+  
             // --------------------------------- inst_ptr iterator 20171224
             //loop thru all squares that intersect drawing area
-            firsti=1;
-            for(i=x1a; i<=x2a;i++)
-            {
-             tmpi=i%NBOXES; if(tmpi<0) tmpi+=NBOXES;
-             if(tmpi==x1b && !firsti) break;
-             firsti=0;
-             firstj=1;
-             for(j=y1a; j<=y2a;j++)
-             {
-              tmpj=j%NBOXES; if(tmpj<0) tmpj+=NBOXES;
-              if(tmpj==y1b && !firstj) break;
-              firstj=0;
-              instanceptr=objecttable[tmpi][tmpj];
-              while(instanceptr) {
-               if(debug_var>0) fprintf(errfp, "drawing instance %d, layer %d in square: %d %d\n", instanceptr->n, c, tmpi, tmpj);
-               if( !int_hash_lookup(insthash, instanceptr->n, 0)) { // 20180926  
-                 int ptr;
-                 ptr = inst_ptr[instanceptr->n].ptr;
-                 if( ptr !=-1) { // 20180921
-                   symptr = ptr+instdef;
-                   if( c==0 || //20150408 draw_symbol_outline call is needed on layer 0 to avoid redundant work (outside check)
-                       symptr->lines[c] ||  // 20150408
-                       symptr->arcs[c] ||
-                       symptr->rects[c] ||   // 20150408
-                       symptr->polygons[c] ||   // 20150408
-                       ((c==TEXTWIRELAYER || c==TEXTLAYER) && symptr->texts)) {  // 20150408
-  
-                     type = symptr->type;
-                     if( (!hilight_nets ||
-                       !type  ||
-                       (strcmp(type,"label") && strcmp(type,"ipin") && strcmp(type,"iopin") && strcmp(type,"opin")) ||
-                       !bus_hilight_lookup( get_tok_value(inst_ptr[instanceptr->n].prop_ptr,"lab",0) , 0, 2 ) )
-                     ) {
-                       draw_symbol_outline(ADD, c, instanceptr->n,c,0,0,0.0,0.0);
-                     }
-                   }  // 20150408
-                 } //if( ptr !=-1) 
-               }
-               instanceptr=instanceptr->next;
-              }
-             }
+            // int mycnt=0; //<<<
+            for(init_inst_iterator(x1, y1, x2, y2); ( instanceptr = inst_iterator_next() ) ;) {
+              int ptr;
+              //mycnt++;
+              ptr = inst_ptr[instanceptr->n].ptr;
+              if( ptr !=-1) { // 20180921
+                symptr = ptr+instdef;
+                if( c==0 || //20150408 draw_symbol_outline call is needed on layer 0 to avoid redundant work (outside check)
+                    symptr->lines[c] ||  // 20150408
+                    symptr->arcs[c] ||
+                    symptr->rects[c] ||   // 20150408
+                    symptr->polygons[c] ||   // 20150408
+                    ((c==TEXTWIRELAYER || c==TEXTLAYER) && symptr->texts)) {  // 20150408
+    
+                  type = symptr->type;
+                  if( (!hilight_nets ||
+                    !type  ||
+                    (strcmp(type,"label") && strcmp(type,"ipin") && strcmp(type,"iopin") && strcmp(type,"opin")) ||
+                    !bus_hilight_lookup( get_tok_value(inst_ptr[instanceptr->n].prop_ptr,"lab",0) , 0, 2 ) )
+                  ) {
+                    draw_symbol_outline(ADD, c, instanceptr->n,c,0,0,0.0,0.0);
+                  }
+                }  // 20150408
+              } //if( ptr !=-1) 
             }
+            // printf("mycnt=%d\n", mycnt);
             // --------------------------------- /20171224
           } else {
             for(i=0;i<lastinst;i++) {
@@ -1438,8 +1394,8 @@ void draw(void)
                   symptr->rects[c] ||   // 20150408
                   symptr->polygons[c] ||   // 20150408
                   ((c==TEXTWIRELAYER || c==TEXTLAYER) && symptr->texts)) {  // 20150408
-
-
+  
+  
                 type = (inst_ptr[i].ptr+instdef)->type;
                 if( (!hilight_nets ||
                   !type ||
@@ -1451,54 +1407,35 @@ void draw(void)
               }  // 20150408
             }
           }
-      
+        
           filledrect(c, END, 0.0, 0.0, 0.0, 0.0);
           drawarc(c, END, 0.0, 0.0, 0.0, 0.0, 0.0);
           drawrect(c, END, 0.0, 0.0, 0.0, 0.0);
           drawline(c, END, 0.0, 0.0, 0.0, 0.0);
         }
-
-
-
+        if(draw_single_layer==-1 || draw_single_layer==WIRELAYER){ // 20151117
+          drawline(WIRELAYER,BEGIN, 0.0, 0.0, 0.0, 0.0);
+          filledrect(WIRELAYER, BEGIN, 0.0, 0.0, 0.0, 0.0);
 
           if( (lastwire > 2000) && (x2 - x1  < ITERATOR_THRESHOLD) ) {
             if(debug_var>2) fprintf(errfp, "using spatial hash table iterator\n");
             //loop thru all squares that intersect drawing area
-            firsti=1;
-            free_int_hash(wirehash);
-            for(i=x1a; i<=x2a;i++)
-            {
-             tmpi=i%NBOXES; if(tmpi<0) tmpi+=NBOXES;
-             if(tmpi==x1b && !firsti) break;
-             firsti=0;
-             firstj=1;
-             for(j=y1a; j<=y2a;j++)
-             {
-              tmpj=j%NBOXES; if(tmpj<0) tmpj+=NBOXES;
-              if(tmpj==y1b && !firstj) break;
-              firstj=0;
-              wireptr=wiretable[tmpi][tmpj];
-              while(wireptr) {
-                ii=wireptr->n;
-                if(debug_var>0) fprintf(errfp, "drawing wire %d in square: %d %d\n", ii, tmpi, tmpj);
-                if( !int_hash_lookup(wirehash, ii, 0)) {
-                  if(wire[ii].bus) {
-                    drawline(WIRELAYER, THICK, wire[ii].x1,wire[ii].y1,wire[ii].x2,wire[ii].y2);
-                  }
-                  else
-                    drawline(WIRELAYER, ADD, wire[ii].x1,wire[ii].y1,wire[ii].x2,wire[ii].y2);
-                  if(draw_dots && wire[ii].end1 >1 && CADHALFDOTSIZE*mooz>=0.5) { // 20150331 draw_dots
-                     filledrect(WIRELAYER, ADD, wire[ii].x1-CADHALFDOTSIZE,wire[ii].y1-CADHALFDOTSIZE,
-                              wire[ii].x1+CADHALFDOTSIZE,wire[ii].y1+CADHALFDOTSIZE );
-                  }
-                  if(draw_dots && wire[ii].end2 >1 && CADHALFDOTSIZE*mooz>=0.5) { // 20150331 draw_dots
-                     filledrect(WIRELAYER, ADD, wire[ii].x2-CADHALFDOTSIZE,wire[ii].y2-CADHALFDOTSIZE,
-                              wire[ii].x2+CADHALFDOTSIZE,wire[ii].y2+CADHALFDOTSIZE );
-                  }
-                }
-                wireptr=wireptr->next;
-              }  // 20150408
-             }
+  
+            for(init_wire_iterator(x1, y1, x2, y2); ( wireptr = wire_iterator_next() ) ;) {
+              ii=wireptr->n;
+              if(wire[ii].bus) {
+                drawline(WIRELAYER, THICK, wire[ii].x1,wire[ii].y1,wire[ii].x2,wire[ii].y2);
+              }
+              else
+                drawline(WIRELAYER, ADD, wire[ii].x1,wire[ii].y1,wire[ii].x2,wire[ii].y2);
+              if(draw_dots && wire[ii].end1 >1 && CADHALFDOTSIZE*mooz>=0.5) { // 20150331 draw_dots
+                 filledrect(WIRELAYER, ADD, wire[ii].x1-CADHALFDOTSIZE,wire[ii].y1-CADHALFDOTSIZE,
+                          wire[ii].x1+CADHALFDOTSIZE,wire[ii].y1+CADHALFDOTSIZE );
+              }
+              if(draw_dots && wire[ii].end2 >1 && CADHALFDOTSIZE*mooz>=0.5) { // 20150331 draw_dots
+                 filledrect(WIRELAYER, ADD, wire[ii].x2-CADHALFDOTSIZE,wire[ii].y2-CADHALFDOTSIZE,
+                          wire[ii].x2+CADHALFDOTSIZE,wire[ii].y2+CADHALFDOTSIZE );
+              }
             }
           } else {
             for(i=0;i<lastwire;i++)
@@ -1521,10 +1458,6 @@ void draw(void)
           drawline(WIRELAYER, END, 0.0, 0.0, 0.0, 0.0);
           filledrect(WIRELAYER, END, 0.0, 0.0, 0.0, 0.0);
         }
-     
-
-
-
         if(draw_single_layer ==-1 || draw_single_layer==TEXTLAYER) { // 20151117
           #ifndef HAS_CAIRO
           drawline(TEXTLAYER,BEGIN, 0.0, 0.0, 0.0, 0.0);

@@ -647,8 +647,9 @@ void fill_symbol_editprop_form(int x)
 
 void change_elem_order(void)
 {
-   Instance tmp;
+   Instance tmpinst;
    Box tmpbox;
+   Wire tmpwire;
    char tmp_txt[50]; // overflow safe
    int c, new_n;
 
@@ -671,9 +672,9 @@ void change_elem_order(void)
      if(selectedgroup[0].type==ELEMENT)
      {
       if(new_n>=lastinst) new_n=lastinst-1;
-      tmp=inst_ptr[new_n];
+      tmpinst=inst_ptr[new_n];
       inst_ptr[new_n]=inst_ptr[selectedgroup[0].n];
-      inst_ptr[selectedgroup[0].n]=tmp;
+      inst_ptr[selectedgroup[0].n]=tmpinst;
       if(debug_var>=1) fprintf(errfp, "change_elem_order(): selected element %d\n", selectedgroup[0].n);
      }
      else if(selectedgroup[0].type==RECT)
@@ -685,6 +686,15 @@ void change_elem_order(void)
       rect[c][selectedgroup[0].n]=tmpbox;
       if(debug_var>=1) fprintf(errfp, "change_elem_order(): selected element %d\n", selectedgroup[0].n);
      }
+     else if(selectedgroup[0].type==WIRE)
+     {
+      if(new_n>=lastwire) new_n=lastwire-1;
+      tmpwire=wire[new_n];
+      wire[new_n]=wire[selectedgroup[0].n];
+      wire[selectedgroup[0].n]=tmpwire;
+      if(debug_var>=1) fprintf(errfp, "change_elem_order(): selected element %d\n", selectedgroup[0].n);
+     }
+
     }
 }
 

@@ -1199,7 +1199,6 @@ void move_objects(int what, int merge, double dx, double dy)
   if(debug_var>=1) fprintf(errfp, "move_objects(): bbox= %d %d %d %d\n", areax1, areay1, areaw, areah);
   draw();
   bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
-  // need_rebuild_selected_array=1; // why? <<<<
   rotatelocal=0;
   draw_window =save_draw;
  }

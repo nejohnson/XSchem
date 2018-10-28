@@ -29,9 +29,9 @@ void set_snap(double newsnap) /*  20161212 set new snap factor and just notify n
     cadsnap = newsnap;
     sprintf(str, "%.16g", newsnap);
     if(newsnap == CADSNAP) {
-      tcleval(".statusbar.3 configure -background PaleGreen");
+      tcleval(".statusbar.3 configure -disabledbackground PaleGreen");
     } else {
-      tcleval(".statusbar.3 configure -background OrangeRed");
+      tcleval(".statusbar.3 configure -disabledbackground OrangeRed");
     }
     tclsetvar("grid", str);
 }

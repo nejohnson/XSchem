@@ -15,7 +15,7 @@ system_library_dir=${prefix}/share/xschem/xschem_library
 xschem_library_path=$(user_library_dir):$(system_library_dir)
 
 OBJ = icon.o callback.o actions.o move.o check.o clip.o draw.o \
-      globals.o main.o netlist.o \
+      globals.o main.o netlist.o hash_iterator.o\
       findnet.o scheduler.o store.o xinit.o select.o font.o editprop.o save.o paste.o \
       token.o psprint.o node_hash.o hilight.o options.o vhdl_netlist.o \
       svgdraw.o spice_netlist.o tedax_netlist.o verilog_netlist.o  parselabel.o expandlabel.o
@@ -57,7 +57,7 @@ endif
 
 ## to fix rendering problems due to bugs in the exceed turboX server
 ## add -DTURBOX_FIX
-MOREFLAGS= -g -std=c99 -pedantic
+MOREFLAGS= -g -std=c99 -pedantic -pg -no-pie
 
 CFLAGS  = -Wall  $(MOREFLAGS)  -I/usr/include/tcl${TCLVER} $(CAIRO_INCLUDES) -I/home/sschippe/include \
            -DPREFIX='"${prefix}"' \

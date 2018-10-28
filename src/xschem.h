@@ -337,21 +337,22 @@ typedef struct
 {
    char *name;/*  symbol name (ex: devices/lab_pin)  */
    int ptr;  /*  was a pointer formerly... */
-   double x0;
+   double x0;  /* symbol origin / anchor point */
    double y0;
-   double x1;
+   double x1;  /* symbol bounding box */
    double y1;
    double x2;
    double y2;
-   double xx1;
+   double xx1; /* bounding box without texts */
    double yy1;
    double xx2;
    double yy2;
    int rot;
    int flip;
    int sel;
-   int flags; /*  bit 0: skip field, bit 1: flag for different textlayer for pin/labels */
-	      /*  bit 2 : hilight flag */
+   int flags; /*  bit 0: skip field, bit 1: flag for different textlayer for pin/labels
+	       *  bit 2 : hilight flag. 
+               */
    char *prop_ptr;
    char **node;
    char *instname; /*  20150409 instance name (example: I23)  */
@@ -613,8 +614,8 @@ extern int text_bbox(char * str,double xscale, double yscale,
 
 /* //test 20171203 */
 extern void del_object_table(void);
-extern void object_iterator(int k);
 extern void hash_wires(void);
+extern void hash_wire(int n);
 extern void hash_objects(void); /*  20171203 insert instance bbox in spatial hash table */
 
 extern struct int_hashentry *int_hash_lookup(struct int_hashentry **table, int token, int remove); /*  20180104 */
@@ -771,6 +772,10 @@ extern void statusmsg(char str[],int n);
 extern void place_text(int draw_text, double mx, double my);
 extern void hash_proplist(char *s,int remove);
 extern struct hashentry *hash_lookup(char *token,char *value,int remove, size_t token_size);
+extern void init_inst_iterator(double x1, double y1, double x2, double y2);
+extern struct objectentry *inst_iterator_next();
+extern void init_wire_iterator(double x1, double y1, double x2, double y2);
+extern struct wireentry *wire_iterator_next();
 extern void free_hash(void);
 extern char *find_nth(char *str, char sep, int n);
 extern char *translate(int inst, char* s);

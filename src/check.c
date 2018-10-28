@@ -222,57 +222,125 @@ void trim_wires(void)
  
 void break_wires_at_pins(void)
 {
-  int i, j, rects, rot, flip, sqx, sqy;
+  int k, i, j, rects, rot, flip, sqx, sqy;
   struct wireentry *wptr;
   Box *rect;
   double x0, y0, rx1, ry1;
+  int changed=0;
 
-  delete_netlist_structs();
+  for(k=0;k<lastwire; k++) wire[k].end1 = wire[k].end2 = 0;
   hash_wires();
-  for(i=0;i<lastinst;i++) {
-   if(inst_ptr[i].ptr<0) continue;
-   delete_inst_node(i);
-   rects=(inst_ptr[i].ptr+instdef)->rects[PINLAYER] +
-         (inst_ptr[i].ptr+instdef)->rects[GENERICLAYER];
-   if( rects > 0 ) {
-     for(j=0;j<rects;j++)
-     {
-       hash_inst_pin(i,j);
-     }
-   }
-  }
-  for(i=0;i<lastinst;i++) // ... assign node fields on all (non label) instances
+  for(k=0;k<lastinst;k++)
   {
-    if( (rects = (inst_ptr[i].ptr+instdef)->rects[PINLAYER]) > 0 )
+    if( (rects = (inst_ptr[k].ptr+instdef)->rects[PINLAYER]) > 0 )
     {
       for(j=0;j<rects;j++)
       {
-        rect=(inst_ptr[i].ptr+instdef)->boxptr[PINLAYER];
+        rect=(inst_ptr[k].ptr+instdef)->boxptr[PINLAYER];
         x0=(rect[j].x1+rect[j].x2)/2;
         y0=(rect[j].y1+rect[j].y2)/2;
-        rot=inst_ptr[i].rot;
-        flip=inst_ptr[i].flip;
+        rot=inst_ptr[k].rot;
+        flip=inst_ptr[k].flip;
         ROTATION(0.0,0.0,x0,y0,rx1,ry1);
-        x0=inst_ptr[i].x0+rx1;
-        y0=inst_ptr[i].y0+ry1;
+        x0=inst_ptr[k].x0+rx1;
+        y0=inst_ptr[k].y0+ry1;
         get_square(x0, y0, &sqx, &sqy);
   
         // name instance nodes that touch named nets
-        wptr=wiretable[sqx][sqy];
-        while(wptr) {
-          if( touch(wire[wptr->n].x1, wire[wptr->n].y1,
-                    wire[wptr->n].x2, wire[wptr->n].y2, x0,y0) )
+        for(wptr=wiretable[sqx][sqy]; wptr; wptr=wptr->next) {
+          i = wptr->n;
+          if( touch(wire[i].x1, wire[i].y1,
+                    wire[i].x2, wire[i].y2, x0,y0) )
           {
-             if( (x0!=wire[wptr->n].x1 && x0!=wire[wptr->n].x2) ||
-                 (y0!=wire[wptr->n].y1 && y0!=wire[wptr->n].y2) ) {
-               // <<<<
+             if( (x0!=wire[i].x1 && x0!=wire[i].x2) ||
+                 (y0!=wire[i].y1 && y0!=wire[i].y2) ) {
+               if(!changed) { push_undo(); changed=1;}
                drawtemprect(gc[7], NOW, x0-10, y0-10, x0+10, y0+10);
+               check_wire_storage();
+               wire[lastwire].x1=wire[i].x1;
+               wire[lastwire].y1=wire[i].y1;
+               wire[lastwire].end1=wire[i].end1;
+               wire[lastwire].end2=0;
+               wire[lastwire].x2=x0;
+               wire[lastwire].y2=y0;
+               wire[lastwire].sel=0;
+               wire[lastwire].prop_ptr=NULL;
+               my_strdup(&wire[lastwire].prop_ptr, wire[i].prop_ptr);
+               if(get_tok_value(wire[lastwire].prop_ptr,"bus",0)[0]) // 20171201
+                 wire[lastwire].bus=1;
+               else
+                 wire[lastwire].bus=0;
+               wire[lastwire].node=NULL;
+               hash_wire(lastwire);
+               my_strdup(&wire[lastwire].node, wire[i].node);
+               lastwire++;
+    
+               wire[i].x1 = x0;
+               wire[i].y1 = y0;
+               wire[i].end1 = 0;
              }
-             
           }
-          wptr=wptr->next;
         }
       }
     }
   }
+  prepared_hash_wires=0; //<<<< remove
+  hash_wires(); //<<<< remove
+  for(k=0; k<lastwire; k++) {
+    int l;
+    for(l=0;l<2;l++) {
+      if(l==0 ) {
+        x0 = wire[k].x1;
+        y0 = wire[k].y1;
+      } else {
+        x0 = wire[k].x2;
+        y0 = wire[k].y2;
+      }
+      get_square(x0, y0, &sqx, &sqy);
+      // printf("k=%d, x0=%g, y0=%g\n", k, x0, y0);
+      for(wptr=wiretable[sqx][sqy] ; wptr ; wptr = wptr->next) {
+        i = wptr->n;
+        if(i==k) {
+          continue; // no check wire against itself
+        }
+        // printf("i=%d, x1=%g, y1=%g x2=%g, y2=%g\n", i, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
+        
+        if( touch(wire[i].x1, wire[i].y1,
+                  wire[i].x2, wire[i].y2, x0,y0) )
+        {
+           if( (x0!=wire[i].x1 && x0!=wire[i].x2) ||
+               (y0!=wire[i].y1 && y0!=wire[i].y2) ) {
+             if(!changed) { push_undo(); changed=1;}
+             drawtemprect(gc[7], NOW, x0-10, y0-10, x0+10, y0+10);
+             check_wire_storage();
+             wire[lastwire].x1=wire[i].x1;
+             wire[lastwire].y1=wire[i].y1;
+             wire[lastwire].end1=wire[i].end1;
+             wire[lastwire].end2=1;
+             wire[lastwire].x2=x0;
+             wire[lastwire].y2=y0;
+             wire[lastwire].sel=0;
+             wire[lastwire].prop_ptr=NULL;
+             my_strdup(&wire[lastwire].prop_ptr, wire[i].prop_ptr);
+             if(get_tok_value(wire[lastwire].prop_ptr,"bus",0)[0]) // 20171201
+               wire[lastwire].bus=1;
+             else
+               wire[lastwire].bus=0;
+             wire[lastwire].node=NULL;
+             hash_wire(lastwire);
+             lastwire++;
+  
+             wire[i].x1 = x0;
+             wire[i].y1 = y0;
+             wire[i].end1 = 1;
+           }
+        }
+      }
+    }
+  }
+  modified=1;
+  prepared_netlist_structs=0;
+  prepared_hilight_structs=0;
+  prepared_hash_wires=0;
+
 }

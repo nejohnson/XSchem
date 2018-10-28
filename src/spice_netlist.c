@@ -74,7 +74,8 @@ void global_spice_netlist(int global)  // netlister driver
   if( type && !(strcmp(type,"ipin")&&strcmp(type,"opin")&&strcmp(type,"iopin")) )
   {
    str_tmp = expandlabel ( get_tok_value(inst_ptr[i].prop_ptr,"lab",0) ,&mult);
-   if(debug_var>=1) fprintf(errfp, "global_spice_netlist(): >>>>>>> %s\n", get_tok_value(inst_ptr[i].prop_ptr,"lab",0));
+   if(debug_var>=1) fprintf(errfp, "global_spice_netlist(): >>>>>>> %s\n", 
+       get_tok_value(inst_ptr[i].prop_ptr,"lab",0));
    ///// must handle  invalid node names
    fprintf(fd, " %s", str_tmp ? str_tmp : "(NULL)" );
   }

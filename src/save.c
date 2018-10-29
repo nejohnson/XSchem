@@ -139,55 +139,55 @@ inline void updatebbox(int count, Box *boundbox, Box *tmp)
 
 void read_xschem_file(FILE *fd) // 20180912
 {
-    int endfile=0;
-    char c[PATH_MAX];
+  int endfile=0;
+  char c[1];
 
-    while(!endfile)
+  while(!endfile)
+  {
+    if(fscanf(fd," %c",c)==EOF) break;
+    switch(c[0])
     {
-      if(fscanf(fd,"%255s",c)==EOF) break;
-      switch(c[0])
-      {
-       case 'E':
-        load_ascii_string(&schtedaxprop,fd); //20100217
-        break;
-       case 'S':
-        load_ascii_string(&schprop,fd); //20100217
-        break;
-       case 'V':
-        load_ascii_string(&schverilogprop,fd); //09112003
-         break;
-       case 'G':
-        load_ascii_string(&schvhdlprop,fd);
-        if(debug_var>=2) fprintf(errfp, "read_xschem_file(): schematic property:%s\n",schvhdlprop?schvhdlprop:"<NULL>");
-        break;
-       case 'L':
-        load_line(fd);
-        break;
-       case 'P':
-        load_polygon(fd);
-        break;
-       case 'A':
-        load_arc(fd);
-        break;
-       case 'B':
-        load_box(fd);
-        break;
-       case 'T':
-        load_text(fd);
-        break;
-       case 'N':
-        load_wire(fd);
-        break;
-       case 'C':
-        load_inst(fd);
-        break;
-       default:
-        //if(debug_var>=2) fprintf(errfp, "read_xschem_file(): end file reached\n");
-        //endfile=1;
-        read_line(fd); /* read rest of line and discard */
-        break;
-      }
+     case 'E':
+      load_ascii_string(&schtedaxprop,fd); //20100217
+      break;
+     case 'S':
+      load_ascii_string(&schprop,fd); //20100217
+      break;
+     case 'V':
+      load_ascii_string(&schverilogprop,fd); //09112003
+       break;
+     case 'G':
+      load_ascii_string(&schvhdlprop,fd);
+      if(debug_var>=2) fprintf(errfp, "read_xschem_file(): schematic property:%s\n",schvhdlprop?schvhdlprop:"<NULL>");
+      break;
+     case 'L':
+      load_line(fd);
+      break;
+     case 'P':
+      load_polygon(fd);
+      break;
+     case 'A':
+      load_arc(fd);
+      break;
+     case 'B':
+      load_box(fd);
+      break;
+     case 'T':
+      load_text(fd);
+      break;
+     case 'N':
+      load_wire(fd);
+      break;
+     case 'C':
+      load_inst(fd);
+      break;
+     default:
+      //if(debug_var>=2) fprintf(errfp, "read_xschem_file(): end file reached\n");
+      //endfile=1;
+      read_line(fd); /* read rest of line and discard */
+      break;
     }
+  }
 }
 
 void load_ascii_string(char **ptr, FILE *fd)
@@ -215,7 +215,7 @@ void load_ascii_string(char **ptr, FILE *fd)
   } else if(c=='{') begin=1;
  }
  if(debug_var>=2) fprintf(errfp, "load_ascii_string(): string read=%s\n",str? str:"<NULL>");
-
+ fscanf(fd, " ");
  my_strdup(ptr, str);
  // my_realloc(&str,(strlength=CADCHUNKALLOC));  // removed 20150402
  if(debug_var>=2) fprintf(errfp, "load_ascii_string(): loaded %s\n",*ptr? *ptr:"<NULL>");

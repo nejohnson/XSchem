@@ -1426,11 +1426,18 @@ proc viewdata {data} {
    return $rcode
 }
 
+# given an absolute path of a symbol/schematic remove the path prefix
+# if file is in a library directory (a $pathlist dir)
 proc rel_sym_path {symbol} {
   global pathlist
 
+  set extension 1
   set symbol_orig [file rootname $symbol]
   set ext [file extension $symbol]
+  if {$ext eq {} } { 
+    set ext .sym  
+    set extension 0
+  }
   set symbol [file rootname [file normalize $symbol]]
   set lib_cell [get_cell $symbol]
   set cell [file rootname [file tail $symbol]]
@@ -1441,29 +1448,37 @@ proc rel_sym_path {symbol} {
     if { [file exists [file dirname "${path_elem}/${lib_cell}"]] && 
        ($symbol_orig eq $lib_cell) } {
       set name ${lib_cell}
+      break
     # /.../path/.../libname/cellname[.ext] and libname in $path_elem 
     # --> libname/cellname
     } elseif { ($symbol eq [file normalize "${path_elem}/${lib_cell}"]) 
              && [file exists [file dirname "${path_elem}/${lib_cell}"]] } {
       set name ${lib_cell}
+      break
     } 
     # symname[.ext]
     # --> symname.ext
     if { [file exists "${path_elem}/${cell}${ext}"] && 
        ($symbol_orig eq $cell) } {
       set name ${cell}${ext}
-    # /.../path/.../libname/cellname[.ext] and libname in XSCHEM_LIBRARY_PATH 
-    # --> cellname.ext
+      break
+    # /.../path/.../libname/symname[.ext] and libname in XSCHEM_LIBRARY_PATH 
+    # --> symname.ext
     } elseif { ($symbol eq [file normalize "${path_elem}/${cell}"]) 
              && [file exists "${path_elem}/${cell}${ext}"] } {
       set name ${cell}${ext}
+      break
     } 
   }
   if { $name eq {} } {
     # no known lib, so return full path
     set name ${symbol}$ext
   }
-  return $name
+  if {$extension == 0 } {
+    return [file rootname $name] 
+  } else {
+    return $name
+  }
 }
 
 
@@ -1473,7 +1488,7 @@ proc abs_sym_path {fname {required_ext {}} } {
 
   set name {}
 
-  #20181029
+  # 20181029
   if { [file exists $fname] } {
     set fname [file normalize $fname]
   }

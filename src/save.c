@@ -139,9 +139,11 @@ inline void updatebbox(int count, Box *boundbox, Box *tmp)
 
 void read_xschem_file(FILE *fd) // 20180912
 {
-  int endfile=0;
+  int i, found, endfile;
+  char name_embedded[PATH_MAX];
   char c[1];
 
+  endfile=0;
   while(!endfile)
   {
     if(fscanf(fd," %c",c)==EOF) break;
@@ -180,6 +182,27 @@ void read_xschem_file(FILE *fd) // 20180912
       break;
      case 'C':
       load_inst(fd);
+      break;
+     case '[':
+      my_strdup(&inst_ptr[lastinst-1].prop_ptr, subst_token(inst_ptr[lastinst-1].prop_ptr, "embed", "true"));
+
+
+      my_snprintf(name_embedded, S(name_embedded),
+         "%s/.xschem_embedded_%d_%s.sym", tclgetvar("XSCHEM_TMP_DIR"), getpid(), get_cell(inst_ptr[lastinst-1].name, 0));
+      found=0;
+      for(i=0;i<lastinstdef;i++)
+      {
+       if(strcmp(name_embedded, instdef[i].name) == 0)
+       {
+        my_strdup(&instdef[i].name, inst_ptr[lastinst-1].name);
+        unlink(name_embedded);
+        found=1;break;
+       }
+      }
+      if(!found) load_symbol_definition(inst_ptr[lastinst-1].name, fd);
+      else {
+        while( strcmp( read_line(fd) , "]\n") ) ; /* skip embedded [ ... ] */
+      }
       break;
      default:
       //if(debug_var>=2) fprintf(errfp, "read_xschem_file(): end file reached\n");
@@ -290,8 +313,6 @@ void save_wire(FILE *fd)
  }
 }  
 
-
-
 void load_wire(FILE *fd)
 {
 
@@ -302,6 +323,109 @@ void load_wire(FILE *fd)
     ORDER(x1, y1, x2, y2);
     storeobject(-1, x1,y1,x2,y2,WIRE,0,0,ptr);
     modified=0; // 20140116 storeobject sets modified flag , but we are loading here ...
+}
+
+//typedef struct
+//{
+//   char *name;
+//   double minx;
+//   double maxx;
+//   double miny;
+//   double maxy;
+//   Line **lineptr;  /*  array of [cadlayers] pointers to Line */
+//   Box  **boxptr;
+//   Polygon **polygonptr; /* 20171115 */
+//   Arc **arcptr; // 20181012
+//   Text  *txtptr;
+//   int *lines;     /*  array of [cadlayers] integers */
+//   int *rects;
+//   int *polygons; /* 20171115 */
+//   int *arcs; /* 20181012 */
+//   int texts;
+//   char *prop_ptr;
+//   char *type; /*  20150409 */
+//   char *templ; /*  20150409 */
+//} Instdef;
+void save_embedded_symbol(Instdef *s, FILE *fd, int brackets)
+{
+  int c, i, j;
+  
+  if(brackets) fprintf(fd, "[\n");
+  fprintf(fd, "G ");
+  save_ascii_string(s->prop_ptr,fd);
+  fputc('\n' ,fd);
+  fprintf(fd, "V {}\n");
+  fprintf(fd, "S {}\n");
+  fprintf(fd, "E {}\n"); // 20180912
+  for(c=0;c<cadlayers;c++)
+  {
+   Line *ptr;
+   ptr=s->lineptr[c];
+   for(i=0;i<s->lines[c];i++)
+   {
+    fprintf(fd, "L %d %.16g %.16g %.16g %.16g ", c,ptr[i].x1, ptr[i].y1,ptr[i].x2,
+     ptr[i].y2 );
+    save_ascii_string(ptr[i].prop_ptr,fd);
+    fputc('\n' ,fd);
+   }
+  }
+
+  for(c=0;c<cadlayers;c++)
+  {
+   Box *ptr;
+   ptr=s->boxptr[c];
+   for(i=0;i<s->rects[c];i++)
+   {
+    fprintf(fd, "B %d %.16g %.16g %.16g %.16g ", c,ptr[i].x1, ptr[i].y1,ptr[i].x2,
+     ptr[i].y2);
+    save_ascii_string(ptr[i].prop_ptr,fd);
+    fputc('\n' ,fd);
+   }
+  }
+  for(c=0;c<cadlayers;c++)
+  {
+   Arc *ptr;
+   ptr=s->arcptr[c];
+   for(i=0;i<s->arcs[c];i++)
+   {
+    fprintf(fd, "A %d %.16g %.16g %.16g %.16g %.16g ", c,ptr[i].x, ptr[i].y,ptr[i].r,
+     ptr[i].a, ptr[i].b);
+    save_ascii_string(ptr[i].prop_ptr,fd);
+    fputc('\n' ,fd);
+   }
+  }
+
+  for(i=0;i<s->texts;i++)
+  {
+   Text *ptr;
+   ptr = s->txtptr;
+   fprintf(fd, "T ");
+   save_ascii_string(ptr[i].txt_ptr,fd);
+   fprintf(fd, " %.16g %.16g %d %d %.16g %.16g ",
+    ptr[i].x0, ptr[i].y0, ptr[i].rot, ptr[i].flip, ptr[i].xscale,
+     ptr[i].yscale);
+   save_ascii_string(ptr[i].prop_ptr,fd);
+   fputc('\n' ,fd);
+  }
+
+  for(c=0;c<cadlayers;c++)
+  {
+   Polygon *ptr;
+   ptr=s->polygonptr[c];
+   for(i=0;i<s->polygons[c];i++)
+   {
+    fprintf(fd, "P %d %d ", c,ptr[i].points);
+    for(j=0;j<ptr[i].points;j++) {
+      fprintf(fd, "%.16g %.16g ", ptr[i].x[j], ptr[i].y[j]);
+    }
+    save_ascii_string(ptr[i].prop_ptr,fd);
+    fputc('\n' ,fd);
+   }
+  }
+
+
+
+  if(brackets) fprintf(fd, "]\n");
 }
 
 void save_inst(FILE *fd)
@@ -318,6 +442,9 @@ void save_inst(FILE *fd)
   fprintf(fd, " %.16g %.16g %d %d ",ptr[i].x0, ptr[i].y0, ptr[i].rot, ptr[i].flip ); 
   save_ascii_string(ptr[i].prop_ptr,fd);
   fputc('\n' ,fd);
+  if( !strcmp(get_tok_value(ptr[i].prop_ptr, "embed", 0), "true")) {
+    save_embedded_symbol( instdef+ptr[i].ptr, fd, 1);
+  }
  }
 }
 
@@ -336,8 +463,7 @@ void load_inst(FILE *fd)
     load_ascii_string(&n,fd);
     my_strdup(&ptr[i].name, n);  // 20181009 rel_sym_path(n)?  perf. issue on big schematics
     my_free(&n);
-    fscanf(fd, "%lf %lf %d %d",&ptr[i].x0, &ptr[i].y0,&ptr[i].rot,
-     &ptr[i].flip);
+    fscanf(fd, "%lf %lf %d %d",&ptr[i].x0, &ptr[i].y0,&ptr[i].rot, &ptr[i].flip);
     ptr[i].flags=0;
     ptr[i].sel=0;
     ptr[i].ptr=-1; //04112003 was 0
@@ -867,7 +993,7 @@ void pop_undo(int redo)  // 20150327
   if(debug_var>=2) fprintf(errfp, "pop_undo(): returning\n");
 }
 
-int load_symbol_definition(char *name)
+int load_symbol_definition(char *name, FILE *embed_fd)
 {
   FILE *fd;
   char name3[PATH_MAX];  // 20161122 overflow safe
@@ -876,7 +1002,7 @@ int load_symbol_definition(char *name)
   static char *aux_ptr=NULL;
   double aux_double;
   int aux_int;
-  char aux_str[PATH_MAX]; // overflow safe 20161122
+  char aux_str[1]; // overflow safe 20161122
   int lastl[cadlayers], lastr[cadlayers], lastp[cadlayers], lastt; // 20171115 lastp
   int lasta[cadlayers];
   Line *ll[cadlayers];
@@ -884,25 +1010,30 @@ int load_symbol_definition(char *name)
   Arc *aa[cadlayers];
   Polygon *pp[cadlayers]; // 20171115
   Text *tt;
-  int endfile=0;
+  int endfile;
   char *strlayer;
 
   if(debug_var>=1) fprintf(errfp, "load_symbol_definition(): name=%s\n", name);
 
-  my_strncpy(name3, abs_sym_path(name, ".sym"), S(name3));
-  if(debug_var>=1) fprintf(errfp, "load_symbol_definition(): trying: %s\n",name3);
-  if((fd=fopen(name3,"r"))==NULL)
-  {
-     if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): Symbol not found: %s\n",name3);
-    //return -1;
-    my_snprintf(name3, S(name3), "%s/%s.sym", tclgetvar("XSCHEM_HOME_DIR"), "systemlib/missing");
-    if((fd=fopen(name3,"r"))==NULL) 
-    { 
-     fprintf(errfp, "load_symbol_definition(): systemlib/missing.sym missing, I give up\n");
-     tcleval( "exit");
+  if(!embed_fd) {
+    my_strncpy(name3, abs_sym_path(name, ".sym"), S(name3));
+    if(debug_var>=1) fprintf(errfp, "load_symbol_definition(): trying: %s\n",name3);
+    if((fd=fopen(name3,"r"))==NULL)
+    {
+      if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): Symbol not found: %s\n",name3);
+      //return -1;
+      my_snprintf(name3, S(name3), "%s/%s.sym", tclgetvar("XSCHEM_HOME_DIR"), "systemlib/missing");
+      if((fd=fopen(name3,"r"))==NULL) 
+      { 
+       fprintf(errfp, "load_symbol_definition(): systemlib/missing.sym missing, I give up\n");
+       tcleval( "exit");
+      }
     }
+  } else {
+    fd = embed_fd;
   }
 
+  endfile=0;
   for(c=0;c<cadlayers;c++) 
   {
    lasta[c]=lastl[c]=lastr[c]=lastp[c]=0; // 20171115 lastp
@@ -920,7 +1051,7 @@ int load_symbol_definition(char *name)
 
    while(!endfile)
    {
-    if(fscanf(fd,"%4095s",aux_str)==EOF) break;
+    if(fscanf(fd," %c",aux_str)==EOF) break;
     switch(aux_str[0])
     {
      case 'E':
@@ -1041,6 +1172,10 @@ int load_symbol_definition(char *name)
       fscanf(fd, "%lf %lf %d %d", &aux_double,&aux_double, &aux_int, &aux_int); 
       load_ascii_string(&aux_ptr,fd);
       break;
+     case ']':
+      read_line(fd);
+      endfile=1;
+      break;
      default:
       // if(debug_var>=1) fprintf(errfp, "load_symbol_definition(): unknown line, assuming EOF\n");
       // endfile=1;
@@ -1048,8 +1183,14 @@ int load_symbol_definition(char *name)
       break;
     }
    }
-   fclose(fd);
-
+   if(!embed_fd) {
+     fclose(fd);
+   }
+   if(embed_fd || strstr(name, ".xschem_embedded_")) {
+     instdef[lastinstdef].flags = EMBEDDED;
+   } else {
+     instdef[lastinstdef].flags = 0;
+   }
    if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): finished parsing file\n");
    for(c=0;c<cadlayers;c++)
    {
@@ -1231,7 +1372,9 @@ void create_sch_from_sym(void)
 void descend_symbol(void)
 {
   static char *str=NULL;
+  FILE *fd;
   char name[PATH_MAX];   // overflow safe 20161122
+  char name_embedded[PATH_MAX];
   // char s[1024]; // 20121121 overflow safe 20161122 // commented out 20161210
   rebuild_selected_array();
   if(lastselected > 1)  return; //20121122
@@ -1267,7 +1410,19 @@ void descend_symbol(void)
   zoom_array[currentsch].y=yorigin;
   zoom_array[currentsch].zoom=zoom;
   ++currentsch;
-  load_symbol(name);
+  if((inst_ptr[selectedgroup[0].n].ptr+instdef)->flags == EMBEDDED ||
+    !strcmp(get_tok_value(inst_ptr[selectedgroup[0].n].prop_ptr,"embed", 0), "true")) {
+    my_snprintf(name_embedded, S(name_embedded),
+      "%s/.xschem_embedded_%d_%s.sym", tclgetvar("XSCHEM_TMP_DIR"), getpid(), get_cell(name, 0));
+    if(!(fd = fopen(name_embedded, "w")) ) {
+      fprintf(errfp, "descend_symbol(): problems opening file %s \n", name_embedded);
+    }
+    save_embedded_symbol(inst_ptr[selectedgroup[0].n].ptr+instdef, fd, 0);
+    fclose(fd);
+    load_symbol(name_embedded);
+  } else {
+    load_symbol(name);
+  }
   zoom_full(1);
 }
 

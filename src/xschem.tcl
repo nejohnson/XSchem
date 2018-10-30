@@ -1472,11 +1472,16 @@ proc abs_sym_path {fname {required_ext {}} } {
   global pathlist
 
   set name {}
+
+  #20181029
+  if { [file exists $fname] } {
+    set fname [file normalize $fname]
+  }
+
+
   # fname is of type libname/cellname[.ext] but not ./cellname[.ext] or
   # ../cellname[.ext] and has a slash, so no cellname[.ext] 
-  if {[file rootname $fname] eq [get_cell $fname]  &&
-     ![regexp {^\.\.\/} $fname] 
-  } { ;# filter out ../cellname
+  if {[file rootname $fname] eq [get_cell $fname]} {
     foreach path_elem $pathlist {
       # libname/cellname[.ext] and libname is in pathlist
       # --> normalized $pathlist/libname/cellname$required_ext

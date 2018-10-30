@@ -195,7 +195,7 @@ int match_symbol(char *name)  // never returns -1, if symbol not found load syst
  if(!found)
  {
   if(debug_var>=1) fprintf(errfp, "match_symbol(): matching symbol not found:%s, loading\n",name);
-  if(load_symbol_definition(name)==-1) return -1;
+  if(load_symbol_definition(name, NULL)==-1) return -1;
  }
  if(debug_var>=1) fprintf(errfp, "match_symbol(): returning %d\n",i);
  return i;

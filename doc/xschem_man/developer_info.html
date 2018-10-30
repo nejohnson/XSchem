@@ -28,7 +28,8 @@ p{padding: 15px  30px 10px;}
  <ol>
   <li>Lines</li>
   <li>Rectangles</li>
-  <li>Polygons</li>
+  <li>Open / close Polygons</li>
+  <li> Arcs / Circles</li>
   <li>Text</li>
  </ol>
  <p>
@@ -122,15 +123,62 @@ p{padding: 15px  30px 10px;}
   <li><kbd>E</kbd> : Global property associated the .sch/.sym file for tEDAx netlisting</li>
   <li><kbd>L</kbd> : Line </li>
   <li><kbd>B</kbd> : Rectangle </li>
-  <li><kbd>P</kbd> : Closed polygon </li>
+  <li><kbd>P</kbd> : Open / Closed polygon </li>
+  <li><kbd>A</kbd> : Arc / Circle </li>
   <li><kbd>T</kbd> : Text </li>
   <li><kbd>N</kbd> : Wire, used to connect together components (only in .sch files) </li>
   <li><kbd>C</kbd> : Component instance in a schematic (only in .sch files) </li>
+  <li><kbd>[</kbd> : Start of a symbol embedding, the symbol refers to the immediately preceding component instance.
+                     This tag must immediately follow a component instance (<kbd>C</kbd>). 
+                     See the example here under. A component symbol is embedded into the schematic file when saving
+                     if the <kbd>embed=true</kbd> attribute is set on one of the component instances.
+                     Only one copy of the embedded symbol is saved into the schematic and all components
+                     referring to this symbol will use the embedded definition.
+                     When a component has an embedded symbol definition immediately following, a <kbd>embed=true</kbd> is
+                     added to the component property string if not already present.
+                     </li><br>
+  
+     <pre class="code">
+C {TECHLIB/PCH} 620 -810 0 0 {name=x5 model=PCHLV w=4 l=0.09  m=1 embed=true}
+[
+G {type=pmos
+format="@name @pinlist @model w=@w l=@l m=@m"
+verilog_format="@verilog_gate #(@del ) @name ( @@d , @@s , @@g );"
+template=" name=x1 verilog_gate=pmos del=50,50,50 model=PCH w=0.68 l=0.07 m=1 "
+generic_type="model=string"
+}
+V {}
+S {}
+E {}
+L 4 5 20 20 20 {}
+L 4 20 20 20 30 {}
+L 4 5 -20 20 -20 {}
+L 4 20 -30 20 -20 {}
+L 4 -20 0 -10 0 {}
+L 4 5 -27.5 5 27.5 {11}
+L 4 5 -5 10 0 {}
+L 4 5 5 10 0 {}
+L 4 10 0 20 0 {}
+L 18 -2.5 -15 -2.5 15 {}
+B 5 17.5 27.5 22.5 32.5 {name=d dir=inout}
+B 5 -22.5 -2.5 -17.5 2.5 {name=g dir=in}
+B 5 17.5 -32.5 22.5 -27.5 {name=s dir=inout}
+B 5 17.5 -2.5 22.5 2.5 {name=b dir=in}
+A 4 -6.25 0 3.75 270 360 {}
+T {@w/@l*@m} 7.5 -17.5 0 0 0.2 0.2 {}
+T {@name} 7.5 6.25 0 0 0.2 0.2 {999}
+T {@model} 2.5 -27.5 0 1 0.2 0.2 {layer=8}
+T {D} 25 17.5 0 0 0.15 0.15 {layer=13}
+T {NF=@nf} -5 -15 0 1 0.15 0.15 {}
+]
+</pre><br>
+  <li><kbd>]</kbd> : End of an embedded symbol. </li>
  </ul>
  <p>
   the object tag in column 1 is followed by space separated fields that completely define the corresponding object.
  </p>
  <h3>GLOBAL SCHEMATIC/SYMBOL PROPERTIES</h3>
+ <p>
   Example:<kbd><br>
 G {type=regulator<br>
 format="x@name @pinlist r@symname"<br>
@@ -138,6 +186,7 @@ verilog_format="assign @#2 = @#0 ;"<br>
 tedax_format="footprint @name @footprint<br>
 device @name @symname"<br>
 template="name=U1 footprint=TO220"}</kbd>
+ </p>
  <p>
   Global properties define a property string bound to the parent schematic/symbol file, there is one global property record per netlisting mode, 
   currently SPICE, VHDL, Verilog, tEDAx.<br>
@@ -187,12 +236,14 @@ in this case only the verilog-related global property has some definition. This 
   The 'Box' 'B' tag is followed by an integer specifying the graphic layer followed by the x1,y1 - x2,y2 coordinates of the rectangle
   and a final property string. This example defines a symbol pin.
  </p>
- <h3>CLOSED POLYGON OBJECT</h3>
+ <h3>OPEN / CLOSED POLYGON OBJECT</h3>
  <p>
   Example: <kbd>P 3 5 2450 -210 2460 -170 2500 -170 2510 -210 2450 -210 {}</kbd><br>
   the Polygon 'P' tag is followed by an integer specifying the layer number, followed by the number of points (integer), 
   the x,y coordinates of the polygon points and the property string (empty in this example).
-  The last point is coincident to the first point and closes the polygon.
+  If the last point is coincident to the first point a closed polygon is drawn.
+  A 'fill=true' arribute may be given to fill a cloded polygon, in this case a polygon line looks like:<br>
+  <kbd>P 3 5 2450 -210 2460 -170 2500 -170 2510 -210 2450 -210 {fill=true}</kbd><br>
  </p>
  <h3>ARC OBJECT</h3>
  <p>

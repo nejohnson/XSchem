@@ -900,6 +900,7 @@ void go_back(int confirm) /*  20171006 add confirm */
 {
  int prev_curr_type=0;
  int save_ok;  /*  20171020 */
+ int from_embedded_sym;
 
  save_ok=0;
  if(currentsch>0)
@@ -932,11 +933,17 @@ void go_back(int confirm) /*  20171006 add confirm */
    }
   }
   if(save_ok==-1) return; /*  20171020 */
-  my_strncpy(schematic[currentsch] , "", S(schematic[currentsch]));
-  currentsch--;
   unselect_all();
   remove_symbols();
+  from_embedded_sym=0;
+  if(strstr(schematic[currentsch], ".xschem_embedded_")) {
+    load_symbol_definition(schematic[currentsch], NULL);
+    from_embedded_sym=1;
+  }
+  my_strncpy(schematic[currentsch] , "", S(schematic[currentsch]));
+  currentsch--;
   load_schematic(1,schematic[currentsch],1);
+  if(from_embedded_sym) modified=1; // to force ask save embedded sym in parent schematic
 
   if(prev_curr_type==SCHEMATIC) {
     hilight_parent_pins();

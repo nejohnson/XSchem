@@ -152,7 +152,7 @@ void global_verilog_netlist(int global)  // netlister driver
  fprintf(fd,"\n);\n");
 
  // 20071006 print top level params if defined in symbol
- load_symbol_definition( schematic[currentsch] );
+ load_symbol_definition( schematic[currentsch], NULL );
  print_verilog_param(fd,lastinstdef-1);  // added print top level params
  remove_symbol();
  // 20071006 end

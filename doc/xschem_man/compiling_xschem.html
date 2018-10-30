@@ -34,10 +34,12 @@ p{padding: 15px  30px 10px;}
  In order to be able to build the program you need the following packages installed on the system: 
 </p>
  <ul>
-  <li> gawk or mawk pattern scanning language
-  <li> bison grammar parser
-  <li> flex lexical analyzer
-  <li> Tcl-Tk and -dev header files
+  <li> gawk or mawk pattern scanning language</li>
+  <li> bison grammar parser</li>
+  <li> flex lexical analyzer and development headers (libfl-dev) </li>
+  <li> Tcl-Tk and -dev header files</li>
+  <li> Cairo libraries and development files (libcairo2-dev) if antialiasing fonts are wanted. 
+       Xschem can work without cairo fonts if the HAS_CAIRO flag is set to 0 in the Makefile.</li>
  </ul>
  <p>
  for Debian and Ubuntu systems these are the packages you should check to be installed.

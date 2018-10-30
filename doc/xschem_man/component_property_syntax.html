@@ -77,6 +77,20 @@ name="mchanged_name" model=\"nmos\" w="20u" l="3u" m="10"
     for example to <kbd>mcurr_source</kbd> but not for example to <kbd>dcurr_source</kbd>. XSCHEM 
     does not enforce that the first character is preserved, it's up to the designer to keep it 
     consistent with the component type.</p>
+  <li><kbd>embed</kbd></li>
+  <p>
+   When the <kbd>embed=true</kbd> is set on a component instance
+   the corresponding symbol will be saved into the schematic (.sch) file on the next save operation.
+   This allows to distribute schematic files that contain the used symbols so these
+   will not depend on external library symbols.
+   When this attribute is set on a component instance, all instances in the schematic referring to the same 
+   symbol will use the embedded symbol definition.
+   When descending into an embedded symbol, any changes will be local, meaning that no library symbol
+   will be affected. The changes will be saved using the embedded tag (<kbd>[...]</kbd>) into the
+   schematic file.
+   Removing this attribute will revert to external symbols after saving and reloading the schematic file.
+
+  </p>
   <li><kbd>url</kbd></li>
   <p> This attribute defines a location (web page, file) that can be viewed when hitting the
     <kbd>&lt;shift&gt;H</kbd> key (or <kbd>&lt;Alt&gt; left mouse buttoni</kbd>) on a selected component. 

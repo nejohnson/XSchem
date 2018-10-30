@@ -111,7 +111,7 @@ void global_vhdl_netlist(int global)  // netlister driver
 
 
  // 20071009 print top level generics if defined in symbol
- load_symbol_definition( schematic[currentsch] );
+ load_symbol_definition( schematic[currentsch], NULL );
  print_generic(fd,"entity", lastinstdef-1);  // added print top level params
  remove_symbol();
  // 20071009 end

@@ -1487,17 +1487,19 @@ proc abs_sym_path {fname {required_ext {}} } {
       # --> normalized $pathlist/libname/cellname$required_ext
       # cellname[.ext] and $pathlist/cellname$required_ext exists
       # --> normalized $pathlist/cellname.$required_ext
-      if { ([file exists "${path_elem}/[file dirname $fname]"] ) &&
+      if { ([file exists "${path_elem}/[get_cell $fname]$required_ext"] ) &&
         [regexp {\/} $fname] 
       } {
         #puts here1
         set name  [file normalize "$path_elem/[get_cell $fname]$required_ext"]
+        break
       }
       if { [file exists "${path_elem}/[file rootname ${fname}]${required_ext}"] &&
         ![regexp {\/} $fname] 
       } {
         #puts here2
         set name  [file normalize "$path_elem/[get_cell $fname]$required_ext"]
+        break
       }
     }
   }
@@ -1536,39 +1538,43 @@ proc gensch {cell {selected {}} } {
   frame .gensch.ipin
   frame .gensch.opin
   frame .gensch.iopin
-  entry .gensch.name  
+  frame .gensch.name
+  label .gensch.name.namedescr -text "File:" -width 8
+  entry .gensch.name.name -width 60 
   label .gensch.ipin.ipindescr   -text "IPIN:" -width 8
   label .gensch.opin.opindescr   -text "OPIN:" -width 8
   label .gensch.iopin.iopindescr -text "IOPIN:" -width 8
   entry .gensch.ipin.ipin   -width 60
   entry .gensch.opin.opin   -width 60
   entry .gensch.iopin.iopin -width 60
-  regsub  {\/.*} $cell {/} cell
+  set cell [file dirname $cell]
+  if {$cell ne {}} { set cell "${cell}/" }
   if { [ string compare $selected {} ] } { 
-    .gensch.name insert 0 [file rootname $selected]
+    .gensch.name.name insert 0 [file rootname $selected]
     gensch_load_sym
   } else {
-    .gensch.name insert 0 ${cell}xxxx
+    .gensch.name.name insert 0 [file rootname ${cell}]xxxx
   }
   button .gensch.but.create -text CREATE -command {
     set gensch_i_pin [.gensch.ipin.ipin get] 
     set gensch_o_pin [.gensch.opin.opin get] 
     set gensch_io_pin [.gensch.iopin.iopin get] 
-    set gensch_cellname [.gensch.name get]
+    set gensch_cellname [.gensch.name.name get]
     gensch_create_sym
   }
   button .gensch.but.load -text LOAD -command gensch_load_sym
   button .gensch.but.canc -text Cancel -command { set gensch_res {}; destroy .gensch; }
   checkbutton .gensch.but.aggr -text {Do not clone schematic}  -variable gensch_aggressive
-  pack .gensch.name
 
+  pack .gensch.name.name -side right -fill x -expand y
+  pack .gensch.name.namedescr  -side left
   pack .gensch.ipin.ipin -side right -fill x -expand y
   pack .gensch.ipin.ipindescr  -side left
   pack .gensch.opin.opin -side right  -fill x -expand y
   pack .gensch.opin.opindescr  -side left
   pack .gensch.iopin.iopin -side right -fill x -expand y
   pack .gensch.iopin.iopindescr -side left
-  pack .gensch.ipin .gensch.opin .gensch.iopin -fill x
+  pack .gensch.name .gensch.ipin .gensch.opin .gensch.iopin -fill x
 
   pack .gensch.but.create .gensch.but.canc .gensch.but.load .gensch.but.aggr -side right 
   pack .gensch.but 

@@ -95,6 +95,7 @@
 #define MAXGROUP 300	    /*  (initial) max # of objects that can be drawn while moving */
 #define ELEMINST 4096        /*  (initial) max # of placed elements,   was 600 20102004 */
 #define ELEMDEF 256         /*  (initial) max # of defined elements */
+#define EMBEDDED 1   /* used for embedded symbols marking in Instdef.flags */
 #define CADMAXGRIDPOINTS 512
 #define CADMAXHIER 80
 #define CADCHUNKALLOC 512 /*  was 256  20102004 */
@@ -331,6 +332,7 @@ typedef struct
    char *prop_ptr;
    char *type; /*  20150409 */
    char *templ; /*  20150409 */
+   int flags;
 } Instdef;
 
 typedef struct
@@ -716,7 +718,7 @@ extern int save_symbol(char *);
 extern void remove_symbols(void);
 extern void remove_symbol(void);
 extern void clear_drawing(void);
-extern int load_symbol_definition(char name[]);
+extern int load_symbol_definition(char name[], FILE *embed_fd);
 extern void load_symbol(const char *abs_name);
 extern void descend_symbol(void);
 extern void place_symbol(int pos, char *symbol_name, double x, double y, int rot, int flip, 

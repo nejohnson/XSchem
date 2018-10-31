@@ -23,10 +23,12 @@ In order to build xschem you need
 - gcc
 - tcl-tk and development header files (tcl8.x, tcl8.x-dev, tk8.x, tk8.x-dev)
 - bison grammar parser
-- flex lexycal analyzer
+- flex lexycal analyzer and libfl-dev header files
 - an awk implementation (gawk or mawk are OK)
 - X11 and development header files
 - libxpm and development files (libxpm, libxpm-dev)
+- libcairo2 and cairo2-dev development files (if antialiased fonts 
+  are compiled in).
 
 If all dependencies are met 'make' will build the program
 
@@ -35,6 +37,40 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.7.0:
+- some fixes in library path management (abs_sym_path and rel_sym_path in xschem.tcl)
+- documentation updates on required -dev files, libfl-dev and cairo2-dev
+- documentation updates on open/closed polygons
+- embedded symbols, (embed=true attr on instances), documentation updated.
+- Status bar grid entry configured as disabled as it is output only
+- make xschem accept some malformed input files, like T{} ... or leading spaces before element tags.
+- code in place for command to cut wires at instance pins and intersections
+- created iterator function for spatial wire & inst hash tables to avoid
+  code duplication
+- removed exec flag on all doc/ files, moved xschem.html to index.html
+- keep calculating bbox for unusually big texts, even if these text are not
+  displayed being fonts too big (crash on old cairo libs)
+- corrected menu accelerators shown for zoom / unzoom.
+- unzoom_nodrift tcl variable can be set to 1 or 0 to produce slightly
+  different unzoom behaviors.
+- flush arc drawing routines (draw[temp]arc(END,...) in addition to lines
+  and rectangles when doing selections /hilight. (forgotten since arcs
+  were introduced).
+- nets are drawn after the other elements so they are always on top.
+- new xschem TCL commands
+ - xschem setprop instance x25 w 55
+   replaces property w of instance x25 with new 55 value
+ - xschem setprop instance_n 123 w 55
+   same as above but indicate instance number (position in inst_ptr array)
+ - xschem replace_symbol instance x25 .../../new_symbol.sym
+   replaces symbol of x25
+ - xschem replace_symbol instance_n 123 .../../new_symbol.sym
+   same as above but indicate instance number (position in inst_ptr array)
+- new commandline option '-i' to tell xschem not to load init files (xschemrc and .xschem)
+- order coordinates before storing nets in load_wire(),
+  for some reason this trivial thing was missing
+- drawing glitches fixed
+
 2.6.8:
 - Pressing 'space' while drawing a net or a line switches between horizontal-vertical
   manhattan path, vertical-horizontal path or oblique path.

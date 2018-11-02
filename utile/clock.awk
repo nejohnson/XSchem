@@ -28,6 +28,7 @@ BEGIN {
 
 /^[ \t]*clock[ \t]+/{
   
+ sub(/[ \t]*;.*/,"")
  clock_name = $2
  clock_start[clock_name]=time
  clock_pulse[clock_name] = $3 + time

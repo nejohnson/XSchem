@@ -199,7 +199,7 @@ void toggle_fullscreen()
 
 void new_window(char *cell, int symbol)
 {
-     char cadname[PATH_MAX];
+     
      char f[PATH_MAX]; /*  overflow safe 20161122 */
      struct stat buf;
      pid_t pid1;
@@ -207,8 +207,7 @@ void new_window(char *cell, int symbol)
      int status;
 
      if(debug_var>=1) fprintf(errfp, "new_window(): cell=%s, symbol=%d\n", cell, symbol);
-     my_snprintf(cadname, S(cadname), "%s/xschem", (char *)tclgetvar("XSCHEM_HOME_DIR"));
-     if(stat(cadname,&buf)) { /*  20121110 */
+     if(stat(xschem_executable,&buf)) { /*  20121110 */
        fprintf(errfp, "new_window(): executable not found\n");
        return;
      }
@@ -230,11 +229,11 @@ void new_window(char *cell, int symbol)
 
 
            my_strncpy(f, abs_sym_path(cell, ".sch"), S(f));
-           execl(cadname,cadname,"-r",f, NULL);
+           execl(xschem_executable,xschem_executable,"-r",f, NULL);
          }
          else {
            my_strncpy(f, abs_sym_path(cell, ".sym"), S(f));
-           execl(cadname,cadname,"-r",f, NULL);
+           execl(xschem_executable,xschem_executable,"-r",f, NULL);
          }
        } else {
          /* error */
@@ -1292,6 +1291,7 @@ void new_wire(int what, double mx_snap, double my_snap)
          storeobject(-1, xx1,yy1,xx2,yy2,WIRE,0,0,NULL);
          drawline(WIRELAYER,NOW, xx1,yy1,xx2,yy2);
        }
+       
      }
      if(! (what &END)) {
        x1=mx_snap;
@@ -1329,6 +1329,7 @@ void new_wire(int what, double mx_snap, double my_snap)
    }
    if( what & END) {
      ui_state &= ~STARTWIRE;
+     update_conn_cues(1,1);
    }
    if( (what & RUBBER)  ) {
      if(manhattan_lines==1) {

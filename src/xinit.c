@@ -704,9 +704,8 @@ int source_tcl_file(char *s)
 int Tcl_AppInit(Tcl_Interp *inter)
 {
  char name[PATH_MAX]; // overflow safe 20161122
- char tmp[PATH_MAX+100]; // 20161122 overflow safe
+ char tmp[2*PATH_MAX+100]; // 20161122 overflow safe
  int i;
- int initfile_found; // 20170330
  struct stat buf;
  const char *home_buff;
 
@@ -736,83 +735,65 @@ int Tcl_AppInit(Tcl_Interp *inter)
  Tcl_CreateExitHandler(tclexit, 0);
 
  
- tclsetvar("XSCHEM_DESIGN_PATH", ""); /* avoid errors if uninitialized and used in .xschem */
-
-
-
- // ... try getting XSCHEM_HOME_DIR from the environment...
- if(getenv("XSCHEM_HOME_DIR")) { // 20121111
-   tclsetvar("XSCHEM_HOME_DIR",getenv("XSCHEM_HOME_DIR"));
- // try current dir
- } else if( !stat("../src/xschem.tcl", &buf)  && !stat("../xschem_library", &buf)) {
-   tclsetvar("XSCHEM_HOME_DIR",pwd_dir); /* for testing xschem builds in src dir*/
+ tclsetvar("XSCHEM_LIBRARY_PATH", ""); /* avoid errors if uninitialized and used in .xschem */
+ if( !stat("./xschem.tcl", &buf)) {
+   tclsetvar("XSCHEM_SHAREDIR",pwd_dir); /* for testing xschem builds in src dir*/
    my_snprintf(tmp, S(tmp), "file normalize %s/../xschem_library", pwd_dir);
    tcleval(tmp);
-   tclsetvar("XSCHEM_DESIGN_PATH", Tcl_GetStringResult(interp));
- } else if( !stat(PREFIX "/share/xschem", &buf) ) {  // 20180918
-   tclsetvar("XSCHEM_HOME_DIR",PREFIX "/share/xschem");
- // ... else give up searching, may set XSCHEM_DESIGN_PATH later after loading xschemrc and .xschem
+   tclsetvar("XSCHEM_LIBRARY_PATH", Tcl_GetStringResult(interp));
+ } else if( !stat(XSCHEM_SHAREDIR, &buf) ) {  // 20180918
+   tclsetvar("XSCHEM_SHAREDIR",XSCHEM_SHAREDIR);
+ // ... else give up searching, may set XSCHEM_LIBRARY_PATH later after loading xschemrc and .xschem
  }
 
 
 //
-//  START LOOKING FOR .xschem
+//  START LOOKING FOR xschemrc
 //
 
-
-
- //
- //  EXECUTE system xschemrc *****
- //
- if(load_initfile && tclgetvar("XSCHEM_HOME_DIR")) {
-   my_snprintf(name, S(name), "%s/%s",tclgetvar("XSCHEM_HOME_DIR"), "xschemrc" );
+ if(load_initfile) {
+   my_snprintf(name, S(name), "%s/xschemrc",pwd_dir);
    if(!stat(name, &buf)) {
      if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): sourcing %s\n", name);
      source_tcl_file(name);
+   } else {
+     my_snprintf(tmp, S(tmp),"regsub {^~} {%s} {%s}", USER_CONF_DIR, home_dir);
+     tcleval(tmp);
+     my_snprintf(name, S(name), "%s/xschemrc",Tcl_GetStringResult(interp));
+     if(!stat(name, &buf)) {
+       if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): sourcing %s\n", name);
+       source_tcl_file(name);
+     } else if(tclgetvar("XSCHEM_SHAREDIR")) {
+       my_snprintf(name, S(name), "%s/xschemrc",tclgetvar("XSCHEM_SHAREDIR"));
+       if(!stat(name, &buf)) {
+         if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): sourcing %s\n", name);
+         source_tcl_file(name);
+       }
+     }
    }
  }
 
-
- initfile_found=0; // 20170330
- my_snprintf(name, S(name), "%s/.xschem", pwd_dir);
- if(!stat(name, &buf)) initfile_found=1; // 20170330
- if( !initfile_found ) {
-   my_snprintf(name, S(name), "%s/.xschem", home_dir);
-   if(!stat(name, &buf)) initfile_found=1; // 20170330
- }
-
- //
- //  EXECUTE .xschem *****
- //
- if(initfile_found && load_initfile) {  // file exists 20121110 // used initfile_found, 20170330
-   if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): sourcing %s\n", name);
-   source_tcl_file(name);
- }
  //
  //  END LOOKING FOR .xschem
  //
 
  if(rainbow_colors) tclsetvar("rainbow_colors","1"); // 20171013
  
- // check old XSCHEM_DESIGN_DIR for compatibility
- if(tclgetvar("XSCHEM_DESIGN_DIR") ) {
-   tclsetvar("XSCHEM_DESIGN_PATH", tclgetvar("XSCHEM_DESIGN_DIR"));
- }
 
  //
  //  START LOOKING FOR xschem.tcl
  //
- if(!tclgetvar("XSCHEM_HOME_DIR")) {
+ if(!tclgetvar("XSCHEM_SHAREDIR")) {
    fprintf(errfp, "Tcl_AppInit() err 3: cannot find xschem.tcl\n");
    if(has_x) {
      tcleval( "wm withdraw ."); // 20161217
      tcleval(
        "tk_messageBox -icon error -type ok -message \"Tcl_AppInit() err 3: xschem.tcl not found, "
-       "you are probably missing XSCHEM_HOME_DIR\"");
+       "you are probably missing XSCHEM_SHAREDIR\"");
    }
    Tcl_ResetResult(interp);
    Tcl_AppendResult(interp, "Tcl_AppInit() err 3: xschem.tcl not found, "
-                            "you are probably missing XSCHEM_HOME_DIR",NULL);
+                            "you are probably missing XSCHEM_SHAREDIR",NULL);
    Tcl_Exit(EXIT_FAILURE);
    return TCL_ERROR; // 20121110
  }
@@ -821,17 +802,16 @@ int Tcl_AppInit(Tcl_Interp *inter)
  //  END LOOKING FOR xschem.tcl
  //
 
- if(getenv("XSCHEM_DESIGN_PATH")) { // 20121111
-   tclsetvar("XSCHEM_DESIGN_PATH",getenv("XSCHEM_DESIGN_PATH"));
+ if( !tclgetvar("XSCHEM_LIBRARY_PATH")  || !tclgetvar("XSCHEM_LIBRARY_PATH")[0]) {
+
+   my_snprintf(tmp, S(tmp),"regsub -all {~} {%s} {%s}", XSCHEM_LIBRARY_PATH, home_dir);
+   tcleval(tmp);
+   tclsetvar("XSCHEM_LIBRARY_PATH", Tcl_GetStringResult(interp));
  }
 
- if( !tclgetvar("XSCHEM_DESIGN_PATH")  || !tclgetvar("XSCHEM_DESIGN_PATH")[0]) {
-   tclsetvar("XSCHEM_DESIGN_PATH", XSCHEM_LIBRARY_PATH);
- }
-
- if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): XSCHEM_HOME_DIR=%s  XSCHEM_DESIGN_PATH=%s\n",
-       tclgetvar("XSCHEM_HOME_DIR"), 
-       tclgetvar("XSCHEM_DESIGN_PATH") ? tclgetvar("XSCHEM_DESIGN_PATH") : "NULL"
+ if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): XSCHEM_SHAREDIR=%s  XSCHEM_LIBRARY_PATH=%s\n",
+       tclgetvar("XSCHEM_SHAREDIR"), 
+       tclgetvar("XSCHEM_LIBRARY_PATH") ? tclgetvar("XSCHEM_LIBRARY_PATH") : "NULL"
  );
  if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done step a of xinit()\n");
 
@@ -845,18 +825,18 @@ int Tcl_AppInit(Tcl_Interp *inter)
  //
  //  EXECUTE xschem.tcl
  //
- my_snprintf(name, S(name), "%s/%s", tclgetvar("XSCHEM_HOME_DIR"), "xschem.tcl");
+ my_snprintf(name, S(name), "%s/%s", tclgetvar("XSCHEM_SHAREDIR"), "xschem.tcl");
  if(stat(name, &buf) ) {
    fprintf(errfp, "Tcl_AppInit() err 4: cannot find %s\n", name);
    if(has_x) {
      tcleval( "wm withdraw ."); // 20161217
      tcleval(
        "tk_messageBox -icon error -type ok -message \"Tcl_AppInit() err 4: xschem.tcl not found, "
-         "installation problem or undefined  XSCHEM_HOME_DIR\"");
+         "installation problem or undefined  XSCHEM_SHAREDIR\"");
    }
    Tcl_ResetResult(interp);
    Tcl_AppendResult(interp, "Tcl_AppInit() err 4: xschem.tcl not found, "
-                            "you are probably missing XSCHEM_HOME_DIR\n",NULL);
+                            "you are probably missing XSCHEM_SHAREDIR\n",NULL);
    Tcl_Exit(EXIT_FAILURE);
    return TCL_ERROR; // 20121110
  }

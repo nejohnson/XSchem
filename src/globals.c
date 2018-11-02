@@ -62,7 +62,7 @@ int cur_undo_ptr=0;
 int tail_undo_ptr=0;
 int head_undo_ptr=0;
 int max_undo=80;
-int draw_dots=0; //20150331
+int draw_dots=1; //20150331
 int draw_single_layer=-1; // 20151117
 
 unsigned short enable_stretch=0;
@@ -144,6 +144,7 @@ unsigned char pixdata_init[22][32]={	// fill patterns... indexed by laynumb.
 
 char **color_array;
 
+const char *xschem_executable=NULL;
 Pixmap cad_icon_pixmap=0, *pixmap,save_pixmap;	// save_pixmap used to restore window
 int areax1,areay1,areax2,areay2,areaw,areah; // window corners / size
 GC *gcstipple,*gc, gctiled;

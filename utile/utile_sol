@@ -1,9 +1,0 @@
-#!/bin/sh 
-# wrapper routine for the (IN)UTILE awk programs
-# 10/01/2000 - all architecture-dependent paths ar set here after!
-#				Schippers Stefan
-
-MY_PREFIX=/home/schippes
-PATH=${MY_PREFIX}/utile3:${MY_PREFIX}/bin_solaris:/usr/bin:/bin
-export PATH
-preprocess.awk $@ | expand_alias.awk | param.awk | clock.awk | stimuli.awk

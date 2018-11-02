@@ -28,6 +28,7 @@
 /*  approximate PI definition */
 #define XSCH_PI 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170676
 
+// #include "../config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -86,7 +87,7 @@
 #define CADMOVESTEP 200
 #define CADMAXZOOM 10000.0
 #define CADMINZOOM 0.0001
-#define CADHALFDOTSIZE 2.5
+#define CADHALFDOTSIZE 4
 #define CADNULLNODE -1	    /*  no valid node number */
 #define CADWIREMINDIST 8.0
 #define CADMAXWIRES 4096
@@ -520,6 +521,7 @@ extern int draw_single_layer; /*  20151117 */
 
 extern Window window;
 extern Window parent_of_topwindow;
+extern const char *xschem_executable;
 extern Pixmap cad_icon_pixmap, *pixmap,save_pixmap;
 extern int depth;
 extern int *fill_type; /* 20171117 for every layer: 0: no fill, 1, solid fill, 2: stipple fill */
@@ -665,6 +667,7 @@ extern void drawtemprect(GC gc, int what, double rectx1,double recty1,
             double rectx2,double recty2);
 extern void drawtemparc(GC gc, int what, double x, double y, double r, double a, double b);
 extern void drawarc(int c, int what, double x, double y, double r, double a, double b);
+extern void filledarc(int c, int what, double x, double y, double r, double a, double b);
 extern void drawtemppolygon(GC gc, int what, double *x, double *y, int points);
 extern void drawpolygon(int c, int what, double *x, double *y, int points, int poly_fill);
 extern void draw_temp_symbol_outline(int what, GC gc, int n,int layer,
@@ -685,6 +688,7 @@ extern int touch(double,double,double,double,double,double);
 extern int rectclip(int,int,int,int,
            double*,double*,double*,double*);
 extern void trim_wires(void);
+extern void update_conn_cues(int draw_cues, int dr_win);
 extern void break_wires_at_pins(void);
 
 extern void check_touch(int i, int j,

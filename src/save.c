@@ -39,7 +39,6 @@ char *read_line(FILE *fp)
   return a;
 }
 
-
 //
 // 20180923
 // return "/<prefix><random string of random_size characters>"
@@ -881,6 +880,7 @@ void load_schematic(int load_symbols, const char *abs_name, int reset_undo) // 2
     tcleval( "wm title . [file tail [xschem get schpath]]"); // 20150417 set window and icon title
     tcleval( "wm iconname . [file tail [xschem get schpath]]");
   }
+  update_conn_cues(0, 0);
 }
 
 void delete_undo(void)  // 20150327
@@ -990,6 +990,7 @@ void pop_undo(int redo)  // 20150327
   prepared_hash_wires=0; // 20171224
   prepared_netlist_structs=0; // 20171224
   prepared_hilight_structs=0; // 20171224
+  update_conn_cues(0, 0);
   if(debug_var>=2) fprintf(errfp, "pop_undo(): returning\n");
 }
 
@@ -1022,7 +1023,7 @@ int load_symbol_definition(char *name, FILE *embed_fd)
     {
       if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): Symbol not found: %s\n",name3);
       //return -1;
-      my_snprintf(name3, S(name3), "%s/%s.sym", tclgetvar("XSCHEM_HOME_DIR"), "systemlib/missing");
+      my_snprintf(name3, S(name3), "%s/%s.sym", tclgetvar("XSCHEM_SHAREDIR"), "systemlib/missing");
       if((fd=fopen(name3,"r"))==NULL) 
       { 
        fprintf(errfp, "load_symbol_definition(): systemlib/missing.sym missing, I give up\n");

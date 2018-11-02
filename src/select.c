@@ -285,15 +285,25 @@ void delete(void)
    {
     j++; 
     // if(get_tok_value(wire[i].prop_ptr,"bus",0)[0])   // 26122004
-    if(wire[i].bus) // 20171201
-      bbox(ADD, wire[i].x1-BUS_WIDTH, wire[i].y1-BUS_WIDTH , wire[i].x2+BUS_WIDTH , wire[i].y2+BUS_WIDTH );
-    else
-      bbox(ADD, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
+    if(wire[i].bus){ // 20171201
+      int ov, y1, y2;
+      ov = BUS_WIDTH> CADHALFDOTSIZE ? BUS_WIDTH : CADHALFDOTSIZE;
+      if(wire[i].y1 < wire[i].y2) { y1 = wire[i].y1-ov; y2 = wire[i].y2+ov; }
+      else                        { y1 = wire[i].y1+ov; y2 = wire[i].y2-ov; }
+      bbox(ADD, wire[i].x1-ov, y1 , wire[i].x2+ov , y2 );
+    } else {
+      int ov, y1, y2;
+      ov = CADHALFDOTSIZE;
+      if(wire[i].y1 < wire[i].y2) { y1 = wire[i].y1-ov; y2 = wire[i].y2+ov; }
+      else                        { y1 = wire[i].y1+ov; y2 = wire[i].y2-ov; }
+      bbox(ADD, wire[i].x1-ov, y1 , wire[i].x2+ov , y2 );
+    }
+
     modified=1;
     prepared_hash_wires=0;
     prepared_netlist_structs=0;
     prepared_hilight_structs=0;
-
+    
     continue;
    }
    if(j) 
@@ -308,6 +318,7 @@ void delete(void)
   lastwire -= j; 
 
  del_rect_line_arc_poly();
+ update_conn_cues(0, 0);
  lastselected = 0;
  bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
  draw();
@@ -470,7 +481,6 @@ void unselect_all(void)
            drawtempline(gctiled, THICK, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
          else
            drawtempline(gctiled, ADD, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
-        
        }
       }
      }
@@ -570,6 +580,7 @@ void select_wire(int i,unsigned short select_mode, int fast)
    wire[i].sel = select_mode;
   if(select_mode) {
    // if(get_tok_value(wire[i].prop_ptr,"bus",0)[0])  // 26122004
+   if(debug_var>=1) fprintf(errfp, "select(): wire[%d].end1=%d, ,end2=%d\n", i, wire[i].end1, wire[i].end2);
    if(wire[i].bus) // 20171201
      drawtempline(gc[SELLAYER], THICK, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
    else

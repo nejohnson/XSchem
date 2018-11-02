@@ -804,7 +804,7 @@ void print_hilight_net(int show)
    return;
  }
  // /20111106
- my_strdup(&cmd, tclgetvar("XSCHEM_HOME_DIR"));
+ my_strdup(&cmd, tclgetvar("XSCHEM_SHAREDIR"));
  my_strcat(&cmd, "/order_labels.awk");
  my_strdup(&cmd2, cmd);
  my_strcat(&cmd2," ");
@@ -813,7 +813,7 @@ void print_hilight_net(int show)
  my_strcat(&cmd2,filetmp2);
 
  // 20111106
- my_strdup(&cmd3, tclgetvar("XSCHEM_HOME_DIR"));
+ my_strdup(&cmd3, tclgetvar("XSCHEM_SHAREDIR"));
  my_strcat(&cmd3, "/sort_labels.awk ");
  my_strcat(&cmd3, filetmp1);
 

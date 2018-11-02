@@ -942,6 +942,68 @@ void arc_3_points(double x1, double y1, double x2, double y2, double x3, double 
   }
 }
 
+void filledarc(int c, int what, double x, double y, double r, double a, double b)
+{
+ static int i=0;
+ static XArc arc[CADDRAWBUFFERSIZE];
+ double x1, y1, x2, y2; // arc bbox
+ double xx1, yy1, xx2, yy2; // complete circle bbox in screen coords
+
+ if(!has_x) return;
+ if(what==ADD)
+ {
+  if(i>=CADDRAWBUFFERSIZE)
+  {
+   if(draw_window) XFillArcs(display, window, gc[c], arc,i);
+   if(draw_pixmap) XFillArcs(display, save_pixmap, gc[c], arc,i);
+   i=0;
+  }
+  xx1=X_TO_SCREEN(x-r);
+  yy1=Y_TO_SCREEN(y-r);
+  xx2=X_TO_SCREEN(x+r);
+  yy2=Y_TO_SCREEN(y+r);
+  arc_bbox(x, y, r, a, b, &x1,&y1,&x2,&y2);
+  x1=X_TO_SCREEN(x1);
+  y1=Y_TO_SCREEN(y1);
+  x2=X_TO_SCREEN(x2);
+  y2=Y_TO_SCREEN(y2);
+  if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
+  {
+   arc[i].x=(short)xx1;
+   arc[i].y=(short)yy1;
+   arc[i].width =(unsigned short)(xx2 - xx1);
+   arc[i].height=(unsigned short)(yy2 - yy1);
+   arc[i].angle1 = a*64;
+   arc[i].angle2 = b*64;
+   i++;
+  }
+ }
+ else if(what==NOW)
+ {
+  xx1=X_TO_SCREEN(x-r);
+  yy1=Y_TO_SCREEN(y-r);
+  xx2=X_TO_SCREEN(x+r);
+  yy2=Y_TO_SCREEN(y+r);
+  arc_bbox(x, y, r, a, b, &x1,&y1,&x2,&y2);
+  x1=X_TO_SCREEN(x1);
+  y1=Y_TO_SCREEN(y1);
+  x2=X_TO_SCREEN(x2);
+  y2=Y_TO_SCREEN(y2);
+  if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
+  {
+   if(draw_window) XFillArc(display, window, gc[c], xx1, yy1, xx2-xx1, yy2-yy1, a*64, b*64);
+   if(draw_pixmap) XFillArc(display, save_pixmap, gc[c], xx1, yy1, xx2-xx1, yy2-yy1, a*64, b*64);
+  }
+ }
+ else if(what==BEGIN) i=0;
+ else if(what==END && i)
+ {
+  if(draw_window) XFillArcs(display, window, gc[c], arc,i);
+  if(draw_pixmap) XFillArcs(display, save_pixmap, gc[c], arc,i);
+  i=0;
+ }
+}
+
 
 void drawarc(int c, int what, double x, double y, double r, double a, double b)
 {
@@ -1081,11 +1143,20 @@ void arc_bbox(double x, double y, double r, double a, double b,
 {
   double x2, y2, x3, y3;
   int aa, bb, i;
+
+  if(b==360.) {
+    *bx1 = x-r;
+    *by1 = y-r;
+    *bx2 = x+r;
+    *by2 = y+r;
+    return;
+  }
   a = fmod(a, 360.);
   if(a<0) a+=360.;
   aa = (int)(ceil(a/90.))*90;
   bb = (int)(floor((a+b)/90.))*90;
 
+    
   // printf("arc_bbox(): aa=%d bb=%d\n", aa, bb);
   x2 = x + r * cos(a * XSCH_PI/180.);
   y2 = y - r * sin(a * XSCH_PI/180.);
@@ -1307,7 +1378,6 @@ void draw(void)
 
  rebuild_selected_array();
  if(has_x) {
-    if(ui_state & SELECTION) draw_dots=0; // 20171114
     if(draw_pixmap)
       XFillRectangle(display, save_pixmap, gc[BACKLAYER], areax1, areay1, areaw, areah);
     // XClearArea seems not be clipped by XSetClipRectangles.--> do not use
@@ -1428,14 +1498,6 @@ void draw(void)
               }
               else
                 drawline(WIRELAYER, ADD, wire[ii].x1,wire[ii].y1,wire[ii].x2,wire[ii].y2);
-              if(draw_dots && wire[ii].end1 >1 && CADHALFDOTSIZE*mooz>=0.5) { // 20150331 draw_dots
-                 filledrect(WIRELAYER, ADD, wire[ii].x1-CADHALFDOTSIZE,wire[ii].y1-CADHALFDOTSIZE,
-                          wire[ii].x1+CADHALFDOTSIZE,wire[ii].y1+CADHALFDOTSIZE );
-              }
-              if(draw_dots && wire[ii].end2 >1 && CADHALFDOTSIZE*mooz>=0.5) { // 20150331 draw_dots
-                 filledrect(WIRELAYER, ADD, wire[ii].x2-CADHALFDOTSIZE,wire[ii].y2-CADHALFDOTSIZE,
-                          wire[ii].x2+CADHALFDOTSIZE,wire[ii].y2+CADHALFDOTSIZE );
-              }
             }
           } else {
             for(i=0;i<lastwire;i++)
@@ -1445,18 +1507,11 @@ void draw(void)
               }
               else
                 drawline(WIRELAYER, ADD, wire[i].x1,wire[i].y1,wire[i].x2,wire[i].y2);
-              if(draw_dots && wire[i].end1 >1 && CADHALFDOTSIZE*mooz>=0.5) { // 20150331 draw_dots
-                 filledrect(WIRELAYER, ADD, wire[i].x1-CADHALFDOTSIZE,wire[i].y1-CADHALFDOTSIZE,
-                          wire[i].x1+CADHALFDOTSIZE,wire[i].y1+CADHALFDOTSIZE );
-              }
-              if(draw_dots && wire[i].end2 >1 && CADHALFDOTSIZE*mooz>=0.5) { // 20150331 draw_dots
-                 filledrect(WIRELAYER, ADD, wire[i].x2-CADHALFDOTSIZE,wire[i].y2-CADHALFDOTSIZE,
-                          wire[i].x2+CADHALFDOTSIZE,wire[i].y2+CADHALFDOTSIZE );
-              }
             }
           }
-          drawline(WIRELAYER, END, 0.0, 0.0, 0.0, 0.0);
+          update_conn_cues(1, draw_window);
           filledrect(WIRELAYER, END, 0.0, 0.0, 0.0, 0.0);
+          drawline(WIRELAYER, END, 0.0, 0.0, 0.0, 0.0);
         }
         if(draw_single_layer ==-1 || draw_single_layer==TEXTLAYER) { // 20151117
           #ifndef HAS_CAIRO

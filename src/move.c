@@ -501,10 +501,20 @@ void copy_objects(int what)
      case WIRE:
       if(k!=WIRELAYER) break;
       check_wire_storage();
-      if(wire[n].bus) // 20181009
+      if(wire[n].bus){ // 20171201
         bbox(ADD, wire[n].x1-BUS_WIDTH, wire[n].y1-BUS_WIDTH , wire[n].x2+BUS_WIDTH , wire[n].y2+BUS_WIDTH );
-      else
-        bbox(ADD, wire[n].x1, wire[n].y1, wire[n].x2, wire[n].y2);
+        int ov, y1, y2;
+        ov = BUS_WIDTH> CADHALFDOTSIZE ? BUS_WIDTH : CADHALFDOTSIZE;
+        if(wire[n].y1 < wire[n].y2) { y1 = wire[n].y1-ov; y2 = wire[n].y2+ov; }
+        else                        { y1 = wire[n].y1+ov; y2 = wire[n].y2-ov; }
+        bbox(ADD, wire[n].x1-ov, y1 , wire[n].x2+ov , y2 );
+      } else {
+        int ov, y1, y2;
+        ov = CADHALFDOTSIZE;
+        if(wire[n].y1 < wire[n].y2) { y1 = wire[n].y1-ov; y2 = wire[n].y2+ov; }
+        else                        { y1 = wire[n].y1+ov; y2 = wire[n].y2-ov; }
+        bbox(ADD, wire[n].x1-ov, y1 , wire[n].x2+ov , y2 );
+      }
       if(rotatelocal) {
         ROTATION(wire[n].x1, wire[n].y1, wire[n].x1, wire[n].y1, rx1,ry1);
         ROTATION(wire[n].x1, wire[n].y1, wire[n].x2, wire[n].y2, rx2,ry2);
@@ -769,6 +779,7 @@ void copy_objects(int what)
       break;
     }
    }
+   update_conn_cues(1, 1); 
    filledrect(k, END, 0.0, 0.0, 0.0, 0.0);
    drawarc(k, END, 0.0, 0.0, 0.0, 0.0, 0.0);
    drawrect(k, END, 0.0, 0.0, 0.0, 0.0);
@@ -878,10 +889,20 @@ void move_objects(int what, int merge, double dx, double dy)
      case WIRE:
       if(k!=WIRELAYER) break;
       // if(get_tok_value(wire[n].prop_ptr,"bus",0)[0])   // 26122004
-      if(wire[n].bus) // 20171201
+      if(wire[n].bus){ // 20171201
         bbox(ADD, wire[n].x1-BUS_WIDTH, wire[n].y1-BUS_WIDTH , wire[n].x2+BUS_WIDTH , wire[n].y2+BUS_WIDTH );
-      else
-        bbox(ADD, wire[n].x1, wire[n].y1, wire[n].x2, wire[n].y2);
+        int ov, y1, y2;
+        ov = BUS_WIDTH> CADHALFDOTSIZE ? BUS_WIDTH : CADHALFDOTSIZE;
+        if(wire[n].y1 < wire[n].y2) { y1 = wire[n].y1-ov; y2 = wire[n].y2+ov; }
+        else                        { y1 = wire[n].y1+ov; y2 = wire[n].y2-ov; }
+        bbox(ADD, wire[n].x1-ov, y1 , wire[n].x2+ov , y2 );
+      } else {
+        int ov, y1, y2;
+        ov = CADHALFDOTSIZE;
+        if(wire[n].y1 < wire[n].y2) { y1 = wire[n].y1-ov; y2 = wire[n].y2+ov; }
+        else                        { y1 = wire[n].y1+ov; y2 = wire[n].y2-ov; }
+        bbox(ADD, wire[n].x1-ov, y1 , wire[n].x2+ov , y2 );
+      }
       if(rotatelocal) {
         ROTATION(wire[n].x1, wire[n].y1, wire[n].x1, wire[n].y1, rx1,ry1);
         ROTATION(wire[n].x1, wire[n].y1, wire[n].x2, wire[n].y2, rx2,ry2);
@@ -917,7 +938,6 @@ void move_objects(int what, int merge, double dx, double dy)
         drawline(k, THICK, wire[n].x1, wire[n].y1, wire[n].x2, wire[n].y2);
       else
         drawline(k, ADD, wire[n].x1, wire[n].y1, wire[n].x2, wire[n].y2);
-
       break;
      case LINE:
       if(c!=k) break;   
@@ -1186,6 +1206,8 @@ void move_objects(int what, int merge, double dx, double dy)
       break;
     }
    }
+   
+   update_conn_cues(1, 1); 
    filledrect(k, END, 0.0, 0.0, 0.0, 0.0); 
    drawarc(k, END, 0.0, 0.0, 0.0, 0.0, 0.0);
    drawrect(k, END, 0.0, 0.0, 0.0, 0.0);

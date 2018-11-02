@@ -3,6 +3,8 @@
 ## XSCHEM will install in ${prefix}/bin, ${prefix}/share/xschem 
 ## and ${prefix}/share/doc/xschem
 prefix=$(HOME)
+sharedir=$(prefix)/share/xschem
+userconfdir=$(prefix)/.xschem
 
 ## specify user schematic/symbol libraries; 
 ## you may redefine it later in .xschem or xschemrc startup files
@@ -57,10 +59,10 @@ endif
 
 ## to fix rendering problems due to bugs in the exceed turboX server
 ## add -DTURBOX_FIX
-MOREFLAGS= -g -std=c99 -pedantic 
+MOREFLAGS= -g -std=c99 -pedantic -pg -no-pie 
 
 CFLAGS  = -Wall  $(MOREFLAGS)  -I/usr/include/tcl${TCLVER} $(CAIRO_INCLUDES) -I/home/sschippe/include \
-           -DPREFIX='"${prefix}"' \
+           -DXSCHEM_SHAREDIR='"${sharedir}"'  -DUSER_CONF_DIR='"${userconfdir}"' \
            -DXSCHEM_LIBRARY_PATH='"${xschem_library_path}"'
 
 LDFLAGS = -L/usr/X11R6/lib -L/home/sschippe/lib $(MOREFLAGS) -lX11 -lm -lXpm -ltcl${TCLVER} -ltk${TCLVER} \

@@ -7,14 +7,14 @@
 #### xschem installation directory
 #### normally there is no reason to set this variable if using standard installation.
 #### location of files is set at compile time but may be overridden with following line
-# set XSCHEM_HOME_DIR $env(HOME)/share/xschem
+# set XSCHEM_SHAREDIR $env(HOME)/share/xschem
 
 #### xschem system-wide design library paths
 #### if unset xschem starts with following default:
-#### XSCHEM_DESIGN_PATH $env(HOME/xschem_library):${XSCHEM_HOME_DIR}/xschem_library
+#### XSCHEM_LIBRARY_PATH $env(HOME/xschem_library):${XSCHEM_SHAREDIR}/xschem_library
 #### you may overide the default system-wide library here and append in user's .xschem
 #### the user's libraries.
-# set XSCHEM_DESIGN_PATH ${XSCHEM_HOME_DIR}/xschem_library
+# set XSCHEM_LIBRARY_PATH ${XSCHEM_SHAREDIR}/xschem_library
 
 #### directory where simulations, netlist and simulator outputs are placed
 #### if unset xschem asks user to choose one when doing a netlist

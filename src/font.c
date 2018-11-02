@@ -28,7 +28,7 @@ void compile_font(void)
  static char *name=NULL; // 20161122 overflow safe
 
  currentsch = 0;
- my_strdup(&name, tclgetvar("XSCHEM_HOME_DIR"));
+ my_strdup(&name, tclgetvar("XSCHEM_SHAREDIR"));
  my_strcat(&name, "/systemlib/font.sch");
  remove_symbols();
  load_schematic(1,name,1);

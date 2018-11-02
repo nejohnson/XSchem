@@ -1,13 +1,21 @@
 #!/usr/bin/awk -f
-# 20200212 added simle expression parsing
+# 20200212 added simple expression parsing
 
 # 20170830 
+BEGIN{
+ for(i=0;i<=127;i++)
+ {
+  val[sprintf("%c",i)]=i  # value of char: val["0"]=45
+  char[i]=sprintf("%c",i) # char[48]="0"
+ }
+}
+
 {
   gsub (/[ \t]*=[ \t]*/, "=")
 }
   
 
-/^\.param/{
+/^\.*param/{
  param[$2]=arith($3)
  next
 }
@@ -33,6 +41,24 @@
     }  
   }
 }   
+
+
+ #20171117 ascii string --> hex
+{
+ if($3 ~/^%/){
+   hexstring=""
+   asciistring=$0
+   #print "before: " asciistring > "/dev/stderr"
+   sub(/^[^%]+%/,"",asciistring)
+   sub(/%.*/,"",asciistring)
+   for(i=1; i<=length(asciistring); i++) {
+     hexstring = hexstring sprintf("%02x", val[substr(asciistring, i, 1)])
+   }
+   sub(/%[^%]+%/, hexstring)
+   #print $0 , "|" asciistring "|" > "/dev/stderr"
+ }
+}
+
 
 { print }
 

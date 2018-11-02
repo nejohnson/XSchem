@@ -61,6 +61,7 @@ void child_handler(int signum)
 
 int main(int argc, char **argv)
 {
+  xschem_executable = argv[0];
   signal(SIGINT, sig_handler);
   signal(SIGSEGV, sig_handler);
   signal(SIGILL, sig_handler);

@@ -87,7 +87,7 @@ proc set_ne { var val } {
   }
 
 proc netlist {source_file show netlist_file} {
- global XSCHEM_HOME_DIR flat_netlist hspice_netlist netlist_dir
+ global XSCHEM_SHAREDIR flat_netlist hspice_netlist netlist_dir
  global verilog_2001
 
 
@@ -98,37 +98,37 @@ proc netlist {source_file show netlist_file} {
      set hspice {}
    }
    if $flat_netlist==0 then {
-     eval exec "${XSCHEM_HOME_DIR}/spice.awk -- $hspice $netlist_dir/$source_file \
-             | ${XSCHEM_HOME_DIR}/break.awk > $netlist_dir/$netlist_file"
+     eval exec "${XSCHEM_SHAREDIR}/spice.awk -- $hspice $netlist_dir/$source_file \
+             | ${XSCHEM_SHAREDIR}/break.awk > $netlist_dir/$netlist_file"
    } else {
-     eval exec "${XSCHEM_HOME_DIR}/spice.awk -- $hspice $netlist_dir/$source_file \
-             | ${XSCHEM_HOME_DIR}/flatten.awk | ${XSCHEM_HOME_DIR}/break.awk > $netlist_dir/$netlist_file"
+     eval exec "${XSCHEM_SHAREDIR}/spice.awk -- $hspice $netlist_dir/$source_file \
+             | ${XSCHEM_SHAREDIR}/flatten.awk | ${XSCHEM_SHAREDIR}/break.awk > $netlist_dir/$netlist_file"
    }
    if ![string compare $show "show"] {
       textwindow $netlist_dir/$netlist_file
    }
  } 
  if [regexp {\.vhdl} $netlist_file ] {
-   eval exec "${XSCHEM_HOME_DIR}/vhdl.awk $netlist_dir/$source_file \
+   eval exec "${XSCHEM_SHAREDIR}/vhdl.awk $netlist_dir/$source_file \
               > $netlist_dir/$netlist_file"
    if ![string compare $show "show"] {
      textwindow $netlist_dir/$netlist_file
    }
  }
  if [regexp {\.tdx$} $netlist_file ] {
-   eval exec "${XSCHEM_HOME_DIR}/tedax.awk $netlist_dir/$source_file \
+   eval exec "${XSCHEM_SHAREDIR}/tedax.awk $netlist_dir/$source_file \
               > $netlist_dir/$netlist_file"
    if ![string compare $show "show"] {
      textwindow $netlist_dir/$netlist_file
    }
  }
  if [regexp {\.v$} $netlist_file ] {
-   eval exec "${XSCHEM_HOME_DIR}/verilog.awk $netlist_dir/$source_file \
+   eval exec "${XSCHEM_SHAREDIR}/verilog.awk $netlist_dir/$source_file \
               > $netlist_dir/$netlist_file"
 
    # 20140409
    if { $verilog_2001==1 } { 
-     eval exec ${XSCHEM_HOME_DIR}/convert_to_verilog2001.awk $netlist_dir/$netlist_file > $netlist_dir/${netlist_file}vv
+     eval exec ${XSCHEM_SHAREDIR}/convert_to_verilog2001.awk $netlist_dir/$netlist_file > $netlist_dir/${netlist_file}vv
      eval exec mv $netlist_dir/${netlist_file}vv $netlist_dir/$netlist_file
    }
    if ![string compare $show "show"] {
@@ -219,7 +219,7 @@ proc edit_file {filename} {
 }
 
 proc simulate {filename} {
- global XSCHEM_HOME_DIR retval env netlist_dir netlist_type
+ global retval env netlist_dir netlist_type
  global task_output task_error
  global iverilog_path vvp_path hspice_path hspicerf_path spice_simulator 
  global modelsim_path verilog_simulator
@@ -292,50 +292,52 @@ proc simulate {filename} {
 }
 
 proc modelsim {schname} {
-  global XSCHEM_HOME_DIR retval netlist_dir netlist_type
+  global retval netlist_dir netlist_type
   global iverilog_path vvp_path hspice_path modelsim_path
   task "${modelsim_path}/vsim -i" $netlist_dir bg
 }
 
 proc utile_translate {schname} { 
-  global XSCHEM_HOME_DIR retval netlist_dir netlist_type tcl_debug
+  global retval netlist_dir netlist_type tcl_debug XSCHEM_SHAREDIR
   global utile_gui_path utile_cmd_path
-  task "$utile_cmd_path stimuli.$schname" $netlist_dir fg
+  exec sh -c "cd $netlist_dir; XSCHEM_SHAREDIR=$XSCHEM_SHAREDIR $utile_cmd_path stimuli.$schname"
 }
 
 proc utile_gui {schname} { 
-  global XSCHEM_HOME_DIR retval netlist_dir netlist_type tcl_debug
+  global retval netlist_dir netlist_type tcl_debug XSCHEM_SHAREDIR
   global utile_gui_path utile_cmd_path
-  task "$utile_gui_path stimuli.$schname" $netlist_dir bg
+  exec sh -c "cd $netlist_dir; XSCHEM_SHAREDIR=$XSCHEM_SHAREDIR $utile_gui_path stimuli.$schname" &
 }
 
 proc utile_edit {schname} { 
-  global XSCHEM_HOME_DIR retval netlist_dir netlist_type tcl_debug editor
+  global retval netlist_dir netlist_type tcl_debug editor XSCHEM_SHAREDIR
   global utile_gui_path utile_cmd_path 
-  task "sh -c \"$editor stimuli.$schname ; $utile_cmd_path stimuli.$schname\"" $netlist_dir bg 
+  exec sh -c "$editor stimuli.$schname ; 
+        cd $netlist_dir; 
+        XSCHEM_SHAREDIR=$XSCHEM_SHAREDIR $utile_cmd_path stimuli.$schname" &
 }
 
 proc waveview {schname} {
-  global XSCHEM_HOME_DIR retval netlist_dir netlist_type tcl_debug
+  global retval netlist_dir netlist_type tcl_debug
   global waveview_path
   task "$waveview_path -k -x $schname.sx" $netlist_dir bg
 }
 
 proc cosmoscope { schname } {
-  global XSCHEM_HOME_DIR retval netlist_dir netlist_type tcl_debug
+  global retval netlist_dir netlist_type tcl_debug
   global cscope_path
   task "$cscope_path" $netlist_dir bg
 }
 
 
 proc gtkwave {schname} {
-  global XSCHEM_HOME_DIR retval netlist_dir netlist_type tcl_debug
+  global retval netlist_dir netlist_type tcl_debug
   global gtkwave_path
   task "$gtkwave_path 2>/dev/null" $netlist_dir bg
 }
 
 proc waves {schname} {
- global XSCHEM_HOME_DIR retval netlist_dir netlist_type tcl_debug
+ global retval netlist_dir netlist_type tcl_debug
  global cscope_path gtkwave_path analog_viewer waveview_path
 
  if { [xschem set_netlist_dir 0] ne "" } {
@@ -359,14 +361,14 @@ proc waves {schname} {
 }
 
 proc get_shell { curpath } {
- global XSCHEM_HOME_DIR retval netlist_dir netlist_type tcl_debug
+ global retval netlist_dir netlist_type tcl_debug
  global cscope_path gtkwave_path analog_viewer waveview_path terminal
 
  task "$terminal" $curpath bg
 }
 
 proc edit_netlist {schname } {
- global XSCHEM_HOME_DIR retval netlist_dir netlist_type tcl_debug
+ global retval netlist_dir netlist_type tcl_debug
  global cscope_path gtkwave_path analog_viewer waveview_path editor terminal
 
  if { [regexp vim $editor] } { set ftype "-c \":set filetype=$netlist_type\"" } else { set ftype {} }
@@ -599,10 +601,10 @@ proc add_lab_prefix {} {
 
 
 proc make_symbol {name} {
- global XSCHEM_HOME_DIR symbol_width
+ global XSCHEM_SHAREDIR symbol_width
  set name [abs_sym_path $name .sch]
- # puts "make_symbol{}, executing: ${XSCHEM_HOME_DIR}/make_sym.awk $symbol_width ${name}"
- eval exec "${XSCHEM_HOME_DIR}/make_sym.awk $symbol_width {$name}"
+ # puts "make_symbol{}, executing: ${XSCHEM_SHAREDIR}/make_sym.awk $symbol_width ${name}"
+ eval exec "${XSCHEM_SHAREDIR}/make_sym.awk $symbol_width {$name}"
  return {}
 }
 
@@ -1828,21 +1830,17 @@ proc reconfigure_layers_menu {} {
 ###   MAIN PROGRAM
 ###
 
-# tcl variable XSCHEM_DESIGN_PATH  should already be set in ~/.xschem,    20121110
-# if not try to evaluate the old (deprecated now) XSCHEM_DESIGN_DIR tcl var.
+# tcl variable XSCHEM_LIBRARY_PATH  should already be set in xschemrc
 set pathlist {}
-if { [info exists XSCHEM_DESIGN_PATH] } {
-  set pathlist_orig [split $XSCHEM_DESIGN_PATH :]
+if { [info exists XSCHEM_LIBRARY_PATH] } {
+  set pathlist_orig [split $XSCHEM_LIBRARY_PATH :]
   foreach i $pathlist_orig {
     lappend pathlist [string replace [file normalize ${i}/__xxx__] end-7 end {}]
   }
-} elseif { [info exists XSCHEM_DESIGN_DIR] } {
-  set XSCHEM_DESIGN_PATH $XSCHEM_DESIGN_DIR
-  set pathlist [string replace [file normalize ${XSCHEM_DESIGN_DIR}/__xxx__] end-7 end {}]
 }
 
 if { [xschem get help ]} {
-  set fd [open ${XSCHEM_HOME_DIR}/xschem.help r]
+  set fd [open ${XSCHEM_SHAREDIR}/xschem.help r]
   set helpfile [read $fd]
   puts $helpfile
   close $fd
@@ -1934,8 +1932,8 @@ set_ne gtkwave_path $env(HOME)/gtkwave/bin/gtkwave
 set_ne waveview_path $env(HOME)/waveview/bin/wv
 
 ## utile
-set_ne utile_gui_path $env(HOME)/utile3/utile3
-set_ne utile_cmd_path $env(HOME)/utile3/utile
+set_ne utile_gui_path ${XSCHEM_SHAREDIR}/utile/utile3
+set_ne utile_cmd_path ${XSCHEM_SHAREDIR}/utile/utile
 
 ## modelsim
 set_ne modelsim_path $env(HOME)/modeltech/bin
@@ -2140,9 +2138,9 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    menu .menubar.simulation.menu -tearoff 0
    menubutton .menubar.help -text "Help" -menu .menubar.help.menu
    menu .menubar.help.menu -tearoff 0
-   .menubar.help.menu add command -label "help" -command "textwindow ${XSCHEM_HOME_DIR}/xschem.help" \
+   .menubar.help.menu add command -label "help" -command "textwindow ${XSCHEM_SHAREDIR}/xschem.help" \
 	-accelerator {?}
-   .menubar.help.menu add command -label "keys" -command "textwindow ${XSCHEM_HOME_DIR}/keys.help"
+   .menubar.help.menu add command -label "keys" -command "textwindow ${XSCHEM_SHAREDIR}/keys.help"
    
    .menubar.file.menu add command -label "New Schematic" \
      -command {
@@ -2486,7 +2484,7 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
     wm withdraw .infotext
     set show_infowindow 0
    }
-   bind .drw  "?" { textwindow ${XSCHEM_HOME_DIR}/xschem.help }
+   bind .drw  "?" { textwindow ${XSCHEM_SHAREDIR}/xschem.help }
 
    if {[array exists replace_key]} {
      foreach i [array names replace_key] {

@@ -1014,6 +1014,21 @@ int Tcl_AppInit(Tcl_Interp *inter)
       XWindowAttributes wattr;
       XGetWindowAttributes(display, window, &wattr);
 
+      #if HAS_XRENDER==1
+      #if HAS_XCB==1
+      sfc = cairo_xcb_surface_create_with_xrender_format(xcbconn, screen_xcb, window, &format_rgb, 1 , 1);
+      save_sfc = cairo_xcb_surface_create_with_xrender_format(xcbconn, screen_xcb, save_pixmap, &format_rgb, 1 , 1);
+      #else
+      format = XRenderFindStandardFormat(display, PictStandardRGB24);
+      sfc = cairo_xlib_surface_create_with_xrender_format (display, window, DefaultScreenOfDisplay(display), format, 1, 1); 
+      save_sfc = cairo_xlib_surface_create_with_xrender_format (display, save_pixmap, DefaultScreenOfDisplay(display), format, 1, 1); 
+      #endif 
+      #else
+      sfc = cairo_xlib_surface_create(display, window, visual, wattr.width, wattr.height);
+      save_sfc = cairo_xlib_surface_create(display, save_pixmap, visual, wattr.width, wattr.height);
+      #endif
+
+/*
       sfc = cairo_xlib_surface_create(display, window, visual, wattr.width, wattr.height);
       save_sfc = cairo_xlib_surface_create(display, save_pixmap, visual, wattr.width, wattr.height);
 
@@ -1031,7 +1046,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
       cairo_surface_destroy(save_sfc);
       save_sfc = cairo_xlib_surface_create_with_xrender_format (display, save_pixmap, DefaultScreenOfDisplay(display), format, 1, 1); 
       #endif //HAS_XRENDER
-  
+*/  
 
       if(cairo_surface_status(sfc)!=CAIRO_STATUS_SUCCESS) {
         fprintf(errfp, "ERROR: invalid cairo surface\n");
@@ -1061,7 +1076,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
       cairo_set_line_cap(save_ctx, CAIRO_LINE_CAP_ROUND);
 
     }
-    #endif
+    #endif /* HAS_CAIRO */
 
     change_linewidth(0.);
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done xinit()\n");

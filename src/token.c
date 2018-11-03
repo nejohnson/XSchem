@@ -139,6 +139,26 @@ if(token==NULL) return NULL;
 }
 
 static  int collisions, max_collisions=0, n_elements=0;
+
+
+
+static struct hashentry *free_hash_entry(struct hashentry *entry)
+{
+  struct hashentry *tmp;
+  while( entry ) {
+    tmp = entry -> next;
+    n_elements++;
+    collisions++;
+    if(debug_var>=3) fprintf(errfp, "free_hash_entry(): removing entry %lu\n", (unsigned long)entry);
+    /* entry->token and entry->value dont need to be freed since */
+    /* entry struct allocated with token and value included */
+    my_free(&entry);
+    entry = tmp;
+  }
+  return NULL;
+}
+
+/*
 static struct hashentry *free_hash_entry(struct hashentry *entry)
 {
  if(entry) 
@@ -153,6 +173,7 @@ static struct hashentry *free_hash_entry(struct hashentry *entry)
  }
  return NULL;
 }
+*/
 
 void free_hash(void) // remove the whole hash table 
 {

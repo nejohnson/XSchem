@@ -155,8 +155,8 @@
 #define ARC 64
 
 /*  for netlist.c */
-#define BOXSIZE 1000
-#define NBOXES 50
+#define BOXSIZE 3000
+#define NBOXES 40
 
 
 /*    some useful primes */
@@ -201,9 +201,6 @@
 #define RECTINSIDE(xa,ya,xb,yb,x1,y1,x2,y2)  \
  (xa>=x1 && xa<=x2 && xb>=x1 && xb<=x2 && ya>=y1 && ya<=y2 && yb>=y1 && yb<=y2 )
 
-#define RECTOUTSIDE(xa,ya,xb,yb,x1,y1,x2,y2)  \
- (xb<x1 || xa>x2 || yb<y1 || ya>y2)
-
 #define ROTATION(x0, y0, x, y, rx, ry) \
 xxtmp = (flip ? 2 * x0 -x : x); \
 if(rot==0)      {rx = xxtmp;  ry = y;} \
@@ -219,7 +216,7 @@ if(x2 < x1) { xxtmp=x1;x1=x2;x2=xxtmp;} \
 if(y2 < y1) { xxtmp=y1;y1=y2;y2=xxtmp;}
 
 #define OUTSIDE(xa,ya,xb,yb,x1,y1,x2,y2) \
- (xa>=x2 || xb<=x1 ||  ya>=y2 || yb<=y1 )
+ (xa>x2 || xb<x1 ||  ya>y2 || yb<y1 )
 
 #define LINE_OUTSIDE(xa,ya,xb,yb,x1,y1,x2,y2) \
  (xa>=x2 || xb<=x1 ||  ( (ya<yb)? (ya>=y2 || yb<=y1) : (yb>=y2 || ya<=y1) ) )
@@ -246,9 +243,9 @@ typedef struct
    double x2;
    double y1;
    double y2;
-   unsigned short  end1;
-   unsigned short  end2;
-   unsigned short sel;
+   short  end1;
+   short  end2;
+   short sel;
    char  *node;
    char *prop_ptr;
    int bus; /*  20171201 cache here wire "bus" property, to avoid too many get_tok_value() calls */
@@ -431,7 +428,8 @@ extern  int hilight_color;
 extern int do_print;
 extern int prepared_netlist_structs;
 extern int prepared_hilight_structs;
-extern int prepared_hash_objects;
+extern int prepared_hash_components;
+extern void hash_component(int n);
 extern int prepared_hash_wires;
 extern void hash_inst_pin(int i, int j);
 extern int has_x; 
@@ -617,10 +615,10 @@ extern int text_bbox(char * str,double xscale, double yscale,
             double *rx2, double *ry2);
 
 /* //test 20171203 */
-extern void del_object_table(void);
+extern void del_component_table(void);
 extern void hash_wires(void);
 extern void hash_wire(int n);
-extern void hash_objects(void); /*  20171203 insert instance bbox in spatial hash table */
+extern void hash_components(void); /*  20171203 insert instance bbox in spatial hash table */
 
 extern struct int_hashentry *int_hash_lookup(struct int_hashentry **table, int token, int remove); /*  20180104 */
 extern void free_int_hash(struct int_hashentry **table); /*  20180104 */

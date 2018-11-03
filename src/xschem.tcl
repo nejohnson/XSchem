@@ -2274,8 +2274,6 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    .menubar.edit.menu add checkbutton -label "Constrained Vertical move" -variable vertical_move \
       -command "xschem set vertical_move" -accelerator v
    # added collapse/join/break wires menu command  (& key) 20171022
-   .menubar.edit.menu add command -label "Join/Break/Collapse wires" \
-      -command "xschem collapse_wires" -accelerator {&}
    .menubar.edit.menu add command -label "Push schematic" -command "xschem descend" -accelerator e
    .menubar.edit.menu add command -label "Push symbol" -command "xschem edit_symbol" -accelerator i
    .menubar.edit.menu add command -label "Pop" -command "xschem go_back" -accelerator C-e
@@ -2374,6 +2372,10 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    .menubar.tools.menu add command -label "Search" -accelerator C-f -command  property_search
    .menubar.tools.menu add command -label "Align to Grid" -accelerator A-u -command  "xschem align"
    .menubar.tools.menu add command -label "Execute TCL command" -command  "tclcmd"
+   .menubar.tools.menu add command -label "Join/Trim wires" \
+      -command "xschem collapse_wires" -accelerator {&}
+   .menubar.tools.menu add command -label "Break wires" \
+      -command "xschem break_wires" -accelerator {!}
 
    .menubar.hilight.menu add command -label {Hilight selected net/pins} -command "xschem hilight" -accelerator k
    .menubar.hilight.menu add command -label {Un-hilight all net/pins} \

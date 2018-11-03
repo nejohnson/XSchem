@@ -482,7 +482,7 @@ void copy_objects(int what)
   bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0); // 20181009
   newpropcnt=0;
   modified=1; push_undo(); // 20150327 push_undo
-  prepared_hash_objects=0; // 20171224
+  prepared_hash_components=0; // 20171224
   prepared_hash_wires=0; // 20171224
   prepared_netlist_structs=0;
   prepared_hilight_structs=0;
@@ -779,13 +779,13 @@ void copy_objects(int what)
       break;
     }
    }
-   update_conn_cues(1, 1); 
    filledrect(k, END, 0.0, 0.0, 0.0, 0.0);
    drawarc(k, END, 0.0, 0.0, 0.0, 0.0, 0.0);
    drawrect(k, END, 0.0, 0.0, 0.0, 0.0);
    drawline(k, END, 0.0, 0.0, 0.0, 0.0);
    
   } // end for(k ...
+  update_conn_cues(1, 1); 
   ui_state &= ~STARTCOPY;
   check_collapsing_objects();
   x1=y_1=x2=y_2=rot=flip=deltax=deltay=0;
@@ -864,7 +864,7 @@ void move_objects(int what, int merge, double dx, double dy)
   draw_selection(gctiled,0);
   bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0);
   modified=1; 
-  prepared_hash_objects=0; // 20171224
+  prepared_hash_components=0; // 20171224
   prepared_hash_wires=0; // 20171224
   prepared_netlist_structs=0;
   prepared_hilight_structs=0;
@@ -1207,12 +1207,13 @@ void move_objects(int what, int merge, double dx, double dy)
     }
    }
    
-   update_conn_cues(1, 1); 
+
    filledrect(k, END, 0.0, 0.0, 0.0, 0.0); 
    drawarc(k, END, 0.0, 0.0, 0.0, 0.0, 0.0);
    drawrect(k, END, 0.0, 0.0, 0.0, 0.0);
    drawline(k, END, 0.0, 0.0, 0.0, 0.0);
   } //end for(k ...
+  update_conn_cues(1, 1); 
   ui_state &= ~STARTMOVE;
   ui_state &= ~STARTMERGE;
   check_collapsing_objects();

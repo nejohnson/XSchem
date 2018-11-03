@@ -1365,6 +1365,7 @@ void draw(void)
  struct wireentry *wireptr;
  int ii;
  char *type=NULL; // 20180109
+ int use_hash;
 
  // /20171224
 
@@ -1393,9 +1394,10 @@ void draw(void)
     y1 = Y_TO_XSCHEM(areay1);
     x2 = X_TO_XSCHEM(areax2);
     y2 = Y_TO_XSCHEM(areay2);
+    use_hash = (lastwire> 2000 || lastinst > 2000 ) &&  (x2 - x1  < ITERATOR_THRESHOLD);
         
-    if( (lastwire> 2000 || lastinst > 2000 ) &&  (x2 - x1  < ITERATOR_THRESHOLD) ) {
-      hash_objects();
+    if(use_hash) {
+      hash_components();
       hash_wires();
     }
     if(!only_probes) { // 20110112
@@ -1424,7 +1426,7 @@ void draw(void)
             drawpolygon(c, NOW, polygon[c][i].x, polygon[c][i].y, polygon[c][i].points, polygon[c][i].fill);
           }
   
-          if( (lastinst > 2000) && (x2 - x1  < ITERATOR_THRESHOLD) ) {
+          if(use_hash) {
   
             // --------------------------------- inst_ptr iterator 20171224
             //loop thru all squares that intersect drawing area
@@ -1487,7 +1489,7 @@ void draw(void)
           drawline(WIRELAYER,BEGIN, 0.0, 0.0, 0.0, 0.0);
           filledrect(WIRELAYER, BEGIN, 0.0, 0.0, 0.0, 0.0);
 
-          if( (lastwire > 2000) && (x2 - x1  < ITERATOR_THRESHOLD) ) {
+          if(use_hash) {
             if(debug_var>2) fprintf(errfp, "using spatial hash table iterator\n");
             //loop thru all squares that intersect drawing area
   

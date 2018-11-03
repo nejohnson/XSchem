@@ -46,19 +46,22 @@ p{padding: 15px  30px 10px;}
  Tck/Tk versions may vary on different systems, 8.4, 8.5, 8.6 versions are all good.
 </p>
  <pre class="code">
-  tcl8.6                libx11-dev
+  tcl8.6                libx11-dev            libfl-dev
   tk8.6                 libxpm-dev
   tcl8.6-dev            bison
   tk8.6-dev             flex
-  gawk or mawk   
+  gawk or mawk          libcairo2-dev
  </pre>
  <p>
 
  Edit the <kbd>prefix</kbd>, the <kbd>user_library_dir</kbd>  and <kbd>system_library_dir</kbd> 
  variables in the <kbd>Makefile</kbd>; 
  <kbd>prefix</kbd> specifies the root directory where 
- the xschem binary will be installed (<kbd>${prefix}/bin</kbd>) and its support files 
- (<kbd>${prefix}/share/xschem</kbd>) and docs (<kbd>${prefix}/share/doc/xschem</kbd>).
+ the xschem binary will be installed (<kbd>${prefix}/bin</kbd>), <kbd>sharedir</kbd>
+ specifies location of XSCHEM support files (<kbd>${prefix}/share/xschem</kbd>).
+ Docs will be placed in (<kbd>${prefix}/share/doc/xschem</kbd>).
+ The <kbd>userconfdir</kbd> specifies the location of the directory containing the
+ <kbd>xschemrc</kbd> configuration file and any other user private data / component libraries.
  The <kbd>user_library_dir</kbd> variable specifies where xschem 
  design example files are stored. This dir should be placed somewhere under the user's home.
  The <kbd>system_library_dir</kbd> variable specifies where xschem 
@@ -74,10 +77,12 @@ p{padding: 15px  30px 10px;}
 ## XSCHEM will install in ${prefix}/bin, ${prefix}/share/xschem 
 ## and ${prefix}/share/doc/xschem
 prefix=$(HOME)
+sharedir=$(prefix)/share/xschem
+userconfdir=$(prefix)/.xschem
 
 ## specify user schematic/symbol libraries; 
 ## you may redefine it later in .xschem or xschemrc startup files
-user_library_dir=$(HOME)/xschem_library
+user_library_dir=$(userconfdir)/xschem_library
 
 ## specify system-wide symbol libraries;
 ## you may redefine it later in .xschem or xschemrc startup files

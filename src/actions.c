@@ -128,7 +128,7 @@ void resetwin(void)
       cairo_select_font_face (save_ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
       cairo_set_font_size (save_ctx, 20);
       /* // 20171125 select xlib or xcb :-) */
-      #if HAS_XCB==1
+      #if HAS_XCB==1 && HAS_XRENDER==1
       cairo_xcb_surface_set_size(sfc, xschem_w, xschem_h); /*  20171123 */
       #else
       cairo_xlib_surface_set_size(sfc, xschem_w, xschem_h); /*  20171123 */
@@ -426,7 +426,7 @@ void remove_symbols(void)
 void clear_drawing(void)
 {
  int i,j;
- del_object_table(); /*  20180917 */
+ del_component_table(); /*  20180917 */
  del_wire_table();   /*  20180917 */
  if(schtedaxprop!=NULL) my_free(&schtedaxprop);
  if(schprop!=NULL) my_free(&schprop);
@@ -722,7 +722,7 @@ void place_symbol(int pos,char *symbol_name, double x, double y, int rot, int fl
             inst_ptr[n].x2, inst_ptr[n].y2);
   lastinst++;
   modified=1;
-  prepared_hash_objects=0; /*  20171224 */
+  prepared_hash_components=0; /*  20171224 */
   prepared_netlist_structs=0;
   prepared_hilight_structs=0;
   if(draw_sym&1) {
@@ -890,7 +890,7 @@ void descend_schematic(void)
     prepare_netlist_structs(1);
     if(enable_drill) drill_hilight(); /*  20171212 */
   }
-  if(debug_var>0) fprintf(errfp, "descend_schematic(): before zoom(): prepared_hash_objects=%d\n", prepared_hash_objects);
+  if(debug_var>0) fprintf(errfp, "descend_schematic(): before zoom(): prepared_hash_components=%d\n", prepared_hash_components);
   zoom_full(1);
  }
 }

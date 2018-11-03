@@ -37,6 +37,26 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.8.0
+- draw connecting dots automatically on T or Y connected wires,
+- new commands in Tools menu to trim and break wires
+  Break wires will break *selected wires* at instance pin / other net connettions.
+  Trim wires will resolve overlapped nets, join parallel nets, etc.
+- .xschem/ directory for private data and config files.
+- initfile renamed, from .xschem to .xschem/xschemrc
+- XSCHEM_HOME_DIR renamed to XSCHEM_SHAREDIR (sharedir in Makefile)
+- added USER_CONF_DIR (Makedile userconfdir) (~/.xschem) 
+- XSCHEM_DESIGN_PATH renamed to XSCHEM_LIBRARY_PATH (makefile xschem_library_path) 
+- make xschem work correctly with all combinations of HAS_XCB and HAS_XRENDER
+- optmizations in update_conn_cues()
+- no recursive functions for deleting hash tables.
+- simpler loops for iterating rectangles that contain a wire in spatial hash table.
+- different location of startup user rc files: .xschem/xschemrc instead
+  of .xschem
+- deleted utile junk old files
+- xschemrc moved under src/
+
+
 2.7.0:
 - some fixes in library path management (abs_sym_path and rel_sym_path in xschem.tcl)
 - documentation updates on required -dev files, libfl-dev and cairo2-dev

@@ -249,7 +249,7 @@ void delete(void)
   if(inst_ptr[i].sel == SELECTED)
   {
    modified=1;
-   prepared_hash_objects=0;
+   prepared_hash_components=0;
    prepared_netlist_structs=0;
    prepared_hilight_structs=0;
 
@@ -895,9 +895,8 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) // 201509
   for(i=0;i<lastpolygon[c]; i++) {  // 20171115
     int k, selected_points, flag;
 
-
     polygon_bbox(polygon[c][i].x, polygon[c][i].y, polygon[c][i].points, &xa, &ya, &xb, &b);
-    if(RECTOUTSIDE(xa, ya, xb, yb, x1, y1, x2, y2)) continue;
+    if(OUTSIDE(xa, ya, xb, yb, x1, y1, x2, y2)) continue;
     selected_points = 0;
     flag=0;
     for(k=0; k<polygon[c][i].points; k++) {
@@ -921,8 +920,6 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) // 201509
     }
     
   }
-
-
   for(i=0;i<lastline[c];i++)
   {
    if(RECTINSIDE(line[c][i].x1,line[c][i].y1,line[c][i].x2,line[c][i].y2, x1,y1,x2,y2))
@@ -941,7 +938,6 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) // 201509
     select_line(c, i,SELECTED2,1);
    }
   }
-
   for(i=0;i<lastarc[c];i++) {
     x = arc[c][i].x;
     y = arc[c][i].y;
@@ -972,9 +968,7 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) // 201509
      ui_state |= SELECTION; // set ui_state to SELECTION also if unselecting by area ????
      select_arc(c, i,SELECTED2,1);
     }
-
   }
-
   for(i=0;i<lastrect[c];i++)
   {
    if(RECTINSIDE(rect[c][i].x1,rect[c][i].y1,rect[c][i].x2,rect[c][i].y2, x1,y1,x2,y2))
@@ -1012,8 +1006,6 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) // 201509
  drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
 }
 
-
-
 void select_all(void)
 {
  int c,i;
@@ -1021,9 +1013,7 @@ void select_all(void)
  drawtemparc(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
  drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
  drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0); 
-
  ui_state |= SELECTION;
-
  for(i=0;i<lastwire;i++)
  {
    select_wire(i,SELECTED, 1);

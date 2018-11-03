@@ -26,16 +26,27 @@
 //// 20171203
 static void objectinsert(int n, int x, int y)
 {
- struct objectentry *ptr, *newptr;
- ptr=objecttable[x][y];
-
- newptr=my_malloc(sizeof(struct objectentry));
- newptr->next=ptr;
- newptr->n=n;
- objecttable[x][y]=newptr;
+  struct objectentry *ptr, *newptr;
+  ptr=objecttable[x][y];
+  newptr=my_malloc(sizeof(struct objectentry));
+  newptr->next=ptr;
+  newptr->n=n;
+  objecttable[x][y]=newptr;
   if(debug_var>=2) fprintf(errfp, "objectinsert(): inserting object %d at %d,%d\n",n,x,y);
 }
 
+static struct objectentry *delobjectentry(struct objectentry *t)
+{
+  struct objectentry *tmp;
+  while( t ) {
+    tmp = t->next;
+    my_free(&t);
+    t = tmp;
+  }
+  return NULL;
+}
+
+/*
 struct objectentry *delobjectentry(struct objectentry *t)
 {
  if(t)
@@ -45,69 +56,69 @@ struct objectentry *delobjectentry(struct objectentry *t)
  }
  return NULL;
 }
+*/
 
-void del_object_table(void)
+void del_component_table(void)
 {
- int i,j;
+  int i,j;
 
- for(i=0;i<NBOXES;i++)
-  for(j=0;j<NBOXES;j++)
-   objecttable[i][j] = delobjectentry(objecttable[i][j]);
- prepared_hash_objects=0;
- if(debug_var>0) fprintf(errfp, "cleared object hash table\n");
+  for(i=0;i<NBOXES;i++)
+    for(j=0;j<NBOXES;j++)
+      objecttable[i][j] = delobjectentry(objecttable[i][j]);
+  prepared_hash_components=0;
+  if(debug_var>0) fprintf(errfp, "cleared object hash table\n");
 }
 
-void hash_objects(void) // 20171203 insert object bbox in spatial hash table
+void hash_component(int n) // 20171203 insert object bbox in spatial hash table
+{
+  int tmpi,tmpj, counti,countj,i,j;
+  double tmpd;
+  double x1, y1, x2, y2;
+  int x1a, x2a, y1a, y2a;
+ 
+  x1=inst_ptr[n].x1;
+  x2=inst_ptr[n].x2;
+  y1=inst_ptr[n].y1;
+  y2=inst_ptr[n].y2;
+  // ordered bbox
+  if( x2 < x1) { tmpd=x2;x2=x1;x1=tmpd;}
+  if( y2 < y1) { tmpd=y2;y2=y1;y1=tmpd;}
+ 
+  // calculate square 4 1st bbox point of object[k]
+  x1a=floor(x1/BOXSIZE);
+  y1a=floor(y1/BOXSIZE);
+ 
+  // calculate square 4 2nd bbox point of object[k]
+  x2a=floor(x2/BOXSIZE);
+  y2a=floor(y2/BOXSIZE);
+ 
+  //loop thru all squares that intersect bbox of object[k]
+  counti=0;
+  for(i=x1a; i<=x2a && counti < NBOXES; i++)
+  {
+   counti++;
+   tmpi=i%NBOXES; if(tmpi<0) tmpi+=NBOXES;
+   countj=0;
+   for(j=y1a; j<=y2a && countj < NBOXES; j++)
+   {
+    countj++;
+    tmpj=j%NBOXES; if(tmpj<0) tmpj+=NBOXES;
+    // insert object_ptr[n] in region [tmpi, tmpj]
+    objectinsert(n, tmpi, tmpj); // 20171203 
+    if(debug_var>0) fprintf(errfp, "hash_components(): hashing inst %d\n", n);
+   }
+  }
+} 
+void hash_components(void) // 20171203 insert object bbox in spatial hash table
 {
  int n;
- int tmpi,tmpj, firsti,firstj,i,j;
- double tmpd;
- double x1, y1, x2, y2;
- int x1a,x1b, x2a,x2b, y1a,y1b, y2a,y2b;
 
- if(prepared_hash_objects) return; 
- del_object_table();
+ if(prepared_hash_components) return; 
+ del_component_table();
  for(n=0; n<lastinst; n++) {
-   x1=inst_ptr[n].x1;
-   x2=inst_ptr[n].x2;
-   y1=inst_ptr[n].y1;
-   y2=inst_ptr[n].y2;
-   // ordered bbox
-   if( x2 < x1) { tmpd=x2;x2=x1;x1=tmpd;}
-   if( y2 < y1) { tmpd=y2;y2=y1;y1=tmpd;}
-  
-   // calculate square 4 1st bbox point of object[k]
-   x1a=floor(x1/BOXSIZE);
-   x1b=x1a % NBOXES; if(x1b<0) x1b+=NBOXES;
-   y1a=floor(y1/BOXSIZE);
-   y1b=y1a % NBOXES; if(y1b<0) y1b+=NBOXES;
-  
-   // calculate square 4 2nd bbox point of object[k]
-   x2a=floor(x2/BOXSIZE);
-   x2b=x2a % NBOXES; if(x2b<0) x2b+=NBOXES;
-   y2a=floor(y2/BOXSIZE);
-   y2b=y2a % NBOXES; if(y2b<0) y2b+=NBOXES;
-  
-   //loop thru all squares that intersect bbox of object[k]
-   firsti=1;
-   for(i=x1a; i<=x2a;i++)
-   {
-    tmpi=i%NBOXES; if(tmpi<0) tmpi+=NBOXES;
-    if(tmpi==x1b && !firsti) break;
-    firsti=0;
-    firstj=1;
-    for(j=y1a; j<=y2a;j++)
-    {
-     tmpj=j%NBOXES; if(tmpj<0) tmpj+=NBOXES;
-     if(tmpj==y1b && !firstj) break;
-     firstj=0;
-     // insert object_ptr[n] in region [tmpi, tmpj]
-     objectinsert(n, tmpi, tmpj); // 20171203 
-     if(debug_var>0) fprintf(errfp, "hash_objects(): hashing inst %d\n", n);
-    }
-   }
+   hash_component(n);
  }
- prepared_hash_objects=1;
+ prepared_hash_components=1;
 } 
 
 //// /20171203
@@ -163,13 +174,26 @@ static void wireinsert(int n, int x, int y)
 
 static struct wireentry *delwireentry(struct wireentry *t)
 {
+  struct wireentry *tmp;
+  while( t ) {
+    tmp = t->next;
+    my_free(&t);
+    t = tmp;
+  }
+  return NULL;
+}
+/*
+static struct wireentry *delwireentry(struct wireentry *t)
+{
  if(t)
  {
   t->next = delwireentry(t->next);
   my_free(&t);
- } 
+ }
  return NULL;
 }
+*/
+
 
 void del_wire_table(void)
 {
@@ -227,11 +251,13 @@ void hash_inst_pin(int i, int j)
 
 void hash_wire(int n)
 {
-  int tmpi,tmpj, firsti,firstj,i,j;
+  int tmpi,tmpj, counti,countj,i,j;
   double tmpd;
   double x1, y1, x2, y2;
-  int x1a,x1b, x2a,x2b, y1a,y1b, y2a,y2b;
+  int x1a, x2a, y1a, y2a;
+
   wire[n].node=NULL;
+  wire[n].end1 = wire[n].end2=-1;
   x1=wire[n].x1;
   x2=wire[n].x2;
   y1=wire[n].y1;
@@ -242,34 +268,27 @@ void hash_wire(int n)
 
   // calculate square 4 1st bbox point of wire[k]
   x1a=floor(x1/BOXSIZE) ;
-  x1b=x1a % NBOXES; if(x1b<0) x1b+=NBOXES;
   y1a=floor(y1/BOXSIZE) ;
-  y1b=y1a % NBOXES; if(y1b<0) y1b+=NBOXES;
 
   // calculate square 4 2nd bbox point of wire[k]
   x2a=floor(x2/BOXSIZE);
-  x2b=x2a % NBOXES; if(x2b<0) x2b+=NBOXES;
   y2a=floor(y2/BOXSIZE);
-  y2b=y2a % NBOXES; if(y2b<0) y2b+=NBOXES;
 
   //loop thru all squares that intersect bbox of wire[k]
-  firsti=1;
-  for(i=x1a; i<=x2a;i++)
+  counti=0;
+  for(i=x1a; i<=x2a && counti < NBOXES; i++)
   {
+   counti++;
    tmpi=i%NBOXES; if(tmpi<0) tmpi+=NBOXES;
-   if(tmpi==x1b && !firsti) break;
-   firsti=0;
-   firstj=1;
-   for(j=y1a; j<=y2a;j++)
+   countj=0;
+   for(j=y1a; j<=y2a && countj < NBOXES; j++)
    {
+    countj++;
     tmpj=j%NBOXES; if(tmpj<0) tmpj+=NBOXES;
-    if(tmpj==y1b && !firstj) break;
-    firstj=0;
     // insert wire[n] in region [tmpi, tmpj]
     wireinsert(n, tmpi, tmpj);
-     if(debug_var>=2) fprintf(errfp, "hash_wire(): %d/%d\n", tmpi,tmpj );
+    if(debug_var>=2) fprintf(errfp, "hash_wire(): %d/%d\n", tmpi,tmpj );
    }
-    if(debug_var>=2) fprintf(errfp, "hash_wire(): \n");
   }
 }
 
@@ -279,9 +298,7 @@ void hash_wires(void)
 
  if(prepared_hash_wires) return; 
  del_wire_table();
- for(n=0; n<lastwire; n++) {
-   hash_wire(n);
- }
+ for(n=0; n<lastwire; n++) hash_wire(n);
  prepared_hash_wires=1;
 } 
 
@@ -355,10 +372,10 @@ static void signal_short( char *n1, char *n2)
 
 static void wirecheck(int k)    // recursive routine
 {
- int tmpi,tmpj, firsti,firstj,i,j;
+ int tmpi,tmpj, counti,countj,i,j;
  int touches;
  double x1, y1, x2, y2;
- int x1a,x1b, x2a,x2b, y1a,y1b, y2a,y2b;
+ int x1a, x2a, y1a, y2a;
  struct wireentry *ptr2;
 
   x1=wire[k].x1;
@@ -366,36 +383,28 @@ static void wirecheck(int k)    // recursive routine
   y1=wire[k].y1;
   y2=wire[k].y2;
 
-// ordered bbox
+  // ordered bbox
   RECTORDER(x1, y1, x2, y2);
-// calculate square 4 1st bbox point of wire[k]
+  // calculate square 4 1st bbox point of wire[k]
   x1a=floor(x1/BOXSIZE) ;
-  x1b=x1a % NBOXES; if(x1b<0) x1b+=NBOXES;
- 
   y1a=floor(y1/BOXSIZE) ;
-  y1b=y1a % NBOXES; if(y1b<0) y1b+=NBOXES;
 
-// calculate square 4 2nd bbox point of wire[k]
+  // calculate square 4 2nd bbox point of wire[k]
   x2a=floor(x2/BOXSIZE);
-  x2b=x2a % NBOXES; if(x2b<0) x2b+=NBOXES;
- 
   y2a=floor(y2/BOXSIZE);
-  y2b=y2a % NBOXES; if(y2b<0) y2b+=NBOXES;
 
-//loop thru all squares that intersect bbox of wire[k]
-  firsti=1;
-  for(i=x1a; i<=x2a;i++)
+  //loop thru all squares that intersect bbox of wire[k]
+  counti=0;
+  for(i=x1a; i<=x2a && counti < NBOXES; i++)
   {
+   counti++;
    tmpi=i%NBOXES; if(tmpi<0) tmpi+=NBOXES;
-   if(tmpi==x1b && !firsti) break;
-   firsti=0;
-   firstj=1;
-   for(j=y1a; j<=y2a;j++)
+   countj=0;
+   for(j=y1a; j<=y2a && countj < NBOXES; j++)
    {
+    countj++;
     tmpj=j%NBOXES; if(tmpj<0) tmpj+=NBOXES;
-    if(tmpj==y1b && !firstj) break;
-    firstj=0;
-//check if wire[k]  touches wires in square [tmpi, tmpj]
+    //check if wire[k]  touches wires in square [tmpi, tmpj]
     ptr2=wiretable[tmpi][tmpj]; 
     while(ptr2)
     {

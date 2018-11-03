@@ -20,6 +20,9 @@
 #### if unset xschem asks user to choose one when doing a netlist
 # set netlist_dir $env(HOME)/xschem_library/simulations
 
+#### Window to open on startup
+#set XSCHEM_START_WINDOW {mylib/0_top}
+
 #### some default behavior
 set netlist_type spice ;# allowed : spice, verilog, vhdl, tedax
 set hspice_netlist 1
@@ -104,8 +107,8 @@ set analog_viewer waveview
 set waveview_path $env(HOME)/waveview_2013/bin/wv
 
 #### utile (stefan's spice stimuli editor)
-set utile_gui_path ${XSCHEM_HOME_DIR}/utile/utile3
-set utile_cmd_path ${XSCHEM_HOME_DIR}/utile/utile
+set utile_gui_path ${XSCHEM_SHAREDIR}/utile/utile3
+set utile_cmd_path ${XSCHEM_SHAREDIR}/utile/utile
 
 #### gtkwave (open source digital wave viewer)
 set gtkwave_path $env(HOME)/gtkwave/bin/gtkwave

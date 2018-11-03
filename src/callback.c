@@ -1002,7 +1002,7 @@ int callback(int event, int mx, int my, KeySym key,
     push_undo(); /* 20150327 */
     round_schematic_to_grid(cadsnap);
     modified=1;
-    prepared_hash_objects=0;
+    prepared_hash_components=0;
     prepared_hash_wires=0;
     prepared_netlist_structs=0;
     prepared_hilight_structs=0;
@@ -1013,15 +1013,15 @@ int callback(int event, int mx, int my, KeySym key,
    if(key=='u' && state==ControlMask)			/* testmode */
    {
      double x1, y1, x2, y2;
-     struct objectentry *ptr;
+     struct wireentry *ptr;
      x1 = X_TO_XSCHEM(areax1);
      y1 = Y_TO_XSCHEM(areay1);
      x2 = X_TO_XSCHEM(areax2);
      y2 = Y_TO_XSCHEM(areay2);
-     hash_objects();
+     hash_wires();
      printf("screen: %g %g %g %g\n", x1, y1, x2, y2);
-     for(init_inst_iterator(x1, y1, x2, y2); ( ptr = inst_iterator_next() );) {
-       select_element(ptr->n,SELECTED,1);
+     for(init_wire_iterator(x1, y1, x2, y2); ( ptr = wire_iterator_next() );) {
+       select_wire(ptr->n,SELECTED,1);
      }
     break;
    }
@@ -1261,7 +1261,7 @@ int callback(int event, int mx, int my, KeySym key,
     }
 
 
-    draw();
+    zoom_full(1);
     break;
    }
 
@@ -1280,7 +1280,7 @@ int callback(int event, int mx, int my, KeySym key,
      view_unzoom(0.0); 
      break;
    }
-   if(key=='!') 	                /* testmode */
+   if(key=='!')
    {
      break_wires_at_pins();
      break;

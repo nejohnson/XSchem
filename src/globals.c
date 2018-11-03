@@ -187,7 +187,7 @@ int flat_netlist=0;
 int netlist_type=-1;
 int prepared_netlist_structs=0;
 int prepared_hilight_structs=0;
-int prepared_hash_objects=0;
+int prepared_hash_components=0;
 int prepared_hash_wires=0;
 //
 // following data is relative to the current schematic

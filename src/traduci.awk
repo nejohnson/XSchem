@@ -18,14 +18,11 @@ END  { endfile(_filename_) }
 # Tcl_Eval(interp
 
 {
- pattern="^B"
+ pattern="hash_object"
 
  if($0 ~ pattern) {
    found=1
-   $3*=2
-   $4*=2
-   $5*=2
-   $6*=2
+   gsub(pattern, "hash_component")
  }
 }
 ###### end  user code  ########################

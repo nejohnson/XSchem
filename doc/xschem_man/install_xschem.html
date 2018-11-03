@@ -36,25 +36,30 @@ p{padding: 15px  30px 10px;}
   XSCHEM will look for this file in the current directory or in the user's <kbd>${HOME}</kbd> directory.
 
  </p>
- <pre class="code" style="height: 300px;">
+ <pre class="code" style="height: 400px;">
 ####
-#### .xschem configuration file, to be placed in user HOME directory
-#### or in the directory where xschem is launched
-#### this file is called after system xschemrc, so any variable set here
-#### overrides the default
+#### xschemrc system configuration file
+#### values may be overridden by user's ~/.xschem configuration file
 ####
 
-#### xschem design libraries root dir
-#### hint: put user dir before system dirs, so file selector
-#### will present user dir.
-set XSCHEM_DESIGN_PATH $env(HOME)/xschem_library:${XSCHEM_DESIGN_PATH}
+#### xschem installation directory
+#### normally there is no reason to set this variable if using standard installation.
+#### location of files is set at compile time but may be overridden with following line
+# set XSCHEM_SHAREDIR $env(HOME)/share/xschem
+
+#### xschem system-wide design library paths
+#### if unset xschem starts with following default:
+#### XSCHEM_LIBRARY_PATH $env(HOME/xschem_library):${XSCHEM_SHAREDIR}/xschem_library
+#### you may overide the default system-wide library here and append in user's .xschem
+#### the user's libraries.
+# set XSCHEM_LIBRARY_PATH ${XSCHEM_SHAREDIR}/xschem_library
 
 #### directory where simulations, netlist and simulator outputs are placed
 #### if unset xschem asks user to choose one when doing a netlist
 # set netlist_dir $env(HOME)/xschem_library/simulations
 
 #### Window to open on startup
-set XSCHEM_START_WINDOW {mylib/0_top}
+#set XSCHEM_START_WINDOW {mylib/0_top}
 
  </pre><br>
  <p class="important">

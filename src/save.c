@@ -719,7 +719,7 @@ int save_symbol(char *schname) // 20171020 added return value
   } 
   prepared_hilight_structs=0; // 20171212
   prepared_netlist_structs=0; // 20171212
-  prepared_hash_objects=0; // 20171224
+  prepared_hash_components=0; // 20171224
   prepared_hash_wires=0; // 20171224
   // delete_netlist_structs(); // 20161222
 
@@ -771,7 +771,7 @@ int save_schematic(char *schname) // 20171020 added return value
     fclose(fd);
     prepared_hilight_structs=0; // 20171212
     prepared_netlist_structs=0; // 20171212
-    prepared_hash_objects=0; // 20171224
+    prepared_hash_components=0; // 20171224
     prepared_hash_wires=0; // 20171224
     // delete_netlist_structs(); // 20161222
     modified=0;
@@ -844,7 +844,7 @@ void load_schematic(int load_symbols, const char *abs_name, int reset_undo) // 2
   current_type=SCHEMATIC;
   prepared_hilight_structs=0; // 20171212
   prepared_netlist_structs=0; // 20171212
-  prepared_hash_objects=0; // 20171224
+  prepared_hash_components=0; // 20171224
   prepared_hash_wires=0; // 20171224
   modified=0;
   if(reset_undo) clear_undo();
@@ -986,7 +986,7 @@ void pop_undo(int redo)  // 20150327
   if(debug_var>=2) fprintf(errfp, "pop_undo(): loaded file:wire=%d inst=%d\n",lastwire , lastinst);
   link_symbols_to_instances();
   modified=1;
-  prepared_hash_objects=0; // 20171224
+  prepared_hash_components=0; // 20171224
   prepared_hash_wires=0; // 20171224
   prepared_netlist_structs=0; // 20171224
   prepared_hilight_structs=0; // 20171224
@@ -1446,7 +1446,7 @@ void load_symbol(const char *abs_name) /* function called when opening a symbol 
 
   unselect_all();
   clear_drawing();
-  prepared_hash_objects=0; // 20171224
+  prepared_hash_components=0; // 20171224
   prepared_hilight_structs=0; // 20171212
   prepared_netlist_structs=0; // 20171212
   prepared_hash_wires=0; // 20171224

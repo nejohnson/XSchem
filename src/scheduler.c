@@ -200,6 +200,18 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
   draw();
  }
 
+ else if(!strcmp(argv[1],"break_wires"))
+ {
+  break_wires_at_pins();
+ }
+
+ else if(!strcmp(argv[1],"collapse_wires"))
+ {
+  push_undo(); /* 20150327 */
+  trim_wires();
+  draw();
+ }
+
  else if(!strcmp(argv[1],"push_undo"))
  {
   push_undo();
@@ -808,7 +820,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
      }
      draw();
      modified=0; // 20171025
-     prepared_hash_objects=0;
+     prepared_hash_components=0;
      prepared_hash_wires=0;
      prepared_netlist_structs=0;
      prepared_hilight_structs=0;
@@ -866,7 +878,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
      bbox(ADD, inst_ptr[inst].x1, inst_ptr[inst].y1, inst_ptr[inst].x2, inst_ptr[inst].y2);
      push_undo();
      modified=1;
-     prepared_hash_objects=0;
+     prepared_hash_components=0;
      prepared_netlist_structs=0;
      prepared_hilight_structs=0;
      hash_proplist(inst_ptr[inst].prop_ptr , 1); // remove old props from hash table
@@ -911,7 +923,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
      my_strncpy(symbol, rel_sym_path(argv[4]), S(symbol));
      push_undo();
      modified=1;
-     prepared_hash_objects=0; // 20171224
+     prepared_hash_components=0; // 20171224
      prepared_netlist_structs=0;
      prepared_hilight_structs=0;
      sym_number=match_symbol(symbol);
@@ -1110,7 +1122,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
     push_undo();
     round_schematic_to_grid(cadsnap);
     modified=1;
-    prepared_hash_objects=0;
+    prepared_hash_components=0;
     prepared_hash_wires=0;
     prepared_netlist_structs=0;
     prepared_hilight_structs=0;

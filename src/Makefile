@@ -59,7 +59,7 @@ endif
 
 ## to fix rendering problems due to bugs in the exceed turboX server
 ## add -DTURBOX_FIX
-MOREFLAGS= -g -std=c99 -pedantic -pg -no-pie 
+MOREFLAGS= -g -std=c99 -pedantic  -pg -no-pie 
 
 CFLAGS  = -Wall  $(MOREFLAGS)  -I/usr/include/tcl${TCLVER} $(CAIRO_INCLUDES) -I/home/sschippe/include \
            -DXSCHEM_SHAREDIR='"${sharedir}"'  -DUSER_CONF_DIR='"${userconfdir}"' \
@@ -89,6 +89,7 @@ clean:
 install: xschem
 	mkdir -p $(prefix)/bin
 	mkdir -p $(prefix)/share/xschem
+	mkdir -p $(prefix)/share/xschem/utile
 	mkdir -p $(prefix)/share/doc/xschem
 	mkdir -p $(system_library_dir)
 	mkdir -p $(user_library_dir)
@@ -108,10 +109,10 @@ install: xschem
 	cp spice.awk $(prefix)/share/xschem
 	cp tedax.awk $(prefix)/share/xschem
 	cp verilog.awk $(prefix)/share/xschem
-	cp ../xschemrc $(prefix)/share/xschem
+	cp xschemrc $(prefix)/share/xschem
 	cp vhdl.awk $(prefix)/share/xschem
 	cp -r ../doc/* $(prefix)/share/doc/xschem/
-	cp -r ../utile $(prefix)/share/xschem
+	cp ../utile/* $(prefix)/share/xschem/utile
 	cp -ru ../xschem_library/mylib $(user_library_dir)
 	cp -ru ../xschem_library/devices $(system_library_dir)
 	cp -ru ../xschem_library/examples $(user_library_dir)

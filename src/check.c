@@ -96,18 +96,21 @@ void update_conn_cues(int draw_cues, int dr_win)
   x2 = X_TO_XSCHEM(areax2);
   y2 = Y_TO_XSCHEM(areay2);
 
-
   if(!prepared_hash_wires) {
     hash_wires();
   }
   for(init_wire_iterator(x1, y1, x2, y2); ( wireptr = wire_iterator_next() ) ;) {
     k=wireptr->n;
-    wire[k].end1 = wire[k].end2 = 0;
+    // wire[k].end1 = wire[k].end2 = 0;
     for(l = 0;l < 2;l++) {
       if(l==0 ) {
+        if(wire[k].end1 !=-1) continue; // 20181103
+        wire[k].end1=0;
         x0 = wire[k].x1;
         y0 = wire[k].y1;
       } else {
+        if(wire[k].end2 !=-1) continue; // 20181103
+        wire[k].end2=0;
         x0 = wire[k].x2;
         y0 = wire[k].y2;
       }
@@ -133,14 +136,12 @@ void update_conn_cues(int draw_cues, int dr_win)
   if(draw_cues) {
     save_draw = draw_window; draw_window = dr_win;
     filledarc(WIRELAYER, BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
-
-
     for(init_wire_iterator(x1, y1, x2, y2); ( wireptr = wire_iterator_next() ) ;) {
-      i=wireptr->n;
-      if(wire[i].end1 >1 && CADHALFDOTSIZE*mooz>=0.5) { // 20150331 draw_dots
+      i = wireptr->n;
+      if( wire[i].end1 >1 ) { // 20150331 draw_dots
         filledarc(WIRELAYER, ADD, wire[i].x1, wire[i].y1, CADHALFDOTSIZE, 0, 360);
       }
-      if(wire[i].end2 >1 && CADHALFDOTSIZE*mooz>=0.5) { // 20150331 draw_dots
+      if( wire[i].end2 >1 ) { // 20150331 draw_dots
         filledarc(WIRELAYER, ADD, wire[i].x2, wire[i].y2, CADHALFDOTSIZE, 0, 360);
       }
     }
@@ -148,7 +149,6 @@ void update_conn_cues(int draw_cues, int dr_win)
     draw_window = save_draw;
   }
 }
-
 
 void trim_wires(void)
 // wire coordinates must be ordered.
@@ -299,7 +299,6 @@ void break_wires_at_pins(void)
   double x0, y0, rx1, ry1;
   int changed=0;
 
-  for(k=0;k<lastwire; k++) wire[k].end1 = wire[k].end2 = 0;
   hash_wires();
   for(k=0;k<lastinst;k++)
   {
@@ -330,8 +329,6 @@ void break_wires_at_pins(void)
                  check_wire_storage();
                  wire[lastwire].x1=wire[i].x1;
                  wire[lastwire].y1=wire[i].y1;
-                 wire[lastwire].end1=wire[i].end1;
-                 wire[lastwire].end2=0;
                  wire[lastwire].x2=x0;
                  wire[lastwire].y2=y0;
                  wire[lastwire].sel=SELECTED;
@@ -348,7 +345,6 @@ void break_wires_at_pins(void)
       
                  wire[i].x1 = x0;
                  wire[i].y1 = y0;
-                 wire[i].end1 = 0;
                }
             }
           }
@@ -386,8 +382,6 @@ void break_wires_at_pins(void)
                check_wire_storage();
                wire[lastwire].x1=wire[i].x1;
                wire[lastwire].y1=wire[i].y1;
-               wire[lastwire].end1=wire[i].end1;
-               wire[lastwire].end2=1;
                wire[lastwire].x2=x0;
                wire[lastwire].y2=y0;
                wire[lastwire].sel=SELECTED;
@@ -402,7 +396,6 @@ void break_wires_at_pins(void)
                lastwire++;
                wire[i].x1 = x0;
                wire[i].y1 = y0;
-               wire[i].end1 = 1;
              }
           }
         }
@@ -413,6 +406,6 @@ void break_wires_at_pins(void)
   prepared_netlist_structs=0;
   prepared_hilight_structs=0;
   prepared_hash_wires=0;
-  update_conn_cues(0, 0);
+  //update_conn_cues(0, 0);
 
 }

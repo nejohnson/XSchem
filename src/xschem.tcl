@@ -219,7 +219,7 @@ proc edit_file {filename} {
 }
 
 proc simulate {filename} {
- global retval env netlist_dir netlist_type
+ global env netlist_dir netlist_type
  global task_output task_error
  global iverilog_path vvp_path hspice_path hspicerf_path spice_simulator 
  global modelsim_path verilog_simulator
@@ -263,12 +263,11 @@ proc simulate {filename} {
      }
      if { $spice_simulator == "hspicerf" } {
        # added computerfarm
-       ## 20161119 $terminal does not fit here, hspice wants only xterm !
-       task "xterm -e \"$computerfarm $hspicerf_path $filename ; bash\"" $netlist_dir bg
+       task "$terminal -e \"$computerfarm $hspicerf_path $filename ; bash\"" $netlist_dir bg
      } elseif { $spice_simulator == "hspice"} {
-       task "xterm -e \"$computerfarm $hspice_path -i $filename | tee hspice.out ; bash\""  $netlist_dir bg
+       task "$terminal -e \"$computerfarm $hspice_path -i $filename | tee hspice.out ; bash\""  $netlist_dir bg
      } elseif {$spice_simulator == "finesim"} {
-       task "xterm -e \"$computerfarm $finesim_path $finesim_opts $filename ; bash \""  $netlist_dir bg
+       task "$terminal -e \"$computerfarm $finesim_path $finesim_opts $filename ; bash \""  $netlist_dir bg
        # 20170410
      } else {
        alert_ "ERROR: undefined SPICE simulator: $spice_simulator"
@@ -292,25 +291,25 @@ proc simulate {filename} {
 }
 
 proc modelsim {schname} {
-  global retval netlist_dir netlist_type
+  global netlist_dir netlist_type
   global iverilog_path vvp_path hspice_path modelsim_path
   task "${modelsim_path}/vsim -i" $netlist_dir bg
 }
 
 proc utile_translate {schname} { 
-  global retval netlist_dir netlist_type tcl_debug XSCHEM_SHAREDIR
+  global netlist_dir netlist_type tcl_debug XSCHEM_SHAREDIR
   global utile_gui_path utile_cmd_path
   exec sh -c "cd $netlist_dir; XSCHEM_SHAREDIR=$XSCHEM_SHAREDIR $utile_cmd_path stimuli.$schname"
 }
 
 proc utile_gui {schname} { 
-  global retval netlist_dir netlist_type tcl_debug XSCHEM_SHAREDIR
+  global netlist_dir netlist_type tcl_debug XSCHEM_SHAREDIR
   global utile_gui_path utile_cmd_path
   exec sh -c "cd $netlist_dir; XSCHEM_SHAREDIR=$XSCHEM_SHAREDIR $utile_gui_path stimuli.$schname" &
 }
 
 proc utile_edit {schname} { 
-  global retval netlist_dir netlist_type tcl_debug editor XSCHEM_SHAREDIR
+  global netlist_dir netlist_type tcl_debug editor XSCHEM_SHAREDIR
   global utile_gui_path utile_cmd_path 
   exec sh -c "$editor stimuli.$schname ; 
         cd $netlist_dir; 
@@ -318,26 +317,26 @@ proc utile_edit {schname} {
 }
 
 proc waveview {schname} {
-  global retval netlist_dir netlist_type tcl_debug
+  global netlist_dir netlist_type tcl_debug
   global waveview_path
   task "$waveview_path -k -x $schname.sx" $netlist_dir bg
 }
 
 proc cosmoscope { schname } {
-  global retval netlist_dir netlist_type tcl_debug
+  global netlist_dir netlist_type tcl_debug
   global cscope_path
   task "$cscope_path" $netlist_dir bg
 }
 
 
 proc gtkwave {schname} {
-  global retval netlist_dir netlist_type tcl_debug
+  global netlist_dir netlist_type tcl_debug
   global gtkwave_path
   task "$gtkwave_path 2>/dev/null" $netlist_dir bg
 }
 
 proc waves {schname} {
- global retval netlist_dir netlist_type tcl_debug
+ global netlist_dir netlist_type tcl_debug
  global cscope_path gtkwave_path analog_viewer waveview_path
 
  if { [xschem set_netlist_dir 0] ne "" } {
@@ -361,14 +360,14 @@ proc waves {schname} {
 }
 
 proc get_shell { curpath } {
- global retval netlist_dir netlist_type tcl_debug
+ global netlist_dir netlist_type tcl_debug
  global cscope_path gtkwave_path analog_viewer waveview_path terminal
 
  task "$terminal" $curpath bg
 }
 
 proc edit_netlist {schname } {
- global retval netlist_dir netlist_type tcl_debug
+ global netlist_dir netlist_type tcl_debug
  global cscope_path gtkwave_path analog_viewer waveview_path editor terminal
 
  if { [regexp vim $editor] } { set ftype "-c \":set filetype=$netlist_type\"" } else { set ftype {} }
@@ -741,14 +740,12 @@ proc tclcmd {} {
     .tclcmd.r delete 1.0 end
     .tclcmd.r insert 1.0 $res
   }
-
   pack .tclcmd.txtlab -side top -fill x
   pack .tclcmd.t -side top -fill  both -expand yes
   pack .tclcmd.result -side top -fill x
   pack .tclcmd.b -side bottom -fill x
   pack .tclcmd.yscroll -side right -fill y
   pack .tclcmd.r -side top -fill  both -expand yes
-
   pack .tclcmd.b.ok -side left -expand yes -fill x
   pack .tclcmd.b.close -side left -expand yes -fill x
 }
@@ -845,7 +842,6 @@ proc attach_labels_to_inst {} {
   set rcode {}
   wm title .label {Add labels to instances}
   bind .label <Visibility> { if { [regexp Obscured %s] } {raise .label; if { $tcl_version > 8.4 } {wm attributes  .label -topmost 1} } }
-
 
   # 20100408
   set X [expr [winfo pointerx .label] - 60]
@@ -972,11 +968,8 @@ proc edit_vi_prop {txtlabel} {
  }
 }
 
-
-
 proc edit_vi_netlist_prop {txtlabel} {
  global XSCHEM_TMP_DIR retval rcode rbutton1 rbutton2 tcl_debug netlist_type editor
-
 
  # 20150914
  global user_wants_copy_cell
@@ -2142,31 +2135,32 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
 	-accelerator {?}
    .menubar.help.menu add command -label "keys" -command "textwindow ${XSCHEM_SHAREDIR}/keys.help"
    
-   .menubar.file.menu add command -label "New Schematic" \
+   .menubar.file.menu add command -label "New Schematic"  -accelerator Ctrl+N\
      -command {
        xschem clear SCHEMATIC
      }
-   .menubar.file.menu add command -label "New Symbol" \
+   .menubar.file.menu add command -label "New Symbol" -accelerator Ctrl+Shift+N \
      -command {
        xschem clear SYMBOL
      }
-   .menubar.file.menu add command -label "Open" -command "xschem load" -accelerator {C-o}
-   .menubar.file.menu add command -label "Save" -command "xschem save" -accelerator {C-s}
-   .menubar.file.menu add command -label "Merge" -command "xschem merge" -accelerator b
-   .menubar.file.menu add command -label "Reload" -accelerator A-s \
+   .menubar.file.menu add command -label "Open" -command "xschem load" -accelerator {Ctrl+O}
+   .menubar.file.menu add command -label "Save" -command "xschem save" -accelerator {Ctrl+S}
+   .menubar.file.menu add command -label "Merge" -command "xschem merge" -accelerator B
+   .menubar.file.menu add command -label "Reload" -accelerator {Alt+S} \
      -command {
       if { [string compare [tk_messageBox -type okcancel -message {sure wanna reload?}] ok]==0 } {
               xschem reload
          }
      }
-   .menubar.file.menu add command -label "Save as" -command "xschem saveas" -accelerator {C-S-s}
-   .menubar.file.menu add command -label "Save as symbol" -command "xschem set current_type SYMBOL; xschem saveas" -accelerator {C-A-s}
+   .menubar.file.menu add command -label "Save as" -command "xschem saveas" -accelerator {Ctrl+Shift+S}
+   .menubar.file.menu add command -label "Save as symbol" \
+      -command "xschem set current_type SYMBOL; xschem saveas" -accelerator {Ctrl+Alt+S}
    # added svg, png 20171022
-   .menubar.file.menu add command -label "PDF Print" -command "xschem print pdf" -accelerator {*}
-   .menubar.file.menu add command -label "PNG Print" -command "xschem print png" -accelerator {C-*}
-   .menubar.file.menu add command -label "SVG Print" -command "xschem print svg" -accelerator {A-*}
+   .menubar.file.menu add command -label "PDF Export" -command "xschem print pdf" -accelerator {*}
+   .menubar.file.menu add command -label "PNG Export" -command "xschem print png" -accelerator {Ctrl+*}
+   .menubar.file.menu add command -label "SVG Export" -command "xschem print svg" -accelerator {Alt+*}
    .menubar.file.menu add separator
-   .menubar.file.menu add command -label "Exit" -command {exit} -accelerator C-d
+   .menubar.file.menu add command -label "Exit" -command {exit} -accelerator {Ctrl+Q}
    
    .menubar.option.menu add checkbutton -label "show info win" -variable show_infowindow \
      -command {
@@ -2190,12 +2184,12 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
          xschem fullscreen
       }
    .menubar.option.menu add checkbutton -label "enable stretch" -variable enable_stretch \
-      -accelerator y \
+      -accelerator Y \
       -command {
          if { $enable_stretch==1 } {xschem set enable_stretch 1} else { xschem set enable_stretch 0} 
       }
    .menubar.option.menu add checkbutton -label "show netlist win" -variable netlist_show \
-      -accelerator A \
+      -accelerator {Shift+A} \
       -command {
          if { $netlist_show==1 } {xschem set netlist_show 1} else { xschem set netlist_show 0} 
       }
@@ -2222,12 +2216,12 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
         if { $draw_grid == 1} { xschem set draw_grid 1; xschem redraw} else { xschem set draw_grid 0; xschem redraw}
       }
    .menubar.option.menu add checkbutton -label "Symbol text" -variable sym_txt \
-      -accelerator {C-b} \
+      -accelerator {Ctrl+B} \
       -command {
         if { $sym_txt == 1} { xschem set sym_txt 1; xschem redraw} else { xschem set sym_txt 0; xschem redraw}
       }
-   .menubar.option.menu add checkbutton -label "variable line width" -variable change_lw \
-      -accelerator {_-toggle} \
+   .menubar.option.menu add checkbutton -label "toggle variable line width" -variable change_lw \
+      -accelerator {_} \
       -command {
         if { $change_lw == 1} { xschem set change_lw 1} else { xschem set change_lw 0}
       }
@@ -2246,37 +2240,37 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
 	}
 
    .menubar.option.menu add separator
-   .menubar.option.menu add radiobutton -label "Vhdl netlist" -variable netlist_type -value vhdl \
-	-accelerator {V-toggle} \
+   .menubar.option.menu add radiobutton -label "VHDL netlist" -variable netlist_type -value vhdl \
+	-accelerator {V} \
 	-command "xschem netlist_type vhdl"
    .menubar.option.menu add radiobutton -label "Verilog netlist" -variable netlist_type -value verilog \
-	-accelerator {V-toggle} \
+	-accelerator {V} \
 	-command "xschem netlist_type verilog"
    .menubar.option.menu add radiobutton -label "Spice netlist" -variable netlist_type -value spice \
-        -accelerator {V-toggle} \
+        -accelerator {V} \
 	-command "xschem netlist_type spice"
    .menubar.option.menu add radiobutton -label "tEDAx netlist" -variable netlist_type -value tedax \
-        -accelerator {V-toggle} \
+        -accelerator {V} \
 	-command "xschem netlist_type tedax"
-   .menubar.edit.menu add command -label "Undo" -state disabled -accelerator u
-   .menubar.edit.menu add command -label "Redo" -state disabled -accelerator C-r
-   .menubar.edit.menu add command -label "Copy" -command "xschem copy" -accelerator C-c
-   .menubar.edit.menu add command -label "Cut" -command "xschem cut"   -accelerator C-x
-   .menubar.edit.menu add command -label "Paste" -command "xschem paste" -accelerator C-v
+   .menubar.edit.menu add command -label "Undo" -state disabled -accelerator U
+   .menubar.edit.menu add command -label "Redo" -state disabled -accelerator {Ctrl+R}
+   .menubar.edit.menu add command -label "Copy" -command "xschem copy" -accelerator Ctrl+C
+   .menubar.edit.menu add command -label "Cut" -command "xschem cut"   -accelerator Ctrl+X
+   .menubar.edit.menu add command -label "Paste" -command "xschem paste" -accelerator Ctrl+V
    .menubar.edit.menu add command -label "Delete" -command "xschem delete" -accelerator Del
-   .menubar.edit.menu add command -label "Select all" -command "xschem select_all" -accelerator C-a
-   .menubar.edit.menu add command -label "edit selected element" -command "xschem schematic_in_new_window" -accelerator A-e
-   .menubar.edit.menu add command -label "edit selected symbol" -command "xschem symbol_in_new_window" -accelerator A-i
-   .menubar.edit.menu add command -label "Duplicate objects" -command "xschem copy_objects" -accelerator c
-   .menubar.edit.menu add command -label "Move objects" -command "xschem move_objects" -accelerator m
+   .menubar.edit.menu add command -label "Select all" -command "xschem select_all" -accelerator Ctrl+A
+   .menubar.edit.menu add command -label "edit selected element" -command "xschem schematic_in_new_window" -accelerator ALt+E
+   .menubar.edit.menu add command -label "edit selected symbol" -command "xschem symbol_in_new_window" -accelerator Alt+I
+   .menubar.edit.menu add command -label "Duplicate objects" -command "xschem copy_objects" -accelerator C
+   .menubar.edit.menu add command -label "Move objects" -command "xschem move_objects" -accelerator M
    .menubar.edit.menu add checkbutton -label "Constrained Horizontal move" -variable horizontal_move \
-      -command "xschem set horizontal_move" -accelerator h
+      -command "xschem set horizontal_move" -accelerator H
    .menubar.edit.menu add checkbutton -label "Constrained Vertical move" -variable vertical_move \
-      -command "xschem set vertical_move" -accelerator v
+      -command "xschem set vertical_move" -accelerator V
    # added collapse/join/break wires menu command  (& key) 20171022
-   .menubar.edit.menu add command -label "Push schematic" -command "xschem descend" -accelerator e
-   .menubar.edit.menu add command -label "Push symbol" -command "xschem edit_symbol" -accelerator i
-   .menubar.edit.menu add command -label "Pop" -command "xschem go_back" -accelerator C-e
+   .menubar.edit.menu add command -label "Push schematic" -command "xschem descend" -accelerator E
+   .menubar.edit.menu add command -label "Push symbol" -command "xschem edit_symbol" -accelerator I
+   .menubar.edit.menu add command -label "Pop" -command "xschem go_back" -accelerator Ctrl+E
    button .menubar.waves -text "Waves"  -activebackground red  -takefocus 0\
      -command {
        waves [file tail [xschem get schname]]
@@ -2319,16 +2313,16 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
      
    }
    .menubar.zoom.menu add command -label "Redraw" -command "xschem redraw" -accelerator Esc
-   .menubar.zoom.menu add command -label "Full" -command "xschem zoom_full" -accelerator f
+   .menubar.zoom.menu add command -label "Full" -command "xschem zoom_full" -accelerator F
 
 
-   .menubar.zoom.menu add command -label "In" -command "xschem zoom_in" -accelerator s-Z
-   .menubar.zoom.menu add command -label "Out" -command "xschem zoom_out" -accelerator c-z 
-   .menubar.zoom.menu add command -label "Zoom box" -command "xschem zoom_box" -accelerator z
-   .menubar.zoom.menu add command -label "Half Snap Threshold" -accelerator g -command {
+   .menubar.zoom.menu add command -label "In" -command "xschem zoom_in" -accelerator Shift+Z
+   .menubar.zoom.menu add command -label "Out" -command "xschem zoom_out" -accelerator Ctrl+Z
+   .menubar.zoom.menu add command -label "Zoom box" -command "xschem zoom_box" -accelerator Z
+   .menubar.zoom.menu add command -label "Half Snap Threshold" -accelerator G -command {
           xschem set cadsnap [expr [xschem get cadsnap] / 2.0 ]
         }
-   .menubar.zoom.menu add command -label "Double Snap Threshold" -accelerator G -command {
+   .menubar.zoom.menu add command -label "Double Snap Threshold" -accelerator Shift-G -command {
           xschem set cadsnap [expr [xschem get cadsnap] * 2.0 ]
         }
    .menubar.zoom.menu add command -label "Set snap value" \
@@ -2339,49 +2333,50 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    .menubar.zoom.menu add checkbutton -label "View only Probes" -variable only_probes \
           -accelerator {5} \
           -command { xschem only_probes }
-   .menubar.zoom.menu add command -label "Toggle colorscheme" -command "xschem toggle_colorscheme" -accelerator {C}
+   .menubar.zoom.menu add command -label "Toggle colorscheme" -command "xschem toggle_colorscheme" -accelerator {Shift+C}
    .menubar.zoom.menu add checkbutton -label "no XCopyArea drawing model" -variable draw_window \
-          -accelerator {C-$-toggle} \
+          -accelerator {Ctrl+$} \
           -command {
            if { $draw_window == 1} { xschem set draw_window 1} else { xschem set draw_window 0}
         }
-   .menubar.prop.menu add command -label "edit" -command "xschem edit_prop" -accelerator q
-   .menubar.prop.menu add command -label "edit with editor" -command "xschem edit_vi_prop" -accelerator Q
-   .menubar.prop.menu add command -label "view" -command "xschem view_prop" -accelerator C-q
-   .menubar.prop.menu add command -background red -label "edit file (danger!)" -command "xschem edit_file" -accelerator A-q
+   .menubar.prop.menu add command -label "edit" -command "xschem edit_prop" -accelerator Q
+   .menubar.prop.menu add command -label "edit with editor" -command "xschem edit_vi_prop" -accelerator Shift+Q
+   .menubar.prop.menu add command -label "view" -command "xschem view_prop" -accelerator Ctrl+Q
+   .menubar.prop.menu add command -background red -label "edit file (danger!)" -command "xschem edit_file" -accelerator Alt+Q
 
-   .menubar.sym.menu add command -label "Make symbol from schematic" -command "xschem make_symbol" -accelerator a
-   .menubar.sym.menu add command -label "Make schematic from symbol" -command "xschem make_sch" -accelerator C-l
-   .menubar.sym.menu add command -label "Attach pins to component instance" -command "xschem attach_pins" -accelerator H
-   .menubar.sym.menu add command -label "Create Symbol pins from selected schematic pins" -command "schpins_to_sympins" -accelerator A-h
+   .menubar.sym.menu add command -label "Make symbol from schematic" -command "xschem make_symbol" -accelerator A
+   .menubar.sym.menu add command -label "Make schematic from symbol" -command "xschem make_sch" -accelerator Ctrl+L
+   .menubar.sym.menu add command -label "Attach pins to component instance" -command "xschem attach_pins" -accelerator Shift+H
+   .menubar.sym.menu add command -label "Create Symbol pins from selected schematic pins" \
+           -command "schpins_to_sympins" -accelerator Alt+H
 
    .menubar.tools.menu add checkbutton -label "Remember last command" -variable persistent_command \
-      -accelerator {tbd} \
+      -accelerator {} \
       -command {
         if { $persistent_command == 1} { xschem set persistent_command 1} else { xschem set persistent_command 0}
       }
    .menubar.tools.menu add command -label "Insert symbol" -command "xschem place_symbol" -accelerator Ins
-   .menubar.tools.menu add command -label "Insert text" -command "xschem place_text" -accelerator t
-   .menubar.tools.menu add command -label "Insert wire" -command "xschem wire" -accelerator w
-   .menubar.tools.menu add command -label "Insert snap wire" -command "xschem snap_wire" -accelerator W
-   .menubar.tools.menu add command -label "Insert line" -command "xschem line" -accelerator l
-   .menubar.tools.menu add command -label "Insert rect" -command "xschem rect" -accelerator r
-   .menubar.tools.menu add command -label "Insert polygon" -command "xschem polygon" -accelerator C-w
-   .menubar.tools.menu add command -label "Insert arc" -command "xschem arc" -accelerator C
-   .menubar.tools.menu add command -label "Insert circle" -command "xschem circle" -accelerator C-C
-   .menubar.tools.menu add command -label "Search" -accelerator C-f -command  property_search
-   .menubar.tools.menu add command -label "Align to Grid" -accelerator A-u -command  "xschem align"
+   .menubar.tools.menu add command -label "Insert text" -command "xschem place_text" -accelerator T
+   .menubar.tools.menu add command -label "Insert wire" -command "xschem wire" -accelerator W
+   .menubar.tools.menu add command -label "Insert snap wire" -command "xschem snap_wire" -accelerator Shift+W
+   .menubar.tools.menu add command -label "Insert line" -command "xschem line" -accelerator L
+   .menubar.tools.menu add command -label "Insert rect" -command "xschem rect" -accelerator R
+   .menubar.tools.menu add command -label "Insert polygon" -command "xschem polygon" -accelerator Ctrl+W
+   .menubar.tools.menu add command -label "Insert arc" -command "xschem arc" -accelerator Shift+C
+   .menubar.tools.menu add command -label "Insert circle" -command "xschem circle" -accelerator Ctrl+Shift+C
+   .menubar.tools.menu add command -label "Search" -accelerator Ctrl+F -command  property_search
+   .menubar.tools.menu add command -label "Align to Grid" -accelerator Alt+U -command  "xschem align"
    .menubar.tools.menu add command -label "Execute TCL command" -command  "tclcmd"
    .menubar.tools.menu add command -label "Join/Trim wires" \
       -command "xschem collapse_wires" -accelerator {&}
    .menubar.tools.menu add command -label "Break wires" \
       -command "xschem break_wires" -accelerator {!}
 
-   .menubar.hilight.menu add command -label {Hilight selected net/pins} -command "xschem hilight" -accelerator k
+   .menubar.hilight.menu add command -label {Hilight selected net/pins} -command "xschem hilight" -accelerator K
    .menubar.hilight.menu add command -label {Un-hilight all net/pins} \
-	-command "xschem delete_hilight_net" -accelerator K
+	-command "xschem delete_hilight_net" -accelerator Shift-K
    .menubar.hilight.menu add command -label {Un-hilight selected net/pins} \
-	-command "xschem unhilight" -accelerator C-k
+	-command "xschem unhilight" -accelerator Ctrl+K
    # 20160413
    .menubar.hilight.menu add checkbutton -label {Auto-hilight net/pins} -variable auto_hilight \
       -command {

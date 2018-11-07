@@ -59,6 +59,22 @@ static unsigned int hash(char *tok)
 }
 */
 
+
+
+static struct hilight_hashentry *free_hilight_entry(struct hilight_hashentry *entry)
+{
+  struct hilight_hashentry *tmp;
+  while(entry) {
+    tmp = entry->next;
+    my_free(&entry->token);
+    my_free(&entry->path);
+    my_free(&entry);
+    entry = tmp;
+  }
+  return NULL;
+}
+
+/*
 static struct hilight_hashentry *free_hilight_entry(struct hilight_hashentry *entry)
 {
  if(entry)
@@ -70,6 +86,7 @@ static struct hilight_hashentry *free_hilight_entry(struct hilight_hashentry *en
  }
  return NULL;
 }
+*/
 
 void free_hilight_hash(void) // remove the whole hash table 
 {

@@ -424,8 +424,28 @@ void traverse_node_hash()
  }
 }
 
-
 static  int collisions, max_collisions=0, n_elements=0;
+
+static struct node_hashentry *free_hash_entry(struct node_hashentry *entry)
+{
+  struct node_hashentry *tmp;
+
+  while(entry) {
+    n_elements++; collisions++;
+    tmp = entry->next;
+    if(entry->token) my_free(&entry->token);
+    if(entry->verilog_type) my_free(&entry->verilog_type); // 09112003
+    if(entry->sig_type) my_free(&entry->sig_type); // 24092001
+    if(entry->class) my_free(&entry->class); // 07102001
+    if(entry->orig_tok) my_free(&entry->orig_tok); // 07102001
+    if(entry->value) my_free(&entry->value); // 27092001
+    my_free(&entry);
+    entry = tmp;
+  }
+  return NULL;
+}
+
+/*
 static struct node_hashentry *free_hash_entry(struct node_hashentry *entry)
 {
  if(entry) 
@@ -442,6 +462,7 @@ static struct node_hashentry *free_hash_entry(struct node_hashentry *entry)
  }
  return NULL;
 }
+*/
 
 void free_node_hash(void) // remove the whole hash table 
 {

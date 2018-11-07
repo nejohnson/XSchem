@@ -22,7 +22,7 @@
 
 #ifndef CADGLOBALS
 #define CADGLOBALS
-
+#define XSCHEM_VERSION "2.8.1_RC3"
 #define  _XOPEN_SOURCE 600     /* realpath(), round(), strtok_r(), getopt() */
 
 /*  approximate PI definition */
@@ -413,14 +413,15 @@ struct wireentry {
   int n;
 };
 
-struct objectentry {
- struct objectentry *next;
+struct instentry {
+ struct instentry *next;
  int n;
 };
 
 
 extern int help; /* 20140406 */
 extern char *cad_icon[];
+extern int semaphore;
 extern int a3page;
 extern int manhattan_lines;
 extern int cadlayers;
@@ -428,10 +429,8 @@ extern  int hilight_color;
 extern int do_print;
 extern int prepared_netlist_structs;
 extern int prepared_hilight_structs;
-extern int prepared_hash_components;
-extern void hash_component(int n);
+extern int prepared_hash_instances;
 extern int prepared_hash_wires;
-extern void hash_inst_pin(int i, int j);
 extern int has_x; 
 extern int sym_txt;
 extern int rainbow_colors; 
@@ -571,10 +570,11 @@ extern int enable_drill;
 extern struct wireentry *wiretable[NBOXES][NBOXES];
 extern struct instpinentry *instpintable[NBOXES][NBOXES];
 extern double mx_double_save, my_double_save; /*  20070322 */
-extern struct objectentry *objecttable[NBOXES][NBOXES];
+extern struct instentry *insttable[NBOXES][NBOXES];
 extern size_t get_tok_value_size;
 
 /*  functions */
+extern void print_version(void);
 extern int set_netlist_dir(int force);
 extern int  check_lib(char * s);
 extern void select_all(void);
@@ -614,11 +614,12 @@ extern int text_bbox(char * str,double xscale, double yscale,
             int rot, int flip, double x1,double y1, double *rx1, double *ry1,
             double *rx2, double *ry2);
 
-/* //test 20171203 */
-extern void del_component_table(void);
+extern void hash_inst(int what, int n);
+extern void hash_inst_pin(int what, int i, int j);
+extern void del_inst_table(void);
 extern void hash_wires(void);
-extern void hash_wire(int n);
-extern void hash_components(void); /*  20171203 insert instance bbox in spatial hash table */
+extern void hash_wire(int what, int n);
+extern void hash_instances(void); /*  20171203 insert instance bbox in spatial hash table */
 
 extern struct int_hashentry *int_hash_lookup(struct int_hashentry **table, int token, int remove); /*  20180104 */
 extern void free_int_hash(struct int_hashentry **table); /*  20180104 */
@@ -777,7 +778,7 @@ extern void place_text(int draw_text, double mx, double my);
 extern void hash_proplist(char *s,int remove);
 extern struct hashentry *hash_lookup(char *token,char *value,int remove, size_t token_size);
 extern void init_inst_iterator(double x1, double y1, double x2, double y2);
-extern struct objectentry *inst_iterator_next();
+extern struct instentry *inst_iterator_next();
 extern void init_wire_iterator(double x1, double y1, double x2, double y2);
 extern struct wireentry *wire_iterator_next();
 extern void free_hash(void);

@@ -449,6 +449,11 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
         my_snprintf(s, S(s), "%d",debug_var);
         Tcl_AppendResult(interp, s,NULL);
   }
+  else if(!strcmp(argv[2],"semaphore"))  {
+        char s[30]; // overflow safe 20161122
+        my_snprintf(s, S(s), "%d",semaphore);
+        Tcl_AppendResult(interp, s,NULL);
+  }
   else if(!strcmp(argv[2],"change_lw"))  {
         char s[30]; // overflow safe 20161122
         my_snprintf(s, S(s), "%d",change_lw);
@@ -568,11 +573,14 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
   else if(!strcmp(argv[2],"netlist_show"))  {
         netlist_show=atoi(argv[3]);
   }
+  else if(!strcmp(argv[2],"semaphore"))  {
+        semaphore=atoi(argv[3]);
+  }
   else if(!strcmp(argv[2],"cadsnap"))  { // 20161212
         set_snap( atof(argv[3]) );
   }
   else if(!strcmp(argv[2],"cadsnap_noalert"))  { // 20161212
-        cadsnap = atof( argv[3] );
+        set_snap( atof(argv[3]) );
   }
   else if(!strcmp(argv[2],"flat_netlist"))  {
         flat_netlist=atoi(argv[3]);
@@ -820,7 +828,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
      }
      draw();
      modified=0; // 20171025
-     prepared_hash_components=0;
+     prepared_hash_instances=0;
      prepared_hash_wires=0;
      prepared_netlist_structs=0;
      prepared_hilight_structs=0;
@@ -878,7 +886,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
      bbox(ADD, inst_ptr[inst].x1, inst_ptr[inst].y1, inst_ptr[inst].x2, inst_ptr[inst].y2);
      push_undo();
      modified=1;
-     prepared_hash_components=0;
+     prepared_hash_instances=0;
      prepared_netlist_structs=0;
      prepared_hilight_structs=0;
      hash_proplist(inst_ptr[inst].prop_ptr , 1); // remove old props from hash table
@@ -923,7 +931,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
      my_strncpy(symbol, rel_sym_path(argv[4]), S(symbol));
      push_undo();
      modified=1;
-     prepared_hash_components=0; // 20171224
+     prepared_hash_instances=0; // 20171224
      prepared_netlist_structs=0;
      prepared_hilight_structs=0;
      sym_number=match_symbol(symbol);
@@ -1122,7 +1130,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
     push_undo();
     round_schematic_to_grid(cadsnap);
     modified=1;
-    prepared_hash_components=0;
+    prepared_hash_instances=0;
     prepared_hash_wires=0;
     prepared_netlist_structs=0;
     prepared_hilight_structs=0;

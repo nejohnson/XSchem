@@ -22,22 +22,41 @@
 
 #include "xschem.h"
 
-/////////////////////////////////////////////////////
-//// 20171203
-static void objectinsert(int n, int x, int y)
+
+
+static void instdelete(int n, int x, int y)
 {
-  struct objectentry *ptr, *newptr;
-  ptr=objecttable[x][y];
-  newptr=my_malloc(sizeof(struct objectentry));
-  newptr->next=ptr;
-  newptr->n=n;
-  objecttable[x][y]=newptr;
-  if(debug_var>=2) fprintf(errfp, "objectinsert(): inserting object %d at %d,%d\n",n,x,y);
+  struct instentry *saveptr, **prevptr, *ptr;
+
+  prevptr = &insttable[x][y];
+  ptr = *prevptr;
+  while(ptr) {
+    if(ptr -> n == n) {
+      saveptr = ptr->next;
+      my_free(&ptr);
+      *prevptr = saveptr;
+      return;
+    }
+    prevptr = &ptr->next;
+    ptr = *prevptr;
+  }
+
 }
 
-static struct objectentry *delobjectentry(struct objectentry *t)
+static void instinsert(int n, int x, int y)
 {
-  struct objectentry *tmp;
+  struct instentry *ptr, *newptr;
+  ptr=insttable[x][y];
+  newptr=my_malloc(sizeof(struct instentry));
+  newptr->next=ptr;
+  newptr->n=n;
+  insttable[x][y]=newptr;
+  if(debug_var>=2) fprintf(errfp, "instinsert(): inserting object %d at %d,%d\n",n,x,y);
+}
+
+static struct instentry *delinstentry(struct instentry *t)
+{
+  struct instentry *tmp;
   while( t ) {
     tmp = t->next;
     my_free(&t);
@@ -47,29 +66,33 @@ static struct objectentry *delobjectentry(struct objectentry *t)
 }
 
 /*
-struct objectentry *delobjectentry(struct objectentry *t)
+struct instentry *delinstentry(struct instentry *t)
 {
  if(t)
  {
-  t->next = delobjectentry(t->next);
+  t->next = delinstentry(t->next);
   my_free(&t);
  }
  return NULL;
 }
 */
 
-void del_component_table(void)
+void del_inst_table(void)
 {
   int i,j;
 
   for(i=0;i<NBOXES;i++)
     for(j=0;j<NBOXES;j++)
-      objecttable[i][j] = delobjectentry(objecttable[i][j]);
-  prepared_hash_components=0;
+      insttable[i][j] = delinstentry(insttable[i][j]);
+  prepared_hash_instances=0;
   if(debug_var>0) fprintf(errfp, "cleared object hash table\n");
 }
 
-void hash_component(int n) // 20171203 insert object bbox in spatial hash table
+/* what: 
+ * 1 : add to hash
+ * 0 : remove from hash
+ */
+void hash_inst(int what, int n) // 20171203 insert object bbox in spatial hash table
 {
   int tmpi,tmpj, counti,countj,i,j;
   double tmpd;
@@ -104,32 +127,48 @@ void hash_component(int n) // 20171203 insert object bbox in spatial hash table
     countj++;
     tmpj=j%NBOXES; if(tmpj<0) tmpj+=NBOXES;
     // insert object_ptr[n] in region [tmpi, tmpj]
-    objectinsert(n, tmpi, tmpj); // 20171203 
-    if(debug_var>0) fprintf(errfp, "hash_components(): hashing inst %d\n", n);
+    if(what) instinsert(n, tmpi, tmpj); // 20171203 
+    else instdelete(n, tmpi, tmpj);
    }
   }
 } 
-void hash_components(void) // 20171203 insert object bbox in spatial hash table
+void hash_instances(void) // 20171203 insert object bbox in spatial hash table
 {
  int n;
 
- if(prepared_hash_components) return; 
- del_component_table();
+ if(prepared_hash_instances) return; 
+ del_inst_table();
  for(n=0; n<lastinst; n++) {
-   hash_component(n);
+   hash_inst(1, n);
  }
- prepared_hash_components=1;
+ prepared_hash_instances=1;
 } 
 
-//// /20171203
-/////////////////////////////////////////////////////
+static void instpindelete(int n,int pin, int x, int y)
+{
+  struct instpinentry *saveptr, **prevptr, *ptr;
+
+  prevptr = &instpintable[x][y];
+  ptr = *prevptr;
+  while(ptr) {
+    if(ptr->n == n && ptr->pin == pin) {
+      saveptr = ptr->next;
+      my_free(&ptr);
+      *prevptr = saveptr;
+      return;
+    }
+    prevptr = &ptr->next;
+    ptr = *prevptr;
+  }
+
+}
 
 //                                      --pin coordinates--  -square coord-
 static void instpininsert(int n,int pin, double x0, double y0, int x, int y)
 {
  struct instpinentry *ptr, *newptr;
- ptr=instpintable[x][y];
 
+ ptr=instpintable[x][y];
  newptr=my_malloc(sizeof(struct instpinentry));
  newptr->next=ptr;
  newptr->n=n;
@@ -140,6 +179,20 @@ static void instpininsert(int n,int pin, double x0, double y0, int x, int y)
   if(debug_var>=2) fprintf(errfp, "instpininsert(): inserting inst %d at %d,%d\n",n,x,y);
 }
 
+
+struct instpinentry *delinstpinentry(struct instpinentry *t)
+{
+  struct instpinentry *tmp;
+
+  while(t) {
+    tmp = t->next;
+    my_free(&t);
+    t = tmp;
+  }
+  return NULL;
+}
+
+/*
 struct instpinentry *delinstpinentry(struct instpinentry *t)
 {
  if(t)
@@ -149,6 +202,7 @@ struct instpinentry *delinstpinentry(struct instpinentry *t)
  } 
  return NULL;
 }
+*/
 
 static void del_inst_pin_table(void)
 {
@@ -159,22 +213,41 @@ static void del_inst_pin_table(void)
    instpintable[i][j] = delinstpinentry(instpintable[i][j]);
 } 
 
+static void wiredelete(int n, int x, int y)
+{
+  struct wireentry *saveptr, **prevptr, *ptr;
+
+  prevptr = &wiretable[x][y];
+  ptr = *prevptr;
+  while(ptr) {
+    if(ptr -> n == n) {
+      saveptr = ptr->next;
+      my_free(&ptr);
+      *prevptr = saveptr;
+      return;
+    }
+    prevptr = &ptr->next;
+    ptr = *prevptr;
+  }
+
+}
 
 static void wireinsert(int n, int x, int y)
 {
- struct wireentry *ptr, *newptr;
- ptr=wiretable[x][y];
+  struct wireentry *ptr, *newptr;
 
- newptr=my_malloc(sizeof(struct wireentry));
- newptr->next=ptr;
- newptr->n=n;
- wiretable[x][y]=newptr;
+  ptr=wiretable[x][y];
+  newptr=my_malloc(sizeof(struct wireentry));
+  newptr->next=ptr;
+  newptr->n=n;
+  wiretable[x][y]=newptr;
   if(debug_var>=2) fprintf(errfp, "wireinsert(): inserting wire %d at %d,%d\n",n,x,y);
 }
 
 static struct wireentry *delwireentry(struct wireentry *t)
 {
   struct wireentry *tmp;
+
   while( t ) {
     tmp = t->next;
     my_free(&t);
@@ -208,6 +281,7 @@ void del_wire_table(void)
 void get_square(double x, double y, int *xx, int *yy)
 {
  int xa, xb, ya, yb;
+
  xa=floor(x/BOXSIZE) ;
  xb=xa % NBOXES; if(xb<0) xb+=NBOXES;
  ya=floor(y/BOXSIZE) ;
@@ -217,39 +291,47 @@ void get_square(double x, double y, int *xx, int *yy)
  *yy=yb;
 }
 
-void hash_inst_pin(int i, int j)
-//                  inst   pin
+/* what: 
+ * 1 : add to hash
+ * 0 : remove from hash
+ */
+void hash_inst_pin(int what, int i, int j)
+//                           inst   pin
+   
 {
- Box *rect;
- double x0, y0, rx1, ry1;
- int rot, flip, sqx, sqy;
- int rects;
-
- rects=(inst_ptr[i].ptr+instdef)->rects[PINLAYER] ;
+  Box *rect;
+  double x0, y0, rx1, ry1;
+  int rot, flip, sqx, sqy;
+  int rects;
  
- if(j>=rects)  // generic pins
- {
-  rect=(inst_ptr[i].ptr+instdef)->boxptr[GENERICLAYER];
-  x0=(rect[j-rects].x1+rect[j-rects].x2)/2;
-  y0=(rect[j-rects].y1+rect[j-rects].y2)/2;
- }
- else
- {
-  rect=(inst_ptr[i].ptr+instdef)->boxptr[PINLAYER];
-  x0=(rect[j].x1+rect[j].x2)/2;
-  y0=(rect[j].y1+rect[j].y2)/2;
- }
- rot=inst_ptr[i].rot;
- flip=inst_ptr[i].flip;
- ROTATION(0.0,0.0,x0,y0,rx1,ry1);
- x0=inst_ptr[i].x0+rx1;
- y0=inst_ptr[i].y0+ry1;
- get_square(x0, y0, &sqx, &sqy);
- instpininsert(i,j,x0, y0,sqx, sqy);
-
+  rects=(inst_ptr[i].ptr+instdef)->rects[PINLAYER] ;
+  if(j>=rects)  // generic pins
+  {
+    rect=(inst_ptr[i].ptr+instdef)->boxptr[GENERICLAYER];
+    x0=(rect[j-rects].x1+rect[j-rects].x2)/2;
+    y0=(rect[j-rects].y1+rect[j-rects].y2)/2;
+  }
+  else
+  {
+    rect=(inst_ptr[i].ptr+instdef)->boxptr[PINLAYER];
+    x0=(rect[j].x1+rect[j].x2)/2;
+    y0=(rect[j].y1+rect[j].y2)/2;
+  }
+  rot=inst_ptr[i].rot;
+  flip=inst_ptr[i].flip;
+  ROTATION(0.0,0.0,x0,y0,rx1,ry1);
+  x0=inst_ptr[i].x0+rx1;
+  y0=inst_ptr[i].y0+ry1;
+  get_square(x0, y0, &sqx, &sqy);
+  if( what ) instpininsert(i, j, x0, y0, sqx, sqy);
+  else       instpindelete(i, j, sqx, sqy);
 }
 
-void hash_wire(int n)
+/* what: 
+ * 1 : add to hash
+ * 0 : remove from hash
+ */
+void hash_wire(int what, int n)
 {
   int tmpi,tmpj, counti,countj,i,j;
   double tmpd;
@@ -286,8 +368,8 @@ void hash_wire(int n)
     countj++;
     tmpj=j%NBOXES; if(tmpj<0) tmpj+=NBOXES;
     // insert wire[n] in region [tmpi, tmpj]
-    wireinsert(n, tmpi, tmpj);
-    if(debug_var>=2) fprintf(errfp, "hash_wire(): %d/%d\n", tmpi,tmpj );
+    if(what==1) wireinsert(n, tmpi, tmpj);
+    else  wiredelete(n, tmpi, tmpj);
    }
   }
 }
@@ -298,7 +380,7 @@ void hash_wires(void)
 
  if(prepared_hash_wires) return; 
  del_wire_table();
- for(n=0; n<lastwire; n++) hash_wire(n);
+ for(n=0; n<lastwire; n++) hash_wire(1, n);
  prepared_hash_wires=1;
 } 
 
@@ -563,7 +645,7 @@ void prepare_netlist_structs(int for_hilight_only)
     for(j=0;j<rects;j++)
     {
       inst_ptr[i].node[j]=NULL;
-      hash_inst_pin(i,j);
+      hash_inst_pin(1, i, j);
     }
   }
  }

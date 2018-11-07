@@ -79,7 +79,6 @@ void check_touch(int i, int j,
   if(debug_var>=2) fprintf(errfp, "check_touch(): xt=%.16g, yt=%.16g\n",*xt, *yt);
 }
 
-
 void update_conn_cues(int draw_cues, int dr_win)
 {
   int k, i, l, sqx, sqy, save_draw;
@@ -293,22 +292,26 @@ void trim_wires(void)
  
 void break_wires_at_pins(void)
 {
-  int k, i, j, rects, rot, flip, sqx, sqy;
+  int k, i, j, r, rects, rot, flip, sqx, sqy;
   struct wireentry *wptr;
   Box *rect;
   double x0, y0, rx1, ry1;
   int changed=0;
-
   hash_wires();
-  for(k=0;k<lastinst;k++)
-  {
+
+  need_rebuild_selected_array=1;
+  rebuild_selected_array();
+  
+  // for(k=0;k<lastinst;k++)
+  for(j=0;j<lastselected;j++) if(selectedgroup[j].type==ELEMENT) {
+    k = selectedgroup[j].n;
     if( (rects = (inst_ptr[k].ptr+instdef)->rects[PINLAYER]) > 0 )
     {
-      for(j=0;j<rects;j++)
+      for(r=0;r<rects;r++)
       {
         rect=(inst_ptr[k].ptr+instdef)->boxptr[PINLAYER];
-        x0=(rect[j].x1+rect[j].x2)/2;
-        y0=(rect[j].y1+rect[j].y2)/2;
+        x0=(rect[r].x1+rect[r].x2)/2;
+        y0=(rect[r].y1+rect[r].y2)/2;
         rot=inst_ptr[k].rot;
         flip=inst_ptr[k].flip;
         ROTATION(0.0,0.0,x0,y0,rx1,ry1);
@@ -319,43 +322,46 @@ void break_wires_at_pins(void)
         // name instance nodes that touch named nets
         for(wptr=wiretable[sqx][sqy]; wptr; wptr=wptr->next) {
           i = wptr->n;
-          if(wire[i].sel==SELECTED) {
-            if( touch(wire[i].x1, wire[i].y1,
-                      wire[i].x2, wire[i].y2, x0,y0) )
-            {
-               if( (x0!=wire[i].x1 && x0!=wire[i].x2) ||
-                   (y0!=wire[i].y1 && y0!=wire[i].y2) ) {
-                 if(!changed) { push_undo(); changed=1;}
-                 check_wire_storage();
-                 wire[lastwire].x1=wire[i].x1;
-                 wire[lastwire].y1=wire[i].y1;
-                 wire[lastwire].x2=x0;
-                 wire[lastwire].y2=y0;
-                 wire[lastwire].sel=SELECTED;
-                 wire[lastwire].prop_ptr=NULL;
-                 my_strdup(&wire[lastwire].prop_ptr, wire[i].prop_ptr);
-                 if(get_tok_value(wire[lastwire].prop_ptr,"bus",0)[0]) // 20171201
-                   wire[lastwire].bus=1;
-                 else
-                   wire[lastwire].bus=0;
-                 wire[lastwire].node=NULL;
-                 hash_wire(lastwire);
-                 my_strdup(&wire[lastwire].node, wire[i].node);
-                 lastwire++;
+          if( touch(wire[i].x1, wire[i].y1,
+                    wire[i].x2, wire[i].y2, x0,y0) )
+          {
+            if( (x0!=wire[i].x1 && x0!=wire[i].x2) ||
+                (y0!=wire[i].y1 && y0!=wire[i].y2) ) {
+              if(!changed) { push_undo(); changed=1;}
+              check_wire_storage();
+              wire[lastwire].x1=wire[i].x1;
+              wire[lastwire].y1=wire[i].y1;
+              wire[lastwire].x2=x0;
+              wire[lastwire].y2=y0;
+              wire[lastwire].sel=SELECTED;
+              wire[lastwire].prop_ptr=NULL;
+              my_strdup(&wire[lastwire].prop_ptr, wire[i].prop_ptr);
+              if(get_tok_value(wire[lastwire].prop_ptr,"bus",0)[0]) // 20171201
+                wire[lastwire].bus=1;
+              else
+                wire[lastwire].bus=0;
+              wire[lastwire].node=NULL;
+              hash_wire(1, lastwire);
+              my_strdup(&wire[lastwire].node, wire[i].node);
+              lastwire++;
       
-                 wire[i].x1 = x0;
-                 wire[i].y1 = y0;
-               }
+              wire[i].x1 = x0;
+              wire[i].y1 = y0;
             }
           }
         }
       }
     }
   }
-  prepared_hash_wires=0;
-  hash_wires();
-  for(k=0; k<lastwire; k++) {
+  // prepared_hash_wires=0;
+  // hash_wires();
+  need_rebuild_selected_array=1;
+  rebuild_selected_array();
+  for(j=0;j<lastselected;j++) if(selectedgroup[j].type==WIRE) {
+  // for(k=0; k < lastwire; k++) {
     int l;
+
+    k = selectedgroup[j].n;
     for(l=0;l<2;l++) {
       if(l==0 ) {
         x0 = wire[k].x1;
@@ -365,38 +371,38 @@ void break_wires_at_pins(void)
         y0 = wire[k].y2;
       }
       get_square(x0, y0, &sqx, &sqy);
-      // printf("k=%d, x0=%g, y0=%g\n", k, x0, y0);
+      // printf("  k=%d, x0=%g, y0=%g\n", k, x0, y0);
       for(wptr=wiretable[sqx][sqy] ; wptr ; wptr = wptr->next) {
         i = wptr->n;
-        if(wire[i].sel == SELECTED) {
-          if(i==k) {
-            continue; // no check wire against itself
-          }
-          // printf("i=%d, x1=%g, y1=%g x2=%g, y2=%g\n", i, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
-          if( touch(wire[i].x1, wire[i].y1,
-                    wire[i].x2, wire[i].y2, x0,y0) )
-          {
-             if( (x0!=wire[i].x1 && x0!=wire[i].x2) ||
-                 (y0!=wire[i].y1 && y0!=wire[i].y2) ) {
-               if(!changed) { push_undo(); changed=1;}
-               check_wire_storage();
-               wire[lastwire].x1=wire[i].x1;
-               wire[lastwire].y1=wire[i].y1;
-               wire[lastwire].x2=x0;
-               wire[lastwire].y2=y0;
-               wire[lastwire].sel=SELECTED;
-               wire[lastwire].prop_ptr=NULL;
-               my_strdup(&wire[lastwire].prop_ptr, wire[i].prop_ptr);
-               if(get_tok_value(wire[lastwire].prop_ptr,"bus",0)[0]) // 20171201
-                 wire[lastwire].bus=1;
-               else
-                 wire[lastwire].bus=0;
-               wire[lastwire].node=NULL;
-               hash_wire(lastwire);
-               lastwire++;
-               wire[i].x1 = x0;
-               wire[i].y1 = y0;
-             }
+        // printf("check wire %d to wire %d\n", k, i);
+        if(i==k) {
+          continue; // no check wire against itself
+        }
+        // printf("  i=%d, x1=%g, y1=%g x2=%g, y2=%g\n", i, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
+        if( touch(wire[i].x1, wire[i].y1,
+                  wire[i].x2, wire[i].y2, x0,y0) )
+        {
+          if( (x0!=wire[i].x1 && x0!=wire[i].x2) ||
+              (y0!=wire[i].y1 && y0!=wire[i].y2) ) {
+            // printf("touch in mid point: %d\n", l+1);
+            if(!changed) { push_undo(); changed=1;}
+            check_wire_storage();
+            wire[lastwire].x1=wire[i].x1;
+            wire[lastwire].y1=wire[i].y1;
+            wire[lastwire].x2=x0;
+            wire[lastwire].y2=y0;
+            wire[lastwire].sel=SELECTED;
+            wire[lastwire].prop_ptr=NULL;
+            my_strdup(&wire[lastwire].prop_ptr, wire[i].prop_ptr);
+            if(get_tok_value(wire[lastwire].prop_ptr,"bus",0)[0]) // 20171201
+              wire[lastwire].bus=1;
+            else
+              wire[lastwire].bus=0;
+            wire[lastwire].node=NULL;
+            hash_wire(1, lastwire);
+            lastwire++;
+            wire[i].x1 = x0;
+            wire[i].y1 = y0;
           }
         }
       }

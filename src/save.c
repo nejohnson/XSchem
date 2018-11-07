@@ -223,10 +223,20 @@ void load_ascii_string(char **ptr, FILE *fd)
  {
   if(i+5>strlength) my_realloc(&str,(strlength+=CADCHUNKALLOC));
   c=fgetc(fd);
+  if(c==EOF) {
+    fprintf(errfp, "EOF reached, malformed {...} string input, missing close brace\n");
+    my_strdup(ptr, NULL);
+    return;
+  }
   if(begin) {
     if(c=='\\') {
      escape=1;
      c=fgetc(fd);
+     if(c==EOF) {
+       fprintf(errfp, "EOF reached, malformed {...} string input, missing close brace\n");
+       my_strdup(ptr, NULL);
+       return;
+     }
     } else escape=0;
     str[i]=c;
     if(c=='}' && !escape) {
@@ -276,25 +286,29 @@ void save_text(FILE *fd)
 
 void load_text(FILE *fd)
 {
-   int i;
-   char *strlayer;
-    check_text_storage();
-    i=lasttext;
-     textelement[i].txt_ptr=NULL;
-     load_ascii_string(&textelement[i].txt_ptr,fd);
-     fscanf(fd, "%lf %lf %d %d %lf %lf ",
-      &textelement[i].x0, &textelement[i].y0, &textelement[i].rot,
-      &textelement[i].flip, &textelement[i].xscale,
-      &textelement[i].yscale);
-     textelement[i].prop_ptr=NULL;
-     textelement[i].font=NULL;
-     textelement[i].sel=0;
-     load_ascii_string(&textelement[i].prop_ptr,fd);
-     my_strdup(&textelement[i].font, get_tok_value(textelement[i].prop_ptr, "font", 0));//20171206
-     strlayer = get_tok_value(textelement[i].prop_ptr, "layer", 0); //20171206
-     if(strlayer[0]) textelement[i].layer = atoi(strlayer);
-     else textelement[i].layer = -1;
-     lasttext++;
+  int i;
+  char *strlayer;
+   check_text_storage();
+   i=lasttext;
+   textelement[i].txt_ptr=NULL;
+   load_ascii_string(&textelement[i].txt_ptr,fd);
+   if(fscanf(fd, "%lf %lf %d %d %lf %lf ",
+     &textelement[i].x0, &textelement[i].y0, &textelement[i].rot,
+     &textelement[i].flip, &textelement[i].xscale,
+     &textelement[i].yscale)<6) {
+     fprintf(errfp,"WARNING:  missing fields for TEXT object, ignoring\n");
+     read_line(fd);
+     return;
+   }
+   textelement[i].prop_ptr=NULL;
+   textelement[i].font=NULL;
+   textelement[i].sel=0;
+   load_ascii_string(&textelement[i].prop_ptr,fd);
+   my_strdup(&textelement[i].font, get_tok_value(textelement[i].prop_ptr, "font", 0));//20171206
+   strlayer = get_tok_value(textelement[i].prop_ptr, "layer", 0); //20171206
+   if(strlayer[0]) textelement[i].layer = atoi(strlayer);
+   else textelement[i].layer = -1;
+   lasttext++;
 }
 
 void save_wire(FILE *fd)
@@ -317,7 +331,11 @@ void load_wire(FILE *fd)
 
     double x1,y1,x2,y2;
     static char *ptr=NULL;
-    fscanf(fd, "%lf %lf %lf %lf",&x1, &y1, &x2, &y2 );
+    if(fscanf(fd, "%lf %lf %lf %lf",&x1, &y1, &x2, &y2 )<4) {
+      fprintf(errfp,"WARNING:  missing fields for WIRE object, ignoring\n");
+      read_line(fd);
+      return;
+    }
     load_ascii_string( &ptr, fd);
     ORDER(x1, y1, x2, y2);
     storeobject(-1, x1,y1,x2,y2,WIRE,0,0,ptr);
@@ -462,7 +480,11 @@ void load_inst(FILE *fd)
     load_ascii_string(&n,fd);
     my_strdup(&ptr[i].name, n);  // 20181009 rel_sym_path(n)?  perf. issue on big schematics
     my_free(&n);
-    fscanf(fd, "%lf %lf %d %d",&ptr[i].x0, &ptr[i].y0,&ptr[i].rot, &ptr[i].flip);
+    if(fscanf(fd, "%lf %lf %d %d",&ptr[i].x0, &ptr[i].y0,&ptr[i].rot, &ptr[i].flip) < 4) {
+      fprintf(errfp,"WARNING: missing fields for INSTANCE object, ignoring.\n"); 
+      read_line(fd);
+      return;
+    }
     ptr[i].flags=0;
     ptr[i].sel=0;
     ptr[i].ptr=-1; //04112003 was 0
@@ -537,11 +559,16 @@ void load_polygon(FILE *fd)
     int i,c, j, points;
     Polygon *ptr;
 
-    fscanf(fd, "%d %d",&c, &points);
-    if(c>=cadlayers) {
-      fprintf(errfp,"FATAL: polygon layer > defined cadlayers, increase cadlayers\n"); 
-      tcleval( "exit");
-    } // 20150408
+    if(fscanf(fd, "%d %d",&c, &points)<2) {
+      fprintf(errfp,"WARNING: missing fields for POLYGON object, ignoring.\n"); 
+      read_line(fd);
+      return;
+    }
+    if(c<0 || c>=cadlayers) {
+      fprintf(errfp,"WARNING: wrong layer number for POLYGON object, ignoring.\n"); 
+      read_line(fd);
+      return;
+    }
     check_polygon_storage(c);
     i=lastpolygon[c];
     ptr=polygon[c];
@@ -555,7 +582,14 @@ void load_polygon(FILE *fd)
     ptr[i].points=points;
     ptr[i].sel=0;
     for(j=0;j<points;j++) {
-      fscanf(fd, "%lf %lf ",&(ptr[i].x[j]), &(ptr[i].y[j]));
+      if(fscanf(fd, "%lf %lf ",&(ptr[i].x[j]), &(ptr[i].y[j]))<2) {
+        fprintf(errfp,"WARNING: missing fields for POLYGON points, ignoring.\n"); 
+        my_free(&ptr[i].x);
+        my_free(&ptr[i].y);
+        my_free(&ptr[i].selected_point);
+        read_line(fd);
+        return;
+      }
     }
     load_ascii_string( &ptr[i].prop_ptr, fd);
     // 20180914
@@ -573,15 +607,20 @@ void load_arc(FILE *fd)
     Arc *ptr;
 
     fscanf(fd, "%d",&c);
-    if(c>=cadlayers) {
-      fprintf(errfp,"FATAL: arc layer > defined cadlayers, increase cadlayers\n");
-      tcleval( "exit");
-    } // 20150408
+    if(c<0 || c>=cadlayers) {
+      fprintf(errfp,"WARNING: wrong layer number for ARC object, ignoring.\n"); 
+      read_line(fd);
+      return;
+    }
     check_arc_storage(c);
     i=lastarc[c];
     ptr=arc[c];
-    fscanf(fd, "%lf %lf %lf %lf %lf ",&ptr[i].x, &ptr[i].y,
-           &ptr[i].r, &ptr[i].a, &ptr[i].b);
+    if(fscanf(fd, "%lf %lf %lf %lf %lf ",&ptr[i].x, &ptr[i].y,
+           &ptr[i].r, &ptr[i].a, &ptr[i].b) < 5) {
+      fprintf(errfp,"WARNING:  missing fields for ARC object, ignoring\n");
+      read_line(fd);
+      return;
+    }
     ptr[i].prop_ptr=NULL;
     ptr[i].sel=0;
     load_ascii_string(&ptr[i].prop_ptr, fd);
@@ -594,16 +633,20 @@ void load_box(FILE *fd)
     Box *ptr;
 
     fscanf(fd, "%d",&c);
-    if(c>=cadlayers) {
-      fprintf(errfp,"FATAL: box layer > defined cadlayers, increase cadlayers\n");
-      tcleval( "exit");
-    } // 20150408
+    if(c<0 || c>=cadlayers) {
+      fprintf(errfp,"WARNING: wrong layer number for RECT object, ignoring.\n"); 
+      read_line(fd);
+      return;
+    }
     check_box_storage(c);
     i=lastrect[c];
     ptr=rect[c];
-    fscanf(fd, "%lf %lf %lf %lf ",&ptr[i].x1, &ptr[i].y1, 
-       &ptr[i].x2, &ptr[i].y2);
-
+    if(fscanf(fd, "%lf %lf %lf %lf ",&ptr[i].x1, &ptr[i].y1, 
+       &ptr[i].x2, &ptr[i].y2) < 4) {
+      fprintf(errfp,"WARNING:  missing fields for RECT object, ignoring\n");
+      read_line(fd);
+      return;
+    }
     RECTORDER(ptr[i].x1, ptr[i].y1, ptr[i].x2, ptr[i].y2); // 20180108
     ptr[i].prop_ptr=NULL;
     ptr[i].sel=0;
@@ -634,12 +677,20 @@ void load_line(FILE *fd)
     Line *ptr;
 
     fscanf(fd, "%d",&c);
-    if(c>=cadlayers) {fprintf(errfp,"FATAL: line layer > defined cadlayers, increase cadlayers\n"); tcleval( "exit");} // 20150408
+    if(c<0 || c>=cadlayers) {
+      fprintf(errfp,"WARNING: Wrong layer number for LINE object, ignoring\n");
+      read_line(fd);
+      return;
+    } 
     check_line_storage(c);
     i=lastline[c];
     ptr=line[c];
-    fscanf(fd, "%lf %lf %lf %lf ",&ptr[i].x1, &ptr[i].y1, 
-       &ptr[i].x2, &ptr[i].y2);
+    if(fscanf(fd, "%lf %lf %lf %lf ",&ptr[i].x1, &ptr[i].y1, 
+       &ptr[i].x2, &ptr[i].y2) < 4) {
+      fprintf(errfp,"WARNING:  missing fields for LINE object, ignoring\n");
+      read_line(fd);
+      return;
+    }
     ORDER(ptr[i].x1, ptr[i].y1, ptr[i].x2, ptr[i].y2); // 20180108
     ptr[i].prop_ptr=NULL;
     ptr[i].sel=0;
@@ -719,11 +770,15 @@ int save_symbol(char *schname) // 20171020 added return value
   } 
   prepared_hilight_structs=0; // 20171212
   prepared_netlist_structs=0; // 20171212
-  prepared_hash_components=0; // 20171224
+  prepared_hash_instances=0; // 20171224
   prepared_hash_wires=0; // 20171224
   // delete_netlist_structs(); // 20161222
 
-  modified=0;
+  // if an embedded symbol is saved ito temp file don't clear modified flag
+  // as it needs to be propagated to parent schematic for saving.
+  if(!strstr(schematic[currentsch], ".xschem_embedded_")) {
+     modified=0;
+  }
   return 0;
 }
 
@@ -771,7 +826,7 @@ int save_schematic(char *schname) // 20171020 added return value
     fclose(fd);
     prepared_hilight_structs=0; // 20171212
     prepared_netlist_structs=0; // 20171212
-    prepared_hash_components=0; // 20171224
+    prepared_hash_instances=0; // 20171224
     prepared_hash_wires=0; // 20171224
     // delete_netlist_structs(); // 20161222
     modified=0;
@@ -844,7 +899,7 @@ void load_schematic(int load_symbols, const char *abs_name, int reset_undo) // 2
   current_type=SCHEMATIC;
   prepared_hilight_structs=0; // 20171212
   prepared_netlist_structs=0; // 20171212
-  prepared_hash_components=0; // 20171224
+  prepared_hash_instances=0; // 20171224
   prepared_hash_wires=0; // 20171224
   modified=0;
   if(reset_undo) clear_undo();
@@ -986,7 +1041,7 @@ void pop_undo(int redo)  // 20150327
   if(debug_var>=2) fprintf(errfp, "pop_undo(): loaded file:wire=%d inst=%d\n",lastwire , lastinst);
   link_symbols_to_instances();
   modified=1;
-  prepared_hash_components=0; // 20171224
+  prepared_hash_instances=0; // 20171224
   prepared_hash_wires=0; // 20171224
   prepared_netlist_structs=0; // 20171224
   prepared_hilight_structs=0; // 20171224
@@ -1446,7 +1501,7 @@ void load_symbol(const char *abs_name) /* function called when opening a symbol 
 
   unselect_all();
   clear_drawing();
-  prepared_hash_components=0; // 20171224
+  prepared_hash_instances=0; // 20171224
   prepared_hilight_structs=0; // 20171212
   prepared_netlist_structs=0; // 20171212
   prepared_hash_wires=0; // 20171224

@@ -468,7 +468,7 @@ void update_symbol(char *result, int x)
     //     |
     if(strcmp(symbol, inst_ptr[i].name)) {
       modified=1;
-      prepared_hash_components=0; // 20171224
+      prepared_hash_instances=0; // 20171224
       prepared_netlist_structs=0;
       prepared_hilight_structs=0;
     }
@@ -517,7 +517,7 @@ void update_symbol(char *result, int x)
              my_strdup2(&inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); // 20160308
 												// allow change name
              modified=1;
-             prepared_hash_components=0; // 20171224
+             prepared_hash_instances=0; // 20171224
              prepared_netlist_structs=0;
              prepared_hilight_structs=0;
            }
@@ -531,7 +531,7 @@ void update_symbol(char *result, int x)
            my_strdup(&inst_ptr[i].prop_ptr, new_prop);
            my_strdup2(&inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); // 20150409
            modified=1;
-           prepared_hash_components=0; // 20171224
+           prepared_hash_instances=0; // 20171224
            prepared_netlist_structs=0;
            prepared_hilight_structs=0;
          }
@@ -663,7 +663,7 @@ void change_elem_order(void)
      {
       push_undo(); // 20150327
       modified=1;
-      prepared_hash_components=0; // 20171224
+      prepared_hash_instances=0; // 20171224
       prepared_netlist_structs=0;
       prepared_hilight_structs=0;
      }

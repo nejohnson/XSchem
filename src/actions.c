@@ -23,6 +23,15 @@
 #include "xschem.h"
 #include <sys/wait.h>  /* waitpid */
 
+void print_version()
+{
+  printf("XSCHEM V%s\n", XSCHEM_VERSION);
+  printf("Copyright 1998-2018 Stefan Schippers\n");
+  printf("\n");
+  printf("This is free software; see the source for copying conditions.  There is NO\n");
+  printf("warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n");
+  exit(EXIT_SUCCESS);
+}
 void set_snap(double newsnap) /*  20161212 set new snap factor and just notify new value */
 {
     char str[256];
@@ -426,7 +435,7 @@ void remove_symbols(void)
 void clear_drawing(void)
 {
  int i,j;
- del_component_table(); /*  20180917 */
+ del_inst_table(); /*  20180917 */
  del_wire_table();   /*  20180917 */
  if(schtedaxprop!=NULL) my_free(&schtedaxprop);
  if(schprop!=NULL) my_free(&schprop);
@@ -722,7 +731,7 @@ void place_symbol(int pos,char *symbol_name, double x, double y, int rot, int fl
             inst_ptr[n].x2, inst_ptr[n].y2);
   lastinst++;
   modified=1;
-  prepared_hash_components=0; /*  20171224 */
+  prepared_hash_instances=0; /*  20171224 */
   prepared_netlist_structs=0;
   prepared_hilight_structs=0;
   if(draw_sym&1) {
@@ -890,7 +899,7 @@ void descend_schematic(void)
     prepare_netlist_structs(1);
     if(enable_drill) drill_hilight(); /*  20171212 */
   }
-  if(debug_var>0) fprintf(errfp, "descend_schematic(): before zoom(): prepared_hash_components=%d\n", prepared_hash_components);
+  if(debug_var>0) fprintf(errfp, "descend_schematic(): before zoom(): prepared_hash_instances=%d\n", prepared_hash_instances);
   zoom_full(1);
  }
 }
@@ -900,6 +909,7 @@ void go_back(int confirm) /*  20171006 add confirm */
  int prev_curr_type=0;
  int save_ok;  /*  20171020 */
  int from_embedded_sym;
+ int save_modified;
 
  save_ok=0;
  if(currentsch>0)
@@ -941,8 +951,11 @@ void go_back(int confirm) /*  20171006 add confirm */
   }
   my_strncpy(schematic[currentsch] , "", S(schematic[currentsch]));
   currentsch--;
+  save_modified = modified; // we propagate modified flag (cleared by load_schematic
+                            // by default) to parent schematic if going back from embedded symbol
+
   load_schematic(1,schematic[currentsch],1);
-  if(from_embedded_sym) modified=1; // to force ask save embedded sym in parent schematic
+  if(from_embedded_sym) modified=save_modified; // to force ask save embedded sym in parent schematic
 
   if(prev_curr_type==SCHEMATIC) {
     hilight_parent_pins();

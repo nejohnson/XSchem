@@ -89,53 +89,53 @@ struct hashentry *hash_lookup(char *token, char *value,int remove, size_t token_
  int t,v,s ;
  
 if(token==NULL) return NULL;
- hashcode=hash(token); 
- index=hashcode % HASHSIZE; 
- entry=table[index];
- preventry=&table[index];
- if(debug_var>=3) fprintf(errfp, "hash_lookup(): ");
- while(1)
- {
-  if(debug_var>=3) fprintf(errfp, "*");
-  if( !entry )		// empty slot
+  hashcode=hash(token); 
+  index=hashcode % HASHSIZE; 
+  entry=table[index];
+  preventry=&table[index];
+  if(debug_var>=3) fprintf(errfp, "hash_lookup(): ");
+  while(1)
   {
-   if(value && !remove)		// insert data
-   {
-    if(debug_var>=3) fprintf(errfp, "hash_lookup(): inserting token <%s>, value <%s>\n",
-     token, value);
-    s=sizeof( struct hashentry );
-    t=token_size + 1; /* strlen(token)+1; */ /* 20180926 */
-    v=strlen(value)+1;
-    ptr= my_malloc(s + t + v );
-    entry=(struct hashentry *)ptr;
-    *preventry=entry;
-    entry->next=NULL;
-    entry->hash=hashcode;
-    ptr+=s;
-    entry->token=(char *)ptr;
-    memcpy(entry->token,token, t); // 20180923
-    ptr+=t;
-    entry->value=(char *)ptr;
-    memcpy(entry->value, value, v); // 20180923
-    return NULL; // if element inserted return NULL since it was not in table
-   }
-   return entry;
+    if(debug_var>=3) fprintf(errfp, "*");
+    if( !entry )		// empty slot
+    {
+      if(value && !remove)		// insert data
+      {
+        if(debug_var>=3) fprintf(errfp, "hash_lookup(): inserting token <%s>, value <%s>\n",
+           token, value);
+        s=sizeof( struct hashentry );
+        t=token_size + 1; /* strlen(token)+1; */ /* 20180926 */
+        v=strlen(value)+1;
+        ptr= my_malloc(s + t + v );
+        entry=(struct hashentry *)ptr;
+        *preventry=entry;
+        entry->next=NULL;
+        entry->hash=hashcode;
+        ptr+=s;
+        entry->token=(char *)ptr;
+        memcpy(entry->token,token, t); // 20180923
+        ptr+=t;
+        entry->value=(char *)ptr;
+        memcpy(entry->value, value, v); // 20180923
+        return NULL; // if element inserted return NULL since it was not in table
+      }
+      return entry;
+    }
+    if( entry->hash==hashcode && !strcmp(token,entry->token) ) {
+      // found a matching token
+      if(remove) 		// remove token from the hash table ...
+      {
+        saveptr=entry->next;
+        my_free(&entry);
+        *preventry=saveptr;
+        return NULL;
+      }
+      else return entry;	// found matching entry, return the address
+    } 
+    preventry=&entry->next; // descend into the list.
+    entry = entry->next;
   }
-  if( entry->hash==hashcode && !strcmp(token,entry->token) ) {
-   // found a matching token
-   if(remove) 		// remove token from the hash table ...
-   {
-    saveptr=entry->next;
-    my_free(&entry);
-    *preventry=saveptr;
-    return NULL;
-   }
-   else return entry;	// found matching entry, return the address
-  } 
-  preventry=&entry->next; // descend into the list.
-  entry = entry->next;
- }
- if(debug_var>=3) fprintf(errfp, "\n");
+  if(debug_var>=3) fprintf(errfp, "\n");
 }
 
 static  int collisions, max_collisions=0, n_elements=0;

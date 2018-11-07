@@ -249,7 +249,7 @@ void delete(void)
   if(inst_ptr[i].sel == SELECTED)
   {
    modified=1;
-   prepared_hash_components=0;
+   prepared_hash_instances=0;
    prepared_netlist_structs=0;
    prepared_hilight_structs=0;
 

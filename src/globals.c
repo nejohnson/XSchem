@@ -25,6 +25,7 @@
 int help=0; // help option set to global scope, printing help is deferred
             // when configuration ~/.schem has been read 20140406
 int fullscreen=0;
+int semaphore=0; /* needed at global scope as it is set by tcl */
 int unzoom_nodrift=1;
 int a3page=-1;
 int has_x=1;
@@ -187,7 +188,7 @@ int flat_netlist=0;
 int netlist_type=-1;
 int prepared_netlist_structs=0;
 int prepared_hilight_structs=0;
-int prepared_hash_components=0;
+int prepared_hash_instances=0;
 int prepared_hash_wires=0;
 //
 // following data is relative to the current schematic
@@ -238,7 +239,7 @@ int no_undo=0; // 20171204
 int enable_drill=0; // 20171211 pass net hilights through components with 'propagate_to' property set on pins
 struct instpinentry *instpintable[NBOXES][NBOXES];
 struct wireentry *wiretable[NBOXES][NBOXES];
-struct objectentry *objecttable[NBOXES][NBOXES];
+struct instentry *insttable[NBOXES][NBOXES];
 size_t get_tok_value_size;
 
 

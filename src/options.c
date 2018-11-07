@@ -26,7 +26,7 @@ void
      int c;
      
      while (1) {
-         c = getopt (argc, argv, "S3icpxzl:d:nfhrsvwtWq");
+         c = getopt (argc, argv, ":S3icpxzl:d:nfhrsVvwtWq");
          if (c == -1)
              break;
  
@@ -89,7 +89,7 @@ void
              netlist_type=CAD_SPICE_NETLIST;
              break;
  
-         case 'v':
+         case 'V':
              if(debug_var>=1) fprintf(errfp, "process_options(): set netlist type to vhdl\n");
              netlist_type=CAD_VHDL_NETLIST;
              break;
@@ -98,6 +98,8 @@ void
              netlist_type=CAD_VERILOG_NETLIST;
              break;
  
+         case 'v':
+             print_version();
          case 't':
              if(debug_var>=1) fprintf(errfp, "process_options(): set netlist type to tEDAx\n");
              netlist_type=CAD_TEDAX_NETLIST;
@@ -120,7 +122,11 @@ void
              break;
  
          case '?':
-             printf ("??\n");
+             printf("Unknown option: %c\n", optopt);
+             break;
+ 
+         case ':':
+             printf("Option: %c requires an argument\n", optopt);
              break;
  
          default:

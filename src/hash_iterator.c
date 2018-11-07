@@ -26,7 +26,7 @@ static int x1a, x2a;
 static int y1a, y2a;
 static int i, j, counti, countj;
 static int tmpi, tmpj;
-static struct objectentry *instanceptr;
+static struct instentry *instanceptr;
 static struct wireentry *wireptr;
 static unsigned short *instflag=NULL;
 static unsigned short *wireflag=NULL;
@@ -49,14 +49,14 @@ void init_inst_iterator(double x1, double y1, double x2, double y2)
       tmpj=j%NBOXES; if(tmpj<0) tmpj+=NBOXES;
       counti=0;
       // printf("init_inst_iterator(): tmpi=%d, tmpj=%d\n", tmpi, tmpj);
-      instanceptr=objecttable[tmpi][tmpj];
+      instanceptr=insttable[tmpi][tmpj];
       countj=0;
 }
 
 
-struct objectentry *inst_iterator_next()
+struct instentry *inst_iterator_next()
 {
-  struct objectentry *ptr;
+  struct instentry *ptr;
   while(1) {
     while(instanceptr) {
       ptr = instanceptr;
@@ -71,7 +71,7 @@ struct objectentry *inst_iterator_next()
       // printf("inst_iterator_next(): j=%d\n", j);
       tmpj=j%NBOXES; if(tmpj<0) tmpj+=NBOXES;
       // printf("j inst_iterator_next(): tmpi=%d tmpj=%d\n", tmpi, tmpj);
-      instanceptr=objecttable[tmpi][tmpj];
+      instanceptr=insttable[tmpi][tmpj];
     } else if(i<x2a && counti++<NBOXES) {
       i++;
       j=y1a;
@@ -79,7 +79,7 @@ struct objectentry *inst_iterator_next()
       tmpi=i%NBOXES; if(tmpi<0) tmpi+=NBOXES;
       tmpj=j%NBOXES; if(tmpj<0) tmpj+=NBOXES;
       // printf("i inst_iterator_next(): tmpi=%d tmpj=%d\n", tmpi, tmpj);
-      instanceptr=objecttable[tmpi][tmpj];
+      instanceptr=insttable[tmpi][tmpj];
     } else {
       return NULL;
     }

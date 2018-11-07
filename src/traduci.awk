@@ -15,16 +15,28 @@ END  { endfile(_filename_) }
 ###### begin user code ########################
 
 
-# Tcl_Eval(interp
 
 {
- pattern="hash_object"
-
- if($0 ~ pattern) {
-   found=1
-   gsub(pattern, "hash_component")
- }
+  replace_pattern("prepared_hash_components", "prepared_hash_instances")
+  replace_pattern("hash_components", "hash_instances")
+  replace_pattern("componentdelete", "instdelete")
+  replace_pattern("componentinsert", "instinsert")
+  replace_pattern("componententry", "instentry")
+  replace_pattern("componenttable", "insttable")
+  replace_pattern("del_component_table", "del_inst_table")
+  replace_pattern("hash_component", "hash_inst")
 }
+
+
+function replace_pattern(old, new)
+{
+  if($0 ~ old) {
+    found=1
+    gsub(old, new)
+  }
+}
+
+
 ###### end  user code  ########################
 
 

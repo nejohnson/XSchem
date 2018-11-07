@@ -1361,7 +1361,7 @@ void draw(void)
 
  // inst_ptr  and wire hash iterator 20171224
  double x1, y1, x2, y2;
- struct objectentry *instanceptr;
+ struct instentry *instanceptr;
  struct wireentry *wireptr;
  int ii;
  char *type=NULL; // 20180109
@@ -1397,7 +1397,7 @@ void draw(void)
     use_hash = (lastwire> 2000 || lastinst > 2000 ) &&  (x2 - x1  < ITERATOR_THRESHOLD);
         
     if(use_hash) {
-      hash_components();
+      hash_instances();
       hash_wires();
     }
     if(!only_probes) { // 20110112

@@ -74,7 +74,6 @@ int callback(int event, int mx, int my, KeySym key,
                  int button, int aux, int state)  
 {
  char str[PATH_MAX];/* overflow safe 20161122 */
- static int semaphore=0;
  FILE *fp;
  unsigned short sel;
 
@@ -682,7 +681,7 @@ int callback(int event, int mx, int my, KeySym key,
     draw();
     break;
    }
-   if(key=='d' && state == ControlMask)	/* exit */
+   if(key=='q' && state == ControlMask)	/* exit */
    {
      if(modified) {
        tcleval("tk_messageBox -type okcancel -message {UNSAVED data: want to exit?}");
@@ -863,7 +862,7 @@ int callback(int event, int mx, int my, KeySym key,
     merge_file(2,".sch");
     break;
    }
-   if(key=='q' && state == ControlMask) /* view prop */
+   if(key=='Q' && state == (ControlMask | ShiftMask) ) /* view prop */
    {
     edit_property(2);break;
    }
@@ -1002,7 +1001,7 @@ int callback(int event, int mx, int my, KeySym key,
     push_undo(); /* 20150327 */
     round_schematic_to_grid(cadsnap);
     modified=1;
-    prepared_hash_components=0;
+    prepared_hash_instances=0;
     prepared_hash_wires=0;
     prepared_netlist_structs=0;
     prepared_hilight_structs=0;
@@ -1012,17 +1011,33 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='u' && state==ControlMask)			/* testmode */
    {
+     int i;
      double x1, y1, x2, y2;
-     struct wireentry *ptr;
+     struct wireentry *wptr;
+     struct instentry *iptr;
      x1 = X_TO_XSCHEM(areax1);
      y1 = Y_TO_XSCHEM(areay1);
      x2 = X_TO_XSCHEM(areax2);
      y2 = Y_TO_XSCHEM(areay2);
      hash_wires();
      printf("screen: %g %g %g %g\n", x1, y1, x2, y2);
-     for(init_wire_iterator(x1, y1, x2, y2); ( ptr = wire_iterator_next() );) {
-       select_wire(ptr->n,SELECTED,1);
+     rebuild_selected_array();
+     for(i=0;i<lastselected; i++) if(selectedgroup[i].type==WIRE) {
+       hash_wire(0, selectedgroup[i].n);
      }
+     for(i=0;i<lastselected; i++) if(selectedgroup[i].type==ELEMENT) {
+       hash_inst(0, selectedgroup[i].n);
+     }
+     unselect_all();
+
+     for(init_inst_iterator(x1, y1, x2, y2); ( iptr = inst_iterator_next() );) {
+       select_element(iptr->n,SELECTED,1);
+     }
+    
+     for(init_wire_iterator(x1, y1, x2, y2); ( wptr = wire_iterator_next() );) {
+       select_wire(wptr->n,SELECTED,1);
+     }
+    
     break;
    }
    if(key=='u' && state==0)				/* undo */
@@ -1101,6 +1116,14 @@ int callback(int event, int mx, int my, KeySym key,
     my_double_save=mousey_snap;
     copy_objects(BEGIN);
     break;
+   }
+   if(key=='n' && state==ControlMask)              /* New schematic */
+   {
+     tcleval("xschem clear SCHEMATIC");
+   }
+   if(key=='N' && state==(ShiftMask|ControlMask) )    /* New symbol */
+   {
+     tcleval("xschem clear SYMBOL");
    }
    if(key=='N' && state==ShiftMask)              /* hierarchical netlist */
    {

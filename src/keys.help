@@ -49,7 +49,11 @@ ctrl       Enter        Confirm closing dialog boxes
 -          Left         Move right
 -          Right        Move left
 -          Up           Move up
+-           '!'         Break selected wires at any wire or component pin
+                        connection
 -           ' '         Pan schematic
+-           ' '         When drawing lines or wires toggle between 
+                        manhattan H-V, manhattan V-H or oblique path.
 -           '5'         View only probes
 -           'a'         Make symbol from pin list of current schematic
 ctrl        'a'         Select all
@@ -61,7 +65,6 @@ ctrl        'c'         Save to clipboard
 shift       'C'         Start arc placement
 shift+ctrl  'C'         Start circle placement
 alt         'C'         Toggle dim/brite background with rest of layers
-ctrl        'd'         Exit
 ctrl        'e'         Back to parent schematic
 -           'e'         Descend to schematic
 alt         'e'         Edit selected schematic in a new window
@@ -95,6 +98,8 @@ ctrl        'o'         Load schematic
 -           'm'         Move selected obj.
 shift       'N'         Hierarchical netlist
 -           'n'         Netlist
+Ctrl        'n'         New schematic
+Ctrl+Shift  'N'         New symbol
 shift       'O'         Toggle Light / Dark colorscheme
 ctrl        'o'         Load schematic
 -           'p'         Pan
@@ -102,7 +107,8 @@ shift       'P'         Pan, other way to.
 alt         'q'         Edit schematic file (dangerous!)
 -           'q'         Edit prop
 shift       'Q'         Edit prop with vim
-ctrl        'q'         View prop
+ctrl+shift  'Q'         View prop
+ctrl        'q'         Exit XSCHEM
 alt         'r'         Rotate objects around their anchor points
 shift       'R'         Rotate
 -           'r'         Start rect

@@ -482,7 +482,7 @@ void copy_objects(int what)
   bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0); // 20181009
   newpropcnt=0;
   modified=1; push_undo(); // 20150327 push_undo
-  prepared_hash_components=0; // 20171224
+  prepared_hash_instances=0; // 20171224
   prepared_hash_wires=0; // 20171224
   prepared_netlist_structs=0;
   prepared_hilight_structs=0;
@@ -864,7 +864,7 @@ void move_objects(int what, int merge, double dx, double dy)
   draw_selection(gctiled,0);
   bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0);
   modified=1; 
-  prepared_hash_components=0; // 20171224
+  prepared_hash_instances=0; // 20171224
   prepared_hash_wires=0; // 20171224
   prepared_netlist_structs=0;
   prepared_hilight_structs=0;

@@ -47,9 +47,6 @@ void sig_handler(int s){
   fprintf(errfp, "\nFATAL: signal %d\n", s);
   fprintf(errfp, "while editing: %s\n", skip_dir(schematic[currentsch]));
   fprintf(errfp, "EMERGENCY SAVE DIR: %s\n", emergency_dir);
-  /* /20150410 */
-  /* tcleval( "exit"); */
-  /* tcleval("exit"); */
   exit(EXIT_FAILURE);
 }
 

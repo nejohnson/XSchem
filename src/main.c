@@ -52,7 +52,7 @@ void sig_handler(int s){
 
 void child_handler(int signum) 
 { 
-    // fprintf(errfp, "SIGCHLD received\n");
+    /* fprintf(errfp, "SIGCHLD received\n"); */
     wait(NULL); 
 } 
 

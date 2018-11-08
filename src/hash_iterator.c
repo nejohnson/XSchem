@@ -35,20 +35,20 @@ void init_inst_iterator(double x1, double y1, double x2, double y2)
 {
       my_realloc(&instflag, lastinst*sizeof(unsigned short));
       memset(instflag, 0, lastinst*sizeof(unsigned short));
-      // calculate square 4 1st corner of drawing area
+      /* calculate square 4 1st corner of drawing area */
       x1a=floor(x1/BOXSIZE) ;
       y1a=floor(y1/BOXSIZE) ;
-      // calculate square 4 2nd corner of drawing area
+      /* calculate square 4 2nd corner of drawing area */
       x2a=floor(x2/BOXSIZE);
       y2a=floor(y2/BOXSIZE);
-      // printf("init_inst_iterator(): x1a=%d, y1a=%d\n", x1a, y1a);
-      // printf("init_inst_iterator(): x2a=%d, y2a=%d\n", x2a, y2a);
+      /* printf("init_inst_iterator(): x1a=%d, y1a=%d\n", x1a, y1a); */
+      /* printf("init_inst_iterator(): x2a=%d, y2a=%d\n", x2a, y2a); */
       i = x1a;
       j = y1a;
       tmpi=i%NBOXES; if(tmpi<0) tmpi+=NBOXES;
       tmpj=j%NBOXES; if(tmpj<0) tmpj+=NBOXES;
       counti=0;
-      // printf("init_inst_iterator(): tmpi=%d, tmpj=%d\n", tmpi, tmpj);
+      /* printf("init_inst_iterator(): tmpi=%d, tmpj=%d\n", tmpi, tmpj); */
       instanceptr=insttable[tmpi][tmpj];
       countj=0;
 }
@@ -68,9 +68,9 @@ struct instentry *inst_iterator_next()
     }
     if(j<y2a && countj++<NBOXES) {
       j++;
-      // printf("inst_iterator_next(): j=%d\n", j);
+      /* printf("inst_iterator_next(): j=%d\n", j); */
       tmpj=j%NBOXES; if(tmpj<0) tmpj+=NBOXES;
-      // printf("j inst_iterator_next(): tmpi=%d tmpj=%d\n", tmpi, tmpj);
+      /* printf("j inst_iterator_next(): tmpi=%d tmpj=%d\n", tmpi, tmpj); */
       instanceptr=insttable[tmpi][tmpj];
     } else if(i<x2a && counti++<NBOXES) {
       i++;
@@ -78,7 +78,7 @@ struct instentry *inst_iterator_next()
       countj=0;
       tmpi=i%NBOXES; if(tmpi<0) tmpi+=NBOXES;
       tmpj=j%NBOXES; if(tmpj<0) tmpj+=NBOXES;
-      // printf("i inst_iterator_next(): tmpi=%d tmpj=%d\n", tmpi, tmpj);
+      /* printf("i inst_iterator_next(): tmpi=%d tmpj=%d\n", tmpi, tmpj); */
       instanceptr=insttable[tmpi][tmpj];
     } else {
       return NULL;
@@ -90,20 +90,20 @@ void init_wire_iterator(double x1, double y1, double x2, double y2)
 {
       my_realloc(&wireflag, lastwire*sizeof(unsigned short));
       memset(wireflag, 0, lastwire*sizeof(unsigned short));
-      // calculate square 4 1st corner of drawing area
+      /* calculate square 4 1st corner of drawing area */
       x1a=floor(x1/BOXSIZE) ;
       y1a=floor(y1/BOXSIZE) ;
-      // calculate square 4 2nd corner of drawing area
+      /* calculate square 4 2nd corner of drawing area */
       x2a=floor(x2/BOXSIZE);
       y2a=floor(y2/BOXSIZE);
-      // printf("init_wire_iterator(): x1a=%d, y1a=%d\n", x1a, y1a);
-      // printf("init_wire_iterator(): x2a=%d, y2a=%d\n", x2a, y2a);
+      /* printf("init_wire_iterator(): x1a=%d, y1a=%d\n", x1a, y1a); */
+      /* printf("init_wire_iterator(): x2a=%d, y2a=%d\n", x2a, y2a); */
       i = x1a;
       j = y1a;
       tmpi=i%NBOXES; if(tmpi<0) tmpi+=NBOXES;
       tmpj=j%NBOXES; if(tmpj<0) tmpj+=NBOXES;
       counti=0;
-      // printf("init_inst_iterator(): tmpi=%d, tmpj=%d\n", tmpi, tmpj);
+      /* printf("init_inst_iterator(): tmpi=%d, tmpj=%d\n", tmpi, tmpj); */
       wireptr=wiretable[tmpi][tmpj];
       countj=0;
 }

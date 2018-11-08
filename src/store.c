@@ -56,7 +56,7 @@ void check_symbol_storage(void)
  if(lastinstdef >= max_symbols)
  {
   if(debug_var>=1) fprintf(errfp, "check_symbol_storage(): more than max_symbols, %s\n",
-	schematic[currentsch] );
+        schematic[currentsch] );
   max_symbols=(1 + lastinstdef / ELEMDEF) * ELEMDEF;
   my_realloc(&instdef, sizeof(Instdef)*max_symbols);
   for(i=lastinstdef;i<max_symbols;i++) {
@@ -84,7 +84,7 @@ void check_symbol_storage(void)
     if(instdef[i].rects==NULL){
       fprintf(errfp, "check_symbol_storage(): calloc error\n");tcleval( "exit");
     }
-    instdef[i].polygons=my_calloc(cadlayers, sizeof(int)); // 20171115
+    instdef[i].polygons=my_calloc(cadlayers, sizeof(int)); /* 20171115 */
     if(instdef[i].polygons==NULL){
       fprintf(errfp, "check_symbol_storage(): calloc error\n");tcleval( "exit");
     }
@@ -129,7 +129,7 @@ void check_line_storage(int c)
  }
 }
 
-void check_polygon_storage(int c) //20171115
+void check_polygon_storage(int c) /*20171115 */
 {
  if(lastpolygon[c] >= max_polygons[c])
  {
@@ -207,7 +207,7 @@ void store_polygon(int pos, double *x, double *y, int points, unsigned int rectc
 
 void storeobject(int pos, double x1,double y1,double x2,double y2,
                  unsigned short type, unsigned int rectcolor,
-		 unsigned short sel, char *prop_ptr)
+                 unsigned short sel, char *prop_ptr)
 {
  int n, j;
     if(type == LINE)
@@ -279,7 +279,7 @@ void storeobject(int pos, double x1,double y1,double x2,double y2,
      wire[n].end1=0;
      wire[n].end2=0;
      my_strdup(&wire[n].prop_ptr, prop_ptr);
-     if(get_tok_value(wire[n].prop_ptr,"bus",0)[0]) wire[n].bus=1; // 20171201
+     if(get_tok_value(wire[n].prop_ptr,"bus",0)[0]) wire[n].bus=1; /* 20171201 */
      else wire[n].bus=0;
 
      wire[n].sel=sel;
@@ -301,7 +301,7 @@ void freenet_nocheck(int i)
     wire[j-1] = wire[j];
     wire[j].prop_ptr=NULL;
     wire[j].node=NULL;
-  } //end for j
+  } /*end for j */
   lastwire--;
 }
 

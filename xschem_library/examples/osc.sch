@@ -1,20 +1,21 @@
-G {} 
-V {} 
-S {} 
+G {}
+V {}
+S {}
+E {}
 T {COLPITTS OSCILLATOR
-EXAMPLE} 460 -480 0 0 0.4 0.4 {} 
-N 240 -270 340 -270 {lab=B} 
-N 380 -300 690 -300 {lab=OUT} 
-N 250 -460 380 -460 {lab=VCC} 
-N 380 -100 380 -80 {lab=VSS} 
-N 380 -100 550 -100 {lab=VSS} 
-N 380 -340 380 -300 {lab=OUT} 
-N 380 -240 380 -220 {lab=E} 
-N 380 -220 380 -160 {lab=E} 
-N 550 -240 550 -200 {lab=E} 
-N 550 -140 550 -100 {lab=VSS} 
-N 380 -210 400 -210 {lab=E} 
-N 400 -210 550 -210 {lab=E} 
+EXAMPLE} 460 -480 0 0 0.4 0.4 {}
+N 240 -270 340 -270 {lab=B}
+N 380 -300 690 -300 {lab=OUT}
+N 250 -460 380 -460 {lab=VCC}
+N 380 -100 380 -80 {lab=VSS}
+N 380 -100 550 -100 {lab=VSS}
+N 380 -340 380 -300 {lab=OUT}
+N 380 -240 380 -220 {lab=E}
+N 380 -220 380 -160 {lab=E}
+N 550 -240 550 -200 {lab=E}
+N 550 -140 550 -100 {lab=VSS}
+N 380 -210 400 -210 {lab=E}
+N 400 -210 550 -210 {lab=E}
 C {devices/code} 750 -190 0 0 {
 name=STIMULI 
 value=".option RUNLVL=6 post 
@@ -22,16 +23,25 @@ vvss vss 0 dc 0
 
 .temp 30
 .tran 1n 100u 
-.probe tran i1(Q1) i2(Q1) i3(Q1) i(L1) i(c1) i(c2) i(r1) i(r2) i(r3)"} 
+.probe tran i1(Q1) i2(Q1) i3(Q1) i(L1) i(c1) i(c2) i(r1) i(r2) i(r3)"}
 C {devices/npn} 360 -270 0 0 {name=Q1 model=q2n2222a area=1
-} 
-C {devices/vsource} 250 -430 0 1 {name=v2 value="5 pwl 0 5 1n 6 2n 6 3n 5"} 
-C {devices/lab_pin} 250 -400 0 0 {name=p0 lab=VSS} 
-C {devices/lab_pin} 690 -300 0 1 {name=p3 lab=OUT} 
-C {devices/lab_pin} 380 -80 0 0 {name=p5 lab=VSS} 
-C {devices/lab_pin} 250 -460 0 0 {name=p6 lab=VCC} 
-C {devices/code} 750 -350 0 0 {
-name=MODELS 
+}
+C {devices/vsource} 250 -430 0 1 {name=v2 value="5 pwl 0 5 1n 6 2n 6 3n 5"}
+C {devices/lab_pin} 250 -400 0 0 {name=p0 lab=VSS}
+C {devices/lab_pin} 690 -300 0 1 {name=p3 lab=OUT}
+C {devices/lab_pin} 380 -80 0 0 {name=p5 lab=VSS}
+C {devices/lab_pin} 250 -460 0 0 {name=p6 lab=VCC}
+C {devices/ind} 380 -430 2 0 {name=L1 value=100u}
+C {devices/capa} 550 -270 0 1 {name=c1 m=1 value=100p}
+C {devices/lab_pin} 380 -230 0 0 {name=p2 lab=E}
+C {devices/vsource} 240 -240 0 1 {name=v1 value=1}
+C {devices/lab_pin} 240 -210 0 0 {name=p1 lab=VSS}
+C {devices/lab_pin} 240 -270 0 0 {name=p4 lab=B}
+C {devices/res} 380 -130 0 1 {name=r1 m=1 value=1k}
+C {devices/res} 380 -370 0 1 {name=r2 m=1 value=2}
+C {devices/capa} 550 -170 0 1 {name=c2 m=1 value=100p}
+C {devices/code} 750 -340 0 0 {name=MODELS 
+only_toplevel=true
 value=".MODEL bd139_2 npn
 +IS=1e-09 BF=222.664 NF=0.85 VAF=36.4079
 +IKF=0.166126 ISE=5.03418e-09 NE=1.45313 BR=1.35467
@@ -54,11 +64,25 @@ value=".MODEL bd139_2 npn
 +MJE=0.3300 FC=0.5 CJC=4.8831E-11 VJC=0.5258
 +MJC=0.3928 XCJC=0.5287 XTB=1.1398 EG=1.2105 XTI=3.0) 
 
+
+.MODEL BD140  PNP(IS=1e-09 BF=650.842 NF=0.85 VAF=10
++IKF=0.0950125 ISE=1e-08 NE=1.54571 BR=56.177
++NR=1.5 VAR=2.11267 IKR=0.950125 ISC=1e-08
++NC=3.58527 RB=41.7566 IRB=0.1 RBM=0.108893
++RE=0.000347052 RC=1.32566 XTB=19.5239 XTI=1
++EG=1.05 CJE=1e-11 VJE=0.75 MJE=0.33
++TF=1e-09 XTF=1 VTF=10 ITF=0.01
++CJC=1e-11 VJC=0.75 MJC=0.33 XCJC=0.9
++FC=0.5 CJS=0 VJS=0.75 MJS=0.5 TR=1e-07 PTF=0 KF=0 AF=10
++ VCEO=80 ICRATING=1A )
+
+
 .MODEL Q2N2222A NPN IS =3.0611E-14 NF =1.00124 BF =220 IKF=0.52 
 +              VAF=104 ISE=7.5E-15 NE =1.41 NR =1.005 BR =4 IKR=0.24 
 +              VAR=28 ISC=1.06525E-11 NC =1.3728 RB =0.13 RE =0.22 
 +              RC =0.12 CJC=9.12E-12 MJC=0.3508 VJC=0.4089 
 +              CJE=27.01E-12 TF =0.325E-9 TR =100E-9
++              vce_max=45 vbe_max=6
 
 .MODEL Q2N2222 NPN (
 + IS = 3.97589E-14 BF = 195.3412 NF = 1.0040078 VAF = 53.081 IKF = 0.976 ISE = 1.60241E-14
@@ -67,7 +91,8 @@ value=".MODEL bd139_2 npn
 + CJE = 2.56E-11 VJE = 0.682256 MJE = 0.3358856 TF = 3.3E-10 XTF = 6 VTF = 0.574
 + ITF = 0.32 PTF = 25.832 CJC = 1.40625E-11 VJC = 0.5417393 MJC = 0.4547893 XCJC = 1
 + TR = 3.2E-7 CJS = 0 VJS = .75 MJS = 0 XTB = 1.6486 EG = 1.11
-+ XTI = 5.8315 KF = 0 AF = 1 FC = 0.83)
++ XTI = 5.8315 KF = 0 AF = 1 FC = 0.83
++              vce_max=45 vbe_max=6 )
 
 
 * 2n2222 p complementary
@@ -79,7 +104,8 @@ value=".MODEL bd139_2 npn
 + NF=1 NR=1 NE=1.829 NC=2 MJE=0.3357 MJC=0.5383
 + TF=603.7E-12 TR=111.3E-9 ITF=0.65 VTF=5 XTF=1.7
 + EG=1.11 KF=1E-9 AF=1
-+ VCEO=45 ICRATING=100M )
++ VCEO=45 ICRATING=100M 
++              vce_max=45 vbe_max=6 )
 
 .MODEL Q2N2907S PNP(IS=2.32E-13 ISE=6.69E-16 ISC=1.65E-13 XTI=3.00
 + BF=3.08E2 BR=2.18E1 IKF=8.42E-1 IKR=1.00 XTB=1.5
@@ -89,7 +115,8 @@ value=".MODEL bd139_2 npn
 + NF=1.04 NR=1.12 NE=1.09 NC=1.13 MJE=4.60E-1 MJC=4.65E-1
 + TF=4.95E-10 TR=0 PTF=0 ITF=3.36E-1 VTF=6.54 XTF=1.87E1
 + EG=1.11 KF=1E-9 AF=1
-+ VCEO=40 ICRATING=500M )
++ VCEO=40 ICRATING=500M 
++              vce_max=45 vbe_max=6 )
 
 *MM3725 MCE 5/13/95
 *Si    1W  40V 500mA 307MHz pkg:TO-39 3,2,1
@@ -115,6 +142,55 @@ value=".MODEL bd139_2 npn
 + BR=4 NR=1 VAR=20 IKR=.9 RE=96.5M RB=.386 RC=38.6M XTB=1.5
 + CJE=78.7P VJE=1.1 MJE=.5 CJC=17.3P VJC=.3 MJC=.3 TF=757P TR=526N)
 
+*BC546 ZETEX Spice model     Last revision  4/90   General Purpose
+*ZTX Si 500mW  65V 200mA 300MHz pkg:TO-92 1,2,3
+.MODEL BC546 NPN(IS=1.8E-14 BF=400 NF=0.9955 VAF=80 IKF=0.14 ISE=5E-14 
++ NE=1.46 BR=35.5 NR=1.005 VAR=12.5 IKR=0.03 ISC=1.72E-13 NC=1.27 RB=0.56 
++ RE=0.6 RC=0.25 CJE=1.3E-11 TF=6.4E-10 CJC=4E-12 VJC=0.54 TR=5.072E-8 
++     vce_max=65 vbe_max=6 )
+
+
+.MODEL BC556 PNP( 
++     IS=2.059E-14
++     NF=1.003
++     ISE=2.971E-15
++     NE=1.316
++     BF=227.3
++     IKF=0.08719
++     VAF=37.2
++     NR=1.007
++     ISC=1.339E-14
++     NC=1.15
++     BR=7.69
++     IKR=0.07646
++     VAR=11.42
++     RB=1
++     IRB=1E-06
++     RBM=1
++     RE=0.688
++     RC=0.6437
++     XTB=0
++     EG=1.11
++     XTI=3
++     CJE=1.4E-11
++     VJE=0.5912
++     MJE=0.3572
++     TF=7.046E-10
++     XTF=4.217
++     VTF=5.367
++     ITF=0.1947
++     PTF=0
++     CJC=1.113E-11
++     VJC=0.1
++     MJC=0.3414
++     XCJC=0.6288
++     TR=1E-32
++     CJS=0
++     VJS=0.75
++     MJS=0.333
++     FC=0.7947
++     vce_max=65 vbe_max=6 )
+*
 
 * NXP Semiconductors
 *
@@ -225,6 +301,24 @@ D1 2 1 DIODE
 * Model generated on October 12, 2003
 * Model format: PSpice
 
+*1N758
+*Ref: Motorola
+*10V 500mW Si Zener pkg:DIODE0.4 1,2
+.MODEL D1N758 D(IS=1E-11 RS=8.483 N=1.27 TT=5E-8 CJO=2.334E-10 VJ=0.75 
++ M=0.33 BV=9.83 IBV=0.01 )
+
+*1N4744
+*Ref: Motorola
+*15V 1W Si Zener pkg:DIODE0.4 1,2
+.MODEL D1N4744 D(IS=5.32E-14 RS=6.47 TT=5.01E-8 CJO=7.83E-11 M=0.33 
++ BV=14.89 IBV=0.017 )
+
+*1N755
+*Ref: Motorola
+*7.5V 500mW Si Zener pkg:DIODE0.4 1,2
+.MODEL D1N755 D(IS=1E-11 RS=3.359 N=1.27 TT=5E-8 CJO=2.959E-10 VJ=0.75 
++ M=0.33 BV=7.433 IBV=0.01 )
+
 ** node order
 * 1: gnd
 * 2: trig
@@ -287,246 +381,35 @@ Q3 2 2 9 QP
 + CJE=12.4P VJE=1.1 MJE=.5 CJC=4.02P VJC=.3 MJC=.3 TF=229P TR=959P)
 .ENDS
 
-.SUBCKT irf540 1 2 3
-**************************************
-* Model Generated by MODPEX *
-*Copyright(c) Symmetry Design Systems*
-* All Rights Reserved *
-* UNPUBLISHED LICENSED SOFTWARE *
-* Contains Proprietary Information *
-* Which is The Property of *
-* SYMMETRY OR ITS LICENSORS *
-*Commercial Use or Resale Restricted *
-* by Symmetry License Agreement *
-**************************************
-* Model generated on Apr 24, 96
-* Model format: SPICE3
-* Symmetry POWER MOS Model (Version 1.0)
-* External Node Designations
-* Node 1 -> Drain
-* Node 2 -> Gate
-* Node 3 -> Source
-M1 9 7 8 8 MM L=100u W=100u
-* Default values used in MM:
-* The voltage-dependent capacitances are
-* not included. Other default values are:
-* RS=0 RD=0 LD=0 CBD=0 CBS=0 CGBO=0
-.MODEL MM NMOS LEVEL=1 IS=1e-32
-+VTO=3.56362 LAMBDA=0.00291031 KP=25.0081
-+CGSO=1.60584e-05 CGDO=4.25919e-07
-RS 8 3 0.0317085
-D1 3 1 MD
-.MODEL MD D IS=1.02194e-10 RS=0.00968022 N=1.21527 BV=100
-+IBV=0.00025 EG=1.2 XTI=3.03885 TT=1e-07
-+CJO=1.81859e-09 VJ=1.1279 M=0.449161 FC=0.5
-RDS 3 1 4e+06
-RD 9 1 0.0135649
-RG 2 7 5.11362
-D2 4 5 MD1
-* Default values used in MD1:
-* RS=0 EG=1.11 XTI=3.0 TT=0
-* BV=infinite IBV=1mA
-.MODEL MD1 D IS=1e-32 N=50
-+CJO=2.49697e-09 VJ=0.5 M=0.9 FC=1e-08
-D3 0 5 MD2
-* Default values used in MD2:
-* EG=1.11 XTI=3.0 TT=0 CJO=0
-* BV=infinite IBV=1mA
-.MODEL MD2 D IS=1e-10 N=0.4 RS=3e-06
-RL 5 10 1
-FI2 7 9 VFI2 -1
-VFI2 4 0 0
-EV16 10 0 9 7 1
-CAP 11 10 2.49697e-09
-FI1 7 9 VFI1 -1
-VFI1 11 6 0
-RCAP 6 10 1
-D4 0 6 MD3
-* Default values used in MD3:
-* EG=1.11 XTI=3.0 TT=0 CJO=0
-* RS=0 BV=infinite IBV=1mA
-.MODEL MD3 D IS=1e-10 N=0.4
-.ENDS
-
-
-
-
-*$
-*LM5134A
-*****************************************************************************
-* (C) Copyright 2016 Texas Instruments Incorporated. All rights reserved.
-*****************************************************************************
-** This model is designed as an aid for customers of Texas Instruments.
-** TI and its licensors and suppliers make no warranties, either expressed
-** or implied, with respect to this model, including the warranties of 
-** merchantability or fitness for a particular purpose.  The model is
-** provided solely on an \\"as is\\" basis.  The entire risk as to its quality
-** and performance is with the customer.
-*****************************************************************************
+.SUBCKT BS250P 3 4 5
+*              D G S
+M1 3 2 5 5 MBS250
+RG 4 2 160
+RL 3 5 1.2E8
+C1 2 5 47E-12
+C2 3 2 10E-12
+D1 3 5 DBS250
 *
-** Released by: WEBENCH Design Center,Texas Instruments Inc.
-* Part: LM5134A
-* Date: 23SEP2016
-* Model Type: TRANSIENT
-* Simulator: PSPICE
-* Simulator Version: 16.2.0.p001
-* EVM Order Number: NA
-* EVM User's Guide: NA
-* Datasheet: SNVS808CMAY 2012REVISED FEBRURARY 2016
-*
-* Model Version: Final 1.00
-*
-*****************************************************************************
-*
-* Updates:
-*
-* Final 1.00
-* Release to Web
-*
-*****************************************************************************
-*
-* Model Usage Notes:
-*
-* A. Features have been modelled
-*	1. Output timing characteristics
-*	2. Output tr & tf vs VDD & CL Capacitor  
-*	3. tD-ON, tPD-ON, tD-OFF & tPD-OFF vs VDD
-*	4. Output peak current limit for VDD = 10V 
-*	5. Input threshold for VDD = 10V
-*	6. VDD UVLO Logic at TA = 25°C
-*
-* B. Features haven't been modelled
-*	1. Supply Current vs Supply Voltage
-*	2. Supply Current vs Load capacitance
-*	3. Frequency dependent plots 
-*	4. Temperature dependent characteristics
-*
-*****************************************************************************
-.SUBCKT LM5134A VDD PILOT OUT IN INB VSS
-E_E2         INB_INT 0 INB VSS 1
-C_U3_C1         U3_N16789866 U3_N16789873  5p  
-X_U3_U5         VDD U3_N16789873 U3_N16790218 0 RVAR  RREF=1
-C_U3_C3         OUT U3_N16789866  1p  
+.MODEL MBS250 PMOS VTO=-3.193 RS=2.041 RD=0.697 IS=1E-15 KP=0.277
++CBD=105E-12 PB=1 LAMBDA=1.2E-2
+.MODEL DBS250 D IS=2E-13 RS=0.309
+.ENDS BS250P
 
-* E_U3_E1         U3_N16790231 OUT vol=' V(MGATE, 0) > 0.5? 5: -5'
-E_U3_E1         U3_N16790231 OUT pwl(1) MGATE 0 0.49 -5 0.51 5
+.SUBCKT BS170 3 4 5
+*             D G S
+M1 3 2 5 5 N3306M
+RG 4 2 270
+RL 3 5 1.2E8
+C1 2 5 28E-12
+C2 3 2 3E-12 
+D1 5 3 N3306D
+*
+.MODEL N3306M NMOS VTO=1.824 RS=1.572 RD=1.436 IS=1E-15 KP=.1233
++CBD=35E-12 PB=1
+.MODEL N3306D D IS=5E-12 RS=.768
+.ENDS BS170
+*
 
-X_U3_U6         U3_N24836 VSS U3_N31827 0 RVAR   RREF=1
-R_U3_R1         U3_N16790231 U3_N16789866  20  
-M_U3_M2         U3_N24836 U3_N16789871 OUT OUT PMOS01           
-E_U3_E4         U3_N16790218 0 pwl(1) VDD_INT 0 
-+ 0 0, 4.5 0.9, 10  0.09, 12.6 0.08   
-X_U3_U10         VSS OUT d_d1 
-R_U3_R2         U3_N16789868 U3_N16789871  20  
-C_U3_C2         U3_N24836 U3_N16789871  5p  
-X_U3_U9         OUT VDD d_d1 
-C_U3_C5         OUT VDD  10p  
-C_U3_C6         OUT U3_N16789871  10p  
-C_U3_C4         VSS OUT  10p  
-M_U3_M1         U3_N16789873 U3_N16789866 OUT OUT NMOS01           
-E_U3_E3         U3_N31827 0 pwl(1) VDD_INT 0 
-+    0 0, 4.5  0.26, 10  0.01, 12.6 0.01   
-E_U3_E2         OUT U3_N16789868 vol= 'V(MGATE, 0) > 0.5? -5: 5'
-E_U4_ABM4         U4_N14683241 0 vol= 'V(U4_ON_INT) >=0.5?V(VDD_INT):0'
-C_U4_C3         U4_N14683221 0  1n  
-V_U4_V6         U4_N155225261 0 80m
-R_U4_R2         U4_N14683241 U4_N14683221  1 
-X_U4_U47         U4_N14683247 U4_N14683251 d_d1 
-E_U4_ABM5         U4_N14683301 0 vol= 'V(U4_ON_INT)<0.5? V(VDD_INT):0'
-C_U4_C1         U4_N14683247 0  1n  
-X_U4_S1    U4_N14683159 0 U4_N14683247 0 PTON_TOFF_U4_S1 
-X_U4_U44         U4_ON_INT PGATE U4_N14683147 AND2_BASIC_GEN  VDD=1
-+  VSS=0 VTHRESH=500E-3
-X_U4_U43         U4_N14683247 PGATE BUF_BASIC_GEN VDD=1 VSS=0
-+  VTHRESH=0.5
-R_U4_R3         U4_N14683301 U4_N14683281  1 
-X_U4_U7         N18232068 U4_N15541612 INV_BASIC_GEN  VDD=1 VSS=0
-+  VTHRESH=500E-3
-G_U4_G1         U4_N14683251 U4_N14683247 pwl(1) U4_N14683221 0 
-+    0 0, 4.5 140m, 10 500m, 12.6 600m   
-G_U4_G2         U4_N14683247 0 pwl(1) U4_N14683281 0 
-+    0 0, 4.5 70m, 10 800m, 12.6 900m 
-X_U4_U8         MGATE U4_N15541600 INV_BASIC_GEN  VDD=1 VSS=0
-+  VTHRESH=500E-3
-C_U4_C4         U4_N14683281 0  1n  
-X_U4_S2    U4_N14683147 0 U4_N14683251 U4_N14683247 PTON_TOFF_U4_S2 
-X_U4_U48         U4_N155225261 U4_N14683247 d_d1 
-X_U4_U45         U4_N15541600 U4_N15541612 U4_ON_INT AND2_BASIC_GEN 
-+  VDD=1 VSS=0 VTHRESH=500E-3
-V_U4_V5         U4_N14683251 0 1V
-X_U4_U46         PGATE U4_ON_INT U4_N14683159 NOR2_BASIC_GEN  VDD=1
-+  VSS=0 VTHRESH=500E-3
-E_E1         IN_INT 0 IN VSS 1
-E_E3         VDD_INT 0 VDD VSS 1
-C_U2_C1         U2_N14683247 0  1n  
-X_U2_U46         MGATE U2_ON_INT U2_N14683159 NOR2_BASIC_GEN  VDD=1
-+  VSS=0 VTHRESH=500E-3
-X_U2_U7         PGATE U2_N15532894 INV_BASIC_GEN  VDD=1 VSS=0
-+  VTHRESH=500E-3
-G_U2_G1         U2_N14683251 U2_N14683247 pwl(1)  U2_N14683221 0 
-+    0 0,  4.5 58m,  10 140m,  12.6 230m   
-
-E_U2_ABM5         U2_N14683301 0 vol= 'V(U2_ON_INT) <0.5? V(VDD_INT):0'
-
-X_U2_U43         U2_N14683247 MGATE BUF_BASIC_GEN VDD=1 VSS=0
-+  VTHRESH=0.5
-X_U2_U48         U2_N147032561 U2_N14683247 d_d1 
-V_U2_V6         U2_N147032561 0 80m
-X_U2_S2    U2_N14683147 0 U2_N14683251 U2_N14683247 MTON_TOFF_U2_S2 
-
-E_U2_ABM4         U2_N14683241 0 vol='V(U2_ON_INT) >=0.5? V(VDD_INT):0  '
-
-R_U2_R2         U2_N14683241 U2_N14683221  1 
-G_U2_G2         U2_N14683247 0 PWL(1) U2_N14683281 0 
-+    0 0, 4.5 32m, 10 90m, 12.6 160m   
-V_U2_V5         U2_N14683251 0 1V
-X_U2_U44         U2_ON_INT MGATE U2_N14683147 AND2_BASIC_GEN  VDD=1
-+  VSS=0 VTHRESH=500E-3
-C_U2_C3         U2_N14683221 0  1n  
-X_U2_U45         N18232068 U2_N15532894 U2_ON_INT AND2_BASIC_GEN  VDD=1
-+  VSS=0 VTHRESH=500E-3
-X_U2_S1    U2_N14683159 0 U2_N14683247 0 MTON_TOFF_U2_S1 
-R_U2_R3         U2_N14683301 U2_N14683281  1 
-C_U2_C4         U2_N14683281 0  1n  
-X_U2_U47         U2_N14683247 U2_N14683251 d_d1 
-X_U1_U6         INB_INT U1_VIH U1_VHYS U1_N15517298 COMPHYS_BASIC_GEN 
-+  VDD=1 VSS=0 VTHRESH=0.5
-R_U1_R1         U1_N15521766 U1_VDD_UVLO  721.5 
-X_U1_U7         U1_N15517298 U1_INB_OUT INV_BASIC_GEN  VDD=1 VSS=0
-+  VTHRESH=500E-3
-X_U1_U9         U1_IN_OUT U1_INB_OUT U1_VDD_UVLO N18232068 AND3_BASIC_GEN
-+   VDD=1 VSS=0 VTHRESH=500E-3
-C_U1_C1         U1_VDD_UVLO 0  1n  
-X_U1_U5         IN_INT U1_VIH U1_VHYS U1_IN_OUT COMPHYS_BASIC_GEN  VDD=1
-+  VSS=0 VTHRESH=0.5
-X_U1_U8         VDD_INT U1_N15521824 U1_N15521760 U1_N15521766
-+  COMPHYS_BASIC_GEN  VDD=1 VSS=0 VTHRESH=0.5
-V_U1_V1         U1_N15521824 0 3.6
-E_U1_ABM3         U1_VHYS 0 vol= '0.34*V(VDD_INT)'
-E_U1_ABM1         U1_VIH 0 vol='0.67*V(VDD_INT)'
-V_U1_V2         U1_N15521760 0 0.36
-X_U1_U35         U1_VDD_UVLO U1_N15521766 d_d1 
-M_U5_M2         U5_N16789896 U5_N23038 PILOT PILOT PMOS02           
-R_U5_R1         U5_N16790231 U5_N16789866  20  
-X_U5_U6         U5_N16789896 VSS U5_N16802670 0 RVAR  RREF=1
-M_U5_M1         U5_N08221 U5_N16789866 PILOT PILOT NMOS02           
-C_U5_C4         VSS PILOT  10p  
-C_U5_C2         U5_N16789896 U5_N23038  5p  
-R_U5_R2         U5_N16789868 U5_N23038  20  
-E_U5_E3         U5_N16802670 0 pwl(1) VDD_INT 0 
-+    0 0, 4.5 2.8, 10 1.9, 12.6 1.6   
-X_U5_U5         VDD U5_N08221 U5_N26349 0 RVAR RREF=1
-C_U5_C1         U5_N08221 U5_N16789866  5p  
-C_U5_C5         PILOT VDD  10p  
-E_U5_E4         U5_N26349 0 pwl(1) VDD_INT 0 
-+    0 0, 4.5 9.5, 10 2.88, 12.6 2.8   
-X_U5_U9         PILOT VDD d_d1 
-C_U5_C3         PILOT U5_N16789866  10p  
-X_U5_U10         VSS PILOT d_d1 
-E_U5_E2         PILOT U5_N16789868 vol= ' V(PGATE, 0) > 0.5? -5: 5'
-E_U5_E1         U5_N16790231 PILOT vol= ' V(PGATE, 0) > 0.5? 5: -5'
-C_U5_C6         PILOT U5_N23038  10p  
-.ENDS LM5134A
 *$
 .SUBCKT PTON_TOFF_U4_S1 1 2 3 4  
 G_Switch 3 4 VCR PWL(1) 1 2 0.2 100e6 0.8 1m
@@ -615,13 +498,136 @@ fcopy 0 301 vsense 1 $$  copy output current thru Z
 eout 101 106 poly(2) 201 202 301 0 0 0 0 0 1   $$ multiply VoverZ with Vctrl
 vsense 106 102 0   $$ sense iout
 .ENDS RVAR
-*$"} 
-C {devices/ind} 380 -430 2 0 {name=L1 value=100u} 
-C {devices/capa} 550 -270 0 1 {name=c1 m=1 value=100p} 
-C {devices/lab_pin} 380 -230 0 0 {name=p2 lab=E} 
-C {devices/vsource} 240 -240 0 1 {name=v1 value=1} 
-C {devices/lab_pin} 240 -210 0 0 {name=p1 lab=VSS} 
-C {devices/lab_pin} 240 -270 0 0 {name=p4 lab=B} 
-C {devices/res} 380 -130 0 1 {name=r1 m=1 value=1k} 
-C {devices/res} 380 -370 0 1 {name=r2 m=1 value=2} 
-C {devices/capa} 550 -170 0 1 {name=c2 m=1 value=100p} 
+*$
+
+
+*LM317 TI voltage regulator - pin order: In, Adj, Out
+*TI adjustable voltage regulator pkg:TO-3
+.SUBCKT LM317 1 2 3 **Changes my be required on this line**
+J1 1 3 4 JN
+Q2 5 5 6 QPL .1
+Q3 5 8 9 QNL .2
+Q4 8 5 7 QPL .1
+Q5 81 8 3 QNL .2
+Q6 3 81 10 QPL .2
+Q7 12 81 13 QNL .2
+Q8 10 5 11 QPL .2
+Q9 14 12 10 QPL .2
+Q10 16 5 17 QPL .2
+Q11 16 14 15 QNL .2
+Q12 3 20 16 QPL .2
+Q13 1 19 20 QNL .2
+Q14 19 5 18 QPL .2
+Q15 3 21 19 QPL .2
+Q16 21 22 16 QPL .2
+Q17 21 3 24 QNL .2
+Q18 22 22 16 QPL .2
+Q19 22 3 241 QNL 2
+Q20 3 25 16 QPL .2
+Q21 25 26 3 QNL .2
+Q22A 35 35 1 QPL 2
+Q22B 16 35 1 QPL 2
+Q23 35 16 30 QNL 2
+Q24A 27 40 29 QNL .2
+Q24B 27 40 28 QNL .2
+Q25 1 31 41 QNL 5
+Q26 1 41 32 QNL 50
+D1 3 4 DZ
+D2 33 1 DZ
+D3 29 34 DZ
+R1 1 6 310
+R2 1 7 310
+R3 1 11 190
+R4 1 17 82
+R5 1 18 5.6K
+R6 4 8 100K
+R7 8 81 130
+R8 10 12 12.4K
+R9 9 3 180
+R10 13 3 4.1K
+R11 14 3 5.8K
+R12 15 3 72
+R13 20 3 5.1K
+R14 2 24 12K
+R15 24 241 2.4K
+R16 16 25 6.7K
+R17 16 40 12K
+R18 30 41 130
+R19 16 31 370
+R20 26 27 13K
+R21 27 40 400
+R22 3 41 160
+R23 33 34 18K
+R24 28 29 160
+R25 28 32 3
+R26 32 3 .1
+C1 21 3 30PF
+C2 21 2 30PF
+C3 25 26 5PF
+CBS1 5 3 2PF
+CBS2 35 3 1PF
+CBS3 22 3 1PF
+.MODEL JN NJF(BETA=1E-4 VTO=-7)
+.MODEL DZ D(BV=6.3)
+.MODEL QNL NPN(EG=1.22 BF=80 RB=100 CCS=1.5PF TF=.3NS TR=6NS CJE=2PF
++ CJC=1PF VAF=100)
+.MODEL QPL PNP(BF=40 RB=20 TF=.6NS TR=10NS CJE=1.5PF CJC=1PF VAF=50)
+.ENDS
+
+.SUBCKT xxxxLM317 1 3 2
+* IN ADJ OUT
+IADJ 1 4 50U
+VREF 4 3 1.25
+RC 1 14 0.742
+DBK 14 13 D1
+CBC 13 15 2.479N
+RBC 15 5 247
+QP 13 5 2 Q1
+RB2 6 5 124
+DSC 6 11 D1
+ESC 11 2 POLY(2) (13,5) (6,5) 2.85
++ 0 0 0 -70.1M
+DFB 6 12 D1
+EFB 12 2 POLY(2) (13,5) (6,5) 3.92
++ -135M 0 1.21M -70.1M
+RB1 7 6 1
+EB 7 2 8 2 2.56
+CPZ 10 2 0.796U
+DPU 10 2 D1
+RZ 8 10 0.104
+RP 9 8 100
+EP 9 2 4 2 103.6
+RI 2 4 100MEG
+.MODEL Q1 NPN (IS=30F BF=100
++ VAF=14.27 NF=1.604)
+.MODEL D1 D (IS=30F N=1.604)
+.ENDS
+
+
+
+.SUBCKT LM337 8 1 19
+*Connections Input Adj. Output
+*LM337 negative voltage regulator
+.MODEL QN NPN (BF=50 TF=1N CJC=1P)
+.MODEL QPOUT PNP (BF=50 TF=1N RE=.2 CJC=1P)
+.MODEL QP PNP CJC=1P TF=2N
+.MODEL DN D
+.MODEL D2 D BV=12 IBV=100U
+R10 25 6 1K
+Q3 8 17 16 QPOUT
+Q4 8 25 17 QP
+R18 19 17 250
+R19 19 16 .3
+G1 8 6 1 18 .1
+C7 6 2 .04U
+R24 2 8 100
+I_ADJ 0 1 65U
+R26 8 25 200K
+Q5 25 4 19 QP
+R27 16 4 200
+R28 7 4 7K
+D1 8 7 D2
+D2 8 6 DN
+V1 18 19 1.25
+.ENDS
+"}

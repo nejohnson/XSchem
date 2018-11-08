@@ -26,8 +26,8 @@ static double distance;
 static Selected sel;
 
 void find_closest_net(double mx,double my)
-// returns the net that is closest to the mouse pointer
-// if there are nets and distance < CADWIREMINDIST
+/* returns the net that is closest to the mouse pointer */
+/* if there are nets and distance < CADWIREMINDIST */
 {
  double tmp;
  static double threshold = CADWIREMINDIST * CADWIREMINDIST;
@@ -47,8 +47,8 @@ void find_closest_net(double mx,double my)
 }
 
 void find_closest_polygon(double mx,double my)
-// returns the polygon that is closest to the mouse pointer
-// if there are lines and distance < CADWIREMINDIST
+/* returns the polygon that is closest to the mouse pointer */
+/* if there are lines and distance < CADWIREMINDIST */
 {
  double tmp;
  static double threshold = CADWIREMINDIST * CADWIREMINDIST;
@@ -58,7 +58,7 @@ void find_closest_polygon(double mx,double my)
  {
   for(i=0;i<lastpolygon[c];i++)
   {
-    //fprintf(errfp, "points=%d\n", polygon[c][i].points);
+    /*fprintf(errfp, "points=%d\n", polygon[c][i].points); */
     for(j=0; j<polygon[c][i].points-1; j++) {
       x1 = polygon[c][i].x[j];
       y1 = polygon[c][i].y[j];
@@ -71,8 +71,8 @@ void find_closest_polygon(double mx,double my)
        if(debug_var>=1) fprintf(errfp, "find_closest_polygon(): distance=%.16g  n=%d\n", distance, i);
       }
     }
-  } // end for i
- } // end for c
+  } /* end for i */
+ } /* end for c */
  if( distance <= threshold && l!=-1)
  {
   sel.n = l; sel.type = POLYGON;
@@ -81,8 +81,8 @@ void find_closest_polygon(double mx,double my)
 
 
 void find_closest_line(double mx,double my)
-// returns the line that is closest to the mouse pointer
-// if there are lines and distance < CADWIREMINDIST
+/* returns the line that is closest to the mouse pointer */
+/* if there are lines and distance < CADWIREMINDIST */
 {
  double tmp;
  static double threshold = CADWIREMINDIST * CADWIREMINDIST;
@@ -97,15 +97,15 @@ void find_closest_line(double mx,double my)
     l = i; distance = tmp;sel.col = c;
     if(debug_var>=1) fprintf(errfp, "find_closest_line(): distance=%.16g  n=%d\n", distance, i);
    }
-  } // end for i
- } // end for c
+  } /* end for i */
+ } /* end for c */
  if( distance <= threshold && l!=-1)
  {
   sel.n = l; sel.type = LINE; 
  }
 }
 
-// 20171022 snap wire to closest pin or net endpoint
+/* 20171022 snap wire to closest pin or net endpoint */
 void find_closest_net_or_symbol_pin(double mx,double my, double *x, double *y)
 {
   int i, j, no_of_pin_rects;
@@ -207,8 +207,8 @@ void find_closest_arc(double mx,double my)
       distance = dist;
       sel.col = c;
     }
-  } // end for i
- } // end for c
+  } /* end for i */
+ } /* end for c */
  if( r!=-1 && distance <= threshold* pow(arc[sel.col][r].r,2))
  {
   sel.n = r; sel.type = ARC;
@@ -233,8 +233,8 @@ void find_closest_box(double mx,double my)
      r = i; distance = tmp;sel.col = c;
     }
    }
-  } // end for i
- } // end for c
+  } /* end for i */
+ } /* end for c */
  if(debug_var>=1) fprintf(errfp, "find_closest_box(): distance=%.16g\n", distance);
  if( r!=-1)
  {
@@ -257,7 +257,7 @@ void find_closest_element(double mx,double my)
    }
     if(debug_var>=2) fprintf(errfp, "find_closest_element(): finding closest element, lastinst=%d, dist=%.16g\n",i,tmp);
   }
- } // end for i
+ } /* end for i */
  if( r!=-1 )
  {
   sel.n = r; sel.type = ELEMENT;
@@ -292,7 +292,7 @@ void find_closest_text(double mx,double my)
     r = i; distance = 0;
      if(debug_var>=2) fprintf(errfp, "find_closest_text(): finding closest text, lasttext=%d, dist=%.16g\n",i,distance);
    }
-  } // end for i
+  } /* end for i */
  if( distance <= threshold && r!=-1)
  {
   sel.n = r; sel.type = TEXT;
@@ -310,7 +310,7 @@ Selected find_closest_obj(double mx,double my)
  find_closest_text(mx,my);
  find_closest_net(mx,my);
  find_closest_element(mx,my);
- return sel;    //sel.type = 0 if nothing found
+ return sel;    /*sel.type = 0 if nothing found */
 }
 
 

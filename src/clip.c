@@ -23,12 +23,12 @@
 #include "xschem.h"
 
 
-// Cohen-Sutherland Algorithm for line clipping
+/* Cohen-Sutherland Algorithm for line clipping */
 #define UP 8
 #define DOWN 4
 #define RIGHT 2
 #define LEFT 1
-static inline int outcode(double x,double y)
+static int outcode(double x,double y)
 {
  register int code=0;
  if(y > xschem_h) code = UP;
@@ -47,8 +47,8 @@ int clip( double *xa,double *ya,double *xb,double *yb)
  outb=outcode(*xb, *yb);
  while(1)
  {
-  if(!(outa | outb)) return 1;  // line is all inside!
-  else if(outa & outb) return 0; // line is all outside!
+  if(!(outa | outb)) return 1;  /* line is all inside! */
+  else if(outa & outb) return 0; /* line is all outside! */
   else
   {
    outpoint=outa? outa:outb;
@@ -58,7 +58,7 @@ int clip( double *xa,double *ya,double *xb,double *yb)
      {x= *xa + (*xb-*xa) * (0 - *ya) / (*yb - *ya); y = 0;}
    else if(RIGHT & outpoint)
      {y= *ya + (*yb-*ya) * (xschem_w - *xa) / (*xb - *xa); x = xschem_w;}
-   // else if(LEFT & outpoint)
+   /* else if(LEFT & outpoint) */
    else
      {y= *ya + (*yb-*ya) * (0 - *xa) / (*xb - *xa); x = 0;}
    if(outpoint == outa)
@@ -72,7 +72,7 @@ int clip( double *xa,double *ya,double *xb,double *yb)
 
 int rectclip(int x1,int y1,int x2,int y2,
           double *xa,double *ya,double *xb,double *yb)
-// coordinates should be ordered, x1<x2,ya<yb and so on...
+/* coordinates should be ordered, x1<x2,ya<yb and so on... */
 {
  if(*xa>x2) return 0;
  if(*xb<x1) return 0;
@@ -86,7 +86,7 @@ int rectclip(int x1,int y1,int x2,int y2,
 }
 
 double dist_from_rect(double mx, double my, double x1, double y1, double x2, double y2)
-{// return square of dist...
+{/* return square of dist... */
  double dist, tmp;
  
  dist=mx-x1;
@@ -104,9 +104,9 @@ double dist_from_rect(double mx, double my, double x1, double y1, double x2, dou
 }
 
 double dist(double x1,double y1,double x2,double y2,double xa,double ya)
-// works if segments are given from left to right, i.e. x1<=x2
-// or y1<y2 for vert. lines .
-{// return square of dist...
+/* works if segments are given from left to right, i.e. x1<=x2 */
+/* or y1<y2 for vert. lines . */
+{/* return square of dist... */
  double distance1,distance2,distance3,denom,a,b,c,ab,xb,yb,tmp;
  double xa1,ya1,xa2,ya2;
 
@@ -123,7 +123,7 @@ double dist(double x1,double y1,double x2,double y2,double xa,double ya)
  denom = a*a + b*b;
  xb = (b*b*xa - ab*ya - c*a) / denom;
  yb = (a*a*ya - ab*xa - c*b) / denom;
-     // debug ...
+     /* debug ... */
      if(debug_var>=1) fprintf(errfp, "dist(): dist1 = %.16g dist2 = %.16g\n",distance1,distance2);
  if(x1<x2)
  {
@@ -131,7 +131,7 @@ double dist(double x1,double y1,double x2,double y2,double xa,double ya)
   {
    tmp = a*xa + b*ya + c;
    distance3 = tmp*tmp / denom;
-     // debug ...
+     /* debug ... */
      if(debug_var >=1) fprintf(errfp, "dist(); dist3 =  %.16g\n",distance3);
    return distance3;
   }
@@ -140,13 +140,13 @@ double dist(double x1,double y1,double x2,double y2,double xa,double ya)
    return MINOR(distance1,distance2);
   }
  }
- else // vert. lines
+ else /* vert. lines */
  {
   if(yb >y1 && yb < y2)
   {
   tmp = a*xa + b*ya + c;
   distance3 = tmp*tmp / denom;
-    // debug ...
+    /* debug ... */
     if(debug_var >=1) fprintf(errfp, "dist(): dist3 =  %.16g\n",distance3);
   return distance3;
   }
@@ -155,11 +155,11 @@ double dist(double x1,double y1,double x2,double y2,double xa,double ya)
    return MINOR(distance1,distance2);
   }
  }
-    // debug ...
+    /* debug ... */
     if(debug_var>=1) {fprintf(errfp, "dist(): Internal error, \n");exit(1);}
 }
 
-//obsolete, will be removed
+/*obsolete, will be removed */
 double rectdist(double x1,double y1,double x2,double y2,double xa,double ya)
 {
  double distance,dist;
@@ -180,9 +180,9 @@ double rectdist(double x1,double y1,double x2,double y2,double xa,double ya)
 }
 
 int touch(double x1,double y1,double x2,double y2,double xa,double ya)
-// improved touch check routine,
-// works if segments are given from left to right, i.e. x1<=x2
-// or y1<y2 for vert. lines .
+/* improved touch check routine, */
+/* works if segments are given from left to right, i.e. x1<=x2 */
+/* or y1<y2 for vert. lines . */
 {
  if( ((x2-x1)*(ya-y1) == (y2-y1)*(xa-x1)) )
  {

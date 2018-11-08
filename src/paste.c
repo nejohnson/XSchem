@@ -42,8 +42,8 @@ void merge_text(FILE *fd)
      textelement[i].font=NULL;
      textelement[i].sel=0;
      load_ascii_string(&textelement[i].prop_ptr,fd);
-     my_strdup(&textelement[i].font, get_tok_value(textelement[i].prop_ptr, "font", 0));//20171206
-     strlayer = get_tok_value(textelement[i].prop_ptr, "layer", 0); //20171206
+     my_strdup(&textelement[i].font, get_tok_value(textelement[i].prop_ptr, "font", 0));/*20171206 */
+     strlayer = get_tok_value(textelement[i].prop_ptr, "layer", 0); /*20171206 */
      if(strlayer[0]) textelement[i].layer = atoi(strlayer);
      else textelement[i].layer = -1;
 
@@ -73,14 +73,14 @@ void merge_box(FILE *fd)
     if(c>=cadlayers) {
       fprintf(errfp,"Rectangle layer > defined cadlayers, increase cadlayers\n");
       c=cadlayers-1;
-    } // 20150408
+    } /* 20150408 */
     check_box_storage(c);
     i=lastrect[c];
     ptr=rect[c];
     fscanf(fd, "%lf %lf %lf %lf ",&ptr[i].x1, &ptr[i].y1, 
        &ptr[i].x2, &ptr[i].y2);
     ptr[i].prop_ptr=NULL;
-    RECTORDER(ptr[i].x1, ptr[i].y1, ptr[i].x2, ptr[i].y2); // 20180108
+    RECTORDER(ptr[i].x1, ptr[i].y1, ptr[i].x2, ptr[i].y2); /* 20180108 */
     ptr[i].sel=0;
     load_ascii_string( &ptr[i].prop_ptr, fd);
     select_box(c,i, SELECTED, 1);
@@ -97,7 +97,7 @@ void merge_arc(FILE *fd)
     if(c>=cadlayers) {
       fprintf(errfp,"arc layer > defined cadlayers, increase cadlayers\n");
       c=cadlayers-1;
-    } // 20150408
+    } /* 20150408 */
     check_arc_storage(c);
     i=lastarc[c];
     ptr=arc[c];
@@ -121,7 +121,7 @@ void merge_polygon(FILE *fd)
     if(c>=cadlayers) {
       fprintf(errfp,"Rectangle layer > defined cadlayers, increase cadlayers\n");
       c=cadlayers-1;
-    } // 20150408
+    } /* 20150408 */
     check_polygon_storage(c);
     i=lastpolygon[c];
     ptr=polygon[c];
@@ -138,7 +138,7 @@ void merge_polygon(FILE *fd)
       fscanf(fd, "%lf %lf ",&(ptr[i].x[j]), &(ptr[i].y[j]));
     }
     load_ascii_string( &ptr[i].prop_ptr, fd);
-    if( !strcmp(get_tok_value(ptr[i].prop_ptr,"fill",0),"true") ) // 20181011
+    if( !strcmp(get_tok_value(ptr[i].prop_ptr,"fill",0),"true") ) /* 20181011 */
       ptr[i].fill =1;
     else
       ptr[i].fill =0;
@@ -156,13 +156,13 @@ void merge_line(FILE *fd)
     if(c>=cadlayers) {
       fprintf(errfp,"Rectangle layer > defined cadlayers, increase cadlayers\n");
       c=cadlayers-1;
-    } // 20150408
+    } /* 20150408 */
     check_line_storage(c);
     i=lastline[c];
     ptr=line[c];
     fscanf(fd, "%lf %lf %lf %lf ",&ptr[i].x1, &ptr[i].y1, 
        &ptr[i].x2, &ptr[i].y2);
-    ORDER(ptr[i].x1, ptr[i].y1, ptr[i].x2, ptr[i].y2); // 20180108
+    ORDER(ptr[i].x1, ptr[i].y1, ptr[i].x2, ptr[i].y2); /* 20180108 */
 
     ptr[i].prop_ptr=NULL;
     ptr[i].sel=0;
@@ -190,7 +190,7 @@ void merge_inst(int k,FILE *fd)
     fscanf(fd, "%lf %lf %d %d",&ptr[i].x0, &ptr[i].y0,&ptr[i].rot,
      &ptr[i].flip);
     ptr[i].prop_ptr=NULL;
-    ptr[i].instname=NULL; // 20150411
+    ptr[i].instname=NULL; /* 20150411 */
     ptr[i].node=NULL;
 
 
@@ -198,9 +198,9 @@ void merge_inst(int k,FILE *fd)
     ptr[i].sel=0;
     load_ascii_string(&prop_ptr,fd);
     new_prop_string(&inst_ptr[i].prop_ptr, prop_ptr,k);
-    my_strdup2(&inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); // 20150409
-    // the final tmp argument is zero for the 1st call and used in
-    // new_prop_string() for cleaning some internal caches.
+    my_strdup2(&inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); /* 20150409 */
+    /* the final tmp argument is zero for the 1st call and used in */
+    /* new_prop_string() for cleaning some internal caches. */
     hash_proplist(inst_ptr[i].prop_ptr,0);
     lastinst++;
     modified=1;
@@ -225,9 +225,9 @@ void match_merged_inst(int old)
      if(symbol == -1)
      {
       if(debug_var>=1) fprintf(errfp, "merge_inst(): missing symbol, skipping...\n");
-      hash_proplist(inst_ptr[i].prop_ptr , 1); // 06052001 remove props from hash table
-      my_strdup(&inst_ptr[i].prop_ptr, NULL);  // 06052001 remove properties
-      my_strdup(&inst_ptr[i].name, NULL);      // 06052001 remove symname  
+      hash_proplist(inst_ptr[i].prop_ptr , 1); /* 06052001 remove props from hash table */
+      my_strdup(&inst_ptr[i].prop_ptr, NULL);  /* 06052001 remove properties */
+      my_strdup(&inst_ptr[i].name, NULL);      /* 06052001 remove symname   */
       missing++;
       continue;
      }
@@ -238,7 +238,7 @@ void match_merged_inst(int old)
       inst_ptr[i-missing] = inst_ptr[i];
       inst_ptr[i].prop_ptr=NULL;
       delete_inst_node(i);
-      inst_ptr[i].ptr=-1;  //04112003 was 0
+      inst_ptr[i].ptr=-1;  /*04112003 was 0 */
       inst_ptr[i].flags=0;
       inst_ptr[i].name=NULL;
      }
@@ -250,8 +250,8 @@ void match_merged_inst(int old)
      select_element(i,SELECTED,1);
      symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1,
                        &inst_ptr[i].x2, &inst_ptr[i].y2);
-     // type=get_tok_value(instdef[inst_ptr[i].ptr].prop_ptr,"type",0); // 20150409
-     type=instdef[inst_ptr[i].ptr].type; // 20150409
+     /* type=get_tok_value(instdef[inst_ptr[i].ptr].prop_ptr,"type",0); */
+     type=instdef[inst_ptr[i].ptr].type; /* 20150409 */
      cond= strcmp(type,"label") && strcmp(type,"ipin") &&
            strcmp(type,"opin") &&  strcmp(type,"iopin");
      if(cond) inst_ptr[i].flags|=2;
@@ -259,31 +259,31 @@ void match_merged_inst(int old)
     }
 }
 
-// merge selection if selection_load=1, otherwise ask for filename
-// selection_load:
-//			0: ask filename to merge
-//                         if ext=="" else use ext as name  ... 20071215
-//			1: merge selection
-//			2: merge clipboard
+/* merge selection if selection_load=1, otherwise ask for filename */
+/* selection_load: */
+/*                      0: ask filename to merge */
+/*                         if ext=="" else use ext as name  ... 20071215 */
+/*                      1: merge selection */
+/*                      2: merge clipboard */
 void merge_file(int selection_load, char ext[])
 {
     FILE *fd;
     int k=0, old;
     int endfile=0;
-    static char *name=NULL; // 20161122 overflow safe
-    char name1[PATH_MAX]; // overflow safe
-    char tmp[256]; // 20161122 overflow safe
+    static char *name=NULL; /* 20161122 overflow safe */
+    char name1[PATH_MAX]; /* overflow safe */
+    char tmp[256]; /* 20161122 overflow safe */
     static char *aux_ptr=NULL;
 
     if(selection_load==0)
     {
-     if(!strcmp(ext,"")) {	// 20071215
+     if(!strcmp(ext,"")) {      /* 20071215 */
        my_snprintf(tmp, S(tmp), "load_file_dialog {Merge file} {.sch.sym} INITIALLOADDIR", ext);
        tcleval(tmp);
        if(!strcmp(Tcl_GetStringResult(interp),"")) return;
        my_strdup(&name, (char *)Tcl_GetStringResult(interp)); /* 20180925 */
      } 
-     else {			// 20071215
+     else {                     /* 20071215 */
        my_strdup(&name,ext);
      }
      if(debug_var>=1) fprintf(errfp, "merge_file(): sch=%d name=%s\n",currentsch,name);
@@ -291,16 +291,16 @@ void merge_file(int selection_load, char ext[])
     else if(selection_load==1)
     {
      my_strdup(&name, home_dir);
-     my_strcat(&name,"/.xschem_selection.sch"); // 20160502 changed PWD to HOME
+     my_strcat(&name,"/.xschem_selection.sch"); /* 20160502 changed PWD to HOME */
     }
-    else    // clipboard load
+    else    /* clipboard load */
     {
       my_strdup(&name, home_dir);
       my_strcat(&name,"/.xschem_clipboard.sch");
     }
     if( (fd=fopen(name,"r"))!= NULL)
     {
-     push_undo(); // 20150327
+     push_undo(); /* 20150327 */
      unselect_all();
      old=lastinst;
      while(!endfile)
@@ -311,7 +311,7 @@ void merge_file(int selection_load, char ext[])
        case 'V':
         load_ascii_string(&aux_ptr, fd);
         break;
-       case 'E': // 20180912
+       case 'E': /* 20180912 */
         load_ascii_string(&aux_ptr, fd);
         break;
        case 'S':
@@ -346,8 +346,8 @@ void merge_file(int selection_load, char ext[])
         merge_inst(k++,fd);
         break;
        default:
-        // if(debug_var>=1) fprintf(errfp, "merge_file(): unknown line, assuming EOF\n");
-        // endfile=1;
+        /* if(debug_var>=1) fprintf(errfp, "merge_file(): unknown line, assuming EOF\n"); */
+        /* endfile=1; */
         read_line(fd); /* read rest of line and discard */
         break;
       }

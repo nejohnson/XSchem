@@ -37,28 +37,6 @@ static unsigned int hash(char *tok)
   return hash;
 }
 
-/*
-static unsigned int hash(char *tok)
-{
-  unsigned int hash = 5381;
-  int c;
-
-  while (( c = *(tok++) ))
-    hash = ((hash << 5) + hash) ^ c; 
-  return hash;
-}
-
-static unsigned int hash(char *tok)
-{
- register unsigned int h=0;
- while(*tok) {
-   h^=*tok++; // 20161221 xor
-   h=(h>>5) | (h<<(8*sizeof(unsigned int)-5)); // 20161221 rotate
- }
-
- return h;
-}
-*/
 
 struct node_hashentry **get_node_table_ptr(void)
 {
@@ -165,7 +143,7 @@ void print_verilog_signals(FILE *fd)
     {
      for(j=mult-1;j>=0;j--)
      { 
-      if(ptr->verilog_type && ptr->verilog_type[0]) //09112003
+      if(ptr->verilog_type && ptr->verilog_type[0]) /*09112003 */
       { 
          fprintf(fd, "%s ", ptr->verilog_type);
       }
@@ -179,7 +157,7 @@ void print_verilog_signals(FILE *fd)
     else
     {
 
-     if(ptr->verilog_type && ptr->verilog_type[0])  //09112003
+     if(ptr->verilog_type && ptr->verilog_type[0])  /*09112003 */
      { 
         fprintf(fd, "%s ", ptr->verilog_type);
      }
@@ -197,8 +175,8 @@ void print_verilog_signals(FILE *fd)
 }
 
 
-// wrapper to node_hash_lookup that handles buses
-// warning, in case of buses return only pointer to first bus element
+/* wrapper to node_hash_lookup that handles buses */
+/* warning, in case of buses return only pointer to first bus element */
 struct node_hashentry *bus_hash_lookup(char *token, char *dir,int remove,int port,
        char *sig_type,char *verilog_type, char *value, char *class)
 {
@@ -225,33 +203,33 @@ struct node_hashentry *bus_hash_lookup(char *token, char *dir,int remove,int por
   c=(*string_ptr);
   if(c==','|| c=='\0')
   {
-    *string_ptr='\0';  // set end string at comma position....
-    // insert one bus element at a time in hash table
+    *string_ptr='\0';  /* set end string at comma position.... */
+    /* insert one bus element at a time in hash table */
     ptr1=node_hash_lookup(start, dir, remove,port, sig_type, verilog_type, value, class, token);
     if(!ptr2) ptr2=ptr1;
     if(debug_var >=3) fprintf(errfp, "bus_hash_lookup(): processing node: %s\n", start);
-    *string_ptr=c;     // ....restore original char
+    *string_ptr=c;     /* ....restore original char */
     start=string_ptr+1;
   }
   if(c==0) break;
   string_ptr++;
  }
- // if something found return first pointer
+ /* if something found return first pointer */
  return ptr2;
 }
 
 
 struct node_hashentry *node_hash_lookup(char *token, char *dir,int remove,int port,
        char *sig_type, char *verilog_type, char *value, char *class, char *orig_tok)
-//    token        dir      remove    ... what ...
-// --------------------------------------------------------------------------
-// "whatever"     "in"/"out"    0	insert in hash table if not in and return NULL
-//					if already present just return entry address 
-//					and update in/out fields sum up port field
-//					return NULL otherwise
-//
-// "whatever"     whatever      1	delete entry if found return NULL
-// "whatever"     whatever      2       only look up element, dont insert
+/*    token        dir      remove    ... what ... */
+/* -------------------------------------------------------------------------- */
+/* "whatever"     "in"/"out"    0       insert in hash table if not in and return NULL */
+/*                                      if already present just return entry address  */
+/*                                      and update in/out fields sum up port field */
+/*                                      return NULL otherwise */
+/* */
+/* "whatever"     whatever      1       delete entry if found return NULL */
+/* "whatever"     whatever      2       only look up element, dont insert */
 {
  unsigned int hashcode, index;
  struct node_hashentry *entry, *saveptr, **preventry;
@@ -260,7 +238,7 @@ struct node_hashentry *node_hash_lookup(char *token, char *dir,int remove,int po
  struct drivers d;
 
  if(debug_var>=3) fprintf(errfp, "node_hash_lookup(): called with: %s dir=%s remove=%d port=%d\n",
-	token, dir, remove, port);
+        token, dir, remove, port);
  d.in=d.out=d.inout=0;
  if(!strcmp(dir,"in") )  d.in=1;
  else if(!strcmp(dir,"out") ) d.out=1;
@@ -273,9 +251,9 @@ struct node_hashentry *node_hash_lookup(char *token, char *dir,int remove,int po
  preventry=&table[index];
  while(1)
  {
-  if( !entry )			// empty slot
+  if( !entry )                  /* empty slot */
   {
-   if( (remove==0) )		// insert data
+   if( (remove==0) )            /* insert data */
    {
     s=sizeof( struct node_hashentry );
     ptr= my_malloc(s );
@@ -284,11 +262,11 @@ struct node_hashentry *node_hash_lookup(char *token, char *dir,int remove,int po
     entry->token = entry->sig_type = entry->verilog_type = 
                    entry->value = entry->class = entry->orig_tok = NULL;
     my_strdup(&(entry->token),token);
-    if(sig_type &&sig_type[0]) my_strdup( &(entry->sig_type), sig_type); // 24092001
-    if(verilog_type &&verilog_type[0]) my_strdup( &(entry->verilog_type), verilog_type); // 09112003
-    if(class && class[0]) my_strdup( &(entry->class), class); // 07102001
-    if(orig_tok && orig_tok[0]) my_strdup( &(entry->orig_tok), orig_tok); // 08102001
-    if(value && value[0]) my_strdup( &(entry->value), value); // 27092001
+    if(sig_type &&sig_type[0]) my_strdup( &(entry->sig_type), sig_type); /* 24092001 */
+    if(verilog_type &&verilog_type[0]) my_strdup( &(entry->verilog_type), verilog_type); /* 09112003 */
+    if(class && class[0]) my_strdup( &(entry->class), class); /* 07102001 */
+    if(orig_tok && orig_tok[0]) my_strdup( &(entry->orig_tok), orig_tok); /* 08102001 */
+    if(value && value[0]) my_strdup( &(entry->value), value); /* 27092001 */
     entry->d.port=d.port;
     entry->d.in=d.in;
     entry->d.out=d.out;
@@ -298,81 +276,52 @@ struct node_hashentry *node_hash_lookup(char *token, char *dir,int remove,int po
     if(debug_var>=3) fprintf(errfp, "node_hash_lookup(): hashing %s : value=%s\n\n",
            entry->token, entry->value? entry->value:"NULL");
     if(debug_var>=3) fprintf(errfp, "node_hash_lookup(): hashing %s in=%d out=%d inout=%d port=%d\n",
-    		token, d.in, d.out, d.inout, d.port);
+                token, d.in, d.out, d.inout, d.port);
    }
-   return NULL; // whether inserted or not return NULL since it was not in
+   return NULL; /* whether inserted or not return NULL since it was not in */
   }
-  if( entry -> hash==hashcode && strcmp(token,entry->token)==0 ) // found matching tok
+  if( entry -> hash==hashcode && strcmp(token,entry->token)==0 ) /* found matching tok */
   {
-   if(remove==1) 		// remove token from the hash table ...
+   if(remove==1)                /* remove token from the hash table ... */
    {
     saveptr=entry->next;
     if(entry->token) my_free(& entry->token);
-    if(entry->verilog_type) my_free(& entry->verilog_type); // 09112003
-    if(entry->sig_type) my_free(& entry->sig_type); // 24092001
-    if(entry->class) my_free(& entry->class); // 07102001
-    if(entry->orig_tok) my_free(& entry->orig_tok); // 07102001
-    if(entry->value) my_free(& entry->value); // 27092001
+    if(entry->verilog_type) my_free(& entry->verilog_type); /* 09112003 */
+    if(entry->sig_type) my_free(& entry->sig_type); /* 24092001 */
+    if(entry->class) my_free(& entry->class); /* 07102001 */
+    if(entry->orig_tok) my_free(& entry->orig_tok); /* 07102001 */
+    if(entry->value) my_free(& entry->value); /* 27092001 */
     my_free(&entry);
     *preventry=saveptr;
     return NULL;
    }
-   else // found matching entry, return the address and update in/out count
+   else /* found matching entry, return the address and update in/out count */
    {
     entry->d.port+=port;
     entry->d.in+=d.in;
     entry->d.out+=d.out;
     entry->d.inout+=d.inout;
     if(sig_type && sig_type[0] !='\0')
-      my_strdup( &(entry->sig_type), sig_type); // 24092001
+      my_strdup( &(entry->sig_type), sig_type); /* 24092001 */
     if(verilog_type && verilog_type[0] !='\0')
-      my_strdup( &(entry->verilog_type), verilog_type); // 09112003
+      my_strdup( &(entry->verilog_type), verilog_type); /* 09112003 */
     if(value && value[0] !='\0')
-      my_strdup( &(entry->value), value); // 27092001
+      my_strdup( &(entry->value), value); /* 27092001 */
     if(debug_var>=3) fprintf(errfp, "node_hash_lookup(): hashing %s : value=%s\n\n",
            entry->token, entry->value? entry->value:"NULL");
     return entry;
    }
   } 
-  preventry=&entry->next; // descend into the list.
+  preventry=&entry->next; /* descend into the list. */
   entry = entry->next;
  }
 }
-
-
-/*
-void insert_missing_pin()
-{
-
- struct node_hashentry *entry;
- int i;
-
- for(i=0;i<HASHSIZE;i++)
- {
-  entry = table[i];
-  while(entry)
-  {
-   if(entry->d.inout ==0 && entry->d.in>0 && entry->d.out ==0) 
-   {
-    if(debug_var>=1) fprintf(errfp, "insert_missing_pin(): missing ipin: %s\n", entry->token);
-   }
-
-   if(entry->d.inout ==0 && entry->d.in==0 && entry->d.out >0) 
-   {
-    if(debug_var>=1) fprintf(errfp, "insert_missing_pin(): missing opin: %s\n", entry->token);
-   }
-
-   entry = entry->next;
-  }
- }
-}
-*/
 
 void traverse_node_hash()
 {
  int i;
  struct node_hashentry *entry;
- char str[2048]; // 20161122 overflow safe
+ char str[2048]; /* 20161122 overflow safe */
 
  if(!show_erc)return;
  for(i=0;i<HASHSIZE;i++)
@@ -394,7 +343,7 @@ void traverse_node_hash()
      if(incr_hilight) hilight_color++;
      statusmsg(str,2);
    }
-   else if(entry->d.out >=2 && entry->d.port>=0)  //  era d.port>=2   03102001
+   else if(entry->d.out >=2 && entry->d.port>=0)  /*  era d.port>=2   03102001 */
    {
      my_snprintf(str, S(str), "shorted output node: %s", entry->token);
      if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color,0);
@@ -408,7 +357,7 @@ void traverse_node_hash()
      if(incr_hilight) hilight_color++;
      statusmsg(str,2);
    }
-   else if(entry->d.out >=2 && entry->d.inout == 0 && entry->d.port>=0)  //  era d.port>=2   03102001
+   else if(entry->d.out >=2 && entry->d.inout == 0 && entry->d.port>=0)  /*  era d.port>=2   03102001 */
    {
      my_snprintf(str, S(str), "shorted output node: %s", entry->token);
      if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color,0);
@@ -417,7 +366,7 @@ void traverse_node_hash()
    }
 
     if(debug_var>=1) fprintf(errfp, "traverse_node_hash(): node: %s in=%d out=%d inout=%d port=%d\n", 
-	entry->token, entry->d.in, entry->d.out, entry->d.inout, entry->d.port);
+        entry->token, entry->d.in, entry->d.out, entry->d.inout, entry->d.port);
 
    entry = entry->next;
   }
@@ -434,37 +383,18 @@ static struct node_hashentry *free_hash_entry(struct node_hashentry *entry)
     n_elements++; collisions++;
     tmp = entry->next;
     if(entry->token) my_free(&entry->token);
-    if(entry->verilog_type) my_free(&entry->verilog_type); // 09112003
-    if(entry->sig_type) my_free(&entry->sig_type); // 24092001
-    if(entry->class) my_free(&entry->class); // 07102001
-    if(entry->orig_tok) my_free(&entry->orig_tok); // 07102001
-    if(entry->value) my_free(&entry->value); // 27092001
+    if(entry->verilog_type) my_free(&entry->verilog_type); /* 09112003 */
+    if(entry->sig_type) my_free(&entry->sig_type); /* 24092001 */
+    if(entry->class) my_free(&entry->class); /* 07102001 */
+    if(entry->orig_tok) my_free(&entry->orig_tok); /* 07102001 */
+    if(entry->value) my_free(&entry->value); /* 27092001 */
     my_free(&entry);
     entry = tmp;
   }
   return NULL;
 }
 
-/*
-static struct node_hashentry *free_hash_entry(struct node_hashentry *entry)
-{
- if(entry) 
- {
-  n_elements++; collisions++;
-  entry->next = free_hash_entry( entry->next );
-    if(entry->token) my_free(& entry->token);
-    if(entry->verilog_type) my_free(& entry->verilog_type); // 09112003
-    if(entry->sig_type) my_free(& entry->sig_type); // 24092001
-    if(entry->class) my_free(& entry->class); // 07102001
-    if(entry->orig_tok) my_free(& entry->orig_tok); // 07102001
-    if(entry->value) my_free(& entry->value); // 27092001
-    my_free(&entry);
- }
- return NULL;
-}
-*/
-
-void free_node_hash(void) // remove the whole hash table 
+void free_node_hash(void) /* remove the whole hash table  */
 {
  int i;
   

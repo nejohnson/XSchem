@@ -33,7 +33,7 @@ typedef struct {
 
 static Svg_color *svg_colors;
 
-static double svg_linew;      // current width of lines / rectangles
+static double svg_linew;      /* current width of lines / rectangles */
 static Svg_color svg_stroke;
 
 static void restore_lw(void) 
@@ -150,49 +150,41 @@ static void svg_draw_string(int gctext,  char *str,
  int pos=0,cc,pos2=0;
  int i; 
 
-if(str==NULL) return;
-// if(xscale*FONTWIDTH* mooz<1)
-// {
-//   if(debug_var>=2) fprintf(errfp, "svg_draw_string(): xscale=%g zoom=%g \n",xscale,zoom);
-//  //svg_drawrect(gctext, rx1,ry1,rx2,ry2);
-// }
- else
- {
-  #ifdef HAS_CAIRO
-  text_bbox_nocairo(str, xscale, yscale, rot, flip, x1,y1, &rx1,&ry1,&rx2,&ry2);
-  #else
-  text_bbox(str, xscale, yscale, rot, flip, x1,y1, &rx1,&ry1,&rx2,&ry2);
-  #endif
+ if(str==NULL) return;
+ #ifdef HAS_CAIRO
+ text_bbox_nocairo(str, xscale, yscale, rot, flip, x1,y1, &rx1,&ry1,&rx2,&ry2);
+ #else
+ text_bbox(str, xscale, yscale, rot, flip, x1,y1, &rx1,&ry1,&rx2,&ry2);
+ #endif
 
-  if(!textclip(areax1,areay1,areax2,areay2,rx1,ry1,rx2,ry2)) return;
-  x1=rx1;y1=ry1;
-  if(rot&1) {y1=ry2;rot=3;}
-  else rot=0;
-  flip = 0; yy=y1;
-  while(str[pos2])
+ if(!textclip(areax1,areay1,areax2,areay2,rx1,ry1,rx2,ry2)) return;
+ x1=rx1;y1=ry1;
+ if(rot&1) {y1=ry2;rot=3;}
+ else rot=0;
+ flip = 0; yy=y1;
+ while(str[pos2])
+ {
+  cc = (int)str[pos2++];
+  if(cc=='\n') 
   {
-   cc = (int)str[pos2++];
-   if(cc=='\n') 
-   {
-    yy+=(FONTHEIGHT+FONTDESCENT+FONTWHITESPACE)*
-     yscale;
-    pos=0;
-    continue;
-   } 
-   a = pos*(FONTWIDTH+FONTWHITESPACE);
-   for(i=0;i<character[cc][0]*4;i+=4)
-   {
-    curr_x1 = ( character[cc][i+1]+ a ) * xscale + x1;
-    curr_y1 = ( character[cc][i+2] ) * yscale+yy;
-    curr_x2 = ( character[cc][i+3]+ a ) * xscale + x1;
-    curr_y2 = ( character[cc][i+4] ) * yscale+yy;
-    ROTATION(x1,y1,curr_x1,curr_y1,rx1,ry1);
-    ROTATION(x1,y1,curr_x2,curr_y2,rx2,ry2);
-    ORDER(rx1,ry1,rx2,ry2);
-    svg_drawline(gctext,  rx1, ry1, rx2, ry2);
-   }
-   pos++;
+   yy+=(FONTHEIGHT+FONTDESCENT+FONTWHITESPACE)*
+    yscale;
+   pos=0;
+   continue;
+  } 
+  a = pos*(FONTWIDTH+FONTWHITESPACE);
+  for(i=0;i<character[cc][0]*4;i+=4)
+  {
+   curr_x1 = ( character[cc][i+1]+ a ) * xscale + x1;
+   curr_y1 = ( character[cc][i+2] ) * yscale+yy;
+   curr_x2 = ( character[cc][i+3]+ a ) * xscale + x1;
+   curr_y2 = ( character[cc][i+4] ) * yscale+yy;
+   ROTATION(x1,y1,curr_x1,curr_y1,rx1,ry1);
+   ROTATION(x1,y1,curr_x2,curr_y2,rx2,ry2);
+   ORDER(rx1,ry1,rx2,ry2);
+   svg_drawline(gctext,  rx1, ry1, rx2, ry2);
   }
+  pos++;
  }
 }
 
@@ -203,7 +195,7 @@ static void svg_drawgrid()
  double delta,tmp;
  if(!draw_grid) return;
  delta=CADGRID* mooz;
- while(delta<CADGRIDTHRESHOLD) delta*=CADGRIDMULTIPLY;	// <-- to be improved,but works
+ while(delta<CADGRIDTHRESHOLD) delta*=CADGRIDMULTIPLY;  /* <-- to be improved,but works */
  x = xorigin* mooz;y = yorigin* mooz;
  set_svg_colors(SELLAYER);
  if(y>areay1 && y<areay2)
@@ -228,9 +220,9 @@ static void svg_drawgrid()
 
 
 static void svg_draw_symbol_outline(int n,int layer,int tmp_flip, int rot, 
-	double xoffset, double yoffset) 
-			    // draws current layer only, should be called within 
-{		            // a "for(i=0;i<cadlayers;i++)" loop
+        double xoffset, double yoffset) 
+                            /* draws current layer only, should be called within  */
+{                           /* a "for(i=0;i<cadlayers;i++)" loop */
  int j;
  double x0,y0,x1,y1,x2,y2;
  int flip;
@@ -252,7 +244,7 @@ static void svg_draw_symbol_outline(int n,int layer,int tmp_flip, int rot,
    }
    else inst_ptr[n].flags&=~1;
 
-   // following code handles different text color for labels/pins 06112002
+   /* following code handles different text color for labels/pins 06112002 */
 
   }
   else if(inst_ptr[n].flags&1)
@@ -276,10 +268,10 @@ static void svg_draw_symbol_outline(int n,int layer,int tmp_flip, int rot,
     svg_drawline(layer, x0+x1, y0+y1, x0+x2, y0+y2);
    }
 
-   for(j=0;j< (inst_ptr[n].ptr+instdef)->polygons[layer];j++) // 20171115
+   for(j=0;j< (inst_ptr[n].ptr+instdef)->polygons[layer];j++) /* 20171115 */
    {
      polygon = ((inst_ptr[n].ptr+instdef)->polygonptr[layer])[j];
-     {   // scope block so we declare some auxiliary arrays for coord transforms. 20171115
+     {   /* scope block so we declare some auxiliary arrays for coord transforms. 20171115 */
        int k;
        double x[polygon.points];
        double y[polygon.points];
@@ -307,7 +299,7 @@ static void svg_draw_symbol_outline(int n,int layer,int tmp_flip, int rot,
     for(j=0;j< (inst_ptr[n].ptr+instdef)->texts;j++)
     {
      text = (inst_ptr[n].ptr+instdef)->txtptr[j];
-     // if(text.xscale*FONTWIDTH* mooz<1) continue;
+     /* if(text.xscale*FONTWIDTH* mooz<1) continue; */
      text.txt_ptr= 
        translate(n, text.txt_ptr);
      ROTATION(0.0,0.0,text.x0,text.y0,x1,y1);
@@ -318,14 +310,14 @@ static void svg_draw_symbol_outline(int n,int layer,int tmp_flip, int rot,
     }
     restore_lw();
    }
-   Tcl_SetResult(interp,"",TCL_STATIC);  //26102003
+   Tcl_SetResult(interp,"",TCL_STATIC);  /*26102003 */
 
 }
 
 
 static void fill_svg_colors()
 {
- char s[200]; // overflow safe 20161122
+ char s[200]; /* overflow safe 20161122 */
  unsigned int i,c;
  if(debug_var>=1) {
    tcleval( "puts $svg_colors"); 
@@ -352,7 +344,7 @@ void svg_draw(void)
  int c,i; 
  int filledrect;
  int old_grid;
- int modified_save; // 20161121
+ int modified_save; /* 20161121 */
 
  svg_colors=my_calloc(cadlayers, sizeof(Svg_color));
  if(svg_colors==NULL){
@@ -371,15 +363,15 @@ void svg_draw(void)
 
 
  modified_save=modified;
- push_undo(); // 20161121
- trim_wires();    // 20161121 add connection boxes on wires but undo at end
+ push_undo(); /* 20161121 */
+ trim_wires();    /* 20161121 add connection boxes on wires but undo at end */
  
   
  fd=fopen("plot.svg", "w");
 
  fprintf(fd, "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"%g\" height=\"%g\" version=\"1.1\">\n", dx, dy);
 
- fprintf(fd, "<style type=\"text/css\">\n");  // use css stylesheet 20121119
+ fprintf(fd, "<style type=\"text/css\">\n");  /* use css stylesheet 20121119 */
  for(i=0;i<cadlayers;i++){
    
    filledrect=0;
@@ -387,7 +379,7 @@ void svg_draw(void)
      filledrect=1;
    }
    svg_linew = lw_double;
-   svg_linew*=0.7;   // have a little smaller line widths
+   svg_linew*=0.7;   /* have a little smaller line widths */
    fprintf(fd, ".l%d{\n", i);
    if(filledrect) fprintf(fd, "  fill: #%02x%02x%02x;\n", svg_colors[i].red, svg_colors[i].green, svg_colors[i].blue);
    else           fprintf(fd, "  fill: none;\n");
@@ -400,12 +392,12 @@ void svg_draw(void)
  fprintf(fd, "</style>\n");
 
  if(color_ps) {
-   // black background
+   /* black background */
    fprintf(fd,"<rect x=\"%g\" y=\"%g\" width=\"%g\" height=\"%g\" fill=\"rgb(%d,%d,%d)\" stroke=\"rgb(%d,%d,%d)\" stroke-width=\"%g\" />\n",
                    0.0,      0.0,      dx,           dy,    0, 0, 0,
                                                             0, 0, 0, svg_linew);
  } else {
-   // white background
+   /* white background */
    fprintf(fd,"<rect x=\"%g\" y=\"%g\" width=\"%g\" height=\"%g\" fill=\"rgb(%d,%d,%d)\" stroke=\"rgb(%d,%d,%d)\" stroke-width=\"%g\" />\n",
                    0.0,      0.0,      dx,           dy,    255, 255, 255,
                                                             255, 255, 255, svg_linew);
@@ -460,8 +452,8 @@ void svg_draw(void)
  draw_grid=old_grid;
  my_free(&svg_colors);
 
- pop_undo(0); // 20161121
- modified=modified_save;  // 20161121
+ pop_undo(0); /* 20161121 */
+ modified=modified_save;  /* 20161121 */
 
 }
 

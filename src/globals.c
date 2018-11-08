@@ -22,8 +22,8 @@
 
 #include "xschem.h"
 
-int help=0; // help option set to global scope, printing help is deferred
-            // when configuration ~/.schem has been read 20140406
+int help=0; /* help option set to global scope, printing help is deferred */
+            /* when configuration ~/.schem has been read 20140406 */
 int fullscreen=0;
 int semaphore=0; /* needed at global scope as it is set by tcl */
 int unzoom_nodrift=1;
@@ -33,130 +33,130 @@ int sym_txt=1;
 int rainbow_colors=0;
 int manhattan_lines=0;
 FILE *errfp; 
-char *filename=NULL; // filename given on cmdline
+char *filename=NULL; /* filename given on cmdline */
 char home_dir[PATH_MAX]; /* home dir obtained via getpwuid */
 char pwd_dir[PATH_MAX];  /* obtained via getcwd() */
 int load_initfile=1;
 int persistent_command=0; /* remember last command 20181022 */
-int quit=0;  // set from process_options (ex netlist from cmdline and quit)
-int debug_var=-10;  // will be set to 0 in xinit.c
+int quit=0;  /* set from process_options (ex netlist from cmdline and quit) */
+int debug_var=-10;  /* will be set to 0 in xinit.c */
 int do_print=0;
 int no_readline=0;
 Colormap colormap;
-int lw=0; // line width
-double lw_double=0.0; // line width
-int fill=1; // filled rectangles
-int draw_pixmap=1; // use pixmap for double buffer
+int lw=0; /* line width */
+double lw_double=0.0; /* line width */
+int fill=1; /* filled rectangles */
+int draw_pixmap=1; /* use pixmap for double buffer */
 int draw_window=0; /* 20181009 */
 int draw_grid=1;
 int current_type=SCHEMATIC;
-int change_lw=0; // allow change linewidth
+int change_lw=0; /* allow change linewidth */
 int incr_hilight=1;
 int auto_hilight=0;
-unsigned int color_index[256]; // layer color lookup table
-unsigned int rectcolor ; // this is the currently used layer
-unsigned long ui_state = 0; // this signals that we are doing a net place,panning etc.
-			  // used to prevent nesting of some commands
+unsigned int color_index[256]; /* layer color lookup table */
+unsigned int rectcolor ; /* this is the currently used layer */
+unsigned long ui_state = 0; /* this signals that we are doing a net place,panning etc. */
+                          /* used to prevent nesting of some commands */
 
-char *undo_dirname = NULL; // 20150327
+char *undo_dirname = NULL; /* 20150327 */
 int cur_undo_ptr=0;
 int tail_undo_ptr=0;
 int head_undo_ptr=0;
 int max_undo=80;
-int draw_dots=1; //20150331
-int draw_single_layer=-1; // 20151117
+int draw_dots=1; /*20150331 */
+int draw_single_layer=-1; /* 20151117 */
 
 unsigned short enable_stretch=0;
 int cadlayers=0;
 int need_rebuild_selected_array=1;
-double xxtmp; // temporary for variable swaps;
-Window window; // window is the drawing area, topwindow is the root win
+double xxtmp; /* temporary for variable swaps; */
+Window window; /* window is the drawing area, topwindow is the root win */
 Window parent_of_topwindow;
 int depth;
-int *fill_type; //20171117 for every layer: 0: no fill, 1, solid fill, 2: stipple fill
+int *fill_type; /*20171117 for every layer: 0: no fill, 1, solid fill, 2: stipple fill */
 unsigned char **pixdata;
-unsigned char pixdata_init[22][32]={	// fill patterns... indexed by laynumb.
-{0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, 0xff,//0
+unsigned char pixdata_init[22][32]={    /* fill patterns... indexed by laynumb. */
+{0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, 0xff,/*0 */
  0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff},
-{0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, 0xff,//1
+{0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, 0xff,/*1 */
  0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff},
-{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},//2
-{//3
+{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},/*2 */
+{/*3 */
    0x55, 0x55, 0x00, 0x00, 0xaa, 0xaa, 0x00, 0x00, 0x55, 0x55, 0x00, 0x00, 0xaa, 0xaa, 0x00, 0x00,
    0x55, 0x55, 0x00, 0x00, 0xaa, 0xaa, 0x00, 0x00, 0x55, 0x55, 0x00, 0x00, 0xaa, 0xaa, 0x00, 0x00
 },
-{0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, 0xff,//4
+{0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, 0xff,/*4 */
  0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff},
-{0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, 0xff,//5
+{0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, 0xff,/*5 */
  0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff},
-{//6
+{/*6 */
    0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x10, 0x00, 0x00,
    0x00, 0x00, 0x00, 0x00, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
    0x10, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 },
-{//7
+{/*7 */
    0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
    0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00,
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02
 },
-{//8
+{/*8 */
    0x11, 0x11, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x11, 0x11, 0x00, 0x00,
    0x00, 0x00, 0x00, 0x00, 0x11, 0x11, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
    0x11, 0x11, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 },
-{//9
+{/*9 */
    0x04, 0x41, 0x00, 0x00, 0x10, 0x04, 0x00, 0x00, 0x41, 0x10, 0x00, 0x00,
    0x04, 0x41, 0x00, 0x00, 0x10, 0x04, 0x00, 0x00, 0x41, 0x10, 0x00, 0x00,
    0x04, 0x41, 0x00, 0x00, 0x10, 0x04, 0x00, 0x00
 },
-{0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, 0xff,//10
+{0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, 0xff,/*10 */
  0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff},
-{//11
+{/*11 */
    0x11, 0x11, 0x00, 0x00, 0x44, 0x44, 0x00, 0x00, 0x11, 0x11, 0x00, 0x00,
    0x44, 0x44, 0x00, 0x00, 0x11, 0x11, 0x00, 0x00, 0x44, 0x44, 0x00, 0x00,
    0x11, 0x11, 0x00, 0x00, 0x44, 0x44, 0x00, 0x00
 },
-{//12
+{/*12 */
    0x04, 0x04, 0x02, 0x02, 0x01, 0x01, 0x80, 0x80, 0x40, 0x40, 0x20, 0x20,
    0x10, 0x10, 0x08, 0x08, 0x04, 0x04, 0x02, 0x02, 0x01, 0x01, 0x80, 0x80,
    0x40, 0x40, 0x20, 0x20, 0x10, 0x10, 0x08, 0x08
 },
-{//13
+{/*13 */
    0x11, 0x11, 0x22, 0x22, 0x44, 0x44, 0x88, 0x88, 0x11, 0x11, 0x22, 0x22, 0x44, 0x44, 0x88, 0x88,
    0x11, 0x11, 0x22, 0x22, 0x44, 0x44, 0x88, 0x88, 0x11, 0x11, 0x22, 0x22, 0x44, 0x44, 0x88, 0x88
 },
-{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},//14
-{//15
+{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},/*14 */
+{/*15 */
    0x44, 0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x44, 0x44, 0x00, 0x00,
    0x00, 0x00, 0x00, 0x00, 0x44, 0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
    0x44, 0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 },
-{  0x11, 0x11, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x22, 0x22, 0x00, 0x00,//16
+{  0x11, 0x11, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x22, 0x22, 0x00, 0x00,/*16 */
    0x00, 0x00, 0x00, 0x00, 0x44, 0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
    0x88, 0x88, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 },
-{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},//17
-{0x55,0x55,0xaa,0xaa,0x55,0x55,0xaa,0xaa,0x55,0x55,0xaa,0xaa,0x55,0x55,0xaa,0xaa,//18
+{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},/*17 */
+{0x55,0x55,0xaa,0xaa,0x55,0x55,0xaa,0xaa,0x55,0x55,0xaa,0xaa,0x55,0x55,0xaa,0xaa,/*18 */
  0x55,0x55,0xaa,0xaa,0x55,0x55,0xaa,0xaa,0x55,0x55,0xaa,0xaa,0x55,0x55,0xaa,0xaa},
-{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},//19
-{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},//20
-{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}//21
+{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},/*19 */
+{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},/*20 */
+{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}/*21 */
 };
 
 char **color_array;
 
 const char *xschem_executable=NULL;
-Pixmap cad_icon_pixmap=0, *pixmap,save_pixmap;	// save_pixmap used to restore window
-int areax1,areay1,areax2,areay2,areaw,areah; // window corners / size
+Pixmap cad_icon_pixmap=0, *pixmap,save_pixmap;  /* save_pixmap used to restore window */
+int areax1,areay1,areax2,areay2,areaw,areah; /* window corners / size */
 GC *gcstipple,*gc, gctiled;
 Display *display;
 XRectangle xrect[1] = {{0,0,0,0}};
-int xschem_h, xschem_w; // 20171130 window size
-double mousex,mousey; // mouse coord.
-double mousex_snap,mousey_snap; // mouse coord. snapped to grid
-double mx_double_save, my_double_save; // 20070322
+int xschem_h, xschem_w; /* 20171130 window size */
+double mousex,mousey; /* mouse coord. */
+double mousex_snap,mousey_snap; /* mouse coord. snapped to grid */
+double mx_double_save, my_double_save; /* 20070322 */
 
-//double xorigin=-CADWIDTH/2.0,yorigin=-CADHEIGHT/2.0;
+/*double xorigin=-CADWIDTH/2.0,yorigin=-CADHEIGHT/2.0; */
 double cadsnap = CADSNAP;
 
 double zoom=CADINITIALZOOM;
@@ -165,9 +165,9 @@ double xorigin=CADINITIALX;
 double yorigin=CADINITIALY;
 double *character[256];
  int lastselected = 0;
-Selected *selectedgroup;     //  array of selected objects to be
-			     //  drawn while moving if < MAXGROUP selected
-XPoint *gridpoint;	     // pointer to array of gridpoints, used in draw()
+Selected *selectedgroup;     /*  array of selected objects to be */
+                             /*  drawn while moving if < MAXGROUP selected */
+XPoint *gridpoint;           /* pointer to array of gridpoints, used in draw() */
 Tcl_Interp *interp;
  int max_texts;
  int max_wires;
@@ -175,14 +175,14 @@ Tcl_Interp *interp;
  int max_symbols;
  int max_selected;
  int *max_rects;
- int *max_polygons; // 20171115
- int *max_arcs; // 20181012
+ int *max_polygons; /* 20171115 */
+ int *max_arcs; /* 20181012 */
  int *max_lines;     
 
-int do_netlist=0;  // set by process_options if user wants netllist from cmdline
-int do_simulation=0;  // 20171007
-int do_waves=0;  // 20171007
-int netlist_count=0; // netlist counter incremented at any cell being netlisted
+int do_netlist=0;  /* set by process_options if user wants netllist from cmdline */
+int do_simulation=0;  /* 20171007 */
+int do_waves=0;  /* 20171007 */
+int netlist_count=0; /* netlist counter incremented at any cell being netlisted */
 int netlist_show=0;
 int flat_netlist=0;
 int netlist_type=-1;
@@ -190,19 +190,19 @@ int prepared_netlist_structs=0;
 int prepared_hilight_structs=0;
 int prepared_hash_instances=0;
 int prepared_hash_wires=0;
-//
-// following data is relative to the current schematic
-//
+/* */
+/* following data is relative to the current schematic */
+/* */
 Wire *wire;
 int lastwire = 0;
-Instance *inst_ptr; 	     // Pointer to element INSTANCE
+Instance *inst_ptr;          /* Pointer to element INSTANCE */
 int lastinst = 0;
-Instdef *instdef;	     // Pointer to element definition
+Instdef *instdef;            /* Pointer to element definition */
 int lastinstdef = 0;
 Box  **rect;
 int *lastrect;
-Polygon **polygon; // 20171115
-int *lastpolygon; // 20171115
+Polygon **polygon; /* 20171115 */
+int *lastpolygon; /* 20171115 */
 Arc **arc;
 int *lastarc;
 Line **line;
@@ -211,32 +211,32 @@ Text *textelement;
 int lasttext=0;
 char schematic[CADMAXHIER][PATH_MAX];
 int currentsch = 0;
-char *schprop=NULL;  // spice
-char *schtedaxprop=NULL;  // tEDAx
-char *schvhdlprop=NULL; // vhdl and symbol property string
-char *schverilogprop=NULL;// verilog
+char *schprop=NULL;  /* spice */
+char *schtedaxprop=NULL;  /* tEDAx */
+char *schvhdlprop=NULL; /* vhdl and symbol property string */
+char *schverilogprop=NULL;/* verilog */
 int show_erc=1;
 int hilight_nets=0;
 char *sch_prefix[CADMAXHIER];
-int previous_instance[CADMAXHIER]; // to remember the instance we came from when going up the hier.
+int previous_instance[CADMAXHIER]; /* to remember the instance we came from when going up the hier. */
 int modified=0;
 int color_ps=-1;
-int only_probes=0; // 20110112
+int only_probes=0; /* 20110112 */
 int hilight_color=0;
 Zoom zoom_array[CADMAXHIER];
 int pending_fullzoom=0;
-int split_files=0; // split netlist files 20081202
-int hspice_netlist=0; // hspice veriants 20081209
-char *netlist_dir=NULL; // 20081210
-int horizontal_move=0; // 20171023
-int vertical_move=0; // 20171023
-XColor xcolor_array[256];// 20171109
-Visual *visual; //20171111
-int dark_colorscheme=1; // 20171113
-double color_dim=0.0; // 20171123
+int split_files=0; /* split netlist files 20081202 */
+int hspice_netlist=0; /* hspice veriants 20081209 */
+char *netlist_dir=NULL; /* 20081210 */
+int horizontal_move=0; /* 20171023 */
+int vertical_move=0; /* 20171023 */
+XColor xcolor_array[256];/* 20171109 */
+Visual *visual; /*20171111 */
+int dark_colorscheme=1; /* 20171113 */
+double color_dim=0.0; /* 20171123 */
 int skip_dim_background=1;
-int no_undo=0; // 20171204
-int enable_drill=0; // 20171211 pass net hilights through components with 'propagate_to' property set on pins
+int no_undo=0; /* 20171204 */
+int enable_drill=0; /* 20171211 pass net hilights through components with 'propagate_to' property set on pins */
 struct instpinentry *instpintable[NBOXES][NBOXES];
 struct wireentry *wiretable[NBOXES][NBOXES];
 struct instentry *insttable[NBOXES][NBOXES];
@@ -249,22 +249,22 @@ cairo_t *ctx, *save_ctx;
 XRenderPictFormat *format;
 
 #if HAS_XCB==1
-xcb_connection_t *xcbconn; // 20171125
+xcb_connection_t *xcbconn; /* 20171125 */
 xcb_render_pictforminfo_t format_rgb, format_rgba;
 xcb_screen_t *screen_xcb;
 xcb_visualtype_t *visual_xcb;
-#endif //HAS_XCB
+#endif /*HAS_XCB */
 
-#endif //HAS_CAIRO
+#endif /*HAS_CAIRO */
 char cairo_font_name[1024]="Monospace";
 int cairo_longest_line;
 int cairo_lines;
-double cairo_font_scale=1.0; // default: 1.0, allows to adjust font size
-double cairo_font_line_spacing=1.0; // allows to change line spacing: default: 1.0
+double cairo_font_scale=1.0; /* default: 1.0, allows to adjust font size */
+double cairo_font_line_spacing=1.0; /* allows to change line spacing: default: 1.0 */
 
-// lift up the text by 'n' pixels (zoom corrected) within the bbox. 
-// This correction is used to better align existing schematics
-// compared to the nocairo xschem version.
-// allowed values should be in the range [-4, 4]
+/* lift up the text by 'n' pixels (zoom corrected) within the bbox.  */
+/* This correction is used to better align existing schematics */
+/* compared to the nocairo xschem version. */
+/* allowed values should be in the range [-4, 4] */
 double cairo_vert_correct=0.0;
                                

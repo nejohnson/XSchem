@@ -42,7 +42,7 @@ void symbol_bbox(int i, double *x1,double *y1, double *x2, double *y2)
    #ifdef HAS_CAIRO
    int customfont;
    #endif
-   // symbol bbox
+   /* symbol bbox */
    flip = inst_ptr[i].flip;
    rot = inst_ptr[i].rot;
    x0=inst_ptr[i].x0;
@@ -54,13 +54,13 @@ void symbol_bbox(int i, double *x1,double *y1, double *x2, double *y2)
    RECTORDER(*x1,*y1,*x2,*y2);
    *x1+=x0;*y1+=y0;
    *x2+=x0;*y2+=y0;
-   inst_ptr[i].xx1 = *x1;		// 20070314 added bbox without text
-   inst_ptr[i].yy1 = *y1;		// for easier select
+   inst_ptr[i].xx1 = *x1;               /* 20070314 added bbox without text */
+   inst_ptr[i].yy1 = *y1;               /* for easier select */
    inst_ptr[i].xx2 = *x2;
    inst_ptr[i].yy2 = *y2;
     if(debug_var>=1) fprintf(errfp, "symbol_bbox(): instance=%d %.16g %.16g %.16g %.16g\n",i,*x1, *y1, *x2, *y2);
    
-   // strings bbox
+   /* strings bbox */
    for(j=0;j< (inst_ptr[i].ptr+instdef)->texts;j++)
    {
     sym_flip = flip;
@@ -159,7 +159,7 @@ static void del_rect_line_arc_poly(void)
   lastarc[c] -= j;
 
 
-  // 20171115
+  /* 20171115 */
   j = 0;
   for(i=0;i<lastpolygon[c];i++)
   {
@@ -173,7 +173,7 @@ static void del_rect_line_arc_poly(void)
       if(k==0 || polygon[c][i].x[k] > x2) x2 = polygon[c][i].x[k];
       if(k==0 || polygon[c][i].y[k] > y2) y2 = polygon[c][i].y[k];
     }
-    //fprintf(errfp, "bbox: %.16g %.16g %.16g %.16g\n", x1, y1, x2, y2);
+    /*fprintf(errfp, "bbox: %.16g %.16g %.16g %.16g\n", x1, y1, x2, y2); */
     j++;
     bbox(ADD, x1, y1, x2, y2);
     modified=1;
@@ -207,7 +207,7 @@ void delete(void)
  j = 0;
  bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0);
  rebuild_selected_array();
- if(lastselected) push_undo(); // 20150327
+ if(lastselected) push_undo(); /* 20150327 */
  for(i=0;i<lasttext;i++)
  {
   if(textelement[i].sel == SELECTED)
@@ -218,7 +218,7 @@ void delete(void)
    customfont = set_text_custom_font(&textelement[i]);
    #endif
    text_bbox(textelement[i].txt_ptr, textelement[i].xscale,
-	     textelement[i].yscale, rot, flip,
+             textelement[i].yscale, rot, flip,
              textelement[i].x0, textelement[i].y0,
              &xx1,&yy1, &xx2,&yy2);
    #ifdef HAS_CAIRO
@@ -253,16 +253,16 @@ void delete(void)
    prepared_netlist_structs=0;
    prepared_hilight_structs=0;
 
-   symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1, &inst_ptr[i].x2, &inst_ptr[i].y2); //20171201
+   symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1, &inst_ptr[i].x2, &inst_ptr[i].y2); /*20171201 */
    bbox(ADD, inst_ptr[i].x1, inst_ptr[i].y1, inst_ptr[i].x2, inst_ptr[i].y2);
    if(inst_ptr[i].prop_ptr != NULL) 
    {
-    hash_proplist(inst_ptr[i].prop_ptr , 1); // remove props from hash table
+    hash_proplist(inst_ptr[i].prop_ptr , 1); /* remove props from hash table */
     my_strdup(&inst_ptr[i].prop_ptr, NULL);
    }
    delete_inst_node(i);
    my_strdup(&inst_ptr[i].name, NULL);
-   my_strdup(&inst_ptr[i].instname, NULL); // 20150409
+   my_strdup(&inst_ptr[i].instname, NULL); /* 20150409 */
    j++;
    continue;
   }
@@ -272,7 +272,7 @@ void delete(void)
    inst_ptr[i].prop_ptr=NULL;
    inst_ptr[i].node=NULL;
    inst_ptr[i].name=NULL;        
-   inst_ptr[i].instname=NULL;  // 20150409
+   inst_ptr[i].instname=NULL;  /* 20150409 */
    inst_ptr[i].flags=0;        
   }
  }
@@ -284,8 +284,7 @@ void delete(void)
    if(wire[i].sel == SELECTED)
    {
     j++; 
-    // if(get_tok_value(wire[i].prop_ptr,"bus",0)[0])   // 26122004
-    if(wire[i].bus){ // 20171201
+    if(wire[i].bus){ /* 20171201 */
       int ov, y1, y2;
       ov = BUS_WIDTH> CADHALFDOTSIZE ? BUS_WIDTH : CADHALFDOTSIZE;
       if(wire[i].y1 < wire[i].y2) { y1 = wire[i].y1-ov; y2 = wire[i].y2+ov; }
@@ -322,12 +321,6 @@ void delete(void)
  lastselected = 0;
  bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
  draw();
- 
- // if(!draw_window) {
- //   XCopyArea(display, save_pixmap, window, gctiled, 
- //      xrect[0].x, xrect[0].y, xrect[0].width, xrect[0].height, xrect[0].x, xrect[0].y); // 20181009
- // }
-
  bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
  ui_state &= ~SELECTION;
 }
@@ -352,13 +345,13 @@ void bbox(int what,double x1,double y1, double x2, double y2)
  static int savew, saveh, savex1, savex2, savey1, savey2;
  static int semaphore=0;
 
- // fprintf(errfp, "bbox: what=%d\n", what);
+ /* fprintf(errfp, "bbox: what=%d\n", what); */
  switch(what)
  {
   case BEGIN:
    if(semaphore==1) {
      fprintf(errfp, "ERROR: rentrant bbox() call\n"); 
-     tcleval("alert_ {ERROR: reentrant bbox() call} {}");//20171215
+     tcleval("alert_ {ERROR: reentrant bbox() call} {}");/*20171215 */
    }
    bbx1 = 300000000;
    bbx2 = 0;
@@ -375,7 +368,7 @@ void bbox(int what,double x1,double y1, double x2, double y2)
   case ADD:
    if(semaphore==0) {
      fprintf(errfp, "ERROR: bbox(ADD) call before bbox(BEGIN)\n"); 
-     tcleval("alert_ {ERROR: bbox(ADD) call before bbox(BEGIN)} {}");//20171215
+     tcleval("alert_ {ERROR: bbox(ADD) call before bbox(BEGIN)} {}");/*20171215 */
    }
    x1=X_TO_SCREEN(x1);
    y1=Y_TO_SCREEN(y1);
@@ -404,12 +397,12 @@ void bbox(int what,double x1,double y1, double x2, double y2)
    xrect[0].width = areaw-4*lw;
    xrect[0].height = areah-4*lw;
 
-   XSetClipMask(display, gctiled, None); // 20171110 optimization, clipping already done in software
+   XSetClipMask(display, gctiled, None); /* 20171110 optimization, clipping already done in software */
 
    for(i=0;i<cadlayers;i++)    
    {
-    XSetClipMask(display, gc[i], None); // 20171110 optimization, clipping already done in software
-    XSetClipMask(display, gcstipple[i], None); // 20171110 optimization, clipping already done in software
+    XSetClipMask(display, gc[i], None); /* 20171110 optimization, clipping already done in software */
+    XSetClipMask(display, gcstipple[i], None); /* 20171110 optimization, clipping already done in software */
    }
    #ifdef HAS_CAIRO
    cairo_reset_clip(ctx);
@@ -420,7 +413,7 @@ void bbox(int what,double x1,double y1, double x2, double y2)
   case SET:
    if(semaphore==0) {
      fprintf(errfp, "ERROR: bbox(SET) call before bbox(BEGIN)\n"); 
-     tcleval("alert_ {ERROR: bbox(SET) call before bbox(BEGIN)} {}");//20171215
+     tcleval("alert_ {ERROR: bbox(SET) call before bbox(BEGIN)} {}");/*20171215 */
    }
    areax1 = bbx1-2*lw;
    areax2 = bbx2+2*lw;
@@ -450,7 +443,7 @@ void bbox(int what,double x1,double y1, double x2, double y2)
    break;
   case DRAW:
    XCopyArea(display, save_pixmap, window, gctiled, xrect[0].x, xrect[0].y,
-       xrect[0].width, xrect[0].height, xrect[0].x, xrect[0].y); // 20181009
+       xrect[0].width, xrect[0].height, xrect[0].x, xrect[0].y); /* 20181009 */
 
   break;
  }
@@ -476,8 +469,7 @@ void unselect_all(void)
       {
        wire[i].sel = 0;
        {
-         // if(get_tok_value(wire[i].prop_ptr,"bus",0)[0])        // 26122004
-         if(wire[i].bus) // 20171201
+         if(wire[i].bus) /* 20171201 */
            drawtempline(gctiled, THICK, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
          else
            drawtempline(gctiled, ADD, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
@@ -500,7 +492,7 @@ void unselect_all(void)
      {
       textelement[i].sel = 0;
       #ifdef HAS_CAIRO
-      customfont = set_text_custom_font(& textelement[i]); // needed for bbox calculation
+      customfont = set_text_custom_font(& textelement[i]); /* needed for bbox calculation */
       #endif
       draw_temp_string(gctiled,ADD, textelement[i].txt_ptr,
        textelement[i].rot, textelement[i].flip,
@@ -552,22 +544,22 @@ void unselect_all(void)
     drawtemprect(gctiled, END, 0.0, 0.0, 0.0, 0.0); 
     drawtempline(gctiled,END, 0.0, 0.0, 0.0, 0.0);
     ui_state &= ~SELECTION;
-    //\statusmsg("",2);
-    my_snprintf(str, S(str), "%s/%s", home_dir, ".xschem_selection.sch"); // 20161115  PWD->HOME
+    /*\statusmsg("",2); */
+    my_snprintf(str, S(str), "%s/%s", home_dir, ".xschem_selection.sch"); /* 20161115  PWD->HOME */
     unlink(str);
 }
 
 void select_wire(int i,unsigned short select_mode, int fast)
 {
-  char str[1024]; 	// overflow safe
-  //my_strncpy(s,wire[i].prop_ptr!=NULL?wire[i].prop_ptr:"<NULL>",256);
+  char str[1024];       /* overflow safe */
+  /*my_strncpy(s,wire[i].prop_ptr!=NULL?wire[i].prop_ptr:"<NULL>",256); */
   if( !fast )
   {
     my_snprintf(str, S(str), "selected wire: n=%d end1=%d end2=%d\nnode=%s",i,
            wire[i].end1, wire[i].end2, 
            wire[i].prop_ptr? wire[i].prop_ptr: "(null)");
     statusmsg(str,2);
-   // 20070323
+   /* 20070323 */
    my_snprintf(str, S(str), "x = %.16g  y = %.16g  w = %.16g h = %.16g",wire[i].x1, wire[i].y1,
       wire[i].x2-wire[i].x1, wire[i].y2-wire[i].y1
    );
@@ -579,16 +571,15 @@ void select_wire(int i,unsigned short select_mode, int fast)
   else 
    wire[i].sel = select_mode;
   if(select_mode) {
-   // if(get_tok_value(wire[i].prop_ptr,"bus",0)[0])  // 26122004
    if(debug_var>=1) fprintf(errfp, "select(): wire[%d].end1=%d, ,end2=%d\n", i, wire[i].end1, wire[i].end2);
-   if(wire[i].bus) // 20171201
+   if(wire[i].bus) /* 20171201 */
      drawtempline(gc[SELLAYER], THICK, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
    else
      drawtempline(gc[SELLAYER], ADD, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
   }
   else {
-   // if(get_tok_value(wire[i].prop_ptr,"bus",0)[0])
-   if(wire[i].bus) // 20171201
+   /* if(get_tok_value(wire[i].prop_ptr,"bus",0)[0]) */
+   if(wire[i].bus) /* 20171201 */
      drawtempline(gctiled, THICK, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
    else
      drawtempline(gctiled, NOW, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
@@ -599,8 +590,8 @@ void select_wire(int i,unsigned short select_mode, int fast)
 void select_element(int i,unsigned short select_mode, int fast)
 {
   int c, j;
-  char str[1024]; 	// overflow safe
-  char s[256];		// overflow safe
+  char str[1024];       /* overflow safe */
+  char s[256];          /* overflow safe */
   my_strncpy(s,inst_ptr[i].prop_ptr!=NULL?inst_ptr[i].prop_ptr:"<NULL>",S(s));
   if( !fast )
   {
@@ -610,7 +601,7 @@ void select_element(int i,unsigned short select_mode, int fast)
    statusmsg(str,2);
    for(j=0;j< (inst_ptr[i].ptr+instdef)->rects[PINLAYER] ;j++) 
    {
-    //                                         --------20170323 check prop_ptr----------------------------
+    /*                                         --------20170323 check prop_ptr---------------------------- */
     if(inst_ptr[i].node && inst_ptr[i].node[j] && (inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][j].prop_ptr)
     {
      my_snprintf(str, S(str), "pin:%s -> %s", 
@@ -641,8 +632,8 @@ void select_element(int i,unsigned short select_mode, int fast)
 
 void select_text(int i,unsigned short select_mode, int fast)
 {
-  char str[1024]; 	// overflow safe
-  char s[256];		// overflow safe
+  char str[1024];       /* overflow safe */
+  char s[256];          /* overflow safe */
   if(!fast) {
     my_strncpy(s,textelement[i].prop_ptr!=NULL?textelement[i].prop_ptr:"<NULL>",S(s));
     my_snprintf(str, S(str), "selected text %d: properties: %s", i,s);
@@ -675,14 +666,14 @@ void select_text(int i,unsigned short select_mode, int fast)
 
 void select_box(int c, int i, unsigned short select_mode, int fast)
 {
-  char str[1024]; 	// overflow safe
-  char s[256];		// overflow safe
+  char str[1024];       /* overflow safe */
+  char s[256];          /* overflow safe */
   if(!fast)
   {
    my_strncpy(s,rect[c][i].prop_ptr!=NULL?rect[c][i].prop_ptr:"<NULL>",S(s));
    my_snprintf(str, S(str), "selected box : layer=%d, n=%d properties: %s",c-4,i,s);
    statusmsg(str,2);
-   // 20070323
+   /* 20070323 */
    my_snprintf(str, S(str), "x = %.16g  y = %.16g  w = %.16g h = %.16g",rect[c][i].x1, rect[c][i].y1,
       rect[c][i].x2-rect[c][i].x1, rect[c][i].y2-rect[c][i].y1
    );
@@ -690,34 +681,34 @@ void select_box(int c, int i, unsigned short select_mode, int fast)
   }
   if(select_mode) {
     if(select_mode==SELECTED) {
-      rect[c][i].sel = select_mode; //20070202
+      rect[c][i].sel = select_mode; /*20070202 */
     } else {
-      rect[c][i].sel |= select_mode; //20070202
+      rect[c][i].sel |= select_mode; /*20070202 */
     }
     drawtemprect(gc[SELLAYER], ADD, rect[c][i].x1, rect[c][i].y1, rect[c][i].x2, rect[c][i].y2);
   } else {
-    rect[c][i].sel = 0; //20070202
+    rect[c][i].sel = 0; /*20070202 */
     drawtemprect(gctiled, NOW, rect[c][i].x1, rect[c][i].y1, rect[c][i].x2, rect[c][i].y2);
   }
 
   if( rect[c][i].sel == (SELECTED1|SELECTED2|SELECTED3|SELECTED4)) rect[c][i].sel = SELECTED;
 
   need_rebuild_selected_array=1;
-  // fprintf(errfp, "select_box(): select_mode=%d, box#=%d, rect[].sel=%d\n", select_mode, i, rect[c][i].sel);
+  /* fprintf(errfp, "select_box(): select_mode=%d, box#=%d, rect[].sel=%d\n", select_mode, i, rect[c][i].sel); */
 }
 
 
 
 void select_arc(int c, int i, unsigned short select_mode, int fast)
 {
-  char str[1024];   // overflow safe
-  char s[256];    // overflow safe
+  char str[1024];   /* overflow safe */
+  char s[256];    /* overflow safe */
   if(!fast)
   {
    my_strncpy(s,rect[c][i].prop_ptr!=NULL?rect[c][i].prop_ptr:"<NULL>",S(s));
    my_snprintf(str, S(str), "selected arc : layer=%d, n=%d properties: %s",c-4,i,s);
    statusmsg(str,2);
-   // 20070323
+   /* 20070323 */
    my_snprintf(str, S(str), "x = %.16g  y = %.16g  r = %.16g a = %.16g b = %.16g",
       arc[c][i].x, arc[c][i].y, arc[c][i].r, arc[c][i].a, arc[c][i].b);
    statusmsg(str,1);
@@ -726,11 +717,11 @@ void select_arc(int c, int i, unsigned short select_mode, int fast)
     arc[c][i].sel = select_mode;
     drawtemparc(gc[SELLAYER], ADD, arc[c][i].x, arc[c][i].y, arc[c][i].r, arc[c][i].a, arc[c][i].b);
   } else {
-    arc[c][i].sel = 0; //20070202
+    arc[c][i].sel = 0; /*20070202 */
     drawtemparc(gctiled, NOW, arc[c][i].x, arc[c][i].y, arc[c][i].r, arc[c][i].a, arc[c][i].b);
   }
 
-  //if( arc[c][i].sel == (SELECTED1|SELECTED2|SELECTED3|SELECTED4)) arc[c][i].sel = SELECTED;
+  /*if( arc[c][i].sel == (SELECTED1|SELECTED2|SELECTED3|SELECTED4)) arc[c][i].sel = SELECTED; */
 
   need_rebuild_selected_array=1;
 }
@@ -739,14 +730,14 @@ void select_arc(int c, int i, unsigned short select_mode, int fast)
 
 void select_polygon(int c, int i, unsigned short select_mode, int fast )
 {
-  char str[1024];       // overflow safe
-  char s[256];          // overflow safe
+  char str[1024];       /* overflow safe */
+  char s[256];          /* overflow safe */
   if(!fast)
   {
    my_strncpy(s,polygon[c][i].prop_ptr!=NULL?polygon[c][i].prop_ptr:"<NULL>",S(s));
    my_snprintf(str, S(str), "selected polygon: layer=%d, n=%d properties: %s",c-4,i,s);
    statusmsg(str,2);
-   // 20070323
+   /* 20070323 */
    my_snprintf(str, S(str), "x0 = %.16g  y0 = %.16g ...",polygon[c][i].x[0], polygon[c][i].y[0]);
    statusmsg(str,1);
   }
@@ -761,14 +752,14 @@ void select_polygon(int c, int i, unsigned short select_mode, int fast )
 
 void select_line(int c, int i, unsigned short select_mode, int fast )
 {
-  char str[1024]; 	// overflow safe
-  char s[256];		// overflow safe
+  char str[1024];       /* overflow safe */
+  char s[256];          /* overflow safe */
   if(!fast)
   {
    my_strncpy(s,line[c][i].prop_ptr!=NULL?line[c][i].prop_ptr:"<NULL>",S(s));
    my_snprintf(str, S(str), "selected line: layer=%d, n=%d properties: %s",c-4,i,s);
    statusmsg(str,2);
-   // 20070323
+   /* 20070323 */
    my_snprintf(str, S(str), "x = %.16g  y = %.16g  w = %.16g h = %.16g",line[c][i].x1, line[c][i].y1,
       line[c][i].x2-line[c][i].x1, line[c][i].y2-line[c][i].y1
    );
@@ -787,7 +778,7 @@ void select_line(int c, int i, unsigned short select_mode, int fast )
   need_rebuild_selected_array=1;
 }
 
-// 20160503 return type field
+/* 20160503 return type field */
 unsigned short select_object(double mousex,double mousey, unsigned short select_mode)
 {
    Selected sel;
@@ -822,7 +813,7 @@ unsigned short select_object(double mousex,double mousey, unsigned short select_
      break;
     default:
      break;
-   } //end switch
+   } /*end switch */
 
    drawtemparc(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0, 0.0);
    drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0); 
@@ -832,10 +823,10 @@ unsigned short select_object(double mousex,double mousey, unsigned short select_
    return sel.type;
 }
 
-void select_inside(double x1,double y1, double x2, double y2, int sel) // 20150927 added unselect (sel param)
+void select_inside(double x1,double y1, double x2, double y2, int sel) /* 20150927 added unselect (sel param) */
 {
  int c,i;
- double x, y, r, a, b, xa, ya, xb, yb; // arc
+ double x, y, r, a, b, xa, ya, xb, yb; /* arc */
  Box tmp;
  #ifdef HAS_CAIRO
  int customfont;
@@ -848,7 +839,7 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) // 201509
  {
   if(RECTINSIDE(wire[i].x1,wire[i].y1,wire[i].x2,wire[i].y2, x1,y1,x2,y2))
   {
-   ui_state |= SELECTION; // set ui_state to SELECTION also if unselecting by area ????
+   ui_state |= SELECTION; /* set ui_state to SELECTION also if unselecting by area ???? */
    sel ? select_wire(i,SELECTED, 1): select_wire(i,0, 1);
   } 
   else if( sel && enable_stretch && POINTINSIDE(wire[i].x1,wire[i].y1, x1,y1,x2,y2) )
@@ -878,7 +869,7 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) // 201509
   #endif
   if(RECTINSIDE(xx1,yy1, xx2, yy2,x1,y1,x2,y2))
   {
-   ui_state |= SELECTION; // set ui_state to SELECTION also if unselecting by area ????
+   ui_state |= SELECTION; /* set ui_state to SELECTION also if unselecting by area ???? */
    sel ? select_text(i, SELECTED, 1): select_text(i, 0, 1);
   }
  }                       
@@ -886,13 +877,13 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) // 201509
  {
   if(RECTINSIDE(inst_ptr[i].xx1, inst_ptr[i].yy1, inst_ptr[i].xx2, inst_ptr[i].yy2, x1,y1,x2,y2))
   {
-   ui_state |= SELECTION; // set ui_state to SELECTION also if unselecting by area ????
+   ui_state |= SELECTION; /* set ui_state to SELECTION also if unselecting by area ???? */
    sel ? select_element(i,SELECTED,1): select_element(i,0,1);
   }
  }
  for(c=0;c<cadlayers;c++)
  {
-  for(i=0;i<lastpolygon[c]; i++) {  // 20171115
+  for(i=0;i<lastpolygon[c]; i++) {  /* 20171115 */
     int k, selected_points, flag;
 
     polygon_bbox(polygon[c][i].x, polygon[c][i].y, polygon[c][i].points, &xa, &ya, &xb, &b);
@@ -915,7 +906,7 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) // 201509
         ui_state |= SELECTION;
         select_polygon(c, i, SELECTED, 1);
       } else if(selected_points) {
-        if(sel && enable_stretch) select_polygon(c, i, SELECTED1,1); // for polygon, SELECTED1 means partial selection
+        if(sel && enable_stretch) select_polygon(c, i, SELECTED1,1); /* for polygon, SELECTED1 means partial selection */
       }
     }
     
@@ -929,7 +920,7 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) // 201509
    }
    else if( sel && enable_stretch && POINTINSIDE(line[c][i].x1,line[c][i].y1, x1,y1,x2,y2) )
    {
-    ui_state |= SELECTION; // set ui_state to SELECTION also if unselecting by area ????
+    ui_state |= SELECTION; /* set ui_state to SELECTION also if unselecting by area ???? */
     select_line(c, i,SELECTED1,1);
    }
    else if( sel && enable_stretch && POINTINSIDE(line[c][i].x2,line[c][i].y2, x1,y1,x2,y2) )
@@ -950,22 +941,22 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) // 201509
     yb = y - r * sin((a+b) * XSCH_PI/180.);
     arc_bbox(x, y, r, a, b, &tmp.x1, &tmp.y1, &tmp.x2, &tmp.y2);
     if(RECTINSIDE(tmp.x1, tmp.y1, tmp.x2, tmp.y2, x1,y1,x2,y2)) {
-      ui_state |= SELECTION; // set ui_state to SELECTION also if unselecting by area ????
+      ui_state |= SELECTION; /* set ui_state to SELECTION also if unselecting by area ???? */
       sel? select_arc(c, i, SELECTED,1): select_arc(c, i, 0,1);
     }
     else if( sel && enable_stretch && POINTINSIDE(x, y, x1, y1, x2, y2) )
     {
-     ui_state |= SELECTION; // set ui_state to SELECTION also if unselecting by area ????
+     ui_state |= SELECTION; /* set ui_state to SELECTION also if unselecting by area ???? */
      select_arc(c, i,SELECTED1,1);
     }
     else if( sel && enable_stretch && POINTINSIDE(xb, yb, x1, y1, x2, y2) )
     {
-     ui_state |= SELECTION; // set ui_state to SELECTION also if unselecting by area ????
+     ui_state |= SELECTION; /* set ui_state to SELECTION also if unselecting by area ???? */
      select_arc(c, i,SELECTED3,1);
     }
     else if( sel && enable_stretch && POINTINSIDE(xa, ya, x1, y1, x2, y2) )
     {
-     ui_state |= SELECTION; // set ui_state to SELECTION also if unselecting by area ????
+     ui_state |= SELECTION; /* set ui_state to SELECTION also if unselecting by area ???? */
      select_arc(c, i,SELECTED2,1);
     }
   }
@@ -973,12 +964,12 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) // 201509
   {
    if(RECTINSIDE(rect[c][i].x1,rect[c][i].y1,rect[c][i].x2,rect[c][i].y2, x1,y1,x2,y2))
    {
-    ui_state |= SELECTION; // set ui_state to SELECTION also if unselecting by area ????
+    ui_state |= SELECTION; /* set ui_state to SELECTION also if unselecting by area ???? */
     sel? select_box(c,i, SELECTED, 1): select_box(c,i, 0, 1);
    }
    else { 
      if( sel && enable_stretch && POINTINSIDE(rect[c][i].x1,rect[c][i].y1, x1,y1,x2,y2) )
-     {					//20070302 added stretch select
+     {                                  /*20070302 added stretch select */
       ui_state |= SELECTION;
       select_box(c, i,SELECTED1,1);
      }
@@ -999,8 +990,8 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) // 201509
      }
    }
 
-  } // end for i
- } // end for c
+  } /* end for i */
+ } /* end for c */
  drawtemparc(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0, 0.0); 
  drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0); 
  drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
@@ -1044,7 +1035,7 @@ void select_all(void)
   {
     select_box(c,i, SELECTED, 1);
   }
- } // end for c
+ } /* end for c */
  drawtemparc(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0, 0.0); 
  drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0); 
  drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);

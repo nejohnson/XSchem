@@ -23,12 +23,16 @@
 #ifndef CADGLOBALS
 #define CADGLOBALS
 #define XSCHEM_VERSION "2.8.1_RC3"
-#define  _XOPEN_SOURCE 600     /* realpath(), round(), strtok_r(), getopt() */
+
+/* realpath(), round(), strtok_r(), getopt() */
+#define  _XOPEN_SOURCE 600
+
+#define TCL_WIDE_INT_TYPE long
 
 /*  approximate PI definition */
-#define XSCH_PI 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170676
+#define XSCH_PI 3.14159265358979323846264338327950288419716939937
 
-// #include "../config.h"
+/* #include "../config.h" */
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -63,7 +67,7 @@
 #include <tk.h>
 /*  #include "memwatch.h" */
 
-#define CADHEIGHT 400			/*  initial window size */
+#define CADHEIGHT 400                   /*  initial window size */
 #define CADWIDTH 600
 
 #define BACKLAYER 0
@@ -88,12 +92,12 @@
 #define CADMAXZOOM 10000.0
 #define CADMINZOOM 0.0001
 #define CADHALFDOTSIZE 4
-#define CADNULLNODE -1	    /*  no valid node number */
+#define CADNULLNODE -1      /*  no valid node number */
 #define CADWIREMINDIST 8.0
 #define CADMAXWIRES 4096
 #define CADMAXTEXT 2048
 #define CADMAXOBJECTS 512   /*  (initial) max # of lines, rects (for each layer!!) */
-#define MAXGROUP 300	    /*  (initial) max # of objects that can be drawn while moving */
+#define MAXGROUP 300        /*  (initial) max # of objects that can be drawn while moving */
 #define ELEMINST 4096        /*  (initial) max # of placed elements,   was 600 20102004 */
 #define ELEMDEF 256         /*  (initial) max # of defined elements */
 #define EMBEDDED 1   /* used for embedded symbols marking in Instdef.flags */
@@ -116,11 +120,11 @@
 #define CAD_VERILOG_NETLIST 3
 #define CAD_TEDAX_NETLIST 4
 
-#define STARTWIRE 1	    /*  possible states, encoded in global 'rubber' */
+#define STARTWIRE 1         /*  possible states, encoded in global 'rubber' */
 #define STARTPAN  2
 #define STARTRECT 4
 #define STARTLINE 8
-#define SELECTION  16	    /*  signals that some objects are selected. */
+#define SELECTION  16       /*  signals that some objects are selected. */
 #define STARTSELECT 32      /*  used for drawing a selection rectangle */
 #define STARTMOVE 64        /*  used for move/copy  operations */
 #define STARTCOPY 128       /*  used for move/copy  operations */
@@ -140,13 +144,13 @@
 #define MENUSTARTCIRCLE 2097152
 
 #define SELECTED 1          /*  used in the .sel field for selected objs. */
-#define SELECTED1 2	    /*  first point selected... */
+#define SELECTED1 2         /*  first point selected... */
 #define SELECTED2 4         /*  second point selected... */
 #define SELECTED3 8
 #define SELECTED4 16
 
 
-#define WIRE 1		    /*  types of defined objects */
+#define WIRE 1              /*  types of defined objects */
 #define RECT  2
 #define LINE 4
 #define ELEMENT 8
@@ -172,7 +176,7 @@
 /*  (and this is done on every redraw) takes time. */
 #define INTHASHSIZE 4177
 
-		   /*  parameters passed to action functions, see actions.c */
+                   /*  parameters passed to action functions, see actions.c */
 #define END      1 /*  endop */
 #define BEGIN    2 /*  begin placing something */
 #define PLACE    4 /*  place something */
@@ -224,6 +228,7 @@ if(y2 < y1) { xxtmp=y1;y1=y2;y2=xxtmp;}
 #define CLIP(x,a,b) (x<a?a:x>b?b:x)
 
 #define MINOR(a,b) ( (a) <= (b) ? (a) : (b) )
+#define ROUND(a) ((a) > 0.0 ? ceil((a) - 0.5) : floor((a) + 0.5))
 
 #define X_TO_SCREEN(x) ( floor((x+xorigin)* mooz) )
 #define Y_TO_SCREEN(y) ( floor((y+yorigin)* mooz) )
@@ -285,7 +290,7 @@ typedef struct /*  20171115 */
   int fill; /*  20180914 */
 } Polygon; 
 
-typedef struct // 20181012
+typedef struct /* 20181012 */
 {
   double x;
   double y;
@@ -320,7 +325,7 @@ typedef struct
    Line **lineptr;  /*  array of [cadlayers] pointers to Line */
    Box  **boxptr;
    Polygon **polygonptr; /* 20171115 */
-   Arc **arcptr; // 20181012
+   Arc **arcptr; /* 20181012 */
    Text  *txtptr;
    int *lines;     /*  array of [cadlayers] integers */
    int *rects;
@@ -351,7 +356,7 @@ typedef struct
    int flip;
    int sel;
    int flags; /*  bit 0: skip field, bit 1: flag for different textlayer for pin/labels
-	       *  bit 2 : hilight flag. 
+               *  bit 2 : hilight flag. 
                */
    char *prop_ptr;
    char **node;
@@ -483,7 +488,7 @@ extern int lastinst ;
 extern int lastinstdef ;
 extern int lasttext;              
 extern Instance *inst_ptr;      /*  Pointer to element INSTANCE */
-extern Instdef *instdef;	/*  Pointer to element definition */
+extern Instdef *instdef;        /*  Pointer to element definition */
 extern Text *textelement; 
 extern char schematic[CADMAXHIER][PATH_MAX];
 extern int currentsch;
@@ -506,7 +511,7 @@ extern int hspice_netlist;
 extern char *netlist_dir;
 
 extern unsigned long ui_state ; /*  this signals that we are doing a net place, */
-			      /*  panning etc... */
+                              /*  panning etc... */
 
 extern char *undo_dirname; /*  20150327 */
 extern int cur_undo_ptr;
@@ -698,7 +703,7 @@ extern void check_touch(int i, int j,
 
 extern void storeobject(int pos, double x1,double y1,double x2,double y2,
                         unsigned short type,unsigned int rectcolor,
-		        unsigned short sel, char *prop_ptr);
+                        unsigned short sel, char *prop_ptr);
 extern void store_polygon(int pos, double *x, double *y, int points,  /*  20171115 */
            unsigned int rectcolor, unsigned short sel, char *prop_ptr);
 extern void store_arc(int pos, double x, double y, double r, double a, double b,
@@ -831,11 +836,11 @@ extern size_t my_strcat(char **, const char *);
 extern int get_unnamed_node(int what, int mult, int node);
 extern void free_node_hash(void);
 extern struct node_hashentry 
-		*node_hash_lookup(char *token, char *dir,int remove, int port, char *sig_type, 
+                *node_hash_lookup(char *token, char *dir,int remove, int port, char *sig_type, 
                 char *verilog_type, char *value, char *class, char *orig_tok);
 extern void traverse_node_hash();
 extern struct node_hashentry 
-		*bus_hash_lookup(char *token, char *dir,int remove, int port, char *sig_type, 
+                *bus_hash_lookup(char *token, char *dir,int remove, int port, char *sig_type, 
                 char *verilog_type, char *value, char *class);
 /* extern void insert_missing_pin(); */
 extern void round_schematic_to_grid(double cadsnap);

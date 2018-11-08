@@ -23,7 +23,7 @@
 #include "xschem.h"
 
 
-void global_vhdl_netlist(int global)  // netlister driver
+void global_vhdl_netlist(int global)  /* netlister driver */
 {
  FILE *fd;
  char *str_tmp;
@@ -31,14 +31,14 @@ void global_vhdl_netlist(int global)  // netlister driver
  static char *sig_type = NULL;
  static char *port_value = NULL;
  int i,j, tmp;
- char netl[PATH_MAX];   // overflow safe 20161122
- char netl2[PATH_MAX];  // 20081202 overflow safe 20161122
- char netl3[PATH_MAX];  // 20081202 overflow safe 20161122
+ char netl[PATH_MAX];   /* overflow safe 20161122 */
+ char netl2[PATH_MAX];  /* 20081202 overflow safe 20161122 */
+ char netl3[PATH_MAX];  /* 20081202 overflow safe 20161122 */
  static char *type=NULL;
 
- statusmsg("",2);  // clear infowindow
- // top sch properties used for library use declarations and type definitions
- // to be printed before any entity declarations
+ statusmsg("",2);  /* clear infowindow */
+ /* top sch properties used for library use declarations and type definitions */
+ /* to be printed before any entity declarations */
 
  if(current_type==SYMBOL) return;
  netlist_count=0;
@@ -65,7 +65,7 @@ void global_vhdl_netlist(int global)  // netlister driver
  if(debug_var>=1) fprintf(errfp, "global_vhdl_netlist(): printing top level packages\n");
   for(i=0;i<lastinst;i++)
   {
-   if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20140416
+   if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; /* 20140416 */
    if(inst_ptr[i].ptr<0) continue;
    if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
      continue;
@@ -75,18 +75,18 @@ void global_vhdl_netlist(int global)  // netlister driver
    my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
    if( type && (strcmp(type,"package"))==0)
    {
-    if(inst_ptr[i].prop_ptr) {				//
-      fprintf(fd, "//// begin package\n");		// 20080213 mark start of packages
+    if(inst_ptr[i].prop_ptr) {                          /* */
+      fprintf(fd, "//// begin package\n");              /* 20080213 mark start of packages */
       fprintf(fd, "%s\n", inst_ptr[i].prop_ptr);
-      fprintf(fd, "//// end package\n");		// 20080213 mark end of packages
-    }							//
+      fprintf(fd, "//// end package\n");                /* 20080213 mark end of packages */
+    }
    }
   }
 
  if(debug_var>=1) fprintf(errfp, "global_vhdl_netlist(): printing top level use statements\n");
   for(i=0;i<lastinst;i++)
   {
-   if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20140416
+   if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; /* 20140416 */
    if(inst_ptr[i].ptr<0) continue;
    if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
      continue;
@@ -100,58 +100,56 @@ void global_vhdl_netlist(int global)  // netlister driver
 
  if(debug_var>=1) fprintf(errfp, "global_vhdl_netlist(): printing top level entity\n");
 
- // 20071015 already done in print_generic()
- // fprintf(fd,">>> entity %s is\n", skip_dir( schematic[currentsch]) );
- // 20071015 end
+ /* 20071015 already done in print_generic() */
+ /* fprintf(fd,">>> entity %s is\n", skip_dir( schematic[currentsch]) ); */
+ /* 20071015 end */
 
- // flush data structures (remove unused symbols)
- if(modified) save_schematic(schematic[currentsch]); // save and flush unused symbols
- remove_symbols();  // removed 25122002, readded 04112003.. this removes unused symbols
- load_schematic(1,schematic[currentsch],0);  // 20180927
+ /* flush data structures (remove unused symbols) */
+ if(modified) save_schematic(schematic[currentsch]); /* save and flush unused symbols */
+ remove_symbols();  /* removed 25122002, readded 04112003.. this removes unused symbols */
+ load_schematic(1,schematic[currentsch],0);  /* 20180927 */
 
 
- // 20071009 print top level generics if defined in symbol
+ /* 20071009 print top level generics if defined in symbol */
  load_symbol_definition( schematic[currentsch], NULL );
- print_generic(fd,"entity", lastinstdef-1);  // added print top level params
+ print_generic(fd,"entity", lastinstdef-1);  /* added print top level params */
  remove_symbol();
- // 20071009 end
+ /* 20071009 end */
 
 
- // 20071009 get generics from symbol
-/*
- // print top subckt generics
- if(debug_var>=1) fprintf(errfp, "global_vhdl_netlist(): printing top level generic pins\n");
- tmp=0;
- for(i=0;i<lastinst;i++)
- {
-  if(inst_ptr[i].ptr<0) continue;
-  my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
-  my_strdup(&sig_type,get_tok_value(inst_ptr[i].prop_ptr,"generic_type",0));
-  if(!sig_type || sig_type[0]=='\0') my_strdup(&sig_type,"std_logic");
-  if( type && (strcmp(type,"generic"))==0)
-  {
-   my_strdup(&port_value,get_tok_value(inst_ptr[i].prop_ptr,"value",2));
-   str_tmp = get_tok_value(inst_ptr[i].prop_ptr,"lab",0);
-   if(!tmp)  fprintf(fd,"generic (\n");
-   if(tmp) fprintf(fd," ;\n");
-   fprintf(fd, "  %s : %s", str_tmp ? str_tmp : "(NULL)", sig_type );
-   if(port_value &&port_value[0])
-      fprintf(fd," := %s", port_value);
-
-   tmp=1;
-  }
- }
- if(tmp) fprintf(fd, "\n);\n");
-*/
+ /* 20071009 get generics from symbol */
+ /* print top subckt generics */
+ /* if(debug_var>=1) fprintf(errfp, "global_vhdl_netlist(): printing top level generic pins\n"); */
+ /* tmp=0; */
+ /* for(i=0;i<lastinst;i++) */
+ /* { */
+ /*  if(inst_ptr[i].ptr<0) continue; */
+ /*  my_strdup(&type,(inst_ptr[i].ptr+instdef)->type); */
+ /*  my_strdup(&sig_type,get_tok_value(inst_ptr[i].prop_ptr,"generic_type",0)); */
+ /*  if(!sig_type || sig_type[0]=='\0') my_strdup(&sig_type,"std_logic"); */
+ /*  if( type && (strcmp(type,"generic"))==0) */
+ /*  { */
+ /*   my_strdup(&port_value,get_tok_value(inst_ptr[i].prop_ptr,"value",2)); */
+ /*   str_tmp = get_tok_value(inst_ptr[i].prop_ptr,"lab",0); */
+ /*   if(!tmp)  fprintf(fd,"generic (\n"); */
+ /*   if(tmp) fprintf(fd," ;\n"); */
+ /*   fprintf(fd, "  %s : %s", str_tmp ? str_tmp : "(NULL)", sig_type ); */
+ /*   if(port_value &&port_value[0]) */
+ /*      fprintf(fd," := %s", port_value); */
+ /* */
+ /*   tmp=1; */
+ /*  } */
+ /* } */
+ /* if(tmp) fprintf(fd, "\n);\n"); */
 
 
 
- // print top subckt ipin/opins
+ /* print top subckt ipin/opins */
  if(debug_var>=1) fprintf(errfp, "global_vhdl_netlist(): printing top level out pins\n");
  tmp=0;
  for(i=0;i<lastinst;i++)
  {
-  if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20140416
+  if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; /* 20140416 */
   if(inst_ptr[i].ptr<0) continue;
   if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
     continue;
@@ -172,7 +170,7 @@ void global_vhdl_netlist(int global)  // netlister driver
  if(debug_var>=1) fprintf(errfp, "global_vhdl_netlist(): printing top level inout pins\n");
  for(i=0;i<lastinst;i++)
  {
-  if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20140416
+  if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; /* 20140416 */
   if(inst_ptr[i].ptr<0) continue;
   if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
     continue;
@@ -193,7 +191,7 @@ void global_vhdl_netlist(int global)  // netlister driver
  if(debug_var>=1) fprintf(errfp, "global_vhdl_netlist(): printing top level input pins\n");
  for(i=0;i<lastinst;i++)
  {
-  if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20140416
+  if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; /* 20140416 */
   if(inst_ptr[i].ptr<0) continue;
   if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
     continue;
@@ -215,7 +213,7 @@ void global_vhdl_netlist(int global)  // netlister driver
  if(debug_var>=1) fprintf(errfp, "global_vhdl_netlist(): printing top level port attributes\n");
   for(i=0;i<lastinst;i++)
   {
-   if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20140416
+   if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; /* 20140416 */
    if(inst_ptr[i].ptr<0) continue;
    if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
      continue;
@@ -229,25 +227,25 @@ void global_vhdl_netlist(int global)  // netlister driver
 
  fprintf(fd,"end %s ;\n\n", skip_dir( schematic[currentsch]) );
  fprintf(fd,"architecture arch_%s of %s is\n\n",  
-	skip_dir( schematic[currentsch]) , skip_dir( schematic[currentsch]));
+        skip_dir( schematic[currentsch]) , skip_dir( schematic[currentsch]));
 
  if(debug_var>=1) fprintf(errfp, "global_vhdl_netlist(): printing top level used components\n");
- // print all components
+ /* print all components */
  for(j=0;j<lastinstdef;j++)
  { 
-  if( strcmp(get_tok_value(instdef[j].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20070726
-  ////if(get_tok_value(instdef[j].prop_ptr,"vhdl_format",2)[0] != '\0') continue; // 20080611
-  if(strcmp(instdef[j].type,"subcircuit")!=0) continue; //20080611
+  if( strcmp(get_tok_value(instdef[j].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; /* 20070726 */
+  /* if(get_tok_value(instdef[j].prop_ptr,"vhdl_format",2)[0] != '\0') continue; */
+  if(strcmp(instdef[j].type,"subcircuit")!=0) continue; /*20080611 */
   if((
       strcmp(instdef[j].type,"subcircuit")==0 ||
       strcmp(instdef[j].type,"primitive")==0 
      ) && check_lib(instdef[j].name)
     ) 
   {
-   // component generics
+   /* component generics */
    print_generic(fd,"component", j);
 
-   // component ports
+   /* component ports */
    tmp=0;
    for(i=0;i<instdef[j].rects[PINLAYER];i++)
    {
@@ -274,23 +272,23 @@ void global_vhdl_netlist(int global)  // netlister driver
  if(debug_var>=1) fprintf(errfp, "global_vhdl_netlist(): netlisting  top level\n");
  vhdl_netlist(fd, 0);
  fprintf(fd,"//// begin user architecture code\n");
- // 20180124
+ /* 20180124 */
  for(i=0;i<lastinst;i++) {
-   if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20140416
+   if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; /* 20140416 */
    if(inst_ptr[i].ptr<0) continue;
    if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
      continue;
    }
    my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
    if(type && !strcmp(type,"netlist_commands")) {
-     fprintf(fd, "%s\n", get_tok_value(inst_ptr[i].prop_ptr,"value",2)); // 20180124
+     fprintf(fd, "%s\n", get_tok_value(inst_ptr[i].prop_ptr,"value",2)); /* 20180124 */
    }
  }
 
  if(schvhdlprop && schvhdlprop[0]) fprintf(fd, "%s\n", schvhdlprop); 
  fprintf(fd, "end arch_%s ;\n\n", skip_dir( schematic[currentsch]) );
 
- if(split_files) { // 20081204
+ if(split_files) { /* 20081204 */
    fclose(fd);
    my_snprintf(netl2, S(netl2), "netlist {%s} noshow {%s.vhdl}", netl3, netl3);
    tcleval(netl2);
@@ -300,50 +298,50 @@ void global_vhdl_netlist(int global)  // netlister driver
 
  if(global)
  {
-   if(modified) save_schematic(schematic[currentsch]); // 20160302 prepare_netlist_structs (called above from verilog_netlist() 
-                                 // may change wire node labels, so save.
+   if(modified) save_schematic(schematic[currentsch]); /* 20160302 prepare_netlist_structs (called above from verilog_netlist()  */
+                                 /* may change wire node labels, so save. */
 
-   remove_symbols(); // 20161205 ensure all unused symbols purged before descending hierarchy
-   load_schematic(1,schematic[currentsch],0); // 20180927
+   remove_symbols(); /* 20161205 ensure all unused symbols purged before descending hierarchy */
+   load_schematic(1,schematic[currentsch],0); /* 20180927 */
 
    currentsch++;
     if(debug_var>=2) fprintf(errfp, "global_vhdl_netlist(): last defined symbol=%d\n",lastinstdef);
    for(i=0;i<lastinstdef;i++)
    {
-    if( strcmp(get_tok_value(instdef[i].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20070726
+    if( strcmp(get_tok_value(instdef[i].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; /* 20070726 */
     if(strcmp(instdef[i].type,"subcircuit")==0 && 
        check_lib(instdef[i].name))
     {
       if( split_files && strcmp(get_tok_value(instdef[i].prop_ptr,"verilog_netlist",0),"true")==0 )
-        verilog_block_netlist(fd, i); // 20081209
+        verilog_block_netlist(fd, i); /* 20081209 */
       else if( split_files && strcmp(get_tok_value(instdef[i].prop_ptr,"spice_netlist",0),"true")==0 )
-        spice_block_netlist(fd, i); // 20081209
+        spice_block_netlist(fd, i); /* 20081209 */
       else
-        vhdl_block_netlist(fd, i);  // 20081205
+        vhdl_block_netlist(fd, i);  /* 20081205 */
     }
    }
    my_strncpy(schematic[currentsch] , "", S(schematic[currentsch]));
    currentsch--;
    remove_symbols();
-   load_schematic(1,schematic[currentsch],0); // 20180927
+   load_schematic(1,schematic[currentsch],0); /* 20180927 */
  }
  if(debug_var>=1) fprintf(errfp, "global_vhdl_netlist(): starting awk on netlist!\n");
  if(!split_files) {
    fclose(fd);
    if(netlist_show) {
     my_snprintf(netl2, S(netl2), "netlist {%s} show {%s.vhdl}", netl3, netl3);
-    tcleval(netl2); // 20081202
+    tcleval(netl2); /* 20081202 */
    }
    else {
     my_snprintf(netl2, S(netl2), "netlist {%s} noshow {%s.vhdl}", netl3, netl3);
-    tcleval(netl2); // 20081202
+    tcleval(netl2); /* 20081202 */
    }
    if(!debug_var) unlink(netl);
  }
 }
 
 
-void  vhdl_block_netlist(FILE *fd, int i)  //20081204
+void  vhdl_block_netlist(FILE *fd, int i)  /*20081204 */
 {
  int j,k,l, tmp, found;
  int vhdl_stop=0;
@@ -352,8 +350,8 @@ void  vhdl_block_netlist(FILE *fd, int i)  //20081204
  static char *port_value = NULL;
  static char *type=NULL;
  char netl[PATH_MAX];
- char netl2[PATH_MAX];  // 20081202
- char netl3[PATH_MAX];  // 20081202
+ char netl2[PATH_MAX];  /* 20081202 */
+ char netl3[PATH_MAX];  /* 20081202 */
  char *str_tmp;
 
      if(!strcmp( get_tok_value(instdef[i].prop_ptr,"vhdl_stop",0),"true") ) 
@@ -361,7 +359,7 @@ void  vhdl_block_netlist(FILE *fd, int i)  //20081204
      else
        vhdl_stop=0;
 
-     if(split_files) { // 20081202
+     if(split_files) { /* 20081202 */
        my_snprintf(netl, S(netl), "%s/%s", netlist_dir,  skip_dir(instdef[i].name) );
        if(debug_var>=1)  fprintf(errfp, "vhdl_block_netlist(): split_files: netl=%s\n", netl);
        fd=fopen(netl, "w");
@@ -371,13 +369,13 @@ void  vhdl_block_netlist(FILE *fd, int i)  //20081204
      if(debug_var>=1) fprintf(errfp, "vhdl_block_netlist(): expanding %s\n",  instdef[i].name);
      fprintf(fd, "\n-- expanding   symbol:  %s # of pins=%d\n\n", 
            instdef[i].name,instdef[i].rects[PINLAYER] );
-     load_schematic(1,instdef[i].name,0); // !stop_vhdl does not print use/packages !!!!!! 27052002
+     load_schematic(1,instdef[i].name,0); /* !stop_vhdl does not print use/packages !!!!!! 27052002 */
 
 
      if(debug_var>=1) fprintf(errfp, "vhdl_block_netlist():       packages\n");
      for(l=0;l<lastinst;l++)
      {
-      if( strcmp(get_tok_value(inst_ptr[l].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20140416
+      if( strcmp(get_tok_value(inst_ptr[l].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; /* 20140416 */
       if(inst_ptr[l].ptr<0) continue;
       if(!strcmp(get_tok_value( (inst_ptr[l].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
         continue;
@@ -389,7 +387,7 @@ void  vhdl_block_netlist(FILE *fd, int i)  //20081204
      if(debug_var>=1) fprintf(errfp, "vhdl_block_netlist():       use statements\n");
      for(l=0;l<lastinst;l++)
      {
-      if( strcmp(get_tok_value(inst_ptr[l].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20140416
+      if( strcmp(get_tok_value(inst_ptr[l].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; /* 20140416 */
       if(inst_ptr[l].ptr<0) continue;
       if(!strcmp(get_tok_value( (inst_ptr[l].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
         continue;
@@ -399,11 +397,11 @@ void  vhdl_block_netlist(FILE *fd, int i)  //20081204
      }
 
      if(debug_var>=1) fprintf(errfp, "vhdl_block_netlist():       entity generics\n");
-     // print entity generics
+     /* print entity generics */
      print_generic(fd, "entity", i);
 
      if(debug_var>=1) fprintf(errfp, "vhdl_block_netlist():       entity ports\n");
-     // print entity ports
+     /* print entity ports */
      tmp=0;
      for(j=0;j<instdef[i].rects[PINLAYER];j++)
      {
@@ -417,7 +415,7 @@ void  vhdl_block_netlist(FILE *fd, int i)  //20081204
        if(tmp) fprintf(fd, " ;\n");
        if(!tmp)  fprintf(fd,"port (\n");
        fprintf(fd,"  %s : %s %s",str_tmp ? str_tmp : "<NULL>", 
-		                          dir_tmp ? dir_tmp : "<NULL>", sig_type);
+                                          dir_tmp ? dir_tmp : "<NULL>", sig_type);
        if(port_value &&port_value[0])
          fprintf(fd," := %s", port_value);
        tmp=1;
@@ -427,7 +425,7 @@ void  vhdl_block_netlist(FILE *fd, int i)  //20081204
      if(debug_var>=1) fprintf(errfp, "vhdl_block_netlist():       port attributes\n");
      for(l=0;l<lastinst;l++)
      {
-      if( strcmp(get_tok_value(inst_ptr[l].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20140416
+      if( strcmp(get_tok_value(inst_ptr[l].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; /* 20140416 */
       if(inst_ptr[l].ptr<0) continue;
       if(!strcmp(get_tok_value( (inst_ptr[l].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
         continue;
@@ -442,22 +440,22 @@ void  vhdl_block_netlist(FILE *fd, int i)  //20081204
 
      if(debug_var>=1) fprintf(errfp, "vhdl_block_netlist():       architecture\n");
      fprintf(fd,"architecture arch_%s of %s is\n\n",  
-	skip_dir( schematic[currentsch]), skip_dir( schematic[currentsch]));
-     // load current schematic to print used components
+        skip_dir( schematic[currentsch]), skip_dir( schematic[currentsch]));
+     /* load current schematic to print used components */
 
      if(debug_var>=1) fprintf(errfp, "vhdl_block_netlist():       used components\n");
-     // print all components
+     /* print all components */
      if(!vhdl_stop)
        for(j=0;j<lastinstdef;j++)
        {
         if(strcmp(instdef[j].type,"subcircuit")==0 && 
            check_lib(instdef[j].name))
         {
-         // only print component declaration if used in current subcircuit
+         /* only print component declaration if used in current subcircuit */
          found=0;
          for(l=0;l<lastinst;l++)
          {
-          if( strcmp(get_tok_value(inst_ptr[l].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20140416
+          if( strcmp(get_tok_value(inst_ptr[l].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; /* 20140416 */
           if(inst_ptr[l].ptr<0) continue;
           if(!strcmp(get_tok_value( (inst_ptr[l].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
             continue;
@@ -469,10 +467,10 @@ void  vhdl_block_netlist(FILE *fd, int i)  //20081204
          }
          if(!found) continue;
   
-         // component generics
+         /* component generics */
          print_generic(fd, "component",j);
   
-         // component ports
+         /* component ports */
          tmp=0;
          for(k=0;k<instdef[j].rects[PINLAYER];k++)
          {
@@ -487,7 +485,7 @@ void  vhdl_block_netlist(FILE *fd, int i)  //20081204
            if(!tmp) fprintf(fd, "port (\n");
            if(tmp) fprintf(fd, " ;\n");
            fprintf(fd,"  %s : %s %s",str_tmp ? str_tmp : "<NULL>", 
-    		                          dir_tmp ? dir_tmp : "<NULL>", sig_type);
+                                          dir_tmp ? dir_tmp : "<NULL>", sig_type);
            if(port_value &&port_value[0])
              fprintf(fd," := %s", port_value);
            tmp=1;
@@ -502,26 +500,26 @@ void  vhdl_block_netlist(FILE *fd, int i)  //20081204
      fprintf(fd,"//// begin user architecture code\n");
 
 
-     // 20180124
+     /* 20180124 */
      for(l=0;l<lastinst;l++) {
-       if( strcmp(get_tok_value(inst_ptr[l].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20140416
+       if( strcmp(get_tok_value(inst_ptr[l].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; /* 20140416 */
        if(inst_ptr[l].ptr<0) continue;
        if(!strcmp(get_tok_value( (inst_ptr[l].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
          continue;
        }                                             
        if(netlist_count &&
-         !strcmp(get_tok_value(inst_ptr[l].prop_ptr, "only_toplevel", 0), "true")) continue; // 20160418
+         !strcmp(get_tok_value(inst_ptr[l].prop_ptr, "only_toplevel", 0), "true")) continue; /* 20160418 */
 
        my_strdup(&type,(inst_ptr[l].ptr+instdef)->type);
        if(type && !strcmp(type,"netlist_commands")) { 
-         fprintf(fd, "%s\n", get_tok_value(inst_ptr[l].prop_ptr,"value",2)); // 20180124
+         fprintf(fd, "%s\n", get_tok_value(inst_ptr[l].prop_ptr,"value",2)); /* 20180124 */
        }
      }
 
 
      if(schvhdlprop && schvhdlprop[0]) fprintf(fd, "%s\n", schvhdlprop);
      fprintf(fd, "end arch_%s ;\n\n", skip_dir( schematic[currentsch]) );
-     if(split_files) { // 20081204
+     if(split_files) { /* 20081204 */
        fclose(fd);
        my_snprintf(netl2, S(netl2), "netlist {%s} noshow {%s.vhdl}", netl3, netl3);
        tcleval(netl2);
@@ -536,15 +534,15 @@ void vhdl_netlist(FILE *fd , int vhdl_stop)
  static char *type=NULL;
 
  prepare_netlist_structs(0);
- modified=1; // 20160302 prepare_netlist_structs could change schematic (wire node naming for example)
- traverse_node_hash();  // print all warnings about unconnected floatings etc
+ modified=1; /* 20160302 prepare_netlist_structs could change schematic (wire node naming for example) */
+ traverse_node_hash();  /* print all warnings about unconnected floatings etc */
 
 
  if(debug_var>=1) fprintf(errfp, "vhdl_netlist():       architecture declarations\n");
  fprintf(fd, "//// begin user declarations\n");
  for(l=0;l<lastinst;l++)
  {
-  if( strcmp(get_tok_value(inst_ptr[l].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20140416
+  if( strcmp(get_tok_value(inst_ptr[l].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; /* 20140416 */
   if(inst_ptr[l].ptr<0) continue;
   if(!strcmp(get_tok_value( (inst_ptr[l].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
     continue;
@@ -562,7 +560,7 @@ void vhdl_netlist(FILE *fd , int vhdl_stop)
  fprintf(fd, "//// begin user attributes\n");
  for(l=0;l<lastinst;l++)
  {
-  if( strcmp(get_tok_value(inst_ptr[l].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20140416
+  if( strcmp(get_tok_value(inst_ptr[l].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; /* 20140416 */
   if(inst_ptr[l].ptr<0) continue;
   if(!strcmp(get_tok_value( (inst_ptr[l].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
     continue;
@@ -576,16 +574,16 @@ void vhdl_netlist(FILE *fd , int vhdl_stop)
  fprintf(fd, "//// end user attributes\n");
 
 
- fprintf(fd, "begin\n"); // begin reintroduced 09122003
+ fprintf(fd, "begin\n"); /* begin reintroduced 09122003 */
  if(!vhdl_stop)
  {
-   for(i=0;i<lastinst;i++) // ... print all element except ipin opin labels use package
-   {			   // dont print elements with vhdl_ignore=true set in symbol
-    if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; // 20140416
+   for(i=0;i<lastinst;i++) /* ... print all element except ipin opin labels use package */
+   {                       /* dont print elements with vhdl_ignore=true set in symbol */
+    if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; /* 20140416 */
     if(inst_ptr[i].ptr<0) continue;
-    if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) { //20070726
-      continue; 										  //20070726
-    }												  //20070726
+    if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) { /*20070726 */
+      continue;                                                                                   /*20070726 */
+    }                                                                                             /*20070726 */
     if(debug_var>=2) fprintf(errfp, "vhdl_netlist():       into the netlisting loop\n");
     my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
     if( type && 
@@ -594,7 +592,7 @@ void vhdl_netlist(FILE *fd , int vhdl_stop)
          strcmp(type,"opin")&&
          strcmp(type,"iopin")&&
          strcmp(type,"use")&&
-         strcmp(type,"netlist_commands")&& // 20180124
+         strcmp(type,"netlist_commands")&& /* 20180124 */
          strcmp(type,"timescale")&&
          strcmp(type,"package")  &&
          strcmp(type,"attributes")  &&
@@ -615,6 +613,5 @@ void vhdl_netlist(FILE *fd , int vhdl_stop)
  }
  if(debug_var>=1) fprintf(errfp, "vhdl_netlist():       end\n");
  if(!netlist_count) draw_hilight_net(1);
- //delete_netlist_structs(); // 20161222 done in prepare_netlist_structs() when needed
 
 }

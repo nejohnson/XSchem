@@ -64,17 +64,17 @@ static void ps_xdrawpoint(int layer, double x1, double y1)
 static void ps_xfillrectange(int layer, double x1, double y1, double x2,
                   double y2)
 {
- //fprintf(fd, "%.16g %.16g moveto %.16g %.16g lineto %.16g %.16g lineto %.16g %.16g lineto closepath\n",
- //       x1,y1,x2,y1,x2,y2,x1,y2);
+ /*fprintf(fd, "%.16g %.16g moveto %.16g %.16g lineto %.16g %.16g lineto %.16g %.16g lineto closepath\n", */
+ /*       x1,y1,x2,y1,x2,y2,x1,y2); */
  fprintf(fd, "%.16g %.16g %.16g %.16g R\n", x1,y1,x2-x1,y2-y1);
  if( (layer==4 || layer==PINLAYER || layer==WIRELAYER) && fill) {
    fprintf(fd, "%.16g %.16g %.16g %.16g RF\n", x1,y1,x2-x1,y2-y1);
-   // fprintf(fd,"fill\n");
+   /* fprintf(fd,"fill\n"); */
  }
- //fprintf(fd,"stroke\n");
+ /*fprintf(fd,"stroke\n"); */
 }
 
-// Convex Nonconvex Complex
+/* Convex Nonconvex Complex */
 #define Polygontype Nonconvex
 static void ps_drawpolygon(int c, int what, double *x, double *y, int points)
 {
@@ -142,48 +142,40 @@ static void ps_draw_string(int gctext,  char *str,
  int pos=0,cc,pos2=0;
  int i; 
 
-if(str==NULL) return;
-// if(xscale*FONTWIDTH* mooz<1)
-// {
-//   if(debug_var>=2) fprintf(errfp, "ps_draw_string(): xscale=%.16g zoom=%.16g \n",xscale,zoom);
-//  //ps_drawrect(gctext, rx1,ry1,rx2,ry2);
-// }
-// else
+ if(str==NULL) return;
+ #ifdef HAS_CAIRO
+ text_bbox_nocairo(str, xscale, yscale, rot, flip, x1,y1, &rx1,&ry1,&rx2,&ry2);
+ #else
+ text_bbox(str, xscale, yscale, rot, flip, x1,y1, &rx1,&ry1,&rx2,&ry2);
+ #endif
+ if(!textclip(areax1,areay1,areax2,areay2,rx1,ry1,rx2,ry2)) return;
+ x1=rx1;y1=ry1;
+ if(rot&1) {y1=ry2;rot=3;}
+ else rot=0;
+ flip = 0; yy=y1;
+ while(str[pos2])
  {
-  #ifdef HAS_CAIRO
-  text_bbox_nocairo(str, xscale, yscale, rot, flip, x1,y1, &rx1,&ry1,&rx2,&ry2);
-  #else
-  text_bbox(str, xscale, yscale, rot, flip, x1,y1, &rx1,&ry1,&rx2,&ry2);
-  #endif
-  if(!textclip(areax1,areay1,areax2,areay2,rx1,ry1,rx2,ry2)) return;
-  x1=rx1;y1=ry1;
-  if(rot&1) {y1=ry2;rot=3;}
-  else rot=0;
-  flip = 0; yy=y1;
-  while(str[pos2])
+  cc = (int)str[pos2++];
+  if(cc=='\n') 
   {
-   cc = (int)str[pos2++];
-   if(cc=='\n') 
-   {
-    yy+=(FONTHEIGHT+FONTDESCENT+FONTWHITESPACE)*
-     yscale;
-    pos=0;
-    continue;
-   } 
-   a = pos*(FONTWIDTH+FONTWHITESPACE);
-   for(i=0;i<character[cc][0]*4;i+=4)
-   {
-    curr_x1 = ( character[cc][i+1]+ a ) * xscale + x1;
-    curr_y1 = ( character[cc][i+2] ) * yscale+yy;
-    curr_x2 = ( character[cc][i+3]+ a ) * xscale + x1;
-    curr_y2 = ( character[cc][i+4] ) * yscale+yy;
-    ROTATION(x1,y1,curr_x1,curr_y1,rx1,ry1);
-    ROTATION(x1,y1,curr_x2,curr_y2,rx2,ry2);
-    ORDER(rx1,ry1,rx2,ry2);
-    ps_drawline(gctext,  rx1, ry1, rx2, ry2);
-   }
-   pos++;
+   yy+=(FONTHEIGHT+FONTDESCENT+FONTWHITESPACE)*
+    yscale;
+   pos=0;
+   continue;
+  } 
+  a = pos*(FONTWIDTH+FONTWHITESPACE);
+  for(i=0;i<character[cc][0]*4;i+=4)
+  {
+   curr_x1 = ( character[cc][i+1]+ a ) * xscale + x1;
+   curr_y1 = ( character[cc][i+2] ) * yscale+yy;
+   curr_x2 = ( character[cc][i+3]+ a ) * xscale + x1;
+   curr_y2 = ( character[cc][i+4] ) * yscale+yy;
+   ROTATION(x1,y1,curr_x1,curr_y1,rx1,ry1);
+   ROTATION(x1,y1,curr_x2,curr_y2,rx2,ry2);
+   ORDER(rx1,ry1,rx2,ry2);
+   ps_drawline(gctext,  rx1, ry1, rx2, ry2);
   }
+  pos++;
  }
 }
 
@@ -194,7 +186,7 @@ static void ps_drawgrid()
  double delta,tmp;
  if(!draw_grid) return;
  delta=CADGRID* mooz;
- while(delta<CADGRIDTHRESHOLD) delta*=CADGRIDMULTIPLY;	// <-- to be improved,but works
+ while(delta<CADGRIDTHRESHOLD) delta*=CADGRIDMULTIPLY;  /* <-- to be improved,but works */
  x = xorigin* mooz;y = yorigin* mooz;
  set_ps_colors(SELLAYER);
  if(y>areay1 && y<areay2)
@@ -219,9 +211,9 @@ static void ps_drawgrid()
 
 
 static void ps_draw_symbol_outline(int n,int layer,int tmp_flip, int rot, 
-	double xoffset, double yoffset) 
-			    // draws current layer only, should be called within 
-{		            // a "for(i=0;i<cadlayers;i++)" loop
+        double xoffset, double yoffset) 
+                            /* draws current layer only, should be called within  */
+{                           /* a "for(i=0;i<cadlayers;i++)" loop */
  int j;
  double x0,y0,x1,y1,x2,y2;
  int flip;
@@ -244,7 +236,7 @@ static void ps_draw_symbol_outline(int n,int layer,int tmp_flip, int rot,
    }
    else inst_ptr[n].flags&=~1;
 
-   // following code handles different text color for labels/pins 06112002
+   /* following code handles different text color for labels/pins 06112002 */
 
   }
   else if(inst_ptr[n].flags&1)
@@ -267,10 +259,10 @@ static void ps_draw_symbol_outline(int n,int layer,int tmp_flip, int rot,
     ORDER(x1,y1,x2,y2);
     ps_drawline(layer, x0+x1, y0+y1, x0+x2, y0+y2);
    }
-   for(j=0;j< (inst_ptr[n].ptr+instdef)->polygons[layer];j++) // 20171115
+   for(j=0;j< (inst_ptr[n].ptr+instdef)->polygons[layer];j++) /* 20171115 */
    {
      polygon = ((inst_ptr[n].ptr+instdef)->polygonptr[layer])[j];
-     {   // scope block so we declare some auxiliary arrays for coord transforms. 20171115
+     {   /* scope block so we declare some auxiliary arrays for coord transforms. 20171115 */
        int k;
        double x[polygon.points];
        double y[polygon.points];
@@ -298,7 +290,7 @@ static void ps_draw_symbol_outline(int n,int layer,int tmp_flip, int rot,
     for(j=0;j< (inst_ptr[n].ptr+instdef)->texts;j++)
     {
      text = (inst_ptr[n].ptr+instdef)->txtptr[j];
-     // if(text.xscale*FONTWIDTH* mooz<1) continue;
+     /* if(text.xscale*FONTWIDTH* mooz<1) continue; */
      text.txt_ptr= 
        translate(n, text.txt_ptr);
      ROTATION(0.0,0.0,text.x0,text.y0,x1,y1);
@@ -309,14 +301,14 @@ static void ps_draw_symbol_outline(int n,int layer,int tmp_flip, int rot,
     }
     restore_lw();
    }
-   Tcl_SetResult(interp,"",TCL_STATIC);  // 26102003
+   Tcl_SetResult(interp,"",TCL_STATIC);  /* 26102003 */
 
 }
 
 
 static void fill_ps_colors()
 {
- char s[200]; // overflow safe 20161122
+ char s[200]; /* overflow safe 20161122 */
  unsigned int i,c;
  if(debug_var>=1) {
    tcleval( "puts $ps_colors"); 
@@ -338,13 +330,13 @@ void ps_draw(void)
  Box bb; 
  double dx, dy, delta,scale;
  int c,i; 
- static char *tmp=NULL; // 20161121
+ static char *tmp=NULL; /* 20161121 */
  int old_grid;
  int modified_save;
 
  modified_save=modified;
- push_undo(); // 20161121
- trim_wires();    // 20161121 add connection boxes on wires but undo at end
+ push_undo(); /* 20161121 */
+ trim_wires();    /* 20161121 add connection boxes on wires but undo at end */
  ps_colors=my_calloc(cadlayers, sizeof(Ps_color));
  if(ps_colors==NULL){
    fprintf(errfp, "ps_draw(): calloc error\n");tcleval( "exit");
@@ -458,10 +450,10 @@ void ps_draw(void)
  fclose(fd);
  draw_grid=old_grid;
  my_free(&ps_colors);
- my_strdup(&tmp, "convert_to_pdf plot.ps"); // 20161121
+ my_strdup(&tmp, "convert_to_pdf plot.ps"); /* 20161121 */
  tcleval( tmp);
  my_free(&tmp);
- pop_undo(0); // 20161121
- modified=modified_save;  // 20161121
+ pop_undo(0); /* 20161121 */
+ modified=modified_save;  /* 20161121 */
 }
 

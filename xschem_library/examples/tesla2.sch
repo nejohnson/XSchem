@@ -1,104 +1,105 @@
-G {} 
-V {} 
-S {} 
-L 4 40 -1110 860 -1110 {} 
-L 4 860 -1110 860 -1060 {} 
-L 4 40 -1110 40 -1060 {} 
-L 4 930 -1110 1800 -1110 {} 
-L 4 1800 -1110 1800 -1060 {} 
-L 4 930 -1110 930 -1060 {} 
-T {BEHAVIORAL PART} 200 -1190 0 0 1 1 {} 
-T {REAL DISCRETE COMPONENTS} 1010 -1190 0 0 1 1 {} 
-N 1320 -570 1440 -570 {lab=#net1} 
-N 1010 -570 1010 -550 {lab=D} 
-N 1010 -700 1010 -670 {lab=VPP} 
-N 1010 -460 1010 -400 {lab=VNN} 
-N 310 -990 310 -970 {lab=#net2} 
-N 310 -850 310 -830 {lab=#net3} 
-N 1230 -640 1230 -570 {lab=D} 
-N 1010 -700 1230 -700 {lab=VPP} 
-N 1210 -570 1210 -530 {lab=D} 
-N 1010 -470 1210 -470 {lab=VNN} 
-N 370 -220 370 -190 {lab=CURSENSE2} 
-N 320 -220 370 -220 {lab=CURSENSE2} 
-N 1440 -510 1440 -480 {lab=#net4} 
-N 1410 -420 1440 -420 {lab=VSS} 
-N 1380 -510 1380 -420 {lab=VSS} 
-N 1410 -230 1680 -230 {lab=VSS} 
-N 1230 -570 1260 -570 {lab=D} 
-N 1010 -750 1010 -700 {lab=VPP} 
-N 1010 -490 1010 -470 {lab=VNN} 
-N 1210 -570 1230 -570 {lab=D} 
-N 1010 -570 1210 -570 {lab=D} 
-N 1010 -580 1010 -570 {lab=D} 
-N 1650 -510 1650 -480 {lab=#net5} 
-N 1680 -570 1710 -570 {lab=HV} 
-N 1680 -420 1710 -420 {lab=#net6} 
-N 1710 -510 1710 -420 {lab=#net6} 
-N 1680 -610 1680 -570 {lab=HV} 
-N 1700 -610 1780 -610 {lab=HV} 
-N 1650 -570 1680 -570 {lab=HV} 
-N 1650 -420 1680 -420 {lab=#net6} 
-N 600 -220 600 -190 {lab=CURSENSE1} 
-N 550 -220 600 -220 {lab=CURSENSE1} 
-N 600 -350 600 -320 {lab=CURSENSE} 
-N 550 -350 600 -350 {lab=CURSENSE} 
-N 190 -640 190 -590 {lab=#net7} 
-N 190 -640 250 -640 {lab=#net7} 
-N 190 -440 250 -440 {lab=#net8} 
-N 190 -490 190 -440 {lab=#net8} 
-N 430 -660 430 -640 {lab=#net9} 
-N 430 -480 430 -440 {lab=#net10} 
-N 1380 -420 1410 -420 {lab=VSS} 
-N 1230 -230 1410 -230 {lab=VSS} 
-N 1780 -610 1780 -510 {lab=HV} 
-N 1780 -450 1780 -230 {lab=VSS} 
-N 1680 -230 1780 -230 {lab=VSS} 
-N 410 -910 500 -910 {lab=VSS} 
-N 400 -840 400 -830 {lab=VNN} 
-N 400 -990 400 -980 {lab=VPP} 
-N 390 -910 400 -900 {lab=VSS} 
-N 400 -920 410 -910 {lab=VSS} 
-N 310 -990 330 -990 {lab=#net2} 
-N 400 -990 500 -990 {lab=VPP} 
-N 310 -830 330 -830 {lab=#net3} 
-N 400 -830 500 -830 {lab=VNN} 
-N 530 -680 590 -680 {lab=VSS} 
-N 590 -700 640 -700 {lab=#net11} 
-N 470 -700 530 -700 {lab=#net9} 
-N 470 -700 470 -640 {lab=#net9} 
-N 620 -660 640 -660 {lab=#net9} 
-N 620 -660 620 -640 {lab=#net9} 
-N 310 -910 390 -910 {lab=VSS} 
-N 390 -910 410 -910 {lab=VSS} 
-N 390 -830 400 -830 {lab=VNN} 
-N 390 -990 400 -990 {lab=VPP} 
-N 430 -640 470 -640 {lab=#net9} 
-N 470 -640 620 -640 {lab=#net9} 
-N 530 -520 590 -520 {lab=VSS} 
-N 590 -540 640 -540 {lab=#net12} 
-N 470 -540 530 -540 {lab=#net10} 
-N 470 -540 470 -480 {lab=#net10} 
-N 620 -500 640 -500 {lab=#net10} 
-N 620 -500 620 -480 {lab=#net10} 
-N 430 -480 470 -480 {lab=#net10} 
-N 470 -480 620 -480 {lab=#net10} 
-N 810 -460 1010 -460 {lab=VNN} 
-N 810 -580 1010 -580 {lab=D} 
-N 740 -680 740 -630 {lab=GH} 
-N 740 -630 770 -630 {lab=GH} 
-N 740 -520 740 -510 {lab=GL} 
-N 740 -510 770 -510 {lab=GL} 
-N 810 -640 910 -640 {lab=#net13} 
-N 810 -520 910 -520 {lab=#net14} 
-N 1010 -470 1010 -460 {lab=VNN} 
-N 1010 -610 1010 -580 {lab=D} 
-N 1680 -610 1700 -610 {lab=HV} 
-N 1410 -260 1410 -230 {lab=VSS} 
-N 1380 -630 1380 -570 {lab=#net1} 
-N 1410 -420 1410 -380 {lab=VSS} 
-N 1670 -420 1670 -350 {lab=#net6} 
-N 1410 -390 1410 -260 {lab=VSS} 
+G {}
+V {}
+S {}
+E {}
+L 4 40 -1110 860 -1110 {}
+L 4 860 -1110 860 -1060 {}
+L 4 40 -1110 40 -1060 {}
+L 4 930 -1110 1800 -1110 {}
+L 4 1800 -1110 1800 -1060 {}
+L 4 930 -1110 930 -1060 {}
+T {BEHAVIORAL PART} 200 -1190 0 0 1 1 {}
+T {REAL DISCRETE COMPONENTS} 1010 -1190 0 0 1 1 {}
+N 1320 -570 1440 -570 {lab=#net1}
+N 1010 -570 1010 -550 {lab=D}
+N 1010 -700 1010 -670 {lab=VPP}
+N 1010 -460 1010 -400 {lab=VNN}
+N 310 -990 310 -970 {lab=#net2}
+N 310 -850 310 -830 {lab=#net3}
+N 1230 -640 1230 -570 {lab=D}
+N 1010 -700 1230 -700 {lab=VPP}
+N 1210 -570 1210 -530 {lab=D}
+N 1010 -470 1210 -470 {lab=VNN}
+N 370 -220 370 -190 {lab=CURSENSE2}
+N 320 -220 370 -220 {lab=CURSENSE2}
+N 1440 -510 1440 -480 {lab=#net4}
+N 1410 -420 1440 -420 {lab=VSS}
+N 1380 -510 1380 -420 {lab=VSS}
+N 1410 -230 1680 -230 {lab=VSS}
+N 1230 -570 1260 -570 {lab=D}
+N 1010 -750 1010 -700 {lab=VPP}
+N 1010 -490 1010 -470 {lab=VNN}
+N 1210 -570 1230 -570 {lab=D}
+N 1010 -570 1210 -570 {lab=D}
+N 1010 -580 1010 -570 {lab=D}
+N 1650 -510 1650 -480 {lab=#net5}
+N 1680 -570 1710 -570 {lab=HV}
+N 1680 -420 1710 -420 {lab=#net6}
+N 1710 -510 1710 -420 {lab=#net6}
+N 1680 -610 1680 -570 {lab=HV}
+N 1700 -610 1780 -610 {lab=HV}
+N 1650 -570 1680 -570 {lab=HV}
+N 1650 -420 1680 -420 {lab=#net6}
+N 600 -220 600 -190 {lab=CURSENSE1}
+N 550 -220 600 -220 {lab=CURSENSE1}
+N 600 -350 600 -320 {lab=CURSENSE}
+N 550 -350 600 -350 {lab=CURSENSE}
+N 190 -640 190 -590 {lab=#net7}
+N 190 -640 250 -640 {lab=#net7}
+N 190 -440 250 -440 {lab=#net8}
+N 190 -490 190 -440 {lab=#net8}
+N 430 -660 430 -640 {lab=#net9}
+N 430 -480 430 -440 {lab=#net10}
+N 1380 -420 1410 -420 {lab=VSS}
+N 1230 -230 1410 -230 {lab=VSS}
+N 1780 -610 1780 -510 {lab=HV}
+N 1780 -450 1780 -230 {lab=VSS}
+N 1680 -230 1780 -230 {lab=VSS}
+N 410 -910 500 -910 {lab=VSS}
+N 400 -840 400 -830 {lab=VNN}
+N 400 -990 400 -980 {lab=VPP}
+N 390 -910 400 -900 {lab=VSS}
+N 400 -920 410 -910 {lab=VSS}
+N 310 -990 330 -990 {lab=#net2}
+N 400 -990 500 -990 {lab=VPP}
+N 310 -830 330 -830 {lab=#net3}
+N 400 -830 500 -830 {lab=VNN}
+N 530 -680 590 -680 {lab=VSS}
+N 590 -700 640 -700 {lab=#net11}
+N 470 -700 530 -700 {lab=#net9}
+N 470 -700 470 -640 {lab=#net9}
+N 620 -660 640 -660 {lab=#net9}
+N 620 -660 620 -640 {lab=#net9}
+N 310 -910 390 -910 {lab=VSS}
+N 390 -910 410 -910 {lab=VSS}
+N 390 -830 400 -830 {lab=VNN}
+N 390 -990 400 -990 {lab=VPP}
+N 430 -640 470 -640 {lab=#net9}
+N 470 -640 620 -640 {lab=#net9}
+N 530 -520 590 -520 {lab=VSS}
+N 590 -540 640 -540 {lab=#net12}
+N 470 -540 530 -540 {lab=#net10}
+N 470 -540 470 -480 {lab=#net10}
+N 620 -500 640 -500 {lab=#net10}
+N 620 -500 620 -480 {lab=#net10}
+N 430 -480 470 -480 {lab=#net10}
+N 470 -480 620 -480 {lab=#net10}
+N 810 -460 1010 -460 {lab=VNN}
+N 810 -580 1010 -580 {lab=D}
+N 740 -680 740 -630 {lab=GH}
+N 740 -630 770 -630 {lab=GH}
+N 740 -520 740 -510 {lab=GL}
+N 740 -510 770 -510 {lab=GL}
+N 810 -640 910 -640 {lab=#net13}
+N 810 -520 910 -520 {lab=#net14}
+N 1010 -470 1010 -460 {lab=VNN}
+N 1010 -610 1010 -580 {lab=D}
+N 1680 -610 1700 -610 {lab=HV}
+N 1410 -260 1410 -230 {lab=VSS}
+N 1380 -630 1380 -570 {lab=#net1}
+N 1410 -420 1410 -380 {lab=VSS}
+N 1670 -420 1670 -350 {lab=#net6}
+N 1410 -390 1410 -260 {lab=VSS}
 C {devices/code} 1850 -510 0 0 {
 name=STIMULI 
 value=".option PARHIER=LOCAL RUNLVL=6 post MODMONTE=1
@@ -118,91 +119,95 @@ vvss vss 0 dc 0
 .meas tran pavg_mos1 AVG p(xm1) from=950u to=990u
 .meas tran pavg_mos2 AVG p(xm2) from=950u to=990u
 .meas tran pavg_d1 AVG p(d1) from=950u to=990u
-.meas tran pavg_d2 AVG p(d2) from=950u to=990u"} 
+.meas tran pavg_d2 AVG p(d2) from=950u to=990u"}
 C {devices/launcher} 1920 -770 0 0 {name=h2 
 descr="BJT MODELS" 
-url="http://www.zen22142.zen.co.uk/ltspice/standard.bjt"} 
+url="http://www.zen22142.zen.co.uk/ltspice/standard.bjt"}
 C {devices/launcher} 1920 -720 0 0 {name=h1 
 descr="NPN MODELS" 
-url="http://web.mit.edu/Magic/Public/ckt/npn.mod"} 
+url="http://web.mit.edu/Magic/Public/ckt/npn.mod"}
 C {devices/launcher} 1920 -820 0 0 {name=h3 
 descr="COIL CALCULATION" 
-url="http://hamwaves.com/antennas/inductance.html"} 
+url="http://hamwaves.com/antennas/inductance.html"}
 C {devices/launcher} 1920 -870 0 0 {name=h4 
 descr="ltwiki BJT MODELS" 
-url="http://ltwiki.org/?title=Standard.bjt"} 
-C {devices/lab_pin} 1230 -230 0 0 {name=p1 lab=VSS} 
-C {devices/ammeter} 1290 -570 3 0 {name=vmeasure} 
-C {devices/vsource} 310 -940 0 0 {name=v1 value=12} 
-C {devices/lab_pin} 310 -910 0 0 {name=p4 lab=VSS} 
-C {devices/vsource} 310 -880 0 0 {name=v2 value=12} 
-C {devices/lab_pin} 500 -990 0 1 {name=p5 lab=VPP} 
-C {devices/lab_pin} 500 -830 0 1 {name=p6 lab=VNN} 
-C {devices/lab_pin} 1010 -750 0 0 {name=p7 lab=VPP} 
-C {devices/lab_pin} 1010 -400 0 0 {name=p9 lab=VNN} 
-C {devices/lab_pin} 1010 -560 0 0 {name=p11 lab=D} 
-C {devices/vsource_arith} 370 -160 0 0 {name=E1 VOL=(i(rfb)-v(offset))*200 MAX=5 MIN=0} 
-C {devices/lab_pin} 370 -130 0 0 {name=p15 lab=VSS} 
-C {devices/lab_pin} 320 -220 0 0 {name=p16 lab=CURSENSE2} 
-C {devices/ind} 1440 -540 2 1 {name=L1 value=9.8u} 
-C {devices/res} 1440 -450 0 1 {name=r1 m=1 value=0.22} 
-C {devices/capa} 1380 -540 0 0 {name=c5 m=1 value=13p} 
-C {devices/ind} 1650 -540 0 1 {name=L2 value=9.1m} 
-C {devices/k} 1540 -540 0 0 {name=K1 K=0.15 L1=L1 L2=L2} 
-C {devices/res} 1650 -450 0 0 {name=r4 m=1 value=.32} 
-C {devices/capa} 1710 -540 0 1 {name=c7 m=1 value=4.1p} 
-C {devices/lab_pin} 1780 -610 0 1 {name=p71 lab=HV} 
-C {devices/vsource_arith} 600 -160 0 0 {name=E11 VOL=(i(rfb)+v(offset))*20000 MAX=5 MIN=0} 
-C {devices/lab_pin} 600 -130 0 0 {name=p0 lab=VSS} 
-C {devices/lab_pin} 550 -220 0 0 {name=p8 lab=CURSENSE1} 
+url="http://ltwiki.org/?title=Standard.bjt"}
+C {devices/lab_pin} 1230 -230 0 0 {name=p1 lab=VSS}
+C {devices/ammeter} 1290 -570 3 0 {name=vmeasure}
+C {devices/vsource} 310 -940 0 0 {name=v1 value=12}
+C {devices/lab_pin} 310 -910 0 0 {name=p4 lab=VSS}
+C {devices/vsource} 310 -880 0 0 {name=v2 value=12}
+C {devices/lab_pin} 500 -990 0 1 {name=p5 lab=VPP}
+C {devices/lab_pin} 500 -830 0 1 {name=p6 lab=VNN}
+C {devices/lab_pin} 1010 -750 0 0 {name=p7 lab=VPP}
+C {devices/lab_pin} 1010 -400 0 0 {name=p9 lab=VNN}
+C {devices/lab_pin} 1010 -560 0 0 {name=p11 lab=D}
+C {devices/vsource_arith} 370 -160 0 0 {name=E1 VOL=(i(rfb)-v(offset))*200 MAX=5 MIN=0}
+C {devices/lab_pin} 370 -130 0 0 {name=p15 lab=VSS}
+C {devices/lab_pin} 320 -220 0 0 {name=p16 lab=CURSENSE2}
+C {devices/ind} 1440 -540 2 1 {name=L1 value=9.8u}
+C {devices/res} 1440 -450 0 1 {name=r1 m=1 value=0.22}
+C {devices/capa} 1380 -540 0 0 {name=c5 m=1 value=13p}
+C {devices/ind} 1650 -540 0 1 {name=L2 value=9.1m}
+C {devices/k} 1540 -540 0 0 {name=K1 K=0.15 L1=L1 L2=L2}
+C {devices/res} 1650 -450 0 0 {name=r4 m=1 value=.32}
+C {devices/capa} 1710 -540 0 1 {name=c7 m=1 value=4.1p}
+C {devices/lab_pin} 1780 -610 0 1 {name=p71 lab=HV}
+C {devices/vsource_arith} 600 -160 0 0 {name=E11 VOL=(i(rfb)+v(offset))*20000 MAX=5 MIN=0}
+C {devices/lab_pin} 600 -130 0 0 {name=p0 lab=VSS}
+C {devices/lab_pin} 550 -220 0 0 {name=p8 lab=CURSENSE1}
 C {devices/vsource} 350 -290 0 0 {name=v3 value="pwl 0 0 280u 0 600u 1.2"
-} 
-C {devices/lab_pin} 350 -260 0 0 {name=p25 lab=VSS} 
-C {devices/lab_pin} 350 -320 0 0 {name=p27 lab=OFFSET} 
-C {devices/vsource_arith} 600 -290 0 0 {name=E2 VOL=i(rfb)*20000 MAX=5 MIN=0} 
-C {devices/lab_pin} 600 -260 0 0 {name=p13 lab=VSS} 
-C {devices/lab_pin} 550 -350 0 0 {name=p17 lab=CURSENSE} 
-C {examples/sr_flop} 340 -430 0 0 {name=x8 VTH=2.5 VHI=5} 
-C {devices/lab_pin} 740 -520 0 1 {name=p28 lab=GL} 
-C {devices/lab_pin} 250 -420 0 0 {name=p29 lab=CURSENSE1} 
-C {devices/lab_pin} 250 -400 0 0 {name=p30 lab=VSS} 
-C {examples/inv} 150 -490 0 0 {name=E7 TABLE="2.3 5 2.7 0.0"} 
-C {devices/lab_pin} 150 -460 0 0 {name=p35 lab=VSS} 
-C {devices/lab_pin} 110 -490 0 0 {name=p36 lab=CURSENSE} 
-C {examples/sr_flop} 340 -650 0 0 {name=x5 VTH=2.5 VHI=5} 
-C {devices/lab_pin} 740 -680 0 1 {name=p37 lab=GH} 
-C {devices/lab_pin} 250 -660 0 0 {name=p38 lab=CURSENSE} 
-C {examples/inv} 150 -590 0 0 {name=E12 TABLE="2.3 5 2.7 0.0"} 
-C {devices/lab_pin} 150 -560 0 0 {name=p39 lab=VSS} 
-C {devices/lab_pin} 250 -620 0 0 {name=p40 lab=VSS} 
-C {devices/lab_pin} 110 -590 0 0 {name=p41 lab=CURSENSE2} 
+}
+C {devices/lab_pin} 350 -260 0 0 {name=p25 lab=VSS}
+C {devices/lab_pin} 350 -320 0 0 {name=p27 lab=OFFSET}
+C {devices/vsource_arith} 600 -290 0 0 {name=E2 VOL=i(rfb)*20000 MAX=5 MIN=0}
+C {devices/lab_pin} 600 -260 0 0 {name=p13 lab=VSS}
+C {devices/lab_pin} 550 -350 0 0 {name=p17 lab=CURSENSE}
+C {examples/sr_flop} 340 -430 0 0 {name=x8 VTH=2.5 VHI=5}
+C {devices/lab_pin} 740 -520 0 1 {name=p28 lab=GL}
+C {devices/lab_pin} 250 -420 0 0 {name=p29 lab=CURSENSE1}
+C {devices/lab_pin} 250 -400 0 0 {name=p30 lab=VSS}
+C {examples/inv} 150 -490 0 0 {name=E7 TABLE="2.3 5 2.7 0.0"}
+C {devices/lab_pin} 150 -460 0 0 {name=p35 lab=VSS}
+C {devices/lab_pin} 110 -490 0 0 {name=p36 lab=CURSENSE}
+C {examples/sr_flop} 340 -650 0 0 {name=x5 VTH=2.5 VHI=5}
+C {devices/lab_pin} 740 -680 0 1 {name=p37 lab=GH}
+C {devices/lab_pin} 250 -660 0 0 {name=p38 lab=CURSENSE}
+C {examples/inv} 150 -590 0 0 {name=E12 TABLE="2.3 5 2.7 0.0"}
+C {devices/lab_pin} 150 -560 0 0 {name=p39 lab=VSS}
+C {devices/lab_pin} 250 -620 0 0 {name=p40 lab=VSS}
+C {devices/lab_pin} 110 -590 0 0 {name=p41 lab=CURSENSE2}
 C {devices/diode} 1210 -500 2 1 {name=D1 model=d1n5400 area=1
-url="http://pdf.datasheetcatalog.com/datasheet/bytes/1N5406.pdf"} 
+url="http://pdf.datasheetcatalog.com/datasheet/bytes/1N5406.pdf"}
 C {devices/diode} 1230 -670 2 0 {name=D2 model=d1n5400 area=1
-url="http://pdf.datasheetcatalog.com/datasheet/bytes/1N5406.pdf"} 
-C {devices/capa} 1780 -480 0 1 {name=c1 m=1 value=1p} 
-C {devices/capa} 400 -950 0 0 {name=c2 m=1 value=10n} 
-C {devices/capa} 400 -870 0 0 {name=c3 m=1 value=10n} 
-C {devices/lab_pin} 500 -910 0 1 {name=p3 lab=VSS} 
-C {devices/res} 360 -990 1 1 {name=r5 m=1 value=0.3} 
-C {devices/res} 360 -830 1 1 {name=r6 m=1 value=0.3} 
-C {examples/an2} 680 -680 0 0 {name=E6 TABLE="2 0 6 8"} 
-C {devices/lab_pin} 680 -640 0 0 {name=p19 lab=VSS} 
-C {devices/delay_hsp} 560 -700 0 0 {name=E4 DEL=5n SCALE=1} 
-C {devices/lab_pin} 530 -680 0 0 {name=p20 lab=VSS} 
-C {examples/an2} 680 -520 0 0 {name=E5 TABLE="2 0 6 8"} 
-C {devices/lab_pin} 680 -480 0 0 {name=p21 lab=VSS} 
-C {devices/delay_hsp} 560 -540 0 0 {name=E9 DEL=5n SCALE=1} 
-C {devices/lab_pin} 530 -520 0 0 {name=p22 lab=VSS} 
-C {devices/nmos3} 990 -640 0 0 {name=xm2 model=irf540 m=1} 
-C {devices/nmos3} 990 -520 0 0 {name=xm1 model=irf540 m=1} 
-C {devices/lab_pin} 770 -590 0 0 {name=p2 lab=VSS} 
-C {devices/lab_pin} 770 -470 0 0 {name=p10 lab=VSS} 
-C {devices/res} 940 -640 1 1 {name=r2 m=1 value=1.5} 
-C {devices/res} 940 -520 1 1 {name=r3 m=1 value=1.5} 
-C {devices/vsource_pwl} 810 -490 0 0 {name=E10 TABLE="1 0 7 8"} 
-C {devices/vsource_pwl} 810 -610 0 0 {name=E3 TABLE="1 0 7 8"} 
-C {devices/res} 1670 -260 0 1 {name=rfb m=1 value=10} 
+url="http://pdf.datasheetcatalog.com/datasheet/bytes/1N5406.pdf"}
+C {devices/capa} 1780 -480 0 1 {name=c1 m=1 value=1p}
+C {devices/capa} 400 -950 0 0 {name=c2 m=1 value=10n}
+C {devices/capa} 400 -870 0 0 {name=c3 m=1 value=10n}
+C {devices/lab_pin} 500 -910 0 1 {name=p3 lab=VSS}
+C {devices/res} 360 -990 1 1 {name=r5 m=1 value=0.3}
+C {devices/res} 360 -830 1 1 {name=r6 m=1 value=0.3}
+C {examples/an2} 680 -680 0 0 {name=E6 TABLE="2 0 6 8"}
+C {devices/lab_pin} 680 -640 0 0 {name=p19 lab=VSS}
+C {devices/delay_hsp} 560 -700 0 0 {name=E4 DEL=5n SCALE=1}
+C {devices/lab_pin} 530 -680 0 0 {name=p20 lab=VSS}
+C {examples/an2} 680 -520 0 0 {name=E5 TABLE="2 0 6 8"}
+C {devices/lab_pin} 680 -480 0 0 {name=p21 lab=VSS}
+C {devices/delay_hsp} 560 -540 0 0 {name=E9 DEL=5n SCALE=1}
+C {devices/lab_pin} 530 -520 0 0 {name=p22 lab=VSS}
+C {devices/nmos3} 990 -640 0 0 {name=xm2 model=irf540 m=1}
+C {devices/nmos3} 990 -520 0 0 {name=xm1 model=irf540 m=1}
+C {devices/lab_pin} 770 -590 0 0 {name=p2 lab=VSS}
+C {devices/lab_pin} 770 -470 0 0 {name=p10 lab=VSS}
+C {devices/res} 940 -640 1 1 {name=r2 m=1 value=1.5}
+C {devices/res} 940 -520 1 1 {name=r3 m=1 value=1.5}
+C {devices/vsource_pwl} 810 -490 0 0 {name=E10 TABLE="1 0 7 8"}
+C {devices/vsource_pwl} 810 -610 0 0 {name=E3 TABLE="1 0 7 8"}
+C {devices/res} 1670 -260 0 1 {name=rfb m=1 value=10}
+C {devices/isource} 1380 -660 0 0 {name=i1 value="pwl 0 0 1u 3 2u 3 3u 0"}
+C {devices/lab_pin} 1380 -690 0 0 {name=p12 lab=VSS}
+C {devices/ammeter} 1670 -320 0 0 {name=vr}
+C {devices/title} 160 -30 0 0 {name=l1 author="Stefan Schippers"}
 C {devices/code} 1850 -660 0 0 {name=MODELS 
 only_toplevel=true
 value=".MODEL bd139_2 npn
@@ -254,7 +259,8 @@ value=".MODEL bd139_2 npn
 + CJE = 2.56E-11 VJE = 0.682256 MJE = 0.3358856 TF = 3.3E-10 XTF = 6 VTF = 0.574
 + ITF = 0.32 PTF = 25.832 CJC = 1.40625E-11 VJC = 0.5417393 MJC = 0.4547893 XCJC = 1
 + TR = 3.2E-7 CJS = 0 VJS = .75 MJS = 0 XTB = 1.6486 EG = 1.11
-+ XTI = 5.8315 KF = 0 AF = 1 FC = 0.83)
++ XTI = 5.8315 KF = 0 AF = 1 FC = 0.83
++              vce_max=45 vbe_max=6 )
 
 
 * 2n2222 p complementary
@@ -277,7 +283,8 @@ value=".MODEL bd139_2 npn
 + NF=1.04 NR=1.12 NE=1.09 NC=1.13 MJE=4.60E-1 MJC=4.65E-1
 + TF=4.95E-10 TR=0 PTF=0 ITF=3.36E-1 VTF=6.54 XTF=1.87E1
 + EG=1.11 KF=1E-9 AF=1
-+ VCEO=40 ICRATING=500M )
++ VCEO=40 ICRATING=500M 
++              vce_max=45 vbe_max=6 )
 
 *MM3725 MCE 5/13/95
 *Si    1W  40V 500mA 307MHz pkg:TO-39 3,2,1
@@ -307,7 +314,9 @@ value=".MODEL bd139_2 npn
 *ZTX Si 500mW  65V 200mA 300MHz pkg:TO-92 1,2,3
 .MODEL BC546 NPN(IS=1.8E-14 BF=400 NF=0.9955 VAF=80 IKF=0.14 ISE=5E-14 
 + NE=1.46 BR=35.5 NR=1.005 VAR=12.5 IKR=0.03 ISC=1.72E-13 NC=1.27 RB=0.56 
-+ RE=0.6 RC=0.25 CJE=1.3E-11 TF=6.4E-10 CJC=4E-12 VJC=0.54 TR=5.072E-8 )
++ RE=0.6 RC=0.25 CJE=1.3E-11 TF=6.4E-10 CJC=4E-12 VJC=0.54 TR=5.072E-8 
++     vce_max=65 vbe_max=6 )
+
 
 .MODEL BC556 PNP( 
 +     IS=2.059E-14
@@ -347,7 +356,8 @@ value=".MODEL bd139_2 npn
 +     CJS=0
 +     VJS=0.75
 +     MJS=0.333
-+     FC=0.7947 )
++     FC=0.7947
++     vce_max=65 vbe_max=6 )
 *
 
 * NXP Semiconductors
@@ -568,246 +578,6 @@ D1 5 3 N3306D
 .ENDS BS170
 *
 
-.SUBCKT irf540 1 2 3
-**************************************
-* Model Generated by MODPEX *
-*Copyright(c) Symmetry Design Systems*
-* All Rights Reserved *
-* UNPUBLISHED LICENSED SOFTWARE *
-* Contains Proprietary Information *
-* Which is The Property of *
-* SYMMETRY OR ITS LICENSORS *
-*Commercial Use or Resale Restricted *
-* by Symmetry License Agreement *
-**************************************
-* Model generated on Apr 24, 96
-* Model format: SPICE3
-* Symmetry POWER MOS Model (Version 1.0)
-* External Node Designations
-* Node 1 -> Drain
-* Node 2 -> Gate
-* Node 3 -> Source
-M1 9 7 8 8 MM L=100u W=100u
-* Default values used in MM:
-* The voltage-dependent capacitances are
-* not included. Other default values are:
-* RS=0 RD=0 LD=0 CBD=0 CBS=0 CGBO=0
-.MODEL MM NMOS LEVEL=1 IS=1e-32
-+VTO=3.56362 LAMBDA=0.00291031 KP=25.0081
-+CGSO=1.60584e-05 CGDO=4.25919e-07
-RS 8 3 0.0317085
-D1 3 1 MD
-.MODEL MD D IS=1.02194e-10 RS=0.00968022 N=1.21527 BV=100
-+IBV=0.00025 EG=1.2 XTI=3.03885 TT=1e-07
-+CJO=1.81859e-09 VJ=1.1279 M=0.449161 FC=0.5
-RDS 3 1 4e+06
-RD 9 1 0.0135649
-RG 2 7 5.11362
-D2 4 5 MD1
-* Default values used in MD1:
-* RS=0 EG=1.11 XTI=3.0 TT=0
-* BV=infinite IBV=1mA
-.MODEL MD1 D IS=1e-32 N=50
-+CJO=2.49697e-09 VJ=0.5 M=0.9 FC=1e-08
-D3 0 5 MD2
-* Default values used in MD2:
-* EG=1.11 XTI=3.0 TT=0 CJO=0
-* BV=infinite IBV=1mA
-.MODEL MD2 D IS=1e-10 N=0.4 RS=3e-06
-RL 5 10 1
-FI2 7 9 VFI2 -1
-VFI2 4 0 0
-EV16 10 0 9 7 1
-CAP 11 10 2.49697e-09
-FI1 7 9 VFI1 -1
-VFI1 11 6 0
-RCAP 6 10 1
-D4 0 6 MD3
-* Default values used in MD3:
-* EG=1.11 XTI=3.0 TT=0 CJO=0
-* RS=0 BV=infinite IBV=1mA
-.MODEL MD3 D IS=1e-10 N=0.4
-.ENDS
-
-
-
-
-*$
-*LM5134A
-*****************************************************************************
-* (C) Copyright 2016 Texas Instruments Incorporated. All rights reserved.
-*****************************************************************************
-** This model is designed as an aid for customers of Texas Instruments.
-** TI and its licensors and suppliers make no warranties, either expressed
-** or implied, with respect to this model, including the warranties of 
-** merchantability or fitness for a particular purpose.  The model is
-** provided solely on an \\"as is\\" basis.  The entire risk as to its quality
-** and performance is with the customer.
-*****************************************************************************
-*
-** Released by: WEBENCH Design Center,Texas Instruments Inc.
-* Part: LM5134A
-* Date: 23SEP2016
-* Model Type: TRANSIENT
-* Simulator: PSPICE
-* Simulator Version: 16.2.0.p001
-* EVM Order Number: NA
-* EVM User's Guide: NA
-* Datasheet: SNVS808CMAY 2012REVISED FEBRURARY 2016
-*
-* Model Version: Final 1.00
-*
-*****************************************************************************
-*
-* Updates:
-*
-* Final 1.00
-* Release to Web
-*
-*****************************************************************************
-*
-* Model Usage Notes:
-*
-* A. Features have been modelled
-*	1. Output timing characteristics
-*	2. Output tr & tf vs VDD & CL Capacitor  
-*	3. tD-ON, tPD-ON, tD-OFF & tPD-OFF vs VDD
-*	4. Output peak current limit for VDD = 10V 
-*	5. Input threshold for VDD = 10V
-*	6. VDD UVLO Logic at TA = 25°C
-*
-* B. Features haven't been modelled
-*	1. Supply Current vs Supply Voltage
-*	2. Supply Current vs Load capacitance
-*	3. Frequency dependent plots 
-*	4. Temperature dependent characteristics
-*
-*****************************************************************************
-.SUBCKT LM5134A VDD PILOT OUT IN INB VSS
-E_E2         INB_INT 0 INB VSS 1
-C_U3_C1         U3_N16789866 U3_N16789873  5p  
-X_U3_U5         VDD U3_N16789873 U3_N16790218 0 RVAR  RREF=1
-C_U3_C3         OUT U3_N16789866  1p  
-
-* E_U3_E1         U3_N16790231 OUT vol=' V(MGATE, 0) > 0.5? 5: -5'
-E_U3_E1         U3_N16790231 OUT pwl(1) MGATE 0 0.49 -5 0.51 5
-
-X_U3_U6         U3_N24836 VSS U3_N31827 0 RVAR   RREF=1
-R_U3_R1         U3_N16790231 U3_N16789866  20  
-M_U3_M2         U3_N24836 U3_N16789871 OUT OUT PMOS01           
-E_U3_E4         U3_N16790218 0 pwl(1) VDD_INT 0 
-+ 0 0, 4.5 0.9, 10  0.09, 12.6 0.08   
-X_U3_U10         VSS OUT d_d1 
-R_U3_R2         U3_N16789868 U3_N16789871  20  
-C_U3_C2         U3_N24836 U3_N16789871  5p  
-X_U3_U9         OUT VDD d_d1 
-C_U3_C5         OUT VDD  10p  
-C_U3_C6         OUT U3_N16789871  10p  
-C_U3_C4         VSS OUT  10p  
-M_U3_M1         U3_N16789873 U3_N16789866 OUT OUT NMOS01           
-E_U3_E3         U3_N31827 0 pwl(1) VDD_INT 0 
-+    0 0, 4.5  0.26, 10  0.01, 12.6 0.01   
-E_U3_E2         OUT U3_N16789868 vol= 'V(MGATE, 0) > 0.5? -5: 5'
-E_U4_ABM4         U4_N14683241 0 vol= 'V(U4_ON_INT) >=0.5?V(VDD_INT):0'
-C_U4_C3         U4_N14683221 0  1n  
-V_U4_V6         U4_N155225261 0 80m
-R_U4_R2         U4_N14683241 U4_N14683221  1 
-X_U4_U47         U4_N14683247 U4_N14683251 d_d1 
-E_U4_ABM5         U4_N14683301 0 vol= 'V(U4_ON_INT)<0.5? V(VDD_INT):0'
-C_U4_C1         U4_N14683247 0  1n  
-X_U4_S1    U4_N14683159 0 U4_N14683247 0 PTON_TOFF_U4_S1 
-X_U4_U44         U4_ON_INT PGATE U4_N14683147 AND2_BASIC_GEN  VDD=1
-+  VSS=0 VTHRESH=500E-3
-X_U4_U43         U4_N14683247 PGATE BUF_BASIC_GEN VDD=1 VSS=0
-+  VTHRESH=0.5
-R_U4_R3         U4_N14683301 U4_N14683281  1 
-X_U4_U7         N18232068 U4_N15541612 INV_BASIC_GEN  VDD=1 VSS=0
-+  VTHRESH=500E-3
-G_U4_G1         U4_N14683251 U4_N14683247 pwl(1) U4_N14683221 0 
-+    0 0, 4.5 140m, 10 500m, 12.6 600m   
-G_U4_G2         U4_N14683247 0 pwl(1) U4_N14683281 0 
-+    0 0, 4.5 70m, 10 800m, 12.6 900m 
-X_U4_U8         MGATE U4_N15541600 INV_BASIC_GEN  VDD=1 VSS=0
-+  VTHRESH=500E-3
-C_U4_C4         U4_N14683281 0  1n  
-X_U4_S2    U4_N14683147 0 U4_N14683251 U4_N14683247 PTON_TOFF_U4_S2 
-X_U4_U48         U4_N155225261 U4_N14683247 d_d1 
-X_U4_U45         U4_N15541600 U4_N15541612 U4_ON_INT AND2_BASIC_GEN 
-+  VDD=1 VSS=0 VTHRESH=500E-3
-V_U4_V5         U4_N14683251 0 1V
-X_U4_U46         PGATE U4_ON_INT U4_N14683159 NOR2_BASIC_GEN  VDD=1
-+  VSS=0 VTHRESH=500E-3
-E_E1         IN_INT 0 IN VSS 1
-E_E3         VDD_INT 0 VDD VSS 1
-C_U2_C1         U2_N14683247 0  1n  
-X_U2_U46         MGATE U2_ON_INT U2_N14683159 NOR2_BASIC_GEN  VDD=1
-+  VSS=0 VTHRESH=500E-3
-X_U2_U7         PGATE U2_N15532894 INV_BASIC_GEN  VDD=1 VSS=0
-+  VTHRESH=500E-3
-G_U2_G1         U2_N14683251 U2_N14683247 pwl(1)  U2_N14683221 0 
-+    0 0,  4.5 58m,  10 140m,  12.6 230m   
-
-E_U2_ABM5         U2_N14683301 0 vol= 'V(U2_ON_INT) <0.5? V(VDD_INT):0'
-
-X_U2_U43         U2_N14683247 MGATE BUF_BASIC_GEN VDD=1 VSS=0
-+  VTHRESH=0.5
-X_U2_U48         U2_N147032561 U2_N14683247 d_d1 
-V_U2_V6         U2_N147032561 0 80m
-X_U2_S2    U2_N14683147 0 U2_N14683251 U2_N14683247 MTON_TOFF_U2_S2 
-
-E_U2_ABM4         U2_N14683241 0 vol='V(U2_ON_INT) >=0.5? V(VDD_INT):0  '
-
-R_U2_R2         U2_N14683241 U2_N14683221  1 
-G_U2_G2         U2_N14683247 0 PWL(1) U2_N14683281 0 
-+    0 0, 4.5 32m, 10 90m, 12.6 160m   
-V_U2_V5         U2_N14683251 0 1V
-X_U2_U44         U2_ON_INT MGATE U2_N14683147 AND2_BASIC_GEN  VDD=1
-+  VSS=0 VTHRESH=500E-3
-C_U2_C3         U2_N14683221 0  1n  
-X_U2_U45         N18232068 U2_N15532894 U2_ON_INT AND2_BASIC_GEN  VDD=1
-+  VSS=0 VTHRESH=500E-3
-X_U2_S1    U2_N14683159 0 U2_N14683247 0 MTON_TOFF_U2_S1 
-R_U2_R3         U2_N14683301 U2_N14683281  1 
-C_U2_C4         U2_N14683281 0  1n  
-X_U2_U47         U2_N14683247 U2_N14683251 d_d1 
-X_U1_U6         INB_INT U1_VIH U1_VHYS U1_N15517298 COMPHYS_BASIC_GEN 
-+  VDD=1 VSS=0 VTHRESH=0.5
-R_U1_R1         U1_N15521766 U1_VDD_UVLO  721.5 
-X_U1_U7         U1_N15517298 U1_INB_OUT INV_BASIC_GEN  VDD=1 VSS=0
-+  VTHRESH=500E-3
-X_U1_U9         U1_IN_OUT U1_INB_OUT U1_VDD_UVLO N18232068 AND3_BASIC_GEN
-+   VDD=1 VSS=0 VTHRESH=500E-3
-C_U1_C1         U1_VDD_UVLO 0  1n  
-X_U1_U5         IN_INT U1_VIH U1_VHYS U1_IN_OUT COMPHYS_BASIC_GEN  VDD=1
-+  VSS=0 VTHRESH=0.5
-X_U1_U8         VDD_INT U1_N15521824 U1_N15521760 U1_N15521766
-+  COMPHYS_BASIC_GEN  VDD=1 VSS=0 VTHRESH=0.5
-V_U1_V1         U1_N15521824 0 3.6
-E_U1_ABM3         U1_VHYS 0 vol= '0.34*V(VDD_INT)'
-E_U1_ABM1         U1_VIH 0 vol='0.67*V(VDD_INT)'
-V_U1_V2         U1_N15521760 0 0.36
-X_U1_U35         U1_VDD_UVLO U1_N15521766 d_d1 
-M_U5_M2         U5_N16789896 U5_N23038 PILOT PILOT PMOS02           
-R_U5_R1         U5_N16790231 U5_N16789866  20  
-X_U5_U6         U5_N16789896 VSS U5_N16802670 0 RVAR  RREF=1
-M_U5_M1         U5_N08221 U5_N16789866 PILOT PILOT NMOS02           
-C_U5_C4         VSS PILOT  10p  
-C_U5_C2         U5_N16789896 U5_N23038  5p  
-R_U5_R2         U5_N16789868 U5_N23038  20  
-E_U5_E3         U5_N16802670 0 pwl(1) VDD_INT 0 
-+    0 0, 4.5 2.8, 10 1.9, 12.6 1.6   
-X_U5_U5         VDD U5_N08221 U5_N26349 0 RVAR RREF=1
-C_U5_C1         U5_N08221 U5_N16789866  5p  
-C_U5_C5         PILOT VDD  10p  
-E_U5_E4         U5_N26349 0 pwl(1) VDD_INT 0 
-+    0 0, 4.5 9.5, 10 2.88, 12.6 2.8   
-X_U5_U9         PILOT VDD d_d1 
-C_U5_C3         PILOT U5_N16789866  10p  
-X_U5_U10         VSS PILOT d_d1 
-E_U5_E2         PILOT U5_N16789868 vol= ' V(PGATE, 0) > 0.5? -5: 5'
-E_U5_E1         U5_N16790231 PILOT vol= ' V(PGATE, 0) > 0.5? 5: -5'
-C_U5_C6         PILOT U5_N23038  10p  
-.ENDS LM5134A
 *$
 .SUBCKT PTON_TOFF_U4_S1 1 2 3 4  
 G_Switch 3 4 VCR PWL(1) 1 2 0.2 100e6 0.8 1m
@@ -896,8 +666,136 @@ fcopy 0 301 vsense 1 $$  copy output current thru Z
 eout 101 106 poly(2) 201 202 301 0 0 0 0 0 1   $$ multiply VoverZ with Vctrl
 vsense 106 102 0   $$ sense iout
 .ENDS RVAR
-*$"} 
-C {devices/isource} 1380 -660 0 0 {name=i1 value="pwl 0 0 1u 3 2u 3 3u 0"} 
-C {devices/lab_pin} 1380 -690 0 0 {name=p12 lab=VSS} 
-C {devices/ammeter} 1670 -320 0 0 {name=vr} 
-C {devices/title} 160 -30 0 0 {name=l1 author="Stefan Schippers"} 
+*$
+
+
+*LM317 TI voltage regulator - pin order: In, Adj, Out
+*TI adjustable voltage regulator pkg:TO-3
+.SUBCKT LM317 1 2 3 **Changes my be required on this line**
+J1 1 3 4 JN
+Q2 5 5 6 QPL .1
+Q3 5 8 9 QNL .2
+Q4 8 5 7 QPL .1
+Q5 81 8 3 QNL .2
+Q6 3 81 10 QPL .2
+Q7 12 81 13 QNL .2
+Q8 10 5 11 QPL .2
+Q9 14 12 10 QPL .2
+Q10 16 5 17 QPL .2
+Q11 16 14 15 QNL .2
+Q12 3 20 16 QPL .2
+Q13 1 19 20 QNL .2
+Q14 19 5 18 QPL .2
+Q15 3 21 19 QPL .2
+Q16 21 22 16 QPL .2
+Q17 21 3 24 QNL .2
+Q18 22 22 16 QPL .2
+Q19 22 3 241 QNL 2
+Q20 3 25 16 QPL .2
+Q21 25 26 3 QNL .2
+Q22A 35 35 1 QPL 2
+Q22B 16 35 1 QPL 2
+Q23 35 16 30 QNL 2
+Q24A 27 40 29 QNL .2
+Q24B 27 40 28 QNL .2
+Q25 1 31 41 QNL 5
+Q26 1 41 32 QNL 50
+D1 3 4 DZ
+D2 33 1 DZ
+D3 29 34 DZ
+R1 1 6 310
+R2 1 7 310
+R3 1 11 190
+R4 1 17 82
+R5 1 18 5.6K
+R6 4 8 100K
+R7 8 81 130
+R8 10 12 12.4K
+R9 9 3 180
+R10 13 3 4.1K
+R11 14 3 5.8K
+R12 15 3 72
+R13 20 3 5.1K
+R14 2 24 12K
+R15 24 241 2.4K
+R16 16 25 6.7K
+R17 16 40 12K
+R18 30 41 130
+R19 16 31 370
+R20 26 27 13K
+R21 27 40 400
+R22 3 41 160
+R23 33 34 18K
+R24 28 29 160
+R25 28 32 3
+R26 32 3 .1
+C1 21 3 30PF
+C2 21 2 30PF
+C3 25 26 5PF
+CBS1 5 3 2PF
+CBS2 35 3 1PF
+CBS3 22 3 1PF
+.MODEL JN NJF(BETA=1E-4 VTO=-7)
+.MODEL DZ D(BV=6.3)
+.MODEL QNL NPN(EG=1.22 BF=80 RB=100 CCS=1.5PF TF=.3NS TR=6NS CJE=2PF
++ CJC=1PF VAF=100)
+.MODEL QPL PNP(BF=40 RB=20 TF=.6NS TR=10NS CJE=1.5PF CJC=1PF VAF=50)
+.ENDS
+
+.SUBCKT xxxxLM317 1 3 2
+* IN ADJ OUT
+IADJ 1 4 50U
+VREF 4 3 1.25
+RC 1 14 0.742
+DBK 14 13 D1
+CBC 13 15 2.479N
+RBC 15 5 247
+QP 13 5 2 Q1
+RB2 6 5 124
+DSC 6 11 D1
+ESC 11 2 POLY(2) (13,5) (6,5) 2.85
++ 0 0 0 -70.1M
+DFB 6 12 D1
+EFB 12 2 POLY(2) (13,5) (6,5) 3.92
++ -135M 0 1.21M -70.1M
+RB1 7 6 1
+EB 7 2 8 2 2.56
+CPZ 10 2 0.796U
+DPU 10 2 D1
+RZ 8 10 0.104
+RP 9 8 100
+EP 9 2 4 2 103.6
+RI 2 4 100MEG
+.MODEL Q1 NPN (IS=30F BF=100
++ VAF=14.27 NF=1.604)
+.MODEL D1 D (IS=30F N=1.604)
+.ENDS
+
+
+
+.SUBCKT LM337 8 1 19
+*Connections Input Adj. Output
+*LM337 negative voltage regulator
+.MODEL QN NPN (BF=50 TF=1N CJC=1P)
+.MODEL QPOUT PNP (BF=50 TF=1N RE=.2 CJC=1P)
+.MODEL QP PNP CJC=1P TF=2N
+.MODEL DN D
+.MODEL D2 D BV=12 IBV=100U
+R10 25 6 1K
+Q3 8 17 16 QPOUT
+Q4 8 25 17 QP
+R18 19 17 250
+R19 19 16 .3
+G1 8 6 1 18 .1
+C7 6 2 .04U
+R24 2 8 100
+I_ADJ 0 1 65U
+R26 8 25 200K
+Q5 25 4 19 QP
+R27 16 4 200
+R28 7 4 7K
+D1 8 7 D2
+D2 8 6 DN
+V1 18 19 1.25
+.ENDS
+"}

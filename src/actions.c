@@ -82,7 +82,7 @@ void resetwin(void)
   XWindowAttributes wattr;
   if(has_x) {
     i = XGetWindowAttributes(display, window, &wattr); /*  should call only when resized */
-     					      /*  to avoid server roundtrip replies */
+                                              /*  to avoid server roundtrip replies */
     if(!i) { /*  20171105 */
       return;
     }
@@ -136,7 +136,7 @@ void resetwin(void)
       cairo_set_line_cap(save_ctx, CAIRO_LINE_CAP_ROUND);
       cairo_select_font_face (save_ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
       cairo_set_font_size (save_ctx, 20);
-      /* // 20171125 select xlib or xcb :-) */
+      /* 20171125 select xlib or xcb :-) */
       #if HAS_XCB==1 && HAS_XRENDER==1
       cairo_xcb_surface_set_size(sfc, xschem_w, xschem_h); /*  20171123 */
       #else
@@ -337,7 +337,7 @@ void ask_new_file(void)
      if(debug_var>=1) fprintf(errfp, "ask_new_file(): load file: %s\n", fullname);
      delete_hilight_net();
      currentsch = 0;
-     unselect_all(); // 20180929
+     unselect_all(); /* 20180929 */
      remove_symbols();
      if(strstr(fullname,".sym")) load_symbol( rel_sym_path(fullname)); /* 20180925.1 */
      else load_schematic(1, rel_sym_path(fullname),1); /* 20180925.1 */
@@ -539,7 +539,6 @@ void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
     if(strcmp(rot_txt,"")) rotated_text=atoi(rot_txt); /*  20171208 */
 
     /*  20111030 skip labels / pins */
-    /*  my_strdup(&type,get_tok_value((inst_ptr[selectedgroup[j].n].ptr+instdef)->prop_ptr,"type",0)); // 20150409 */
     my_strdup(&type,(inst_ptr[selectedgroup[j].n].ptr+instdef)->type); /*  20150409 */
     if( type && (strcmp(type,"label") && strcmp(type,"ipin")&&strcmp(type,"opin")&&strcmp(type,"iopin") )==0)
       continue;
@@ -620,7 +619,7 @@ void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
            rot1=rot;
            if(rot1==1 || rot1==2) { dir=!dir;rot1 = (rot1+2) %4;}  /*  20111103 */
          } else {
-           rot1=(rot+rotated_text)%4; /*  20111103 // 20171208 text_rotation */
+           rot1=(rot+rotated_text)%4; /*  20111103 20171208 text_rotation */
          }
          if(!strcmp(tclgetvar("use_lab_wire"),"0")) {
            place_symbol(-1,symname_pin, pinx0, piny0, rot1, dir, prop, 0, first_call);
@@ -716,7 +715,6 @@ void place_symbol(int pos,char *symbol_name, double x, double y, int rot, int fl
 
   my_strdup2(&inst_ptr[n].instname, get_tok_value(inst_ptr[n].prop_ptr,"name",0) ); /*  20150409 */
 
-  /*  type=get_tok_value(instdef[inst_ptr[n].ptr].prop_ptr,"type",0); // 20150409 removed */
   type = instdef[inst_ptr[n].ptr].type; /* 20150409 */
   cond= strcmp(type,"label") && strcmp(type,"ipin") &&
         strcmp(type,"opin") &&  strcmp(type,"iopin");
@@ -779,12 +777,10 @@ void schematic_in_new_window(void)
  {
   if(                   /*  do not descend if not subcircuit */
      strcmp(
-        /*  get_tok_value( (inst_ptr[selectedgroup[0].n].ptr+instdef)->prop_ptr, "type",0), // 20150409 */
         (inst_ptr[selectedgroup[0].n].ptr+instdef)->type, /*  20150409 */
          "subcircuit"
      ) && 
      strcmp(
-        /*  get_tok_value( (inst_ptr[selectedgroup[0].n].ptr+instdef)->prop_ptr, "type",0), // 20150409 */
         (inst_ptr[selectedgroup[0].n].ptr+instdef)->type, /*  20150409 */
          "primitive"
      ) 
@@ -859,14 +855,12 @@ void descend_schematic(void)
 
   if(debug_var>0) fprintf(errfp, "type of instance: %s\n", (inst_ptr[selectedgroup[0].n].ptr+instdef)->type);
 
-  if(			/*  do not descend if not subcircuit */
+  if(                   /*  do not descend if not subcircuit */
      strcmp(
-        /*  get_tok_value( (inst_ptr[selectedgroup[0].n].ptr+instdef)->prop_ptr, "type",0), // 20150409 */
         (inst_ptr[selectedgroup[0].n].ptr+instdef)->type, /*  20150409 */
          "subcircuit"
      ) && 
      strcmp(
-        /*  get_tok_value( (inst_ptr[selectedgroup[0].n].ptr+instdef)->prop_ptr, "type",0), // 20150409 */
         (inst_ptr[selectedgroup[0].n].ptr+instdef)->type, /*  20150409 */
          "primitive"
      ) 
@@ -878,7 +872,6 @@ void descend_schematic(void)
   }
 
   /*  build up current hierarchy path */
-  /*  str=get_tok_value(inst_ptr[selectedgroup[0].n].prop_ptr,"name",0); // 20150409 */
   str=inst_ptr[selectedgroup[0].n].instname; /*  20150409 */
   my_strdup(&sch_prefix[currentsch+1], sch_prefix[currentsch]);
   my_strcat(&sch_prefix[currentsch+1], str);
@@ -951,11 +944,11 @@ void go_back(int confirm) /*  20171006 add confirm */
   }
   my_strncpy(schematic[currentsch] , "", S(schematic[currentsch]));
   currentsch--;
-  save_modified = modified; // we propagate modified flag (cleared by load_schematic
-                            // by default) to parent schematic if going back from embedded symbol
+  save_modified = modified; /* we propagate modified flag (cleared by load_schematic */
+                            /* by default) to parent schematic if going back from embedded symbol */
 
   load_schematic(1,schematic[currentsch],1);
-  if(from_embedded_sym) modified=save_modified; // to force ask save embedded sym in parent schematic
+  if(from_embedded_sym) modified=save_modified; /* to force ask save embedded sym in parent schematic */
 
   if(prev_curr_type==SCHEMATIC) {
     hilight_parent_pins();
@@ -1094,7 +1087,8 @@ void calc_drawing_bbox(Box *boundbox)
  }
  for(i=0;i<lastinst;i++)
  {
-  /*  symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1, &inst_ptr[i].x2, &inst_ptr[i].y2); // cpu hog 20171206 */
+  /* cpu hog 20171206 */
+  /*  symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1, &inst_ptr[i].x2, &inst_ptr[i].y2); */
   tmp.x1=inst_ptr[i].x1;
   tmp.y1=inst_ptr[i].y1;
   tmp.x2=inst_ptr[i].x2;
@@ -1159,8 +1153,8 @@ void view_unzoom(double z)
   if(zoom>CADMAXZOOM) return;
   zoom*= factor;
   mooz=1/zoom;
-  //// 20181022 make unzoom and zoom symmetric 
-  //// keeping the mouse pointer as the origin
+  /* 20181022 make unzoom and zoom symmetric  */
+  /* keeping the mouse pointer as the origin */
   if(unzoom_nodrift) {
     xorigin=-mousex_snap+(mousex_snap+xorigin)*factor;
     yorigin=-mousey_snap+(mousey_snap+yorigin)*factor;
@@ -1601,7 +1595,7 @@ void new_rect(int what)
      push_undo();
      drawrect(rectcolor, NOW, x1,y1,x2,y2);
      save_draw = draw_window;
-     draw_window = 1; // 20181009
+     draw_window = 1; /* 20181009 */
      filledrect(rectcolor, NOW, x1,y1,x2,y2); /* draw fill pattern even in XCopyArea mode */
      draw_window = save_draw; 
      storeobject(-1, x1,y1,x2,y2,RECT,rectcolor, 0, NULL);
@@ -1634,7 +1628,7 @@ void new_polygon(int what) /*  20171115 */
 
    if( what & PLACE ) points=0; /*  start new polygon placement */
 
-   if(points >= maxpoints-1) {	/*  check storage for 2 points */
+   if(points >= maxpoints-1) {  /*  check storage for 2 points */
      maxpoints = (1+points / CADCHUNKALLOC) * CADCHUNKALLOC;
      my_realloc(&x, sizeof(double)*maxpoints);
      my_realloc(&y, sizeof(double)*maxpoints);
@@ -1707,9 +1701,9 @@ int text_bbox(char *str, double xscale, double yscale,
   if(!str) return 0;
   size = (xscale+yscale)*26.*cairo_font_scale;
 
-  //  if(size*mooz>800.) {
-  //    return 0;
-  //  }
+  /*  if(size*mooz>800.) { */
+  /*    return 0; */
+  /*  } */
   cairo_set_font_size (ctx, size*mooz);
   cairo_font_extents(ctx, &fext);
 
@@ -1808,7 +1802,7 @@ void place_text(int draw_text, double mx, double my)
            tclgetvar("vsize") );
   
   txt =  (char *)tclgetvar("txt");
-  if(!strcmp(txt,"")) return;	/*  01112004 dont allocate text object if empty string given */
+  if(!strcmp(txt,"")) return;   /*  01112004 dont allocate text object if empty string given */
   push_undo(); /*  20150327 */
   check_text_storage();
   textelement[lasttext].txt_ptr=NULL;
@@ -1844,7 +1838,7 @@ void place_text(int draw_text, double mx, double my)
     cairo_select_font_face (save_ctx, textfont, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
   }
   #endif
-  save_draw=draw_window; // 20181009
+  save_draw=draw_window; /* 20181009 */
   draw_window=1;
   if(draw_text) draw_string(textlayer, NOW, textelement[lasttext].txt_ptr, 0, 0, 
               textelement[lasttext].x0,textelement[lasttext].y0,

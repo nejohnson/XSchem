@@ -88,11 +88,11 @@ int callback(int event, int mx, int my, KeySym key,
    }
    /* return 0; */
  }
- semaphore++;		/* used to debug Tcl-Tk frontend */
+ semaphore++;           /* used to debug Tcl-Tk frontend */
  mousex=X_TO_XSCHEM(mx);
  mousey=Y_TO_XSCHEM(my);
- mousex_snap=round(( mousex)/cadsnap)*cadsnap;
- mousey_snap=round(( mousey)/cadsnap)*cadsnap;
+ mousex_snap=ROUND(( mousex)/cadsnap)*cadsnap;
+ mousey_snap=ROUND(( mousey)/cadsnap)*cadsnap;
  my_snprintf(str, S(str), "mouse = %.16g %.16g - %s  selected: %d", 
    mousex_snap, mousey_snap, schematic[currentsch], lastselected );
  statusmsg(str,1);
@@ -265,75 +265,75 @@ int callback(int event, int mx, int my, KeySym key,
      }
      break;
    }
-   if(key == '_' )		/* toggle change line width */
+   if(key == '_' )              /* toggle change line width */
    {
     change_lw =!change_lw;
     if(change_lw) {
-	tcleval("alert_ { enabling change line width} {}");
-	tclsetvar("change_lw","1");
+        tcleval("alert_ { enabling change line width} {}");
+        tclsetvar("change_lw","1");
     }
     else {
-	tcleval("alert_ { disabling change line width} {}");
-	tclsetvar("change_lw","0");
+        tcleval("alert_ { disabling change line width} {}");
+        tclsetvar("change_lw","0");
     }
     break;
    }
-   if(key == 'b' && state==ControlMask)		/* toggle show text in symbol */
+   if(key == 'b' && state==ControlMask)         /* toggle show text in symbol */
    {
     sym_txt =!sym_txt;
     if(sym_txt) {
-	/* tcleval("alert_ { enabling text in symbol} {}"); */
-	tclsetvar("sym_txt","1");
+        /* tcleval("alert_ { enabling text in symbol} {}"); */
+        tclsetvar("sym_txt","1");
         draw();
     }
     else {
-	/* tcleval("alert_ { disabling text in symbol} {}"); */
-	tclsetvar("sym_txt","0");
+        /* tcleval("alert_ { disabling text in symbol} {}"); */
+        tclsetvar("sym_txt","0");
         draw();
     }
     break;
    }
-   if(key == '%' )		/* toggle draw grid */
+   if(key == '%' )              /* toggle draw grid */
    {
     draw_grid =!draw_grid;
     if(draw_grid) {
-	/* tcleval("alert_ { enabling draw grid} {}"); */
-	tclsetvar("draw_grid","1");
+        /* tcleval("alert_ { enabling draw grid} {}"); */
+        tclsetvar("draw_grid","1");
         draw();
     }
     else {
-	/* tcleval("alert_ { disabling draw grid} {}"); */
-	tclsetvar("draw_grid","0");
+        /* tcleval("alert_ { disabling draw grid} {}"); */
+        tclsetvar("draw_grid","0");
         draw();
     }
     break;
    }
-   if(key == 'j'  && state==0 )			/* print list of highlight nets */
+   if(key == 'j'  && state==0 )                 /* print list of highlight nets */
    {
      print_hilight_net(1);
      break;
    }
-   if(key == 'j'  && state==ControlMask)	/* create ipins from highlight nets */
+   if(key == 'j'  && state==ControlMask)        /* create ipins from highlight nets */
    {
      print_hilight_net(0);
      break;
    }
-   if(key == 'j'  && state==Mod1Mask)	/* create labels without i prefix from hilight nets */
+   if(key == 'j'  && state==Mod1Mask)   /* create labels without i prefix from hilight nets */
    {
      print_hilight_net(4);
      break;
    }
-   if(key == 'J'  && state==(Mod1Mask | ShiftMask) )	/* create labels with i prefix from hilight nets 20120913 */
+   if(key == 'J'  && state==(Mod1Mask | ShiftMask) )    /* create labels with i prefix from hilight nets 20120913 */
    {
      print_hilight_net(2);
      break;
    }
-   if(key == 'h'  && state==ControlMask )	/* 20161102 go to http link */
+   if(key == 'h'  && state==ControlMask )       /* 20161102 go to http link */
    {
      launcher();
      break;
    }
-   if(key == 'h'  && state==Mod1Mask)	/* create symbol pins from schematic pins 20171208 */
+   if(key == 'h'  && state==Mod1Mask)   /* create symbol pins from schematic pins 20171208 */
    {
      tcleval("schpins_to_sympins");
      break;
@@ -358,7 +358,7 @@ int callback(int event, int mx, int my, KeySym key,
      }
      break;
    }
-   if(key=='H' && state==ShiftMask) {		/* attach labels to selected instances */
+   if(key=='H' && state==ShiftMask) {           /* attach labels to selected instances */
     attach_labels_to_inst();
     break;
    }
@@ -437,14 +437,14 @@ int callback(int event, int mx, int my, KeySym key,
     }
     break;
    }
-   if(key == '$'  && ( state == ShiftMask) )		/* toggle pixmap  saving */
+   if(key == '$'  && ( state == ShiftMask) )            /* toggle pixmap  saving */
    {
     draw_pixmap =!draw_pixmap;
     if(draw_pixmap) tcleval("alert_ { enabling draw pixmap} {}");
     else tcleval("alert_ { disabling draw pixmap} {}");
     break;
    }
-   if(key == '$' && (state &ControlMask) )		/* toggle window  drawing */
+   if(key == '$' && (state &ControlMask) )              /* toggle window  drawing */
    {
     draw_window =!draw_window;
     if(draw_window) {
@@ -456,7 +456,7 @@ int callback(int event, int mx, int my, KeySym key,
     }
     break;
    }
-   if(key == '='  && (state &ControlMask))		/* toggle fill rectangles */
+   if(key == '='  && (state &ControlMask))              /* toggle fill rectangles */
    {
     int x;
     fill++;
@@ -483,14 +483,14 @@ int callback(int event, int mx, int my, KeySym key,
     draw();
     break;
    }
-   if(key == '+'  && state&ControlMask)		/* change line width */
+   if(key == '+'  && state&ControlMask)         /* change line width */
    {
     lw_double+=0.1;
     change_linewidth(lw_double);
     draw();
     break;
    }
-   if(key == '+'  && !(state&ControlMask))		/* brite colors */
+   if(key == '+'  && !(state&ControlMask))              /* brite colors */
    {
      color_dim +=0.1;
      if(color_dim >5.) color_dim=5.;
@@ -499,7 +499,7 @@ int callback(int event, int mx, int my, KeySym key,
      break;
    }
      
-   if(key == '-'  && !(state&ControlMask))		/* dim colors */
+   if(key == '-'  && !(state&ControlMask))              /* dim colors */
    {
      color_dim -=0.1;
      if(color_dim <-5.) color_dim=-5.;
@@ -508,7 +508,7 @@ int callback(int event, int mx, int my, KeySym key,
      break;
    }
      
-   if(key == '-'  && state&ControlMask)		/* change line width */
+   if(key == '-'  && state&ControlMask)         /* change line width */
    {
     lw_double-=0.1;if(lw_double<0.0) lw_double=0.0;
     change_linewidth(lw_double);
@@ -534,7 +534,7 @@ int callback(int event, int mx, int my, KeySym key,
      for(k=0; k<lastselected; k++) {
        if(selectedgroup[k].type!=ELEMENT) continue;
        j = selectedgroup[k].n ;
-       /* my_strdup(&type,get_tok_value((inst_ptr[j].ptr+instdef)->prop_ptr,"type",0)); // 20150409 */
+       /* my_strdup(&type,get_tok_value((inst_ptr[j].ptr+instdef)->prop_ptr,"type",0)); */
        my_strdup(&type,(inst_ptr[j].ptr+instdef)->type); /* 20150409 */
        if( type && (strcmp(type,"label") && strcmp(type,"ipin")&&strcmp(type,"opin")&&strcmp(type,"iopin") )==0) break;
        symbol = instdef + inst_ptr[j].ptr;
@@ -559,7 +559,7 @@ int callback(int event, int mx, int my, KeySym key,
      /* /20130628 */
      break;
    }
-   if(key== 'W' && state == ShiftMask) {			/* 20171022 create wire snapping to closest instance pin */
+   if(key== 'W' && state == ShiftMask) {                        /* 20171022 create wire snapping to closest instance pin */
      double x, y;
      int xx, yy;
      if(!(ui_state & STARTWIRE)){
@@ -567,8 +567,8 @@ int callback(int event, int mx, int my, KeySym key,
        xx = X_TO_SCREEN(x);
        yy = Y_TO_SCREEN(y);
        mx_save = xx; my_save = yy; /* 20070323 */
-       mx_double_save=round( X_TO_XSCHEM(xx)/cadsnap)*cadsnap;
-       my_double_save=round( Y_TO_XSCHEM(yy)/cadsnap)*cadsnap;
+       mx_double_save=ROUND( X_TO_XSCHEM(xx)/cadsnap)*cadsnap;
+       my_double_save=ROUND( Y_TO_XSCHEM(yy)/cadsnap)*cadsnap;
        new_wire(PLACE, x, y);
      }
      else {
@@ -580,7 +580,7 @@ int callback(int event, int mx, int my, KeySym key,
      }
      break;
    }
-   if(key == 'w'&& state==0)	/* place wire. */
+   if(key == 'w'&& state==0)    /* place wire. */
    {
      start_wire(mx, my); 
     break;
@@ -589,7 +589,7 @@ int callback(int event, int mx, int my, KeySym key,
     new_polygon(ADD|END);
     break;
    }
-   if(key == XK_Escape )			/* abort & redraw */
+   if(key == XK_Escape )                        /* abort & redraw */
    {
     tcleval("set vertical_move 0; set horizontal_move 0" );
     last_command=0;
@@ -611,16 +611,16 @@ int callback(int event, int mx, int my, KeySym key,
     draw();
     break;
    }
-   if(key=='z' && state == 0) 			/* zoom box */
+   if(key=='z' && state == 0)                   /* zoom box */
    {
     if(debug_var>=1) fprintf(errfp, "callback(): zoom_box call\n");
     zoom_box(BEGIN);break;
    }
-   if(key=='Z' && state == ShiftMask) 			/* zoom in */
+   if(key=='Z' && state == ShiftMask)                   /* zoom in */
    {
     view_zoom(0.0); break;
    }
-   if(key=='p' && state == 0)		 		/* pan */
+   if(key=='p' && state == 0)                           /* pan */
    {
     pan(BEGIN);break;
    }
@@ -633,11 +633,11 @@ int callback(int event, int mx, int my, KeySym key,
      new_polygon(PLACE);
      break;
    }
-   if(key=='p' && state == ControlMask)		 		/* pan */
+   if(key=='p' && state == ControlMask)                         /* pan */
    {
     pan(BEGIN);break;
    }
-   if(key=='P' && state == ShiftMask) 			/* pan, other way to. */
+   if(key=='P' && state == ShiftMask)                   /* pan, other way to. */
    {
     xorigin=-mousex_snap+areaw*zoom/2.0;yorigin=-mousey_snap+areah*zoom/2.0;
     draw();
@@ -647,41 +647,41 @@ int callback(int event, int mx, int my, KeySym key,
     toggle_only_probes();
     break;
    }  /* /20110112 */
-   if(key<='9' && key >='0' && state==ControlMask) 		/* choose layer */
+   if(key<='9' && key >='0' && state==ControlMask)              /* choose layer */
    {
     rectcolor = key - '0'+4;
     if(debug_var>=1) fprintf(errfp, "callback(): new color: %d\n",color_index[rectcolor]);
     break;
    }
-   if(key==XK_Delete && (ui_state & SELECTION) )	/* delete objects */
+   if(key==XK_Delete && (ui_state & SELECTION) )        /* delete objects */
    {
     delete();break;
    }
-   if(key==XK_Right) 			/* left */
+   if(key==XK_Right)                    /* left */
    {
     xorigin+=-CADMOVESTEP*zoom;
     draw();
     break;
    }
-   if(key==XK_Left) 			/* right */
+   if(key==XK_Left)                     /* right */
    {
     xorigin-=-CADMOVESTEP*zoom;
     draw();
     break;
    }
-   if(key==XK_Down) 			/* down */
+   if(key==XK_Down)                     /* down */
    {
     yorigin+=-CADMOVESTEP*zoom;
     draw();
     break;
    }
-   if(key==XK_Up) 			/* up */
+   if(key==XK_Up)                       /* up */
    {
     yorigin-=-CADMOVESTEP*zoom;
     draw();
     break;
    }
-   if(key=='q' && state == ControlMask)	/* exit */
+   if(key=='q' && state == ControlMask) /* exit */
    {
      if(modified) {
        tcleval("tk_messageBox -type okcancel -message {UNSAVED data: want to exit?}");
@@ -702,13 +702,13 @@ int callback(int event, int mx, int my, KeySym key,
    if(key=='r' && !ui_state && state==0)              /* start rect */
    {
     if(debug_var>=1) fprintf(errfp, "callback(): start rect\n");
-    mx_save = mx; my_save = my;	/* 20070323 */
+    mx_save = mx; my_save = my; /* 20070323 */
     mx_double_save=mousex_snap;
     my_double_save=mousey_snap;
     new_rect(PLACE);
     break;
    }
-   if(key=='V' && state == ShiftMask)				/* toggle spice/vhdl netlist  */
+   if(key=='V' && state == ShiftMask)                           /* toggle spice/vhdl netlist  */
    {
     netlist_type++; if(netlist_type==5) netlist_type=1;
     if(netlist_type == CAD_VHDL_NETLIST)
@@ -734,7 +734,7 @@ int callback(int event, int mx, int my, KeySym key,
     break;
    }
 
-   if(key=='s' && (state == ControlMask) )	/* save 20121201 */
+   if(key=='s' && (state == ControlMask) )      /* save 20121201 */
    {
      if(semaphore==2) break;
      if(!strcmp(schematic[currentsch],"")) { /* 20170622 check if unnamed schematic, use saveas in this case... */
@@ -744,7 +744,7 @@ int callback(int event, int mx, int my, KeySym key,
      }
      break;
    }
-   if(key=='s' && state == (ControlMask | Mod1Mask) )		/* save as symbol */
+   if(key=='s' && state == (ControlMask | Mod1Mask) )           /* save as symbol */
    {
      if(semaphore==2) break;
      current_type=SYMBOL;
@@ -757,17 +757,17 @@ int callback(int event, int mx, int my, KeySym key,
      saveas();
      break;
    }
-   if(key=='e' && state == 0)  		/* descend to schematic */
+   if(key=='e' && state == 0)           /* descend to schematic */
    {
     if(semaphore==2) break;
     descend_schematic();break;
    }
-   if(key=='e' && state == Mod1Mask)  		/* edit schematic in new window */
+   if(key=='e' && state == Mod1Mask)            /* edit schematic in new window */
    {
     schematic_in_new_window();
     break;
    }
-   if(key=='i' && state == Mod1Mask)  		/* edit symbol in new window */
+   if(key=='i' && state == Mod1Mask)            /* edit symbol in new window */
    {
     symbol_in_new_window();
     break;
@@ -778,7 +778,7 @@ int callback(int event, int mx, int my, KeySym key,
     go_back(1);break;
    }
 
-   if(key=='a' && state == 0) 	/* make symbol */
+   if(key=='a' && state == 0)   /* make symbol */
    {
     if(semaphore==2) break; /* 20180914 */
     tcleval("tk_messageBox -type okcancel -message {do you want to make symbol view ?}");
@@ -795,17 +795,17 @@ int callback(int event, int mx, int my, KeySym key,
     select_all();
     break;
    }
-   if(key=='y' && state == 0)           		/* toggle stretching */
+   if(key=='y' && state == 0)                           /* toggle stretching */
    {
     enable_stretch=!enable_stretch;
     
     if(enable_stretch) {
-	tcleval("alert_ { enabling stretch mode } {}");
-	tclsetvar("enable_stretch","1");
+        tcleval("alert_ { enabling stretch mode } {}");
+        tclsetvar("enable_stretch","1");
     }
     else {
-	tcleval("alert_ { disabling stretch mode } {}");
-	tclsetvar("enable_stretch","0");
+        tcleval("alert_ { disabling stretch mode } {}");
+        tclsetvar("enable_stretch","0");
     }
     break;
    }
@@ -866,13 +866,13 @@ int callback(int event, int mx, int my, KeySym key,
    {
     edit_property(2);break;
    }
-   if(key=='q' && state==0)           		/* edit prop */
+   if(key=='q' && state==0)                     /* edit prop */
    {
     if(semaphore==2) break;
     edit_property(0);
     break;
    }
-   if(key=='q' && state==Mod1Mask)           		/* edit .sch file (DANGER!!) */
+   if(key=='q' && state==Mod1Mask)                      /* edit .sch file (DANGER!!) */
    {
     rebuild_selected_array();
     if(lastselected==0 ) {
@@ -893,22 +893,22 @@ int callback(int event, int mx, int my, KeySym key,
     }
     break;
    }
-   if(key=='Q' && state == ShiftMask)           		/* edit prop with vim */
+   if(key=='Q' && state == ShiftMask)                           /* edit prop with vim */
    {
     if(semaphore==2) break;
     edit_property(1);break;
    }
-   if(key=='i' && state==0)           		/* descend to  symbol */
+   if(key=='i' && state==0)                     /* descend to  symbol */
    {
     if(semaphore==2) break;
     descend_symbol();break;
    }
-   if(key==XK_Insert)			/* insert sym */
+   if(key==XK_Insert)                   /* insert sym */
    {
     place_symbol(-1,NULL,mousex_snap, mousey_snap, 0, 0, NULL,3, 1);
     break;
    }
-   if(key=='s' && state & Mod1Mask)			/* reload */
+   if(key=='s' && state & Mod1Mask)                     /* reload */
    {
     if(semaphore==2) break;
      tcleval("tk_messageBox -type okcancel -message {Are you sure you want to reload from disk?}");
@@ -932,29 +932,29 @@ int callback(int event, int mx, int my, KeySym key,
     change_elem_order();
     break;
    }
-   if(key=='k' && state==ControlMask)				/* unhilight net */
+   if(key=='k' && state==ControlMask)                           /* unhilight net */
    {
-    /* // 20160413 */
+    /* 20160413 */
     unhilight_net();
     undraw_hilight_net(1);
     /* draw(); */
     break;
    }
-   if(key=='K' && state==(ControlMask|ShiftMask))	/* hilight net drilling thru elements  */
-							/* with 'propagate_to' prop set on pins */
+   if(key=='K' && state==(ControlMask|ShiftMask))       /* hilight net drilling thru elements  */
+                                                        /* with 'propagate_to' prop set on pins */
    {
     enable_drill=1;
     hilight_net();
     draw_hilight_net(1);
     break;
    }
-   if(key=='k' && state==0)				/* hilight net */
+   if(key=='k' && state==0)                             /* hilight net */
    {
     hilight_net();
     draw_hilight_net(1);
     break;
    }
-   if(key=='K' && state == ShiftMask)				/* delete hilighted nets */
+   if(key=='K' && state == ShiftMask)                           /* delete hilighted nets */
    {
     enable_drill=0;
     delete_hilight_net();
@@ -981,22 +981,22 @@ int callback(int event, int mx, int my, KeySym key,
     set_snap(cadsnap * 2.0);
     break;
    }
-   if(key=='*' && state==(Mod1Mask|ShiftMask) )		/* svg print , 20121108 */
+   if(key=='*' && state==(Mod1Mask|ShiftMask) )         /* svg print , 20121108 */
    {
     svg_draw();
     break;
    }
-   if(key=='*' && state==ShiftMask )			/* postscript print */
+   if(key=='*' && state==ShiftMask )                    /* postscript print */
    {
     ps_draw();
     break;
    }
-   if(key=='*' && state==(ControlMask|ShiftMask) )	/* xpm print */
+   if(key=='*' && state==(ControlMask|ShiftMask) )      /* xpm print */
    {
     print_image();
     break;
    }
-   if(key=='u' && state==Mod1Mask)			/* align to grid */
+   if(key=='u' && state==Mod1Mask)                      /* align to grid */
    {
     push_undo(); /* 20150327 */
     round_schematic_to_grid(cadsnap);
@@ -1009,7 +1009,7 @@ int callback(int event, int mx, int my, KeySym key,
     draw();
     break;
    }
-   if(key=='u' && state==ControlMask)			/* testmode */
+   if(key=='u' && state==ControlMask)                   /* testmode */
    {
      int i;
      double x1, y1, x2, y2;
@@ -1040,19 +1040,19 @@ int callback(int event, int mx, int my, KeySym key,
     
     break;
    }
-   if(key=='u' && state==0)				/* undo */
+   if(key=='u' && state==0)                             /* undo */
    {
     pop_undo(0);
     draw();
     break;
    }
-   if(key=='U' && state==ShiftMask)			/* redo */
+   if(key=='U' && state==ShiftMask)                     /* redo */
    {
     pop_undo(1);
     draw();
     break;
    }
-   if(key=='&')				/* check wire connectivity */
+   if(key=='&')                         /* check wire connectivity */
    {
     push_undo(); /* 20150327 */
     trim_wires();
@@ -1069,31 +1069,31 @@ int callback(int event, int mx, int my, KeySym key,
     start_line(mx, my);
     break;
    }
-   if(key=='F' && state==ShiftMask)			/* Flip */
+   if(key=='F' && state==ShiftMask)                     /* Flip */
    {
     if(ui_state & STARTMOVE) move_objects(FLIP,0,0,0);
     if(ui_state & STARTCOPY) copy_objects(FLIP);
     break;
    }
-   if(key=='F' && state==(ShiftMask|Mod1Mask))		/* Fullscreen */
+   if(key=='F' && state==(ShiftMask|Mod1Mask))          /* Fullscreen */
    {
     if(debug_var>=1) fprintf(errfp, "callback(): toggle fullscreen\n");
     toggle_fullscreen();
     break;
    }
-   if(key=='f' && state==Mod1Mask)		/* flip objects around their anchor points 20171208 */
+   if(key=='f' && state==Mod1Mask)              /* flip objects around their anchor points 20171208 */
    {
     if(ui_state & STARTMOVE) move_objects(FLIP|ROTATELOCAL,0,0,0);
     if(ui_state & STARTCOPY) copy_objects(FLIP|ROTATELOCAL);
     break;
    }
-   if(key=='R' && state==ShiftMask)		/* Rotate */
+   if(key=='R' && state==ShiftMask)             /* Rotate */
    {
     if(ui_state & STARTMOVE) move_objects(ROTATE,0,0,0);
     if(ui_state & STARTCOPY) copy_objects(ROTATE);
     break;
    }
-   if(key=='r' && state==Mod1Mask)		/* Rotate objects around their anchor points 20171208 */
+   if(key=='r' && state==Mod1Mask)              /* Rotate objects around their anchor points 20171208 */
    {
     if(ui_state & STARTMOVE) move_objects(ROTATE|ROTATELOCAL,0,0,0);
     if(ui_state & STARTCOPY) copy_objects(ROTATE|ROTATELOCAL);
@@ -1101,17 +1101,17 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='m' && state==0 && !(ui_state & (STARTMOVE | STARTCOPY)))/* move selected obj. */
    {
-    mx_save = mx; my_save = my;	/* 20070323 */
+    mx_save = mx; my_save = my; /* 20070323 */
     mx_double_save=mousex_snap;
     my_double_save=mousey_snap;
     move_objects(BEGIN,0,0,0);
     break;
    }
    
-   if(key=='c' && state==0 &&		/* copy selected obj.  */
+   if(key=='c' && state==0 &&           /* copy selected obj.  */
      !(ui_state & (STARTMOVE | STARTCOPY)))
    {
-    mx_save = mx; my_save = my;	/* 20070323 */
+    mx_save = mx; my_save = my; /* 20070323 */
     mx_double_save=mousex_snap;
     my_double_save=mousey_snap;
     copy_objects(BEGIN);
@@ -1127,7 +1127,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='N' && state==ShiftMask)              /* hierarchical netlist */
    {
-    unselect_all(); // 20180929
+    unselect_all(); /* 20180929 */
     if(set_netlist_dir(0)) {
       if(debug_var>=1) fprintf(errfp, "callback(): -------------\n");
       if(netlist_type == CAD_SPICE_NETLIST)
@@ -1144,7 +1144,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='n' && state==0)              /* netlist */
    {
-    unselect_all(); // 20180929
+    unselect_all(); /* 20180929 */
     if( set_netlist_dir(0) ) {
       if(debug_var>=1) fprintf(errfp, "callback(): -------------\n");
       if(netlist_type == CAD_SPICE_NETLIST)
@@ -1159,16 +1159,16 @@ int callback(int event, int mx, int my, KeySym key,
     }
     break;
    }
-   if(key=='A' && state==ShiftMask)				/* toggle show netlist */
+   if(key=='A' && state==ShiftMask)                             /* toggle show netlist */
    {
     netlist_show = !netlist_show;
     if(netlist_show) {
-	tcleval("alert_ { enabling show netlist window} {}");
-	tclsetvar("netlist_show","1");
+        tcleval("alert_ { enabling show netlist window} {}");
+        tclsetvar("netlist_show","1");
     }
     else {
-	tcleval("alert_ { disabling show netlist window } {}");
-	tclsetvar("netlist_show","0");
+        tcleval("alert_ { disabling show netlist window } {}");
+        tclsetvar("netlist_show","0");
     }
     break;
    }
@@ -1182,26 +1182,26 @@ int callback(int event, int mx, int my, KeySym key,
      draw();
      break;
    }
-   if(key==':')				/* toggle flat netlist (only spice)  */
+   if(key==':')                         /* toggle flat netlist (only spice)  */
    {
     flat_netlist = !flat_netlist;
     if(flat_netlist) {
-	tcleval("alert_ { enabling flat netlist} {}");
-	tclsetvar("flat_netlist","1");
+        tcleval("alert_ { enabling flat netlist} {}");
+        tclsetvar("flat_netlist","1");
     }
     else {
-	tcleval("alert_ { set hierarchical netlist } {}");
-	tclsetvar("flat_netlist","0");
+        tcleval("alert_ { set hierarchical netlist } {}");
+        tclsetvar("flat_netlist","0");
     }
     break;
    }
-   if(key=='b' && state==0) 	                /* merge schematic */
+   if(key=='b' && state==0)                     /* merge schematic */
    {
     if(semaphore==2) break;
     merge_file(0, ""); /* 2nd parameter not used any more for merge 25122002 */
     break;
    }
-   if(key=='B' && state==ShiftMask) 	                /* delete files */
+   if(key=='B' && state==ShiftMask)                     /* delete files */
    {
 
     if(semaphore==2) break; /* 20160423 */
@@ -1217,7 +1217,7 @@ int callback(int event, int mx, int my, KeySym key,
     tcleval(str);
     break;
    }
-   if(key=='x' && state == 0 ) 	                /* new cad session */
+   if(key=='x' && state == 0 )                  /* new cad session */
    {
     char * tmp;
     tmp = (char *) tclgetvar("XSCHEM_START_WINDOW"); /* 20121110 */
@@ -1229,7 +1229,7 @@ int callback(int event, int mx, int my, KeySym key,
     }
     break;
    }
-   if(key==';' && state & ControlMask ) 	/* testmode 20171203 */
+   if(key==';' && state & ControlMask )         /* testmode 20171203 */
    {
     int j;
     unsigned short parallel, breaks, broken, touches, included, includes;
@@ -1251,13 +1251,13 @@ int callback(int event, int mx, int my, KeySym key,
     }
     break;
    }
-   if(key==';' && state & Mod1Mask ) 	/* testmode:  for performance testing */
+   if(key==';' && state & Mod1Mask )    /* testmode:  for performance testing */
    {
     draw_stuff(); 
     draw();
     break;
    }
-   if(key=='#' && !(state&ControlMask)) 	/* testmode */
+   if(key=='#' && !(state&ControlMask))         /* testmode */
    {
     double w, x1, y1, x2, y2;
     int i;
@@ -1265,18 +1265,18 @@ int callback(int event, int mx, int my, KeySym key,
 
     clear_drawing();
     for(i=0;i<1000; i++) {
-      w = (1+round(rand()%700/snap))*snap;
-      x1 = 40000+round(rand()%10000/snap)*snap;
-      y1 = 40000+round(rand()%10000/snap)*snap;
+      w = (1+ROUND(rand()%700/snap))*snap;
+      x1 = 40000+ROUND(rand()%10000/snap)*snap;
+      y1 = 40000+ROUND(rand()%10000/snap)*snap;
       x2=x1+w;
       y2=y1;
       ORDER(x1, y1, x2, y2);
       storeobject(-1, x1, y1, x2, y2 ,WIRE,0,0,NULL);
     }
     for(i=0;i<1000; i++) {
-      w = (1+round(rand()%700/snap))*snap;
-      x1 = 40000+round(rand()%10000/snap)*snap;
-      y1 = 40000+round(rand()%10000/snap)*snap;
+      w = (1+ROUND(rand()%700/snap))*snap;
+      x1 = 40000+ROUND(rand()%10000/snap)*snap;
+      y1 = 40000+ROUND(rand()%10000/snap)*snap;
       x2=x1;
       y2=y1+w;
       ORDER(x1, y1, x2, y2);
@@ -1293,12 +1293,12 @@ int callback(int event, int mx, int my, KeySym key,
     tcleval("property_search");
     break;
    }
-   if(key=='f' && state == 0 ) 	                /* full zoom */
+   if(key=='f' && state == 0 )                  /* full zoom */
    {
     zoom_full(1);
     break;
    }
-   if((key=='z' && state==ControlMask))  	                /* zoom out */
+   if((key=='z' && state==ControlMask))                         /* zoom out */
    {
      view_unzoom(0.0); 
      break;
@@ -1309,7 +1309,7 @@ int callback(int event, int mx, int my, KeySym key,
      break;
    }
   break;
-  case ButtonPress:			/* end operation */
+  case ButtonPress:                     /* end operation */
    if(debug_var>=1) fprintf(errfp, "callback(): ButtonPress  ui_state=%ld state=%d\n",ui_state,state);
    if(button==Button5 && state == 0 ) view_unzoom(CADZOOMSTEP);
    else if(button==Button4 && state == 0 ) view_zoom(CADZOOMSTEP);
@@ -1331,7 +1331,7 @@ int callback(int event, int mx, int my, KeySym key,
     draw();
    }
    else if(button==Button3) {
-     mx_save = mx; my_save = my;	/* 20171218 */
+     mx_save = mx; my_save = my;        /* 20171218 */
      mx_double_save=mousex_snap;
      my_double_save=mousey_snap;
      if(state==0) {
@@ -1364,7 +1364,7 @@ int callback(int event, int mx, int my, KeySym key,
        break; /* 20161201 */
      }
      if(ui_state & MENUSTARTWIRE) {
-       mx_save = mx; my_save = my;	/* 20070323 */
+       mx_save = mx; my_save = my;      /* 20070323 */
        mx_double_save=mousex_snap;
        my_double_save=mousey_snap;
        new_wire(PLACE, mousex_snap, mousey_snap); 
@@ -1379,14 +1379,14 @@ int callback(int event, int mx, int my, KeySym key,
        xx = X_TO_SCREEN(x);
        yy = Y_TO_SCREEN(y);
        mx_save = xx; my_save = yy; /* 20070323 */
-       mx_double_save=round( X_TO_XSCHEM(xx)/cadsnap )*cadsnap;
-       my_double_save=round( Y_TO_XSCHEM(yy)/cadsnap )*cadsnap;
+       mx_double_save=ROUND( X_TO_XSCHEM(xx)/cadsnap )*cadsnap;
+       my_double_save=ROUND( Y_TO_XSCHEM(yy)/cadsnap )*cadsnap;
        new_wire(PLACE, x, y);
        ui_state &=~MENUSTARTSNAPWIRE;
        break;
      }
      if(ui_state & MENUSTARTLINE) {
-       mx_save = mx; my_save = my;	/* 20070323 */
+       mx_save = mx; my_save = my;      /* 20070323 */
        mx_double_save=mousex_snap;
        my_double_save=mousey_snap;
        new_line(PLACE);
@@ -1394,7 +1394,7 @@ int callback(int event, int mx, int my, KeySym key,
        break;
      }
      if(ui_state & MENUSTARTRECT) {
-       mx_save = mx; my_save = my;	/* 20070323 */
+       mx_save = mx; my_save = my;      /* 20070323 */
        mx_double_save=mousex_snap;
        my_double_save=mousey_snap;
        new_rect(PLACE);

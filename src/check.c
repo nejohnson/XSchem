@@ -46,7 +46,7 @@ void check_touch(int i, int j,
  *breaks = 0;
  *parallel = (delta1x*delta2y == delta2x*delta1y ? 1:0);
 
- // the order of the following 4 if(touch...) is not don't care !!!
+ /* the order of the following 4 if(touch...) is not don't care !!! */
  if(touch(wire[j].x1,wire[j].y1,wire[j].x2,wire[j].y2,x1,y1) )
  {
   *touches = 1;touch3 =1;
@@ -100,15 +100,15 @@ void update_conn_cues(int draw_cues, int dr_win)
   }
   for(init_wire_iterator(x1, y1, x2, y2); ( wireptr = wire_iterator_next() ) ;) {
     k=wireptr->n;
-    // wire[k].end1 = wire[k].end2 = 0;
+    /* wire[k].end1 = wire[k].end2 = 0; */
     for(l = 0;l < 2;l++) {
       if(l==0 ) {
-        if(wire[k].end1 !=-1) continue; // 20181103
+        if(wire[k].end1 !=-1) continue; /* 20181103 */
         wire[k].end1=0;
         x0 = wire[k].x1;
         y0 = wire[k].y1;
       } else {
-        if(wire[k].end2 !=-1) continue; // 20181103
+        if(wire[k].end2 !=-1) continue; /* 20181103 */
         wire[k].end2=0;
         x0 = wire[k].x2;
         y0 = wire[k].y2;
@@ -117,7 +117,7 @@ void update_conn_cues(int draw_cues, int dr_win)
       for(wptr = wiretable[sqx][sqy] ; wptr ; wptr = wptr->next) {
         i = wptr->n;
         if(i == k) {
-          continue; // no check wire against itself
+          continue; /* no check wire against itself */
         }
         if( touch(wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2, x0,y0) ) {
           if( (x0 != wire[i].x1 && x0 != wire[i].x2) ||
@@ -137,10 +137,10 @@ void update_conn_cues(int draw_cues, int dr_win)
     filledarc(WIRELAYER, BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
     for(init_wire_iterator(x1, y1, x2, y2); ( wireptr = wire_iterator_next() ) ;) {
       i = wireptr->n;
-      if( wire[i].end1 >1 ) { // 20150331 draw_dots
+      if( wire[i].end1 >1 ) { /* 20150331 draw_dots */
         filledarc(WIRELAYER, ADD, wire[i].x1, wire[i].y1, CADHALFDOTSIZE, 0, 360);
       }
-      if( wire[i].end2 >1 ) { // 20150331 draw_dots
+      if( wire[i].end2 >1 ) { /* 20150331 draw_dots */
         filledarc(WIRELAYER, ADD, wire[i].x2, wire[i].y2, CADHALFDOTSIZE, 0, 360);
       }
     }
@@ -150,7 +150,7 @@ void update_conn_cues(int draw_cues, int dr_win)
 }
 
 void trim_wires(void)
-// wire coordinates must be ordered.
+/* wire coordinates must be ordered. */
 {
  int j,i, changed;
  unsigned short parallel,breaks,broken,touches,included,includes;
@@ -181,15 +181,15 @@ void trim_wires(void)
          changed=1;
          j--;
          continue;
-  			// new net contains net, so delete that
-      }		  	// net and repeat current iteration
+                        /* new net contains net, so delete that */
+      }                 /* net and repeat current iteration */
       if(touches)
       { 
          if(parallel)
          {
-            if(wire[j].x1 == xt && wire[j].y1 == yt) // touch in x1, y1
+            if(wire[j].x1 == xt && wire[j].y1 == yt) /* touch in x1, y1 */
             {
-               if(wire[i].end2 == 0)  // merge wire
+               if(wire[i].end2 == 0)  /* merge wire */
                {
                   changed=1;
                   wire[i].x2 = wire[j].x2;wire[i].y2 = wire[j].y2;
@@ -199,9 +199,9 @@ void trim_wires(void)
                   break;
                }
             }
-            else  // touch in x2,y2
+            else  /* touch in x2,y2 */
             {
-               if(wire[i].end1 == 0)  // merge wire
+               if(wire[i].end1 == 0)  /* merge wire */
                {
                   changed=1;
                   wire[i].x1 = wire[j].x1;wire[i].y1 = wire[j].y1;
@@ -211,7 +211,7 @@ void trim_wires(void)
                   break;
                }
             }
-         } // end if parallel
+         } /* end if parallel */
          if(broken)
          {
            check_wire_storage();
@@ -225,7 +225,7 @@ void trim_wires(void)
            wire[lastwire].sel=0;
            wire[lastwire].prop_ptr=NULL;
            my_strdup(&wire[lastwire].prop_ptr, wire[i].prop_ptr);
-           if(get_tok_value(wire[lastwire].prop_ptr,"bus",0)[0]) // 20171201
+           if(get_tok_value(wire[lastwire].prop_ptr,"bus",0)[0]) /* 20171201 */
              wire[lastwire].bus=1;
            else
              wire[lastwire].bus=0;
@@ -236,8 +236,8 @@ void trim_wires(void)
            wire[i].x1 = xt;
            wire[i].y1 = yt;
            wire[i].end1 = 1;
-         } // end if broken
-         else if(breaks) //wire[i] breaks wire[j]
+         } /* end if broken */
+         else if(breaks) /*wire[i] breaks wire[j] */
          {
            changed=1;
            if(wire[i].x1==xt && wire[i].y1==yt) wire[i].end1+=1;
@@ -253,7 +253,7 @@ void trim_wires(void)
            wire[lastwire].sel=0;
            wire[lastwire].prop_ptr=NULL;
            my_strdup(&wire[lastwire].prop_ptr, wire[j].prop_ptr);
-           if(get_tok_value(wire[lastwire].prop_ptr,"bus",0)[0]) // 20171201
+           if(get_tok_value(wire[lastwire].prop_ptr,"bus",0)[0]) /* 20171201 */
              wire[lastwire].bus=1;
            else
              wire[lastwire].bus=0;
@@ -264,8 +264,8 @@ void trim_wires(void)
            wire[j].x1 = xt;
            wire[j].y1 = yt;
            wire[j].end1 = 1;
-         } // end else if breaks
-         else  // wire[i] touches but does not break wire[j]
+         } /* end else if breaks */
+         else  /* wire[i] touches but does not break wire[j] */
          {
           if(wire[i].x1==wire[j].x1 && wire[i].y1==wire[j].y1)
             {wire[i].end1++;wire[j].end1++;}
@@ -276,9 +276,9 @@ void trim_wires(void)
           else 
             {wire[i].end2++;wire[j].end2++;}
          }
-      } // end if touches
-    } // end for j
-   } // end for i 
+      } /* end if touches */
+    } /* end for j */
+   } /* end for i  */
    if(changed) {
      modified=1;
      prepared_netlist_structs=0;
@@ -302,7 +302,7 @@ void break_wires_at_pins(void)
   need_rebuild_selected_array=1;
   rebuild_selected_array();
   
-  // for(k=0;k<lastinst;k++)
+  /* for(k=0;k<lastinst;k++) */
   for(j=0;j<lastselected;j++) if(selectedgroup[j].type==ELEMENT) {
     k = selectedgroup[j].n;
     if( (rects = (inst_ptr[k].ptr+instdef)->rects[PINLAYER]) > 0 )
@@ -319,7 +319,7 @@ void break_wires_at_pins(void)
         y0=inst_ptr[k].y0+ry1;
         get_square(x0, y0, &sqx, &sqy);
   
-        // name instance nodes that touch named nets
+        /* name instance nodes that touch named nets */
         for(wptr=wiretable[sqx][sqy]; wptr; wptr=wptr->next) {
           i = wptr->n;
           if( touch(wire[i].x1, wire[i].y1,
@@ -336,7 +336,7 @@ void break_wires_at_pins(void)
               wire[lastwire].sel=SELECTED;
               wire[lastwire].prop_ptr=NULL;
               my_strdup(&wire[lastwire].prop_ptr, wire[i].prop_ptr);
-              if(get_tok_value(wire[lastwire].prop_ptr,"bus",0)[0]) // 20171201
+              if(get_tok_value(wire[lastwire].prop_ptr,"bus",0)[0]) /* 20171201 */
                 wire[lastwire].bus=1;
               else
                 wire[lastwire].bus=0;
@@ -353,12 +353,12 @@ void break_wires_at_pins(void)
       }
     }
   }
-  // prepared_hash_wires=0;
-  // hash_wires();
+  /* prepared_hash_wires=0; */
+  /* hash_wires(); */
   need_rebuild_selected_array=1;
   rebuild_selected_array();
   for(j=0;j<lastselected;j++) if(selectedgroup[j].type==WIRE) {
-  // for(k=0; k < lastwire; k++) {
+  /* for(k=0; k < lastwire; k++) { */
     int l;
 
     k = selectedgroup[j].n;
@@ -371,20 +371,20 @@ void break_wires_at_pins(void)
         y0 = wire[k].y2;
       }
       get_square(x0, y0, &sqx, &sqy);
-      // printf("  k=%d, x0=%g, y0=%g\n", k, x0, y0);
+      /* printf("  k=%d, x0=%g, y0=%g\n", k, x0, y0); */
       for(wptr=wiretable[sqx][sqy] ; wptr ; wptr = wptr->next) {
         i = wptr->n;
-        // printf("check wire %d to wire %d\n", k, i);
+        /* printf("check wire %d to wire %d\n", k, i); */
         if(i==k) {
-          continue; // no check wire against itself
+          continue; /* no check wire against itself */
         }
-        // printf("  i=%d, x1=%g, y1=%g x2=%g, y2=%g\n", i, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
+        /* printf("  i=%d, x1=%g, y1=%g x2=%g, y2=%g\n", i, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2); */
         if( touch(wire[i].x1, wire[i].y1,
                   wire[i].x2, wire[i].y2, x0,y0) )
         {
           if( (x0!=wire[i].x1 && x0!=wire[i].x2) ||
               (y0!=wire[i].y1 && y0!=wire[i].y2) ) {
-            // printf("touch in mid point: %d\n", l+1);
+            /* printf("touch in mid point: %d\n", l+1); */
             if(!changed) { push_undo(); changed=1;}
             check_wire_storage();
             wire[lastwire].x1=wire[i].x1;
@@ -394,7 +394,7 @@ void break_wires_at_pins(void)
             wire[lastwire].sel=SELECTED;
             wire[lastwire].prop_ptr=NULL;
             my_strdup(&wire[lastwire].prop_ptr, wire[i].prop_ptr);
-            if(get_tok_value(wire[lastwire].prop_ptr,"bus",0)[0]) // 20171201
+            if(get_tok_value(wire[lastwire].prop_ptr,"bus",0)[0]) /* 20171201 */
               wire[lastwire].bus=1;
             else
               wire[lastwire].bus=0;
@@ -412,6 +412,6 @@ void break_wires_at_pins(void)
   prepared_netlist_structs=0;
   prepared_hilight_structs=0;
   prepared_hash_wires=0;
-  //update_conn_cues(0, 0);
+  /*update_conn_cues(0, 0); */
 
 }

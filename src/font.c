@@ -25,7 +25,7 @@
 void compile_font(void)
 {
  int code, i;
- static char *name=NULL; // 20161122 overflow safe
+ static char *name=NULL; /* 20161122 overflow safe */
 
  currentsch = 0;
  my_strdup(&name, tclgetvar("XSCHEM_SHAREDIR"));

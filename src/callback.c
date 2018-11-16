@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
  * simulation.
- * Copyright (C) 1998-2016 Stefan Frederik Schippers
+ * Copyright (C) 1998-2018 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -90,9 +90,9 @@ int callback(int event, int mx, int my, KeySym key,
  }
  semaphore++;           /* used to debug Tcl-Tk frontend */
  mousex=X_TO_XSCHEM(mx);
- mousey=Y_TO_XSCHEM(my);
- mousex_snap=ROUND(( mousex)/cadsnap)*cadsnap;
- mousey_snap=ROUND(( mousey)/cadsnap)*cadsnap;
+ mousey=Y_TO_XSCHEM(my); 
+ mousex_snap=ROUND(mousex / cadsnap) * cadsnap;
+ mousey_snap=ROUND(mousey / cadsnap) * cadsnap;
  my_snprintf(str, S(str), "mouse = %.16g %.16g - %s  selected: %d", 
    mousex_snap, mousey_snap, schematic[currentsch], lastselected );
  statusmsg(str,1);
@@ -567,8 +567,8 @@ int callback(int event, int mx, int my, KeySym key,
        xx = X_TO_SCREEN(x);
        yy = Y_TO_SCREEN(y);
        mx_save = xx; my_save = yy; /* 20070323 */
-       mx_double_save=ROUND( X_TO_XSCHEM(xx)/cadsnap)*cadsnap;
-       my_double_save=ROUND( Y_TO_XSCHEM(yy)/cadsnap)*cadsnap;
+       mx_double_save = ROUND(x / cadsnap) * cadsnap;
+       my_double_save = ROUND(y / cadsnap) * cadsnap;
        new_wire(PLACE, x, y);
      }
      else {
@@ -1251,10 +1251,19 @@ int callback(int event, int mx, int my, KeySym key,
     }
     break;
    }
-   if(key==';' && state & Mod1Mask )    /* testmode:  for performance testing */
+   if(key==';' && (state & ControlMask) )    /* testmode:  for performance testing */
    {
     draw_stuff(); 
     draw();
+    break;
+   }
+   if(key=='~' && state & ControlMask)    /* testmode:  for performance testing */
+   {
+    clock_t start, stop;
+    start = clock();
+    push_undo();
+    stop = clock();
+    printf("time=%g\n",  (double) (stop - start) / CLOCKS_PER_SEC);
     break;
    }
    if(key=='#' && !(state&ControlMask))         /* testmode */
@@ -1379,8 +1388,9 @@ int callback(int event, int mx, int my, KeySym key,
        xx = X_TO_SCREEN(x);
        yy = Y_TO_SCREEN(y);
        mx_save = xx; my_save = yy; /* 20070323 */
-       mx_double_save=ROUND( X_TO_XSCHEM(xx)/cadsnap )*cadsnap;
-       my_double_save=ROUND( Y_TO_XSCHEM(yy)/cadsnap )*cadsnap;
+       mx_double_save = ROUND(x / cadsnap) * cadsnap;
+       my_double_save = ROUND(y / cadsnap) * cadsnap;
+
        new_wire(PLACE, x, y);
        ui_state &=~MENUSTARTSNAPWIRE;
        break;

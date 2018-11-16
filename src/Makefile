@@ -17,7 +17,7 @@ system_library_dir=${prefix}/share/xschem/xschem_library
 xschem_library_path=$(user_library_dir):$(system_library_dir)
 
 OBJ = icon.o callback.o actions.o move.o check.o clip.o draw.o \
-      globals.o main.o netlist.o hash_iterator.o\
+      globals.o main.o netlist.o hash_iterator.o in_memory_undo.o \
       findnet.o scheduler.o store.o xinit.o select.o font.o editprop.o save.o paste.o \
       token.o psprint.o node_hash.o hilight.o options.o vhdl_netlist.o \
       svgdraw.o spice_netlist.o tedax_netlist.o verilog_netlist.o  parselabel.o expandlabel.o
@@ -34,6 +34,15 @@ HAS_CAIRO=1
 ## set to 0 these 2 variables on old machines.
 HAS_XCB=1
 HAS_XRENDER=1
+
+## comment for on disk undo history
+#IN_MEMORY_UNDO=-DIN_MEMORY_UNDO
+
+## use popen/pclose for undo buffer, else use pipe/fork/dup/fdopen/close/execlp
+HAS_POPEN=0
+
+## use pipe/fork/dup/fdopen/close/execlp for undo buffer
+HAS_PIPE=1
 
 XCB_INC=
 ifeq ($(HAS_XCB),1)
@@ -59,14 +68,15 @@ endif
 
 ## to fix rendering problems due to bugs in the exceed turboX server
 ## add -DTURBOX_FIX
-MOREFLAGS= -g -std=c99 -pedantic
+MOREFLAGS= -g -std=c89 -pedantic  -pg -no-pie 
 
 CFLAGS  = -Wall  $(MOREFLAGS)  -I/usr/include/tcl${TCLVER} $(CAIRO_INCLUDES) -I/home/sschippe/include \
-           -DXSCHEM_SHAREDIR='"${sharedir}"'  -DUSER_CONF_DIR='"${userconfdir}"' \
-           -DXSCHEM_LIBRARY_PATH='"${xschem_library_path}"'
+           $(IN_MEMORY_UNDO) -DXSCHEM_SHAREDIR='"${sharedir}"'  -DUSER_CONF_DIR='"${userconfdir}"' \
+           -DXSCHEM_LIBRARY_PATH='"${xschem_library_path}"' \
+           -DHAS_POPEN=$(HAS_POPEN) -DHAS_PIPE=$(HAS_PIPE)
 
 LDFLAGS = -L/usr/X11R6/lib -L/home/sschippe/lib $(MOREFLAGS) -lX11 -lm -lXpm -ltcl${TCLVER} -ltk${TCLVER} \
-           -lfl $(CAIRO_LIBS)
+           $(CAIRO_LIBS)
 
 xschem: 	$(OBJ)
 	$(CC) -o $@   $^ $(LDFLAGS)

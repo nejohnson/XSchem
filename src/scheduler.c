@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
  * simulation.
- * Copyright (C) 1998-2016 Stefan Frederik Schippers
+ * Copyright (C) 1998-2018 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,8 @@
 void statusmsg(char str[],int n)
 {
  static char *s=NULL;     /* overflow safe */
+
+ if(!has_x) return;
  if(n==2)
  {
   my_strdup(&s,"infowindow {");
@@ -44,7 +46,7 @@ void statusmsg(char str[],int n)
 }
 
 /* can be used to reach C functions from the Tk shell. */
-int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
+int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * argv[])
 {       
  int i;
  char name[1024]; /* overflow safe 20161122 */
@@ -813,13 +815,14 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
   cancel=save(1);
   if(!cancel){  /* 20161209 */
      currentsch = 0;
-     my_strncpy(schematic[currentsch], "", S(schematic[currentsch]));
      unselect_all(); /* 20180929 */
      clear_drawing();
      remove_symbols();
      if(argc>=3 && !strcmp(argv[2],"SYMBOL")) { /* 20171025 */
+       my_strncpy(schematic[currentsch], "untitled.sym", S(schematic[currentsch]));
        current_type=SYMBOL;
      } else {
+       my_strncpy(schematic[currentsch], "untitled.sch", S(schematic[currentsch]));
        current_type=SCHEMATIC;
      }
      draw();
@@ -829,8 +832,8 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
      prepared_netlist_structs=0;
      prepared_hilight_structs=0;
      if(has_x) {
-       tcleval( "wm title . { }"); /* 20150417 set window and icon title */
-       tcleval( "wm iconname . {}");
+       tcleval( "wm title . \"xschem - [file tail [xschem get schpath]]\""); /* 20150417 set window and icon title */
+       tcleval( "wm iconname . \"xschem - [file tail [xschem get schpath]]\"");
      }
   }
  }
@@ -970,12 +973,12 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, char * argv[])
      bbox(END,0.0,0.0,0.0,0.0);
    }
  } else if( !strcmp(argv[1],"getprop")) { /* 20171028 */
+   int i, p, found=0, mult=0, no_of_pins=0;
+   const char *str_ptr=NULL;
    if(argc!=5) {
      Tcl_AppendResult(interp, "xschem getprop needs 3 additional arguments", NULL);
      return TCL_ERROR;
    }
-   int i, p, found=0, mult=0, no_of_pins=0;
-   const char *str_ptr=NULL;
    Tcl_ResetResult(interp);
    if(!strcmp(argv[2],"instance_n")) {
      i=atol(argv[3]);

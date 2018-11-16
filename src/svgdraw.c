@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
  * simulation.
- * Copyright (C) 1998-2016 Stefan Frederik Schippers
+ * Copyright (C) 1998-2018 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -273,14 +273,15 @@ static void svg_draw_symbol_outline(int n,int layer,int tmp_flip, int rot,
      polygon = ((inst_ptr[n].ptr+instdef)->polygonptr[layer])[j];
      {   /* scope block so we declare some auxiliary arrays for coord transforms. 20171115 */
        int k;
-       double x[polygon.points];
-       double y[polygon.points];
+       double *x = my_malloc(sizeof(double) * polygon.points);
+       double *y = my_malloc(sizeof(double) * polygon.points);
        for(k=0;k<polygon.points;k++) {
          ROTATION(0.0,0.0,polygon.x[k],polygon.y[k],x[k],y[k]);
          x[k]+= x0;
          y[k] += y0;
        }
        svg_drawpolygon(layer, NOW, x, y, polygon.points);
+       my_free(&x); my_free(&y);
      }
 
    }

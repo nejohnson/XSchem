@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
  * simulation.
- * Copyright (C) 1998-2016 Stefan Frederik Schippers
+ * Copyright (C) 1998-2018 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,8 @@
  */
 
 #include "xschem.h"
+#define X_TO_PS(x) ( (x+xorigin)* mooz )
+#define Y_TO_PS(y) ( (y+yorigin)* mooz )
 
 static FILE *fd; 
 
@@ -37,8 +39,8 @@ static void restore_lw(void)
  if(lw_double==0.0)
    fprintf(fd, "%.16g setlinewidth\n",0.5);
  else
-   if(a3page) fprintf(fd, "%.16g setlinewidth\n",lw_double/sqrt(2));
-   else fprintf(fd, "%.16g setlinewidth\n",lw_double);
+   if(a3page) fprintf(fd, "%.16g setlinewidth\n",lw_double/1.2/sqrt(2));
+   else fprintf(fd, "%.16g setlinewidth\n",lw_double/1.2);
 }
 
 static void set_ps_colors(unsigned int pixel)
@@ -47,6 +49,15 @@ static void set_ps_colors(unsigned int pixel)
    if(color_ps) fprintf(fd, "%.16g %.16g %.16g setrgbcolor\n", 
     (double)ps_colors[pixel].red/256.0, (double)ps_colors[pixel].green/256.0, 
     (double)ps_colors[pixel].blue/256.0);
+ 
+}
+
+static void ps_xdrawarc(int layer, int fillarc, double x, double y, double r, double a, double b)
+{
+ if(fill && fillarc) 
+   fprintf(fd, "%.16g %.16g %.16g %.16g %.16g AF\n", x, y, r, -a, -a-b);
+ else
+   fprintf(fd, "%.16g %.16g %.16g %.16g %.16g A\n", x, y, r, -a, -a-b);
  
 }
 
@@ -82,17 +93,17 @@ static void ps_drawpolygon(int c, int what, double *x, double *y, int points)
   double xx, yy;
   int i;
   polygon_bbox(x, y, points, &x1,&y1,&x2,&y2);
-  x1=X_TO_SCREEN(x1);
-  y1=Y_TO_SCREEN(y1);
-  x2=X_TO_SCREEN(x2);
-  y2=Y_TO_SCREEN(y2);
+  x1=X_TO_PS(x1);
+  y1=Y_TO_PS(y1);
+  x2=X_TO_PS(x2);
+  y2=Y_TO_PS(y2);
   if( !rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) ) {
     return;
   }
 
   for(i=0;i<points; i++) {
-    xx = X_TO_SCREEN(x[i]);
-    yy = Y_TO_SCREEN(y[i]);
+    xx = X_TO_PS(x[i]);
+    yy = Y_TO_PS(y[i]);
     if(i==0) fprintf(fd, "%.16g %.16g MT\n", xx, yy);
     else fprintf(fd, "%.16g %.16g LT\n", xx, yy);
   }
@@ -108,24 +119,45 @@ static void ps_filledrect(int gc, double rectx1,double recty1,double rectx2,doub
 {
  double x1,y1,x2,y2;
 
-  x1=X_TO_SCREEN(rectx1);
-  y1=Y_TO_SCREEN(recty1);
-  x2=X_TO_SCREEN(rectx2);
-  y2=Y_TO_SCREEN(recty2);
+  x1=X_TO_PS(rectx1);
+  y1=Y_TO_PS(recty1);
+  x2=X_TO_PS(rectx2);
+  y2=Y_TO_PS(recty2);
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
    ps_xfillrectange(gc, x1,y1,x2,y2);
   }
 }
 
+static void ps_drawarc(int gc, int fillarc, double x,double y,double r,double a, double b)
+{
+ double xx,yy,rr;
+ double x1, y1, x2, y2;
+
+  xx=X_TO_PS(x);
+  yy=Y_TO_PS(y);
+  rr=r*mooz;
+  arc_bbox(x, y, r, a, b, &x1,&y1,&x2,&y2);
+  x1=X_TO_PS(x1);
+  y1=Y_TO_PS(y1);
+  x2=X_TO_PS(x2);
+  y2=Y_TO_PS(y2);
+
+  if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
+  {
+   ps_xdrawarc(gc, fillarc, xx, yy, rr, a, b);
+  }
+}
+
+
 static void ps_drawline(int gc, double linex1,double liney1,double linex2,double liney2)
 {
  double x1,y1,x2,y2;
 
-  x1=X_TO_SCREEN(linex1);
-  y1=Y_TO_SCREEN(liney1);
-  x2=X_TO_SCREEN(linex2);
-  y2=Y_TO_SCREEN(liney2);
+  x1=X_TO_PS(linex1);
+  y1=Y_TO_PS(liney1);
+  x2=X_TO_PS(linex2);
+  y2=Y_TO_PS(liney2);
   if( clip(&x1,&y1,&x2,&y2) )
   {
    ps_xdrawline(gc, x1, y1, x2, y2);
@@ -220,15 +252,16 @@ static void ps_draw_symbol_outline(int n,int layer,int tmp_flip, int rot,
  Line line;
  Box box;
  Text text;
+ Arc arc;
  Polygon polygon;
 
 
   if(layer==0)
   {
-   x1=X_TO_SCREEN(inst_ptr[n].x1);
-   x2=X_TO_SCREEN(inst_ptr[n].x2);
-   y1=Y_TO_SCREEN(inst_ptr[n].y1);
-   y2=Y_TO_SCREEN(inst_ptr[n].y2);
+   x1=X_TO_PS(inst_ptr[n].x1);
+   x2=X_TO_PS(inst_ptr[n].x2);
+   y1=Y_TO_PS(inst_ptr[n].y1);
+   y2=Y_TO_PS(inst_ptr[n].y2);
    if(OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2))
    {
     inst_ptr[n].flags|=1;
@@ -264,18 +297,32 @@ static void ps_draw_symbol_outline(int n,int layer,int tmp_flip, int rot,
      polygon = ((inst_ptr[n].ptr+instdef)->polygonptr[layer])[j];
      {   /* scope block so we declare some auxiliary arrays for coord transforms. 20171115 */
        int k;
-       double x[polygon.points];
-       double y[polygon.points];
+       double *x = my_malloc(sizeof(double) * polygon.points);
+       double *y = my_malloc(sizeof(double) * polygon.points);
        for(k=0;k<polygon.points;k++) {
          ROTATION(0.0,0.0,polygon.x[k],polygon.y[k],x[k],y[k]);
          x[k]+= x0;
          y[k] += y0;
        }
        ps_drawpolygon(layer, NOW, x, y, polygon.points);
+       my_free(&x); my_free(&y);
      }
  
    }
-
+   for(j=0;j< (inst_ptr[n].ptr+instdef)->arcs[layer];j++)
+   {
+     double angle;
+     arc = ((inst_ptr[n].ptr+instdef)->arcptr[layer])[j];
+     if(flip) {
+       angle = 270.*rot+180.-arc.b-arc.a;
+     } else {
+       angle = arc.a+rot*270.;
+     }
+     angle = fmod(angle, 360.);
+     if(angle<0.) angle+=360.;
+     ROTATION(0.0,0.0,arc.x,arc.y,x1,y1);
+     ps_drawarc(layer, 0, x0+x1, y0+y1, arc.r, angle, arc.b);
+   }
    for(j=0;j< (inst_ptr[n].ptr+instdef)->rects[layer];j++)
    {
     box = ((inst_ptr[n].ptr+instdef)->boxptr[layer])[j];
@@ -375,6 +422,8 @@ void ps_draw(void)
  fprintf(fd,"/LT {lineto} bind def\n");
  fprintf(fd,"/MT {moveto} bind def\n");
  fprintf(fd,"/L {moveto lineto stroke} bind def\n");
+ fprintf(fd,"/A {arcn stroke} bind def\n");
+ fprintf(fd,"/AF {arcn fill stroke} bind def\n");
  fprintf(fd,"/R {rectstroke} bind def\n");
  fprintf(fd,"/RF {rectfill} bind def\n");
  if(dx/dy>27.7/19 || dy/dx>27.7/19)
@@ -404,46 +453,72 @@ void ps_draw(void)
 
  fprintf(fd, "1 setlinejoin 1 setlinecap\n");
  restore_lw();
-   ps_drawgrid();
-   set_ps_colors(WIRELAYER);
-   for(i=0;i<lastwire;i++)
-   {
-      ps_drawline(WIRELAYER, wire[i].x1,wire[i].y1,wire[i].x2,wire[i].y2);
-      if(wire[i].end1 >1)
-       ps_filledrect(WIRELAYER, wire[i].x1-CADHALFDOTSIZE,wire[i].y1-CADHALFDOTSIZE,
-                  wire[i].x1+CADHALFDOTSIZE,wire[i].y1+CADHALFDOTSIZE );
-      if(wire[i].end2 >1)
-       ps_filledrect(WIRELAYER, wire[i].x2-CADHALFDOTSIZE,wire[i].y2-CADHALFDOTSIZE,
-                  wire[i].x2+CADHALFDOTSIZE,wire[i].y2+CADHALFDOTSIZE );
+ ps_drawgrid();
+
+ set_ps_colors(TEXTLAYER);
+ for(i=0;i<lasttext;i++) 
+ {
+   ps_draw_string(TEXTLAYER, textelement[i].txt_ptr,
+     textelement[i].rot, textelement[i].flip,
+     textelement[i].x0,textelement[i].y0,
+     textelement[i].xscale, textelement[i].yscale); 
+ }
+ restore_lw();
+
+ for(c=0;c<cadlayers;c++)
+ {
+  set_ps_colors(c);
+  for(i=0;i<lastline[c];i++) 
+   ps_drawline(c, line[c][i].x1, line[c][i].y1, line[c][i].x2, line[c][i].y2);
+  for(i=0;i<lastrect[c];i++) 
+  {
+   ps_filledrect(c, rect[c][i].x1, rect[c][i].y1, rect[c][i].x2, rect[c][i].y2);
+  }
+  for(i=0;i<lastarc[c];i++)
+  {
+    ps_drawarc(c, 0, arc[c][i].x, arc[c][i].y, arc[c][i].r, arc[c][i].a, arc[c][i].b);
+  }
+  for(i=0;i<lastpolygon[c];i++) {
+    ps_drawpolygon(c, NOW, polygon[c][i].x, polygon[c][i].y, polygon[c][i].points);
+  }
+
+
+  for(i=0;i<lastinst;i++)
+   ps_draw_symbol_outline(i,c,0,0,0.0,0.0);
+
+ }
+ set_ps_colors(WIRELAYER);
+ for(i=0;i<lastwire;i++)
+ {
+    ps_drawline(WIRELAYER, wire[i].x1,wire[i].y1,wire[i].x2,wire[i].y2);
+ }
+
+ {
+   double x1, y1, x2, y2;
+   struct wireentry *wireptr;
+   int i;
+   update_conn_cues(0, 0);
+   /* draw connecting dots */
+   x1 = X_TO_XSCHEM(areax1);
+   y1 = Y_TO_XSCHEM(areay1);
+   x2 = X_TO_XSCHEM(areax2);
+   y2 = Y_TO_XSCHEM(areay2);
+   for(init_wire_iterator(x1, y1, x2, y2); ( wireptr = wire_iterator_next() ) ;) {
+     i = wireptr->n;
+     if( wire[i].end1 >1 ) { /* 20150331 draw_dots */
+       ps_drawarc(WIRELAYER, 1, wire[i].x1, wire[i].y1, CADHALFDOTSIZE, 0, 360);
+     }
+     if( wire[i].end2 >1 ) { /* 20150331 draw_dots */
+       ps_drawarc(WIRELAYER, 1, wire[i].x2, wire[i].y2, CADHALFDOTSIZE, 0, 360);
+     }
    }
+ }
 
-   set_ps_colors(TEXTLAYER);
-   for(i=0;i<lasttext;i++) 
-   {
-     ps_draw_string(TEXTLAYER, textelement[i].txt_ptr,
-       textelement[i].rot, textelement[i].flip,
-       textelement[i].x0,textelement[i].y0,
-       textelement[i].xscale, textelement[i].yscale); 
-   }
-   restore_lw();
+  
 
-   for(c=0;c<cadlayers;c++)
-   {
-    set_ps_colors(c);
-    for(i=0;i<lastpolygon[c];i++) {
-      ps_drawpolygon(c, NOW, polygon[c][i].x, polygon[c][i].y, polygon[c][i].points);
-    }
 
-    for(i=0;i<lastline[c];i++) 
-     ps_drawline(c, line[c][i].x1, line[c][i].y1, line[c][i].x2, line[c][i].y2);
-    for(i=0;i<lastrect[c];i++) 
-    {
-     ps_filledrect(c, rect[c][i].x1, rect[c][i].y1, rect[c][i].x2, rect[c][i].y2);
-    }
-    for(i=0;i<lastinst;i++)
-     ps_draw_symbol_outline(i,c,0,0,0.0,0.0);
 
-   }
+
  if(debug_var>=1) fprintf(errfp, "ps_draw(): lw=%d\n",lw);
  fprintf(fd, "showpage\n\n");
  fprintf(fd, "%%%%EOF\n");

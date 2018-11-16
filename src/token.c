@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
  * simulation.
- * Copyright (C) 1998-2016 Stefan Frederik Schippers
+ * Copyright (C) 1998-2018 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -299,7 +299,7 @@ int set_different_token(char **s,char *new, char *old)
 /* 1: return unescaped quotes as part of the token value if they are present */
 /* 2: eat backslashes */
 /* 3: 1+2  :) */
-char *get_tok_value(char *s,char *tok, int with_quotes)
+char *get_tok_value(const char *s,const char *tok, int with_quotes)
 {
   static char *result=NULL;
   static char *token=NULL;
@@ -479,7 +479,7 @@ const char *find_bracket(const char *s)
  return s;
 }
 
-void new_prop_string(char **new_prop,char *old_prop, int fast)
+void new_prop_string(char **new_prop,const char *old_prop, int fast)
 {
 /* given a old_prop property string, return a new */
 /* property string in new_prop such that the element name is */
@@ -539,7 +539,7 @@ void new_prop_string(char **new_prop,char *old_prop, int fast)
  }
 }
 
-char *subst_token(char *s,char *tok, char *new_val)
+char *subst_token(const char *s, const char *tok, const char *new_val)
 /* given a string <s> with multiple "token=value ..." assignments */
 /* substitute <tok>'s value with <new_val> */
 /* if tok not found in s add tok=new_val at end. 04052001 */
@@ -1295,12 +1295,14 @@ void print_tedax_element(FILE *fd, int inst)
  }
 
  if(extra){ 
-   /* fprintf(fd, "extra: %s\n", extra); */
+   /* fprintf(errfp, "extra_pinnumber: |%s|\n", extra_pinnumber); */
+   /* fprintf(errfp, "extra: |%s|\n", extra); */
    for(extra_ptr = extra, extra_pinnumber_ptr = extra_pinnumber; ; extra_ptr=NULL, extra_pinnumber_ptr=NULL) {
-     extra_pinnumber_token=strtok_r(extra_pinnumber_ptr, " ", &saveptr1);
-     extra_token=strtok_r(extra_ptr, " ", &saveptr2);
+     extra_pinnumber_token=my_strtok_r(extra_pinnumber_ptr, " ", &saveptr1);
+     extra_token=my_strtok_r(extra_ptr, " ", &saveptr2);
      if(!extra_token) break;
-     /* fprintf(fd, "extra token:%s\n", extra_token); */
+     /* fprintf(errfp, "extra_pinnumber_token: |%s|\n", extra_pinnumber_token); */
+     /* fprintf(errfp, "extra_token: |%s|\n", extra_token); */
      instance_based=0;
      extra_token_val=get_tok_value(inst_ptr[inst].prop_ptr, extra_token, 0);
      if(!extra_token_val[0]) extra_token_val=get_tok_value(template, extra_token, 0);
@@ -1401,7 +1403,7 @@ void print_tedax_element(FILE *fd, int inst)
       if( strchr(token, ':') )  {
 
         int n;
-        char subtok[sizetok];
+        char *subtok = my_malloc(sizetok * sizeof(char));
         subtok[0]='\0';
         n=-1;
         sscanf(token+2, "%d:%s", &n, subtok);
@@ -1417,6 +1419,7 @@ void print_tedax_element(FILE *fd, int inst)
             fprintf(fd, "%s", value);
           }
         }
+        my_free(&subtok);
       } else {
         /* reference by pin number instead of pin name, allows faster lookup of the attached net name 20180911 */
         /* @#n --> return net name attached to pin of index 'n' */
@@ -2080,7 +2083,8 @@ char *translate(int inst, char* s)
     result_pos+=tmp;
    } else if(token[0]=='@' && token[1]=='#') {  /* 20180911 */
      int n; 
-     char subtok[sizetok];
+     char *subtok = my_malloc(sizetok * sizeof(char));
+
      subtok[0]='\0';
      n=-1;
      sscanf(token+2, "%d:%s", &n, subtok);
@@ -2102,6 +2106,7 @@ char *translate(int inst, char* s)
          result_pos+=tmp;
        }
      }
+     my_free(&subtok);
    } else if(strcmp(token,"@sch_last_modified")==0) {
 
     my_strncpy(file_name, abs_sym_path(inst_ptr[inst].name, ".sch"), S(file_name));

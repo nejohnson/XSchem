@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
  * simulation.
- * Copyright (C) 1998-2016 Stefan Frederik Schippers
+ * Copyright (C) 1998-2018 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,27 @@
 #include <stdarg.h>
 
 static int rot = 0, flip = 0;          
+
+char *my_strtok_r(char *str, const char *delim, char **saveptr)
+{
+  char *tok;
+  if(str) { /* 1st call */
+    *saveptr = str;
+  }
+  while(**saveptr && strchr(delim, **saveptr) ) { /* skip separators */
+    ++(*saveptr);
+  }
+  tok = *saveptr; /* start of token */
+  while(**saveptr && !strchr(delim, **saveptr) ) { /* look for separator marking end of current token */
+    ++(*saveptr);
+  }
+  if(**saveptr) {
+    **saveptr = '\0'; /* mark end of token */
+    ++(*saveptr);     /* if not at end of string advance one char for next iteration */
+  }
+  if(tok[0]) return tok; /* return token */
+  else return NULL; /* no more tokens */
+}
 
 size_t my_strdup(char **dest, const char *src) /* empty source string --> dest=NULL */
 {
@@ -69,7 +90,7 @@ void my_strndup(char **dest, const char *src, int n) /* empty source string --> 
  }
 }
 
-
+#ifdef HAS_SNPRINTF
 int my_snprintf(char *str, int size, const char *fmt, ...) /* 20161124 */
 {
   int  size_of_print;
@@ -87,7 +108,109 @@ int my_snprintf(char *str, int size, const char *fmt, ...) /* 20161124 */
   va_end(args);
   return size_of_print;
 }
+#else
 
+/*
+   this is a replacement for snprintf(), **however** it implements only
+   the bare minimum set of formatting used by XSCHEM
+*/
+int my_snprintf(char *string, int size, const char *format, ...)
+{
+  va_list args;
+  const char *f, *fmt, *prev;
+  int overflow, format_spec, l, n = 0;
+
+  va_start(args, format);
+
+  /* fprintf(errfp, "my_snprintf(): size=%d, format=%s\n", size, format); */
+  prev = format;
+  format_spec = 0;
+  overflow = 0;
+  for(f = format; *f; f++) {
+    if(*f == '%') {
+      format_spec = 1;
+      fmt = f;
+    }
+    if(*f == 's' && format_spec) {
+      char *sptr;
+      sptr = va_arg(args, char *);
+      l = fmt - prev;
+      if(n+l > size) {
+        overflow = 1;
+        break;
+      }
+      memcpy(string + n, prev, l);
+      string[n+l] = '\0';
+      n += l;
+      l = strlen(sptr);
+      if(n+l+1 > size) {
+        overflow = 1;
+        break;
+      }
+      memcpy(string + n, sptr, l+1);
+      n += l;
+      format_spec = 0;
+      prev = f + 1;
+    }
+    else if(format_spec && (*f == 'd' || *f == 'x' || *f == 'c') ) {
+      char nfmt[50], nstr[50];
+      int i, nlen;
+      i = va_arg(args, int);
+      l = f - fmt+1;
+      strncpy(nfmt, fmt, l);
+      nfmt[l] = '\0';
+      l = fmt - prev;
+      if(n+l > size) break;
+      memcpy(string + n, prev, l);
+      string[n+l] = '\0';
+      n += l;
+      nlen = sprintf(nstr, nfmt, i);
+      if(n + nlen + 1 > size) {
+        overflow = 1;
+        break;
+      }
+      memcpy(string +n, nstr, nlen+1);
+      n += nlen;
+      format_spec = 0;
+      prev = f + 1;
+    }
+    else if(format_spec && *f == 'g') {
+      char nfmt[50], nstr[50];
+      double i;
+      int nlen;
+      i = va_arg(args, double);
+      l = f - fmt+1;
+      strncpy(nfmt, fmt, l);
+      nfmt[l] = '\0';
+      l = fmt - prev;
+      if(n+l > size) {
+        overflow = 1;
+        break;
+      }
+      memcpy(string + n, prev, l);
+      string[n+l] = '\0';
+      n += l;
+      nlen = sprintf(nstr, nfmt, i);
+      if(n + nlen + 1 > size) {
+        overflow = 1;
+        break;
+      }
+      memcpy(string +n, nstr, nlen+1);
+      n += nlen;
+      format_spec = 0;
+      prev = f + 1;
+    }
+  }
+  l = f - prev;
+  if(!overflow && n+l+1 <= size) {
+    memcpy(string + n, prev, l+1);
+    n += l;
+  }
+  va_end(args);
+  /* fprintf(errfp, "my_snprintf(): returning: |%s|\n", string); */
+  return n;
+}
+#endif /* HAS_SNPRINTF */
 
 size_t my_strdup2(char **dest, const char *src) /* 20150409 duplicates also empty string  */
 {
@@ -113,11 +236,11 @@ size_t my_strcat(char **str, const char *append_str)
 {
  size_t s, a;
  if(debug_var>=3) fprintf(errfp,"my_strcat(): str=%s  append_str=%s\n", *str, append_str);
+ a = strlen(append_str) + 1;
  if( *str != NULL)
  {
   s = strlen(*str);
   if(append_str == NULL || append_str[0]=='\0') return s;
-  a = strlen(append_str)+1;
   my_realloc(str, s + a );
   memcpy(*str+s, append_str, a); /* 20180923 */
   if(debug_var>=3) fprintf(errfp,"my_strcat(): reallocated %lx, string %s\n",(unsigned long)*str, *str);
@@ -126,10 +249,36 @@ size_t my_strcat(char **str, const char *append_str)
  else
  {
   if(append_str == NULL || append_str[0]=='\0') return 0;
-  a = strlen(append_str) + 1;
   *str = my_malloc( a );
   memcpy(*str, append_str, a); /* 20180923 */
   if(debug_var>=3) fprintf(errfp,"my_strcat(): allocated %lx, string %s\n",(unsigned long)*str, *str);
+  return a -1;
+ }
+}
+
+size_t my_strncat(char **str, size_t n, const char *append_str)
+{
+ size_t s, a;
+ if(debug_var>=3) fprintf(stderr,"my_strncat(): str=%s  append_str=%s\n", *str, append_str);
+ a = strlen(append_str)+1;
+ if(a>n+1) a=n+1;
+ if( *str != NULL)
+ {
+  s = strlen(*str);
+  if(append_str == NULL || append_str[0]=='\0') return s;
+  my_realloc(str, s + a );
+  memcpy(*str+s, append_str, a); /* 20180923 */
+  *(*str+s+a) = '\0';
+  if(debug_var>=3) fprintf(stderr,"my_strncat(): reallocated %lx, string %s\n",(unsigned long)*str, *str);
+  return s + a -1;
+ }
+ else
+ {
+  if(append_str == NULL || append_str[0]=='\0') return 0;
+  *str = my_malloc( a );
+  memcpy(*str, append_str, a); /* 20180923 */
+  *(*str+a) = '\0';
+  if(debug_var>=3) fprintf(stderr,"my_strncat(): allocated %lx, string %s\n",(unsigned long)*str, *str);
   return a -1;
  }
 }
@@ -410,7 +559,7 @@ void edit_symbol_property(int x)
 
 
 /* x=0 use text widget   x=1 use vim editor */
-void update_symbol(char *result, int x)
+void update_symbol(const char *result, int x)
 {
  int k, sym_number;
  int no_change_props=0;

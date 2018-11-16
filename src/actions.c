@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
  * simulation.
- * Copyright (C) 1998-2016 Stefan Frederik Schippers
+ * Copyright (C) 1998-2018 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -206,7 +206,7 @@ void toggle_fullscreen()
 }
 
 
-void new_window(char *cell, int symbol)
+void new_window(const char *cell, int symbol)
 {
      
      char f[PATH_MAX]; /*  overflow safe 20161122 */
@@ -648,8 +648,8 @@ void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
 /*  */
 /*  first_call: set to 1 on first invocation for a given set of symbols (same prefix) */
 /*  set to 0 on next calls, this speeds up searching for unique names in prop string */
-void place_symbol(int pos,char *symbol_name, double x, double y, int rot, int flip, 
-                   char *inst_props, int draw_sym, int first_call)
+void place_symbol(int pos, const char *symbol_name, double x, double y, int rot, int flip, 
+                   const char *inst_props, int draw_sym, int first_call)
 /*  if symbol_name is a valid string load specified cell and */
 /*  use the given params, otherwise query user */
 {
@@ -856,6 +856,7 @@ void descend_schematic(void)
   if(debug_var>0) fprintf(errfp, "type of instance: %s\n", (inst_ptr[selectedgroup[0].n].ptr+instdef)->type);
 
   if(                   /*  do not descend if not subcircuit */
+     (inst_ptr[selectedgroup[0].n].ptr+instdef)->type && 
      strcmp(
         (inst_ptr[selectedgroup[0].n].ptr+instdef)->type, /*  20150409 */
          "subcircuit"
@@ -1104,7 +1105,6 @@ void zoom_full(int dr)
   Box boundbox;
   double yy1;
 
-  if(!has_x) return;
   if(change_lw) lw = lw_double=1.;
   areax1 = -2*lw;
   areay1 = -2*lw;
@@ -1126,6 +1126,7 @@ void zoom_full(int dr)
   if(dr)
   { 
    change_linewidth(-1.);
+   if(!has_x) return;
    draw();
   }
 }
@@ -1948,10 +1949,12 @@ void select_rect(int what, int select)
  }
  else if(what & BEGIN)
  {
-    if(semaphore==1) {
-      fprintf(errfp, "ERROR: reentrant call of select_rect()\n");
-      tcleval("alert_ {ERROR: reentrant call of select_rect()} {}"); /*  20171020 */
-    }
+    /*
+     * if(semaphore==1) {
+     *  fprintf(errfp, "ERROR: reentrant call of select_rect()\n");
+     *  tcleval("alert_ {ERROR: reentrant call of select_rect()} {}");
+     * }
+     */
     sel = select; /*  20150927 */
     ui_state |= STARTSELECT;
 

@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
  * simulation.
- * Copyright (C) 1998-2016 Stefan Frederik Schippers
+ * Copyright (C) 1998-2018 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -231,7 +231,7 @@ void hilight_child_pins(int i)
  int j,rects;
  char *pin_node;
  struct hilight_hashentry *entry;
- int save_currentsch;;
+ int save_currentsch;
 
  if(!hilight_nets) return;
  save_currentsch=currentsch;
@@ -256,7 +256,7 @@ void hilight_child_pins(int i)
 }
 
 
-int bus_search(char*s) 
+int bus_search(const char*s) 
 { 
  int c, bus=0;
  while( (c=*s++) ) {
@@ -266,7 +266,7 @@ int bus_search(char*s)
  return bus;
 }
 
-void search_inst(char *tok, char *val, int sub, int sel, int what)
+void search_inst(const char *tok, const char *val, int sub, int sel, int what)
 {
  int save_draw;
  int i,c, col,tmp,bus=0;
@@ -382,7 +382,7 @@ void search_inst(char *tok, char *val, int sub, int sel, int what)
 /* 'propagate_to' properties set on pins) */
 void drill_hilight(void)
 {
-  static char *netname=NULL, *propagated_net=NULL;;
+  static char *netname=NULL, *propagated_net=NULL;
   int mult=0;
   int found;
   Instdef *symbol;

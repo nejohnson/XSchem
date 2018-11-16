@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
  * simulation.
- * Copyright (C) 1998-2016 Stefan Frederik Schippers
+ * Copyright (C) 1998-2018 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -252,7 +252,7 @@ void match_merged_inst(int old)
                        &inst_ptr[i].x2, &inst_ptr[i].y2);
      /* type=get_tok_value(instdef[inst_ptr[i].ptr].prop_ptr,"type",0); */
      type=instdef[inst_ptr[i].ptr].type; /* 20150409 */
-     cond= strcmp(type,"label") && strcmp(type,"ipin") &&
+     cond= type && strcmp(type,"label") && strcmp(type,"ipin") &&
            strcmp(type,"opin") &&  strcmp(type,"iopin");
      if(cond) inst_ptr[i].flags|=2;
      else inst_ptr[i].flags &=~2;
@@ -265,7 +265,7 @@ void match_merged_inst(int old)
 /*                         if ext=="" else use ext as name  ... 20071215 */
 /*                      1: merge selection */
 /*                      2: merge clipboard */
-void merge_file(int selection_load, char ext[])
+void merge_file(int selection_load, const char ext[])
 {
     FILE *fd;
     int k=0, old;

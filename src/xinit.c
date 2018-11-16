@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
  * simulation.
- * Copyright (C) 1998-2016 Stefan Frederik Schippers
+ * Copyright (C) 1998-2018 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -269,6 +269,7 @@ void xwin_exit(void)
 
  if(debug_var>=1) fprintf(errfp, "xwin_exit(): closed display\n");
  my_free(&filename);
+ 
  delete_undo(); /* 20150327 */
  if(debug_var>=1) fprintf(errfp, "xwin_exit(): deleted undo buffer\n");
  if(errfp!=stderr) fclose(errfp);
@@ -709,18 +710,18 @@ int Tcl_AppInit(Tcl_Interp *inter)
  struct stat buf;
  const char *home_buff;
 
+ #if HAS_XCB==1
+ xcb_render_query_pict_formats_reply_t *formats_reply;
+ xcb_render_pictforminfo_t *formats;
+ xcb_render_query_pict_formats_cookie_t formats_cookie;
+ #endif
+
  /* get PWD and HOME */
  getcwd(pwd_dir, PATH_MAX);
  if ((home_buff = getenv("HOME")) == NULL) {
    home_buff = getpwuid(getuid())->pw_dir;
  }
  my_strncpy(home_dir, home_buff, S(home_dir));
-
- #if HAS_XCB==1
- xcb_render_query_pict_formats_reply_t *formats_reply;
- xcb_render_pictforminfo_t *formats;
- xcb_render_query_pict_formats_cookie_t formats_cookie;
- #endif
 
  for(i=0;i<CADMAXHIER;i++) sch_prefix[i]=NULL;
  my_strdup(&sch_prefix[0],".");
@@ -892,6 +893,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
 
  alloc_data();
 
+ #ifndef IN_MEMORY_UNDO
  /* 20150327 create undo directory */
  /* 20180923 no more mkdtemp (portability issues) */
  if( !my_strdup(&undo_dirname, create_tmpdir("xschem_undo_") )) {
@@ -899,6 +901,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
    tcleval( "exit");
  }
  if(debug_var>=1) fprintf(errfp, "undo_dirname=%s\n", undo_dirname);
+ #endif
 
  init_pixdata();
  init_color_array(0, 0.0);
@@ -907,6 +910,8 @@ int Tcl_AppInit(Tcl_Interp *inter)
  if(flat_netlist) tclsetvar("flat_netlist","1");
 
  lw=1;
+ xschem_w = CADWIDTH;
+ xschem_h = CADHEIGHT;
  areaw = CADWIDTH+4*lw;  /* clip area extends 1 pixel beyond physical window area */
  areah = CADHEIGHT+4*lw; /* to avoid drawing clipped rectangle borders at window edges */
  areax1 = -2*lw;
@@ -1121,7 +1126,9 @@ int Tcl_AppInit(Tcl_Interp *inter)
      fprintf(errfp, "xschem: can't do a print without a filename\n");
      tcleval( "exit");
    }
-   ps_draw();
+   if(do_print==1) ps_draw();
+   else if(do_print == 2) print_image();
+   else svg_draw();
  }
 
  if(do_simulation) {

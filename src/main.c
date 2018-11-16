@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
  * simulation.
- * Copyright (C) 1998-2016 Stefan Frederik Schippers
+ * Copyright (C) 1998-2018 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,14 +24,18 @@
 #include <sys/wait.h>
 
 void sig_handler(int s){
+  #ifndef IN_MEMORY_UNDO
   char emergency_prefix[PATH_MAX];
   const char *emergency_dir;
+  #endif
 
   /* 20150410 */
   if(s==SIGINT) {
     fprintf(errfp, "Use 'exit' to close the program\n");
     return;
   }
+
+  #ifndef IN_MEMORY_UNDO
   /* 20180923 no more mkdtemp */
   my_snprintf(emergency_prefix, S(emergency_prefix), "xschem_emergencysave_%s_", 
            skip_dir(schematic[currentsch]));
@@ -44,9 +48,10 @@ void sig_handler(int s){
   if(rename(undo_dirname, emergency_dir)) {
     fprintf(errfp, "rename dir %s to %s failed\n", undo_dirname, emergency_dir);
   }
+  fprintf(errfp, "EMERGENCY SAVE DIR: %s\n", emergency_dir);
+  #endif
   fprintf(errfp, "\nFATAL: signal %d\n", s);
   fprintf(errfp, "while editing: %s\n", skip_dir(schematic[currentsch]));
-  fprintf(errfp, "EMERGENCY SAVE DIR: %s\n", emergency_dir);
   exit(EXIT_FAILURE);
 }
 

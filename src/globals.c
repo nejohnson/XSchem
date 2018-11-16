@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
  * simulation.
- * Copyright (C) 1998-2016 Stefan Frederik Schippers
+ * Copyright (C) 1998-2018 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,14 +62,13 @@ char *undo_dirname = NULL; /* 20150327 */
 int cur_undo_ptr=0;
 int tail_undo_ptr=0;
 int head_undo_ptr=0;
-int max_undo=80;
+int max_undo=MAX_UNDO;
 int draw_dots=1; /*20150331 */
 int draw_single_layer=-1; /* 20151117 */
 
 unsigned short enable_stretch=0;
 int cadlayers=0;
 int need_rebuild_selected_array=1;
-double xxtmp; /* temporary for variable swaps; */
 Window window; /* window is the drawing area, topwindow is the root win */
 Window parent_of_topwindow;
 int depth;

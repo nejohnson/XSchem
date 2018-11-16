@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
  * simulation.
- * Copyright (C) 1998-2016 Stefan Frederik Schippers
+ * Copyright (C) 1998-2018 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -177,12 +177,12 @@ void draw_selection(GC g, int interruptable)
 {
   int i, c, k, n;
   double  angle; /* arc */
-  drawtemparc(g, BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
-  drawtempline(g, BEGIN, 0.0, 0.0, 0.0, 0.0);
-  drawtemprect(g, BEGIN, 0.0, 0.0, 0.0, 0.0);
   #ifdef HAS_CAIRO
   int customfont;
   #endif
+  drawtemparc(g, BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
+  drawtempline(g, BEGIN, 0.0, 0.0, 0.0, 0.0);
+  drawtemprect(g, BEGIN, 0.0, 0.0, 0.0, 0.0);
 
   if(g == gc[SELLAYER]) lastsel = lastselected;
   for(i=0;i<lastsel;i++)
@@ -278,8 +278,8 @@ void draw_selection(GC g, int interruptable)
      break;
     case POLYGON: /* 20171115 */
      {
-      double x[polygon[c][n].points];
-      double y[polygon[c][n].points];
+      double *x = my_malloc(sizeof(double) *polygon[c][n].points);
+      double *y = my_malloc(sizeof(double) *polygon[c][n].points);
       if(polygon[c][n].sel==SELECTED || polygon[c][n].sel==SELECTED1) {
         for(k=0;k<polygon[c][n].points; k++) {
           if( polygon[c][n].sel==SELECTED || polygon[c][n].selected_point[k]) {
@@ -297,6 +297,7 @@ void draw_selection(GC g, int interruptable)
         }
         drawtemppolygon(g, NOW, x, y, polygon[c][n].points);
       }
+      my_free(&x); my_free(&y);
      }
      break;
 
@@ -499,8 +500,8 @@ void copy_objects(int what)
       if(k!=WIRELAYER) break;
       check_wire_storage();
       if(wire[n].bus){ /* 20171201 */
-        bbox(ADD, wire[n].x1-BUS_WIDTH, wire[n].y1-BUS_WIDTH , wire[n].x2+BUS_WIDTH , wire[n].y2+BUS_WIDTH );
         int ov, y1, y2;
+        bbox(ADD, wire[n].x1-BUS_WIDTH, wire[n].y1-BUS_WIDTH , wire[n].x2+BUS_WIDTH , wire[n].y2+BUS_WIDTH );
         ov = BUS_WIDTH> CADHALFDOTSIZE ? BUS_WIDTH : CADHALFDOTSIZE;
         if(wire[n].y1 < wire[n].y2) { y1 = wire[n].y1-ov; y2 = wire[n].y2+ov; }
         else                        { y1 = wire[n].y1+ov; y2 = wire[n].y2-ov; }
@@ -584,8 +585,8 @@ void copy_objects(int what)
       if(c!=k) break;
       {
         double bx1, by1, bx2, by2;
-        double x[polygon[c][n].points];
-        double y[polygon[c][n].points];
+        double *x = my_malloc(sizeof(double) *polygon[c][n].points);
+        double *y = my_malloc(sizeof(double) *polygon[c][n].points);
         int j;
         for(j=0; j<polygon[c][n].points; j++) {
           if(j==0 || polygon[c][n].x[j] < bx1) bx1 = polygon[c][n].x[j];
@@ -610,6 +611,7 @@ void copy_objects(int what)
         selectedgroup[i].n=lastpolygon[c];
         store_polygon(-1, x, y, polygon[c][n].points, c, polygon[c][n].sel, polygon[c][n].prop_ptr);
         polygon[c][n].sel=0;
+        my_free(&x); my_free(&y);
       }
       break;
      case ARC:
@@ -885,8 +887,8 @@ void move_objects(int what, int merge, double dx, double dy)
      case WIRE:
       if(k!=WIRELAYER) break;
       if(wire[n].bus){ /* 20171201 */
-        bbox(ADD, wire[n].x1-BUS_WIDTH, wire[n].y1-BUS_WIDTH , wire[n].x2+BUS_WIDTH , wire[n].y2+BUS_WIDTH );
         int ov, y1, y2;
+        bbox(ADD, wire[n].x1-BUS_WIDTH, wire[n].y1-BUS_WIDTH , wire[n].x2+BUS_WIDTH , wire[n].y2+BUS_WIDTH );
         ov = BUS_WIDTH> CADHALFDOTSIZE ? BUS_WIDTH : CADHALFDOTSIZE;
         if(wire[n].y1 < wire[n].y2) { y1 = wire[n].y1-ov; y2 = wire[n].y2+ov; }
         else                        { y1 = wire[n].y1+ov; y2 = wire[n].y2-ov; }

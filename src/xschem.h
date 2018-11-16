@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
  * simulation.
- * Copyright (C) 1998-2016 Stefan Frederik Schippers
+ * Copyright (C) 1998-2018 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,9 +22,9 @@
 
 #ifndef CADGLOBALS
 #define CADGLOBALS
-#define XSCHEM_VERSION "2.8.1_RC3"
+#define XSCHEM_VERSION "2.8.1_RC4"
 
-/* realpath(), round(), strtok_r(), getopt() */
+/* fdopen()*/
 #define  _XOPEN_SOURCE 600
 
 #define TCL_WIDE_INT_TYPE long
@@ -67,8 +67,8 @@
 #include <tk.h>
 /*  #include "memwatch.h" */
 
-#define CADHEIGHT 400                   /*  initial window size */
-#define CADWIDTH 600
+#define CADHEIGHT 700                   /*  initial window size */
+#define CADWIDTH 1000
 
 #define BACKLAYER 0
 #define WIRELAYER 1
@@ -162,6 +162,7 @@
 #define BOXSIZE 3000
 #define NBOXES 40
 
+#define MAX_UNDO 80
 
 /*    some useful primes */
 /*    109, 163, 251, 367, 557, 823, 1237, 1861, 2777, 4177, 6247, 9371, 14057 */
@@ -206,18 +207,26 @@
  (xa>=x1 && xa<=x2 && xb>=x1 && xb<=x2 && ya>=y1 && ya<=y2 && yb>=y1 && yb<=y2 )
 
 #define ROTATION(x0, y0, x, y, rx, ry) \
-xxtmp = (flip ? 2 * x0 -x : x); \
-if(rot==0)      {rx = xxtmp;  ry = y;} \
-else if(rot==1) {rx = x0 - y + y0; ry = y0 + xxtmp - x0;} \
-else if(rot==2) {rx = 2 * x0 - xxtmp; ry = 2 * y0 - y;} \
-else            {rx = x0 + y - y0; ry = y0 - xxtmp + x0;}
+{ \
+  double xxtmp = (flip ? 2 * x0 -x : x); \
+  if(rot==0)      {rx = xxtmp;  ry = y;} \
+  else if(rot==1) {rx = x0 - y + y0; ry = y0 + xxtmp - x0;} \
+  else if(rot==2) {rx = 2 * x0 - xxtmp; ry = 2 * y0 - y;} \
+  else            {rx = x0 + y - y0; ry = y0 - xxtmp + x0;} \
+}
 
-#define ORDER(x1,y1,x2,y2) \
-if(x2 < x1) {xxtmp=x1;x1=x2;x2=xxtmp;xxtmp=y1;y1=y2;y2=xxtmp;} \
-else if(x2 == x1 && y2 < y1) {xxtmp=y1;y1=y2;y2=xxtmp;}
-#define RECTORDER(x1,y1,x2,y2) \
-if(x2 < x1) { xxtmp=x1;x1=x2;x2=xxtmp;} \
-if(y2 < y1) { xxtmp=y1;y1=y2;y2=xxtmp;}
+
+#define ORDER(x1,y1,x2,y2) {\
+  double xxtmp; \
+  if(x2 < x1) {xxtmp=x1;x1=x2;x2=xxtmp;xxtmp=y1;y1=y2;y2=xxtmp;} \
+  else if(x2 == x1 && y2 < y1) {xxtmp=y1;y1=y2;y2=xxtmp;} \
+}
+
+#define RECTORDER(x1,y1,x2,y2) { \
+  double xxtmp; \
+  if(x2 < x1) { xxtmp=x1;x1=x2;x2=xxtmp;} \
+  if(y2 < y1) { xxtmp=y1;y1=y2;y2=xxtmp;} \
+} 
 
 #define OUTSIDE(xa,ya,xb,yb,x1,y1,x2,y2) \
  (xa>x2 || xb<x1 ||  ya>y2 || yb<y1 )
@@ -466,7 +475,6 @@ extern int need_rebuild_selected_array;
 extern unsigned int rectcolor;
 extern XEvent xev;
 extern KeySym key;
-extern double xxtmp;
 extern unsigned short enable_stretch;
 extern unsigned int button;
 extern unsigned int state; /*  status of shift,ctrl etc.. */
@@ -587,14 +595,14 @@ extern void change_linewidth(double w);
 extern void set_fill(int n);
 extern void schematic_in_new_window(void);
 extern void symbol_in_new_window(void);
-extern void new_window(char *cell, int symbol);
+extern void new_window(const char *cell, int symbol);
 extern void ask_new_file(void);
 extern void saveas(void);
 extern int save(int confirm);
 extern struct hilight_hashentry *bus_hilight_lookup(const char *token, int value, int remove) ;
 extern int  name_strcmp(char *s, char *d) ;
-extern void search_inst(char *tok, char *val, int sub, int sel, int what);
-extern void process_options(int argc, char **argv);
+extern void search_inst(const char *tok, const char *val, int sub, int sel, int what);
+extern int process_options(int argc, char **argv);
 extern void calc_drawing_bbox(Box *boundbox);
 extern void ps_draw(void);
 extern void svg_draw(void);
@@ -729,8 +737,8 @@ extern void clear_drawing(void);
 extern int load_symbol_definition(char name[], FILE *embed_fd);
 extern void load_symbol(const char *abs_name);
 extern void descend_symbol(void);
-extern void place_symbol(int pos, char *symbol_name, double x, double y, int rot, int flip, 
-                         char *inst_props, int draw_sym, int first_call);
+extern void place_symbol(int pos, const char *symbol_name, double x, double y, int rot, int flip, 
+                         const char *inst_props, int draw_sym, int first_call);
 extern void attach_labels_to_inst(void);
 extern int match_symbol(char name[]);
 extern int save_schematic(char *); /*  20171020 added return value */
@@ -774,7 +782,7 @@ extern void rebuild_selected_array(void);
 
 extern void edit_property(int x);
 extern int xschem(ClientData clientdata, Tcl_Interp *interp, 
-           int argc, char * argv[]);
+           int argc, const char * argv[]);
 extern void tcleval(const char str[]);
 extern const char *tclgetvar(const char *s);
 extern void tclsetvar(const char *s, const char *value);
@@ -795,14 +803,15 @@ extern void print_vhdl_element(FILE *fd, int inst);
 extern void print_verilog_element(FILE *fd, int inst);
 extern void print_verilog_primitive(FILE *fd, int inst);
 extern void print_vhdl_primitive(FILE *fd, int inst);
-extern char *get_tok_value(char *s,char *tok,int with_quotes);
+extern char *get_tok_value(const char *s,const char *tok,int with_quotes);
 extern int  my_snprintf(char *str, int size, const char *fmt, ...);
 extern size_t my_strdup(char **dest, const char *src);
 extern void my_strndup(char **dest, const char *src, int n);
 extern size_t my_strdup2(char **dest, const char *src);
+extern char *my_strtok_r(char *str, const char *delim, char **saveptr);
 extern void my_strncpy(char *d, const char *s, int n);
-extern char *subst_token(char *s,char *tok, char *new_val);
-extern void new_prop_string(char **new_prop,char *old_prop,int fast);
+extern char *subst_token(const char *s, const char *tok, const char *new_val);
+extern void new_prop_string(char **new_prop,const char *old_prop,int fast);
 extern void symbol_bbox(int i, double *x1,double *y1, double *x2, double *y2);
 extern void set_inst_prop(int i);
 extern void *my_malloc(size_t size);
@@ -821,7 +830,7 @@ extern void check_line_storage(int c);
 extern void check_polygon_storage(int c); /*  20171115 */
 extern const char *expandlabel(const char *s, int *m);
 extern void merge_inst(int k, FILE *fd);
-extern void merge_file(int selection_load, char ext[]);
+extern void merge_file(int selection_load, const char ext[]);
 extern void select_wire(int i, unsigned short select_mode, int fast);
 extern void select_element(int i, unsigned short select_mode, int fast);
 extern void select_text(int i, unsigned short select_mode, int fast);
@@ -870,7 +879,7 @@ extern int window_state (Display *disp, Window win, char *arg);
 extern void toggle_fullscreen();
 extern void toggle_only_probes(); /*  20110112 */
 extern void fill_symbol_editprop_form(int x);
-extern void update_symbol(char *result, int x);
+extern void update_symbol(const char *result, int x);
 extern void tclexit(ClientData s);
 extern int build_colors(int skip_background, double dim); /*  reparse the TCL 'colors' list and reassign colors 20171113 */
 extern void drill_hilight(void);

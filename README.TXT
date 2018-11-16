@@ -37,6 +37,16 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.8.1_RC4
+- option for in memory undo (IN_MEMORY_UNDO in makefile)
+- c89 portability: eliminated snprintf, strtok*, Variable length arrays,
+  getopt, 
+- more error checking on malformed input fieles
+- added circles / arcs to pdf export
+- better window titles
+- untitled.sch default file name if xschem launched without a file name.
+- long options (--version, --help, etc)
+
 2.8.0
 - draw connecting dots automatically on T or Y connected wires,
 - new commands in Tools menu to trim and break wires
@@ -55,7 +65,6 @@ CHANGELOG
   of .xschem
 - deleted utile junk old files
 - xschemrc moved under src/
-
 
 2.7.0:
 - some fixes in library path management (abs_sym_path and rel_sym_path in xschem.tcl)

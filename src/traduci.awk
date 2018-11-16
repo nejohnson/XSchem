@@ -17,14 +17,7 @@ END  { endfile(_filename_) }
 
 
 {
-  replace_pattern("prepared_hash_components", "prepared_hash_instances")
-  replace_pattern("hash_components", "hash_instances")
-  replace_pattern("componentdelete", "instdelete")
-  replace_pattern("componentinsert", "instinsert")
-  replace_pattern("componententry", "instentry")
-  replace_pattern("componenttable", "insttable")
-  replace_pattern("del_component_table", "del_inst_table")
-  replace_pattern("hash_component", "hash_inst")
+  replace_pattern("TCL7P5", "OLDTCL")
 }
 
 

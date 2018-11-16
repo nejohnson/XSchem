@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
  * simulation.
- * Copyright (C) 1998-2016 Stefan Frederik Schippers
+ * Copyright (C) 1998-2018 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -478,16 +478,16 @@ void draw_symbol_outline(int what,int c, int n,int layer,int tmp_flip, int rot,
     polygon = (symptr->polygonptr[layer])[j];
     {   /* scope block so we declare some auxiliary arrays for coord transforms. 20171115 */
       int k;
-      double x[polygon.points];
-      double y[polygon.points];
+      double *x = my_malloc(sizeof(double) * polygon.points);
+      double *y = my_malloc(sizeof(double) * polygon.points);
       for(k=0;k<polygon.points;k++) {
         ROTATION(0.0,0.0,polygon.x[k],polygon.y[k],x[k],y[k]);
         x[k]+= x0;
         y[k] += y0;
       }
       drawpolygon(c, NOW, x, y, polygon.points, polygon.fill); /* 20180914 added fill */
+      my_free(&x); my_free(&y);
     }
-
   }
   for(j=0;j< symptr->arcs[layer];j++)
   { 
@@ -609,15 +609,16 @@ void draw_temp_symbol_outline(int what, GC gc, int n,int layer,int tmp_flip, int
 
    {   /* scope block so we declare some auxiliary arrays for coord transforms. 20171115 */
      int k;
-     double x[polygon.points];
-     double y[polygon.points];
+     double *x = my_malloc(sizeof(double) * polygon.points);
+     double *y = my_malloc(sizeof(double) * polygon.points);
      for(k=0;k<polygon.points;k++) {
        ROTATION(0.0,0.0,polygon.x[k],polygon.y[k],x[k],y[k]);
        x[k] += x0;
        y[k] += y0;
      }
      drawtemppolygon(gc, NOW, x, y, polygon.points);
-    }
+     my_free(&x); my_free(&y);
+   }
  }
  
  for(j=0;j< symptr->rects[layer];j++)
@@ -1197,7 +1198,7 @@ void arc_bbox(double x, double y, double r, double a, double b,
 void drawpolygon(int c, int what, double *x, double *y, int points, int poly_fill)
 {
   double x1,y1,x2,y2;
-  XPoint p[points];
+  XPoint *p = my_malloc(sizeof(XPoint) * points);
   int i;
   if(!has_x) return;
   polygon_bbox(x, y, points, &x1,&y1,&x2,&y2);
@@ -1223,12 +1224,13 @@ void drawpolygon(int c, int what, double *x, double *y, int points, int poly_fil
     if(draw_pixmap)
        XFillPolygon(display, save_pixmap, gcstipple[c], p, points, Polygontype, CoordModeOrigin);
   }
+  my_free(&p);
 }
 
 void drawtemppolygon(GC g, int what, double *x, double *y, int points)
 {
   double x1,y1,x2,y2;
-  XPoint p[points];
+  XPoint *p = my_malloc(sizeof(XPoint) * points);
   int i;
   if(!has_x) return;
   polygon_bbox(x, y, points, &x1,&y1,&x2,&y2);
@@ -1243,6 +1245,7 @@ void drawtemppolygon(GC g, int what, double *x, double *y, int points)
     }
     XDrawLines(display, window, g, p, points, CoordModeOrigin);
   }
+  my_free(&p);
 }
 
 void drawrect(int c, int what, double rectx1,double recty1,double rectx2,double recty2)

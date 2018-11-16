@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
  * simulation.
- * Copyright (C) 1998-2016 Stefan Frederik Schippers
+ * Copyright (C) 1998-2018 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -634,15 +634,15 @@ void select_text(int i,unsigned short select_mode, int fast)
 {
   char str[1024];       /* overflow safe */
   char s[256];          /* overflow safe */
+  #ifdef HAS_CAIRO
+  int customfont;
+  #endif
+
   if(!fast) {
     my_strncpy(s,textelement[i].prop_ptr!=NULL?textelement[i].prop_ptr:"<NULL>",S(s));
     my_snprintf(str, S(str), "selected text %d: properties: %s", i,s);
     statusmsg(str,2);
   }
-  #ifdef HAS_CAIRO
-  int customfont;
-  #endif
-
   textelement[i].sel = select_mode;
 
   #ifdef HAS_CAIRO

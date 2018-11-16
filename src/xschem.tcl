@@ -5,7 +5,7 @@
 #  This file is part of XSCHEM,
 #  a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
 #  simulation.
-#  Copyright (C) 1998-2016 Stefan Frederik Schippers
+#  Copyright (C) 1998-2018 Stefan Frederik Schippers
 # 
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -145,11 +145,11 @@ proc netlist {source_file show netlist_file} {
 # 20161216 execute task in other work dir
 proc task { cmd {dir .}  {background fg}} {
   global task_output task_error
-  if {$background eq {bg}} {
+  if {![string compare $background {bg} ] } {
     set task_error [catch {exec sh -c "cd $dir; exec $cmd" &} task_output]
-  } elseif {$background eq {fg}} {
+  } elseif {![string compare $background  {fg} ] } {
     set task_error [catch {exec sh -c "cd $dir; exec $cmd"} task_output]
-  } elseif {$background eq {tk_exec}} {
+  } elseif {![string compare $background {tk_exec} ] } {
     set task_error [catch {tk_exec sh -c "cd $dir; exec $cmd"} task_output]
   }
 }
@@ -202,7 +202,7 @@ proc key_binding {  s  d } {
   if {[regexp ButtonPress- $d]} {
     bind .drw "<${s}>" "xschem callback %T %x %y 0 $key 0 $state"
   } else {
-    if {$d eq {} } {
+    if {![string compare $d {} ] } {
       bind .drw "<${s}>" {}
     } else {
       bind .drw  "<${s}>" "xschem callback %T %x %y [scan "$key" %c] 0 0 $state"
@@ -311,7 +311,7 @@ proc utile_gui {schname} {
 proc utile_edit {schname} { 
   global netlist_dir netlist_type tcl_debug editor XSCHEM_SHAREDIR
   global utile_gui_path utile_cmd_path 
-  exec sh -c "$editor stimuli.$schname ; 
+  exec sh -c "cd $netlist_dir; $editor stimuli.$schname ; 
         cd $netlist_dir; 
         XSCHEM_SHAREDIR=$XSCHEM_SHAREDIR $utile_cmd_path stimuli.$schname" &
 }
@@ -527,7 +527,7 @@ proc schpins_to_sympins {} {
       set pinx2 [expr $x0+$pinhsize]
       set piny1 [expr $y0-$pinhsize]
       set piny2 [expr $y0+$pinhsize]
-      if {$dir eq "out" || $dir eq "inout"} {
+      if {![string compare $dir  "out"] || ![string compare $dir "inout"] } {
         set linex1 [expr $x0-20]
         set liney1 $y0
         set linex2 $x0
@@ -1429,7 +1429,7 @@ proc rel_sym_path {symbol} {
   set extension 1
   set symbol_orig [file rootname $symbol]
   set ext [file extension $symbol]
-  if {$ext eq {} } { 
+  if {![string compare $ext {}] } { 
     set ext .sym  
     set extension 0
   }
@@ -1441,12 +1441,12 @@ proc rel_sym_path {symbol} {
     # libname/symname[.ext] and libname in $path_elem 
     # --> libname/symname
     if { [file exists [file dirname "${path_elem}/${lib_cell}"]] && 
-       ($symbol_orig eq $lib_cell) } {
+       (![string compare $symbol_orig $lib_cell ]) } {
       set name ${lib_cell}
       break
     # /.../path/.../libname/cellname[.ext] and libname in $path_elem 
     # --> libname/cellname
-    } elseif { ($symbol eq [file normalize "${path_elem}/${lib_cell}"]) 
+    } elseif { (![string compare $symbol  [file normalize "${path_elem}/${lib_cell}"] ]) 
              && [file exists [file dirname "${path_elem}/${lib_cell}"]] } {
       set name ${lib_cell}
       break
@@ -1454,18 +1454,18 @@ proc rel_sym_path {symbol} {
     # symname[.ext]
     # --> symname.ext
     if { [file exists "${path_elem}/${cell}${ext}"] && 
-       ($symbol_orig eq $cell) } {
+       (![string compare $symbol_orig $cell ]) } {
       set name ${cell}${ext}
       break
     # /.../path/.../libname/symname[.ext] and libname in XSCHEM_LIBRARY_PATH 
     # --> symname.ext
-    } elseif { ($symbol eq [file normalize "${path_elem}/${cell}"]) 
+    } elseif { (![string compare $symbol [file normalize "${path_elem}/${cell}"] ]) 
              && [file exists "${path_elem}/${cell}${ext}"] } {
       set name ${cell}${ext}
       break
     } 
   }
-  if { $name eq {} } {
+  if { ![string compare $name {} ] } {
     # no known lib, so return full path
     set name ${symbol}$ext
   }
@@ -1491,13 +1491,13 @@ proc abs_sym_path {fname {required_ext {}} } {
 
   # fname is of type libname/cellname[.ext] but not ./cellname[.ext] or
   # ../cellname[.ext] and has a slash, so no cellname[.ext] 
-  if {[file rootname $fname] eq [get_cell $fname]} {
+  if {![string compare [file rootname $fname] [get_cell $fname] ] } {
     foreach path_elem $pathlist {
       # libname/cellname[.ext] and libname is in pathlist
       # --> normalized $pathlist/libname/cellname$required_ext
       # cellname[.ext] and $pathlist/cellname$required_ext exists
       # --> normalized $pathlist/cellname.$required_ext
-      if { ([file exists "${path_elem}/[get_cell $fname]$required_ext"] ) &&
+      if { ([file exists "${path_elem}/[file dirname $fname]"] ) &&
         [regexp {\/} $fname] 
       } {
         #puts here1
@@ -1513,7 +1513,7 @@ proc abs_sym_path {fname {required_ext {}} } {
       }
     }
   }
-  if { $name eq {} } {
+  if { ![string compare $name {}] } {
     #puts here3
     set name [file rootname [file normalize $fname]]$required_ext
   }
@@ -1787,7 +1787,7 @@ proc launcher {} {
   
   ## puts ">>> $launcher_program $launcher_var &"
   # 20170413
-  if { $launcher_program eq {} } { set launcher_program $launcher_default_program}
+  if { ![string compare $launcher_program {}] } { set launcher_program $launcher_default_program}
 
   eval exec  $launcher_program {$launcher_var} &
 }
@@ -2013,8 +2013,8 @@ if {!$rainbow_colors} {
 ## pad missing colors with black
 for {set i 0} { $i<$cadlayers } { incr i} {
   foreach j { ps_colors light_colors dark_colors } {
-    if { [lindex [set $j] $i] eq {} } {
-      if { $j eq {ps_colors} } {
+    if { ![string compare [lindex [set $j] $i] {} ] } {
+      if { ![string compare $j {ps_colors} ] } {
         lappend $j {0x000000}
       } else {
         lappend $j {#000000}
@@ -2086,6 +2086,7 @@ xschem set netlist_dir $netlist_dir
 xschem set cairo_font_scale $cairo_font_scale
 xschem set cairo_font_line_spacing $cairo_font_line_spacing
 xschem set cairo_vert_correct $cairo_vert_correct
+xschem set persistent_command $persistent_command
 # font name can not be set here as we need to wait for X-initialization 
 # to complete. Done in xinit.c
 
@@ -2441,8 +2442,8 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
 
    frame .drw -background {} -takefocus 1
 
-   wm  title . "XSCHEM"
-   wm iconname . "XSCHEM"
+   wm  title . "xschem - "
+   wm iconname . "xschem - "
    . configure  -background {}
    wm  geometry . $initial_geometry
    #wm maxsize . 1600 1200

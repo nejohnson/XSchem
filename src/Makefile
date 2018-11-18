@@ -32,8 +32,8 @@ TCLVER=8.6
 HAS_CAIRO=1
 
 ## set to 0 these 2 variables on old machines.
-HAS_XCB=1
-HAS_XRENDER=1
+HAS_XCB=0
+HAS_XRENDER=0
 
 ## comment for on disk undo history
 #IN_MEMORY_UNDO=-DIN_MEMORY_UNDO
@@ -68,7 +68,7 @@ endif
 
 ## to fix rendering problems due to bugs in the exceed turboX server
 ## add -DTURBOX_FIX
-MOREFLAGS= -g -std=c89 -pedantic  -pg -no-pie 
+MOREFLAGS= -g -std=c89 -pedantic
 
 CFLAGS  = -Wall  $(MOREFLAGS)  -I/usr/include/tcl${TCLVER} $(CAIRO_INCLUDES) -I/home/sschippe/include \
            $(IN_MEMORY_UNDO) -DXSCHEM_SHAREDIR='"${sharedir}"'  -DUSER_CONF_DIR='"${userconfdir}"' \

@@ -86,7 +86,6 @@ void print_image()
   #else
   save_sfc = cairo_xlib_surface_create(display, save_pixmap, visual, w, h);
   #endif /*HAS_XRENDER */
-
   if(cairo_surface_status(save_sfc)!=CAIRO_STATUS_SUCCESS) {
     fprintf(errfp, "ERROR: invalid cairo xcb surface\n");
      exit(-1);
@@ -148,7 +147,6 @@ void print_image()
   #else
   save_sfc = cairo_xlib_surface_create(display, save_pixmap, visual, w, h);
   #endif /*HAS_XRENDER */
-
   if(cairo_surface_status(save_sfc)!=CAIRO_STATUS_SUCCESS) {
     fprintf(errfp, "ERROR: invalid cairo xcb surface\n");
      exit(-1);
@@ -1377,7 +1375,6 @@ void draw(void)
   #ifdef HAS_CAIRO
   char *textfont;
   #endif
-
  rebuild_selected_array();
  if(has_x) {
     if(draw_pixmap)
@@ -1420,7 +1417,6 @@ void draw(void)
             /* 20180914 added fill */
             drawpolygon(c, NOW, polygon[c][i].x, polygon[c][i].y, polygon[c][i].points, polygon[c][i].fill);
           }
-  
           if(use_hash) {
   
             /* --------------------------------- inst_ptr iterator 20171224 */

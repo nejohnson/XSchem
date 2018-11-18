@@ -292,25 +292,18 @@ int err(Display *display, XErrorEvent *xev)
 unsigned int  find_best_color(char colorname[])
 {
  int i;
- static int color_flag=0;
  double distance=10000000000.0, dist, r, g, b, red, green, blue;
  double deltar,deltag,deltab;
  unsigned int index;
 
  if( XAllocNamedColor(display, colormap, colorname, &xcolor_exact, &xcolor) ==0 )
  {
-
-  if(!color_flag)
-  {
-   for(i=0;i<=255;i++)
-   {
+  for(i=0;i<=255;i++) {
     xcolor_array[i].pixel=i;
     XQueryColor(display, colormap, xcolor_array+i);
-    color_flag=1;
-   }
   }
   /* debug ... */
-  if(debug_var>=1) fprintf(errfp, 
+  if(debug_var>=2) fprintf(errfp, 
         "find_best_color(): Server failed to allocate requested color, finding substitute\n");
   XLookupColor(display, colormap, colorname, &xcolor_exact, &xcolor);
   red = xcolor.red; green = xcolor.green; blue = xcolor.blue;
@@ -681,7 +674,6 @@ static xcb_visualtype_t *find_visual(xcb_connection_t *xcbconn, xcb_visualid_t v
 }
 #endif /*HAS_XCB */
 
-
 int source_tcl_file(char *s)
 {
   char tmp[1024];
@@ -709,13 +701,13 @@ int Tcl_AppInit(Tcl_Interp *inter)
  int i;
  struct stat buf;
  const char *home_buff;
+ /* XVisualInfo vinfo; */
 
  #if HAS_XCB==1
  xcb_render_query_pict_formats_reply_t *formats_reply;
  xcb_render_pictforminfo_t *formats;
  xcb_render_query_pict_formats_cookie_t formats_cookie;
  #endif
-
  /* get PWD and HOME */
  getcwd(pwd_dir, PATH_MAX);
  if ((home_buff = getenv("HOME")) == NULL) {
@@ -849,7 +841,10 @@ int Tcl_AppInit(Tcl_Interp *inter)
  /*  END EXECUTE xschem.tcl */
  /* */
 
+
  /* set global variables fetching data from tcl code 25122002 */
+ if(tclgetvar("dark_colorscheme")[0] == '1') dark_colorscheme = 1; 
+ else dark_colorscheme = 0;
  if(netlist_type==-1) {
   if(!strcmp(tclgetvar("netlist_type"),"vhdl") ) netlist_type=CAD_VHDL_NETLIST;
   else if(!strcmp(tclgetvar("netlist_type"),"verilog") ) netlist_type=CAD_VERILOG_NETLIST;
@@ -964,8 +959,8 @@ int Tcl_AppInit(Tcl_Interp *inter)
 
     formats = xcb_render_query_pict_formats_formats(formats_reply);
     for (i = 0; i < formats_reply->num_formats; i++) {
-            /* fprintf(errfp, "i=%d depth=%d  type=%d red_shift=%d\n", i,  */
-            /*      formats[i].depth, formats[i].type, formats[i].direct.red_shift); */
+             /* fprintf(errfp, "i=%d depth=%d  type=%d red_shift=%d\n", i, 
+                  formats[i].depth, formats[i].type, formats[i].direct.red_shift); */
             if (formats[i].direct.red_mask != 0xff &&
                 formats[i].direct.red_shift != 16)
                     continue;
@@ -987,8 +982,15 @@ int Tcl_AppInit(Tcl_Interp *inter)
     colormap = DefaultColormap(display, screen_number);
     depth = DisplayPlanes(display, screen_number);
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): screen depth: %d\n",depth);
-  
+
     visual = DefaultVisual(display, screen_number);
+
+    /* 
+    if (!XMatchVisualInfo(
+        display, XDefaultScreen(display), 24, TrueColor, &vinfo)
+    ) return fprintf(stderr, "no 32 bit visual\n");
+    visual = vinfo.visual;
+    */
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done step b of xinit()\n");
     rectcolor= 4;  /* this is the current layer when xschem started. */
     for(i=0;i<cadlayers;i++)

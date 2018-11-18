@@ -22,10 +22,17 @@
 
 #ifndef CADGLOBALS
 #define CADGLOBALS
-#define XSCHEM_VERSION "2.8.1_RC4"
+#define XSCHEM_VERSION "2.8.1_RC5"
 
-/* fdopen()*/
-#define  _XOPEN_SOURCE 600
+#if HAS_PIPE == 1
+/* fdopen() */
+#define _POSIX_C_SOURCE 1
+#endif
+
+#if  HAS_POPEN==1
+/* popen() , pclose(), */
+#define _POSIX_C_SOURCE 2
+#endif
 
 #define TCL_WIDE_INT_TYPE long
 

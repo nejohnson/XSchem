@@ -1006,7 +1006,33 @@ proc edit_vi_netlist_prop {txtlabel} {
  }
 }
 
+proc change_color {} {
+  global colors dark_colors light_colors dark_colorscheme cadlayers ctrl_down
 
+
+  .menubar.layers configure -background [lindex $colors [xschem get rectcolor]]
+  if { $ctrl_down ==0 } { return } 
+  set ctrl_down 0
+  set n [xschem get rectcolor]
+  if { $n < 0 || $n >=$cadlayers} return
+  if { $dark_colorscheme == 1 } {
+    set c $dark_colors
+  } else {
+    set c $light_colors
+  }
+  set initial_color [lindex $c $n]
+  set value [tk_chooseColor -initialcolor $initial_color]
+  if {[string compare $value {}] } {
+    set cc [lreplace $c $n $n $value]
+    set colors $cc
+    if { $dark_colorscheme == 1 } {
+      set dark_colors $cc
+    } else {
+      set light_colors $cc
+    }
+    xschem change_colors
+  }
+}
 
 proc edit_prop {txtlabel} {
    global edit_prop_default_geometry
@@ -1283,7 +1309,9 @@ proc alert_ {txtlabel {position +200+300}} {
 
    # 20100203
    if { $::wm_fix } { tkwait visibility .ent3 }
-
+   bind .ent3 <Visibility> { 
+     if { [regexp Obscured %s] } {raise .ent3 }
+   }
    if { [string compare $position ""] != 0 } {
      wm geometry .ent3 $position
    } else {
@@ -1812,17 +1840,19 @@ proc reconfigure_layers_menu {} {
        set layfg black
      }
      .menubar.layers.menu entryconfigure $j -background $i \
-         -command " xschem set rectcolor $j;  .menubar.layers configure -background $i "
+        -command " 
+           xschem set rectcolor $j
+           change_color
+         "
      incr j
    }
    .menubar.layers configure -background [lindex $colors [xschem get rectcolor]]
 }
 
-
 ### 
 ###   MAIN PROGRAM
 ###
-
+set ctrl_down 0
 # tcl variable XSCHEM_LIBRARY_PATH  should already be set in xschemrc
 set pathlist {}
 if { [info exists XSCHEM_LIBRARY_PATH] } {
@@ -1950,6 +1980,7 @@ set_ne cairo_vert_correct 1.0
 # has_cairo set by c program if cairo enabled
 set has_cairo 0 
 set rotated_text {} ;#20171208
+set_ne dark_colorscheme 1
 ##### set colors
 if {!$rainbow_colors} {
   set_ne cadlayers 22
@@ -1959,22 +1990,21 @@ if {!$rainbow_colors} {
    "#bb2200" "#00ccee" "#ff0000" "#888800" "#00aaaa"
    "#880088" "#00ff00" "#0000cc" "#666600" "#557755"
    "#aa2222" "#7ccc40" "#00ffcc" "#ce0097" "#d2d46b"
-   "#ef6158" "#fdb200" }
+   "#ef6158" "#fdb200"}
 
   set_ne dark_colors {
    "#000000" "#00ccee" "#3f3f3f" "#cccccc" "#88dd00" 
    "#bb2200" "#00ccee" "#ff0000" "#ffff00" "#ffffff"
    "#ff00ff" "#00ff00" "#0000cc" "#aaaa00" "#aaccaa"
    "#ff7777" "#bfff81" "#00ffcc" "#ce0097" "#d2d46b" 
-   "#ef6158" "#fdb200" }
+   "#ef6158" "#fdb200"}
 
   set_ne ps_colors {
     0x000000 0x0000ee 0x7f7f7f 0x000000 0x338800 
     0xbb2200 0x0000ee 0xff0000 0xffff00 0x000000 
     0xff00ff 0x00ff00 0x0000cc 0xaaaa00 0xaaccaa 
     0xff7777 0xbfff81 0x00ffcc 0xce0097 0xd2d46b 
-    0xef6158 0xfdb200 
-  }
+    0xef6158 0xfdb200}
 } else {
   # rainbow colors for bitmapping
   # skip if colors defined in ~/.xschem 20121110
@@ -2122,6 +2152,7 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    menu .menubar.prop.menu -tearoff 0
    menubutton .menubar.layers -text "Layers" -menu .menubar.layers.menu \
     -background [lindex $colors 4]
+   menu .menubar.layers.menu -tearoff 0
    menubutton .menubar.tools -text "Tools" -menu .menubar.tools.menu
    menu .menubar.tools.menu -tearoff 0
    menubutton .menubar.sym -text "Symbol" -menu .menubar.sym.menu
@@ -2289,7 +2320,6 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
      -command {
        xschem netlist
       }
-   menu .menubar.layers.menu -tearoff 0
    set j 0
    foreach i $colors {
      ## 20121121
@@ -2307,8 +2337,11 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
        set layfg black
      }
 
-     .menubar.layers.menu add command  -label $laylab  -foreground $layfg -background $i -activebackground $i \
-        -command " xschem set rectcolor $j;  .menubar.layers configure -background $i "
+   .menubar.layers.menu add command  -label $laylab  -foreground $layfg -background $i -activebackground $i \
+        -command " 
+           xschem set rectcolor $j
+           change_color
+         "
      if { [expr $j%10] == 0 } { .menubar.layers.menu entryconfigure $j -columnbreak 1 }
      incr j
      
@@ -2334,7 +2367,10 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    .menubar.zoom.menu add checkbutton -label "View only Probes" -variable only_probes \
           -accelerator {5} \
           -command { xschem only_probes }
-   .menubar.zoom.menu add command -label "Toggle colorscheme" -command "xschem toggle_colorscheme" -accelerator {Shift+C}
+   .menubar.zoom.menu add command -label "Toggle colorscheme"  -accelerator {Shift+C} -command {
+           xschem toggle_colorscheme
+           xschem change_colors
+        }
    .menubar.zoom.menu add checkbutton -label "no XCopyArea drawing model" -variable draw_window \
           -accelerator {Ctrl+$} \
           -command {
@@ -2466,6 +2502,10 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
 ###
 ### bind .drv <event> {xschem callback <type> <x> <y> <keysym> <button of w> <h> <state>}
 ###
+   bind . <KeyPress-Control_L> { set ctrl_down 1} 
+   bind . <KeyRelease-Control_L> { set ctrl_down 0} 
+   bind . <KeyPress-Control_R> { set ctrl_down 1} 
+   bind . <KeyRelease-Control_R> { set ctrl_down 0} 
    bind .drw <Double-Button-1> {xschem callback -3 %x %y 0 %b 0 %s}
    bind .drw <Double-Button-2> {xschem callback -3 %x %y 0 %b 0 %s}
    bind .drw <Double-Button-3> {xschem callback -3 %x %y 0 %b 0 %s}

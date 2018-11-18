@@ -851,6 +851,7 @@ int callback(int event, int mx, int my, KeySym key,
    if(key=='O' && state == ShiftMask)   /* Toggle light/dark colorscheme 20171113 */
    {
      dark_colorscheme=!dark_colorscheme;
+     tclsetvar("dark_colorscheme", dark_colorscheme ? "1" : "0");
      color_dim=0.0;
      build_colors(0, 0.0);
      draw();

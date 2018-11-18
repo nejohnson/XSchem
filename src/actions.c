@@ -125,7 +125,6 @@ void resetwin(void)
       #else
       save_sfc = cairo_xlib_surface_create(display, save_pixmap, visual, xschem_w, xschem_h);
       #endif /* HAS_XRENDER */
-
       if(cairo_surface_status(save_sfc)!=CAIRO_STATUS_SUCCESS) {
         fprintf(errfp, "ERROR: invalid cairo xcb surface\n");
          exit(-1);

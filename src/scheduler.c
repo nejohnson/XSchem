@@ -120,12 +120,15 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
  else if(!strcmp(argv[1],"print") ) { /* 20171022 added png, svg */
    if(argc==2 || (argc==3 && !strcmp(argv[2],"pdf")) ) {
      ps_draw();
+     Tcl_ResetResult(interp);
    }
    else if(argc==3 && !strcmp(argv[2],"png") ) {
      print_image();
+     Tcl_ResetResult(interp);
    }
    else if(argc==3 && !strcmp(argv[2],"svg") ) {
      svg_draw();
+     Tcl_ResetResult(interp);
    }
  }
 
@@ -196,6 +199,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
  else if(!strcmp(argv[1],"redraw"))
  {
   draw();
+  Tcl_ResetResult(interp);
  }
 
  else if(!strcmp(argv[1],"break_wires"))
@@ -208,6 +212,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
   push_undo(); /* 20150327 */
   trim_wires();
   draw();
+  Tcl_ResetResult(interp);
  }
 
  else if(!strcmp(argv[1],"push_undo"))
@@ -279,6 +284,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
    push_undo();
    trim_wires();
    draw();
+   Tcl_ResetResult(interp);
  }
 
  else if(!strcmp(argv[1],"delete"))
@@ -290,18 +296,21 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
  {
     unhilight_net();
     draw();
+    Tcl_ResetResult(interp);
  }
 
  else if(!strcmp(argv[1],"hilight"))
  {
-    hilight_net();
-    draw_hilight_net(1);
+   hilight_net();
+   draw_hilight_net(1);
+   Tcl_ResetResult(interp);
  }
 
  else if(!strcmp(argv[1],"delete_hilight_net"))
  {
-    delete_hilight_net();
-    draw();
+   delete_hilight_net();
+   draw();
+   Tcl_ResetResult(interp);
  }
 
  else if(!strcmp(argv[1],"search"))
@@ -645,11 +654,17 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
     save_selection(2);
  }
 
+ else if(!strcmp(argv[1],"change_colors"))
+ {
+   build_colors(0, 0.0);
+   draw();
+   Tcl_ResetResult(interp);
+ }
+
  else if(!strcmp(argv[1],"toggle_colorscheme"))
  {
    dark_colorscheme=!dark_colorscheme;
-   build_colors(0, 0.0);
-   draw();
+   tclsetvar("dark_colorscheme", dark_colorscheme ? "1" : "0");
  }
 
  else if(!strcmp(argv[1],"color_dim"))
@@ -657,6 +672,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
    if(argc==3)
    build_colors(skip_dim_background, atof(argv[2]));
    draw();
+   Tcl_ResetResult(interp);
  }
 
  else if(!strcmp(argv[1],"cut"))
@@ -1316,19 +1332,21 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
 
 const char *tclgetvar(const char *s)
 {
+  if(debug_var>=2) fprintf(errfp, "tclgetvar(): %s\n", s);
   return Tcl_GetVar(interp,s, TCL_GLOBAL_ONLY);
 }
 
 void tcleval(const char str[])
 {
- 
- if( Tcl_EvalEx(interp, str, -1, TCL_EVAL_GLOBAL) != TCL_OK) {
-   fprintf(errfp, "tcleval(): evaluation of script: %s failed\n", str);
- }
+  if(debug_var>=2) fprintf(errfp, "tcleval(): %s\n", str);
+  if( Tcl_EvalEx(interp, str, -1, TCL_EVAL_GLOBAL) != TCL_OK) {
+    fprintf(errfp, "tcleval(): evaluation of script: %s failed\n", str);
+  }
 }
 
 void tclsetvar(const char *s, const char *value)
 {
+  if(debug_var>=2) fprintf(errfp, "tclsetvar(): %s to %s\n", s, value);
   if(!Tcl_SetVar(interp, s, value, TCL_GLOBAL_ONLY)) {
     fprintf(errfp, "tclsetvar(): error setting variable %s to %s\n", s, value);
   }

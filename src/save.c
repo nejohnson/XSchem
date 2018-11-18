@@ -888,7 +888,8 @@ void load_schematic(int load_symbols, const char *abs_name, int reset_undo) /* 2
     if( (fd=fopen(name,"r"))== NULL) {
       fprintf(errfp, "load_schematic(): unable to open file: %s, abs_name=%s\n", 
           name, abs_name ? abs_name : "(null)");
-      my_snprintf(msg, S(msg), "tk_messageBox -type ok -message {Unable to open file: %s}", abs_name ? abs_name: "(null)");
+      /* my_snprintf(msg, S(msg), "tk_messageBox -type ok -message {Unable to open file: %s}", abs_name ? abs_name: "(null)");*/
+      my_snprintf(msg, S(msg), "alert_ {Unable to open file: %s}", abs_name ? abs_name: "(null)");
       tcleval(msg);
     } else {
       if(debug_var>=1) fprintf(errfp, "load_schematic(): reading file: %s\n", name);

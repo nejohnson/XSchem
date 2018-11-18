@@ -205,7 +205,10 @@ int my_snprintf(char *string, int size, const char *format, ...)
   if(!overflow && n+l+1 <= size) {
     memcpy(string + n, prev, l+1);
     n += l;
+  } else {
+    fprintf(errfp, "my_snprintf: overflow, target size=%d, format=%s\n", size, format);
   }
+  
   va_end(args);
   /* fprintf(errfp, "my_snprintf(): returning: |%s|\n", string); */
   return n;
@@ -327,17 +330,24 @@ void my_free(void *ptr)
  *(void **)ptr=NULL;
 }
 
+/* n characters at most are copied, *d will be always NUL terminated if *s does
+ *   not fit(d[n-1]='\0')
+ */
 void my_strncpy(char *d, const char *s, int n)
 {
- int i=0;
- n-=1;
- if(debug_var>=3) 
-   fprintf(errfp, "my_strncpy():  copying %s to %lu\n", s, (unsigned long)d);
- while( (d[i]=s[i]) )
- {
-  if(i==n) { d[i]='\0'; return; }
-  i++;
- }
+  int i = 0;
+  n -= 1;
+  if(debug_var>=3) 
+    fprintf(errfp, "my_strncpy():  copying %s to %lu\n", s, (unsigned long)d);
+  while( (d[i] = s[i]) )
+  {
+    if(i == n) { 
+      if(s[i] != '\0') fprintf(errfp, "my_strncpy(): overflow, n=%d, s=%s\n", n+1, s);
+      d[i] = '\0';
+      return; 
+    }
+   i++;
+  }
 }
 
 void set_inst_prop(int i)

@@ -745,7 +745,18 @@ int Tcl_AppInit(Tcl_Interp *inter)
 /* */
 
  if(load_initfile) {
-   my_snprintf(name, S(name), "%s/xschemrc",pwd_dir);
+   if(rcfile[0]) {
+     my_snprintf(name, S(name), rcfile);
+     if(stat(name, &buf) ) {
+       fprintf(errfp, "Tcl_AppInit() err 2: cannot find %s\n", name);
+       Tcl_ResetResult(interp);
+       Tcl_Exit(EXIT_FAILURE);
+       return TCL_ERROR; /* 20121110 */
+     }
+
+   } else {
+     my_snprintf(name, S(name), "%s/xschemrc",pwd_dir);
+   }
    if(!stat(name, &buf)) {
      if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): sourcing %s\n", name);
      source_tcl_file(name);

@@ -206,7 +206,7 @@ int my_snprintf(char *string, int size, const char *format, ...)
     memcpy(string + n, prev, l+1);
     n += l;
   } else {
-    fprintf(errfp, "my_snprintf: overflow, target size=%d, format=%s\n", size, format);
+    if(debug_var>=1) fprintf(errfp, "my_snprintf: overflow, target size=%d, format=%s\n", size, format);
   }
   
   va_end(args);
@@ -342,7 +342,7 @@ void my_strncpy(char *d, const char *s, int n)
   while( (d[i] = s[i]) )
   {
     if(i == n) { 
-      if(s[i] != '\0') fprintf(errfp, "my_strncpy(): overflow, n=%d, s=%s\n", n+1, s);
+      if(s[i] != '\0') if(debug_var>=1)  fprintf(errfp, "my_strncpy(): overflow, n=%d, s=%s\n", n+1, s);
       d[i] = '\0';
       return; 
     }

@@ -197,14 +197,14 @@ static void svg_drawgrid()
  delta=CADGRID* mooz;
  while(delta<CADGRIDTHRESHOLD) delta*=CADGRIDMULTIPLY;  /* <-- to be improved,but works */
  x = xorigin* mooz;y = yorigin* mooz;
- set_svg_colors(SELLAYER);
+ set_svg_colors(GRIDLAYER);
  if(y>areay1 && y<areay2)
  {
-  svg_xdrawline(SELLAYER,areax1+1,(int)y, areax2-1, (int)y);
+  svg_xdrawline(GRIDLAYER,areax1+1,(int)y, areax2-1, (int)y);
  }
  if(x>areax1 && x<areax2)
  {
-  svg_xdrawline(SELLAYER,(int)x,areay1+1, (int)x, areay2-1);
+  svg_xdrawline(GRIDLAYER,(int)x,areay1+1, (int)x, areay2-1);
  }
  set_svg_colors(GRIDLAYER);
  tmp = floor((areay1+1)/delta)*delta-fmod(-yorigin* mooz,delta);

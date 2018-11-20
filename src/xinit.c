@@ -852,7 +852,12 @@ int Tcl_AppInit(Tcl_Interp *inter)
  /*  END EXECUTE xschem.tcl */
  /* */
 
-
+ /* READ COLORS */
+ my_snprintf(name, S(name), "%s/colors", USER_CONF_DIR);
+ if(!stat(name, &buf)) {
+   source_tcl_file(name);
+ }
+   
  /* set global variables fetching data from tcl code 25122002 */
  if(tclgetvar("dark_colorscheme")[0] == '1') dark_colorscheme = 1; 
  else dark_colorscheme = 0;

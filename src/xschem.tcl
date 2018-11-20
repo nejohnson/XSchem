@@ -750,6 +750,32 @@ proc tclcmd {} {
   pack .tclcmd.b.close -side left -expand yes -fill x
 }
 
+proc about {} {
+
+  if [winfo exists .about] { 
+    bind .about.link <Button-1> {}
+    bind .about.link2 <Button-1> {}
+    destroy .about
+  }
+  toplevel .about -class dialog
+  wm title .about {About XSCHEM}
+  label .about.xschem -text "[xschem get version]" -font {Sans 24 bold}
+  label .about.descr -text "Schematic editor / netlister for VHDL, Verilog, SPICE, tEDAx"
+  button .about.link -text "http://repo.hu/projects/xschem" -font Underline-Font -fg blue -relief flat
+  button .about.link2 -text "http://repo.hu/projects/coraleda" -font Underline-Font -fg blue -relief flat
+  label .about.copyright -text "\n Copyright 1998-2018 Stefan Schippers (stefan.schippers@gmail.com) \n
+ This is free software; see the source for copying conditions.  There is NO warranty;
+ not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE\n"
+  button .about.close -text Close -command {destroy .about} -font {Sans 18}
+  pack .about.xschem
+  pack .about.link
+  pack .about.link2
+  pack .about.descr
+  pack .about.copyright
+  pack .about.close
+  bind .about.link <Button-1> { task {xdg-open http://repo.hu/projects/xschem} . tk_exec }
+  bind .about.link2 <Button-1> { task {xdg-open http://repo.hu/projects/coraleda} . tk_exec }
+}
 
 proc property_search {} {
   global search_value
@@ -1822,28 +1848,23 @@ proc launcher {} {
 
 
 proc reconfigure_layers_menu {} {
-   global colors
+   global colors dark_colorscheme
    set j 0
    foreach i $colors {
-     ## 20121121
-     if {  $j == [xschem get pinlayer] } {
-       set laylab PIN
-       set layfg white
-     } elseif { $j == [xschem get wirelayer] } {
-       set laylab WIRE
-       set layfg black
-     } elseif { $j == [xschem get textlayer] } { ;# 20161206
-       set laylab TEXT
-       set layfg blue
+     if {  $j == [xschem get backlayer] } {
+        if { $dark_colorscheme == 1 } { 
+          set layfg white
+        } else {
+          set layfg black
+        }
      } else {
-       set laylab {        }
-       set layfg black
+        if { $dark_colorscheme == 1 } { 
+          set layfg black
+        } else {
+          set layfg white
+        }
      }
-     .menubar.layers.menu entryconfigure $j -background $i \
-        -command " 
-           xschem set rectcolor $j
-           change_color
-         "
+     .menubar.layers.menu entryconfigure $j -activebackground $i -background $i -foreground $layfg -activeforeground $layfg
      incr j
    }
    .menubar.layers configure -background [lindex $colors [xschem get rectcolor]]
@@ -1852,6 +1873,11 @@ proc reconfigure_layers_menu {} {
 ### 
 ###   MAIN PROGRAM
 ###
+
+# for hyperlink in about dialog
+eval  font create Underline-Font [ font actual TkDefaultFont ]
+font configure Underline-Font -underline true -size 24
+
 set ctrl_down 0
 # tcl variable XSCHEM_LIBRARY_PATH  should already be set in xschemrc
 set pathlist {}
@@ -2166,6 +2192,7 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    .menubar.help.menu add command -label "help" -command "textwindow ${XSCHEM_SHAREDIR}/xschem.help" \
 	-accelerator {?}
    .menubar.help.menu add command -label "keys" -command "textwindow ${XSCHEM_SHAREDIR}/keys.help"
+   .menubar.help.menu add command -label "About XSCHEM" -command "about"
    
    .menubar.file.menu add command -label "New Schematic"  -accelerator Ctrl+N\
      -command {
@@ -2192,7 +2219,7 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    .menubar.file.menu add command -label "PNG Export" -command "xschem print png" -accelerator {Ctrl+*}
    .menubar.file.menu add command -label "SVG Export" -command "xschem print svg" -accelerator {Alt+*}
    .menubar.file.menu add separator
-   .menubar.file.menu add command -label "Exit" -command {exit} -accelerator {Ctrl+Q}
+   .menubar.file.menu add command -label "Exit" -command {xschem exit} -accelerator {Ctrl+Q}
    
    .menubar.option.menu add checkbutton -label "show info win" -variable show_infowindow \
      -command {
@@ -2320,24 +2347,37 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
      -command {
        xschem netlist
       }
+   
+   if { $dark_colorscheme == 1 } { set txt_color black} else { set txt_color white} 
    set j 0
    foreach i $colors {
      ## 20121121
      if {  $j == [xschem get pinlayer] } { 
-       set laylab PIN
-       set layfg white
+       set laylab [format %2d $j]-PIN
+       set layfg $txt_color
      } elseif { $j == [xschem get wirelayer] } { 
-       set laylab WIRE
-       set layfg black
+       set laylab [format %2d $j]-WIRE
+       set layfg $txt_color
      } elseif { $j == [xschem get textlayer] } { ;# 20161206
-       set laylab TEXT
-       set layfg {#777777}
+       set laylab [format %2d $j]-TEXT
+       set layfg $txt_color
+     } elseif { $j == [xschem get backlayer] } { ;# 20161206
+       set laylab [format %2d $j]-BG
+       if { $dark_colorscheme == 1 } {
+         set layfg white
+       } else {
+         set layfg black
+       }
+     } elseif { $j == [xschem get gridlayer] } { ;# 20161206
+       set laylab [format %2d $j]-GRID
+       set layfg $txt_color
      } else {
-       set laylab {        }
-       set layfg black
+       set laylab "[format %2d $j]        "
+       set layfg $txt_color
      }
 
-   .menubar.layers.menu add command  -label $laylab  -foreground $layfg -background $i -activebackground $i \
+   .menubar.layers.menu add command  -label $laylab  -activeforeground $layfg \
+        -foreground $layfg -background $i -activebackground $i \
         -command " 
            xschem set rectcolor $j
            change_color

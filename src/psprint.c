@@ -220,14 +220,14 @@ static void ps_drawgrid()
  delta=CADGRID* mooz;
  while(delta<CADGRIDTHRESHOLD) delta*=CADGRIDMULTIPLY;  /* <-- to be improved,but works */
  x = xorigin* mooz;y = yorigin* mooz;
- set_ps_colors(SELLAYER);
+ set_ps_colors(GRIDLAYER);
  if(y>areay1 && y<areay2)
  {
-  ps_xdrawline(SELLAYER,areax1+1,(int)y, areax2-1, (int)y);
+  ps_xdrawline(GRIDLAYER,areax1+1,(int)y, areax2-1, (int)y);
  }
  if(x>areax1 && x<areax2)
  {
-  ps_xdrawline(SELLAYER,(int)x,areay1+1, (int)x, areay2-1);
+  ps_xdrawline(GRIDLAYER,(int)x,areay1+1, (int)x, areay2-1);
  }
  set_ps_colors(GRIDLAYER);
  tmp = floor((areay1+1)/delta)*delta-fmod(-yorigin* mooz,delta);

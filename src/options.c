@@ -26,7 +26,11 @@
 
 void check_opt(char *opt, char *optval, int type)
 {
-    if( (type == SHORT && *opt == 'S') || (type == LONG && !strcmp("simulate", opt)) ) {
+    if( (type == SHORT && *opt == 'd') || (type == LONG && !strcmp("debug", opt)) ) {
+        if(optval) debug_var=atoi(optval);
+        else debug_var = 0;
+
+    } else if( (type == SHORT && *opt == 'S') || (type == LONG && !strcmp("simulate", opt)) ) {
         if(debug_var>=1) fprintf(errfp, "process_options(): will do simulation\n");
         do_simulation=1;
 
@@ -49,6 +53,10 @@ void check_opt(char *opt, char *optval, int type)
         if(debug_var>=1) fprintf(errfp, "process_options(): will print postscript\n");
         do_print=1;
 
+    } else if( (type == LONG && !strcmp("rcfile", opt)) ) {
+        if(debug_var>=1) fprintf(errfp, "process_options(): user rcfile specified: %s\n", optval ? optval : "NULL");
+        if(optval) strcpy(rcfile, optval);
+
     } else if( (type == LONG && !strcmp("png", opt)) ) {
         if(debug_var>=1) fprintf(errfp, "process_options(): will print png\n");
         do_print=2;
@@ -67,10 +75,6 @@ void check_opt(char *opt, char *optval, int type)
 
     } else if( (type == SHORT && *opt == 'i') || (type == LONG && !strcmp("no_rcload", opt)) ) {
         load_initfile=0;
-
-    } else if( (type == SHORT && *opt == 'd') || (type == LONG && !strcmp("debug", opt)) ) {
-        if(optval) debug_var=atoi(optval);
-        else debug_var = 0;
 
     } else if( (type == SHORT && *opt == 'l') || (type == LONG && !strcmp("log", opt)) ) {
         if(optval) errfp = fopen(optval, "w");
@@ -122,17 +126,23 @@ int process_options(int argc, char *argv[])
       opt++;
       if(opt && *opt=='-') { /* long options */
         opt++;
-        if(opt) {
+        if(*opt) {
           optval = strchr(opt, '=');
           if(optval) {
             *optval = '\0';
             optval++;
           }
-          if(!strcmp("debug", opt)) {
-            if(!optval) optval = argv[++i];
-          }
-          if(!strcmp("log", opt)) {
-            if(!optval) optval = argv[++i];
+          if(!optval && i < argc-1 && argv[i+1][0] != '-') {
+            /* options requiring arguments are listed here */
+            if(!strcmp("debug", opt)) {
+              optval = argv[++i];
+            }
+            else if(!strcmp("log", opt)) {
+              optval = argv[++i];
+            }
+            else if(!strcmp("rcfile", opt)) {
+              optval = argv[++i];
+            }
           }
           check_opt(opt, optval, LONG);
           /* printf("long opt:%s, value: %s\n", opt, optval ? optval : "no value"); */
@@ -141,10 +151,11 @@ int process_options(int argc, char *argv[])
       else { /* short options */
         while(*opt) {
           optval = NULL;
+          /* options requiring arguments are listed here */
           if(*opt == 'l') {
             optval = argv[++i];
           }
-          if(*opt == 'd') {
+          else if(*opt == 'd') {
             optval = argv[++i];
           }
           check_opt(opt, optval, SHORT);

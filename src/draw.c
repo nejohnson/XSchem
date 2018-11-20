@@ -675,15 +675,15 @@ void drawgrid()
  x = xorigin*mooz;y = yorigin*mooz;
  if(y>areay1 && y<areay2)
  {
-  if(draw_window) XDrawLine(display, window, gc[SELLAYER],areax1+1,(int)y, areax2-1, (int)y);
+  if(draw_window) XDrawLine(display, window, gc[GRIDLAYER],areax1+1,(int)y, areax2-1, (int)y);
   if(draw_pixmap)
-    XDrawLine(display, save_pixmap, gc[SELLAYER],areax1+1,(int)y, areax2-1, (int)y);
+    XDrawLine(display, save_pixmap, gc[GRIDLAYER],areax1+1,(int)y, areax2-1, (int)y);
  }
  if(x>areax1 && x<areax2)
  {
-  if(draw_window) XDrawLine(display, window, gc[SELLAYER],(int)x,areay1+1, (int)x, areay2-1);
+  if(draw_window) XDrawLine(display, window, gc[GRIDLAYER],(int)x,areay1+1, (int)x, areay2-1);
   if(draw_pixmap)
-    XDrawLine(display, save_pixmap, gc[SELLAYER],(int)x,areay1+1, (int)x, areay2-1);
+    XDrawLine(display, save_pixmap, gc[GRIDLAYER],(int)x,areay1+1, (int)x, areay2-1);
  }
  tmp = floor((areay1+1)/delta)*delta-fmod(-yorigin*mooz,delta);
  for(x=floor((areax1+1)/delta)*delta-fmod(-xorigin*mooz,delta);x<areax2;x+=delta)

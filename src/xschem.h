@@ -26,12 +26,12 @@
 
 #if HAS_PIPE == 1
 /* fdopen() */
-#define _POSIX_C_SOURCE 1
+#define _POSIX_C_SOURCE 200112L
 #endif
 
 #if  HAS_POPEN==1
 /* popen() , pclose(), */
-#define _POSIX_C_SOURCE 2
+#define _POSIX_C_SOURCE 200112L
 #endif
 
 #define TCL_WIDE_INT_TYPE long
@@ -461,6 +461,7 @@ extern char *filename;
 extern char home_dir[PATH_MAX]; /* home dir obtained via getpwuid */
 extern char pwd_dir[PATH_MAX]; /* obtained via getcwd() */
 extern int load_initfile;
+extern char rcfile[PATH_MAX];
 extern int persistent_command;
 
 extern int debug_var; 

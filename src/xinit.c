@@ -853,7 +853,9 @@ int Tcl_AppInit(Tcl_Interp *inter)
  /* */
 
  /* READ COLORS */
- my_snprintf(name, S(name), "%s/colors", USER_CONF_DIR);
+ my_snprintf(tmp, S(tmp),"regsub {^~} {%s} {%s}", USER_CONF_DIR, home_dir);
+ tcleval(tmp);
+ my_snprintf(name, S(name), "%s/colors",Tcl_GetStringResult(interp));
  if(!stat(name, &buf)) {
    source_tcl_file(name);
  }

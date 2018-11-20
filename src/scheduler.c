@@ -514,6 +514,11 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
         my_snprintf(s, S(s), "XSCHEM V%s",XSCHEM_VERSION);
         Tcl_AppendResult(interp, s,NULL);
   }
+  else if(!strcmp(argv[2],"userconfdir"))  {  /* 20121121 */
+        char s[30]; /* overflow safe 20161122 */
+        my_snprintf(s, S(s), "%s",USER_CONF_DIR);
+        Tcl_AppendResult(interp, s,NULL);
+  }
   else {
     fprintf(errfp, "xschem get %s: invalid command.\n", argv[2]);
   }

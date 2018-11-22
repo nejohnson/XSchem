@@ -715,8 +715,8 @@ void place_symbol(int pos, const char *symbol_name, double x, double y, int rot,
   my_strdup2(&inst_ptr[n].instname, get_tok_value(inst_ptr[n].prop_ptr,"name",0) ); /*  20150409 */
 
   type = instdef[inst_ptr[n].ptr].type; /* 20150409 */
-  cond= strcmp(type,"label") && strcmp(type,"ipin") &&
-        strcmp(type,"opin") &&  strcmp(type,"iopin");
+  cond= !type || (strcmp(type,"label") && strcmp(type,"ipin") &&
+        strcmp(type,"opin") &&  strcmp(type,"iopin"));
   if(cond) inst_ptr[n].flags|=2;
   else inst_ptr[n].flags &=~2;
 

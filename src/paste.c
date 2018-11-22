@@ -187,20 +187,22 @@ void merge_inst(int k,FILE *fd)
     ptr=inst_ptr;
     ptr[i].name=NULL;
     load_ascii_string(&ptr[i].name,fd);
-    fscanf(fd, "%lf %lf %d %d",&ptr[i].x0, &ptr[i].y0,&ptr[i].rot,
-     &ptr[i].flip);
+    if(fscanf(fd, "%lf %lf %d %d",&ptr[i].x0, &ptr[i].y0,&ptr[i].rot, &ptr[i].flip) < 4) {
+      fprintf(errfp,"WARNING: missing fields for INSTANCE object, ignoring.\n");
+      read_line(fd);
+      return;
+    }
+    ptr[i].sel=0;
+    ptr[i].flags=0;
+    ptr[i].ptr=-1; 
     ptr[i].prop_ptr=NULL;
     ptr[i].instname=NULL; /* 20150411 */
     ptr[i].node=NULL;
-
-
-
-    ptr[i].sel=0;
     load_ascii_string(&prop_ptr,fd);
     new_prop_string(&inst_ptr[i].prop_ptr, prop_ptr,k);
-    my_strdup2(&inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); /* 20150409 */
     /* the final tmp argument is zero for the 1st call and used in */
     /* new_prop_string() for cleaning some internal caches. */
+    my_strdup2(&inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); /* 20150409 */
     hash_proplist(inst_ptr[i].prop_ptr,0);
     lastinst++;
     modified=1;
@@ -252,8 +254,8 @@ void match_merged_inst(int old)
                        &inst_ptr[i].x2, &inst_ptr[i].y2);
      /* type=get_tok_value(instdef[inst_ptr[i].ptr].prop_ptr,"type",0); */
      type=instdef[inst_ptr[i].ptr].type; /* 20150409 */
-     cond= type && strcmp(type,"label") && strcmp(type,"ipin") &&
-           strcmp(type,"opin") &&  strcmp(type,"iopin");
+     cond= !type || (strcmp(type,"label") && strcmp(type,"ipin") &&
+           strcmp(type,"opin") &&  strcmp(type,"iopin"));
      if(cond) inst_ptr[i].flags|=2;
      else inst_ptr[i].flags &=~2;
     }

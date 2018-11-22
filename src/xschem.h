@@ -593,6 +593,7 @@ extern struct instpinentry *instpintable[NBOXES][NBOXES];
 extern double mx_double_save, my_double_save; /*  20070322 */
 extern struct instentry *insttable[NBOXES][NBOXES];
 extern size_t get_tok_value_size;
+extern int renumber_instances;
 
 /*  functions */
 extern void print_version(void);
@@ -757,15 +758,8 @@ extern void clear_undo(void);
 extern void load_schematic(int load_symbol, const char *abs_name, int reset_undo);
 extern void link_symbols_to_instances(void);
 extern void load_ascii_string(char **ptr, FILE *fd);
-extern void load_text(FILE *fd);
-extern void load_wire(FILE *fd);
-extern void load_inst(FILE *fd);
-extern void load_box(FILE *fd);
-extern void load_arc(FILE *fd);
 extern void read_xschem_file(FILE *fd); /*  20180912 */
 extern char *read_line(FILE *fp);
-extern void load_polygon(FILE *fd); /*  20171115 */
-extern void load_line(FILE *fd);
 extern void create_sch_from_sym(void);
 extern void descend_schematic(void);
 extern void go_back(int confirm);
@@ -797,7 +791,6 @@ extern void tclsetvar(const char *s, const char *value);
 extern void statusmsg(char str[],int n);
 extern void place_text(int draw_text, double mx, double my);
 extern void hash_proplist(char *s,int remove);
-extern struct hashentry *hash_lookup(char *token,char *value,int remove, size_t token_size);
 extern void init_inst_iterator(double x1, double y1, double x2, double y2);
 extern struct instentry *inst_iterator_next();
 extern void init_wire_iterator(double x1, double y1, double x2, double y2);

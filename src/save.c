@@ -395,13 +395,221 @@ void write_xschem_file(FILE *fd, int type)
   save_inst(fd);
 }
 
+static void load_text(FILE *fd)
+{
+  int i;
+  char *strlayer;
+   check_text_storage();
+   i=lasttext;
+   textelement[i].txt_ptr=NULL;
+   load_ascii_string(&textelement[i].txt_ptr,fd);
+   if(fscanf(fd, "%lf %lf %d %d %lf %lf ",
+     &textelement[i].x0, &textelement[i].y0, &textelement[i].rot,
+     &textelement[i].flip, &textelement[i].xscale,
+     &textelement[i].yscale)<6) {
+     fprintf(errfp,"WARNING:  missing fields for TEXT object, ignoring\n");
+     read_line(fd);
+     return;
+   }
+   textelement[i].prop_ptr=NULL;
+   textelement[i].font=NULL;
+   textelement[i].sel=0;
+   load_ascii_string(&textelement[i].prop_ptr,fd);
+   my_strdup(&textelement[i].font, get_tok_value(textelement[i].prop_ptr, "font", 0));/*20171206 */
+   strlayer = get_tok_value(textelement[i].prop_ptr, "layer", 0); /*20171206 */
+   if(strlayer[0]) textelement[i].layer = atoi(strlayer);
+   else textelement[i].layer = -1;
+   lasttext++;
+}
+
+static void load_wire(FILE *fd)
+{
+
+    double x1,y1,x2,y2;
+    static char *ptr=NULL;
+    if(fscanf(fd, "%lf %lf %lf %lf",&x1, &y1, &x2, &y2 )<4) {
+      fprintf(errfp,"WARNING:  missing fields for WIRE object, ignoring\n");
+      read_line(fd);
+      return;
+    }
+    load_ascii_string( &ptr, fd);
+    ORDER(x1, y1, x2, y2);
+    storeobject(-1, x1,y1,x2,y2,WIRE,0,0,ptr);
+    modified=0; /* 20140116 storeobject sets modified flag , but we are loading here ... */
+}
+
+static void load_inst(int k, FILE *fd)
+{
+    int i;
+    char *prop_ptr=NULL;
+
+    Instance *ptr;
+    i=lastinst;
+    check_inst_storage();
+    ptr=inst_ptr;
+    ptr[i].name=NULL;
+    load_ascii_string(&ptr[i].name, fd);
+    if(fscanf(fd, "%lf %lf %d %d",&ptr[i].x0, &ptr[i].y0,&ptr[i].rot, &ptr[i].flip) < 4) {
+      fprintf(errfp,"WARNING: missing fields for INSTANCE object, ignoring.\n"); 
+      read_line(fd);
+      return;
+    }
+    ptr[i].flags=0;
+    ptr[i].sel=0;
+    ptr[i].ptr=-1; /*04112003 was 0 */
+    ptr[i].prop_ptr=NULL;
+    ptr[i].instname=NULL; /* 20150409 */
+    ptr[i].node=NULL;
+    load_ascii_string(&prop_ptr,fd);
+    if(renumber_instances) {
+      new_prop_string(&inst_ptr[i].prop_ptr, prop_ptr, k);
+    } else {
+      my_strdup(&inst_ptr[i].prop_ptr, prop_ptr);
+    }
+    my_strdup2(&ptr[i].instname, get_tok_value(ptr[i].prop_ptr, "name", 0)); /* 20150409 */
+    hash_proplist(ptr[i].prop_ptr,0);
+
+
+    if(debug_var>=2) fprintf(errfp, "load_inst(): n=%d name=%s prop=%s\n",
+            i, ptr[i].name? ptr[i].name:"<NULL>", ptr[i].prop_ptr? ptr[i].prop_ptr:"<NULL>");
+    lastinst++;
+}
+
+static void load_polygon(FILE *fd)
+{
+    int i,c, j, points;
+    Polygon *ptr;
+
+    if(fscanf(fd, "%d %d",&c, &points)<2) {
+      fprintf(errfp,"WARNING: missing fields for POLYGON object, ignoring.\n"); 
+      read_line(fd);
+      return;
+    }
+    if(c<0 || c>=cadlayers) {
+      fprintf(errfp,"WARNING: wrong layer number for POLYGON object, ignoring.\n"); 
+      read_line(fd);
+      return;
+    }
+    check_polygon_storage(c);
+    i=lastpolygon[c];
+    ptr=polygon[c];
+    ptr[i].x=NULL;
+    ptr[i].y=NULL;
+    ptr[i].selected_point=NULL;
+    ptr[i].prop_ptr=NULL;
+    ptr[i].x = my_calloc(points, sizeof(double));
+    ptr[i].y = my_calloc(points, sizeof(double));
+    ptr[i].selected_point= my_calloc(points, sizeof(unsigned short));
+    ptr[i].points=points;
+    ptr[i].sel=0;
+    for(j=0;j<points;j++) {
+      if(fscanf(fd, "%lf %lf ",&(ptr[i].x[j]), &(ptr[i].y[j]))<2) {
+        fprintf(errfp,"WARNING: missing fields for POLYGON points, ignoring.\n"); 
+        my_free(&ptr[i].x);
+        my_free(&ptr[i].y);
+        my_free(&ptr[i].selected_point);
+        read_line(fd);
+        return;
+      }
+    }
+    load_ascii_string( &ptr[i].prop_ptr, fd);
+    /* 20180914 */
+    if( !strcmp(get_tok_value(ptr[i].prop_ptr,"fill",0),"true") )
+      ptr[i].fill =1;
+    else
+      ptr[i].fill =0;
+
+    lastpolygon[c]++;
+}
+
+static void load_arc(FILE *fd)
+{
+    int i,c;
+    Arc *ptr;
+
+    fscanf(fd, "%d",&c);
+    if(c<0 || c>=cadlayers) {
+      fprintf(errfp,"WARNING: wrong layer number for ARC object, ignoring.\n"); 
+      read_line(fd);
+      return;
+    }
+    check_arc_storage(c);
+    i=lastarc[c];
+    ptr=arc[c];
+    if(fscanf(fd, "%lf %lf %lf %lf %lf ",&ptr[i].x, &ptr[i].y,
+           &ptr[i].r, &ptr[i].a, &ptr[i].b) < 5) {
+      fprintf(errfp,"WARNING:  missing fields for ARC object, ignoring\n");
+      read_line(fd);
+      return;
+    }
+    ptr[i].prop_ptr=NULL;
+    ptr[i].sel=0;
+    load_ascii_string(&ptr[i].prop_ptr, fd);
+    lastarc[c]++;
+}
+
+static void load_box(FILE *fd)
+{
+    int i,c;
+    Box *ptr;
+
+    fscanf(fd, "%d",&c);
+    if(c<0 || c>=cadlayers) {
+      fprintf(errfp,"WARNING: wrong layer number for RECT object, ignoring.\n"); 
+      read_line(fd);
+      return;
+    }
+    check_box_storage(c);
+    i=lastrect[c];
+    ptr=rect[c];
+    if(fscanf(fd, "%lf %lf %lf %lf ",&ptr[i].x1, &ptr[i].y1, 
+       &ptr[i].x2, &ptr[i].y2) < 4) {
+      fprintf(errfp,"WARNING:  missing fields for RECT object, ignoring\n");
+      read_line(fd);
+      return;
+    }
+    RECTORDER(ptr[i].x1, ptr[i].y1, ptr[i].x2, ptr[i].y2); /* 20180108 */
+    ptr[i].prop_ptr=NULL;
+    ptr[i].sel=0;
+    load_ascii_string( &ptr[i].prop_ptr, fd);
+    lastrect[c]++;
+}
+
+static void load_line(FILE *fd)
+{
+    int i,c;
+    Line *ptr;
+
+    fscanf(fd, "%d",&c);
+    if(c<0 || c>=cadlayers) {
+      fprintf(errfp,"WARNING: Wrong layer number for LINE object, ignoring\n");
+      read_line(fd);
+      return;
+    } 
+    check_line_storage(c);
+    i=lastline[c];
+    ptr=line[c];
+    if(fscanf(fd, "%lf %lf %lf %lf ",&ptr[i].x1, &ptr[i].y1, 
+       &ptr[i].x2, &ptr[i].y2) < 4) {
+      fprintf(errfp,"WARNING:  missing fields for LINE object, ignoring\n");
+      read_line(fd);
+      return;
+    }
+    ORDER(ptr[i].x1, ptr[i].y1, ptr[i].x2, ptr[i].y2); /* 20180108 */
+    ptr[i].prop_ptr=NULL;
+    ptr[i].sel=0;
+    load_ascii_string( &ptr[i].prop_ptr, fd);
+    lastline[c]++;
+}
+
 void read_xschem_file(FILE *fd) /* 20180912 */
 {
   int i, found, endfile;
   char name_embedded[PATH_MAX];
   char c[1];
+  int inst_cnt;
 
-  endfile=0;
+  inst_cnt = endfile = 0;
   while(!endfile)
   {
     if(fscanf(fd," %c",c)==EOF) break;
@@ -439,7 +647,7 @@ void read_xschem_file(FILE *fd) /* 20180912 */
       load_wire(fd);
       break;
      case 'C':
-      load_inst(fd);
+      load_inst(inst_cnt++, fd);
       break;
      case '[':
       my_strdup(&inst_ptr[lastinst-1].prop_ptr, subst_token(inst_ptr[lastinst-1].prop_ptr, "embed", "true"));
@@ -509,213 +717,6 @@ void load_ascii_string(char **ptr, FILE *fd)
  fscanf(fd, " ");
  my_strdup(ptr, str);
  if(debug_var>=2) fprintf(errfp, "load_ascii_string(): loaded %s\n",*ptr? *ptr:"<NULL>");
-}
-
-
-void load_text(FILE *fd)
-{
-  int i;
-  char *strlayer;
-   check_text_storage();
-   i=lasttext;
-   textelement[i].txt_ptr=NULL;
-   load_ascii_string(&textelement[i].txt_ptr,fd);
-   if(fscanf(fd, "%lf %lf %d %d %lf %lf ",
-     &textelement[i].x0, &textelement[i].y0, &textelement[i].rot,
-     &textelement[i].flip, &textelement[i].xscale,
-     &textelement[i].yscale)<6) {
-     fprintf(errfp,"WARNING:  missing fields for TEXT object, ignoring\n");
-     read_line(fd);
-     return;
-   }
-   textelement[i].prop_ptr=NULL;
-   textelement[i].font=NULL;
-   textelement[i].sel=0;
-   load_ascii_string(&textelement[i].prop_ptr,fd);
-   my_strdup(&textelement[i].font, get_tok_value(textelement[i].prop_ptr, "font", 0));/*20171206 */
-   strlayer = get_tok_value(textelement[i].prop_ptr, "layer", 0); /*20171206 */
-   if(strlayer[0]) textelement[i].layer = atoi(strlayer);
-   else textelement[i].layer = -1;
-   lasttext++;
-}
-
-void load_wire(FILE *fd)
-{
-
-    double x1,y1,x2,y2;
-    static char *ptr=NULL;
-    if(fscanf(fd, "%lf %lf %lf %lf",&x1, &y1, &x2, &y2 )<4) {
-      fprintf(errfp,"WARNING:  missing fields for WIRE object, ignoring\n");
-      read_line(fd);
-      return;
-    }
-    load_ascii_string( &ptr, fd);
-    ORDER(x1, y1, x2, y2);
-    storeobject(-1, x1,y1,x2,y2,WIRE,0,0,ptr);
-    modified=0; /* 20140116 storeobject sets modified flag , but we are loading here ... */
-}
-
-
-
-
-void load_inst(FILE *fd)
-{
-    int i;
-    static char *n=NULL;
-    Instance *ptr;
-    i=lastinst;
-    check_inst_storage();
-    ptr=inst_ptr;
-    ptr[i].name=NULL;
-    load_ascii_string(&n,fd);
-    my_strdup(&ptr[i].name, n);  /* 20181009 rel_sym_path(n)?  perf. issue on big schematics */
-    my_free(&n);
-    if(fscanf(fd, "%lf %lf %d %d",&ptr[i].x0, &ptr[i].y0,&ptr[i].rot, &ptr[i].flip) < 4) {
-      fprintf(errfp,"WARNING: missing fields for INSTANCE object, ignoring.\n"); 
-      read_line(fd);
-      return;
-    }
-    ptr[i].flags=0;
-    ptr[i].sel=0;
-    ptr[i].ptr=-1; /*04112003 was 0 */
-    ptr[i].prop_ptr=NULL;
-    ptr[i].instname=NULL; /* 20150409 */
-    ptr[i].node=NULL;
-    load_ascii_string(&ptr[i].prop_ptr,fd);
-    my_strdup2(&ptr[i].instname, get_tok_value(ptr[i].prop_ptr, "name", 0)); /* 20150409 */
-    hash_proplist(ptr[i].prop_ptr,0);
-
-
-    if(debug_var>=2) fprintf(errfp, "load_inst(): n=%d name=%s prop=%s\n",
-            i, ptr[i].name? ptr[i].name:"<NULL>", ptr[i].prop_ptr? ptr[i].prop_ptr:"<NULL>");
-    lastinst++;
-}
-
-void load_polygon(FILE *fd)
-{
-    int i,c, j, points;
-    Polygon *ptr;
-
-    if(fscanf(fd, "%d %d",&c, &points)<2) {
-      fprintf(errfp,"WARNING: missing fields for POLYGON object, ignoring.\n"); 
-      read_line(fd);
-      return;
-    }
-    if(c<0 || c>=cadlayers) {
-      fprintf(errfp,"WARNING: wrong layer number for POLYGON object, ignoring.\n"); 
-      read_line(fd);
-      return;
-    }
-    check_polygon_storage(c);
-    i=lastpolygon[c];
-    ptr=polygon[c];
-    ptr[i].x=NULL;
-    ptr[i].y=NULL;
-    ptr[i].selected_point=NULL;
-    ptr[i].prop_ptr=NULL;
-    ptr[i].x = my_calloc(points, sizeof(double));
-    ptr[i].y = my_calloc(points, sizeof(double));
-    ptr[i].selected_point= my_calloc(points, sizeof(unsigned short));
-    ptr[i].points=points;
-    ptr[i].sel=0;
-    for(j=0;j<points;j++) {
-      if(fscanf(fd, "%lf %lf ",&(ptr[i].x[j]), &(ptr[i].y[j]))<2) {
-        fprintf(errfp,"WARNING: missing fields for POLYGON points, ignoring.\n"); 
-        my_free(&ptr[i].x);
-        my_free(&ptr[i].y);
-        my_free(&ptr[i].selected_point);
-        read_line(fd);
-        return;
-      }
-    }
-    load_ascii_string( &ptr[i].prop_ptr, fd);
-    /* 20180914 */
-    if( !strcmp(get_tok_value(ptr[i].prop_ptr,"fill",0),"true") )
-      ptr[i].fill =1;
-    else
-      ptr[i].fill =0;
-
-    lastpolygon[c]++;
-}
-
-void load_arc(FILE *fd)
-{
-    int i,c;
-    Arc *ptr;
-
-    fscanf(fd, "%d",&c);
-    if(c<0 || c>=cadlayers) {
-      fprintf(errfp,"WARNING: wrong layer number for ARC object, ignoring.\n"); 
-      read_line(fd);
-      return;
-    }
-    check_arc_storage(c);
-    i=lastarc[c];
-    ptr=arc[c];
-    if(fscanf(fd, "%lf %lf %lf %lf %lf ",&ptr[i].x, &ptr[i].y,
-           &ptr[i].r, &ptr[i].a, &ptr[i].b) < 5) {
-      fprintf(errfp,"WARNING:  missing fields for ARC object, ignoring\n");
-      read_line(fd);
-      return;
-    }
-    ptr[i].prop_ptr=NULL;
-    ptr[i].sel=0;
-    load_ascii_string(&ptr[i].prop_ptr, fd);
-    lastarc[c]++;
-}
-
-void load_box(FILE *fd)
-{
-    int i,c;
-    Box *ptr;
-
-    fscanf(fd, "%d",&c);
-    if(c<0 || c>=cadlayers) {
-      fprintf(errfp,"WARNING: wrong layer number for RECT object, ignoring.\n"); 
-      read_line(fd);
-      return;
-    }
-    check_box_storage(c);
-    i=lastrect[c];
-    ptr=rect[c];
-    if(fscanf(fd, "%lf %lf %lf %lf ",&ptr[i].x1, &ptr[i].y1, 
-       &ptr[i].x2, &ptr[i].y2) < 4) {
-      fprintf(errfp,"WARNING:  missing fields for RECT object, ignoring\n");
-      read_line(fd);
-      return;
-    }
-    RECTORDER(ptr[i].x1, ptr[i].y1, ptr[i].x2, ptr[i].y2); /* 20180108 */
-    ptr[i].prop_ptr=NULL;
-    ptr[i].sel=0;
-    load_ascii_string( &ptr[i].prop_ptr, fd);
-    lastrect[c]++;
-}
-
-void load_line(FILE *fd)
-{
-    int i,c;
-    Line *ptr;
-
-    fscanf(fd, "%d",&c);
-    if(c<0 || c>=cadlayers) {
-      fprintf(errfp,"WARNING: Wrong layer number for LINE object, ignoring\n");
-      read_line(fd);
-      return;
-    } 
-    check_line_storage(c);
-    i=lastline[c];
-    ptr=line[c];
-    if(fscanf(fd, "%lf %lf %lf %lf ",&ptr[i].x1, &ptr[i].y1, 
-       &ptr[i].x2, &ptr[i].y2) < 4) {
-      fprintf(errfp,"WARNING:  missing fields for LINE object, ignoring\n");
-      read_line(fd);
-      return;
-    }
-    ORDER(ptr[i].x1, ptr[i].y1, ptr[i].x2, ptr[i].y2); /* 20180108 */
-    ptr[i].prop_ptr=NULL;
-    ptr[i].sel=0;
-    load_ascii_string( &ptr[i].prop_ptr, fd);
-    lastline[c]++;
 }
 
 void make_symbol(void)
@@ -815,15 +816,15 @@ void link_symbols_to_instances(void) /* 20150326 separated from load_schematic()
   missing = 0;
   for(i=0;i<lastinst;i++)
   {
-     symfilename=inst_ptr[i].name; /*05112003 */
+    symfilename=inst_ptr[i].name; /*05112003 */
 
-     if(debug_var>=1) fprintf(errfp, "link_symbols_to_instances(): inst=%d\n", i);
-     if(debug_var>=1) fprintf(errfp, "link_symbols_to_instances(): matching inst %d name=%s \n",i, inst_ptr[i].name);
-     if(debug_var>=1) fprintf(errfp, "link_symbols_to_instances(): -------\n");
-     
-     symbol = match_symbol(symfilename);
-     if(symbol == -1) 
-     {
+    if(debug_var>=1) fprintf(errfp, "link_symbols_to_instances(): inst=%d\n", i);
+    if(debug_var>=1) fprintf(errfp, "link_symbols_to_instances(): matching inst %d name=%s \n",i, inst_ptr[i].name);
+    if(debug_var>=1) fprintf(errfp, "link_symbols_to_instances(): -------\n");
+    
+    symbol = match_symbol(symfilename);
+    if(symbol == -1) 
+    {
       if(debug_var>=1) fprintf(errfp, "link_symbols_to_instances(): missing symbol, skipping...\n");
       hash_proplist(inst_ptr[i].prop_ptr , 1); /* 06052001 remove props from hash table  */
       my_strdup(&inst_ptr[i].prop_ptr, NULL);  /* 06052001 remove properties */
@@ -832,12 +833,12 @@ void link_symbols_to_instances(void) /* 20150326 separated from load_schematic()
       my_strdup(&inst_ptr[i].instname, NULL);  /* 20150409 */
       missing++;
       continue;
-     }
-      if(debug_var>=2) fprintf(errfp, "link_symbols_to_instances(): \n");
-     inst_ptr[i].ptr = symbol;
-      if(debug_var>=2) fprintf(errfp, "link_symbols_to_instances(): missing=%d\n",missing);
-     if(missing) 
-     {
+    }
+    if(debug_var>=2) fprintf(errfp, "link_symbols_to_instances(): \n");
+    inst_ptr[i].ptr = symbol;
+    if(debug_var>=2) fprintf(errfp, "link_symbols_to_instances(): missing=%d\n",missing);
+    if(missing) 
+    {
       inst_ptr[i-missing] = inst_ptr[i];
       inst_ptr[i].prop_ptr=NULL;
       inst_ptr[i].instname=NULL; /* 20150409 */
@@ -845,7 +846,7 @@ void link_symbols_to_instances(void) /* 20150326 separated from load_schematic()
       inst_ptr[i].ptr=-1;  /*04112003 was 0 */
       inst_ptr[i].flags=0;
       inst_ptr[i].name=NULL;
-     }
+    }
   } 
   lastinst -= missing;
   for(i=0;i<lastinst;i++) {
@@ -853,8 +854,8 @@ void link_symbols_to_instances(void) /* 20150326 separated from load_schematic()
     symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1,
                       &inst_ptr[i].x2, &inst_ptr[i].y2);
     type=instdef[inst_ptr[i].ptr].type; /* 20150409 */
-    cond= type && strcmp(type,"label") && strcmp(type,"ipin") &&
-         strcmp(type,"opin") &&  strcmp(type,"iopin");
+    cond= !type || (strcmp(type,"label") && strcmp(type,"ipin") &&
+         strcmp(type,"opin") &&  strcmp(type,"iopin"));
     if(cond) inst_ptr[i].flags|=2;
     else inst_ptr[i].flags &=~2;
   }
@@ -1518,8 +1519,8 @@ void descend_symbol(void)
      if(save(1)) return;
    }
 
+   /* fprintf(errfp, "instname selected: %s\n", inst_ptr[selectedgroup[0].n].instname); */
    my_strdup( &str, inst_ptr[selectedgroup[0].n].instname);  /* 20180911 */
-
    my_snprintf(name, S(name), "%s", inst_ptr[selectedgroup[0].n].name);
    /* dont allow descend in the default missing symbol */
    if(!strcmp( 

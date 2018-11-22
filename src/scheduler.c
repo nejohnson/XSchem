@@ -479,6 +479,11 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
   else if(!strcmp(argv[2],"netlist_dir"))  {
         Tcl_AppendResult(interp, netlist_dir,NULL);
   }
+  else if(!strcmp(argv[2],"lastinst"))  {  /* 20121121 */
+        char s[30]; /* overflow safe 20161122 */
+        my_snprintf(s, S(s), "%d",lastinst);
+        Tcl_AppendResult(interp, s,NULL);
+  }
   else if(!strcmp(argv[2],"pinlayer"))  {  /* 20121121 */
         char s[30]; /* overflow safe 20161122 */
         my_snprintf(s, S(s), "%d",PINLAYER);
@@ -555,6 +560,10 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
   if(!strcmp(argv[2],"no_undo"))  { /* 20171204 */
     int s = atoi(argv[3]);
     no_undo=s;
+  }
+  else if(!strcmp(argv[2],"renumber"))  { /* 20171204 */
+    int s = atoi(argv[3]);
+    renumber_instances=s;
   }
   else if(!strcmp(argv[2],"cairo_font_scale"))  {
     double s = atof(argv[3]);
@@ -999,8 +1008,8 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
        my_strdup2(&inst_ptr[inst].instname, get_tok_value(inst_ptr[inst].prop_ptr, "name",0)); /* 20150409 */
 
        type=instdef[inst_ptr[inst].ptr].type; /* 20150409 */
-       cond= strcmp(type,"label") && strcmp(type,"ipin") &&
-           strcmp(type,"opin") &&  strcmp(type,"iopin");
+       cond= !type || (strcmp(type,"label") && strcmp(type,"ipin") &&
+           strcmp(type,"opin") &&  strcmp(type,"iopin"));
        if(cond) inst_ptr[inst].flags|=2;
        else inst_ptr[inst].flags &=~2;
      }

@@ -241,6 +241,7 @@ struct instpinentry *instpintable[NBOXES][NBOXES];
 struct wireentry *wiretable[NBOXES][NBOXES];
 struct instentry *insttable[NBOXES][NBOXES];
 size_t get_tok_value_size;
+int renumber_instances = 0;
 
 
 #ifdef HAS_CAIRO

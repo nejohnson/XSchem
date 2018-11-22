@@ -237,26 +237,25 @@ size_t my_strdup2(char **dest, const char *src) /* 20150409 duplicates also empt
 
 size_t my_strcat(char **str, const char *append_str)
 {
- size_t s, a;
- if(debug_var>=3) fprintf(errfp,"my_strcat(): str=%s  append_str=%s\n", *str, append_str);
- a = strlen(append_str) + 1;
- if( *str != NULL)
- {
-  s = strlen(*str);
-  if(append_str == NULL || append_str[0]=='\0') return s;
-  my_realloc(str, s + a );
-  memcpy(*str+s, append_str, a); /* 20180923 */
-  if(debug_var>=3) fprintf(errfp,"my_strcat(): reallocated %lx, string %s\n",(unsigned long)*str, *str);
-  return s + a -1;
- }
- else
- {
-  if(append_str == NULL || append_str[0]=='\0') return 0;
-  *str = my_malloc( a );
-  memcpy(*str, append_str, a); /* 20180923 */
-  if(debug_var>=3) fprintf(errfp,"my_strcat(): allocated %lx, string %s\n",(unsigned long)*str, *str);
-  return a -1;
- }
+  size_t s, a;
+  if(debug_var>=3) fprintf(errfp,"my_strcat(): str=%s  append_str=%s\n", *str, append_str);
+  if( *str != NULL)
+  {
+    s = strlen(*str);
+    if(append_str == NULL || append_str[0]=='\0') return s;
+    a = strlen(append_str) + 1;
+    my_realloc(str, s + a );
+    memcpy(*str + s, append_str, a); /* 20180923 */
+    if(debug_var >= 3) fprintf(errfp,"my_strcat(): reallocated %lx, string %s\n",(unsigned long)*str, *str);
+    return s + a - 1;
+  } else {
+    if(append_str == NULL || append_str[0] == '\0') return 0;
+    a = strlen(append_str) + 1;
+    *str = my_malloc(a);
+    memcpy(*str, append_str, a); /* 20180923 */
+    if(debug_var>=3) fprintf(errfp,"my_strcat(): allocated %lx, string %s\n",(unsigned long)*str, *str);
+    return a - 1;
+  }
 }
 
 size_t my_strncat(char **str, size_t n, const char *append_str)
@@ -350,29 +349,28 @@ void my_strncpy(char *d, const char *s, int n)
   }
 }
 
+
 void set_inst_prop(int i)
-{/* set inst prop from symbol template string */
+{
   char *ptr;
+  char *tmp;
 
   ptr = (inst_ptr[i].ptr+instdef)->templ; /*20150409 */
-
-  if(get_tok_value(ptr,"name",0)[0]==0)  /* if does not have a name field just copy  */
-                                            /* the entire template string 03102001 */
+  fprintf(errfp, "set_inst_prop(): i=%d, name=%s, prop_ptr = %s, template=%s\n", 
+     i, inst_ptr[i].name, inst_ptr[i].prop_ptr, ptr);
+  if(!inst_ptr[i].prop_ptr && get_tok_value(ptr,"name",0)[0]) 
   {
-   my_strdup(&inst_ptr[i].prop_ptr, ptr);
-   my_strdup2(&inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); /* 20150409 */
-   return;
+    my_strdup(&inst_ptr[i].prop_ptr, ptr);
   }
-
-
-   if(debug_var>=2) fprintf(errfp, "set_inst_prop(): lookin for format string: %s\n",  ptr);
-  if(ptr!=NULL) {/* 03-02-2000 */
-    new_prop_string(&inst_ptr[i].prop_ptr, ptr,0);
-  } else {
-    my_strdup( &inst_ptr[i].prop_ptr,NULL);
+  if(get_tok_value(inst_ptr[i].prop_ptr, "name", 0)[0] ) {
+    tmp = NULL;
+    new_prop_string(&tmp, inst_ptr[i].prop_ptr, 0);
+    my_free(&inst_ptr[i].prop_ptr);
+    inst_ptr[i].prop_ptr = tmp;
   }
   my_strdup2(&inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name",0)); /* 20150409 */
 }
+
 
 /* x=0 use text widget   x=1 use vim editor */
 void edit_text_property(int x)
@@ -714,8 +712,8 @@ void update_symbol(const char *result, int x)
      my_strdup2(&inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name",0)); /* 20150409 */
  
      type=instdef[inst_ptr[i].ptr].type; /* 20150409 */
-     cond= strcmp(type,"label") && strcmp(type,"ipin") &&
-           strcmp(type,"opin") &&  strcmp(type,"iopin");
+     cond= !type || (strcmp(type,"label") && strcmp(type,"ipin") &&
+           strcmp(type,"opin") &&  strcmp(type,"iopin"));
      if(cond) inst_ptr[i].flags|=2;
      else inst_ptr[i].flags &=~2;
     }

@@ -70,8 +70,9 @@ int name_strcmp(char *s, char *d) /* compare strings up to '\0' or'[' */
  }
 }
 
+
 /* 20180926 added token_size */
-struct hashentry *hash_lookup(char *token, char *value,int remove, size_t token_size)
+static struct hashentry *hash_lookup(char *token, char *value,int remove, size_t token_size)
 /*    token        value      remove    ... what ... */
 /* -------------------------------------------------------------------------- */
 /* "whatever"    "whatever"     0       insert in hash table if not in. */
@@ -86,46 +87,36 @@ struct hashentry *hash_lookup(char *token, char *value,int remove, size_t token_
  unsigned int index;
  struct hashentry *entry, *saveptr, **preventry;
  char *ptr;
- int t,v,s ;
+ int s ;
  
 if(token==NULL) return NULL;
   hashcode=hash(token); 
   index=hashcode % HASHSIZE; 
   entry=table[index];
   preventry=&table[index];
-  if(debug_var>=3) fprintf(errfp, "hash_lookup(): ");
-  while(1)
-  {
-    if(debug_var>=3) fprintf(errfp, "*");
-    if( !entry )                /* empty slot */
-    {
-      if(value && !remove)              /* insert data */
-      {
-        if(debug_var>=3) fprintf(errfp, "hash_lookup(): inserting token <%s>, value <%s>\n",
-           token, value);
+  while(1) {
+    if( !entry ) {              /* empty slot */
+      if(value && !remove) {            /* insert data */
         s=sizeof( struct hashentry );
-        t=token_size + 1; /* strlen(token)+1; */ /* 20180926 */
-        v=strlen(value)+1;
-        ptr= my_malloc(s + t + v );
+        ptr= my_malloc(s);
         entry=(struct hashentry *)ptr;
         *preventry=entry;
         entry->next=NULL;
         entry->hash=hashcode;
-        ptr+=s;
-        entry->token=(char *)ptr;
-        memcpy(entry->token,token, t); /* 20180923 */
-        ptr+=t;
-        entry->value=(char *)ptr;
-        memcpy(entry->value, value, v); /* 20180923 */
+        entry->token=NULL;
+        entry->token = my_malloc(token_size + 1);
+        memcpy(entry->token,token, token_size + 1);
+        my_strdup(&entry->token, token);
+        entry->value = value;
         return NULL; /* if element inserted return NULL since it was not in table */
       }
       return entry;
     }
     if( entry->hash==hashcode && !strcmp(token,entry->token) ) {
       /* found a matching token */
-      if(remove)                /* remove token from the hash table ... */
-      {
+      if(remove) {              /* remove token from the hash table ... */
         saveptr=entry->next;
+        my_free(&entry->token);
         my_free(&entry);
         *preventry=saveptr;
         return NULL;
@@ -135,7 +126,6 @@ if(token==NULL) return NULL;
     preventry=&entry->next; /* descend into the list. */
     entry = entry->next;
   }
-  if(debug_var>=3) fprintf(errfp, "\n");
 }
 
 static  int collisions, max_collisions=0, n_elements=0;
@@ -485,7 +475,8 @@ void new_prop_string(char **new_prop,const char *old_prop, int fast)
 /* property string in new_prop such that the element name is */
 /* unique in current design (that is, element name is changed */
 /* if necessary) */
-/* if old_prop=NULL or "" or does not contain name=... then return NULL  */
+/* if old_prop=NULL return NULL */
+/* if old_prop does not contain a valid "name" or empty return old_prop */
  static char prefix, *old_name=NULL, *new_name=NULL;
  const char *tmp;
  const char *tmp2;
@@ -493,7 +484,7 @@ void new_prop_string(char **new_prop,const char *old_prop, int fast)
  static int last[256];
  static int not_zero=0;
  int old_name_len; /* 20180926 */
- int new_name_len; /* 20180926 */
+ int new_name_len;
 
  if(!fast && not_zero) {for(q=1;q<=255;q++) last[q]=0;not_zero=0;}
  

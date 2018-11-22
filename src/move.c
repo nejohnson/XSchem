@@ -763,9 +763,9 @@ void copy_objects(int what)
           ( (flip && (inst_ptr[lastinst].rot & 1) ) ? rot+2 : rot) ) & 0x3;
        inst_ptr[lastinst].flip = (flip? !inst_ptr[n].flip:inst_ptr[n].flip);
        new_prop_string(&inst_ptr[lastinst].prop_ptr, inst_ptr[n].prop_ptr,newpropcnt++);
-       my_strdup2(&inst_ptr[lastinst].instname, get_tok_value(inst_ptr[lastinst].prop_ptr, "name", 0)); /* 20150409 */
        /* the final newpropcnt argument is zero for the 1st call and used in  */
        /* new_prop_string() for cleaning some internal caches. */
+       my_strdup2(&inst_ptr[lastinst].instname, get_tok_value(inst_ptr[lastinst].prop_ptr, "name", 0)); /* 20150409 */
        hash_proplist(inst_ptr[lastinst].prop_ptr , 0);
        n=selectedgroup[i].n=lastinst;
        symbol_bbox(lastinst, &inst_ptr[lastinst].x1, &inst_ptr[lastinst].y1,

@@ -886,7 +886,7 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) /* 201509
   for(i=0;i<lastpolygon[c]; i++) {  /* 20171115 */
     int k, selected_points, flag;
 
-    polygon_bbox(polygon[c][i].x, polygon[c][i].y, polygon[c][i].points, &xa, &ya, &xb, &b);
+    polygon_bbox(polygon[c][i].x, polygon[c][i].y, polygon[c][i].points, &xa, &ya, &xb, &yb);
     if(OUTSIDE(xa, ya, xb, yb, x1, y1, x2, y2)) continue;
     selected_points = 0;
     flag=0;

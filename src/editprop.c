@@ -117,7 +117,7 @@ int my_snprintf(char *str, int size, const char *fmt, ...) /* 20161124 */
 int my_snprintf(char *string, int size, const char *format, ...)
 {
   va_list args;
-  const char *f, *fmt, *prev;
+  const char *f, *fmt = NULL, *prev;
   int overflow, format_spec, l, n = 0;
 
   va_start(args, format);

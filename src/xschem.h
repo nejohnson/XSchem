@@ -22,7 +22,7 @@
 
 #ifndef CADGLOBALS
 #define CADGLOBALS
-#define XSCHEM_VERSION "2.8.1_RC5"
+#define XSCHEM_VERSION "2.8.1_RC6"
 
 #if HAS_PIPE == 1
 /* fdopen() */
@@ -453,6 +453,7 @@ extern int prepared_hilight_structs;
 extern int prepared_hash_instances;
 extern int prepared_hash_wires;
 extern int has_x; 
+extern int no_draw;
 extern int sym_txt;
 extern int rainbow_colors; 
 extern FILE *errfp;

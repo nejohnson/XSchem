@@ -29,6 +29,7 @@ int semaphore=0; /* needed at global scope as it is set by tcl */
 int unzoom_nodrift=1;
 int a3page=-1;
 int has_x=1;
+int no_draw=0;
 int sym_txt=1;
 int rainbow_colors=0;
 int manhattan_lines=0;

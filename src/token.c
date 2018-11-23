@@ -534,6 +534,8 @@ char *subst_token(const char *s, const char *tok, const char *new_val)
 /* given a string <s> with multiple "token=value ..." assignments */
 /* substitute <tok>'s value with <new_val> */
 /* if tok not found in s add tok=new_val at end. 04052001 */
+/* if new_val is empty ('\0') set token value to "" (token="") */
+/* if new_val is NULL *remove* 'token=val' from s */
 {
  static char *result=NULL;
  int size=0, tmp;
@@ -544,11 +546,13 @@ char *subst_token(const char *s, const char *tok, const char *new_val)
  int quote=0;
  int done_subst=0;
  int escape=0;
+ /*
  if(new_val==NULL || new_val[0]=='\0') 
  {
   my_strdup(&result, s);
   return result;
  }
+ */
  sizetok=CADCHUNKALLOC;
  if(token==NULL) token=my_malloc(sizetok);
  else my_realloc(&token,sizetok);
@@ -568,90 +572,105 @@ char *subst_token(const char *s, const char *tok, const char *new_val)
   else if( state==XSEPARATOR && !space) state=XVALUE;
   else if( state==XVALUE && space && !quote) state=XEND;
 
-  if(result_pos>=size)
+  if(result_pos >= size)
   {
-   size+=CADCHUNKALLOC;
-   my_realloc(&result,size);
+   size += CADCHUNKALLOC;
+   my_realloc(&result, size);
   }
 
-  if(token_pos>=sizetok)
+  if(token_pos >= sizetok)
   {
-   sizetok+=CADCHUNKALLOC;
-   my_realloc(&token,sizetok); /* 20171104 **Long** standing bug fixed, was doing realloc on result instead of token. */
+   sizetok += CADCHUNKALLOC;
+   my_realloc(&token, sizetok); /* 20171104 **Long** standing bug fixed, was doing realloc on result instead of token. */
                                /* causing the program to crash on first very long token encountered */
   }
 
   if(state==XTOKEN) 
   {
-       token[token_pos++]=c;
-       result[result_pos++]=c;
+       token[token_pos++] = c;
+       result[result_pos++] = c;
   } 
   else if(state==XSEPARATOR) 
   {
-       token[token_pos]='\0'; 
-       token_pos=0;
-       result[result_pos++]=c;
+       token[token_pos] = '\0'; 
+       if(!strcmp(token,tok) && !new_val) {
+         result_pos -= token_pos + 1; /* discard token if new_val == NULL */
+       } else {
+         result[result_pos++] = c;
+       }
+       token_pos = 0;
+     
   }
   else if(state==XVALUE) 
   {
-       if(c=='"' && !escape) quote=!quote;
+       if(c == '"' && !escape) quote=!quote;
      
-       if(c=='\\')
+       if(c == '\\')
        {
-         escape=1;
+         escape = 1;
        }
        else 
-        escape=0;
+        escape = 0;
        if(!strcmp(token,tok))
        {
         if(!done_subst)
         {
-         tmp=strlen(new_val);
-         if(result_pos + tmp>=size)
-         {
-          size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
-          my_realloc(&result,size);
+         if(new_val && new_val[0]) {
+           tmp = strlen(new_val);
+         } else if(new_val) {
+           new_val = "\"\"";
+           tmp = 2;
          }
-         memcpy(result + result_pos ,new_val, tmp+1); /* 20180923 */
-         result_pos+=tmp;
-         done_subst=1;
+         if(new_val) {
+           if(result_pos + tmp >= size)
+           {
+             size = (1 + (result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
+             my_realloc(&result, size);
+           }
+           memcpy(result + result_pos ,new_val, tmp + 1); /* 20180923 */
+           result_pos += tmp;
+         }
+         done_subst = 1;
         }
        }
        else result[result_pos++]=c;
   }
-  else if(state==XEND) {
-       token[token_pos]='\0'; 
-       token_pos=0;
-       result[result_pos++]=c;
-       state=XBEGIN;
+  else if(state == XEND) {
+       token[token_pos] = '\0'; 
+       token_pos = 0;
+       result[result_pos++] = c;
+       state = XBEGIN;
   }
-  else if(state==XBEGIN) {
-       result[result_pos++]=c;
+  else if(state == XBEGIN) {
+       result[result_pos++] = c;
   }
-  if(c=='\0')  break;
+  if(c == '\0')  break;
  } /* end while */
 
  if(!done_subst)  /* 04052001 if tok not found add tok=new_value at end */
  {
-  if(result[0]=='\0') 
+  if(result[0] == '\0' && new_val) 
   {
    int s;
-   s = strlen(new_val)+strlen(tok)+2;
+   
+   if(!new_val[0]) new_val = "\"\"";
+   s = strlen(new_val) + strlen(tok) + 2;
    my_realloc(&result, s);
    my_snprintf(result, s, "%s=%s", tok, new_val ); /* overflow safe 20161122 */
   }
-  else
+  else if(new_val)
   {
-   tmp=strlen(new_val)+strlen(tok)+2; /* 20171104 */
-   if(result_pos + tmp>=size)
+   if(!new_val[0]) new_val = "\"\"";
+   tmp = strlen(new_val) + strlen(tok) + 2; /* 20171104 */
+   if(result_pos + tmp >= size)
    {
-     size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
+     size = (1 + (result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
      my_realloc(&result,size);
    }
-   my_snprintf(result+result_pos-1, size, " %s=%s", tok, new_val ); /* 20171104, 20171201 -> result_pos-1 */
+   my_snprintf(result + result_pos - 1, size, " %s=%s", tok, new_val ); /* 20171104, 20171201 -> result_pos-1 */
   }
  }
- if(debug_var>=2) fprintf(errfp, "subst_token(): returning: %s\n",result);
+ if(debug_var >= 2) fprintf(errfp, "subst_token(): returning: %s\n",result);
  return result;
 }
 

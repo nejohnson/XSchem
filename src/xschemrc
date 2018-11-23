@@ -25,7 +25,7 @@
 
 #### some default behavior
 set netlist_type spice ;# allowed : spice, verilog, vhdl, tedax
-set hspice_netlist 1
+set hspice_netlist 1 ;# tuning spice netlist syntax for synopsys Hspice (1) or ELDO (8)
 set verilog_2001 1
 # set line_width 2
 set change_lw 1

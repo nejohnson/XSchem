@@ -326,12 +326,24 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
  }
 
  /* 20171010 allows to retrieve name of n-th parent schematic */
- else if(!strcmp(argv[1],"get") && !strcmp(argv[2],"schname") && argc==4) {
+ else if(argc == 4 && !strcmp(argv[1],"get") && !strcmp(argv[2],"schname") ) {
    int x;
    x = atoi(argv[3]);
    if(x<0 && currentsch+x>=0) {
      Tcl_AppendResult(interp, schematic[currentsch+x], NULL);
    }
+ }
+ else if(argc == 4 && !strcmp(argv[1],"get") && !strcmp(argv[2],"expandlabel"))  {  /* 20121121 */
+   int tmp, llen;
+   char *result=NULL;
+   const char *l;
+
+   l = expandlabel(argv[3], &tmp);
+   llen = strlen(l);
+   result = my_malloc(llen + 30);
+   my_snprintf(result, llen + 30, "%s %d", l, tmp);
+   Tcl_AppendResult(interp, result, NULL);
+   my_free(&result);
  }
  else if(!strcmp(argv[1],"get") && argc==3)
  {
@@ -479,6 +491,9 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
   else if(!strcmp(argv[2],"netlist_dir"))  {
         Tcl_AppendResult(interp, netlist_dir,NULL);
   }
+  else if(!strcmp(argv[2],"sch_path"))  {  /* 20121121 */
+        Tcl_AppendResult(interp, sch_prefix[currentsch], NULL);
+  }
   else if(!strcmp(argv[2],"lastinst"))  {  /* 20121121 */
         char s[30]; /* overflow safe 20161122 */
         my_snprintf(s, S(s), "%d",lastinst);
@@ -560,6 +575,10 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
   if(!strcmp(argv[2],"no_undo"))  { /* 20171204 */
     int s = atoi(argv[3]);
     no_undo=s;
+  }
+  else if(!strcmp(argv[2],"no_draw"))  { /* 20171204 */
+    int s = atoi(argv[3]);
+    no_draw=s;
   }
   else if(!strcmp(argv[2],"renumber"))  { /* 20171204 */
     int s = atoi(argv[3]);
@@ -913,6 +932,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
 
  } else if(!strcmp(argv[1], "setprop")) {
    int found=0, i, inst;
+
    if(argc!=6) {
      Tcl_AppendResult(interp, "xschem setprop needs 4 additional arguments", NULL);
      return TCL_ERROR;
@@ -939,7 +959,10 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
      prepared_netlist_structs=0;
      prepared_hilight_structs=0;
      hash_proplist(inst_ptr[inst].prop_ptr , 1); /* remove old props from hash table */
-     new_prop_string(&inst_ptr[inst].prop_ptr, subst_token(inst_ptr[inst].prop_ptr, argv[4], argv[5]),0); 
+     if(!strcmp("NULL", argv[5]) )
+       new_prop_string(&inst_ptr[inst].prop_ptr, subst_token(inst_ptr[inst].prop_ptr, argv[4], NULL),0); 
+     else 
+       new_prop_string(&inst_ptr[inst].prop_ptr, subst_token(inst_ptr[inst].prop_ptr, argv[4], argv[5]),0); 
      my_strdup2(&inst_ptr[inst].instname, get_tok_value(inst_ptr[inst].prop_ptr, "name",0));
      hash_proplist(inst_ptr[inst].prop_ptr , 0); /* put new props in hash table */
      /* new symbol bbox after prop changes (may change due to text length) */
@@ -989,6 +1012,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
        my_strdup(&template, (instdef+sym_number)->templ); /* 20150409 */
        prefix=(get_tok_value(template, "name",0))[0]; /* get new symbol prefix  */
      }
+     else prefix = 'x';
      delete_inst_node(inst); /* 20180208 fix crashing bug: delete node info if changing symbol */
                           /* if number of pins is different we must delete these data *before* */
                           /* changing ysmbol, otherwise i might end up deleting non allocated data. */
@@ -1242,6 +1266,10 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
   printf("Usage:\n");
   printf("      xschem callback X-event_type mousex mousey Xkeysym mouse_button Xstate\n");
   printf("                   can be used to send any event to the application\n");
+  printf("      xschem netlist\n");
+  printf("                   generates a netlist in the selected format for the current schematic\n");
+  printf("      xschem simulate\n");
+  printf("                   launches the currently set simulator on the generated netlist\n");
   printf("      xschem redraw\n");
   printf("                   Redraw the window\n");
   printf("      xschem new_window library/cell\n");

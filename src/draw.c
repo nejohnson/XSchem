@@ -653,7 +653,7 @@ void draw_temp_symbol_outline(int what, GC gc, int n,int layer,int tmp_flip, int
    #ifdef HAS_CAIRO
    customfont = set_text_custom_font(&text);
    #endif
-   draw_temp_string(gc, what, text.txt_ptr,
+   if(text.txt_ptr[0]) draw_temp_string(gc, what, text.txt_ptr,
      (text.rot + ( (flip && (text.rot & 1) ) ? rot+2 : rot) ) & 0x3,
      flip^text.flip, x0+x1, y0+y1, text.xscale, text.yscale);                    
    #ifdef HAS_CAIRO
@@ -1365,9 +1365,6 @@ void draw(void)
  int ii;
  char *type=NULL; /* 20180109 */
  int use_hash;
-
- /* /20171224 */
-
  register int c,i; 
  register Instdef *symptr; /* 20150408 */
  int textlayer;
@@ -1375,6 +1372,8 @@ void draw(void)
   #ifdef HAS_CAIRO
   char *textfont;
   #endif
+
+ if(no_draw) return;
  rebuild_selected_array();
  if(has_x) {
     if(draw_pixmap)

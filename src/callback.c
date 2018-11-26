@@ -490,23 +490,6 @@ int callback(int event, int mx, int my, KeySym key,
     draw();
     break;
    }
-   if(key == '+'  && !(state&ControlMask))              /* brite colors */
-   {
-     color_dim +=0.1;
-     if(color_dim >5.) color_dim=5.;
-     build_colors(skip_dim_background, color_dim);
-     draw();
-     break;
-   }
-     
-   if(key == '-'  && !(state&ControlMask))              /* dim colors */
-   {
-     color_dim -=0.1;
-     if(color_dim <-5.) color_dim=-5.;
-     build_colors(skip_dim_background, color_dim);
-     draw();
-     break;
-   }
      
    if(key == '-'  && state&ControlMask)         /* change line width */
    {
@@ -534,17 +517,17 @@ int callback(int event, int mx, int my, KeySym key,
      for(k=0; k<lastselected; k++) {
        if(selectedgroup[k].type!=ELEMENT) continue;
        j = selectedgroup[k].n ;
-       /* my_strdup(&type,get_tok_value((inst_ptr[j].ptr+instdef)->prop_ptr,"type",0)); */
-       my_strdup(&type,(inst_ptr[j].ptr+instdef)->type); /* 20150409 */
+       /* my_strdup(22, &type,get_tok_value((inst_ptr[j].ptr+instdef)->prop_ptr,"type",0)); */
+       my_strdup(23, &type,(inst_ptr[j].ptr+instdef)->type); /* 20150409 */
        if( type && (strcmp(type,"label") && strcmp(type,"ipin")&&strcmp(type,"opin")&&strcmp(type,"iopin") )==0) break;
        symbol = instdef + inst_ptr[j].ptr;
        npin = symbol->rects[PINLAYER];
        rect=symbol->boxptr[PINLAYER];
        if(debug_var>=1) fprintf(errfp, "\n");
        for(i=0;i<npin;i++) {
-         my_strdup(&labname,get_tok_value(rect[i].prop_ptr,"name",0));
-         my_strdup(&lab, expandlabel(labname, &mult));
-         my_strdup(&netname, pin_node(j,i,&mult, 0));
+         my_strdup(24, &labname,get_tok_value(rect[i].prop_ptr,"name",0));
+         my_strdup(25, &lab, expandlabel(labname, &mult));
+         my_strdup(26, &netname, pin_node(j,i,&mult, 0));
          if(debug_var>=1) fprintf(errfp, "i=%d labname=%s explabname = %s  net = %s\n", i, labname, lab, netname);
          if(netname && strcmp(lab, netname)) { 
            if(debug_var>=1) fprintf(errfp, "hilight: %s\n", netname);
@@ -827,11 +810,6 @@ int callback(int event, int mx, int my, KeySym key,
     }
     break;
    }
-   if(key=='c' && state == Mod1Mask)   /* toggle background dim */
-   {
-     skip_dim_background = !skip_dim_background;
-     break;
-   }
    if(key=='C' && state == ShiftMask)   /* place arc */
    {
      mx_save = mx; my_save = my;
@@ -853,7 +831,7 @@ int callback(int event, int mx, int my, KeySym key,
      dark_colorscheme=!dark_colorscheme;
      tclsetvar("dark_colorscheme", dark_colorscheme ? "1" : "0");
      color_dim=0.0;
-     build_colors(0, 0.0);
+     build_colors(color_dim);
      draw();
      break;
    }
@@ -1001,7 +979,7 @@ int callback(int event, int mx, int my, KeySym key,
    {
     push_undo(); /* 20150327 */
     round_schematic_to_grid(cadsnap);
-    modified=1;
+    set_modify(1);
     prepared_hash_instances=0;
     prepared_hash_wires=0;
     prepared_netlist_structs=0;

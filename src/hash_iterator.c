@@ -33,7 +33,8 @@ static unsigned short *wireflag=NULL;
 
 void init_inst_iterator(double x1, double y1, double x2, double y2)
 {
-      my_realloc(&instflag, lastinst*sizeof(unsigned short));
+      if(debug_var>=3) fprintf(errfp, "init_inst_iterator(): lastinst=%d\n", lastinst);
+      my_realloc(135, &instflag, lastinst*sizeof(unsigned short));
       memset(instflag, 0, lastinst*sizeof(unsigned short));
       /* calculate square 4 1st corner of drawing area */
       x1a=floor(x1/BOXSIZE) ;
@@ -57,6 +58,7 @@ void init_inst_iterator(double x1, double y1, double x2, double y2)
 struct instentry *inst_iterator_next()
 {
   struct instentry *ptr;
+  if(debug_var>=3) fprintf(errfp, "inst_iterator_next(): lastinst=%d\n", lastinst);
   while(1) {
     while(instanceptr) {
       ptr = instanceptr;
@@ -81,6 +83,7 @@ struct instentry *inst_iterator_next()
       /* printf("i inst_iterator_next(): tmpi=%d tmpj=%d\n", tmpi, tmpj); */
       instanceptr=insttable[tmpi][tmpj];
     } else {
+      my_free(&instflag);
       return NULL;
     }
   }
@@ -88,7 +91,8 @@ struct instentry *inst_iterator_next()
 
 void init_wire_iterator(double x1, double y1, double x2, double y2)
 {
-      my_realloc(&wireflag, lastwire*sizeof(unsigned short));
+      if(debug_var>=3) fprintf(errfp, "init_wire_iterator(): lastwire=%d\n", lastwire);
+      my_realloc(136, &wireflag, lastwire*sizeof(unsigned short));
       memset(wireflag, 0, lastwire*sizeof(unsigned short));
       /* calculate square 4 1st corner of drawing area */
       x1a=floor(x1/BOXSIZE) ;
@@ -112,6 +116,7 @@ void init_wire_iterator(double x1, double y1, double x2, double y2)
 struct wireentry *wire_iterator_next()
 {
   struct wireentry *ptr;
+  if(debug_var>=3) fprintf(errfp, "wire_iterator_next(): lastwire=%d\n", lastwire);
   while(1) {
     while(wireptr) {
       ptr = wireptr;
@@ -133,6 +138,7 @@ struct wireentry *wire_iterator_next()
       tmpj=j%NBOXES; if(tmpj<0) tmpj+=NBOXES;
       wireptr=wiretable[tmpi][tmpj];
     } else {
+      my_free(&wireflag);
       return NULL;
     }
   }

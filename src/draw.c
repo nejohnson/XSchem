@@ -476,8 +476,8 @@ void draw_symbol_outline(int what,int c, int n,int layer,int tmp_flip, int rot,
     polygon = (symptr->polygonptr[layer])[j];
     {   /* scope block so we declare some auxiliary arrays for coord transforms. 20171115 */
       int k;
-      double *x = my_malloc(sizeof(double) * polygon.points);
-      double *y = my_malloc(sizeof(double) * polygon.points);
+      double *x = my_malloc(34, sizeof(double) * polygon.points);
+      double *y = my_malloc(35, sizeof(double) * polygon.points);
       for(k=0;k<polygon.points;k++) {
         ROTATION(0.0,0.0,polygon.x[k],polygon.y[k],x[k],y[k]);
         x[k]+= x0;
@@ -607,8 +607,8 @@ void draw_temp_symbol_outline(int what, GC gc, int n,int layer,int tmp_flip, int
 
    {   /* scope block so we declare some auxiliary arrays for coord transforms. 20171115 */
      int k;
-     double *x = my_malloc(sizeof(double) * polygon.points);
-     double *y = my_malloc(sizeof(double) * polygon.points);
+     double *x = my_malloc(36, sizeof(double) * polygon.points);
+     double *y = my_malloc(37, sizeof(double) * polygon.points);
      for(k=0;k<polygon.points;k++) {
        ROTATION(0.0,0.0,polygon.x[k],polygon.y[k],x[k],y[k]);
        x[k] += x0;
@@ -1196,9 +1196,10 @@ void arc_bbox(double x, double y, double r, double a, double b,
 void drawpolygon(int c, int what, double *x, double *y, int points, int poly_fill)
 {
   double x1,y1,x2,y2;
-  XPoint *p = my_malloc(sizeof(XPoint) * points);
+  XPoint *p;
   int i;
   if(!has_x) return;
+
   polygon_bbox(x, y, points, &x1,&y1,&x2,&y2);
   x1=X_TO_SCREEN(x1);
   y1=Y_TO_SCREEN(y1);
@@ -1209,6 +1210,7 @@ void drawpolygon(int c, int what, double *x, double *y, int points, int poly_fil
   }
   if( !only_probes && (x2-x1)<0.3 && (y2-y1)<0.3) return; /* 20171206 */
 
+  p = my_malloc(38, sizeof(XPoint) * points);
   for(i=0;i<points; i++) {
     p[i].x = X_TO_SCREEN(x[i]);
     p[i].y = Y_TO_SCREEN(y[i]);
@@ -1216,11 +1218,12 @@ void drawpolygon(int c, int what, double *x, double *y, int points, int poly_fil
   if(draw_window) XDrawLines(display, window, gc[c], p, points, CoordModeOrigin);
   if(draw_pixmap)
     XDrawLines(display, save_pixmap, gc[c], p, points, CoordModeOrigin);
-  if(!fill || !fill_type[c]) return;
-  if(poly_fill && (x[0] == x[points-1]) && (y[0] == y[points-1])) { /* 20180914 */
-    if(draw_window) XFillPolygon(display, window, gcstipple[c], p, points, Polygontype, CoordModeOrigin);
-    if(draw_pixmap)
-       XFillPolygon(display, save_pixmap, gcstipple[c], p, points, Polygontype, CoordModeOrigin);
+  if(fill && fill_type[c]){
+    if(poly_fill && (x[0] == x[points-1]) && (y[0] == y[points-1])) { /* 20180914 */
+      if(draw_window) XFillPolygon(display, window, gcstipple[c], p, points, Polygontype, CoordModeOrigin);
+      if(draw_pixmap)
+         XFillPolygon(display, save_pixmap, gcstipple[c], p, points, Polygontype, CoordModeOrigin);
+    }
   }
   my_free(&p);
 }
@@ -1228,7 +1231,7 @@ void drawpolygon(int c, int what, double *x, double *y, int points, int poly_fil
 void drawtemppolygon(GC g, int what, double *x, double *y, int points)
 {
   double x1,y1,x2,y2;
-  XPoint *p = my_malloc(sizeof(XPoint) * points);
+  XPoint *p;
   int i;
   if(!has_x) return;
   polygon_bbox(x, y, points, &x1,&y1,&x2,&y2);
@@ -1236,6 +1239,7 @@ void drawtemppolygon(GC g, int what, double *x, double *y, int points)
   y1=Y_TO_SCREEN(y1);
   x2=X_TO_SCREEN(x2);
   y2=Y_TO_SCREEN(y2);
+  p = my_malloc(39, sizeof(XPoint) * points);
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) ) {
     for(i=0;i<points; i++) {
       p[i].x = X_TO_SCREEN(x[i]);
@@ -1393,6 +1397,7 @@ void draw(void)
     }
     if(!only_probes) { /* 20110112 */
         
+        if(debug_var>=3) fprintf(errfp, "draw(): check4\n");
         for(c=0;c<cadlayers;c++)
         {
           if(draw_single_layer!=-1 && c != draw_single_layer) continue; /* 20151117 */

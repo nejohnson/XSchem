@@ -25,6 +25,7 @@
 static struct hilight_hashentry *table[HASHSIZE];
 static int nelements=0; /* 20161221 */
 
+static int *inst_color=NULL;
 
 static unsigned int hash(char *tok)
 {
@@ -96,13 +97,13 @@ struct hilight_hashentry *hilight_lookup(char *token, int value, int remove)
    if( (remove==0) )            /* insert data */
    {
     s=sizeof( struct hilight_hashentry );
-    ptr= my_malloc(s ); 
+    ptr= my_malloc(137, s ); 
     entry=(struct hilight_hashentry *)ptr;
     entry->next = NULL;
     entry->token = NULL;
-    my_strdup(&(entry->token),token);
+    my_strdup(138, &(entry->token),token);
     entry->path = NULL;
-    my_strdup(&(entry->path),sch_prefix[currentsch]);
+    my_strdup(139, &(entry->path),sch_prefix[currentsch]);
     entry->value=value;
     entry->hash=hashcode;
     *preventry=entry;
@@ -148,10 +149,10 @@ struct hilight_hashentry *bus_hilight_lookup(const char *token, int value, int r
 
  if(token==NULL) return NULL;
  if( token[0] == '#') {
-   my_strdup(&string, token);
+   my_strdup(140, &string, token);
  }
  else {
-   my_strdup(&string, expandlabel(token,&mult));
+   my_strdup(141, &string, expandlabel(token,&mult));
  }
 
  if(string==NULL) return NULL;
@@ -186,6 +187,7 @@ void delete_hilight_net(void)
  for(i=0;i<lastinst;i++) {
    inst_ptr[i].flags &= ~4 ;
  }
+ my_free(&inst_color);
  hilight_color=0;
 }
 
@@ -271,10 +273,16 @@ void search_inst(const char *tok, const char *val, int sub, int sel, int what)
  int save_draw;
  int i,c, col,tmp,bus=0;
  const char *str;
+ char *type; 
+ int has_token;
  const char empty_string[] = "";
  static char *tmpname=NULL;
  regex_t re;
 
+ if(!val) {
+   fprintf(errfp, "search_inst(): warning: null val key\n");
+   return;
+ }
  save_draw = draw_window;
  draw_window=1;
  if(regcomp(&re, val , REG_EXTENDED)) return;
@@ -289,21 +297,26 @@ void search_inst(const char *tok, const char *val, int sub, int sel, int what)
     col=hilight_color;
     if(incr_hilight) hilight_color++;
 
+    has_token = 0;
     prepare_netlist_structs(1);
     bus=bus_search(val);
     for(i=0;i<lastinst;i++) {
       if(!strcmp(tok,"cell__name")) {
+        has_token = (inst_ptr[i].name != NULL) && inst_ptr[i].name[0];
         str = inst_ptr[i].name;
       } else if(!strncmp(tok,"cell__", 6)) {
-        my_strdup(&tmpname,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,tok+6,0)); /* flexible cell__ search 20140408 */
+        has_token = (inst_ptr[i].ptr+instdef)->prop_ptr && strstr((inst_ptr[i].ptr+instdef)->prop_ptr, tok + 6) != NULL;
+        my_strdup(142, &tmpname,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,tok+6,0)); /* flexible cell__ search 20140408 */
         if(tmpname) {
           str = tmpname;
         } else {
           str = empty_string;
         }
       } else if(!strcmp(tok,"propstring")) { /* 20170408 */
+        has_token = (inst_ptr[i].prop_ptr != NULL) && inst_ptr[i].prop_ptr[0];
         str = inst_ptr[i].prop_ptr;
       } else {
+        has_token =  inst_ptr[i].prop_ptr && strstr(inst_ptr[i].prop_ptr, tok) != NULL;
         str = get_tok_value(inst_ptr[i].prop_ptr, tok,0);
       }
       if(debug_var>=1) fprintf(errfp, "search_inst(): inst=%d, tok=%s, val=%s \n", i,tok, str);
@@ -312,64 +325,70 @@ void search_inst(const char *tok, const char *val, int sub, int sel, int what)
        if(debug_var>=1) fprintf(errfp, "search_inst(): doing substr search on bus sig:%s inst=%d tok=%s val=%s\n", str,i,tok,val);
        str=expandlabel(str,&tmp);
       }
-      if(!str) str=empty_string; /* 20180906 */
-      if( (!regexec(&re, str,0 , NULL, 0) && !sub) ||           /* 20071120 regex instead of strcmp */
-          (strstr(str,val) && sub) ) 
-      {
-        str = get_tok_value(inst_ptr[i].prop_ptr, "lab",0);
-        if(str && str[0]) {
-           bus_hilight_lookup(str, col,0);
-           if(what==NOW) for(c=0;c<cadlayers;c++)
-             draw_symbol_outline(NOW,col%(cadlayers-7)+7, i,c,0,0,0.0,0.0);
-        }
-        else {
-          if(debug_var>=1) fprintf(errfp, "search_inst(): setting hilight flag on inst %d\n",i);
-          hilight_nets=1;
-          inst_ptr[i].flags |= 4;
-          if(what==NOW) for(c=0;c<cadlayers;c++)
-            draw_symbol_outline(NOW,col%(cadlayers-7)+7, i,c,0,0,0.0,0.0);  /* 20150804 */
-        }
-
-        if(sel==1) {
-          select_element(i, SELECTED, 1);
-          ui_state|=SELECTION;
-        }
-        if(sel==-1) { /* 20171211 unselect */
-          select_element(i, 0, 1);
+      if(str && has_token) {
+        if( (!regexec(&re, str,0 , NULL, 0) && !sub) ||           /* 20071120 regex instead of strcmp */
+            (strstr(str,val) && sub) ) 
+        {
+          type = (inst_ptr[i].ptr+instdef)->type;
+          if( type && 
+              !(strcmp(type,"label") && strcmp(type,"ipin") &&
+                strcmp(type,"iopin") && strcmp(type,"opin")) && (str = get_tok_value(inst_ptr[i].prop_ptr, "lab",0))[0] 
+            ) {
+            if(!bus_hilight_lookup(str, col,0)) hilight_nets = 1;
+            if(what==NOW) for(c=0;c<cadlayers;c++)
+              draw_symbol_outline(NOW,col%(cadlayers-7)+7, i,c,0,0,0.0,0.0);
+          }
+          else {
+            if(debug_var>=1) fprintf(errfp, "search_inst(): setting hilight flag on inst %d\n",i);
+            hilight_nets=1;
+            inst_ptr[i].flags |= 4;
+            if(what==NOW) for(c=0;c<cadlayers;c++)
+              draw_symbol_outline(NOW,col%(cadlayers-7)+7, i,c,0,0,0.0,0.0);  /* 20150804 */
+          }
+  
+          if(sel==1) {
+            select_element(i, SELECTED, 1);
+            ui_state|=SELECTION;
+          }
+          if(sel==-1) { /* 20171211 unselect */
+            select_element(i, 0, 1);
+         }
         }
       }
       
     }
     for(i=0;i<lastwire;i++) {
+      has_token = strstr(wire[i].prop_ptr, tok) != NULL;
       str = get_tok_value(wire[i].prop_ptr, tok,0);
-      /*if(   (!strcmp(str, val) && !sub )  || */
-      if(   (!regexec(&re, str,0 , NULL, 0) && !sub )  ||       /* 20071120 regex instead of strcmp */
-            ( strstr(str, val) &&  sub )
-        ) {
-          str = get_tok_value(wire[i].prop_ptr, "lab",0);
-          if(debug_var>=2) fprintf(errfp, "search_inst(): wire=%d, tok=%s, val=%s \n", i,tok, str);
-          if(str && str[0]) {
-             bus_hilight_lookup(str, col,0);
-             if(what==NOW) {
-               drawline(col%(cadlayers-7)+7, NOW, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
-             }
-          }
-          if(sel) {
-            select_wire(i,SELECTED, 1);
-            ui_state|=SELECTION;
-          }
-      }
-      else {
-        if(debug_var>=2) fprintf(errfp, "search_inst():  not found wire=%d, tok=%s, val=%s search=%s\n", i,tok, str,val);
+      if(has_token ) {
+        if(   (!regexec(&re, str,0 , NULL, 0) && !sub )  ||       /* 20071120 regex instead of strcmp */
+              ( strstr(str, val) &&  sub )
+          ) {
+            str = get_tok_value(wire[i].prop_ptr, "lab",0);
+            if(debug_var>=2) fprintf(errfp, "search_inst(): wire=%d, tok=%s, val=%s \n", i,tok, str);
+            if(str && str[0]) {
+               bus_hilight_lookup(str, col,0);
+               if(what==NOW) {
+                 drawline(col%(cadlayers-7)+7, NOW, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
+               }
+            }
+            if(sel) {
+              select_wire(i,SELECTED, 1);
+              ui_state|=SELECTION;
+            }
+        }
+        else {
+          if(debug_var>=2) fprintf(errfp, "search_inst():  not found wire=%d, tok=%s, val=%s search=%s\n", i,tok, str,val);
+        }
       }
     }
  }
+ else if(what==END) draw_hilight_net(1);
  if(sel) {
    drawtemparc(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0, 0.0);
    drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
    drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
  }
- else if(what==END) draw_hilight_net(1);
 
  regfree(&re);
  draw_window = save_draw;
@@ -403,11 +422,11 @@ void drill_hilight(void)
       npin = symbol->rects[PINLAYER];
       rect=symbol->boxptr[PINLAYER];
       for(j=0; j<npin;j++) {
-        my_strdup(&netname, pin_node(i, j, &mult, 1));
+        my_strdup(143, &netname, pin_node(i, j, &mult, 1));
         propagate_str=get_tok_value(rect[j].prop_ptr, "propagate_to", 0);
         if(propagate_str[0] && (entry=bus_hilight_lookup(netname, 0, 2))) {
           propagate = atoi(propagate_str);
-          my_strdup(&propagated_net, pin_node(i, propagate, &mult, 1)); /* get net to propagate highlight to... */
+          my_strdup(144, &propagated_net, pin_node(i, propagate, &mult, 1)); /* get net to propagate highlight to... */
           propag_entry = bus_hilight_lookup(propagated_net, entry->value, 0); /* add net to highlight list */
           if(!propag_entry) {
             /* fprintf(errfp, "inst %s: j=%d  count=%d propagate=%d --> net %s, propagate to --> %s color %d\n",  */
@@ -534,7 +553,6 @@ void draw_hilight_net(int on_window)
 {
  char *str;
  int save_draw;
- static int *inst_color=NULL;
  char *type=NULL;
  int i,c;
  struct hilight_hashentry *entry;
@@ -571,7 +589,7 @@ void draw_hilight_net(int on_window)
 
   }
 
- my_realloc(&inst_color,lastinst*sizeof(int)); 
+ my_realloc(145, &inst_color,lastinst*sizeof(int)); 
  for(i=0;i<lastinst;i++)
  {
    /* 20150409 */
@@ -641,7 +659,6 @@ void undraw_hilight_net(int on_window) /* 20160413 */
 {
  char *str;
  int save_draw; /* 20181009 */
- static int *inst_color=NULL;
  char *type=NULL;
  int i,c;
  struct hilight_hashentry *entry;
@@ -675,7 +692,7 @@ void undraw_hilight_net(int on_window) /* 20160413 */
    }
 
  }
- my_realloc(&inst_color,lastinst*sizeof(int)); 
+ my_realloc(146, &inst_color,lastinst*sizeof(int)); 
  for(i=0;i<lastinst;i++)
  {
    /* 20150409 */
@@ -759,13 +776,13 @@ void print_hilight_net(int show)
    fprintf(errfp, "print_hilight_net(): can not create tmpfile %s\n", filename_ptr);
    return;
  }
- my_strdup(&filetmp2, filename_ptr);
+ my_strdup(147, &filetmp2, filename_ptr);
  fclose(fd);
  if(!(fd = open_tmpfile("hilight_", &filename_ptr))) {
    fprintf(errfp, "print_hilight_net(): can not create tmpfile %s\n", filename_ptr);
    return;
  }
- my_strdup(&filetmp1, filename_ptr);
+ my_strdup(148, &filetmp1, filename_ptr);
 
  if(show == 3) {
    tclsetvar("filetmp2",filetmp1);
@@ -779,18 +796,18 @@ void print_hilight_net(int show)
    return;
  }
  /* /20111106 */
- my_strdup(&cmd, tclgetvar("XSCHEM_SHAREDIR"));
- my_strcat(&cmd, "/order_labels.awk");
- my_strdup(&cmd2, cmd);
- my_strcat(&cmd2," ");
- my_strcat(&cmd2,filetmp1);
- my_strcat(&cmd2,">");
- my_strcat(&cmd2,filetmp2);
+ my_strdup(149, &cmd, tclgetvar("XSCHEM_SHAREDIR"));
+ my_strcat(150, &cmd, "/order_labels.awk");
+ my_strdup(151, &cmd2, cmd);
+ my_strcat(152, &cmd2," ");
+ my_strcat(153, &cmd2,filetmp1);
+ my_strcat(154, &cmd2,">");
+ my_strcat(155, &cmd2,filetmp2);
 
  /* 20111106 */
- my_strdup(&cmd3, tclgetvar("XSCHEM_SHAREDIR"));
- my_strcat(&cmd3, "/sort_labels.awk ");
- my_strcat(&cmd3, filetmp1);
+ my_strdup(156, &cmd3, tclgetvar("XSCHEM_SHAREDIR"));
+ my_strcat(157, &cmd3, "/sort_labels.awk ");
+ my_strcat(158, &cmd3, filetmp1);
 
  /*fd=fopen(filetmp1, "w"); */
  if(fd==NULL){ 
@@ -833,17 +850,17 @@ void print_hilight_net(int show)
    tcleval(b1);
  }
  if(show==1) {
-   my_strdup(&cmd, "set ::retval [ read_data_nonewline ");
-   my_strcat(&cmd, filetmp2);
-   my_strcat(&cmd, " ]");
+   my_strdup(159, &cmd, "set ::retval [ read_data_nonewline ");
+   my_strcat(160, &cmd, filetmp2);
+   my_strcat(161, &cmd, " ]");
    tcleval(cmd);
    tcleval("viewdata $::retval");
  }
  if(show==3) {
    system(cmd3);
-   my_strdup(&cmd, "set ::retval [ read_data_nonewline ");
-   my_strcat(&cmd, filetmp1);
-   my_strcat(&cmd, " ]");
+   my_strdup(162, &cmd, "set ::retval [ read_data_nonewline ");
+   my_strcat(163, &cmd, filetmp1);
+   my_strcat(164, &cmd, " ]");
    tcleval(cmd);
    tcleval("viewdata $::retval");
  }

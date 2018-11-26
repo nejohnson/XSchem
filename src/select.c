@@ -107,14 +107,13 @@ static void del_rect_line_arc_poly(void)
    {
     j++; 
     bbox(ADD, rect[c][i].x1, rect[c][i].y1, rect[c][i].x2, rect[c][i].y2);
-    modified=1;
+    my_free(&rect[c][i].prop_ptr);
+    set_modify(1);
     continue;
    }
    if(j) 
    {
-    my_strdup(&rect[c][i-j].prop_ptr, NULL);
     rect[c][i-j] = rect[c][i];
-    rect[c][i].prop_ptr=NULL;
    }
   }
   lastrect[c] -= j; 
@@ -125,14 +124,13 @@ static void del_rect_line_arc_poly(void)
    {
     j++;
     bbox(ADD, line[c][i].x1, line[c][i].y1, line[c][i].x2, line[c][i].y2);
-    modified=1;
+    set_modify(1);
+    my_free(&line[c][i].prop_ptr);
     continue;
    }
    if(j) 
    {
-    my_strdup(&line[c][i-j].prop_ptr, NULL);
     line[c][i-j] = line[c][i];
-    line[c][i].prop_ptr=NULL;
    }
   }
   lastline[c] -= j;
@@ -146,14 +144,13 @@ static void del_rect_line_arc_poly(void)
     arc_bbox(arc[c][i].x, arc[c][i].y, arc[c][i].r, arc[c][i].a, arc[c][i].b,
              &tmp.x1, &tmp.y1, &tmp.x2, &tmp.y2);
     bbox(ADD, tmp.x1, tmp.y1, tmp.x2, tmp.y2);
-    modified=1;
+    my_free(&arc[c][i].prop_ptr);
+    set_modify(1);
     continue;
    }
    if(j)
    {
-    my_strdup(&arc[c][i-j].prop_ptr, NULL);
     arc[c][i-j] = arc[c][i];
-    arc[c][i].prop_ptr=NULL;
    }
   }
   lastarc[c] -= j;
@@ -173,23 +170,19 @@ static void del_rect_line_arc_poly(void)
       if(k==0 || polygon[c][i].x[k] > x2) x2 = polygon[c][i].x[k];
       if(k==0 || polygon[c][i].y[k] > y2) y2 = polygon[c][i].y[k];
     }
-    /*fprintf(errfp, "bbox: %.16g %.16g %.16g %.16g\n", x1, y1, x2, y2); */
     j++;
     bbox(ADD, x1, y1, x2, y2);
-    modified=1;
+    my_free(&polygon[c][i].prop_ptr);
+    my_free(&polygon[c][i].x);
+    my_free(&polygon[c][i].y);
+    my_free(&polygon[c][i].selected_point);
+    /*fprintf(errfp, "bbox: %.16g %.16g %.16g %.16g\n", x1, y1, x2, y2); */
+    set_modify(1);
     continue;
    }
    if(j)
    {
-    my_strdup(&polygon[c][i-j].prop_ptr, NULL);
-    my_free(&polygon[c][i-j].x);
-    my_free(&polygon[c][i-j].y);
-    my_free(&polygon[c][i-j].selected_point);
     polygon[c][i-j] = polygon[c][i];
-    polygon[c][i].prop_ptr=NULL;
-    polygon[c][i].x=NULL;
-    polygon[c][i].y=NULL;
-    polygon[c][i].selected_point=NULL;
    }
   }
   lastpolygon[c] -= j;
@@ -204,6 +197,7 @@ void delete(void)
  int customfont;
  #endif
 
+ if(debug_var>=3) fprintf(errfp, "delete(): start\n");
  j = 0;
  bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0);
  rebuild_selected_array();
@@ -225,10 +219,10 @@ void delete(void)
    if(customfont) cairo_restore(ctx);
    #endif
    bbox(ADD, xx1, yy1, xx2, yy2 );
-   my_strdup(&textelement[i].prop_ptr, NULL);
-   my_strdup(&textelement[i].font, NULL);
-   my_strdup(&textelement[i].txt_ptr, NULL);
-   modified=1;
+   my_free(&textelement[i].prop_ptr);
+   my_free(&textelement[i].font);
+   my_free(&textelement[i].txt_ptr);
+   set_modify(1);
    j++;
    continue;
   }
@@ -236,9 +230,6 @@ void delete(void)
   {
    if(debug_var>=1) fprintf(errfp, "select(); deleting string %d\n",i-j);
    textelement[i-j] = textelement[i];
-   textelement[i].txt_ptr=NULL;
-   textelement[i].prop_ptr=NULL;
-   textelement[i].font=NULL;
    if(debug_var>=1) fprintf(errfp, "select(); new string %d = %s\n",i-j,textelement[i-j].txt_ptr);
   }
  }
@@ -248,7 +239,7 @@ void delete(void)
  {
   if(inst_ptr[i].sel == SELECTED)
   {
-   modified=1;
+   set_modify(1);
    prepared_hash_instances=0;
    prepared_netlist_structs=0;
    prepared_hilight_structs=0;
@@ -258,22 +249,17 @@ void delete(void)
    if(inst_ptr[i].prop_ptr != NULL) 
    {
     hash_proplist(inst_ptr[i].prop_ptr , 1); /* remove props from hash table */
-    my_strdup(&inst_ptr[i].prop_ptr, NULL);
+    my_free(&inst_ptr[i].prop_ptr);
    }
    delete_inst_node(i);
-   my_strdup(&inst_ptr[i].name, NULL);
-   my_strdup(&inst_ptr[i].instname, NULL); /* 20150409 */
+   my_free(&inst_ptr[i].name);
+   my_free(&inst_ptr[i].instname); /* 20150409 */
    j++;
    continue;
   }
   if(j) 
   {
    inst_ptr[i-j] = inst_ptr[i];
-   inst_ptr[i].prop_ptr=NULL;
-   inst_ptr[i].node=NULL;
-   inst_ptr[i].name=NULL;        
-   inst_ptr[i].instname=NULL;  /* 20150409 */
-   inst_ptr[i].flags=0;        
   }
  }
  lastinst-=j;
@@ -297,8 +283,10 @@ void delete(void)
       else                        { y1 = wire[i].y1+ov; y2 = wire[i].y2-ov; }
       bbox(ADD, wire[i].x1-ov, y1 , wire[i].x2+ov , y2 );
     }
+    my_free(&wire[i].prop_ptr);
+    my_free(&wire[i].node);
 
-    modified=1;
+    set_modify(1);
     prepared_hash_wires=0;
     prepared_netlist_structs=0;
     prepared_hilight_structs=0;
@@ -307,11 +295,7 @@ void delete(void)
    }
    if(j) 
    {
-    my_strdup(&wire[i-j].prop_ptr, NULL);
-    my_strdup(&wire[i-j].node, NULL);
     wire[i-j] = wire[i];
-    wire[i].prop_ptr=NULL;
-    wire[i].node=NULL;
    }
   }
   lastwire -= j; 

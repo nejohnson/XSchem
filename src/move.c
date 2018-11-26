@@ -109,17 +109,15 @@ void check_collapsing_objects()
   {
    if(wire[i].x1==wire[i].x2 && wire[i].y1 == wire[i].y2)
    {
+    my_free(&wire[i].prop_ptr);
+    my_free(&wire[i].node);
     found=1;
     j++; 
     continue;
    }
    if(j) 
    {
-    my_strdup(&wire[i-j].prop_ptr, NULL);
-    my_strdup(&wire[i-j].node, NULL);
     wire[i-j] = wire[i];
-    wire[i].prop_ptr=NULL;
-    wire[i].node=NULL;
    }
   }
   lastwire -= j; 
@@ -132,15 +130,14 @@ void check_collapsing_objects()
     {
      if(line[c][i].x1==line[c][i].x2 && line[c][i].y1 == line[c][i].y2)
      {
+      my_free(&line[c][i].prop_ptr);
       found=1;
       j++;
       continue;
      }
      if(j) 
      {
-      my_strdup(&line[c][i-j].prop_ptr, NULL);
       line[c][i-j] = line[c][i];
-      line[c][i].prop_ptr=NULL;
      }
     }
     lastline[c] -= j;
@@ -152,15 +149,14 @@ void check_collapsing_objects()
     {
      if(rect[c][i].x1==rect[c][i].x2 || rect[c][i].y1 == rect[c][i].y2)
      {
+      my_free(&rect[c][i].prop_ptr);
       found=1;
       j++;
       continue;
      }
      if(j) 
      {
-      my_strdup(&rect[c][i-j].prop_ptr, NULL);
       rect[c][i-j] = rect[c][i];
-      rect[c][i].prop_ptr=NULL;
      }
     }
     lastrect[c] -= j;
@@ -278,8 +274,8 @@ void draw_selection(GC g, int interruptable)
      break;
     case POLYGON: /* 20171115 */
      {
-      double *x = my_malloc(sizeof(double) *polygon[c][n].points);
-      double *y = my_malloc(sizeof(double) *polygon[c][n].points);
+      double *x = my_malloc(223, sizeof(double) *polygon[c][n].points);
+      double *y = my_malloc(224, sizeof(double) *polygon[c][n].points);
       if(polygon[c][n].sel==SELECTED || polygon[c][n].sel==SELECTED1) {
         for(k=0;k<polygon[c][n].points; k++) {
           if( polygon[c][n].sel==SELECTED || polygon[c][n].selected_point[k]) {
@@ -447,8 +443,8 @@ void copy_objects(int what)
   draw_selection(gctiled,0);
   rot=flip=deltax=deltay=0;
   ui_state&=~STARTCOPY;
-  my_strdup(&str, home_dir);
-  my_strcat(&str, "/.xschem_selection.sch");
+  my_strdup(225, &str, home_dir);
+  my_strcat(226, &str, "/.xschem_selection.sch");
   unlink(str);
 
  }
@@ -479,7 +475,7 @@ void copy_objects(int what)
   draw_selection(gctiled,0);
   bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0); /* 20181009 */
   newpropcnt=0;
-  modified=1; push_undo(); /* 20150327 push_undo */
+  set_modify(1); push_undo(); /* 20150327 push_undo */
   prepared_hash_instances=0; /* 20171224 */
   prepared_hash_wires=0; /* 20171224 */
   prepared_netlist_structs=0;
@@ -585,8 +581,8 @@ void copy_objects(int what)
       if(c!=k) break;
       {
         double bx1, by1, bx2, by2;
-        double *x = my_malloc(sizeof(double) *polygon[c][n].points);
-        double *y = my_malloc(sizeof(double) *polygon[c][n].points);
+        double *x = my_malloc(227, sizeof(double) *polygon[c][n].points);
+        double *y = my_malloc(228, sizeof(double) *polygon[c][n].points);
         int j;
         for(j=0; j<polygon[c][n].points; j++) {
           if(j==0 || polygon[c][n].x[j] < bx1) bx1 = polygon[c][n].x[j];
@@ -686,7 +682,7 @@ void copy_objects(int what)
         ROTATION(x1, y_1, textelement[n].x0, textelement[n].y0, rx1,ry1);
       }
       textelement[lasttext].txt_ptr=NULL;
-      my_strdup(&textelement[lasttext].txt_ptr,textelement[n].txt_ptr);
+      my_strdup(229, &textelement[lasttext].txt_ptr,textelement[n].txt_ptr);
       textelement[n].sel=0;
        if(debug_var>=2) fprintf(errfp, "copy_objects(): current str=%s\n",
         textelement[lasttext].txt_ptr);
@@ -698,8 +694,8 @@ void copy_objects(int what)
       textelement[lasttext].sel=SELECTED;
       textelement[lasttext].prop_ptr=NULL;
       textelement[lasttext].font=NULL;
-      my_strdup(&textelement[lasttext].prop_ptr, textelement[n].prop_ptr);
-      my_strdup(&textelement[lasttext].font, get_tok_value(textelement[lasttext].prop_ptr, "font", 0));/*20171206 */
+      my_strdup(230, &textelement[lasttext].prop_ptr, textelement[n].prop_ptr);
+      my_strdup(231, &textelement[lasttext].font, get_tok_value(textelement[lasttext].prop_ptr, "font", 0));/*20171206 */
       strlayer = get_tok_value(textelement[lasttext].prop_ptr, "layer", 0); /*20171206 */
       if(strlayer[0]) textelement[lasttext].layer = atoi(strlayer);
       else textelement[lasttext].layer = -1;
@@ -752,9 +748,9 @@ void copy_objects(int what)
        inst_ptr[lastinst].instname=NULL; /* 20150409 */
        inst_ptr[lastinst].node=NULL;
        inst_ptr[lastinst].name=NULL;
-       my_strdup(&inst_ptr[lastinst].name, inst_ptr[n].name);
-       my_strdup(&inst_ptr[lastinst].prop_ptr, inst_ptr[n].prop_ptr);
-       my_strdup2(&inst_ptr[lastinst].instname, get_tok_value(inst_ptr[n].prop_ptr, "name",0)); /* 20150409 */
+       my_strdup(232, &inst_ptr[lastinst].name, inst_ptr[n].name);
+       my_strdup(233, &inst_ptr[lastinst].prop_ptr, inst_ptr[n].prop_ptr);
+       my_strdup2(234, &inst_ptr[lastinst].instname, get_tok_value(inst_ptr[n].prop_ptr, "name",0)); /* 20150409 */
        inst_ptr[n].sel=0;
        inst_ptr[lastinst].x0 = rx1+deltax;
        inst_ptr[lastinst].y0 = ry1+deltay;
@@ -765,7 +761,7 @@ void copy_objects(int what)
        new_prop_string(&inst_ptr[lastinst].prop_ptr, inst_ptr[n].prop_ptr,newpropcnt++);
        /* the final newpropcnt argument is zero for the 1st call and used in  */
        /* new_prop_string() for cleaning some internal caches. */
-       my_strdup2(&inst_ptr[lastinst].instname, get_tok_value(inst_ptr[lastinst].prop_ptr, "name", 0)); /* 20150409 */
+       my_strdup2(235, &inst_ptr[lastinst].instname, get_tok_value(inst_ptr[lastinst].prop_ptr, "name", 0)); /* 20150409 */
        hash_proplist(inst_ptr[lastinst].prop_ptr , 0);
        n=selectedgroup[i].n=lastinst;
        symbol_bbox(lastinst, &inst_ptr[lastinst].x1, &inst_ptr[lastinst].y1,
@@ -861,7 +857,7 @@ void move_objects(int what, int merge, double dx, double dy)
   draw_window=1; /* temporarily re-enable draw to window together with pixmap */
   draw_selection(gctiled,0);
   bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0);
-  modified=1; 
+  set_modify(1); 
   prepared_hash_instances=0; /* 20171224 */
   prepared_hash_wires=0; /* 20171224 */
   prepared_netlist_structs=0;

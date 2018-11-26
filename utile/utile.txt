@@ -306,6 +306,17 @@ set <bus>  <value> [r=value>] [vhi[gh]=<value>] [vlo[w]=<value>] [slo[pe]=<value
 		   written if a signal has to be set at 1 volt and not at logic one.
 		   for the ncsim format real signals must be assigned using decimal dot,
 		   for example: set vxr 4.6. 
+    %Ascii_str% -> the ascii string enclosed between % characters is converted to hexadecimal
+                   %READ% --> 52454144
+                   this is very useful to print commands in waveform viewer, declare a bus
+                   with the right number of bits, example:
+                   buswidth CMD 32 < > 
+                   ...
+                   beginfile stimuli.cir
+                   ...
+                   set CMD %READ%
+                   ...
+                   endfile
 
   - bus assignment
     examples:  

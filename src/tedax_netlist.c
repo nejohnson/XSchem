@@ -139,7 +139,7 @@ void tedax_block_netlist(FILE *fd, int i)  /*20081223 */
        else 
          fprintf(fd,"<NULL> ");
      }
-     my_strdup(&extra, get_tok_value(instdef[i].prop_ptr,"extra",0) ); /* 20081206 */
+     my_strdup(420, &extra, get_tok_value(instdef[i].prop_ptr,"extra",0) ); /* 20081206 */
      fprintf(fd, "%s ", extra ? extra : "" );
      
      /* 20081206 new get_sym_template does not return token=value pairs where token listed in extra */
@@ -174,7 +174,7 @@ void tedax_netlist(FILE *fd, int tedax_stop )
  static char *place=NULL;  /* 20121223 */
 
  prepare_netlist_structs(0);
- modified=1; /* 20160302 prepare_netlist_structs could change schematic (wire node naming for example) */
+ set_modify(1); /* 20160302 prepare_netlist_structs could change schematic (wire node naming for example) */
  traverse_node_hash();  /* print all warnings about unconnected floatings etc */
 
 
@@ -186,8 +186,8 @@ void tedax_netlist(FILE *fd, int tedax_stop )
     if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "tedax_ignore",0 ), "true") ) {
       continue;
     }
-    my_strdup(&type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
-    my_strdup(&place,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"place",0));  /* 20121223 */
+    my_strdup(421, &type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
+    my_strdup(422, &place,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"place",0));  /* 20121223 */
     if( type && (/*strcmp(type,"label") && */ strcmp(type,"ipin")&&strcmp(type,"opin")&&strcmp(type,"iopin") )==0)
     {
       print_tedax_element(fd, i) ;  /* this is the element line  */
@@ -202,8 +202,8 @@ void tedax_netlist(FILE *fd, int tedax_stop )
       continue;                                                                                   /*20070726 */
     }                                                                                             /*20070726 */
   
-    my_strdup(&type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
-    my_strdup(&place,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"place",0));  /* 20121223 */
+    my_strdup(423, &type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
+    my_strdup(424, &place,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"place",0));  /* 20121223 */
     if( type && (strcmp(type,"label")&&strcmp(type,"ipin")&& strcmp(type,"opin")&&strcmp(type,"iopin")))
     {
       if(!strcmp(type,"netlist_commands") && netlist_count==0) continue; /* already done in global_tedax_netlist */

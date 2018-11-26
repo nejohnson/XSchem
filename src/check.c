@@ -87,6 +87,7 @@ void update_conn_cues(int draw_cues, int dr_win)
   double x1, y1, x2, y2;
   struct wireentry *wireptr;
 
+  if(!lastwire) return;
   if(!draw_dots) return;
   if(CADHALFDOTSIZE*mooz<0.7) return;
 
@@ -132,6 +133,7 @@ void update_conn_cues(int draw_cues, int dr_win)
       }
     }
   }
+  if(debug_var>=3) fprintf(errfp, "update_conn_cues(): check3\n");
   if(draw_cues) {
     save_draw = draw_window; draw_window = dr_win;
     filledarc(WIRELAYER, BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
@@ -224,13 +226,13 @@ void trim_wires(void)
            wire[lastwire].y2=yt;
            wire[lastwire].sel=0;
            wire[lastwire].prop_ptr=NULL;
-           my_strdup(&wire[lastwire].prop_ptr, wire[i].prop_ptr);
+           my_strdup(27, &wire[lastwire].prop_ptr, wire[i].prop_ptr);
            if(get_tok_value(wire[lastwire].prop_ptr,"bus",0)[0]) /* 20171201 */
              wire[lastwire].bus=1;
            else
              wire[lastwire].bus=0;
            wire[lastwire].node=NULL;
-           my_strdup(&wire[lastwire].node, wire[i].node);
+           my_strdup(28, &wire[lastwire].node, wire[i].node);
            lastwire++;
   
            wire[i].x1 = xt;
@@ -252,13 +254,13 @@ void trim_wires(void)
            wire[lastwire].y2=yt;
            wire[lastwire].sel=0;
            wire[lastwire].prop_ptr=NULL;
-           my_strdup(&wire[lastwire].prop_ptr, wire[j].prop_ptr);
+           my_strdup(29, &wire[lastwire].prop_ptr, wire[j].prop_ptr);
            if(get_tok_value(wire[lastwire].prop_ptr,"bus",0)[0]) /* 20171201 */
              wire[lastwire].bus=1;
            else
              wire[lastwire].bus=0;
            wire[lastwire].node=NULL;
-           my_strdup(&wire[lastwire].node, wire[j].node);
+           my_strdup(30, &wire[lastwire].node, wire[j].node);
            lastwire++;
   
            wire[j].x1 = xt;
@@ -280,7 +282,7 @@ void trim_wires(void)
     } /* end for j */
    } /* end for i  */
    if(changed) {
-     modified=1;
+     set_modify(1);
      prepared_netlist_structs=0;
      prepared_hilight_structs=0;
      prepared_hash_wires=0;
@@ -335,14 +337,14 @@ void break_wires_at_pins(void)
               wire[lastwire].y2=y0;
               wire[lastwire].sel=SELECTED;
               wire[lastwire].prop_ptr=NULL;
-              my_strdup(&wire[lastwire].prop_ptr, wire[i].prop_ptr);
+              my_strdup(31, &wire[lastwire].prop_ptr, wire[i].prop_ptr);
               if(get_tok_value(wire[lastwire].prop_ptr,"bus",0)[0]) /* 20171201 */
                 wire[lastwire].bus=1;
               else
                 wire[lastwire].bus=0;
               wire[lastwire].node=NULL;
               hash_wire(1, lastwire);
-              my_strdup(&wire[lastwire].node, wire[i].node);
+              my_strdup(32, &wire[lastwire].node, wire[i].node);
               lastwire++;
       
               wire[i].x1 = x0;
@@ -393,7 +395,7 @@ void break_wires_at_pins(void)
             wire[lastwire].y2=y0;
             wire[lastwire].sel=SELECTED;
             wire[lastwire].prop_ptr=NULL;
-            my_strdup(&wire[lastwire].prop_ptr, wire[i].prop_ptr);
+            my_strdup(33, &wire[lastwire].prop_ptr, wire[i].prop_ptr);
             if(get_tok_value(wire[lastwire].prop_ptr,"bus",0)[0]) /* 20171201 */
               wire[lastwire].bus=1;
             else
@@ -408,7 +410,7 @@ void break_wires_at_pins(void)
       }
     }
   }
-  modified=1;
+  set_modify(1);
   prepared_netlist_structs=0;
   prepared_hilight_structs=0;
   prepared_hash_wires=0;

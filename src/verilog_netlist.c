@@ -74,11 +74,11 @@ void global_verilog_netlist(int global)  /* netlister driver */
   if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "verilog_ignore",0 ), "true") ) {
     continue;
   }
-  my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
+  my_strdup(544, &type,(inst_ptr[i].ptr+instdef)->type);
   if( type && (strcmp(type,"timescale"))==0)
   {
    str_tmp = get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr ,"format",0);
-   my_strdup(&tmp_string, str_tmp);
+   my_strdup(545, &tmp_string, str_tmp);
    fprintf(fd, "%s\n", str_tmp ? translate(i, tmp_string) : "(NULL)");
   }
  }
@@ -103,7 +103,7 @@ void global_verilog_netlist(int global)  /* netlister driver */
   if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "verilog_ignore",0 ), "true") ) {
     continue;
   }
-  my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
+  my_strdup(546, &type,(inst_ptr[i].ptr+instdef)->type);
   if( type && (strcmp(type,"opin"))==0)
   {
    if(tmp) fprintf(fd, " ,\n"); 
@@ -121,7 +121,7 @@ void global_verilog_netlist(int global)  /* netlister driver */
   if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "verilog_ignore",0 ), "true") ) {
     continue;
   }
-  my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
+  my_strdup(547, &type,(inst_ptr[i].ptr+instdef)->type);
   if( type && (strcmp(type,"iopin"))==0)
   {
    if(tmp) fprintf(fd, " ,\n");
@@ -139,7 +139,7 @@ void global_verilog_netlist(int global)  /* netlister driver */
   if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "verilog_ignore",0 ), "true") ) {
     continue;
   }
-  my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
+  my_strdup(548, &type,(inst_ptr[i].ptr+instdef)->type);
   if( type && (strcmp(type,"ipin"))==0)
   {
    if(tmp) fprintf(fd, " ,\n");
@@ -168,12 +168,12 @@ void global_verilog_netlist(int global)  /* netlister driver */
   if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "verilog_ignore",0 ), "true") ) {
     continue;
   }
-  my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
+  my_strdup(549, &type,(inst_ptr[i].ptr+instdef)->type);
   if( type && (strcmp(type,"opin"))==0)
   {
-   my_strdup(&port_value,get_tok_value(inst_ptr[i].prop_ptr,"value",0));
-   my_strdup(&sig_type,get_tok_value(inst_ptr[i].prop_ptr,"verilog_type",0));
-   if(!sig_type || sig_type[0]=='\0') my_strdup(&sig_type,"wire"); /* 20070720 changed reg to wire */
+   my_strdup(550, &port_value,get_tok_value(inst_ptr[i].prop_ptr,"value",0));
+   my_strdup(551, &sig_type,get_tok_value(inst_ptr[i].prop_ptr,"verilog_type",0));
+   if(!sig_type || sig_type[0]=='\0') my_strdup(552, &sig_type,"wire"); /* 20070720 changed reg to wire */
    str_tmp = get_tok_value(inst_ptr[i].prop_ptr,"lab",0);
    fprintf(fd, "  output %s ;\n", str_tmp ? str_tmp : "(NULL)");
    fprintf(fd, "  %s %s ", sig_type, str_tmp ? str_tmp : "(NULL)");
@@ -191,12 +191,12 @@ void global_verilog_netlist(int global)  /* netlister driver */
   if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "verilog_ignore",0 ), "true") ) {
     continue;
   }
-  my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
+  my_strdup(553, &type,(inst_ptr[i].ptr+instdef)->type);
   if( type && (strcmp(type,"iopin"))==0)
   {
-   my_strdup(&port_value,get_tok_value(inst_ptr[i].prop_ptr,"value",0));
-   my_strdup(&sig_type,get_tok_value(inst_ptr[i].prop_ptr,"verilog_type",0));
-   if(!sig_type || sig_type[0]=='\0') my_strdup(&sig_type,"wire");
+   my_strdup(554, &port_value,get_tok_value(inst_ptr[i].prop_ptr,"value",0));
+   my_strdup(555, &sig_type,get_tok_value(inst_ptr[i].prop_ptr,"verilog_type",0));
+   if(!sig_type || sig_type[0]=='\0') my_strdup(556, &sig_type,"wire");
    str_tmp = get_tok_value(inst_ptr[i].prop_ptr,"lab",0);
    fprintf(fd, "  inout %s ;\n", str_tmp ? str_tmp : "(NULL)");
    fprintf(fd, "  %s %s ", sig_type, str_tmp ? str_tmp : "(NULL)");
@@ -214,12 +214,12 @@ void global_verilog_netlist(int global)  /* netlister driver */
   if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "verilog_ignore",0 ), "true") ) {
     continue;
   }
-  my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
+  my_strdup(557, &type,(inst_ptr[i].ptr+instdef)->type);
   if( type && (strcmp(type,"ipin"))==0)
   {
-   my_strdup(&port_value,get_tok_value(inst_ptr[i].prop_ptr,"value",0));
-   my_strdup(&sig_type,get_tok_value(inst_ptr[i].prop_ptr,"verilog_type",0));
-   if(!sig_type || sig_type[0]=='\0') my_strdup(&sig_type,"wire");
+   my_strdup(558, &port_value,get_tok_value(inst_ptr[i].prop_ptr,"value",0));
+   my_strdup(559, &sig_type,get_tok_value(inst_ptr[i].prop_ptr,"verilog_type",0));
+   if(!sig_type || sig_type[0]=='\0') my_strdup(560, &sig_type,"wire");
    str_tmp = get_tok_value(inst_ptr[i].prop_ptr,"lab",0);
    fprintf(fd, "  input %s ;\n", str_tmp ? str_tmp : "<NULL>");
    fprintf(fd, "  %s %s ", sig_type, str_tmp ? str_tmp : "<NULL>");
@@ -241,7 +241,7 @@ void global_verilog_netlist(int global)  /* netlister driver */
    if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "verilog_ignore",0 ), "true") ) {
      continue;
    }
-   my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
+   my_strdup(561, &type,(inst_ptr[i].ptr+instdef)->type);
    if(type && !strcmp(type,"netlist_commands")) {
      fprintf(fd, "%s\n", get_tok_value(inst_ptr[i].prop_ptr,"value",2)); /* 20180124 */
    }
@@ -349,9 +349,9 @@ void verilog_block_netlist(FILE *fd, int i)  /*20081205 */
      tmp=0;
      for(j=0;j<instdef[i].rects[PINLAYER];j++)
      {
-       my_strdup(&port_value, get_tok_value(
+       my_strdup(562, &port_value, get_tok_value(
                  instdef[i].boxptr[PINLAYER][j].prop_ptr,"value",2) );
-       my_strdup(&dir_tmp, get_tok_value(instdef[i].boxptr[PINLAYER][j].prop_ptr,"dir",0) );
+       my_strdup(563, &dir_tmp, get_tok_value(instdef[i].boxptr[PINLAYER][j].prop_ptr,"dir",0) );
        str_tmp = get_tok_value(instdef[i].boxptr[PINLAYER][j].prop_ptr,"name",0);
        if(tmp) fprintf(fd, " ,\n"); 
        tmp++;
@@ -371,15 +371,15 @@ void verilog_block_netlist(FILE *fd, int i)  /*20081205 */
      tmp=0;
      for(j=0;j<instdef[i].rects[PINLAYER];j++)
      {
-       my_strdup(&sig_type,get_tok_value(
+       my_strdup(564, &sig_type,get_tok_value(
                  instdef[i].boxptr[PINLAYER][j].prop_ptr,"verilog_type",0));
-       my_strdup(&port_value, get_tok_value(
+       my_strdup(565, &port_value, get_tok_value(
                  instdef[i].boxptr[PINLAYER][j].prop_ptr,"value",2) );
-       my_strdup(&dir_tmp, get_tok_value(instdef[i].boxptr[PINLAYER][j].prop_ptr,"dir",0) );
+       my_strdup(566, &dir_tmp, get_tok_value(instdef[i].boxptr[PINLAYER][j].prop_ptr,"dir",0) );
        if(strcmp(dir_tmp,"in")){
-          if(!sig_type || sig_type[0]=='\0') my_strdup(&sig_type,"wire"); /* 20070720 changed reg to wire */
+          if(!sig_type || sig_type[0]=='\0') my_strdup(567, &sig_type,"wire"); /* 20070720 changed reg to wire */
        } else {
-          if(!sig_type || sig_type[0]=='\0') my_strdup(&sig_type,"wire");
+          if(!sig_type || sig_type[0]=='\0') my_strdup(568, &sig_type,"wire");
        }
        str_tmp = get_tok_value(instdef[i].boxptr[PINLAYER][j].prop_ptr,"name",0);
        fprintf(fd,"  %s %s ;\n", 
@@ -408,7 +408,7 @@ void verilog_block_netlist(FILE *fd, int i)  /*20081205 */
        if(netlist_count &&
          !strcmp(get_tok_value(inst_ptr[l].prop_ptr, "only_toplevel", 0), "true")) continue; /* 20160418 */
 
-       my_strdup(&type,(inst_ptr[l].ptr+instdef)->type);
+       my_strdup(569, &type,(inst_ptr[l].ptr+instdef)->type);
        if(type && !strcmp(type,"netlist_commands")) {
          fprintf(fd, "%s\n", get_tok_value(inst_ptr[l].prop_ptr,"value",2)); /* 20180124 */
        }
@@ -433,7 +433,7 @@ void verilog_netlist(FILE *fd , int verilog_stop)
  static char *type=NULL;
 
  prepare_netlist_structs(0);
- modified=1; /* 20160302 prepare_netlist_structs could change schematic (wire node naming for example) */
+ set_modify(1); /* 20160302 prepare_netlist_structs could change schematic (wire node naming for example) */
  if(debug_var>=2) fprintf(errfp, "verilog_netlist(): end prepare_netlist_structs\n");
  traverse_node_hash();  /* print all warnings about unconnected floatings etc */
 
@@ -455,7 +455,7 @@ void verilog_netlist(FILE *fd , int verilog_stop)
     }                                                                                             /*20070726 */
 
     if(debug_var>=2) fprintf(errfp, "verilog_netlist():       into the netlisting loop\n");
-    my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
+    my_strdup(570, &type,(inst_ptr[i].ptr+instdef)->type);
     if( type && 
        ( strcmp(type,"label")&&
          strcmp(type,"ipin")&&

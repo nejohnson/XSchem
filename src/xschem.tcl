@@ -90,14 +90,13 @@ proc netlist {source_file show netlist_file} {
  global XSCHEM_SHAREDIR flat_netlist hspice_netlist netlist_dir
  global verilog_2001
 
-
  if [regexp {\.spice} $netlist_file ] {
    if { $hspice_netlist == 1 } {
      set hspice {-hspice}
    } else {
      set hspice {}
    }
-   if $flat_netlist==0 then {
+   if {$flat_netlist==0} then {
      eval exec "${XSCHEM_SHAREDIR}/spice.awk -- $hspice $netlist_dir/$source_file \
              | ${XSCHEM_SHAREDIR}/break.awk > $netlist_dir/$netlist_file"
    } else {
@@ -750,6 +749,17 @@ proc tclcmd {} {
   pack .tclcmd.b.close -side left -expand yes -fill x
 }
 
+proc color_dim {} {
+  toplevel .dim -class dialog
+  wm title .dim {Dim colors}
+  scale .dim.scale -digits 2 -label {Dim factor} -length 256 \
+     -showvalue 1 -command {xschem color_dim} -orient horizontal \
+     -from -5 -to 5 -resolution 0.1
+  button .dim.ok -text OK -command {destroy .dim}
+  .dim.scale set [xschem get dim]
+  pack .dim.scale
+  pack .dim.ok
+}
 proc about {} {
 
   if [winfo exists .about] { 
@@ -814,7 +824,7 @@ proc property_search {} {
         set search_value [.lw.val.e get]
         set custom_token [.lw.custom.e get]
         if $tcl_debug<=-1 then { puts stderr "|$custom_token|" }
-	set token $custom_token
+        set token $custom_token
         if { $search_substring==1 } { xschem search sub $search_select $token $search_value
         } else { xschem search nosub $search_select $token $search_value }
         destroy .lw 
@@ -884,7 +894,7 @@ proc attach_labels_to_inst {} {
   frame .label.but
   button .label.but.ok -text OK -command {
         set custom_label_prefix [.label.custom.e get]
-	set token $custom_token
+        set token $custom_token
         #### put command here
         set rcode yes
         destroy .label 
@@ -1036,9 +1046,6 @@ proc change_color {} {
   global colors dark_colors light_colors dark_colorscheme cadlayers ctrl_down
 
 
-  .menubar.layers configure -background [lindex $colors [xschem get rectcolor]]
-  if { $ctrl_down ==0 } { return } 
-  set ctrl_down 0
   set n [xschem get rectcolor]
   if { $n < 0 || $n >=$cadlayers} return
   if { $dark_colorscheme == 1 } {
@@ -1879,11 +1886,6 @@ proc reconfigure_layers_menu {} {
 ###   MAIN PROGRAM
 ###
 
-# for hyperlink in about dialog
-eval  font create Underline-Font [ font actual TkDefaultFont ]
-font configure Underline-Font -underline true -size 24
-
-set ctrl_down 0
 # tcl variable XSCHEM_LIBRARY_PATH  should already be set in xschemrc
 set pathlist {}
 if { [info exists XSCHEM_LIBRARY_PATH] } {
@@ -2157,6 +2159,11 @@ xschem set persistent_command $persistent_command
 if { [string length   [lindex [array get env DISPLAY] 1] ] > 0 
      && ![info exist no_x]} {
 
+# for hyperlink in about dialog
+eval  font create Underline-Font [ font actual TkDefaultFont ]
+font configure Underline-Font -underline true -size 24
+
+
    . configure -cursor left_ptr
 #   option add *Button*font "-*-helvetica-medium-r-normal-*-12-*-*-*-p-*-iso8859-1" startupFile
 #   option add *Menubutton*font "-*-helvetica-medium-r-normal-*-12-*-*-*-p-*-iso8859-1" startupFile
@@ -2188,14 +2195,14 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    menu .menubar.tools.menu -tearoff 0
    menubutton .menubar.sym -text "Symbol" -menu .menubar.sym.menu
    menu .menubar.sym.menu -tearoff 0
-   menubutton .menubar.hilight -text "Hilight" -menu .menubar.hilight.menu
+   menubutton .menubar.hilight -text "Highlight" -menu .menubar.hilight.menu
    menu .menubar.hilight.menu -tearoff 0
    menubutton .menubar.simulation -text "Simulation" -menu .menubar.simulation.menu
    menu .menubar.simulation.menu -tearoff 0
    menubutton .menubar.help -text "Help" -menu .menubar.help.menu
    menu .menubar.help.menu -tearoff 0
    .menubar.help.menu add command -label "help" -command "textwindow ${XSCHEM_SHAREDIR}/xschem.help" \
-	-accelerator {?}
+        -accelerator {?}
    .menubar.help.menu add command -label "keys" -command "textwindow ${XSCHEM_SHAREDIR}/keys.help"
    .menubar.help.menu add command -label "About XSCHEM" -command "about"
    
@@ -2226,12 +2233,12 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    .menubar.file.menu add separator
    .menubar.file.menu add command -label "Exit" -command {xschem exit} -accelerator {Ctrl+Q}
    
-   .menubar.option.menu add checkbutton -label "show info win" -variable show_infowindow \
+   .menubar.option.menu add checkbutton -label "Show info win" -variable show_infowindow \
      -command {
-	if { $show_infowindow != 0 } {wm deiconify .infotext
+        if { $show_infowindow != 0 } {wm deiconify .infotext
         } else {wm withdraw .infotext}
       }
-   .menubar.option.menu add checkbutton -label "color postscript" -variable color_ps \
+   .menubar.option.menu add checkbutton -label "Color postscript" -variable color_ps \
       -command {
          if { $color_ps==1 } {xschem set color_ps 1} else { xschem set color_ps 0}
       }
@@ -2247,34 +2254,34 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
       -command {
          xschem fullscreen
       }
-   .menubar.option.menu add checkbutton -label "enable stretch" -variable enable_stretch \
+   .menubar.option.menu add checkbutton -label "Enable stretch" -variable enable_stretch \
       -accelerator Y \
       -command {
          if { $enable_stretch==1 } {xschem set enable_stretch 1} else { xschem set enable_stretch 0} 
       }
-   .menubar.option.menu add checkbutton -label "show netlist win" -variable netlist_show \
+   .menubar.option.menu add checkbutton -label "Show netlist win" -variable netlist_show \
       -accelerator {Shift+A} \
       -command {
          if { $netlist_show==1 } {xschem set netlist_show 1} else { xschem set netlist_show 0} 
       }
-   .menubar.option.menu add checkbutton -label "flat netlist" -variable flat_netlist \
+   .menubar.option.menu add checkbutton -label "Flat netlist" -variable flat_netlist \
       -accelerator : \
       -command {
          if { $flat_netlist==1 } {xschem set flat_netlist 1} else { xschem set flat_netlist 0} 
       }
-   .menubar.option.menu add checkbutton -label "split netlist" -variable split_files \
+   .menubar.option.menu add checkbutton -label "Split netlist" -variable split_files \
       -accelerator {} \
       -command {
          if { $split_files==1 } {xschem set split_files 1} else { xschem set split_files 0} 
       }
-   .menubar.option.menu add checkbutton -label "hspice netlist" -variable hspice_netlist \
+   .menubar.option.menu add checkbutton -label "Hspice netlist" -variable hspice_netlist \
       -accelerator {} \
       -command {
          if { $hspice_netlist==1 } {xschem set hspice_netlist 1} else { xschem set hspice_netlist 0} 
       }
    .menubar.option.menu add checkbutton -label "Verilog 2001 netlist variant" -variable verilog_2001 \
    
-   .menubar.option.menu add checkbutton -label "draw grid" -variable draw_grid \
+   .menubar.option.menu add checkbutton -label "Draw grid" -variable draw_grid \
       -accelerator {%} \
       -command {
         if { $draw_grid == 1} { xschem set draw_grid 1; xschem redraw} else { xschem set draw_grid 0; xschem redraw}
@@ -2284,7 +2291,7 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
       -command {
         if { $sym_txt == 1} { xschem set sym_txt 1; xschem redraw} else { xschem set sym_txt 0; xschem redraw}
       }
-   .menubar.option.menu add checkbutton -label "toggle variable line width" -variable change_lw \
+   .menubar.option.menu add checkbutton -label "Toggle variable line width" -variable change_lw \
       -accelerator {_} \
       -command {
         if { $change_lw == 1} { xschem set change_lw 1} else { xschem set change_lw 0}
@@ -2295,27 +2302,27 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
       }
    
    .menubar.option.menu add command -label "Set line width" \
-	-command {
+        -command {
           input_number "Enter linewidth (float):" "xschem line_width"
-	}
+        }
    .menubar.option.menu add command -label "Set symbol width" \
-	-command {
+        -command {
           input_number "Enter Symbol width ($symbol_width)" "set symbol_width"
-	}
+        }
 
    .menubar.option.menu add separator
    .menubar.option.menu add radiobutton -label "VHDL netlist" -variable netlist_type -value vhdl \
-	-accelerator {V} \
-	-command "xschem netlist_type vhdl"
+        -accelerator {V} \
+        -command "xschem netlist_type vhdl"
    .menubar.option.menu add radiobutton -label "Verilog netlist" -variable netlist_type -value verilog \
-	-accelerator {V} \
-	-command "xschem netlist_type verilog"
+        -accelerator {V} \
+        -command "xschem netlist_type verilog"
    .menubar.option.menu add radiobutton -label "Spice netlist" -variable netlist_type -value spice \
         -accelerator {V} \
-	-command "xschem netlist_type spice"
+        -command "xschem netlist_type spice"
    .menubar.option.menu add radiobutton -label "tEDAx netlist" -variable netlist_type -value tedax \
         -accelerator {V} \
-	-command "xschem netlist_type tedax"
+        -command "xschem netlist_type tedax"
    .menubar.edit.menu add command -label "Undo" -state disabled -accelerator U
    .menubar.edit.menu add command -label "Redo" -state disabled -accelerator {Ctrl+R}
    .menubar.edit.menu add command -label "Copy" -command "xschem copy" -accelerator Ctrl+C
@@ -2323,8 +2330,8 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    .menubar.edit.menu add command -label "Paste" -command "xschem paste" -accelerator Ctrl+V
    .menubar.edit.menu add command -label "Delete" -command "xschem delete" -accelerator Del
    .menubar.edit.menu add command -label "Select all" -command "xschem select_all" -accelerator Ctrl+A
-   .menubar.edit.menu add command -label "edit selected element" -command "xschem schematic_in_new_window" -accelerator ALt+E
-   .menubar.edit.menu add command -label "edit selected symbol" -command "xschem symbol_in_new_window" -accelerator Alt+I
+   .menubar.edit.menu add command -label "Edit selected element" -command "xschem schematic_in_new_window" -accelerator Alt+E
+   .menubar.edit.menu add command -label "Edit selected symbol" -command "xschem symbol_in_new_window" -accelerator Alt+I
    .menubar.edit.menu add command -label "Duplicate objects" -command "xschem copy_objects" -accelerator C
    .menubar.edit.menu add command -label "Move objects" -command "xschem move_objects" -accelerator M
    .menubar.edit.menu add checkbutton -label "Constrained Horizontal move" -variable horizontal_move \
@@ -2384,8 +2391,8 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    .menubar.layers.menu add command  -label $laylab  -activeforeground $layfg \
         -foreground $layfg -background $i -activebackground $i \
         -command " 
+           .menubar.layers configure -background [lindex $colors $j]
            xschem set rectcolor $j
-           change_color
          "
      if { [expr $j%10] == 0 } { .menubar.layers.menu entryconfigure $j -columnbreak 1 }
      incr j
@@ -2408,7 +2415,7 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
           -command {
           input_number "Enter snap value ( default: [xschem get cadsnap_default] current: [xschem get cadsnap])" \
           "xschem set cadsnap_noalert"
-	}
+        }
    .menubar.zoom.menu add checkbutton -label "View only Probes" -variable only_probes \
           -accelerator {5} \
           -command { xschem only_probes }
@@ -2416,15 +2423,22 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
            xschem toggle_colorscheme
            xschem change_colors
         }
-   .menubar.zoom.menu add checkbutton -label "no XCopyArea drawing model" -variable draw_window \
+   .menubar.zoom.menu add command -label "Dim colors"  -accelerator {} -command {
+           color_dim
+           xschem color_dim
+        }
+   .menubar.zoom.menu add command -label "Change Current Layer color"  -accelerator {} -command {
+           change_color
+        }
+   .menubar.zoom.menu add checkbutton -label "No XCopyArea drawing model" -variable draw_window \
           -accelerator {Ctrl+$} \
           -command {
            if { $draw_window == 1} { xschem set draw_window 1} else { xschem set draw_window 0}
         }
-   .menubar.prop.menu add command -label "edit" -command "xschem edit_prop" -accelerator Q
-   .menubar.prop.menu add command -label "edit with editor" -command "xschem edit_vi_prop" -accelerator Shift+Q
-   .menubar.prop.menu add command -label "view" -command "xschem view_prop" -accelerator Ctrl+Q
-   .menubar.prop.menu add command -background red -label "edit file (danger!)" -command "xschem edit_file" -accelerator Alt+Q
+   .menubar.prop.menu add command -label "Edit" -command "xschem edit_prop" -accelerator Q
+   .menubar.prop.menu add command -label "Edit with editor" -command "xschem edit_vi_prop" -accelerator Shift+Q
+   .menubar.prop.menu add command -label "View" -command "xschem view_prop" -accelerator Ctrl+Q
+   .menubar.prop.menu add command -background red -label "Edit file (danger!)" -command "xschem edit_file" -accelerator Alt+Q
 
    .menubar.sym.menu add command -label "Make symbol from schematic" -command "xschem make_symbol" -accelerator A
    .menubar.sym.menu add command -label "Make schematic from symbol" -command "xschem make_sch" -accelerator Ctrl+L
@@ -2454,13 +2468,13 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    .menubar.tools.menu add command -label "Break wires" \
       -command "xschem break_wires" -accelerator {!}
 
-   .menubar.hilight.menu add command -label {Hilight selected net/pins} -command "xschem hilight" -accelerator K
-   .menubar.hilight.menu add command -label {Un-hilight all net/pins} \
-	-command "xschem delete_hilight_net" -accelerator Shift-K
-   .menubar.hilight.menu add command -label {Un-hilight selected net/pins} \
-	-command "xschem unhilight" -accelerator Ctrl+K
+   .menubar.hilight.menu add command -label {Highlight selected net/pins} -command "xschem hilight" -accelerator K
+   .menubar.hilight.menu add command -label {Un-highlight all net/pins} \
+        -command "xschem delete_hilight_net" -accelerator Shift-K
+   .menubar.hilight.menu add command -label {Un-highlight selected net/pins} \
+        -command "xschem unhilight" -accelerator Ctrl+K
    # 20160413
-   .menubar.hilight.menu add checkbutton -label {Auto-hilight net/pins} -variable auto_hilight \
+   .menubar.hilight.menu add checkbutton -label {Auto-highlight net/pins} -variable auto_hilight \
       -command {
         if { $auto_hilight == 1} {
           xschem set auto_hilight 1
@@ -2482,7 +2496,7 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
    .menubar.simulation.menu add command -label {Utile Stimuli Translate)} -command {utile_translate [file tail [xschem get schname]]}
    .menubar.simulation.menu add command -label {Modelsim} -command {modelsim [file tail [xschem get schname]]}
    .menubar.simulation.menu add command -label {Shell [current schematic library path]} \
-      -command {get_shell [file dirname [abs_sym_path [xschem get schpath]]]}
+      -command {get_shell [file dirname [abs_sym_path [xschem get schname]]]}
    .menubar.simulation.menu add command -label {Shell [simulation path]} \
       -command {
          if { [xschem set_netlist_dir 0] ne "" } {
@@ -2547,10 +2561,6 @@ if { [string length   [lindex [array get env DISPLAY] 1] ] > 0
 ###
 ### bind .drv <event> {xschem callback <type> <x> <y> <keysym> <button of w> <h> <state>}
 ###
-   bind . <KeyPress-Control_L> { set ctrl_down 1} 
-   bind . <KeyRelease-Control_L> { set ctrl_down 0} 
-   bind . <KeyPress-Control_R> { set ctrl_down 1} 
-   bind . <KeyRelease-Control_R> { set ctrl_down 0} 
    bind .drw <Double-Button-1> {xschem callback -3 %x %y 0 %b 0 %s}
    bind .drw <Double-Button-2> {xschem callback -3 %x %y 0 %b 0 %s}
    bind .drw <Double-Button-3> {xschem callback -3 %x %y 0 %b 0 %s}

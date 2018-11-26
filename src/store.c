@@ -28,7 +28,7 @@ void check_wire_storage(void)
  if(lastwire >= max_wires)
  {
   max_wires=(1+lastwire / CADMAXWIRES)*CADMAXWIRES;
-  my_realloc(&wire, sizeof(Wire)*max_wires);
+  my_realloc(392, &wire, sizeof(Wire)*max_wires);
  }
 }
 
@@ -37,7 +37,7 @@ void check_selected_storage(void)
  if(lastselected >= max_selected)
  {
   max_selected=(1+lastselected / MAXGROUP) * MAXGROUP;
-  my_realloc(&selectedgroup, sizeof(Selected)*max_selected);
+  my_realloc(393, &selectedgroup, sizeof(Selected)*max_selected);
  }
 }
 
@@ -46,7 +46,7 @@ void check_text_storage(void)
  if(lasttext >= max_texts)
  {
   max_texts=(1 + lasttext / CADMAXTEXT) * CADMAXTEXT;
-  my_realloc(&textelement, sizeof(Text)*max_texts);
+  my_realloc(394, &textelement, sizeof(Text)*max_texts);
  }
 }
 
@@ -58,34 +58,43 @@ void check_symbol_storage(void)
   if(debug_var>=1) fprintf(errfp, "check_symbol_storage(): more than max_symbols, %s\n",
         schematic[currentsch] );
   max_symbols=(1 + lastinstdef / ELEMDEF) * ELEMDEF;
-  my_realloc(&instdef, sizeof(Instdef)*max_symbols);
+  my_realloc(395, &instdef, sizeof(Instdef)*max_symbols);
   for(i=lastinstdef;i<max_symbols;i++) {
-    instdef[i].polygonptr=my_calloc(cadlayers, sizeof(Polygon *));
+    instdef[i].polygonptr=my_calloc(396, cadlayers, sizeof(Polygon *));
     if(instdef[i].polygonptr==NULL){
        fprintf(errfp, "check_symbol_storage(): calloc error\n");tcleval( "exit");
     }
   
-    instdef[i].lineptr=my_calloc(cadlayers, sizeof(Line *));
+    instdef[i].arcptr=my_calloc(396, cadlayers, sizeof(Arc *));
+    if(instdef[i].arcptr==NULL){
+       fprintf(errfp, "check_symbol_storage(): calloc error\n");tcleval( "exit");
+    }
+  
+    instdef[i].lineptr=my_calloc(397, cadlayers, sizeof(Line *));
     if(instdef[i].lineptr==NULL){
        fprintf(errfp, "check_symbol_storage(): calloc error\n");tcleval( "exit");
     }
   
-    instdef[i].boxptr=my_calloc(cadlayers, sizeof(Line *));
+    instdef[i].boxptr=my_calloc(398, cadlayers, sizeof(Box *));
     if(instdef[i].boxptr==NULL){
       fprintf(errfp, "check_symbol_storage(): calloc error\n");tcleval( "exit");
     }
    
-    instdef[i].lines=my_calloc(cadlayers, sizeof(int));
+    instdef[i].lines=my_calloc(399, cadlayers, sizeof(int));
     if(instdef[i].lines==NULL){
       fprintf(errfp, "check_symbol_storage(): calloc error\n");tcleval( "exit");
     }
    
-    instdef[i].rects=my_calloc(cadlayers, sizeof(int));
+    instdef[i].rects=my_calloc(400, cadlayers, sizeof(int));
     if(instdef[i].rects==NULL){
       fprintf(errfp, "check_symbol_storage(): calloc error\n");tcleval( "exit");
     }
-    instdef[i].polygons=my_calloc(cadlayers, sizeof(int)); /* 20171115 */
+    instdef[i].polygons=my_calloc(401, cadlayers, sizeof(int)); /* 20171115 */
     if(instdef[i].polygons==NULL){
+      fprintf(errfp, "check_symbol_storage(): calloc error\n");tcleval( "exit");
+    }
+    instdef[i].arcs=my_calloc(401, cadlayers, sizeof(int)); /* 20171115 */
+    if(instdef[i].arcs==NULL){
       fprintf(errfp, "check_symbol_storage(): calloc error\n");tcleval( "exit");
     }
   }
@@ -98,7 +107,7 @@ void check_inst_storage(void)
  if(lastinst >= max_instances)
  {
   max_instances=(1 + lastinst / ELEMINST) * ELEMINST;
-  my_realloc(&inst_ptr, sizeof(Instance)*max_instances);
+  my_realloc(402, &inst_ptr, sizeof(Instance)*max_instances);
  }
 }
 
@@ -107,7 +116,7 @@ void check_arc_storage(int c)
  if(lastarc[c] >= max_arcs[c])
  {
   max_arcs[c]=(1 + lastarc[c] / CADMAXOBJECTS) * CADMAXOBJECTS;
-  my_realloc(&arc[c], sizeof(Arc)*max_arcs[c]);
+  my_realloc(403, &arc[c], sizeof(Arc)*max_arcs[c]);
  }
 }
 
@@ -116,7 +125,7 @@ void check_box_storage(int c)
  if(lastrect[c] >= max_rects[c])
  {
   max_rects[c]=(1 + lastrect[c] / CADMAXOBJECTS) * CADMAXOBJECTS;
-  my_realloc(&rect[c], sizeof(Box)*max_rects[c]);
+  my_realloc(404, &rect[c], sizeof(Box)*max_rects[c]);
  }
 }
 
@@ -125,7 +134,7 @@ void check_line_storage(int c)
  if(lastline[c] >= max_lines[c])
  {
   max_lines[c]=(1 + lastline[c] / CADMAXOBJECTS) * CADMAXOBJECTS;
-  my_realloc(&line[c], sizeof(Line)*max_lines[c]);
+  my_realloc(405, &line[c], sizeof(Line)*max_lines[c]);
  }
 }
 
@@ -134,7 +143,7 @@ void check_polygon_storage(int c) /*20171115 */
  if(lastpolygon[c] >= max_polygons[c])
  {
   max_polygons[c]=(1 + lastpolygon[c] / CADMAXOBJECTS) * CADMAXOBJECTS;
-  my_realloc(&polygon[c], sizeof(Polygon)*max_polygons[c]);
+  my_realloc(406, &polygon[c], sizeof(Polygon)*max_polygons[c]);
  }
 }
 
@@ -158,10 +167,10 @@ void store_arc(int pos, double x, double y, double r, double a, double b,
   arc[rectcolor][n].a = a;
   arc[rectcolor][n].b = b;
   arc[rectcolor][n].prop_ptr = NULL;
-  my_strdup(&arc[rectcolor][n].prop_ptr, prop_ptr);
+  my_strdup(407, &arc[rectcolor][n].prop_ptr, prop_ptr);
   arc[rectcolor][n].sel = sel;
   lastarc[rectcolor]++;
-  modified=1;
+  set_modify(1);
 }
 
 void store_polygon(int pos, double *x, double *y, int points, unsigned int rectcolor, unsigned short sel, char *prop_ptr)
@@ -183,10 +192,10 @@ void store_polygon(int pos, double *x, double *y, int points, unsigned int rectc
   polygon[rectcolor][n].y=NULL;
   polygon[rectcolor][n].selected_point=NULL;
   polygon[rectcolor][n].prop_ptr=NULL;
-  polygon[rectcolor][n].x= my_calloc(points, sizeof(double));
-  polygon[rectcolor][n].y= my_calloc(points, sizeof(double));
-  polygon[rectcolor][n].selected_point= my_calloc(points, sizeof(unsigned short));
-  my_strdup(&polygon[rectcolor][n].prop_ptr, prop_ptr);
+  polygon[rectcolor][n].x= my_calloc(408, points, sizeof(double));
+  polygon[rectcolor][n].y= my_calloc(409, points, sizeof(double));
+  polygon[rectcolor][n].selected_point= my_calloc(410, points, sizeof(unsigned short));
+  my_strdup(411, &polygon[rectcolor][n].prop_ptr, prop_ptr);
   for(j=0;j<points; j++) {
     polygon[rectcolor][n].x[j] = x[j];
     polygon[rectcolor][n].y[j] = y[j];
@@ -202,7 +211,7 @@ void store_polygon(int pos, double *x, double *y, int points, unsigned int rectc
 
 
   lastpolygon[rectcolor]++;
-  modified=1;
+  set_modify(1);
 }
 
 void storeobject(int pos, double x1,double y1,double x2,double y2,
@@ -229,10 +238,10 @@ void storeobject(int pos, double x1,double y1,double x2,double y2,
      line[rectcolor][n].y1=y1;
      line[rectcolor][n].y2=y2;
      line[rectcolor][n].prop_ptr=NULL;
-     my_strdup(&line[rectcolor][n].prop_ptr, prop_ptr);
+     my_strdup(412, &line[rectcolor][n].prop_ptr, prop_ptr);
      line[rectcolor][n].sel=sel;
      lastline[rectcolor]++;
-     modified=1;
+     set_modify(1);
     }
     if(type == RECT)
     {
@@ -252,10 +261,10 @@ void storeobject(int pos, double x1,double y1,double x2,double y2,
      rect[rectcolor][n].y1=y1;
      rect[rectcolor][n].y2=y2;
      rect[rectcolor][n].prop_ptr=NULL;
-     my_strdup(&rect[rectcolor][n].prop_ptr, prop_ptr);
+     my_strdup(413, &rect[rectcolor][n].prop_ptr, prop_ptr);
      rect[rectcolor][n].sel=sel;
      lastrect[rectcolor]++;
-     modified=1;
+     set_modify(1);
     }
     if(type == WIRE)
     {
@@ -278,13 +287,13 @@ void storeobject(int pos, double x1,double y1,double x2,double y2,
      wire[n].node=NULL;
      wire[n].end1=0;
      wire[n].end2=0;
-     my_strdup(&wire[n].prop_ptr, prop_ptr);
+     my_strdup(414, &wire[n].prop_ptr, prop_ptr);
      if(get_tok_value(wire[n].prop_ptr,"bus",0)[0]) wire[n].bus=1; /* 20171201 */
      else wire[n].bus=0;
 
      wire[n].sel=sel;
      lastwire++;
-     modified=1;
+     set_modify(1);
      prepared_hash_wires=0;
      prepared_netlist_structs=0;
      prepared_hilight_structs=0;
@@ -294,8 +303,8 @@ void storeobject(int pos, double x1,double y1,double x2,double y2,
 void freenet_nocheck(int i)
 {
  int j;
-  my_strdup(&wire[i].prop_ptr, NULL);
-  my_strdup(&wire[i].node, NULL);
+  my_strdup(415, &wire[i].prop_ptr, NULL);
+  my_strdup(416, &wire[i].node, NULL);
   for(j=i+1;j<lastwire;j++)
   {
     wire[j-1] = wire[j];

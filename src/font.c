@@ -25,11 +25,10 @@
 void compile_font(void)
 {
  int code, i;
- static char *name=NULL; /* 20161122 overflow safe */
+ char name[PATH_MAX];
 
  currentsch = 0;
- my_strdup(&name, tclgetvar("XSCHEM_SHAREDIR"));
- my_strcat(&name, "/systemlib/font.sch");
+ my_snprintf(name, S(name), "%s/systemlib/font.sch", tclgetvar("XSCHEM_SHAREDIR"));
  remove_symbols();
  load_schematic(1,name,1);
  for(code=0;code<127;code++)
@@ -38,7 +37,7 @@ void compile_font(void)
   select_inside(code*FONTOFFSET-1,-FONTHEIGHT-1,
                  code*FONTOFFSET+FONTWIDTH+1,FONTDESCENT+1, 1);
   rebuild_selected_array();
-  character[code] = my_calloc(lastselected*4+1, sizeof(double));
+  character[code] = my_calloc(134, lastselected*4+1, sizeof(double));
   character[code][0] = (double)lastselected;
   if(debug_var >=2) fprintf(errfp, "compile_font(): character[%d][]={%.16g",code,character[code][0]);
   for(i=0;i<lastselected;i++)

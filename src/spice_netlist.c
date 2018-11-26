@@ -68,7 +68,7 @@ void global_spice_netlist(int global)  /* netlister driver */
   if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "spice_ignore",0 ), "true") ) {
     continue;
   }
-  my_strdup(&type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
+  my_strdup(380, &type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
   if(debug_var>=1) fprintf(errfp, "global_spice_netlist(): >>>>>>> |%s|\n", type);
   if( type && !(strcmp(type,"ipin")&&strcmp(type,"opin")&&strcmp(type,"iopin")) )
   {
@@ -94,11 +94,11 @@ void global_spice_netlist(int global)  /* netlister driver */
   if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "spice_ignore",0 ), "true") ) {
     continue;
   }
-  my_strdup(&type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
-  my_strdup(&place,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"place",0));  /* 20121223 */
+  my_strdup(381, &type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
+  my_strdup(382, &place,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"place",0));  /* 20121223 */
   if( type && !strcmp(type,"netlist_commands") ) {
    if(!place || strcmp(place, "end" )) {  /* 20121223 */
-     my_strdup(&place,get_tok_value(inst_ptr[i].prop_ptr,"place",0));  /*20160920 */
+     my_strdup(383, &place,get_tok_value(inst_ptr[i].prop_ptr,"place",0));  /*20160920 */
      if(!place || strcmp(place, "end" )) {  /*20160920 */
        print_spice_element(fd, i) ;  /* this is the element line  */
      }
@@ -163,13 +163,13 @@ void global_spice_netlist(int global)  /* netlister driver */
   if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "spice_ignore",0 ), "true") ) {
     continue;
   }
-  my_strdup(&type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
-  my_strdup(&place,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"place",0));  /* 20121223 */
+  my_strdup(384, &type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
+  my_strdup(385, &place,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"place",0));  /* 20121223 */
   if( type && !strcmp(type,"netlist_commands") ) {
    if(place && !strcmp(place, "end" )) {  /* 20121223 */
      print_spice_element(fd, i) ;  /* this is the element line  */
    } else { /* 20160920 */
-     my_strdup(&place,get_tok_value(inst_ptr[i].prop_ptr,"place",0));  /*20160920 */
+     my_strdup(386, &place,get_tok_value(inst_ptr[i].prop_ptr,"place",0));  /*20160920 */
      if(place && !strcmp(place, "end" )) {  /* 20160920 */
        print_spice_element(fd, i) ;  /* 20160920 */
      }
@@ -237,7 +237,7 @@ void spice_block_netlist(FILE *fd, int i)  /*20081223 */
        else 
          fprintf(fd,"<NULL> ");
      }
-     my_strdup(&extra, get_tok_value(instdef[i].prop_ptr,"extra",0) ); /* 20081206 */
+     my_strdup(387, &extra, get_tok_value(instdef[i].prop_ptr,"extra",0) ); /* 20081206 */
      fprintf(fd, "%s ", extra ? extra : "" );
      
      /* 20081206 new get_sym_template does not return token=value pairs where token listed in extra */
@@ -271,7 +271,7 @@ void spice_netlist(FILE *fd, int spice_stop )
  static char *place=NULL;  /* 20121223 */
 
  prepare_netlist_structs(0);
- modified=1; /* 20160302 prepare_netlist_structs could change schematic (wire node naming for example) */
+ set_modify(1); /* 20160302 prepare_netlist_structs could change schematic (wire node naming for example) */
  traverse_node_hash();  /* print all warnings about unconnected floatings etc */
 
 
@@ -283,8 +283,8 @@ void spice_netlist(FILE *fd, int spice_stop )
     if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "spice_ignore",0 ), "true") ) {
       continue;
     }
-    my_strdup(&type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
-    my_strdup(&place,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"place",0));  /* 20121223 */
+    my_strdup(388, &type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
+    my_strdup(389, &place,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"place",0));  /* 20121223 */
     if( type && (/*strcmp(type,"label") && */ strcmp(type,"ipin")&&strcmp(type,"opin")&&strcmp(type,"iopin") )==0)
     {
       print_spice_element(fd, i) ;  /* this is the element line  */
@@ -299,8 +299,8 @@ void spice_netlist(FILE *fd, int spice_stop )
       continue;                                                                                   /*20070726 */
     }                                                                                             /*20070726 */
   
-    my_strdup(&type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
-    my_strdup(&place,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"place",0));  /* 20121223 */
+    my_strdup(390, &type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
+    my_strdup(391, &place,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"place",0));  /* 20121223 */
     if( type && (strcmp(type,"label")&&strcmp(type,"ipin")&& strcmp(type,"opin")&&strcmp(type,"iopin")))
     {
       if(!strcmp(type,"netlist_commands") && netlist_count==0) continue; /* already done in global_spice_netlist */

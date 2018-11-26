@@ -39,16 +39,7 @@ BEGIN{
 }
 
 {
- if($1 ~ /^.?include$/)
- {
-  file=$2
-  while ((getline  < file) > 0)
-  {
-   sub(/;/," ;",$0)
-   process_line()
-  }
- }
- else process_line()
+  process_line()
 }
 
 

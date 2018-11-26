@@ -42,13 +42,13 @@ void merge_text(FILE *fd)
      textelement[i].font=NULL;
      textelement[i].sel=0;
      load_ascii_string(&textelement[i].prop_ptr,fd);
-     my_strdup(&textelement[i].font, get_tok_value(textelement[i].prop_ptr, "font", 0));/*20171206 */
+     my_strdup(302, &textelement[i].font, get_tok_value(textelement[i].prop_ptr, "font", 0));/*20171206 */
      strlayer = get_tok_value(textelement[i].prop_ptr, "layer", 0); /*20171206 */
      if(strlayer[0]) textelement[i].layer = atoi(strlayer);
      else textelement[i].layer = -1;
 
      select_text(i,SELECTED, 1);
-     modified=1;
+     set_modify(1);
      lasttext++;
 }
 
@@ -85,7 +85,7 @@ void merge_box(FILE *fd)
     load_ascii_string( &ptr[i].prop_ptr, fd);
     select_box(c,i, SELECTED, 1);
     lastrect[c]++;
-    modified=1;
+    set_modify(1);
 }
 
 void merge_arc(FILE *fd)
@@ -108,7 +108,7 @@ void merge_arc(FILE *fd)
     load_ascii_string(&ptr[i].prop_ptr, fd);
     select_arc(c,i, SELECTED, 1);
     lastarc[c]++;
-    modified=1;
+    set_modify(1);
 }
 
 
@@ -129,9 +129,9 @@ void merge_polygon(FILE *fd)
     ptr[i].y=NULL;
     ptr[i].selected_point=NULL;
     ptr[i].prop_ptr=NULL;
-    ptr[i].x = my_calloc(points, sizeof(double));
-    ptr[i].y = my_calloc(points, sizeof(double));
-    ptr[i].selected_point= my_calloc(points, sizeof(unsigned short));
+    ptr[i].x = my_calloc(303, points, sizeof(double));
+    ptr[i].y = my_calloc(304, points, sizeof(double));
+    ptr[i].selected_point= my_calloc(305, points, sizeof(unsigned short));
     ptr[i].points=points;
     ptr[i].sel=0;
     for(j=0;j<points;j++) {
@@ -144,7 +144,7 @@ void merge_polygon(FILE *fd)
       ptr[i].fill =0;
     select_polygon(c,i, SELECTED, 1);
     lastpolygon[c]++;
-    modified=1;
+    set_modify(1);
 }
 
 void merge_line(FILE *fd)
@@ -169,7 +169,7 @@ void merge_line(FILE *fd)
     load_ascii_string( &ptr[i].prop_ptr, fd);
     select_line(c,i, SELECTED, 1);
     lastline[c]++;
-    modified=1;
+    set_modify(1);
 }
 
 
@@ -202,10 +202,10 @@ void merge_inst(int k,FILE *fd)
     new_prop_string(&inst_ptr[i].prop_ptr, prop_ptr,k);
     /* the final tmp argument is zero for the 1st call and used in */
     /* new_prop_string() for cleaning some internal caches. */
-    my_strdup2(&inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); /* 20150409 */
+    my_strdup2(306, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); /* 20150409 */
     hash_proplist(inst_ptr[i].prop_ptr,0);
     lastinst++;
-    modified=1;
+    set_modify(1);
     prepared_hash_instances=0;
     prepared_netlist_structs=0;
     prepared_hilight_structs=0;
@@ -228,8 +228,8 @@ void match_merged_inst(int old)
      {
       if(debug_var>=1) fprintf(errfp, "merge_inst(): missing symbol, skipping...\n");
       hash_proplist(inst_ptr[i].prop_ptr , 1); /* 06052001 remove props from hash table */
-      my_strdup(&inst_ptr[i].prop_ptr, NULL);  /* 06052001 remove properties */
-      my_strdup(&inst_ptr[i].name, NULL);      /* 06052001 remove symname   */
+      my_strdup(307, &inst_ptr[i].prop_ptr, NULL);  /* 06052001 remove properties */
+      my_strdup(308, &inst_ptr[i].name, NULL);      /* 06052001 remove symname   */
       missing++;
       continue;
      }
@@ -272,7 +272,7 @@ void merge_file(int selection_load, const char ext[])
     FILE *fd;
     int k=0, old;
     int endfile=0;
-    static char *name=NULL; /* 20161122 overflow safe */
+    char name[PATH_MAX];
     char name1[PATH_MAX]; /* overflow safe */
     char tmp[256]; /* 20161122 overflow safe */
     static char *aux_ptr=NULL;
@@ -283,22 +283,20 @@ void merge_file(int selection_load, const char ext[])
        my_snprintf(tmp, S(tmp), "load_file_dialog {Merge file} {.sch.sym} INITIALLOADDIR", ext);
        tcleval(tmp);
        if(!strcmp(Tcl_GetStringResult(interp),"")) return;
-       my_strdup(&name, (char *)Tcl_GetStringResult(interp)); /* 20180925 */
+       my_strncpy(name, (char *)Tcl_GetStringResult(interp), S(name)); /* 20180925 */
      } 
      else {                     /* 20071215 */
-       my_strdup(&name,ext);
+       my_strncpy(name, ext, S(name));
      }
      if(debug_var>=1) fprintf(errfp, "merge_file(): sch=%d name=%s\n",currentsch,name);
     }
     else if(selection_load==1)
     {
-     my_strdup(&name, home_dir);
-     my_strcat(&name,"/.xschem_selection.sch"); /* 20160502 changed PWD to HOME */
+      my_snprintf(name, S(name), "%s/.xschem_selection.sch", home_dir);
     }
     else    /* clipboard load */
     {
-      my_strdup(&name, home_dir);
-      my_strcat(&name,"/.xschem_clipboard.sch");
+      my_snprintf(name, S(name), "%s/.xschem_clipboard.sch", home_dir);
     }
     if( (fd=fopen(name,"r"))!= NULL)
     {

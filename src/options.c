@@ -170,7 +170,7 @@ int process_options(int argc, char *argv[])
   }
   if (arg_cnt>=2) {
     if(debug_var>=1) fprintf(errfp, "process_option(): file name given: %s\n",argv[1]);
-    my_strdup(&filename, argv[1]);
+    my_strdup(291, &filename, argv[1]);
   }
   return arg_cnt;
 }

@@ -98,15 +98,14 @@ if(token==NULL) return NULL;
     if( !entry ) {              /* empty slot */
       if(value && !remove) {            /* insert data */
         s=sizeof( struct hashentry );
-        ptr= my_malloc(s);
+        ptr= my_malloc(425, s);
         entry=(struct hashentry *)ptr;
         *preventry=entry;
         entry->next=NULL;
         entry->hash=hashcode;
         entry->token=NULL;
-        entry->token = my_malloc(token_size + 1);
+        entry->token = my_malloc(426, token_size + 1);
         memcpy(entry->token,token, token_size + 1);
-        my_strdup(&entry->token, token);
         entry->value = value;
         return NULL; /* if element inserted return NULL since it was not in table */
       }
@@ -137,6 +136,7 @@ static struct hashentry *free_hash_entry(struct hashentry *entry)
   struct hashentry *tmp;
   while( entry ) {
     tmp = entry -> next;
+    my_free(&(entry->token));
     n_elements++;
     collisions++;
     if(debug_var>=3) fprintf(errfp, "free_hash_entry(): removing entry %lu\n", (unsigned long)entry);
@@ -215,12 +215,12 @@ int set_different_token(char **s,char *new, char *old)
  if(new==NULL) return 0;
 
  sizetok=CADCHUNKALLOC;
- if(token==NULL) token=my_malloc(sizetok);
- else my_realloc(&token,sizetok);
+ if(token==NULL) token=my_malloc(427, sizetok);
+ else my_realloc(428, &token,sizetok);
 
  sizeval=CADCHUNKALLOC;
- if(value==NULL) value=my_malloc(sizeval);
- else my_realloc(&value,sizeval);
+ if(value==NULL) value=my_malloc(429, sizeval);
+ else my_realloc(430, &value,sizeval);
 
  while(1)
  {
@@ -235,13 +235,13 @@ int set_different_token(char **s,char *new, char *old)
   if(value_pos>=sizeval)
   {
    sizeval+=CADCHUNKALLOC;
-   my_realloc(&value,sizeval);
+   my_realloc(431, &value,sizeval);
   }
 
   if(token_pos>=sizetok)
   {
    sizetok+=CADCHUNKALLOC;
-   my_realloc(&token,sizetok);
+   my_realloc(432, &token,sizetok);
   }
 
   if(state==XTOKEN) token[token_pos++]=c;
@@ -269,7 +269,7 @@ int set_different_token(char **s,char *new, char *old)
    if(strcmp(value, get_tok_value(old,token,1)))
    {
     mod=1;
-    my_strdup(s, subst_token(*s, token, value) );
+    my_strdup(433, s, subst_token(*s, token, value) );
    }
    state=XBEGIN;
   }
@@ -303,8 +303,8 @@ char *get_tok_value(const char *s,const char *tok, int with_quotes)
   if(!size) {
     size=CADCHUNKALLOC;
     sizetok=CADCHUNKALLOC;
-    my_realloc(&result,size);
-    my_realloc(&token,sizetok);
+    my_realloc(434, &result,size);
+    my_realloc(435, &token,sizetok);
   }
   if(s==NULL){result[0]='\0'; return result;}
     if(debug_var>=3) fprintf(errfp, "get_tok_value(): looking for <%s> in <%s>\n",tok,s);
@@ -318,11 +318,11 @@ char *get_tok_value(const char *s,const char *tok, int with_quotes)
     else if( state==XVALUE && space && !quote) state=XEND;
     if(value_pos>=size) {
       size+=CADCHUNKALLOC;
-      my_realloc(&result,size);
+      my_realloc(436, &result,size);
     }
     if(token_pos>=sizetok) {
       sizetok+=CADCHUNKALLOC;
-      my_realloc(&token,sizetok);
+      my_realloc(437, &token,sizetok);
     }
     if(state==XTOKEN) token[token_pos++]=c;
     else if(state==XVALUE) {
@@ -378,13 +378,13 @@ char *get_sym_template(char *s,char *extra)
  if(!sizeval) {
    sizeval=CADCHUNKALLOC;
    sizetok=CADCHUNKALLOC;
-   my_realloc(&value,sizeval);
-   my_realloc(&token,sizetok);
+   my_realloc(438, &value,sizeval);
+   my_realloc(439, &token,sizetok);
  }
  l = strlen(s);
  if(l >= sizeres) {
    sizeres = l+1;
-   my_realloc(&result,sizeres);
+   my_realloc(440, &result,sizeres);
  }
 
  if(s==NULL){result[0]='\0'; return result;}
@@ -401,13 +401,13 @@ char *get_sym_template(char *s,char *extra)
   if(value_pos>=sizeval)
   {
     sizeval+=CADCHUNKALLOC;
-    my_realloc(&value,sizeval);
+    my_realloc(441, &value,sizeval);
   }
 
   if(token_pos>=sizetok)
   {
     sizetok+=CADCHUNKALLOC;
-    my_realloc(&token,sizetok);
+    my_realloc(442, &token,sizetok);
   }
 
   if(state==XBEGIN) {
@@ -491,27 +491,27 @@ void new_prop_string(char **new_prop,const char *old_prop, int fast)
  if(old_prop==NULL) 
  { 
   if(debug_var>=1) fprintf(errfp, "new_prop_string():-0-  old=%s fast=%d\n", old_prop,fast);
-  my_strdup(new_prop,NULL);
+  my_strdup(443, new_prop,NULL);
   return;
  }
  if(debug_var>=1) fprintf(errfp, "new_prop_string(): new=%s   old=%s\n",*new_prop, old_prop);
- old_name_len = my_strdup(&old_name,get_tok_value(old_prop,"name",0) ); /* added old_name_len 20180926 */
+ old_name_len = my_strdup(444, &old_name,get_tok_value(old_prop,"name",0) ); /* added old_name_len 20180926 */
  if(old_name==NULL) 
  { 
-  /*my_strdup(new_prop,NULL); */
-  my_strdup(new_prop,old_prop);  /* 03102001 changed to copy old props if no name */
+  /*my_strdup(445, new_prop,NULL); */
+  my_strdup(446, new_prop,old_prop);  /* 03102001 changed to copy old props if no name */
   return;
  }
  prefix=old_name[0];
  /* don't change old_prop if name does not conflict. */
  if(hash_lookup(old_name, NULL, 0, old_name_len) == NULL)
  {
-  my_strdup(new_prop, old_prop);
+  my_strdup(447, new_prop, old_prop);
   if(debug_var>=1) fprintf(errfp, "new_prop_string():-1-  new=%s old=%s fast=%d\n",*new_prop, old_prop,fast);
   return;
  }
  tmp=find_bracket(old_name);
- my_realloc(&new_name, old_name_len + 40); /* strlen(old_name)+40); */ /* 20180926 */
+ my_realloc(448, &new_name, old_name_len + 40); /* strlen(old_name)+40); */ /* 20180926 */
  qq=fast ?  last[(int)prefix] : 0; 
  if(debug_var>=1) fprintf(errfp, "new_prop_string(): -2- new=%s old=%s fast=%d\n",*new_prop, old_prop,fast);
  for(q=qq;;q++)
@@ -526,7 +526,7 @@ void new_prop_string(char **new_prop,const char *old_prop, int fast)
  tmp2 = subst_token(old_prop, "name", new_name); 
  if(strcmp(tmp2, old_prop) ) {
    if(debug_var>=1) fprintf(errfp, "new_prop_string(): tmp2=%s, old_prop=%s\n", tmp2, old_prop);
-   my_strdup(new_prop, tmp2);
+   my_strdup(449, new_prop, tmp2);
  }
 }
 
@@ -546,20 +546,23 @@ char *subst_token(const char *s, const char *tok, const char *new_val)
  int quote=0;
  int done_subst=0;
  int escape=0;
- /*
- if(new_val==NULL || new_val[0]=='\0') 
- {
-  my_strdup(&result, s);
-  return result;
+
+ if(new_val && !strcmp(new_val, "DELETE")) {
+    if(!strcmp(tok,"name")) {
+      fprintf(errfp,"subst_token(): Can not DELETE name attribute\n");
+      size = my_strdup(450, &result, s);
+      size+=1;
+      return result;
+    }
+    new_val = NULL;
  }
- */
  sizetok=CADCHUNKALLOC;
- if(token==NULL) token=my_malloc(sizetok);
- else my_realloc(&token,sizetok);
+ if(token==NULL) token=my_malloc(451, sizetok);
+ else my_realloc(452, &token,sizetok);
 
  size=CADCHUNKALLOC;
- if(result==NULL) result=my_malloc(size);
- else my_realloc(&result,size);
+ if(result==NULL) result=my_malloc(453, size);
+ else my_realloc(454, &result,size);
 
 
  if(s==NULL){result[0]='\0';}
@@ -575,13 +578,13 @@ char *subst_token(const char *s, const char *tok, const char *new_val)
   if(result_pos >= size)
   {
    size += CADCHUNKALLOC;
-   my_realloc(&result, size);
+   my_realloc(455, &result, size);
   }
 
   if(token_pos >= sizetok)
   {
    sizetok += CADCHUNKALLOC;
-   my_realloc(&token, sizetok); /* 20171104 **Long** standing bug fixed, was doing realloc on result instead of token. */
+   my_realloc(456, &token, sizetok); /* 20171104 **Long** standing bug fixed, was doing realloc on result instead of token. */
                                /* causing the program to crash on first very long token encountered */
   }
 
@@ -625,7 +628,7 @@ char *subst_token(const char *s, const char *tok, const char *new_val)
            if(result_pos + tmp >= size)
            {
              size = (1 + (result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
-             my_realloc(&result, size);
+             my_realloc(457, &result, size);
            }
            memcpy(result + result_pos ,new_val, tmp + 1); /* 20180923 */
            result_pos += tmp;
@@ -651,12 +654,16 @@ char *subst_token(const char *s, const char *tok, const char *new_val)
  {
   if(result[0] == '\0' && new_val) 
   {
-   int s;
    
    if(!new_val[0]) new_val = "\"\"";
-   s = strlen(new_val) + strlen(tok) + 2;
-   my_realloc(&result, s);
-   my_snprintf(result, s, "%s=%s", tok, new_val ); /* overflow safe 20161122 */
+   tmp = strlen(new_val) + strlen(tok) + 2;
+   if(result_pos + tmp >= size)
+   {
+     size = (1 + (result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
+     my_realloc(458, &result,size);
+   }
+   my_realloc(459, &result, size);
+   my_snprintf(result, size, "%s=%s", tok, new_val ); /* overflow safe 20161122 */
   }
   else if(new_val)
   {
@@ -665,7 +672,7 @@ char *subst_token(const char *s, const char *tok, const char *new_val)
    if(result_pos + tmp >= size)
    {
      size = (1 + (result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
-     my_realloc(&result,size);
+     my_realloc(460, &result,size);
    }
    my_snprintf(result + result_pos - 1, size, " %s=%s", tok, new_val ); /* 20171104, 20171201 -> result_pos-1 */
   }
@@ -749,11 +756,11 @@ void print_vhdl_element(FILE *fd, int inst) /* 20071217 */
   return;
  }
 
- my_strdup(&template,
+ my_strdup(461, &template,
      (inst_ptr[inst].ptr+instdef)->templ); /* 2015049 */
 
- my_strdup(&name,inst_ptr[inst].instname); /* 20161210 */
- /* my_strdup(&name,get_tok_value(inst_ptr[inst].prop_ptr,"name",0)); */
+ my_strdup(462, &name,inst_ptr[inst].instname); /* 20161210 */
+ /* my_strdup(463, &name,get_tok_value(inst_ptr[inst].prop_ptr,"name",0)); */
 
  if((name==NULL) ) return;
  no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
@@ -774,7 +781,7 @@ void print_vhdl_element(FILE *fd, int inst) /* 20071217 */
 
  tmp=0;
  /* 20080213 use generic_type property to decide if some properties are strings, see later */
- my_strdup(&generic_type, get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"generic_type",2));
+ my_strdup(464, &generic_type, get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"generic_type",2));
 
  while(1)
  {
@@ -796,13 +803,13 @@ void print_vhdl_element(FILE *fd, int inst) /* 20071217 */
   if(value_pos>=sizeval)
   {
    sizeval+=CADCHUNKALLOC;
-   my_realloc(&value,sizeval);
+   my_realloc(465, &value,sizeval);
   }
 
   if(token_pos>=sizetok)
   {
    sizetok+=CADCHUNKALLOC;
-   my_realloc(&token,sizetok);
+   my_realloc(466, &token,sizetok);
   }
 
   if(state==XTOKEN) token[token_pos++]=c;
@@ -851,10 +858,10 @@ void print_vhdl_element(FILE *fd, int inst) /* 20071217 */
     /* print generic map */
     for(i=0;i<no_of_generics;i++)
     {
-      my_strdup(&generic_type,get_tok_value(
+      my_strdup(467, &generic_type,get_tok_value(
         (inst_ptr[inst].ptr+instdef)->boxptr[GENERICLAYER][i].prop_ptr,"type",0));
-      my_strdup(&generic_value,   inst_ptr[inst].node[no_of_pins+i] );
-      /*my_strdup(&generic_value, get_tok_value( */
+      my_strdup(468, &generic_value,   inst_ptr[inst].node[no_of_pins+i] );
+      /*my_strdup(469, &generic_value, get_tok_value( */
       /*  (inst_ptr[inst].ptr+instdef)->boxptr[GENERICLAYER][i].prop_ptr,"value") ); */
       str_ptr = get_tok_value(
         (inst_ptr[inst].ptr+instdef)->boxptr[GENERICLAYER][i].prop_ptr,"name",0);
@@ -905,9 +912,9 @@ void print_generic(FILE *fd, char *ent_or_comp, int symbol)
  int escape=0;
  int token_number=0;
 
- my_strdup(&format, get_tok_value(instdef[symbol].prop_ptr,"format",0));
- my_strdup(&generic_type, get_tok_value(instdef[symbol].prop_ptr,"generic_type",0));
- my_strdup(&template, instdef[symbol].templ); /* 20150409 */
+ my_strdup(470, &format, get_tok_value(instdef[symbol].prop_ptr,"format",0));
+ my_strdup(471, &generic_type, get_tok_value(instdef[symbol].prop_ptr,"generic_type",0));
+ my_strdup(472, &template, instdef[symbol].templ); /* 20150409 */
  if( !template || !(template[0]) )  return;
   if(debug_var>=2) fprintf(errfp, "print_generic(): symbol=%d template=%s \n", symbol, template);
 
@@ -938,13 +945,13 @@ void print_generic(FILE *fd, char *ent_or_comp, int symbol)
   if(value_pos>=sizeval)
   {
    sizeval+=CADCHUNKALLOC;
-   my_realloc(&value,sizeval);
+   my_realloc(473, &value,sizeval);
   }
 
   if(token_pos>=sizetok)
   {
    sizetok+=CADCHUNKALLOC;
-   my_realloc(&token,sizetok);
+   my_realloc(474, &token,sizetok);
   }
 
   if(state==XTOKEN) token[token_pos++]=c;
@@ -960,7 +967,7 @@ void print_generic(FILE *fd, char *ent_or_comp, int symbol)
    token_number++;
    value[value_pos]='\0';
    value_pos=0;
-   my_strdup(&type, get_tok_value(generic_type,token,0));
+   my_strdup(475, &type, get_tok_value(generic_type,token,0));
 
    if(value[0] != '\0') /* token has a value */
    {
@@ -992,9 +999,9 @@ void print_generic(FILE *fd, char *ent_or_comp, int symbol)
 
   for(i=0;i<instdef[symbol].rects[GENERICLAYER];i++)
   {
-    my_strdup(&generic_type,get_tok_value(
+    my_strdup(476, &generic_type,get_tok_value(
               instdef[symbol].boxptr[GENERICLAYER][i].prop_ptr,"generic_type",0));
-    my_strdup(&generic_value, get_tok_value(
+    my_strdup(477, &generic_value, get_tok_value(
               instdef[symbol].boxptr[GENERICLAYER][i].prop_ptr,"value",2) ); /*<< 170402 */
     str_tmp = get_tok_value(instdef[symbol].boxptr[GENERICLAYER][i].prop_ptr,"name",0);
     if(!tmp) fprintf(fd, "generic (\n");
@@ -1019,9 +1026,9 @@ void print_verilog_param(FILE *fd, int symbol) /*16112003 */
  int escape=0;
  int token_number=0;
 
- /* my_strdup(&template, get_tok_value(instdef[symbol].prop_ptr,"template",0)); */
- my_strdup(&template, instdef[symbol].templ); /* 20150409 20171103 */
- my_strdup(&generic_type, get_tok_value(instdef[symbol].prop_ptr,"generic_type",0));
+ /* my_strdup(478, &template, get_tok_value(instdef[symbol].prop_ptr,"template",0)); */
+ my_strdup(479, &template, instdef[symbol].templ); /* 20150409 20171103 */
+ my_strdup(480, &generic_type, get_tok_value(instdef[symbol].prop_ptr,"generic_type",0));
  if( !template || !(template[0]) )  return;
   if(debug_var>=2) fprintf(errfp, "print_verilog_param(): symbol=%d template=%s \n", symbol, template);
 
@@ -1046,13 +1053,13 @@ void print_verilog_param(FILE *fd, int symbol) /*16112003 */
   if(value_pos>=sizeval)
   {
    sizeval+=CADCHUNKALLOC;
-   my_realloc(&value,sizeval);
+   my_realloc(481, &value,sizeval);
   }
 
   if(token_pos>=sizetok)
   {
    sizetok+=CADCHUNKALLOC;
-   my_realloc(&token,sizetok);
+   my_realloc(482, &token,sizetok);
   }
 
   if(state==XTOKEN) token[token_pos++]=c;
@@ -1115,13 +1122,13 @@ void print_spice_element(FILE *fd, int inst)
  int quote=0; /* 20171029 */
  /* struct hashentry *ptr; */
 
- my_strdup(&template,
+ my_strdup(483, &template,
      (inst_ptr[inst].ptr+instdef)->templ); /* 20150409 */
 
- my_strdup(&name,inst_ptr[inst].instname); /* 20161210 */
- /* my_strdup(&name,get_tok_value(inst_ptr[inst].prop_ptr,"name",0)); */
+ my_strdup(484, &name,inst_ptr[inst].instname); /* 20161210 */
+ /* my_strdup(485, &name,get_tok_value(inst_ptr[inst].prop_ptr,"name",0)); */
 
- my_strdup(&format,
+ my_strdup(486, &format,
      get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"format",0));
  if((name==NULL) || (format==NULL) ) return; /* do no netlist unwanted insts(no format) */
  no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
@@ -1148,7 +1155,7 @@ void print_spice_element(FILE *fd, int inst)
   if(token_pos>=sizetok)
   {
    sizetok+=CADCHUNKALLOC;
-   my_realloc(&token,sizetok);
+   my_realloc(487, &token,sizetok);
   }
 
   if(state==XTOKEN) {
@@ -1218,7 +1225,7 @@ void print_spice_element(FILE *fd, int inst)
      size_t s;
      char *tclcmd=NULL;
      s = token_pos + strlen(name) + strlen(inst_ptr[inst].name) + 100;
-     tclcmd = my_malloc(s);
+     tclcmd = my_malloc(488, s);
      Tcl_ResetResult(interp);
      my_snprintf(tclcmd, s, "tclpropeval {%s} {%s} {%s}", token, name, inst_ptr[inst].name);
      tcleval(tclcmd);
@@ -1266,18 +1273,18 @@ void print_tedax_element(FILE *fd, int inst)
  /* struct hashentry *ptr; */
 
 
- my_strdup(&extra, get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"extra",2));
- my_strdup(&extra_pinnumber, get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"extra_pinnumber",2));
- my_strdup(&template,
+ my_strdup(489, &extra, get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"extra",2));
+ my_strdup(490, &extra_pinnumber, get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"extra_pinnumber",2));
+ my_strdup(491, &template,
      (inst_ptr[inst].ptr+instdef)->templ); /* 20150409 */
- my_strdup(&numslots, get_tok_value(inst_ptr[inst].prop_ptr,"numslots",2));
- if(!numslots) my_strdup(&numslots, get_tok_value(template,"numslots",2));
- if(!numslots) my_strdup(&numslots, "1");
+ my_strdup(492, &numslots, get_tok_value(inst_ptr[inst].prop_ptr,"numslots",2));
+ if(!numslots) my_strdup(493, &numslots, get_tok_value(template,"numslots",2));
+ if(!numslots) my_strdup(494, &numslots, "1");
 
- my_strdup(&name,inst_ptr[inst].instname); /* 20161210 */
- /* my_strdup(&name,get_tok_value(inst_ptr[inst].prop_ptr,"name",0)); */
+ my_strdup(495, &name,inst_ptr[inst].instname); /* 20161210 */
+ /* my_strdup(496, &name,get_tok_value(inst_ptr[inst].prop_ptr,"name",0)); */
 
- my_strdup(&format,
+ my_strdup(497, &format,
      get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"tedax_format",0));
  if((name==NULL) ) return; /* do no netlist unwanted insts(no format) */
  no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
@@ -1289,11 +1296,11 @@ void print_tedax_element(FILE *fd, int inst)
     * int slot;
     * char *pinnumber_ptr;
    */
-   my_strdup(&pinname, get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"name",0));
-   if(!pinname) my_strdup(&pinnumber, "--UNDEF--");
+   my_strdup(498, &pinname, get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"name",0));
+   if(!pinname) my_strdup(499, &pinnumber, "--UNDEF--");
    else
-     my_strdup(&pinnumber, get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"pinnumber",0));
-   if(!pinnumber) my_strdup(&pinnumber, "--UNDEF--");
+     my_strdup(500, &pinnumber, get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"pinnumber",0));
+   if(!pinnumber) my_strdup(501, &pinnumber, "--UNDEF--");
    /*
     * pinnumber_ptr = pinnumber;
     * if( (ss=strchr(name, ':')) ) {
@@ -1349,7 +1356,7 @@ void print_tedax_element(FILE *fd, int inst)
    if(token_pos>=sizetok)
    {
     sizetok+=CADCHUNKALLOC;
-    my_realloc(&token,sizetok);
+    my_realloc(502, &token,sizetok);
    }
  
    if(state==XTOKEN) {
@@ -1413,7 +1420,7 @@ void print_tedax_element(FILE *fd, int inst)
       if( strchr(token, ':') )  {
 
         int n;
-        char *subtok = my_malloc(sizetok * sizeof(char));
+        char *subtok = my_malloc(503, sizetok * sizeof(char));
         subtok[0]='\0';
         n=-1;
         sscanf(token+2, "%d:%s", &n, subtok);
@@ -1445,7 +1452,7 @@ void print_tedax_element(FILE *fd, int inst)
       size_t s;
       char *tclcmd=NULL;
       s = token_pos + strlen(name) + strlen(inst_ptr[inst].name) + 100;
-      tclcmd = my_malloc(s);
+      tclcmd = my_malloc(504, s);
       Tcl_ResetResult(interp);
       my_snprintf(tclcmd, s, "tclpropeval {%s} {%s} {%s}", token, name, inst_ptr[inst].name);
       tcleval(tclcmd);
@@ -1496,17 +1503,17 @@ void print_verilog_element(FILE *fd, int inst)
 
 
  /* 20080915 use generic_type property to decide if some properties are strings, see later */
- my_strdup(&generic_type, get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"generic_type",2));
+ my_strdup(505, &generic_type, get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"generic_type",2));
  
  if(get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"verilog_format",2)[0] != '\0') {
   print_verilog_primitive(fd, inst); /*15112003 */
   return;
  }
- my_strdup(&template,
+ my_strdup(506, &template,
      (inst_ptr[inst].ptr+instdef)->templ); /* 20150409 */
 
- my_strdup(&name,inst_ptr[inst].instname); /* 20161210 */
- /* my_strdup(&name,get_tok_value(inst_ptr[inst].prop_ptr,"name",0)); */
+ my_strdup(507, &name,inst_ptr[inst].instname); /* 20161210 */
+ /* my_strdup(508, &name,get_tok_value(inst_ptr[inst].prop_ptr,"name",0)); */
 
  if(name==NULL) return;
  no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
@@ -1536,13 +1543,13 @@ void print_verilog_element(FILE *fd, int inst)
   if(value_pos>=sizeval)
   {
    sizeval+=CADCHUNKALLOC;
-   my_realloc(&value,sizeval);
+   my_realloc(509, &value,sizeval);
   }
 
   if(token_pos>=sizetok)
   {
    sizetok+=CADCHUNKALLOC;
-   my_realloc(&token,sizetok);
+   my_realloc(510, &token,sizetok);
   }
 
   if(state==XTOKEN) token[token_pos++]=c;
@@ -1651,8 +1658,8 @@ const char *pin_node(int i, int j, int *mult, int hash_prefix_unnamed_net)
  {
    *mult=1;
 
-   my_strdup(&name, inst_ptr[i].instname); /* 20161210 */
-   /* my_strdup(&name , get_tok_value(inst_ptr[i].prop_ptr,"name",0) ); */
+   my_strdup(511, &name, inst_ptr[i].instname); /* 20161210 */
+   /* my_strdup(512, &name , get_tok_value(inst_ptr[i].prop_ptr,"name",0) ); */
 
    my_snprintf(errstr, S(errstr), "error: unconnected pin,  inst %d -- %s\n", i,  name ) ;
    statusmsg(errstr,2);
@@ -1679,13 +1686,13 @@ void print_vhdl_primitive(FILE *fd, int inst) /* netlist  primitives, 20071217 *
  int quote=0; /* 20171029 */
  /* struct hashentry *ptr; */
 
- my_strdup(&template,
+ my_strdup(513, &template,
      /* get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"template",2)); */
      (inst_ptr[inst].ptr+instdef)->templ); /* 20150409 20171103 */
- my_strdup(&name, inst_ptr[inst].instname); /* 20161210 */
- /* my_strdup(&name,get_tok_value(inst_ptr[inst].prop_ptr,"name",0)); */
+ my_strdup(514, &name, inst_ptr[inst].instname); /* 20161210 */
+ /* my_strdup(515, &name,get_tok_value(inst_ptr[inst].prop_ptr,"name",0)); */
 
- my_strdup(&format,
+ my_strdup(516, &format,
      get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"vhdl_format",0)); /* 20071217 */
  if((name==NULL) || (format==NULL) ) return; /*do no netlist unwanted insts(no format) */
  no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
@@ -1713,7 +1720,7 @@ void print_vhdl_primitive(FILE *fd, int inst) /* netlist  primitives, 20071217 *
   if(token_pos>=sizetok)
   {
    sizetok+=CADCHUNKALLOC;
-   my_realloc(&token,sizetok);
+   my_realloc(517, &token,sizetok);
   }
 
   if(state==XTOKEN) {
@@ -1793,7 +1800,7 @@ void print_vhdl_primitive(FILE *fd, int inst) /* netlist  primitives, 20071217 *
      size_t s;
      char *tclcmd=NULL;
      s = token_pos + strlen(name) + strlen(inst_ptr[inst].name) + 100;
-     tclcmd = my_malloc(s);
+     tclcmd = my_malloc(518, s);
      Tcl_ResetResult(interp);
      my_snprintf(tclcmd, s, "tclpropeval {%s} {%s} {%s}", token, name, inst_ptr[inst].name);
      tcleval(tclcmd);
@@ -1839,13 +1846,13 @@ void print_verilog_primitive(FILE *fd, int inst) /* netlist switch level primiti
  int quote=0; /* 20171029 */
  /* struct hashentry *ptr; */
 
- my_strdup(&template,
+ my_strdup(519, &template,
      (inst_ptr[inst].ptr+instdef)->templ); /* 20150409 */
 
- my_strdup(&name,inst_ptr[inst].instname); /*20161210 */
- /* my_strdup(&name,get_tok_value(inst_ptr[inst].prop_ptr,"name",0)); */
+ my_strdup(520, &name,inst_ptr[inst].instname); /*20161210 */
+ /* my_strdup(521, &name,get_tok_value(inst_ptr[inst].prop_ptr,"name",0)); */
 
- my_strdup(&format,
+ my_strdup(522, &format,
      get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"verilog_format",0));
  if((name==NULL) || (format==NULL) ) return; /*do no netlist unwanted insts(no format) */
  no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
@@ -1873,7 +1880,7 @@ void print_verilog_primitive(FILE *fd, int inst) /* netlist switch level primiti
   if(token_pos>=sizetok)
   {
    sizetok+=CADCHUNKALLOC;
-   my_realloc(&token,sizetok);
+   my_realloc(523, &token,sizetok);
   }
 
   if(state==XTOKEN) {
@@ -1953,7 +1960,7 @@ void print_verilog_primitive(FILE *fd, int inst) /* netlist switch level primiti
      size_t s;
      char *tclcmd=NULL;
      s = token_pos + strlen(name) + strlen(inst_ptr[inst].name) + 100;
-     tclcmd = my_malloc(s);
+     tclcmd = my_malloc(524, s);
      Tcl_ResetResult(interp);
      my_snprintf(tclcmd, s, "tclpropeval {%s} {%s} {%s}", token, name, inst_ptr[inst].name);
      tcleval(tclcmd);
@@ -1994,7 +2001,7 @@ char *find_nth(char *str, char sep, int n)
   char *ptr;
   int count;
 
-  my_strdup(&ss, str);
+  my_strdup(525, &ss, str);
   if(!ss) return empty;
   for(i=0, count=1, ptr=ss; ss[i] != 0; i++) {
     if(ss[i]==sep) {
@@ -2029,8 +2036,8 @@ char *translate(int inst, char* s)
  int escape=0; /* 20161210 */
  
  size=CADCHUNKALLOC;
- if(result==NULL) result=my_malloc(size);
- else my_realloc(&result,size);
+ if(result==NULL) result=my_malloc(526, size);
+ else my_realloc(527, &result,size);
 
   if(debug_var>=2) fprintf(errfp, "translate(): substituting props in <%s>, instance <%s>\n",
         s?s:"NULL",inst_ptr[inst].instname?inst_ptr[inst].instname:"NULL");
@@ -2056,13 +2063,13 @@ char *translate(int inst, char* s)
   if(result_pos>=size)
   {
    size+=CADCHUNKALLOC;
-   my_realloc(&result,size);
+   my_realloc(528, &result,size);
   }
 
   if(token_pos>=sizetok)
   {
    sizetok+=CADCHUNKALLOC;
-   my_realloc(&token,sizetok);
+   my_realloc(529, &token,sizetok);
   }
 
   if(state==XTOKEN) token[token_pos++]=c;
@@ -2078,7 +2085,7 @@ char *translate(int inst, char* s)
     tmp=get_tok_value_size;  /* strlen(value); */  /* 20180926 */
     if(result_pos + tmp>=size) {
      size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
-     my_realloc(&result,size);
+     my_realloc(530, &result,size);
     }
     memcpy(result+result_pos, value, tmp+1); /* 20180923 */
     result_pos+=tmp;
@@ -2087,13 +2094,13 @@ char *translate(int inst, char* s)
     tmp=strlen(tmp_sym_name);
     if(result_pos + tmp>=size) {
      size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
-     my_realloc(&result,size);
+     my_realloc(531, &result,size);
     }
     memcpy(result+result_pos,tmp_sym_name, tmp+1); /* 20180923 */
     result_pos+=tmp;
    } else if(token[0]=='@' && token[1]=='#') {  /* 20180911 */
      int n; 
-     char *subtok = my_malloc(sizetok * sizeof(char));
+     char *subtok = my_malloc(532, sizetok * sizeof(char));
 
      subtok[0]='\0';
      n=-1;
@@ -2110,7 +2117,7 @@ char *translate(int inst, char* s)
          tmp=strlen(value);
          if(result_pos + tmp>=size) {
            size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
-           my_realloc(&result,size);
+           my_realloc(533, &result,size);
          }
          memcpy(result+result_pos, value, tmp+1); /* 20180923 */
          result_pos+=tmp;
@@ -2125,7 +2132,7 @@ char *translate(int inst, char* s)
     tmp=strlen( asctime(tm));
     if(result_pos + tmp>=size) {
      size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
-     my_realloc(&result,size);
+     my_realloc(534, &result,size);
     }
     memcpy(result+result_pos,asctime(tm), tmp+1); /* 20180923 */
     result_pos+=tmp;
@@ -2136,7 +2143,7 @@ char *translate(int inst, char* s)
     tmp=strlen( asctime(tm));
     if(result_pos + tmp>=size) {
      size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
-     my_realloc(&result,size);
+     my_realloc(535, &result,size);
     }
     memcpy(result+result_pos,asctime(tm), tmp+1); /* 20180923 */
     result_pos+=tmp;
@@ -2147,7 +2154,7 @@ char *translate(int inst, char* s)
       tmp=strlen( asctime(tm));
       if(result_pos + tmp>=size) {
        size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
-       my_realloc(&result,size);
+       my_realloc(536, &result,size);
       }
       memcpy(result+result_pos,asctime(tm), tmp+1); /* 20180923 */
       result_pos+=tmp;
@@ -2156,7 +2163,7 @@ char *translate(int inst, char* s)
      tmp=strlen(schematic[currentsch]);
      if(result_pos + tmp>=size) {
       size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
-      my_realloc(&result,size);
+      my_realloc(537, &result,size);
      }
      memcpy(result+result_pos,schematic[currentsch], tmp+1); /* 20180923 */
      result_pos+=tmp;
@@ -2166,7 +2173,7 @@ char *translate(int inst, char* s)
      if(result_pos + tmp>=size)
      {
       size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
-      my_realloc(&result,size);
+      my_realloc(538, &result,size);
      }
      memcpy(result+result_pos,inst_ptr[inst].prop_ptr, tmp+1); /* 20180923 */
      result_pos+=tmp;
@@ -2177,7 +2184,7 @@ char *translate(int inst, char* s)
      if(result_pos + tmp>=size)
      {
       size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
-      my_realloc(&result,size);
+      my_realloc(539, &result,size);
      }
      memcpy(result+result_pos,schvhdlprop, tmp+1); /* 20180923 */
      result_pos+=tmp;
@@ -2189,7 +2196,7 @@ char *translate(int inst, char* s)
      if(result_pos + tmp>=size)
      {
       size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
-      my_realloc(&result,size);
+      my_realloc(540, &result,size);
      }
      memcpy(result+result_pos,schprop, tmp+1); /* 20180923 */
      result_pos+=tmp;
@@ -2202,7 +2209,7 @@ char *translate(int inst, char* s)
      if(result_pos + tmp>=size)
      {
       size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
-      my_realloc(&result,size);
+      my_realloc(541, &result,size);
      }
      memcpy(result+result_pos,schtedaxprop, tmp+1); /* 20180923 */
      result_pos+=tmp;
@@ -2215,7 +2222,7 @@ char *translate(int inst, char* s)
      if(result_pos + tmp>=size)
      {
       size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
-      my_realloc(&result,size);
+      my_realloc(542, &result,size);
      }
      memcpy(result+result_pos,schverilogprop, tmp+1); /* 20180923 */
      result_pos+=tmp;
@@ -2270,7 +2277,7 @@ struct int_hashentry *int_hash_lookup(struct int_hashentry **table, int token, i
   if( !entry ) { /* empty slot */
    if(!remove) { /* insert data */
     s=sizeof( struct int_hashentry );
-    entry=(struct int_hashentry *) my_malloc(s);
+    entry=(struct int_hashentry *) my_malloc(543, s);
     entry->next=NULL;
     entry->token=token;
     *preventry=entry;

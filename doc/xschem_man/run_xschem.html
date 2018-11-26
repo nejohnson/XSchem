@@ -25,11 +25,53 @@ p{padding: 10px  30px 10px;}
 
  <pre class="code">
 user:~$ xschem
-% </pre>
+ </pre>
  <p> the xschem window should appear. If <kbd>xschem</kbd> is not in the search path then specify 
      its full pathname.
  </p>
  <img src="xschem_home.png"> 
+
+
+ <h3>XSCHEM COMMAND LINE OPTIONS </H3>
+ <p>
+  xschem accepts short (-h) or long (--help) options:
+ </p>
+ <pre class="code">
+   usage: xschem [options] [schematic | symbol ]
+Options:
+  -h  --help          print this help
+  -n  --netlist       do a netlist of the given schematic cell
+  -v  --version       print version information and exit.
+  -V  --vhdl          set netlist type to VHDL
+  -S  --simulate      run a simulation of the current schematc file 
+                      (spice/Verilog/VHDL, depending on the netlist 
+                      type chosen).
+  -w  --verilog       set netlist type to Verilog
+  -i  --no_rcload     do not load any xschemrc file
+  -t  --tedax         set netlist type to tEDAx
+  -s  --spice         set netlist type to SPICE
+  -3  --a3page        set page size for pdf export to A3
+  -x  --no_x          dont use X (only command mode)
+  -z  --rainbow       use a raibow-looking layer color table
+  -W  --waves         show simulation waveforms
+  -f  --flat_netlist  set flat netlist (for spice format only)
+  -r  --no_readline   start without the tclreadline package ( this is
+                      necessary if stdin and stdout are to be redirected
+                      for example to /dev/null).
+  -c  --color_ps      set color postscript
+  --rcfile file&gt;      use &lt;file&gt; as a rc file for startup instead of the
+                      default xschemrc.
+  -p  --postscript    export pdf schematic
+      --png           export png schematic
+      --svg           export svg schematic
+  -q  --quit          quit after doing things (no interactive mode)
+  -l &lt;file&gt;
+  --log &lt;file&gt;        set a log file
+  -d &lt;n&gt;
+  --debug &lt;n&gt;         set debug level:  1,  2,  3,..  C program debug
+                                       -1, -2, -3...  TCL frontend debug
+
+ </pre>
  <h3> CREATING A NEW SCHEMATIC</H3>
  <p>
   To create a new schematic one possible approach is to delete the whole drawing window and save with a 
@@ -39,12 +81,12 @@ user:~$ xschem
  <img src="xschem_all_selected.png"> 
  <p> 
   Use the <kbd>Delete</kbd> key to delete all selected objects.
-  Now press the <kbd>'$lt;ctrl shift&gt;s'</kbd> key or use the menu <kbd>'Save As'</kbd> function, 
+  Now press the <kbd>'&lt;ctrl shift&gt;s'</kbd> key or use the menu <kbd>'Save As'</kbd> function, 
   use the TCL fileselector to go to a XSCHEM library
   (we will cover libraries more in detail later, XSCHEM libraries are just directories where 
   schematic files (.sch) or symbol files (.sym) are stored).
-  in XSCHEM all design libraries are placed under the <kbd>XSCHEM_DESIGN_PATH</kbd> defined in the 
-  <kbd>.schem</kbd> file. Choose for example <kbd> ~/xschem_library/mylib</kbd> and write <kbd>test.sch</kbd>
+  in XSCHEM all design libraries are placed in the locations specified by <kbd>XSCHEM_DESIGN_PATH</kbd> defined in the 
+  <kbd>xschemrc</kbd> file. Choose for example <kbd> ~/xschem_library/mylib</kbd> and write <kbd>test.sch</kbd>
   as the schematic name.
  </p>
  <img src="xschem_saveas.png"> 
@@ -67,7 +109,7 @@ xschem ${HOME}/xschem_library/mylib/test.sch
  <p>
  you can load <kbd>test.sch</kbd> when xschem is running by using the load command <kbd>'&lt;ctrl&gt;o'</kbd> key or 
  by menu <kbd>Open</kbd> command. Use the file selector dialog to locate the schematic and load it in.
- When loading a new file XSCHEM asks to save the currently loaded schematic if it has ben modified.
+ When loading a new file XSCHEM asks to save the currently loaded schematic if it has been modified.
  </p>
  <!-- end of slide -->
  <div class="filler"></div>

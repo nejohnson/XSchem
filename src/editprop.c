@@ -46,32 +46,32 @@ char *my_strtok_r(char *str, const char *delim, char **saveptr)
   else return NULL; /* no more tokens */
 }
 
-size_t my_strdup(char **dest, const char *src) /* empty source string --> dest=NULL */
+size_t my_strdup(int id, char **dest, const char *src) /* empty source string --> dest=NULL */
 {
  size_t len;
  if(*dest!=NULL) { 
-   if(debug_var>=3) fprintf(errfp,"  my_strdup:  calling my_free %lx\n", (unsigned long)*dest);
+   if(debug_var>=3) fprintf(errfp,"my_strdup():  calling my_free\n");
    my_free(dest);
  }
  if(src!=NULL && src[0]!='\0')  
  {
   /* 20180923 */
   len = strlen(src)+1;
-  *dest = my_malloc(len);
+  *dest = my_malloc(id, len);
   memcpy(*dest, src, len);
   /* *dest=strdup(src); */
-  if(debug_var>=3) fprintf(errfp,"my_strdup(): duplicated %lx string %s\n",(unsigned long)*dest, src);
+  if(debug_var>=3) fprintf(errfp,"my_strdup(%d,): duplicated string %s\n", id, src);
   return len-1;
  }
  return 0;
 }
 
 /* 20171004 copy at most n chars, adding a null char at end */
-void my_strndup(char **dest, const char *src, int n) /* empty source string --> dest=NULL */
+void my_strndup(int id, char **dest, const char *src, int n) /* empty source string --> dest=NULL */
 
 {
  if(*dest!=NULL) {
-   if(debug_var>=3) fprintf(errfp,"  my_strdup:  calling my_free %lx\n", (unsigned long)*dest);
+   if(debug_var>=3) fprintf(errfp,"  my_strndup:  calling my_free\n");
    my_free(dest);
  }
  if(src!=NULL && src[0]!='\0')
@@ -79,14 +79,14 @@ void my_strndup(char **dest, const char *src, int n) /* empty source string --> 
   /* 20180924 replace strndup() */
   char *p = memchr(src, '\0', n);
   if(p) n = p - src;
-  *dest = my_malloc(n+1);
+  *dest = my_malloc(id, n+1);
   if(*dest) {
     memcpy(*dest, src, n);
     (*dest)[n] = '\0';
   }
   /* *dest=strndup(src, n); */
 
-  if(debug_var>=3) fprintf(errfp,"my_strndup(): duplicated %lx string %s\n",(unsigned long)*dest, src);
+  if(debug_var>=3) fprintf(errfp,"my_strndup(%d,): duplicated string %s\n", id, src);
  }
 }
 
@@ -206,7 +206,7 @@ int my_snprintf(char *string, int size, const char *format, ...)
     memcpy(string + n, prev, l+1);
     n += l;
   } else {
-    if(debug_var>=1) fprintf(errfp, "my_snprintf: overflow, target size=%d, format=%s\n", size, format);
+    if(debug_var>=1) fprintf(errfp, "my_snprintf(): overflow, target size=%d, format=%s\n", size, format);
   }
   
   va_end(args);
@@ -215,110 +215,119 @@ int my_snprintf(char *string, int size, const char *format, ...)
 }
 #endif /* HAS_SNPRINTF */
 
-size_t my_strdup2(char **dest, const char *src) /* 20150409 duplicates also empty string  */
+size_t my_strdup2(int id, char **dest, const char *src) /* 20150409 duplicates also empty string  */
 {
  size_t len;
  if(*dest!=NULL) {
-   if(debug_var>=3) fprintf(errfp,"  my_strdup:  calling my_free %lx\n", (unsigned long)*dest);
+   if(debug_var>=3) fprintf(errfp,"  my_strdup2():  calling my_free\n");
    my_free(dest);
  }
  if(src!=NULL)
  {
   /* 20180923 */
   len = strlen(src)+1;
-  *dest = my_malloc(len);
+  *dest = my_malloc(id, len);
   memcpy(*dest, src, len);
   /* *dest=strdup(src); */
-  if(debug_var>=3) fprintf(errfp,"my_strdup2(): duplicated %lx string %s\n",(unsigned long)*dest, src);
+  if(debug_var>=3) fprintf(errfp,"my_strdup2(%d,): duplicated string %s\n", id, src);
   return len-1;
  }
  return 0;
 }
 
-size_t my_strcat(char **str, const char *append_str)
+size_t my_strcat(int id, char **str, const char *append_str)
 {
   size_t s, a;
-  if(debug_var>=3) fprintf(errfp,"my_strcat(): str=%s  append_str=%s\n", *str, append_str);
+  if(debug_var>=3) fprintf(errfp,"my_strcat(%d,): str=%s  append_str=%s\n", id, *str, append_str);
   if( *str != NULL)
   {
     s = strlen(*str);
     if(append_str == NULL || append_str[0]=='\0') return s;
     a = strlen(append_str) + 1;
-    my_realloc(str, s + a );
+    my_realloc(id, str, s + a );
     memcpy(*str + s, append_str, a); /* 20180923 */
-    if(debug_var >= 3) fprintf(errfp,"my_strcat(): reallocated %lx, string %s\n",(unsigned long)*str, *str);
+    if(debug_var >= 3) fprintf(errfp,"my_strcat(%d,): reallocated string %s\n", id, *str);
     return s + a - 1;
   } else {
     if(append_str == NULL || append_str[0] == '\0') return 0;
     a = strlen(append_str) + 1;
-    *str = my_malloc(a);
+    *str = my_malloc(id, a);
     memcpy(*str, append_str, a); /* 20180923 */
-    if(debug_var>=3) fprintf(errfp,"my_strcat(): allocated %lx, string %s\n",(unsigned long)*str, *str);
+    if(debug_var>=3) fprintf(errfp,"my_strcat(%d,): allocated string %s\n", id, *str);
     return a - 1;
   }
 }
 
-size_t my_strncat(char **str, size_t n, const char *append_str)
+size_t my_strncat(int id, char **str, size_t n, const char *append_str)
 {
  size_t s, a;
- if(debug_var>=3) fprintf(stderr,"my_strncat(): str=%s  append_str=%s\n", *str, append_str);
+ if(debug_var>=3) fprintf(stderr,"my_strncat(%d,): str=%s  append_str=%s\n", id, *str, append_str);
  a = strlen(append_str)+1;
  if(a>n+1) a=n+1;
  if( *str != NULL)
  {
   s = strlen(*str);
   if(append_str == NULL || append_str[0]=='\0') return s;
-  my_realloc(str, s + a );
+  my_realloc(id, str, s + a );
   memcpy(*str+s, append_str, a); /* 20180923 */
   *(*str+s+a) = '\0';
-  if(debug_var>=3) fprintf(stderr,"my_strncat(): reallocated %lx, string %s\n",(unsigned long)*str, *str);
+  if(debug_var>=3) fprintf(stderr,"my_strncat(%d,): reallocated string %s\n", id, *str);
   return s + a -1;
  }
  else
  {
   if(append_str == NULL || append_str[0]=='\0') return 0;
-  *str = my_malloc( a );
+  *str = my_malloc(id,  a );
   memcpy(*str, append_str, a); /* 20180923 */
   *(*str+a) = '\0';
-  if(debug_var>=3) fprintf(stderr,"my_strncat(): allocated %lx, string %s\n",(unsigned long)*str, *str);
+  if(debug_var>=3) fprintf(stderr,"my_strncat(%d,): allocated string %s\n", id, *str);
   return a -1;
  }
 }
 
 
-void *my_calloc(size_t nmemb, size_t size)
+void *my_calloc(int id, size_t nmemb, size_t size)
 {
    void *ptr;
    if(size*nmemb > 0) {
      ptr=calloc(nmemb, size);
+     if(ptr == NULL) fprintf(errfp,"my_calloc(%d,): allocation failure\n", id);
      if(debug_var>=3) 
-       fprintf(errfp, "my_calloc(): allocating %lx ,  %lu bytes\n",
-               (unsigned long)ptr, (unsigned long) (size*nmemb));
+       fprintf(errfp, "my_calloc(%d,): allocating %lx , %lu bytes\n",
+               id, (unsigned long)ptr, (unsigned long) (size*nmemb));
    }
    else ptr = NULL;
    return ptr;
 }
 
-void *my_malloc(size_t size) 
+void *my_malloc(int id, size_t size) 
 {
  void *ptr;
  if(size>0) {
    ptr=malloc(size);
-   if(debug_var>=3) fprintf(errfp, "my_malloc(): allocating %lx , %lu bytes\n",
-     (unsigned long)ptr, (unsigned long) size);
+  if(ptr == NULL) fprintf(errfp,"my_malloc(%d,): allocation failure\n", id);
+   if(debug_var>=3) fprintf(errfp, "my_malloc(%d,): allocating %lx , %lu bytes\n",
+     id, (unsigned long)ptr, (unsigned long) size);
  }
  else ptr=NULL;
  return ptr;
 }
 
-void my_realloc(void *ptr,size_t size)
+void my_realloc(int id, void *ptr,size_t size)
 {
  unsigned long a;
  a = (unsigned long) *(void **)ptr;
- *(void **)ptr=realloc(*(void **)ptr,size);
- if(debug_var>=3) 
-   fprintf(errfp, "my_realloc(): reallocating %lx --> %lx to %lu bytes\n",
-           a, (unsigned long) *(void **)ptr,(unsigned long) size);
+ if(size == 0) {
+   free(*(void **)ptr);
+   *(void **)ptr=NULL;
+   if(debug_var>=3) fprintf(errfp, "my_free():  my_realloc_freeing %lx\n",(unsigned long)*(void **)ptr);
+ } else {
+   *(void **)ptr=realloc(*(void **)ptr,size);
+    if(*(void **)ptr == NULL) fprintf(errfp,"my_realloc(%d,): allocation failure\n", id);
+   if(debug_var>=3) 
+     fprintf(errfp, "my_realloc(%d,): reallocating %lx --> %lx to %lu bytes\n",
+           id, a, (unsigned long) *(void **)ptr,(unsigned long) size);
+ }
 
 } 
 
@@ -360,7 +369,7 @@ void set_inst_prop(int i)
      i, inst_ptr[i].name, inst_ptr[i].prop_ptr, ptr);
   if(!inst_ptr[i].prop_ptr && get_tok_value(ptr,"name",0)[0]) 
   {
-    my_strdup(&inst_ptr[i].prop_ptr, ptr);
+    my_strdup(69, &inst_ptr[i].prop_ptr, ptr);
   }
   if(get_tok_value(inst_ptr[i].prop_ptr, "name", 0)[0] ) {
     tmp = NULL;
@@ -368,7 +377,7 @@ void set_inst_prop(int i)
     my_free(&inst_ptr[i].prop_ptr);
     inst_ptr[i].prop_ptr = tmp;
   }
-  my_strdup2(&inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name",0)); /* 20150409 */
+  my_strdup2(70, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name",0)); /* 20150409 */
 }
 
 
@@ -428,7 +437,7 @@ void edit_text_property(int x)
    if(strcmp(tclgetvar("rcode"),"") )
    {
      if(debug_var>=1) fprintf(errfp, "edit_text_property(): rcode !=\"\"\n");
-     modified=1; push_undo(); /* 20150327 */
+     set_modify(1); push_undo(); /* 20150327 */
      bbox(BEGIN,0.0,0.0,0.0,0.0);
      for(k=0;k<lastselected;k++)
      {
@@ -482,11 +491,11 @@ void edit_text_property(int x)
                    (fabs(yy1 - pcy) < CADGRID*6 || fabs(yy2 - pcy) < CADGRID*6) )
                ) {
                  if(x==0)  /* 20080804 */
-                   my_strdup(&rect[PINLAYER][l].prop_ptr, 
+                   my_strdup(71, &rect[PINLAYER][l].prop_ptr, 
                      subst_token(rect[PINLAYER][l].prop_ptr, "name", 
                      (char *) tclgetvar("txt")) );
                  else
-                   my_strdup(&rect[PINLAYER][l].prop_ptr, 
+                   my_strdup(72, &rect[PINLAYER][l].prop_ptr, 
                      subst_token(rect[PINLAYER][l].prop_ptr, "name", 
                      (char *) tclgetvar("retval")) );
                }
@@ -494,14 +503,14 @@ void edit_text_property(int x)
            } 
          }
          if(x==0)  /* 20080804 */
-           my_strdup(&textelement[sel].txt_ptr, (char *) tclgetvar("txt"));
+           my_strdup(73, &textelement[sel].txt_ptr, (char *) tclgetvar("txt"));
          else /* 20080804 */
-           my_strdup(&textelement[sel].txt_ptr, (char *) tclgetvar("retval"));
+           my_strdup(74, &textelement[sel].txt_ptr, (char *) tclgetvar("retval"));
          
        }
        if(x==0) {
-       my_strdup(&textelement[sel].prop_ptr,(char *) tclgetvar("props"));
-       my_strdup(&textelement[sel].font, get_tok_value(textelement[sel].prop_ptr, "font", 0));/*20171206 */
+       my_strdup(75, &textelement[sel].prop_ptr,(char *) tclgetvar("props"));
+       my_strdup(76, &textelement[sel].font, get_tok_value(textelement[sel].prop_ptr, "font", 0));/*20171206 */
        strlayer = get_tok_value(textelement[sel].prop_ptr, "layer", 0); /* 20171206 */
        if(strlayer[0]) textelement[sel].layer = atoi(strlayer);
        else textelement[sel].layer=-1;
@@ -537,7 +546,7 @@ static int netlist_commands;
 /* x=0 use text widget   x=1 use vim editor */
 void edit_symbol_property(int x)
 {
- static char *result=NULL;
+   char *result=NULL;
 
    i=selectedgroup[0].n;
    netlist_commands =  !strcmp(         /* 20070318 */
@@ -550,16 +559,17 @@ void edit_symbol_property(int x)
 
    if(x==0) {
      tcleval("edit_prop {Input property:}");
-     my_strdup(&result, Tcl_GetStringResult(interp));
+     my_strdup(77, &result, Tcl_GetStringResult(interp));
    }
    else {
      if(netlist_commands && x==1)    tcleval("edit_vi_netlist_prop {Input property:}");
      else if(x==1)    tcleval("edit_vi_prop {Input property:}");
      else if(x==2)    tcleval("viewdata $::retval");
-     my_strdup(&result, Tcl_GetStringResult(interp));
+     my_strdup(78, &result, Tcl_GetStringResult(interp));
    }
    if(debug_var>=1) fprintf(errfp, "edit_symbol_property(): before update_symbol, modified=%d\n", modified);
    update_symbol(result, x);
+   my_free(&result);
    if(debug_var>=1) fprintf(errfp, "edit_symbol_property(): done update_symbol, modified=%d\n", modified);
    i=-1; /* 20160423 */
 }
@@ -590,12 +600,12 @@ void update_symbol(const char *result, int x)
 
    if(netlist_commands && x==1) {
    /* 20070318 */
-     my_strdup( &new_prop,
+     my_strdup(79,  &new_prop,
        subst_token(old_prop, "value", (char *) tclgetvar("retval") )
      );
    }
    else {
-     my_strdup(&new_prop, (char *) tclgetvar("retval"));
+     my_strdup(80, &new_prop, (char *) tclgetvar("retval"));
      if(debug_var>=1) fprintf(errfp, "update_symbol(): new_prop=%s\n", new_prop);
    }
 
@@ -624,7 +634,7 @@ void update_symbol(const char *result, int x)
     /* 20150911 */
     /*     | */
     if(strcmp(symbol, inst_ptr[i].name)) {
-      modified=1;
+      set_modify(1);
       prepared_hash_instances=0; /* 20171224 */
       prepared_netlist_structs=0;
       prepared_hilight_structs=0;
@@ -632,7 +642,7 @@ void update_symbol(const char *result, int x)
     sym_number=match_symbol(symbol); /* check if exist */
     if(sym_number>=0)
     {
-     my_strdup(&template, (instdef+sym_number)->templ); /* 20150409 */
+     my_strdup(81, &template, (instdef+sym_number)->templ); /* 20150409 */
      prefix=(get_tok_value(template, "name",0))[0]; /* get new symbol prefix  */
     }
    }
@@ -656,7 +666,7 @@ void update_symbol(const char *result, int x)
      delete_inst_node(i); /* 20180208 fix crashing bug: delete node info if changing symbol */
                           /* if number of pins is different we must delete these data *before* */
                           /* changing ysmbol, otherwise i might end up deleting non allocated data. */
-     my_strdup(&inst_ptr[i].name,symbol);
+     my_strdup(82, &inst_ptr[i].name,symbol);
      inst_ptr[i].ptr=sym_number;
     }
 
@@ -670,9 +680,9 @@ void update_symbol(const char *result, int x)
      if(debug_var>=1) fprintf(errfp, "update_symbol(): no_change_props=%d\n", no_change_props);
      if(only_different) {
            if( set_different_token(&inst_ptr[i].prop_ptr, new_prop, old_prop) ) {
-             my_strdup2(&inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); /* 20160308 */
+             my_strdup2(83, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); /* 20160308 */
                                                                                                 /* allow change name */
-             modified=1;
+             set_modify(1);
              prepared_hash_instances=0; /* 20171224 */
              prepared_netlist_structs=0;
              prepared_hilight_structs=0;
@@ -684,20 +694,20 @@ void update_symbol(const char *result, int x)
          /* .................... <-- 20111205 20160308 changed from if(inst_ptr... && strcmp...) */
          if(!inst_ptr[i].prop_ptr || strcmp(inst_ptr[i].prop_ptr, new_prop)) {
            if(debug_var>=1) fprintf(errfp, "update_symbol(): changing prop: |%s| -> |%s|\n", inst_ptr[i].prop_ptr, new_prop);
-           my_strdup(&inst_ptr[i].prop_ptr, new_prop);
-           my_strdup2(&inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); /* 20150409 */
-           modified=1;
+           my_strdup(84, &inst_ptr[i].prop_ptr, new_prop);
+           my_strdup2(85, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); /* 20150409 */
+           set_modify(1);
            prepared_hash_instances=0; /* 20171224 */
            prepared_netlist_structs=0;
            prepared_hilight_structs=0;
          }
        }  else {  /* 20111205 */
-         my_strdup(&inst_ptr[i].prop_ptr, "");
-         my_strdup2(&inst_ptr[i].instname, ""); /* 20150409 */
+         my_strdup(86, &inst_ptr[i].prop_ptr, "");
+         my_strdup2(87, &inst_ptr[i].instname, ""); /* 20150409 */
        }
      }
     }
-    my_strdup(&name, inst_ptr[i].instname); /* 20150409 */
+    my_strdup(88, &name, inst_ptr[i].instname); /* 20150409 */
     if(name && name[0] )  /* 30102003 */
     {  
      if(debug_var>=1) fprintf(errfp, "update_symbol(): prefix!='\\0', name=%s\n", name);
@@ -706,10 +716,10 @@ void update_symbol(const char *result, int x)
      if(prefix) name[0]=prefix; /* change prefix if changing symbol type; */
 
      if(debug_var>=1) fprintf(errfp, "update_symbol(): name=%s\n", name);
-     my_strdup(&ptr,subst_token(inst_ptr[i].prop_ptr, "name", name) );
+     my_strdup(89, &ptr,subst_token(inst_ptr[i].prop_ptr, "name", name) );
                     /* set name of current inst */
      new_prop_string(&inst_ptr[i].prop_ptr, ptr,0); /* set new prop_ptr */
-     my_strdup2(&inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name",0)); /* 20150409 */
+     my_strdup2(90, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name",0)); /* 20150409 */
  
      type=instdef[inst_ptr[i].ptr].type; /* 20150409 */
      cond= !type || (strcmp(type,"label") && strcmp(type,"ipin") &&
@@ -785,9 +795,9 @@ void fill_symbol_editprop_form(int x)
 
    /* moved here from update_symbol() 20110413 */
    if(netlist_commands && x==1) {
-     my_strdup(&old_prop, inst_ptr[i].prop_ptr);
+     my_strdup(91, &old_prop, inst_ptr[i].prop_ptr);
    } else {
-     my_strdup(&old_prop, (char *) tclgetvar("retval"));
+     my_strdup(92, &old_prop, (char *) tclgetvar("retval"));
    }
    /* /20110413 */
 
@@ -811,7 +821,7 @@ void change_elem_order(void)
      if(strcmp(tclgetvar("rcode"),"") )
      {
       push_undo(); /* 20150327 */
-      modified=1;
+      set_modify(1);
       prepared_hash_instances=0; /* 20171224 */
       prepared_netlist_structs=0;
       prepared_hilight_structs=0;
@@ -892,27 +902,27 @@ void edit_property(int x)
    {
      if(current_type==SYMBOL && /* 20120404 added case for symbol editing, use schvhdlprop regardless of netlisting mode */
         (!schvhdlprop || strcmp(schvhdlprop, tclgetvar("retval") ) ) ) { /* symbol edit */
-        modified=1; push_undo(); /* 20150327 */
-        my_strdup(&schvhdlprop, (char *) tclgetvar("retval"));
+        set_modify(1); push_undo(); /* 20150327 */
+        my_strdup(93, &schvhdlprop, (char *) tclgetvar("retval"));
      } else if(netlist_type==CAD_VERILOG_NETLIST && current_type==SCHEMATIC && /* 20120228 check if schverilogprop NULL */
         (!schverilogprop || strcmp(schverilogprop, tclgetvar("retval") ) ) ) { /* 20120209 */
-        modified=1; push_undo(); /* 20150327 */
-        my_strdup(&schverilogprop, (char *) tclgetvar("retval")); /*09112003 */
+        set_modify(1); push_undo(); /* 20150327 */
+        my_strdup(94, &schverilogprop, (char *) tclgetvar("retval")); /*09112003 */
     
      } else if(netlist_type==CAD_SPICE_NETLIST && current_type==SCHEMATIC && /* 20120228 check if schprop NULL */
         (!schprop || strcmp(schprop, tclgetvar("retval") ) ) ) { /* 20120209 */
-        modified=1; push_undo(); /* 20150327 */
-        my_strdup(&schprop, (char *) tclgetvar("retval")); /*09112003  */
+        set_modify(1); push_undo(); /* 20150327 */
+        my_strdup(95, &schprop, (char *) tclgetvar("retval")); /*09112003  */
 
      } else if(netlist_type==CAD_TEDAX_NETLIST && current_type==SCHEMATIC && /* 20120228 check if schprop NULL */
         (!schtedaxprop || strcmp(schtedaxprop, tclgetvar("retval") ) ) ) { /* 20120209 */
-        modified=1; push_undo(); /* 20150327 */
-        my_strdup(&schtedaxprop, (char *) tclgetvar("retval")); /*09112003  */
+        set_modify(1); push_undo(); /* 20150327 */
+        my_strdup(96, &schtedaxprop, (char *) tclgetvar("retval")); /*09112003  */
 
      } else if(netlist_type==CAD_VHDL_NETLIST && current_type==SCHEMATIC && /* 20120228 check if schvhdlprop NULL */
         (!schvhdlprop || strcmp(schvhdlprop, tclgetvar("retval") ) ) ) { /* netlist_type==CAD_VHDL_NETLIST */
-        modified=1; push_undo(); /* 20150327 */
-        my_strdup(&schvhdlprop, (char *) tclgetvar("retval"));
+        set_modify(1); push_undo(); /* 20150327 */
+        my_strdup(97, &schvhdlprop, (char *) tclgetvar("retval"));
      }
    }
 
@@ -945,8 +955,8 @@ void edit_property(int x)
    tcleval("text_line {Input property:} 0");
    if(strcmp(tclgetvar("rcode"),"") )
    {
-    modified=1; push_undo(); /* 20150327 */
-    my_strdup(&arc[selectedgroup[0].col][selectedgroup[0].n].prop_ptr,
+    set_modify(1); push_undo(); /* 20150327 */
+    my_strdup(98, &arc[selectedgroup[0].col][selectedgroup[0].n].prop_ptr,
      (char *) tclgetvar("retval"));
    }
    break;
@@ -961,8 +971,8 @@ void edit_property(int x)
    tcleval("text_line {Input property:} 0");
    if(strcmp(tclgetvar("rcode"),"") )
    {
-    modified=1; push_undo(); /* 20150327 */
-    my_strdup(&rect[selectedgroup[0].col][selectedgroup[0].n].prop_ptr,
+    set_modify(1); push_undo(); /* 20150327 */
+    my_strdup(99, &rect[selectedgroup[0].col][selectedgroup[0].n].prop_ptr,
            (char *) tclgetvar("retval"));
    }
    break;
@@ -979,8 +989,8 @@ void edit_property(int x)
     prepared_hash_wires=0; /* 20181025 */
     prepared_netlist_structs=0;
     prepared_hilight_structs=0;
-    modified=1; push_undo(); /* 20150327 */
-    my_strdup(&wire[selectedgroup[0].n].prop_ptr,(char *) tclgetvar("retval"));
+    set_modify(1); push_undo(); /* 20150327 */
+    my_strdup(100, &wire[selectedgroup[0].n].prop_ptr,(char *) tclgetvar("retval"));
     if(get_tok_value(wire[selectedgroup[0].n].prop_ptr,"bus",0)[0]) wire[selectedgroup[0].n].bus=1; /* 20171201 */
     else wire[selectedgroup[0].n].bus=0;
    }
@@ -1002,8 +1012,8 @@ void edit_property(int x)
 
     c = selectedgroup[0].col;
     i = selectedgroup[0].n;
-    modified=1; push_undo(); /* 20150327 */
-    my_strdup(&polygon[c][i].prop_ptr,
+    set_modify(1); push_undo(); /* 20150327 */
+    my_strdup(101, &polygon[c][i].prop_ptr,
         (char *) tclgetvar("retval"));
     /* 20180914 */
     old_fill = polygon[c][i].fill;
@@ -1037,8 +1047,8 @@ void edit_property(int x)
    tcleval("text_line {Input property:} 0");
    if(strcmp(tclgetvar("rcode"),"") )
    {
-    modified=1; push_undo(); /* 20150327 */
-    my_strdup(&line[selectedgroup[0].col][selectedgroup[0].n].prop_ptr, (char *) tclgetvar("retval"));
+    set_modify(1); push_undo(); /* 20150327 */
+    my_strdup(102, &line[selectedgroup[0].col][selectedgroup[0].n].prop_ptr, (char *) tclgetvar("retval"));
    }
    break;
   case TEXT:

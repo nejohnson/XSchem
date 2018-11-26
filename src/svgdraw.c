@@ -318,8 +318,8 @@ static void svg_draw_symbol_outline(int n,int layer,int tmp_flip, int rot,
      polygon = ((inst_ptr[n].ptr+instdef)->polygonptr[layer])[j];
      {   /* scope block so we declare some auxiliary arrays for coord transforms. 20171115 */
        int k;
-       double *x = my_malloc(sizeof(double) * polygon.points);
-       double *y = my_malloc(sizeof(double) * polygon.points);
+       double *x = my_malloc(417, sizeof(double) * polygon.points);
+       double *y = my_malloc(418, sizeof(double) * polygon.points);
        for(k=0;k<polygon.points;k++) {
          ROTATION(0.0,0.0,polygon.x[k],polygon.y[k],x[k],y[k]);
          x[k]+= x0;
@@ -406,7 +406,7 @@ void svg_draw(void)
 
  restore_lw();
 
- svg_colors=my_calloc(cadlayers, sizeof(Svg_color));
+ svg_colors=my_calloc(419, cadlayers, sizeof(Svg_color));
  if(svg_colors==NULL){
    fprintf(errfp, "svg_draw(): calloc error\n");tcleval( "exit");
  } 

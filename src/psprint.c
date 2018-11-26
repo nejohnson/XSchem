@@ -297,8 +297,8 @@ static void ps_draw_symbol_outline(int n,int layer,int tmp_flip, int rot,
      polygon = ((inst_ptr[n].ptr+instdef)->polygonptr[layer])[j];
      {   /* scope block so we declare some auxiliary arrays for coord transforms. 20171115 */
        int k;
-       double *x = my_malloc(sizeof(double) * polygon.points);
-       double *y = my_malloc(sizeof(double) * polygon.points);
+       double *x = my_malloc(309, sizeof(double) * polygon.points);
+       double *y = my_malloc(310, sizeof(double) * polygon.points);
        for(k=0;k<polygon.points;k++) {
          ROTATION(0.0,0.0,polygon.x[k],polygon.y[k],x[k],y[k]);
          x[k]+= x0;
@@ -384,7 +384,7 @@ void ps_draw(void)
  modified_save=modified;
  push_undo(); /* 20161121 */
  trim_wires();    /* 20161121 add connection boxes on wires but undo at end */
- ps_colors=my_calloc(cadlayers, sizeof(Ps_color));
+ ps_colors=my_calloc(311, cadlayers, sizeof(Ps_color));
  if(ps_colors==NULL){
    fprintf(errfp, "ps_draw(): calloc error\n");tcleval( "exit");
  } 
@@ -525,7 +525,7 @@ void ps_draw(void)
  fclose(fd);
  draw_grid=old_grid;
  my_free(&ps_colors);
- my_strdup(&tmp, "convert_to_pdf plot.ps"); /* 20161121 */
+ my_strdup(312, &tmp, "convert_to_pdf plot.ps"); /* 20161121 */
  tcleval( tmp);
  my_free(&tmp);
  pop_undo(0); /* 20161121 */

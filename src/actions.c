@@ -23,6 +23,24 @@
 #include "xschem.h"
 #include <sys/wait.h>  /* waitpid */
 
+void set_modify(int mod) 
+{
+  static int prev = -1;
+  modified = mod;
+  if(mod != prev) {
+    prev = mod;
+    if(has_x) {
+      if(mod == 1) {
+        tcleval( "wm title . \"* xschem - [file tail [xschem get schname]]\"");    /* 20161207 */
+        tcleval( "wm iconname . \"* xschem - [file tail [xschem get schname]]\""); /* 20161207 */
+      } else {
+        tcleval( "wm title . \"xschem - [file tail [xschem get schname]]\"");    /* 20161207 */
+        tcleval( "wm iconname . \"xschem - [file tail [xschem get schname]]\""); /* 20161207 */
+      }
+    }
+  }
+}
+
 void print_version()
 {
   printf("XSCHEM V%s\n", XSCHEM_VERSION);
@@ -52,7 +70,7 @@ int set_netlist_dir(int force) /*  20081210 */
       if(!strcmp("", Tcl_GetStringResult(interp)) ) {
         return 0;
       }
-      my_strdup(&netlist_dir, Tcl_GetStringResult(interp)); /*  20081210 */
+      my_strdup(0, &netlist_dir, Tcl_GetStringResult(interp)); /*  20081210 */
     }
     return 1;
 }
@@ -340,7 +358,7 @@ void ask_new_file(void)
      remove_symbols();
      if(strstr(fullname,".sym")) load_symbol( rel_sym_path(fullname)); /* 20180925.1 */
      else load_schematic(1, rel_sym_path(fullname),1); /* 20180925.1 */
-     my_strdup(&sch_prefix[currentsch],".");
+     my_strdup(1, &sch_prefix[currentsch],".");
      zoom_full(1);
     }
 }
@@ -382,6 +400,8 @@ void remove_symbol(void)
      my_free(&instdef[j].lineptr[c][i].prop_ptr);
     }
    }
+   if(instdef[j].lineptr[c]) my_free(&instdef[j].lineptr[c]);
+
    for(i=0;i<instdef[j].arcs[c];i++)
    {
     if(instdef[j].arcptr[c][i].prop_ptr != NULL)
@@ -389,7 +409,8 @@ void remove_symbol(void)
      my_free(&instdef[j].arcptr[c][i].prop_ptr);
     }
    }
-   if(instdef[j].lineptr[c]) my_free(&instdef[j].lineptr[c]);
+   if(instdef[j].arcptr[c]) my_free(&instdef[j].arcptr[c]);
+
    for(i=0;i<instdef[j].rects[c];i++)
    {
     if(instdef[j].boxptr[c][i].prop_ptr != NULL)
@@ -415,7 +436,7 @@ void remove_symbol(void)
    }
   }
   if(instdef[j].txtptr) my_free(&instdef[j].txtptr);
-  my_strdup(&instdef[j].name, NULL);
+  my_strdup(2, &instdef[j].name, NULL);
 
   lastinstdef--;
 }
@@ -436,21 +457,21 @@ void clear_drawing(void)
  int i,j;
  del_inst_table(); /*  20180917 */
  del_wire_table();   /*  20180917 */
- if(schtedaxprop!=NULL) my_free(&schtedaxprop);
- if(schprop!=NULL) my_free(&schprop);
- if(schvhdlprop!=NULL) my_free(&schvhdlprop);
- if(schverilogprop!=NULL) my_free(&schverilogprop); /* 09112003 */
+ my_free(&schtedaxprop);
+ my_free(&schprop);
+ my_free(&schvhdlprop);
+ my_free(&schverilogprop); /* 09112003 */
  for(i=0;i<lastwire;i++)
  {
-  my_strdup(&wire[i].prop_ptr, NULL);
-  my_strdup(&wire[i].node, NULL);
+  my_strdup(3, &wire[i].prop_ptr, NULL);
+  my_strdup(4, &wire[i].node, NULL);
  } 
  lastwire = 0;
  for(i=0;i<lastinst;i++)
  {
-  my_strdup(&inst_ptr[i].prop_ptr, NULL);
-  my_strdup(&inst_ptr[i].name, NULL);
-  my_strdup(&inst_ptr[i].instname, NULL); /*  20150409 */
+  my_free(&inst_ptr[i].prop_ptr);
+  my_free(&inst_ptr[i].name);
+  my_free(&inst_ptr[i].instname);
   delete_inst_node(i);
  }
  lastinst = 0;
@@ -522,8 +543,8 @@ void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
   for(j=0;j<k;j++) if(selectedgroup[j].type==ELEMENT) {
 
 
-    my_strdup(&prop, inst_ptr[selectedgroup[j].n].instname);
-    my_strcat(&prop, "_");
+    my_strdup(5, &prop, inst_ptr[selectedgroup[j].n].instname);
+    my_strcat(6, &prop, "_");
     tclsetvar("custom_label_prefix",prop);
     /*  20171005 */
     if(!do_all_inst) {
@@ -538,7 +559,7 @@ void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
     if(strcmp(rot_txt,"")) rotated_text=atoi(rot_txt); /*  20171208 */
 
     /*  20111030 skip labels / pins */
-    my_strdup(&type,(inst_ptr[selectedgroup[j].n].ptr+instdef)->type); /*  20150409 */
+    my_strdup(7, &type,(inst_ptr[selectedgroup[j].n].ptr+instdef)->type); /*  20150409 */
     if( type && (strcmp(type,"label") && strcmp(type,"ipin")&&strcmp(type,"opin")&&strcmp(type,"iopin") )==0)
       continue;
     /*  /20111030 */
@@ -560,7 +581,7 @@ void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
     rect=symbol->boxptr[PINLAYER];
     
     for(i=0;i<npin;i++) {
-       my_strdup(&labname,get_tok_value(rect[i].prop_ptr,"name",0));
+       my_strdup(8, &labname,get_tok_value(rect[i].prop_ptr,"name",0));
        if(debug_var>=1) fprintf(errfp,"200711 2 --> labname=%s\n", labname);
        
        pinx0 = (rect[i].x1+rect[i].x2)/2;
@@ -604,15 +625,15 @@ void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
          wptr = wptr->next;
        }
        if(!skip) {
-         my_strdup(&prop, "name=p1 lab=");
+         my_strdup(9, &prop, "name=p1 lab=");
 
          /*  20171005 */
          if(!strcmp(tclgetvar("use_label_prefix"),"1")) {
-           my_strcat(&prop, (char *)tclgetvar("custom_label_prefix"));
+           my_strcat(10, &prop, (char *)tclgetvar("custom_label_prefix"));
          }
          /*  /20171005 */
 
-         my_strcat(&prop, labname);
+         my_strcat(11, &prop, labname);
          dir ^= flip; /*  20101129  20111030 */
          if(rotated_text ==-1) {
            rot1=rot;
@@ -689,7 +710,7 @@ void place_symbol(int pos, const char *symbol_name, double x, double y, int rot,
   inst_ptr[n].name=NULL;
   inst_ptr[n].instname=NULL; /*  20150409 */
   if(debug_var>=1) fprintf(errfp, "place_symbol(): entering my_strdup: name=%s\n",name);  /*  03-02-2000 */
-  my_strdup(&inst_ptr[n].name ,name);
+  my_strdup(12, &inst_ptr[n].name ,name);
   if(debug_var>=1) fprintf(errfp, "place_symbol(): done my_strdup: name=%s\n",name);  /*  03-02-2000 */
   /*  inst_ptr[n].x0=symbol_name ? x : mousex_snap; */
   /*  inst_ptr[n].y0=symbol_name ? y : mousey_snap; */
@@ -712,7 +733,7 @@ void place_symbol(int pos, const char *symbol_name, double x, double y, int rot,
   if(debug_var>=1) fprintf(errfp, "place_symbol(): done set_inst_prop()\n");  /*  03-02-2000 */
   hash_proplist(inst_ptr[n].prop_ptr , 0);
 
-  my_strdup2(&inst_ptr[n].instname, get_tok_value(inst_ptr[n].prop_ptr,"name",0) ); /*  20150409 */
+  my_strdup2(13, &inst_ptr[n].instname, get_tok_value(inst_ptr[n].prop_ptr,"name",0) ); /*  20150409 */
 
   type = instdef[inst_ptr[n].ptr].type; /* 20150409 */
   cond= !type || (strcmp(type,"label") && strcmp(type,"ipin") &&
@@ -727,7 +748,7 @@ void place_symbol(int pos, const char *symbol_name, double x, double y, int rot,
   bbox(ADD, inst_ptr[n].x1, inst_ptr[n].y1, 
             inst_ptr[n].x2, inst_ptr[n].y2);
   lastinst++;
-  modified=1;
+  set_modify(1);
   prepared_hash_instances=0; /*  20171224 */
   prepared_netlist_structs=0;
   prepared_hilight_structs=0;
@@ -873,9 +894,9 @@ void descend_schematic(void)
 
   /*  build up current hierarchy path */
   str=inst_ptr[selectedgroup[0].n].instname; /*  20150409 */
-  my_strdup(&sch_prefix[currentsch+1], sch_prefix[currentsch]);
-  my_strcat(&sch_prefix[currentsch+1], str);
-  my_strcat(&sch_prefix[currentsch+1], ".");
+  my_strdup(14, &sch_prefix[currentsch+1], sch_prefix[currentsch]);
+  my_strcat(15, &sch_prefix[currentsch+1], str);
+  my_strcat(16, &sch_prefix[currentsch+1], ".");
   if(debug_var>=1) fprintf(errfp, "descend_schematic(): current path: %s\n", sch_prefix[currentsch+1]);
 
   previous_instance[currentsch]=selectedgroup[0].n;
@@ -1630,8 +1651,8 @@ void new_polygon(int what) /*  20171115 */
 
    if(points >= maxpoints-1) {  /*  check storage for 2 points */
      maxpoints = (1+points / CADCHUNKALLOC) * CADCHUNKALLOC;
-     my_realloc(&x, sizeof(double)*maxpoints);
-     my_realloc(&y, sizeof(double)*maxpoints);
+     my_realloc(17, &x, sizeof(double)*maxpoints);
+     my_realloc(18, &y, sizeof(double)*maxpoints);
    }
    if( what & PLACE )
    {
@@ -1808,7 +1829,7 @@ void place_text(int draw_text, double mx, double my)
   textelement[lasttext].txt_ptr=NULL;
   textelement[lasttext].prop_ptr=NULL;  /*  20111006 added missing initialization of pointer */
   textelement[lasttext].font=NULL;  /*  20171206 */
-  my_strdup(&textelement[lasttext].txt_ptr, txt);
+  my_strdup(19, &textelement[lasttext].txt_ptr, txt);
   textelement[lasttext].x0=mx;
   textelement[lasttext].y0=my;
   textelement[lasttext].rot=0;
@@ -1818,14 +1839,14 @@ void place_text(int draw_text, double mx, double my)
    atof(tclgetvar("hsize"));
   textelement[lasttext].yscale=
    atof(tclgetvar("vsize"));
-   my_strdup(&textelement[lasttext].prop_ptr, (char *)tclgetvar("props"));
+   my_strdup(20, &textelement[lasttext].prop_ptr, (char *)tclgetvar("props"));
   /*  debug ... */
   /*  textelement[lasttext].prop_ptr=NULL; */
   if(debug_var>=1) fprintf(errfp, "place_text(): done text input\n");
   strlayer = get_tok_value(textelement[lasttext].prop_ptr, "layer", 0);
   if(strlayer[0]) textelement[lasttext].layer = atoi(strlayer);
   else textelement[lasttext].layer = -1;
-  my_strdup(&textelement[lasttext].font, get_tok_value(textelement[lasttext].prop_ptr, "font", 0));/* 20171206 */
+  my_strdup(21, &textelement[lasttext].font, get_tok_value(textelement[lasttext].prop_ptr, "font", 0));/* 20171206 */
   textlayer = TEXTLAYER;
   #ifdef HAS_CAIRO
   textlayer = textelement[lasttext].layer;
@@ -1858,7 +1879,7 @@ void place_text(int draw_text, double mx, double my)
   drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
   drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
   lasttext++;
-  modified=1;
+  set_modify(1);
 }
 
 void pan2(int what, int mx, int my) /*  20121123 */

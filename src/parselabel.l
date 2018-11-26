@@ -30,7 +30,7 @@
 
 extern int debug_var;
 extern FILE *errfp;
-extern void my_strdup(char **dest, char *src);
+extern void my_strdup(int id, char **dest, char *src);
 extern void my_free(void *ptr);
 typedef struct          /* used in expandlabel.y */
 {
@@ -83,7 +83,7 @@ const char *expandlabel(const char *s, int *m)
 %%
 ^(alias|ipin|opin)[+ \n]+[^+\n ]+/[\n +]+ { 
                          yylval.ptr.str=NULL; /*19102004 */
-       my_strdup(&yylval.ptr.str, yytext); /* these things are freed after use in expandlabel.y */
+       my_strdup(298, &yylval.ptr.str, yytext); /* these things are freed after use in expandlabel.y */
                          BEGIN(next_to_alias);
                          return B_LINE;
                         }
@@ -101,7 +101,7 @@ const char *expandlabel(const char *s, int *m)
                         }
 ^\*.*                   {              /* a comment, return as LINE token */
        yylval.ptr.str=NULL; /*19102004 */
-       my_strdup(&yylval.ptr.str, yytext); /* these things are freed after use in expandlabel.y */
+       my_strdup(299, &yylval.ptr.str, yytext); /* these things are freed after use in expandlabel.y */
                          return B_LINE;
                         }
 <label>{
@@ -119,7 +119,7 @@ const char *expandlabel(const char *s, int *m)
                         }
 [.=_a-zA-Z][:.=_a-zA-Z0-9]*     {
        yylval.ptr.str=NULL; /*19102004 */
-       my_strdup(&yylval.ptr.str, yytext); /* these things are freed after use in expandlabel.y */
+       my_strdup(300, &yylval.ptr.str, yytext); /* these things are freed after use in expandlabel.y */
        if(debug_var>=3) fprintf(errfp, "parselabel(): B_NAME (%lu) \n", (unsigned long)yylval.ptr.str);
                          return B_NAME;
                         }
@@ -140,7 +140,7 @@ const char *expandlabel(const char *s, int *m)
 (.|\n)*                 {
                          if(debug_var>=3) fprintf(errfp, "yylex(): doing the rest\n");
        yylval.ptr.str=NULL; /*19102004 */
-       my_strdup(&yylval.ptr.str, yytext); /* these things are freed after use in expandlabel.y */
+       my_strdup(301, &yylval.ptr.str, yytext); /* these things are freed after use in expandlabel.y */
                          BEGIN(INITIAL);
                          return B_LINE;
                         }

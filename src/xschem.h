@@ -22,7 +22,7 @@
 
 #ifndef CADGLOBALS
 #define CADGLOBALS
-#define XSCHEM_VERSION "2.8.1_RC6"
+#define XSCHEM_VERSION "2.8.1_RC7"
 
 #if HAS_PIPE == 1
 /* fdopen() */
@@ -526,6 +526,7 @@ extern int previous_instance[];
 extern int split_files;
 extern int hspice_netlist;
 extern char *netlist_dir;
+extern void set_modify(int mod);
 
 extern unsigned long ui_state ; /*  this signals that we are doing a net place, */
                               /*  panning etc... */
@@ -585,7 +586,6 @@ extern XColor xcolor_array[];/*  20171109 */
 extern Visual *visual;
 extern int dark_colorscheme; /*  20171113 */
 extern double color_dim;
-extern int skip_dim_background;
 extern int no_undo; /*  20171204 */
 extern int enable_drill;
 
@@ -807,19 +807,20 @@ extern void print_verilog_primitive(FILE *fd, int inst);
 extern void print_vhdl_primitive(FILE *fd, int inst);
 extern char *get_tok_value(const char *s,const char *tok,int with_quotes);
 extern int  my_snprintf(char *str, int size, const char *fmt, ...);
-extern size_t my_strdup(char **dest, const char *src);
-extern void my_strndup(char **dest, const char *src, int n);
-extern size_t my_strdup2(char **dest, const char *src);
+extern size_t my_strdup(int id, char **dest, const char *src);
+extern void my_strndup(int id, char **dest, const char *src, int n);
+extern size_t my_strdup2(int id, char **dest, const char *src);
 extern char *my_strtok_r(char *str, const char *delim, char **saveptr);
 extern void my_strncpy(char *d, const char *s, int n);
+extern void *my_malloc(int id, size_t size);
+extern void my_realloc(int id, void *ptr,size_t size);
+extern void *my_calloc(int id, size_t nmemb, size_t size);
+extern void my_free(void *ptr);
+extern size_t my_strcat(int id, char **, const char *);
 extern char *subst_token(const char *s, const char *tok, const char *new_val);
 extern void new_prop_string(char **new_prop,const char *old_prop,int fast);
 extern void symbol_bbox(int i, double *x1,double *y1, double *x2, double *y2);
 extern void set_inst_prop(int i);
-extern void *my_malloc(size_t size);
-extern void my_realloc(void *ptr,size_t size);
-extern void *my_calloc(size_t nmemb, size_t size);
-extern void my_free(void *ptr);
 extern void unselect_wire(int i);
 extern void check_wire_storage(void);
 extern void check_text_storage(void);
@@ -843,7 +844,6 @@ extern void select_polygon(int c, int i, unsigned short select_mode, int fast );
 extern const char *pin_node(int i, int j, int *mult, int hash_prefix_unnamed_net);
 extern void record_global_node(int what, FILE *fp, char *node);
 extern int count_labels(char *s);
-extern size_t my_strcat(char **, const char *);
 extern int get_unnamed_node(int what, int mult, int node);
 extern void free_node_hash(void);
 extern struct node_hashentry 
@@ -883,7 +883,7 @@ extern void toggle_only_probes(); /*  20110112 */
 extern void fill_symbol_editprop_form(int x);
 extern void update_symbol(const char *result, int x);
 extern void tclexit(ClientData s);
-extern int build_colors(int skip_background, double dim); /*  reparse the TCL 'colors' list and reassign colors 20171113 */
+extern int build_colors(double dim); /*  reparse the TCL 'colors' list and reassign colors 20171113 */
 extern void drill_hilight(void);
 extern void get_square(double x, double y, int *xx, int *yy);
 extern void del_wire_table(void); /*  20180917 */

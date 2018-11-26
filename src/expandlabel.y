@@ -45,10 +45,10 @@ extern Stringptr dest_string; /* 20140108 */
 static int idxsize=INITIALIDXSIZE;
 extern int yylex();
 extern FILE *errfp;
-extern void *my_malloc(size_t size);
+extern void *my_malloc(int id, size_t size);
 extern void my_free(void *ptr);
-extern void my_realloc(void *ptr,size_t size);
-extern void my_strdup(char **dest, char *src);
+extern void my_realloc(int id, void *ptr,size_t size);
+extern void my_strdup(int id, char **dest, char *src);
 extern int debug_var;
 
 static void yyerror (const char *s)  /* Called by yyparse on error */
@@ -61,13 +61,13 @@ static char *expandlabel_strdup(char *src)
  char *ptr;
  if(src==NULL || src[0]=='\0') {
    ptr=NULL;
-   my_strdup(&ptr,"");
+   my_strdup(121, &ptr,"");
    return ptr;
  }
  else
  {
   ptr=NULL;
-  my_strdup(&ptr,src);
+  my_strdup(122, &ptr,src);
   if(debug_var >=3) fprintf(errfp, "expandlabel_strdup: duplicated %lu string %s\n",(unsigned long)ptr,src);
   return ptr;
  }
@@ -81,7 +81,7 @@ static char *my_strcat2(char *s1, char c, char *s2)
 
  if(s1!=NULL) l1=strlen(s1);
  if(s1!=NULL) l2=strlen(s2);
- res=my_malloc(l1+l2+2); /* 2 strings plus 'c' and '\0' */
+ res=my_malloc(123, l1+l2+2); /* 2 strings plus 'c' and '\0' */
  
  /* 20180923 */
  memcpy(res, s1, l1);
@@ -108,7 +108,7 @@ static char *my_strmult2(int n, char *s)
  if(n==0) return expandlabel_strdup("");
  len=strlen(s);
  prev=s;
- ss = str=my_malloc( (len+1)*n);
+ ss = str=my_malloc(124,  (len+1)*n);
  str[0]='\0';
  for(pos=s;pos<=s+len;pos++) {
    if(*pos==',' || pos==s+len) {
@@ -138,7 +138,7 @@ static char *my_strmult(int n, char *s)
 
  if(n==0) return expandlabel_strdup("");
  len=strlen(s);
- str=pos=my_malloc( (len+1)*n);
+ str=pos=my_malloc(125,  (len+1)*n);
  for(i=1;i<=n;i++)
  {
   /* strcpy(pos,s); */
@@ -155,9 +155,9 @@ static char *my_strbus(char *s, int *n)
  int i,l;
  int tmplen;
  char *res=NULL;
- static char *tmp=NULL;
- my_realloc(&res, n[0]*(strlen(s)+20));
- my_realloc(&tmp, strlen(s)+30);
+ char *tmp=NULL;
+ my_realloc(126, &res, n[0]*(strlen(s)+20));
+ my_realloc(127, &tmp, strlen(s)+30);
  l=0;
  for(i=1;i<n[0];i++)
  {
@@ -166,6 +166,7 @@ static char *my_strbus(char *s, int *n)
   memcpy(res+l,tmp, tmplen+1); /* 20180923 */
   l+=tmplen;
  }
+ my_free(&tmp);
  sprintf(res+l, "%s[%d]", s, n[i]);
  return res;
 }
@@ -176,7 +177,7 @@ static void check_idx(int **ptr,int n)
  {
   idxsize*=2;
   if(debug_var >=3)  fprintf(errfp, "check_idx(): reallocating idx array: size=%d\n",idxsize);
-  my_realloc(ptr, idxsize*sizeof(int));
+  my_realloc(128, ptr, idxsize*sizeof(int));
  }
 }
 
@@ -212,7 +213,7 @@ input:    /* empty string. allows ctrl-D as input */
         | input line
 ;
 line:     list          {
-                         my_strdup( &(dest_string.str),$1.str); /*19102004 */
+                         my_strdup(129,  &(dest_string.str),$1.str); /*19102004 */
                          my_free(&$1.str); /*19102004 */
                          dest_string.m=$1.m;
                         }
@@ -286,7 +287,7 @@ index:    B_IDXNUM ':' B_IDXNUM ':' B_IDXNUM
                          int sign;
 
                          sign = SIGN($3-$1);
-                         $$=my_malloc(INITIALIDXSIZE*sizeof(int));
+                         $$=my_malloc(130, INITIALIDXSIZE*sizeof(int));
                          $$[0]=0;
                          if(debug_var>=3) fprintf(errfp, "yyparse(): parsing first idx range\n");
                          for(i=$1;;i+=sign*$5)
@@ -301,7 +302,7 @@ index:    B_IDXNUM ':' B_IDXNUM ':' B_IDXNUM
         | B_IDXNUM ':' B_IDXNUM
                         {
                          int i;
-                         $$=my_malloc(INITIALIDXSIZE*sizeof(int));
+                         $$=my_malloc(131, INITIALIDXSIZE*sizeof(int));
                          $$[0]=0;
                          if(debug_var>=3) fprintf(errfp, "yyparse(): parsing first idx range\n");
                          for(i=$1;;i+=SIGN($3-$1))
@@ -313,7 +314,7 @@ index:    B_IDXNUM ':' B_IDXNUM ':' B_IDXNUM
                         }
         | B_IDXNUM      { 
                          if(debug_var>=3) fprintf(errfp, "yyparse(): parsing first idx item\n");
-                         $$=my_malloc(INITIALIDXSIZE*sizeof(int));
+                         $$=my_malloc(132, INITIALIDXSIZE*sizeof(int));
                          $$[0]=0;
                           check_idx(&$$, ++$$[0]);
                          $$[$$[0]]=$1;

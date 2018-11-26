@@ -152,11 +152,13 @@
 
 BEGIN{
  OFMT="%.9g" # better precision
+ filename= ARGV[1]
+ ARGC=1
  invert=0  # used for invert bus flag (tilde prefix)
  origin=0
  format="relative_powermill"
  roff=1e9
- ron=0.1
+ ron=0.001
  time=0
  slope=0.002
  voltage=1.8
@@ -285,7 +287,6 @@ BEGIN{
 /^[ \t]*endfile[ \t]*;.*$/{ end_file();next }
 
 /^[ \t]*set[ \t]+/{
-
 
  # 20100301
  res = ron 
@@ -439,7 +440,10 @@ function end_file(){
  if(time > total_time) total_time=time
  if(format ~ /^eldo/)
  {
-  print "* ELDO STIMULI FILE">file
+  print "**************************************" > file
+  print "* SPICE STIMULI FILE">file
+  print "* generated from " filename > file
+  print "**************************************\n" > file
   for(i in signalname)
   {
     ix=i

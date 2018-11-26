@@ -120,7 +120,7 @@ void find_closest_net_or_symbol_pin(double mx,double my, double *x, double *y)
     y0=inst_ptr[i].y0;
     rot = inst_ptr[i].rot;
     flip = inst_ptr[i].flip;
-    my_strdup(&type,(inst_ptr[i].ptr+instdef)->type);
+    my_strdup(133, &type,(inst_ptr[i].ptr+instdef)->type);
 
 
     no_of_pin_rects = (inst_ptr[i].ptr+instdef)->rects[PINLAYER];

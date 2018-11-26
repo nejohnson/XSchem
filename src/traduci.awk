@@ -14,18 +14,20 @@ END  { endfile(_filename_) }
 
 ###### begin user code ########################
 
-
+BEGIN{
+}
 
 {
-  replace_pattern("TCL7P5", "OLDTCL")
+  replace_pattern("modified *= *1", "set_modify(1)")
+  replace_pattern("modified *= *0", "set_modify(0)")
 }
 
 
 function replace_pattern(old, new)
 {
   if($0 ~ old) {
-    found=1
     gsub(old, new)
+    found = 1
   }
 }
 

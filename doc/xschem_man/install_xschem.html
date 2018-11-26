@@ -30,16 +30,17 @@ p{padding: 15px  30px 10px;}
  </pre>
  <p>
   This will install all the runtime needed files into the locations defined in the <kbd>Makefile</kbd>.
-  It is possible to setup a configuration file, <kbd><b>.xschem</b></kbd>, into your 
+  It is possible to setup a configuration file, <kbd><b>.xschem/xschemrc</b></kbd>, into your 
   home directory. This file will tell XSCHEM where to look for schematic and component libraries.
   this is neded if you decide to add or change the library locations specified at compile time.
-  XSCHEM will look for this file in the current directory or in the user's <kbd>${HOME}</kbd> directory.
+  XSCHEM will look for this file in the current directory or in the user's <kbd>${HOME}/.xschem/</kbd> directory
+  or in any other location specified at compile time in the Makefile.
 
  </p>
  <pre class="code" style="height: 400px;">
 ####
 #### xschemrc system configuration file
-#### values may be overridden by user's ~/.xschem configuration file
+#### values may be overridden by user's ~/xschemrc/.xschem configuration file
 ####
 
 #### xschem installation directory
@@ -60,12 +61,21 @@ p{padding: 15px  30px 10px;}
 
 #### Window to open on startup
 #set XSCHEM_START_WINDOW {mylib/0_top}
+#### some default behavior
+set netlist_type spice ;# allowed : spice, verilog, vhdl, tedax
+set hspice_netlist 1 ;# tuning spice netlist syntax for synopsys Hspice (1) or ELDO (8)
+set verilog_2001 1
+# set line_width 2
+set change_lw 1
+set color_ps 1
+set initial_geometry {800x600}
+
 
  </pre><br>
  <p class="important">
   For testing purposes <kbd>xschem</kbd> can be run and invoked from the build directory
-  <kbd>xschem-&lt;version&gt;/</kbd> or <kbd>xschem-&lt;version&gt;/src/</kbd> without
-  any .xschem or xschemrc definitions.<br>
+  <kbd>xschem-&lt;version&gt;/src/</kbd> without
+  any xschemrc definitions.<br>
  </p>
  <p>
   When xschem is running, type <kbd>puts $XSCHEM_DESIGN_PATH</kbd> in the xschem tcl prompt to 
@@ -75,7 +85,7 @@ p{padding: 15px  30px 10px;}
  <img src="install_xschem1.png">
 
  <p>
-  Note that <kbd>.xschem</kbd> is a TCL file, so use the TCL syntax for setting
+  Note that the <kbd>xschemrc</kbd> is a TCL file, so use the TCL syntax for setting
   variables and accessing environment variables.
   The <kbd>XSCHEM_DESIGN_PATH</kbd> contains a list of library directories separated by colons.
   These directories contain all xschem symbols and schematics. Normally you should append
@@ -94,39 +104,39 @@ p{padding: 15px  30px 10px;}
   
   
   <br><br>
-  If you need a <kbd>.xschem</kbd> file in your <kbd>$HOME</kbd> directory you may start from 
-  a sample <kbd>.xschem</kbd> file that is provided in the distribution sources.
+  If you need a <kbd>.xschem/xschemrc</kbd> file in your <kbd>$HOME</kbd> directory you may start from 
+  a sample <kbd>xschemrc</kbd> file that is provided in the distribution sources.
   Change it to fit your needs.
  </p> 
  <pre class="code">
-  user:xschem-&lt;version&gt;/src$ cp .xschem ~/
+  user:xschem-&lt;version&gt;/src$ cp xschemrc ~/.xschem/xschemrc
  </pre><br>
  <p class="important">
-  XSCHEM_HOME_DIR and XSCHEM_DESIGN_PATH shell environmental variables may be used to override any
-  definition in xschem startup files
+   When setting up a <kbd>.xschem/xschemrc</kbd> in the home directory (or in the location specified in the Makefile) 
+   or a <kbd>xschemrc</kbd> in the current directory, xschem will *NOT* read the system configuration file, 
+   so the best approach is to copy the system <kbd>xschemrc</kbd> (located usually in <kbd>(prefix)/share/xschem</kbd>) 
+   into the user directory and make the necessary changes.
  </p><br><br>
 
  <h2> Detailed XSCHEM startup sequence </h2>
- <ul>
- <li>look for <kbd>XSCHEM_HOME_DIR</kbd> from environment variables.</li>
- <li>else if there is <kbd>../src/xchem.tcl</kbd> with respect to current dir and 
-     <kbd>../xschem_library</kbd> then we are starting
-     from a build directory, set <kbd>XSCHEM_HOME_DIR</kbd> to <kbd>`pwd`</kbd> and
-     also set <kbd>XSCHEM_DESIGN_PATH</kbd> to <kbd>`pwd`/../xschem_library</kbd>.</li>
- <li>else if there is a <kbd>PREFIX/share/xschem</kbd> directory then set <kbd>XSCHEM_HOME_DIR</kbd>,
-     to <kbd>PREFIX/share/xschem</kbd>.<br>
-     <kbd>PREFIX</kbd> is a preprocessor macro passed at compile time by setting the Makefile <kbd>prefix</kbd> variable.</li>
- <li>source <kbd>XSCHEM_HOME_DIR/xschemrc</kbd> if existing.</li>
- <li>source <kbd>`pwd`/.xschem</kbd> or <kbd>$HOME/.xschem</kbd> if existing.</li>
- <li>if <kbd>XSCHEM_HOME_DIR</kbd> not defined --&gt; error and quit.</li>
- <li>look for <kbd>XSCHEM_DESIGN_PATH</kbd> from environment variables. This will override any
-     value given in  xschemrc and .xschem startup files.</li>
- <li>if <kbd>XSCHEM_DESIGN_PATH</kbd> undefined set it to compile time default provided by Makefile variable
-     <kbd>xschem_library_path</kbd>.</li>
- <li>source <kbd>$XSCHEM_HOME_DIR/xschem.tcl</kbd>.</li>
+ <ol>
+ <li>If <kbd>../src/xchem.tcl</kbd> with respect to current dir is existing and
+     <kbd>../xschem_library</kbd> is also existing then we are starting
+     from a build directory, set <kbd>XSCHEM_SHAREDIR</kbd> to <kbd>`pwd`</kbd> and
+     also set <kbd>XSCHEM_LIBRARY_PATH</kbd> to <kbd>`pwd`/../xschem_library</kbd>.
+ <li> else use compile-time (generated from configure script) provided <kbd>XSCHEM_SHAREDIR</kbd>.
+ <li> if in current dir there is a <kbd>xschemrc</kbd> file source it.</li>
+ <li>else if there is a <kbd>USER_CONF_DIR/xschemrc</kbd> file source it.</li>
+ <li>else if there is a <kbd>XSCHEM_SHAREDIR/xschemrc</kbd> file then source it<br>
+     <kbd>XSCHEM_SHAREDIR</kbd>  and <kbd>USER_CONF_DIR</kbd> are preprocessor macros
+     passed at compile time by the configure script.
+     The first one will be overridden only if executing from a build directory, see point 1.</li>
+ <li>if <kbd>XSCHEM_SHAREDIR</kbd> not defined --&gt; error and quit.</li>
+ <li>source <kbd>$XSCHEM_SHAREDIR/xschem.tcl</kbd>.</li>
  <li>start loading user provided schematic file or start with empty window  (or filename
      specified in <kbd>XSCHEM_START_WINDOW</kbd> tcl variable).</li>
- </ul>
+ </ol>
+
  <br><br>
 
  <!-- end of slide -->

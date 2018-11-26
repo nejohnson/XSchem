@@ -220,7 +220,7 @@ int show_erc=1;
 int hilight_nets=0;
 char *sch_prefix[CADMAXHIER];
 int previous_instance[CADMAXHIER]; /* to remember the instance we came from when going up the hier. */
-int modified=0;
+int modified = 0;
 int color_ps=-1;
 int only_probes=0; /* 20110112 */
 int hilight_color=0;
@@ -235,7 +235,6 @@ XColor xcolor_array[256];/* 20171109 */
 Visual *visual; /*20171111 */
 int dark_colorscheme=1; /* 20171113 */
 double color_dim=0.0; /* 20171123 */
-int skip_dim_background=1;
 int no_undo=0; /* 20171204 */
 int enable_drill=0; /* 20171211 pass net hilights through components with 'propagate_to' property set on pins */
 struct instpinentry *instpintable[NBOXES][NBOXES];

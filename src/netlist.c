@@ -47,7 +47,7 @@ static void instinsert(int n, int x, int y)
 {
   struct instentry *ptr, *newptr;
   ptr=insttable[x][y];
-  newptr=my_malloc(sizeof(struct instentry));
+  newptr=my_malloc(236, sizeof(struct instentry));
   newptr->next=ptr;
   newptr->n=n;
   insttable[x][y]=newptr;
@@ -157,7 +157,7 @@ static void instpininsert(int n,int pin, double x0, double y0, int x, int y)
  struct instpinentry *ptr, *newptr;
 
  ptr=instpintable[x][y];
- newptr=my_malloc(sizeof(struct instpinentry));
+ newptr=my_malloc(237, sizeof(struct instpinentry));
  newptr->next=ptr;
  newptr->n=n;
  newptr->x0=x0;
@@ -213,7 +213,7 @@ static void wireinsert(int n, int x, int y)
   struct wireentry *ptr, *newptr;
 
   ptr=wiretable[x][y];
-  newptr=my_malloc(sizeof(struct wireentry));
+  newptr=my_malloc(238, sizeof(struct wireentry));
   newptr->next=ptr;
   newptr->n=n;
   wiretable[x][y]=newptr;
@@ -398,13 +398,10 @@ void print_wires(void)
 
 static void signal_short( char *n1, char *n2)
 {
- static char *str=NULL;
+ char str[2048];
  if( n1 && n2 && strcmp( n1, n2) )
  {
-   my_strdup(&str, "shorted: ");
-   my_strcat(&str, n1);
-   my_strcat(&str, " - ");
-   my_strcat(&str, n2);
+   my_snprintf(str, S(str), "shorted: %s - %s", n1, n2);
    if(debug_var>=1) fprintf(errfp, "signal_short(): signal_short: shorted: %s - %s \n", n1, n2);
    statusmsg(str,2);
    if(!netlist_count) {
@@ -466,8 +463,8 @@ static void wirecheck(int k)    /* recursive routine */
                     wire[ptr2->n].y2, wire[k].x2,wire[k].y2);
        if( touches )
        {
-         my_strdup(&wire[ptr2->n].node, wire[k].node);
-         my_strdup(&wire[ptr2->n].prop_ptr, 
+         my_strdup(239, &wire[ptr2->n].node, wire[k].node);
+         my_strdup(240, &wire[ptr2->n].prop_ptr, 
            subst_token(wire[ptr2->n].prop_ptr, "lab", wire[ptr2->n].node));
          wirecheck(ptr2->n); /* recursive check */
        }
@@ -491,14 +488,12 @@ int get_unnamed_node(int what, int mult,int node)
  static int node_mult_size;
  int i;
 
-  if(debug_var>=2) fprintf(errfp, "get_unnamed_node(): what=%d mult=%d node=%d\n", what, mult, node);
+ if(debug_var>=2) fprintf(errfp, "get_unnamed_node(): what=%d mult=%d node=%d\n", what, mult, node);
  if(what==0)  /* initialize unnamed node data structures */
  {
   new_node=0;
-  if(node_mult) my_free(&node_mult); 
-  node_mult=my_malloc(sizeof(int)*CADCHUNKALLOC);
-  for(i=0;i<CADCHUNKALLOC;i++) node_mult[i]=0; 
-  node_mult_size=CADCHUNKALLOC;
+  my_free(&node_mult); 
+  node_mult_size=0;
   return 0;
  }
  else if(what==1) /* get a new unique unnamed node */
@@ -507,7 +502,7 @@ int get_unnamed_node(int what, int mult,int node)
   if(new_node>= node_mult_size)  /* enlarge array and zero it */
   {
    node_mult_size += CADCHUNKALLOC;
-   my_realloc(&node_mult, sizeof(int) * node_mult_size );
+   my_realloc(242, &node_mult, sizeof(int) * node_mult_size );
    for(i=node_mult_size-CADCHUNKALLOC;i<node_mult_size;i++) node_mult[i]=0;
   } 
   node_mult[new_node]=mult;
@@ -521,7 +516,7 @@ int get_unnamed_node(int what, int mult,int node)
  }
  else /* what=3 , return node multiplicity */
  {
-   if(debug_var>=2) fprintf(errfp, "get_unnamed_node(): returning mult=%d\n", node_mult[node]);
+  if(debug_var>=2) fprintf(errfp, "get_unnamed_node(): returning mult=%d\n", node_mult[node]);
   return node_mult[node];
  }
 }
@@ -531,6 +526,7 @@ int get_unnamed_node(int what, int mult,int node)
 /* what: */
 /*      0: print list of global nodes and delete list */
 /*      1: add entry */
+/*      2: delete list only, no print */
 void record_global_node(int what, FILE *fp, char *node)
 {
  static int max_globals=0;
@@ -545,14 +541,14 @@ void record_global_node(int what, FILE *fp, char *node)
     }
     if(max_globals>=size_globals) {
        size_globals+=CADCHUNKALLOC;
-       my_realloc(&globals, size_globals*sizeof(char *) );
+       my_realloc(243, &globals, size_globals*sizeof(char *) );
     }
     globals[max_globals]=NULL;
-    my_strdup(&globals[max_globals], node);
+    my_strdup(244, &globals[max_globals], node);
     max_globals++;
- } else if(what==0) {
+ } else if(what == 0 || what == 2) {
     for(i=0;i<max_globals;i++) {
-       fprintf(fp, ".GLOBAL %s\n", globals[i]);
+       if(what == 0 ) fprintf(fp, ".GLOBAL %s\n", globals[i]);
        my_free(&globals[i]);
     }
     my_free(&globals);
@@ -565,7 +561,7 @@ void prepare_netlist_structs(int for_hilight_only)
 {
  Box *rect;
  char tmp_str[30]; /* overflow safe */
- static char *nn=NULL;
+ char nn[PATH_MAX+30];
  double x0, y0;
  int rot = 0;
  int  flip = 0;
@@ -591,8 +587,7 @@ void prepare_netlist_structs(int for_hilight_only)
  else if(for_hilight_only && prepared_hilight_structs ) return; /* 20171210 */
  else delete_netlist_structs(); 
 
- my_strdup(&nn, "-----------");
- my_strcat(&nn, schematic[currentsch]);
+ my_snprintf(nn, S(nn), "-----------%s", schematic[currentsch]);
  statusmsg(nn,2);
 /* reset wire & inst node labels  */
  if(debug_var>=1) fprintf(errfp, "prepare_netlist_structs(): resetting node hash tables\n");
@@ -605,7 +600,7 @@ void prepare_netlist_structs(int for_hilight_only)
         (inst_ptr[i].ptr+instdef)->rects[GENERICLAYER];
   if( rects > 0 )
   {
-    inst_ptr[i].node = my_malloc(sizeof(char *) * rects);
+    inst_ptr[i].node = my_malloc(247, sizeof(char *) * rects);
     for(j=0;j<rects;j++)
     {
       inst_ptr[i].node[j]=NULL;
@@ -621,7 +616,7 @@ void prepare_netlist_structs(int for_hilight_only)
   if(inst_ptr[i].ptr<0) continue;
 
 
-  my_strdup(&type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
+  my_strdup(248, &type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
   if( type &&
       inst_ptr[i].node &&   /* instance must have a pin! */
       !(strcmp(type,"label") && strcmp(type,"ipin") &&
@@ -643,34 +638,34 @@ void prepare_netlist_structs(int for_hilight_only)
    if( strcmp(type,"label") ){  /* instance is a port (not a label) */
      port=1; 
      /* 20071204 only define a dir property if instance is not a label */
-     if(for_hilight_only) my_strdup(&dir, "");
+     if(for_hilight_only) my_strdup(249, &dir, "");
      else
-       my_strdup(&dir, get_tok_value( (inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][0].prop_ptr, "dir",0) );
+       my_strdup(250, &dir, get_tok_value( (inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][0].prop_ptr, "dir",0) );
    }
    else {
      /* handle global nodes (global=1 set as symbol property) 28032003 */
-     my_strdup(&global_node,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"global",0));
+     my_strdup(251, &global_node,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"global",0));
      /*20071204 if instance is a label dont define a dir property for more precise erc checking */
-     my_strdup(&dir,"none");
+     my_strdup(252, &dir,"none");
    }
 
-   if(!dir) my_strdup(&dir,"none"); /* 20100422, define dir if not alrerady defined by  */
+   if(!dir) my_strdup(253, &dir,"none"); /* 20100422, define dir if not alrerady defined by  */
                                     /* previous code, to avoid nasty segfaults if pins not correctly defined */
 
    /* obtain ipin/opin/label signal type (default: std_logic) */
    if(for_hilight_only) {
-     my_strdup(&sig_type,"");
-     my_strdup(&verilog_type,"");
-     my_strdup(&value,"");
-     my_strdup(&class,"");
+     my_strdup(254, &sig_type,"");
+     my_strdup(255, &verilog_type,"");
+     my_strdup(256, &value,"");
+     my_strdup(257, &class,"");
    } else {
-     my_strdup(&sig_type,get_tok_value(inst_ptr[i].prop_ptr,"sig_type",0));
-     my_strdup(&verilog_type,get_tok_value(inst_ptr[i].prop_ptr,"verilog_type",0)); /*09112003 */
-     my_strdup(&value,get_tok_value(inst_ptr[i].prop_ptr,"value",2));
-     my_strdup(&class,get_tok_value(inst_ptr[i].prop_ptr,"class",0));
+     my_strdup(258, &sig_type,get_tok_value(inst_ptr[i].prop_ptr,"sig_type",0));
+     my_strdup(259, &verilog_type,get_tok_value(inst_ptr[i].prop_ptr,"verilog_type",0)); /*09112003 */
+     my_strdup(260, &value,get_tok_value(inst_ptr[i].prop_ptr,"value",2));
+     my_strdup(261, &class,get_tok_value(inst_ptr[i].prop_ptr,"class",0));
    }
 
-   my_strdup(&inst_ptr[i].node[0], get_tok_value(inst_ptr[i].prop_ptr,"lab",0));
+   my_strdup(262, &inst_ptr[i].node[0], get_tok_value(inst_ptr[i].prop_ptr,"lab",0));
 
    /* handle global nodes (global=1 set as symbol property) 28032003 */
    if( !strcmp(type,"label") && global_node && global_node[0]=='1') {
@@ -707,8 +702,8 @@ void prepare_netlist_structs(int for_hilight_only)
     {
      /* short circuit check */
      if(!for_hilight_only) signal_short(wire[wptr->n].node, inst_ptr[i].node[0]);
-     my_strdup( &wire[wptr->n].node, inst_ptr[i].node[0]);
-     my_strdup(&wire[wptr->n].prop_ptr, 
+     my_strdup(263,  &wire[wptr->n].node, inst_ptr[i].node[0]);
+     my_strdup(264, &wire[wptr->n].prop_ptr, 
        subst_token(wire[wptr->n].prop_ptr, "lab", wire[wptr->n].node));
      wirecheck(wptr->n);
     }
@@ -725,8 +720,8 @@ void prepare_netlist_structs(int for_hilight_only)
   if(  wire[i].node == NULL) 
   {
    my_snprintf(tmp_str, S(tmp_str), "#net%d", get_unnamed_node(1,0,0));
-   my_strdup(&wire[i].node , tmp_str);
-   my_strdup(&wire[i].prop_ptr, 
+   my_strdup(265, &wire[i].node , tmp_str);
+   my_strdup(266, &wire[i].prop_ptr, 
      subst_token(wire[i].prop_ptr, "lab", wire[i].node));
    bus_hash_lookup(wire[i].node,"",0,0,"","","","");   /* insert unnamed wire name in hash table */
 
@@ -742,7 +737,7 @@ void prepare_netlist_structs(int for_hilight_only)
  for(i=0;i<lastinst;i++) /* ... assign node fields on all (non label) instances */
  {
   if(inst_ptr[i].ptr<0) continue;
-  my_strdup(&type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
+  my_strdup(267, &type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
   if( type &&
       strcmp(type,"label") &&
       strcmp(type,"ipin")  &&
@@ -785,17 +780,17 @@ void prepare_netlist_structs(int for_hilight_only)
             if(debug_var>=2) fprintf(errfp, "prepare_netlist_structs(): naming generic %s\n", 
              inst_ptr[iptr->n].node[iptr->pin] ); 
 
-           my_strdup( &inst_ptr[i].node[j], 
+           my_strdup(268,  &inst_ptr[i].node[j], 
              get_tok_value(inst_ptr[iptr->n].prop_ptr,"value",2) );
            
-           /*my_strdup( &inst_ptr[i].node[j], inst_ptr[iptr->n].node[iptr->pin] ); */
+           /*my_strdup(269,  &inst_ptr[i].node[j], inst_ptr[iptr->n].node[iptr->pin] ); */
 
            if(for_hilight_only) {
-             my_strdup(&sig_type,"");
+             my_strdup(270, &sig_type,"");
              bus_hash_lookup(inst_ptr[iptr->n].node[iptr->pin],"none",
                0,1, sig_type,"", "","");
            } else {
-             my_strdup(&sig_type,get_tok_value(
+             my_strdup(271, &sig_type,get_tok_value(
                (inst_ptr[i].ptr+instdef)->boxptr[GENERICLAYER][j-rects].prop_ptr, "sig_type",0));
 
              /* insert generic label in hash table as a port so it will not */
@@ -828,7 +823,7 @@ void prepare_netlist_structs(int for_hilight_only)
  {
   if(inst_ptr[i].ptr<0) continue;
   expandlabel(inst_ptr[i].instname, &inst_mult); /* 20171210 */
-  my_strdup(&type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
+  my_strdup(272, &type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
   if( type &&
       strcmp(type,"label") &&
       strcmp(type,"ipin")  &&
@@ -868,7 +863,7 @@ void prepare_netlist_structs(int for_hilight_only)
 
        if(!touches)
        {
-        my_strdup( &inst_ptr[i].node[j], wire[wptr->n].node );
+        my_strdup(273,  &inst_ptr[i].node[j], wire[wptr->n].node );
         bus_hash_lookup(inst_ptr[i].node[j],
            get_tok_value( (inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][j].prop_ptr, "dir",0),
            0,0,"","","","");
@@ -907,7 +902,7 @@ void prepare_netlist_structs(int for_hilight_only)
          }
          if(!touches)
          {
-           my_strdup( &inst_ptr[i].node[j], inst_ptr[iptr->n].node[iptr->pin] );
+           my_strdup(274,  &inst_ptr[i].node[j], inst_ptr[iptr->n].node[iptr->pin] );
            if(for_hilight_only) {
              bus_hash_lookup(inst_ptr[i].node[j],
                 "none", 0,0,"","","","");
@@ -949,7 +944,7 @@ void prepare_netlist_structs(int for_hilight_only)
         /* expandlabel(get_tok_value( */
         /* inst_ptr[i].prop_ptr,"name",0), &inst_mult); */
         my_snprintf( tmp_str, S(tmp_str), "#net%d", get_unnamed_node(1, pin_mult * inst_mult, 0) );
-        my_strdup( &inst_ptr[i].node[j], tmp_str );
+        my_strdup(275,  &inst_ptr[i].node[j], tmp_str );
         if(for_hilight_only) {
           bus_hash_lookup(inst_ptr[i].node[j],
              "none", 0,0,"","","","");
@@ -980,7 +975,7 @@ void delete_inst_node(int i)
    if( rects > 0 )
    {
      for(j=0;j< rects ;j++)
-       my_strdup( &inst_ptr[i].node[j], NULL );
+       my_free( &inst_ptr[i].node[j]);
      my_free(& inst_ptr[i].node );
    }
 }
@@ -996,7 +991,7 @@ void delete_netlist_structs(void)
   }
   for(i=0;i<lastwire;i++)
   {
-    my_strdup(&wire[i].node, NULL);
+    my_strdup(276, &wire[i].node, NULL);
   } 
   /* erase inst and wire topological hash tables */
   del_inst_pin_table();

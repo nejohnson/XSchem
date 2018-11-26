@@ -83,7 +83,7 @@ int window_state (Display *disp, Window win, char *arg) {/*{{{*/
     const char *argerr = "expects a list of comma separated parameters: \"(remove|add|toggle),<PROP1>[,<PROP2>]\"\n";
 
 
-    my_strdup(&arg_copy, arg);
+    my_strdup(604, &arg_copy, arg);
 
     if(debug_var>=1) fprintf(errfp,"window_state() , win=0x%x arg_copy=%s\n", 
           (int)win,arg_copy);
@@ -190,10 +190,15 @@ void windowid()
 void xwin_exit(void)
 {
  int i;
+  
  if(!init_done) {
    if(debug_var>=1) fprintf(errfp, "xwin_exit() double call, doing nothing...\n");
    return;  /* 20150409 */
  }
+ delete_netlist_structs();
+ delete_hilight_net();
+ get_unnamed_node(0, 0, 0);
+
  if(has_x) {
     #ifdef HAS_CAIRO /* 20171105 */
     cairo_destroy(ctx);
@@ -240,6 +245,8 @@ void xwin_exit(void)
  for(i=0;i<max_symbols;i++) {
     my_free(&instdef[i].lineptr);
     my_free(&instdef[i].boxptr);
+    my_free(&instdef[i].arcptr);
+    my_free(&instdef[i].polygonptr);
     my_free(&instdef[i].lines);
     my_free(&instdef[i].polygons); /* 20171115 */
     my_free(&instdef[i].arcs); /* 20181012 */
@@ -264,6 +271,9 @@ void xwin_exit(void)
  my_free(&gc);
  my_free(&gcstipple);
  my_free(&color_array);
+
+ for(i=0;i<CADMAXHIER;i++) my_free(&sch_prefix[i]);
+
  if(debug_var>=1) fprintf(errfp, "xwin_exit(): removing font\n");
  for(i=0;i<127;i++) my_free(&character[i]);
 
@@ -271,6 +281,8 @@ void xwin_exit(void)
  my_free(&filename);
  
  delete_undo(); /* 20150327 */
+ my_free(&netlist_dir);
+ record_global_node(2, NULL, NULL); /* delete global node array */
  if(debug_var>=1) fprintf(errfp, "xwin_exit(): deleted undo buffer\n");
  if(errfp!=stderr) fclose(errfp);
  errfp=stderr;
@@ -330,7 +342,7 @@ unsigned int  find_best_color(char colorname[])
 }
 
 
-void init_color_array(int skip_background, double dim)
+void init_color_array(double dim)
 {
  char s[256]; /* overflow safe 20161122 */
  int i;
@@ -344,7 +356,7 @@ void init_color_array(int skip_background, double dim)
    sscanf(Tcl_GetStringResult(interp), "#%02x%02x%02x", &r, &g, &b);/* 20171123 */
    rr=r; gg=g; bb=b;
   
-   if(1|| !(i==0 && skip_background) ) {
+   if( (i!=BACKLAYER) ) {
      if(dim>=0.) {
        rr +=(51.-rr/5.)*dim;
        gg +=(51.-gg/5.)*dim;
@@ -361,7 +373,7 @@ void init_color_array(int skip_background, double dim)
      if(b>0xff) b=0xff;
    }
    my_snprintf(s, S(s), "#%02x%02x%02x", r, g, b);
-   my_strdup(&color_array[i], s);
+   my_strdup(605, &color_array[i], s);
  }
 
 }
@@ -403,91 +415,91 @@ void alloc_data()
  max_instances=ELEMINST;
  max_symbols=ELEMDEF;
  max_selected=MAXGROUP;
- textelement=my_calloc(max_texts,sizeof(Text));
+ textelement=my_calloc(606, max_texts,sizeof(Text));
  if(textelement==NULL){
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
- wire=my_calloc(max_wires,sizeof(Wire));
+ wire=my_calloc(607, max_wires,sizeof(Wire));
  if(wire==NULL){
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
- gridpoint=(XPoint*)my_calloc(CADMAXGRIDPOINTS,sizeof(XPoint));
+ gridpoint=(XPoint*)my_calloc(608, CADMAXGRIDPOINTS,sizeof(XPoint));
  if(gridpoint==NULL){
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
- inst_ptr=my_calloc(max_instances , sizeof(Instance) );
+ inst_ptr=my_calloc(609, max_instances , sizeof(Instance) );
  if(inst_ptr==NULL){
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
- instdef=my_calloc(max_symbols , sizeof(Instdef) );
+ instdef=my_calloc(610, max_symbols , sizeof(Instdef) );
  if(instdef==NULL){
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
  for(i=0;i<max_symbols;i++) {
-   instdef[i].lineptr=my_calloc(cadlayers, sizeof(Line *));
+   instdef[i].lineptr=my_calloc(611, cadlayers, sizeof(Line *));
    if(instdef[i].lineptr==NULL){
      fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
    }
 
-   instdef[i].polygonptr=my_calloc(cadlayers, sizeof(Polygon *));
+   instdef[i].polygonptr=my_calloc(612, cadlayers, sizeof(Polygon *));
    if(instdef[i].polygonptr==NULL){
      fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
    }
 
-   instdef[i].arcptr=my_calloc(cadlayers, sizeof(Arc *));
+   instdef[i].arcptr=my_calloc(613, cadlayers, sizeof(Arc *));
    if(instdef[i].arcptr==NULL){
      fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
    }
 
-   instdef[i].boxptr=my_calloc(cadlayers, sizeof(Box *));
+   instdef[i].boxptr=my_calloc(614, cadlayers, sizeof(Box *));
    if(instdef[i].boxptr==NULL){
      fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
    }
 
-   instdef[i].lines=my_calloc(cadlayers, sizeof(int));
+   instdef[i].lines=my_calloc(615, cadlayers, sizeof(int));
    if(instdef[i].lines==NULL){
      fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
    }
 
-   instdef[i].rects=my_calloc(cadlayers, sizeof(int));
+   instdef[i].rects=my_calloc(616, cadlayers, sizeof(int));
    if(instdef[i].rects==NULL){
      fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
    }
-   instdef[i].arcs=my_calloc(cadlayers, sizeof(int));
+   instdef[i].arcs=my_calloc(617, cadlayers, sizeof(int));
    if(instdef[i].arcs==NULL){
      fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
    }
-   instdef[i].polygons=my_calloc(cadlayers, sizeof(int)); /* 20171115 */
+   instdef[i].polygons=my_calloc(618, cadlayers, sizeof(int)); /* 20171115 */
    if(instdef[i].polygons==NULL){
      fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
    }
  }
 
- selectedgroup=my_calloc(max_selected, sizeof(Selected));
+ selectedgroup=my_calloc(619, max_selected, sizeof(Selected));
  if(selectedgroup==NULL){
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
- max_rects=my_calloc(cadlayers, sizeof(int));
+ max_rects=my_calloc(620, cadlayers, sizeof(int));
  if(max_rects==NULL){
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
- max_arcs=my_calloc(cadlayers, sizeof(int));
+ max_arcs=my_calloc(621, cadlayers, sizeof(int));
  if(max_arcs==NULL){
    fprintf(errfp, "Tcl_AppInit(): max_arcscalloc error\n");tcleval( "exit");
  }
 
- max_polygons=my_calloc(cadlayers, sizeof(int)); /* 20171115 */
+ max_polygons=my_calloc(622, cadlayers, sizeof(int)); /* 20171115 */
  if(max_polygons==NULL){
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
- max_lines=my_calloc(cadlayers, sizeof(int));
+ max_lines=my_calloc(623, cadlayers, sizeof(int));
  if(max_lines==NULL){
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
@@ -500,102 +512,102 @@ void alloc_data()
   max_arcs[i]=CADMAXOBJECTS;
  }
 
- rect=my_calloc(cadlayers, sizeof(Box *));
+ rect=my_calloc(624, cadlayers, sizeof(Box *));
  if(rect==NULL){
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
- line=my_calloc(cadlayers, sizeof(Line *));
+ line=my_calloc(625, cadlayers, sizeof(Line *));
  if(rect==NULL){
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
- polygon=my_calloc(cadlayers, sizeof(Polygon *));
+ polygon=my_calloc(626, cadlayers, sizeof(Polygon *));
  if(polygon==NULL){
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
- arc=my_calloc(cadlayers, sizeof(Arc *));
+ arc=my_calloc(627, cadlayers, sizeof(Arc *));
  if(arc==NULL){
    fprintf(errfp, "Tcl_AppInit(): arc calloc error\n");tcleval( "exit");
  }
 
  for(i=0;i<cadlayers;i++)
  {
-  rect[i]=my_calloc(max_rects[i],sizeof(Box));
+  rect[i]=my_calloc(628, max_rects[i],sizeof(Box));
   if(rect[i]==NULL){
     fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
   }
 
-  arc[i]=my_calloc(max_arcs[i],sizeof(Arc));
+  arc[i]=my_calloc(629, max_arcs[i],sizeof(Arc));
   if(arc[i]==NULL){
     fprintf(errfp, "Tcl_AppInit(): arc[] calloc error\n");tcleval( "exit");
   }
 
-  polygon[i]=my_calloc(max_polygons[i],sizeof(Polygon));
+  polygon[i]=my_calloc(630, max_polygons[i],sizeof(Polygon));
   if(polygon[i]==NULL){
     fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
   }
 
-  line[i]=my_calloc(max_lines[i],sizeof(Line));
+  line[i]=my_calloc(631, max_lines[i],sizeof(Line));
   if(line[i]==NULL){
     fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
   }
  }
 
- lastrect=my_calloc(cadlayers, sizeof(int));
+ lastrect=my_calloc(632, cadlayers, sizeof(int));
  if(lastrect==NULL){
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
- lastpolygon=my_calloc(cadlayers, sizeof(int)); /* 20171115 */
+ lastpolygon=my_calloc(633, cadlayers, sizeof(int)); /* 20171115 */
  if(lastpolygon==NULL){
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
- lastarc=my_calloc(cadlayers, sizeof(int)); /* 20171115 */
+ lastarc=my_calloc(634, cadlayers, sizeof(int)); /* 20171115 */
  if(lastarc==NULL){
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
- lastline=my_calloc(cadlayers, sizeof(int));
+ lastline=my_calloc(635, cadlayers, sizeof(int));
  if(lastline==NULL){
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
- pixmap=my_calloc(cadlayers, sizeof(Pixmap));
+ pixmap=my_calloc(636, cadlayers, sizeof(Pixmap));
  if(pixmap==NULL){
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
- color_array=my_calloc(cadlayers, sizeof(char*));
+ color_array=my_calloc(637, cadlayers, sizeof(char*));
  if(color_array==NULL){
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
- gc=my_calloc(cadlayers, sizeof(GC));
+ gc=my_calloc(638, cadlayers, sizeof(GC));
  if(gc==NULL){
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
- gcstipple=my_calloc(cadlayers, sizeof(GC));
+ gcstipple=my_calloc(639, cadlayers, sizeof(GC));
  if(gcstipple==NULL){
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
- fill_type=my_calloc(cadlayers, sizeof(int));
+ fill_type=my_calloc(640, cadlayers, sizeof(int));
  if(fill_type==NULL){
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
- pixdata=my_calloc(cadlayers, sizeof(char*));
+ pixdata=my_calloc(641, cadlayers, sizeof(char*));
  if(pixdata==NULL){
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
  for(i=0;i<cadlayers;i++)
  {
-   pixdata[i]=my_calloc(32, sizeof(char));
+   pixdata[i]=my_calloc(642, 32, sizeof(char));
    if(pixdata[i]==NULL){
      fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
    }
@@ -603,7 +615,7 @@ void alloc_data()
 }
 
 
-int build_colors(int skip_background, double dim) /* 20171113 */
+int build_colors(double dim) /* 20171113 */
 {
     int i;
     if(dark_colorscheme) {
@@ -622,26 +634,21 @@ int build_colors(int skip_background, double dim) /* 20171113 */
       fprintf(errfp,"Tcl var colors not set correctly\n");
       return -1; /* fail */
     }
-    init_color_array(skip_background, dim);
+    init_color_array(dim);
     for(i=0;i<cadlayers;i++)
     {
      color_index[i] = find_best_color(color_array[i]);
     }
     for(i=0;i<cadlayers;i++)
     {
-      if(!(i==0 && skip_background) ) {
-        XSetForeground(display, gc[i], color_index[i]);
-        XSetForeground(display, gcstipple[i], color_index[i]);
-      }
+      XSetForeground(display, gc[i], color_index[i]);
+      XSetForeground(display, gcstipple[i], color_index[i]);
     }
     for(i=0;i<cadlayers;i++) {
       XLookupColor(display, colormap, color_array[i], &xcolor_exact, &xcolor);
       xcolor_array[i] = xcolor;
     }
     tcleval("reconfigure_layers_menu");
-    if(!skip_background) {
-      XSetWindowBackground(display, window, color_index[0]); /* 20171124 */
-    }
     return 0; /* success */
 }
 
@@ -716,7 +723,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
  my_strncpy(home_dir, home_buff, S(home_dir));
 
  for(i=0;i<CADMAXHIER;i++) sch_prefix[i]=NULL;
- my_strdup(&sch_prefix[0],".");
+ my_strdup(643, &sch_prefix[0],".");
 
  XSetErrorHandler(err);
 
@@ -909,7 +916,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
  #ifndef IN_MEMORY_UNDO
  /* 20150327 create undo directory */
  /* 20180923 no more mkdtemp (portability issues) */
- if( !my_strdup(&undo_dirname, create_tmpdir("xschem_undo_") )) {
+ if( !my_strdup(644, &undo_dirname, create_tmpdir("xschem_undo_") )) {
    fprintf(errfp, "xinit(): problems creating tmp undo dir\n");
    tcleval( "exit");
  }
@@ -917,7 +924,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
  #endif
 
  init_pixdata();
- init_color_array(0, 0.0);
+ init_color_array(0.0);
  my_snprintf(tmp, S(tmp), "%d",debug_var);
  tclsetvar("tcl_debug",tmp );
  if(flat_netlist) tclsetvar("flat_netlist","1");
@@ -1022,7 +1029,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
     }
     gctiled = XCreateGC(display,window,0L, NULL);
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done step c of xinit()\n");
-    if(build_colors(0, 0.0)) exit(-1);
+    if(build_colors(0.0)) exit(-1);
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done step e of xinit()\n");
     /* save_pixmap must be created as resetwin() frees it before recreating with new size. */
     save_pixmap = XCreatePixmap(display,window,CADWIDTH,CADHEIGHT,depth);

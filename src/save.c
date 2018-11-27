@@ -433,7 +433,6 @@ static void load_wire(FILE *fd)
       load_ascii_string( &ptr, fd);
       ORDER(x1, y1, x2, y2);
       storeobject(-1, x1,y1,x2,y2,WIRE,0,0,ptr);
-      set_modify(0); /* 20140116 storeobject sets modified flag , but we are loading here ... */
     }
     my_free(&ptr);
 }
@@ -880,7 +879,6 @@ void load_schematic(int load_symbols, const char *abs_name, int reset_undo) /* 2
   prepared_netlist_structs=0; /* 20171212 */
   prepared_hash_instances=0; /* 20171224 */
   prepared_hash_wires=0; /* 20171224 */
-  set_modify(0);
   if(reset_undo) clear_undo();
 
   if(abs_name && abs_name[0]) {
@@ -902,11 +900,13 @@ void load_schematic(int load_symbols, const char *abs_name, int reset_undo) /* 2
       if(debug_var>=1) fprintf(errfp, "load_schematic(): reading file: %s\n", name);
       read_xschem_file(fd);
       fclose(fd); /* 20150326 moved before load symbols */
+      set_modify(0);
       if(debug_var>=2) fprintf(errfp, "load_schematic(): loaded file:wire=%d inst=%d\n",lastwire , lastinst);
       if(load_symbols) link_symbols_to_instances();
     }
     if(debug_var>=1) fprintf(errfp, "load_schematic(): %s, returning\n", schematic[currentsch]);
   } else {
+    set_modify(0);
     clear_drawing();
     my_strncpy(schematic[currentsch], "untitled.sch", S(schematic[currentsch]));
   }
@@ -1583,19 +1583,19 @@ void load_symbol(const char *abs_name) /* function called when opening a symbol 
   prepared_hilight_structs=0; /* 20171212 */
   prepared_netlist_structs=0; /* 20171212 */
   prepared_hash_wires=0; /* 20171224 */
-  set_modify(0);
-  if(has_x) {
-    tcleval( "wm title . \"xschem - [file tail [xschem get schname]]\""); /* 20150417 set window and icon title */
-    tcleval( "wm iconname . \"xschem - [file tail [xschem get schname]]\"");
-  }
   if(!name[0]) return;
   if( (fd=fopen(name,"r"))== NULL) {
     fprintf(errfp, "load_symbol(): can not open file: %s\n", name);
     return;
   }
+  if(has_x) {
+    tcleval( "wm title . \"xschem - [file tail [xschem get schname]]\""); /* 20150417 set window and icon title */
+    tcleval( "wm iconname . \"xschem - [file tail [xschem get schname]]\"");
+  }
   read_xschem_file(fd);
   fclose(fd);
   link_symbols_to_instances(); /* 20180921 */
+  set_modify(0);
 }
 
 

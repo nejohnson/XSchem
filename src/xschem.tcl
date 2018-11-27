@@ -97,37 +97,37 @@ proc netlist {source_file show netlist_file} {
      set hspice {}
    }
    if {$flat_netlist==0} then {
-     eval exec "${XSCHEM_SHAREDIR}/spice.awk -- $hspice $netlist_dir/$source_file \
-             | ${XSCHEM_SHAREDIR}/break.awk > $netlist_dir/$netlist_file"
+     eval exec "awk -f ${XSCHEM_SHAREDIR}/spice.awk -- $hspice $netlist_dir/$source_file \
+             | awk -f ${XSCHEM_SHAREDIR}/break.awk > $netlist_dir/$netlist_file"
    } else {
-     eval exec "${XSCHEM_SHAREDIR}/spice.awk -- $hspice $netlist_dir/$source_file \
-             | ${XSCHEM_SHAREDIR}/flatten.awk | ${XSCHEM_SHAREDIR}/break.awk > $netlist_dir/$netlist_file"
+     eval exec awk -f "${XSCHEM_SHAREDIR}/spice.awk -- $hspice $netlist_dir/$source_file \
+             | awk -f ${XSCHEM_SHAREDIR}/flatten.awk | awk -f ${XSCHEM_SHAREDIR}/break.awk > $netlist_dir/$netlist_file"
    }
    if ![string compare $show "show"] {
       textwindow $netlist_dir/$netlist_file
    }
  } 
  if [regexp {\.vhdl} $netlist_file ] {
-   eval exec "${XSCHEM_SHAREDIR}/vhdl.awk $netlist_dir/$source_file \
+   eval exec "awk -f ${XSCHEM_SHAREDIR}/vhdl.awk $netlist_dir/$source_file \
               > $netlist_dir/$netlist_file"
    if ![string compare $show "show"] {
      textwindow $netlist_dir/$netlist_file
    }
  }
  if [regexp {\.tdx$} $netlist_file ] {
-   eval exec "${XSCHEM_SHAREDIR}/tedax.awk $netlist_dir/$source_file \
+   eval exec "awk -f ${XSCHEM_SHAREDIR}/tedax.awk $netlist_dir/$source_file \
               > $netlist_dir/$netlist_file"
    if ![string compare $show "show"] {
      textwindow $netlist_dir/$netlist_file
    }
  }
  if [regexp {\.v$} $netlist_file ] {
-   eval exec "${XSCHEM_SHAREDIR}/verilog.awk $netlist_dir/$source_file \
+   eval exec "awk -f ${XSCHEM_SHAREDIR}/verilog.awk $netlist_dir/$source_file \
               > $netlist_dir/$netlist_file"
 
    # 20140409
    if { $verilog_2001==1 } { 
-     eval exec ${XSCHEM_SHAREDIR}/convert_to_verilog2001.awk $netlist_dir/$netlist_file > $netlist_dir/${netlist_file}vv
+     eval exec "awk -f ${XSCHEM_SHAREDIR}/convert_to_verilog2001.awk $netlist_dir/$netlist_file > $netlist_dir/${netlist_file}vv"
      eval exec mv $netlist_dir/${netlist_file}vv $netlist_dir/$netlist_file
    }
    if ![string compare $show "show"] {
@@ -602,7 +602,7 @@ proc make_symbol {name} {
  global XSCHEM_SHAREDIR symbol_width
  set name [abs_sym_path $name .sch]
  # puts "make_symbol{}, executing: ${XSCHEM_SHAREDIR}/make_sym.awk $symbol_width ${name}"
- eval exec "${XSCHEM_SHAREDIR}/make_sym.awk $symbol_width {$name}"
+ eval exec "awk -f ${XSCHEM_SHAREDIR}/make_sym.awk $symbol_width {$name}"
  return {}
 }
 

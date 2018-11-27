@@ -293,8 +293,8 @@ void *my_calloc(int id, size_t nmemb, size_t size)
      ptr=calloc(nmemb, size);
      if(ptr == NULL) fprintf(errfp,"my_calloc(%d,): allocation failure\n", id);
      if(debug_var>=3) 
-       fprintf(errfp, "my_calloc(%d,): allocating %lx , %lu bytes\n",
-               id, (unsigned long)ptr, (unsigned long) (size*nmemb));
+       fprintf(errfp, "my_calloc(%d,): allocating %p , %lu bytes\n",
+               id, ptr, (unsigned long) (size*nmemb));
    }
    else ptr = NULL;
    return ptr;
@@ -306,8 +306,8 @@ void *my_malloc(int id, size_t size)
  if(size>0) {
    ptr=malloc(size);
   if(ptr == NULL) fprintf(errfp,"my_malloc(%d,): allocation failure\n", id);
-   if(debug_var>=3) fprintf(errfp, "my_malloc(%d,): allocating %lx , %lu bytes\n",
-     id, (unsigned long)ptr, (unsigned long) size);
+   if(debug_var>=3) fprintf(errfp, "my_malloc(%d,): allocating %p , %lu bytes\n",
+     id, ptr, (unsigned long) size);
  }
  else ptr=NULL;
  return ptr;
@@ -315,25 +315,25 @@ void *my_malloc(int id, size_t size)
 
 void my_realloc(int id, void *ptr,size_t size)
 {
- unsigned long a;
- a = (unsigned long) *(void **)ptr;
+ void *a;
+ a = *(void **)ptr;
  if(size == 0) {
    free(*(void **)ptr);
    *(void **)ptr=NULL;
-   if(debug_var>=3) fprintf(errfp, "my_free():  my_realloc_freeing %lx\n",(unsigned long)*(void **)ptr);
+   if(debug_var>=3) fprintf(errfp, "my_free():  my_realloc_freeing %p\n",*(void **)ptr);
  } else {
    *(void **)ptr=realloc(*(void **)ptr,size);
     if(*(void **)ptr == NULL) fprintf(errfp,"my_realloc(%d,): allocation failure\n", id);
    if(debug_var>=3) 
-     fprintf(errfp, "my_realloc(%d,): reallocating %lx --> %lx to %lu bytes\n",
-           id, a, (unsigned long) *(void **)ptr,(unsigned long) size);
+     fprintf(errfp, "my_realloc(%d,): reallocating %p --> %p to %lu bytes\n",
+           id, a, *(void **)ptr,(unsigned long) size);
  }
 
 } 
 
 void my_free(void *ptr)
 {
- if(debug_var>=3) fprintf(errfp, "my_free():  freeing %lx\n",(unsigned long)*(void **)ptr);
+ if(debug_var>=3) fprintf(errfp, "my_free():  freeing %p\n",*(void **)ptr);
  free(*(void **)ptr);
  *(void **)ptr=NULL;
 }

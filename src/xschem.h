@@ -118,7 +118,7 @@
 /*  looping through the whole wire[] and inst_ptr[] arrays */
 /*  when drawing area is very big using spatial hash table may take longer than */
 /*  a simple for() loop through the big arrays + clip check. */
-#define ITERATOR_THRESHOLD  12000.0
+#define ITERATOR_THRESHOLD  42000.0
 
 #define SCHEMATIC 1
 #define SYMBOL 2

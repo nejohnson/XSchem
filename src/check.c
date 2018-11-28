@@ -96,9 +96,7 @@ void update_conn_cues(int draw_cues, int dr_win)
   x2 = X_TO_XSCHEM(areax2);
   y2 = Y_TO_XSCHEM(areay2);
 
-  if(!prepared_hash_wires) {
-    hash_wires();
-  }
+  hash_wires();
   for(init_wire_iterator(x1, y1, x2, y2); ( wireptr = wire_iterator_next() ) ;) {
     k=wireptr->n;
     /* wire[k].end1 = wire[k].end2 = 0; */

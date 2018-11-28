@@ -558,6 +558,137 @@ void draw_hilight_net(int on_window)
  struct hilight_hashentry *entry;
  register double x1,y1,x2,y2; /* 20150409 */
  Instdef *symptr; /* 20160414 */
+ int use_hash;
+ struct wireentry *wireptr;
+
+ if(!hilight_nets) return;
+ save_draw = draw_window; /* 20181009 */
+ draw_window = on_window;
+ x1 = X_TO_XSCHEM(areax1);
+ y1 = Y_TO_XSCHEM(areay1);
+ x2 = X_TO_XSCHEM(areax2);
+ y2 = Y_TO_XSCHEM(areay2);
+ use_hash = (lastwire> 2000 || lastinst > 2000 ) &&  (x2 - x1  < ITERATOR_THRESHOLD);
+ if(use_hash) {
+   hash_wires();
+ }
+ if(!use_hash) for(i=0;i<lastwire;i++)
+ {
+    str = get_tok_value(wire[i].prop_ptr, "lab",0);
+    if(str[0]) {
+      if( (entry = bus_hilight_lookup(str, 0,2)) ) {
+        if(wire[i].bus) /* 20171201 */
+          drawline(7+entry->value%(cadlayers-7), THICK,
+             wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
+        else
+          drawline(7+entry->value%(cadlayers-7), NOW,
+             wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
+        if(CADHALFDOTSIZE*mooz>=0.7) {
+          if( wire[i].end1 >1 ) { /* 20150331 draw_dots */
+            filledarc(7+entry->value%(cadlayers-7), NOW, wire[i].x1, wire[i].y1, CADHALFDOTSIZE, 0, 360);
+          }
+          if( wire[i].end2 >1 ) { /* 20150331 draw_dots */
+            filledarc(7+entry->value%(cadlayers-7), NOW, wire[i].x2, wire[i].y2, CADHALFDOTSIZE, 0, 360);
+          }
+        }
+      }
+    }
+ } else for(init_wire_iterator(x1, y1, x2, y2); ( wireptr = wire_iterator_next() ) ;) {
+    i = wireptr->n;
+    str = get_tok_value(wire[i].prop_ptr, "lab",0);
+    if(str[0]) {
+      if( (entry = bus_hilight_lookup(str, 0,2)) ) {
+        if(wire[i].bus) /* 20171201 */
+          drawline(7+entry->value%(cadlayers-7), THICK,
+             wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
+        else
+          drawline(7+entry->value%(cadlayers-7), NOW,
+             wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
+        if(CADHALFDOTSIZE*mooz>=0.7) {
+          if( wire[i].end1 >1 ) { /* 20150331 draw_dots */
+            filledarc(7+entry->value%(cadlayers-7), NOW, wire[i].x1, wire[i].y1, CADHALFDOTSIZE, 0, 360);
+          }
+          if( wire[i].end2 >1 ) { /* 20150331 draw_dots */
+            filledarc(7+entry->value%(cadlayers-7), NOW, wire[i].x2, wire[i].y2, CADHALFDOTSIZE, 0, 360);
+          }
+        }
+      }
+    }
+ }
+ my_realloc(145, &inst_color,lastinst*sizeof(int)); 
+ for(i=0;i<lastinst;i++)
+ {
+   /* 20150409 */
+   x1=X_TO_SCREEN(inst_ptr[i].x1);
+   x2=X_TO_SCREEN(inst_ptr[i].x2);
+   y1=Y_TO_SCREEN(inst_ptr[i].y1);
+   y2=Y_TO_SCREEN(inst_ptr[i].y2);
+   inst_color[i]=0;
+   if(OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2)) continue;
+   /* /20150409 */
+
+  type = (inst_ptr[i].ptr+instdef)->type; /* 20150409 */
+  if( type &&
+      !(strcmp(type,"label") && strcmp(type,"ipin") &&
+        strcmp(type,"iopin") && strcmp(type,"opin") )
+    )
+  {
+   entry=bus_hilight_lookup( get_tok_value(inst_ptr[i].prop_ptr,"lab",0) , 0, 2 );
+   if(entry) inst_color[i]=7+entry->value%(cadlayers-7);
+  }
+  else if( inst_ptr[i].flags & 4) {
+    if(debug_var>=1) fprintf(errfp, "draw_hilight_net(): instance %d flags &4 true\n", i);
+    inst_color[i]=PINLAYER;
+  }
+ }
+
+ for(c=0;c<cadlayers;c++) {
+  /* 20160414 from draw() */
+  if(draw_single_layer!=-1 && c != draw_single_layer) continue; /* 20151117 */
+
+  for(i=0;i<lastinst;i++)
+  {
+    if(inst_color[i] )
+    {
+     /* 20150409 */
+     x1=X_TO_SCREEN(inst_ptr[i].x1);
+     x2=X_TO_SCREEN(inst_ptr[i].x2);
+     y1=Y_TO_SCREEN(inst_ptr[i].y1);
+     y2=Y_TO_SCREEN(inst_ptr[i].y2);
+     if(OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2)) continue;
+     if(debug_var>=1) fprintf(errfp, "draw_hilight_net(): instance:%d\n",i);
+     drawline(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0);
+     drawrect(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0);
+     filledrect(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0);
+     drawarc(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
+     /* 20160414 from draw() */
+     symptr = (inst_ptr[i].ptr+instdef);
+     if( c==0 || /*draw_symbol_outline call is needed on layer 0 to avoid redundant work (outside check) */
+         symptr->lines[c] ||
+         symptr->rects[c] ||
+         ((c==TEXTWIRELAYER || c==TEXTLAYER) && symptr->texts)) {
+       draw_symbol_outline(ADD, inst_color[i], i,c,0,0,0.0,0.0);
+     }
+     filledrect(inst_color[i], END, 0.0, 0.0, 0.0, 0.0);
+     drawarc(inst_color[i], END, 0.0, 0.0, 0.0, 0.0, 0.0);
+     drawrect(inst_color[i], END, 0.0, 0.0, 0.0, 0.0);
+     drawline(inst_color[i], END, 0.0, 0.0, 0.0, 0.0);
+    }
+  }
+ }
+ draw_window = save_draw;
+}
+
+
+void xdraw_hilight_net(int on_window)
+{
+ char *str;
+ int save_draw;
+ char *type=NULL;
+ int i,c;
+ struct hilight_hashentry *entry;
+ register double x1,y1,x2,y2; /* 20150409 */
+ Instdef *symptr; /* 20160414 */
 
   if(!hilight_nets) return;
   save_draw = draw_window; /* 20181009 */
@@ -654,7 +785,6 @@ void draw_hilight_net(int on_window)
 }
 
 
-
 void undraw_hilight_net(int on_window) /* 20160413 */
 {
  char *str;
@@ -688,6 +818,14 @@ void undraw_hilight_net(int on_window) /* 20160413 */
        else
          drawline(WIRELAYER, NOW, 
             wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
+        if(CADHALFDOTSIZE*mooz>=0.7) {
+          if( wire[i].end1 >1 ) { /* 20150331 draw_dots */
+            filledarc(WIRELAYER, NOW, wire[i].x1, wire[i].y1, CADHALFDOTSIZE, 0, 360);
+          }
+          if( wire[i].end2 >1 ) { /* 20150331 draw_dots */
+            filledarc(WIRELAYER, NOW, wire[i].x2, wire[i].y2, CADHALFDOTSIZE, 0, 360);
+          }
+        }
      }
    }
 

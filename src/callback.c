@@ -929,6 +929,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='k' && state==0)                             /* hilight net */
    {
+    enable_drill=0;
     hilight_net();
     draw_hilight_net(1);
     break;

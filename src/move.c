@@ -779,9 +779,9 @@ void copy_objects(int what)
    drawline(k, END, 0.0, 0.0, 0.0, 0.0);
    
   } /* end for(k ... */
+  check_collapsing_objects();
   update_conn_cues(1, 1); 
   ui_state &= ~STARTCOPY;
-  check_collapsing_objects();
   x1=y_1=x2=y_2=rot=flip=deltax=deltay=0;
   bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
   draw();
@@ -1205,10 +1205,10 @@ void move_objects(int what, int merge, double dx, double dy)
    drawrect(k, END, 0.0, 0.0, 0.0, 0.0);
    drawline(k, END, 0.0, 0.0, 0.0, 0.0);
   } /*end for(k ... */
+  check_collapsing_objects();
   update_conn_cues(1, 1); 
   ui_state &= ~STARTMOVE;
   ui_state &= ~STARTMERGE;
-  check_collapsing_objects();
   x1=y_1=x2=y_2=rot=flip=deltax=deltay=0;
   bbox(SET , 0.0 , 0.0 , 0.0 , 0.0); 
   if(debug_var>=1) fprintf(errfp, "move_objects(): bbox= %d %d %d %d\n", areax1, areay1, areaw, areah);

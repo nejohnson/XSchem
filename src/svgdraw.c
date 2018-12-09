@@ -238,7 +238,7 @@ static void svg_drawgrid()
  double x,y;
  double delta,tmp;
  if(!draw_grid) return;
- delta=CADGRID* mooz;
+ delta=cadgrid* mooz;
  while(delta<CADGRIDTHRESHOLD) delta*=CADGRIDMULTIPLY;  /* <-- to be improved,but works */
  x = xorigin* mooz;y = yorigin* mooz;
  set_svg_colors(GRIDLAYER);

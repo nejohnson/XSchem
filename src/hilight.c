@@ -94,7 +94,7 @@ struct hilight_hashentry *hilight_lookup(char *token, int value, int remove)
  {
   if( !entry )                  /* empty slot */
   {
-   if( (remove==0) )            /* insert data */
+   if( remove==0 )              /* insert data */
    {
     s=sizeof( struct hilight_hashentry );
     ptr= my_malloc(137, s ); 
@@ -366,11 +366,24 @@ void search_inst(const char *tok, const char *val, int sub, int sel, int what)
           ) {
             str = get_tok_value(wire[i].prop_ptr, "lab",0);
             if(debug_var>=2) fprintf(errfp, "search_inst(): wire=%d, tok=%s, val=%s \n", i,tok, str);
-            if(str && str[0]) {
-               bus_hilight_lookup(str, col,0);
-               if(what==NOW) {
-                 drawline(col%(cadlayers-7)+7, NOW, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
-               }
+            if(str[0]) {
+              bus_hilight_lookup(str, col, 0);
+              if(what == NOW) {
+                if(wire[i].bus) /* 20171201 */
+                  drawline(7+col%(cadlayers-7), THICK,
+                     wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
+                else
+                  drawline(7+col%(cadlayers-7), NOW,
+                     wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
+                if(CADHALFDOTSIZE*mooz>=0.7) {
+                  if( wire[i].end1 >1 ) {
+                    filledarc(7+col%(cadlayers-7), NOW, wire[i].x1, wire[i].y1, CADHALFDOTSIZE, 0, 360);
+                  }
+                  if( wire[i].end2 >1 ) {
+                    filledarc(7+col%(cadlayers-7), NOW, wire[i].x2, wire[i].y2, CADHALFDOTSIZE, 0, 360);
+                  }
+                }
+              }
             }
             if(sel) {
               select_wire(i,SELECTED, 1);
@@ -666,6 +679,8 @@ void draw_hilight_net(int on_window)
      if( c==0 || /*draw_symbol_outline call is needed on layer 0 to avoid redundant work (outside check) */
          symptr->lines[c] ||
          symptr->rects[c] ||
+         symptr->arcs[c] ||
+         symptr->polygons[c] ||
          ((c==TEXTWIRELAYER || c==TEXTLAYER) && symptr->texts)) {
        draw_symbol_outline(ADD, inst_color[i], i,c,0,0,0.0,0.0);
      }
@@ -771,6 +786,8 @@ void xdraw_hilight_net(int on_window)
      if( c==0 || /*draw_symbol_outline call is needed on layer 0 to avoid redundant work (outside check) */
          symptr->lines[c] ||
          symptr->rects[c] ||
+         symptr->arcs[c] ||
+         symptr->polygons[c] ||
          ((c==TEXTWIRELAYER || c==TEXTLAYER) && symptr->texts)) {
        draw_symbol_outline(ADD, inst_color[i], i,c,0,0,0.0,0.0);
      }
@@ -873,6 +890,8 @@ void undraw_hilight_net(int on_window) /* 20160413 */
      if( c==0 || /*draw_symbol_outline call is needed on layer 0 to avoid redundant work (outside check) */
          symptr->lines[c] ||
          symptr->rects[c] ||
+         symptr->arcs[c] ||
+         symptr->polygons[c] ||
          ((c==TEXTWIRELAYER || c==TEXTLAYER) && symptr->texts)) {
        draw_symbol_outline(ADD, c, i,c,0,0,0.0,0.0);
      }

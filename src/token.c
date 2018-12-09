@@ -547,6 +547,7 @@ char *subst_token(const char *s, const char *tok, const char *new_val)
  int done_subst=0;
  int escape=0;
 
+ if(debug_var>=1) fprintf(errfp, "subst_token(%s, %s, %s)\n", s, tok, new_val);
  if(new_val && !strcmp(new_val, "DELETE")) {
     if(!strcmp(tok,"name")) {
       fprintf(errfp,"subst_token(): Can not DELETE name attribute\n");
@@ -598,6 +599,8 @@ char *subst_token(const char *s, const char *tok, const char *new_val)
        token[token_pos] = '\0'; 
        if(!strcmp(token,tok) && !new_val) {
          result_pos -= token_pos + 1; /* discard token if new_val == NULL */
+         if(result_pos < 0) result_pos = 0; /* if first token is to be deleted there is no space before */
+         if(debug_var>=3) fprintf(errfp, "subst_token(): result_pos=%d\n", result_pos);/* <<< */
        } else {
          result[result_pos++] = c;
        }
@@ -762,7 +765,7 @@ void print_vhdl_element(FILE *fd, int inst) /* 20071217 */
  my_strdup(462, &name,inst_ptr[inst].instname); /* 20161210 */
  /* my_strdup(463, &name,get_tok_value(inst_ptr[inst].prop_ptr,"name",0)); */
 
- if((name==NULL) ) return;
+ if(name==NULL) return;
  no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
  no_of_generics= (inst_ptr[inst].ptr+instdef)->rects[GENERICLAYER];
 
@@ -1286,7 +1289,7 @@ void print_tedax_element(FILE *fd, int inst)
 
  my_strdup(497, &format,
      get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"tedax_format",0));
- if((name==NULL) ) return; /* do no netlist unwanted insts(no format) */
+ if(name==NULL) return; /* do no netlist unwanted insts(no format) */
  no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
 
  fprintf(fd, "begin_inst %s numslots %s\n", name, numslots);

@@ -686,7 +686,7 @@ int source_tcl_file(char *s)
   char tmp[1024];
   if(Tcl_EvalFile(interp, s)==TCL_ERROR) { 
     fprintf(errfp, "Tcl_AppInit() error: can not execute %s, please fix:\n", s);
-    fprintf(errfp, Tcl_GetStringResult(interp));
+    fprintf(errfp, "%s", Tcl_GetStringResult(interp));
     fprintf(errfp, "\n");
     my_snprintf(tmp, S(tmp), "tk_messageBox -icon error -type ok -message \
        {Tcl_AppInit() err 1: can not execute %s, please fix:\n %s}",
@@ -784,6 +784,18 @@ int Tcl_AppInit(Tcl_Interp *inter)
    }
  }
 
+ /* create USER_CONF_DIR if it was not installed */
+ my_snprintf(tmp, S(tmp),"regsub {^~} {%s} {%s}", USER_CONF_DIR, home_dir);
+ tcleval(tmp);
+ if(stat(Tcl_GetStringResult(interp), &buf)) {
+   if(!mkdir(Tcl_GetStringResult(interp), 0700)) {
+     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): created %s dir\n", USER_CONF_DIR);
+   } else {
+    fprintf(errfp, "Tcl_AppInit(): failure creating %s\n", USER_CONF_DIR);
+    Tcl_Exit(EXIT_FAILURE);
+   }
+ }
+  
  /* */
  /*  END LOOKING FOR .xschem */
  /* */
@@ -1085,8 +1097,8 @@ int Tcl_AppInit(Tcl_Interp *inter)
 
     change_linewidth(0.);
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done xinit()\n");
-    /* winattr.backing_store = WhenMapped; */
-    winattr.backing_store = NotUseful;
+    winattr.backing_store = WhenMapped;
+    /* winattr.backing_store = NotUseful;*/
     Tk_ChangeWindowAttributes(tkwindow, CWBackingStore, &winattr);
    
     if(debug_var>=1) 
@@ -1098,7 +1110,8 @@ int Tcl_AppInit(Tcl_Interp *inter)
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): xserver max request size: %d\n", 
                              (int)XMaxRequestSize(display));
 
-    set_snap(CADSNAP);
+    set_snap(0); /* set default value specified in xschemrc as 'snap' else CADSNAP */
+    set_grid(0); /* set default value specified in xschemrc as 'grid' else CADGRID */
  } /* if(has_x) */
  if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done X init\n");
 
@@ -1131,22 +1144,26 @@ int Tcl_AppInit(Tcl_Interp *inter)
                   */
  pending_fullzoom=1; /* 20121111 */
  if(do_netlist) {
-  if(debug_var>=1) {
-   if(flat_netlist) 
-     fprintf(errfp, "xschem: flat netlist requested\n");
-  }
-  if(!filename) {
-    fprintf(errfp, "xschem: cant do a netlist without a filename\n");
-    tcleval( "exit");
-  }
-  if(netlist_type == CAD_SPICE_NETLIST)
-    global_spice_netlist(1);                  /* 1 means global netlist */
-  else if(netlist_type == CAD_VHDL_NETLIST)
-    global_vhdl_netlist(1);                   /* 1 means global netlist */
-  else if(netlist_type == CAD_VERILOG_NETLIST)
-    global_verilog_netlist(1);                   /* 1 means global netlist */
-  else if(netlist_type == CAD_TEDAX_NETLIST)
-    global_tedax_netlist(1);                   /* 1 means global netlist */
+   if(debug_var>=1) {
+     if(flat_netlist) 
+       fprintf(errfp, "xschem: flat netlist requested\n");
+   }
+   if(!filename) {
+     fprintf(errfp, "xschem: cant do a netlist without a filename\n");
+     tcleval( "exit");
+   }
+   if(netlist_dir && netlist_dir[0]) {
+     if(netlist_type == CAD_SPICE_NETLIST)
+       global_spice_netlist(1);                  /* 1 means global netlist */
+     else if(netlist_type == CAD_VHDL_NETLIST)
+       global_vhdl_netlist(1);                   /* 1 means global netlist */
+     else if(netlist_type == CAD_VERILOG_NETLIST)
+       global_verilog_netlist(1);                   /* 1 means global netlist */
+     else if(netlist_type == CAD_TEDAX_NETLIST)
+       global_tedax_netlist(1);                   /* 1 means global netlist */
+   } else {
+    fprintf(errfp, "xschem: please set netlist_dir in xschemrc\n");
+   }
  }
  if(do_print) {
    if(!filename) {

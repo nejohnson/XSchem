@@ -51,6 +51,7 @@ int fill=1; /* filled rectangles */
 int draw_pixmap=1; /* use pixmap for double buffer */
 int draw_window=0; /* 20181009 */
 int draw_grid=1;
+double cadgrid = CADGRID;
 int current_type=SCHEMATIC;
 int change_lw=0; /* allow change linewidth */
 int incr_hilight=1;

@@ -254,7 +254,7 @@ struct node_hashentry *node_hash_lookup(char *token, char *dir,int remove,int po
  {
   if( !entry )                  /* empty slot */
   {
-   if( (remove==0) )            /* insert data */
+   if( remove==0 )              /* insert data */
    {
     s=sizeof( struct node_hashentry );
     ptr= my_malloc(281, s );

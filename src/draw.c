@@ -670,7 +670,7 @@ void drawgrid()
  double delta,tmp;
  int i=0;
  if( !draw_grid || !has_x) return;
- delta=CADGRID*mooz;
+ delta=cadgrid*mooz;
  while(delta<CADGRIDTHRESHOLD) delta*=CADGRIDMULTIPLY;  /* <-- to be improved,but works */
  x = xorigin*mooz;y = yorigin*mooz;
  if(y>areay1 && y<areay2)

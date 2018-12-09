@@ -90,6 +90,11 @@ function process(        i, iprefix)
  # dxm6[1] 0 HDD dnwell area='(50u + 73u)*(10u + 32u)' pj='2*(50u +73u)+2*(10u +32u)' 
  # dxm6[0] 0 HDD dnwell area='(50u + 73u)*(10u + 32u)' pj='2*(50u +73u)+2*(10u +32u)' 
  #20151027 do this for all fields
+ # 20181208 do not process commented lines
+ if($1 ~/^\*/) {
+   print
+   return
+ }
  for(i=1; i<=NF;i++) {
    if($i ~/^#[a-zA-Z_0-9]+#[a-zA-Z_]+/) {
      iprefix=$i
@@ -136,8 +141,6 @@ function process(        i, iprefix)
    gsub(/ VALUE=/," ")
    if($0 ~ /^D/ ) sub(/PERI[ \t]*=/,"PJ=")
  }
-
-
 
  # .probe tran v( @1 DL[3],DL[2],DL[1],DL[0] , @1 WL[3],WL{2],WL[1],WL[0] )
  if($1 ==".probe" && $4 ~/^@/ && $7 ~/^@/ && NF==9) {

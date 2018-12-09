@@ -474,9 +474,13 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
        Tcl_AppendResult(interp, "--> Instance not found", NULL);
        return TCL_ERROR;
      } else {
-       if(strstr(argv[4], "cell__") ) {
-         char *tmp;
+       char *tmp;
+       if(!strcmp(argv[4],"cell__name")) {
+         tmp = inst_ptr[i].name;
+         Tcl_AppendResult(interp, tmp, NULL);
+       } else if(strstr(argv[4], "cell__") ) {
          tmp = get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, argv[4]+6, 0);
+         if(debug_var>=1) fprintf(errfp, "xschem getprop: looking up instance %d prop cell__|%s| : |%s|\n", i, argv[4]+6, tmp);
          Tcl_AppendResult(interp, tmp, NULL);
        } else {
          Tcl_AppendResult(interp, get_tok_value(inst_ptr[i].prop_ptr, argv[4], 0), NULL);
@@ -784,7 +788,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
   printf("                   unlight selected nets/pins\n");
   printf("      xschem hilight\n");
   printf("                   hilight selected nets/pins\n");
-  printf("      xschem delete_hilight_net\n");
+  printf("      xschem clear_hilights\n");
   printf("                   unhilight  all nets/pins\n");
   printf("      xschem print [color]\n");
   printf("                   print schematic (optionally in color)\n");
@@ -1008,6 +1012,16 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
   edit_property(2);
  }
 
+ else if(!strcmp(argv[1],"undo"))
+ {
+  pop_undo(0);
+ }
+
+ else if(!strcmp(argv[1],"redo"))
+ {
+  pop_undo(1);
+ }
+
  else if(!strcmp(argv[1],"edit_prop"))
  {
   edit_property(0);
@@ -1045,7 +1059,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
    Tcl_ResetResult(interp);
  }
 
- else if(!strcmp(argv[1],"delete_hilight_net"))
+ else if(!strcmp(argv[1],"clear_hilights"))
  {
    delete_hilight_net();
    draw();
@@ -1054,8 +1068,9 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
 
  else if(!strcmp(argv[1],"search"))
  {
-   /*   0      1       2      3   4   5 */
-   /* xschem search [no]sub  0|1 tok val  */
+   /*   0      1       2      3       4   5   */
+   /*                       select            */
+   /* xschem search [no]sub 0|1|-1   tok val  */
   int select, what;
   what = NOW;
   if(argc == 7) {
@@ -1230,9 +1245,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
         Tcl_AppendResult(interp, schematic[currentsch], NULL);
   }
   else if(!strcmp(argv[2],"cadsnap_default"))  { /* 20161212 */
-        char s[30]; /* overflow safe 20161212 */
-        my_snprintf(s, S(s), "%.9g",CADSNAP);
-        Tcl_AppendResult(interp, s,NULL);
+        Tcl_AppendResult(interp, tclgetvar("snap"),NULL);
   }
   else if(!strcmp(argv[2],"cadsnap"))  { /* 20161212 */
         char s[30]; /* overflow safe 20161212 */
@@ -1434,8 +1447,8 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
   else if(!strcmp(argv[2],"cadsnap"))  { /* 20161212 */
         set_snap( atof(argv[3]) );
   }
-  else if(!strcmp(argv[2],"cadsnap_noalert"))  { /* 20161212 */
-        set_snap( atof(argv[3]) );
+  else if(!strcmp(argv[2],"cadgrid"))  { /* 20161212 */
+        set_grid( atof(argv[3]) );
   }
   else if(!strcmp(argv[2],"flat_netlist"))  {
         flat_netlist=atoi(argv[3]);

@@ -1948,6 +1948,8 @@ set_ne enable_stretch 0
 set_ne horizontal_move 0 ; # 20171023
 set_ne vertical_move 0 ; # 20171023
 set_ne draw_grid 1
+set_ne snap 10
+set_ne grid 20
 set_ne persistent_command 0
 set_ne sym_txt 1
 set_ne show_infowindow 0 
@@ -2414,7 +2416,11 @@ font configure Underline-Font -underline true -size 24
    .menubar.zoom.menu add command -label "Set snap value" \
           -command {
           input_number "Enter snap value ( default: [xschem get cadsnap_default] current: [xschem get cadsnap])" \
-          "xschem set cadsnap_noalert"
+          "xschem set cadsnap"
+        }
+   .menubar.zoom.menu add command -label "Set grid spacing" \
+        -command {
+          input_number "Enter grid spacing (float):" "xschem set cadgrid"
         }
    .menubar.zoom.menu add checkbutton -label "View only Probes" -variable only_probes \
           -accelerator {5} \
@@ -2547,11 +2553,16 @@ font configure Underline-Font -underline true -size 24
 
    frame .statusbar  
    label .statusbar.1   -text "STATUS BAR 1"  
-   label .statusbar.2   -text "GRID:"
-   entry .statusbar.3 -textvariable grid -relief sunken -bg white \
+   label .statusbar.2   -text "SNAP:"
+   entry .statusbar.3 -textvariable snap -relief sunken -bg white \
+          -width 10 -state disabled -disabledforeground black 
+   label .statusbar.4   -text "GRID:"
+   entry .statusbar.5 -textvariable grid -relief sunken -bg white \
           -width 10 -state disabled -disabledforeground black 
    pack .statusbar.2 -side left 
    pack .statusbar.3 -side left 
+   pack .statusbar.4 -side left 
+   pack .statusbar.5 -side left 
    pack .statusbar.1 -side left -fill x
    pack .drw -anchor n -side top -fill both -expand true
    pack .menubar -anchor n -side top -fill x  -before .drw

@@ -1239,11 +1239,8 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='~' && state & ControlMask)    /* testmode:  for performance testing */
    {
-    clock_t start, stop;
-    start = clock();
-    push_undo();
-    stop = clock();
-    printf("time=%g\n",  (double) (stop - start) / CLOCKS_PER_SEC);
+   fprintf(errfp, "%s\n",  subst_token("embed=true name=R4 m=1 value=47k footprint=1206 device=resistor", "embed", "DELETE"));
+    fprintf(errfp, "%s\n", subst_token("name=R4 m=1 value=47k footprint=1206 device=resistor", "name", "R4"));
     break;
    }
    if(key=='#' && !(state&ControlMask))         /* testmode */

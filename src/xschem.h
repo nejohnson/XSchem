@@ -22,7 +22,7 @@
 
 #ifndef CADGLOBALS
 #define CADGLOBALS
-#define XSCHEM_VERSION "2.8.1_RC7"
+#define XSCHEM_VERSION "2.8.1"
 
 #if HAS_PIPE == 1
 /* fdopen() */
@@ -478,6 +478,7 @@ extern int incr_hilight;
 extern int auto_hilight;
 extern int fill; /*  fill rectangles */
 extern int draw_grid;
+extern double cadgrid;
 extern int draw_pixmap; /*  pixmap used as 2nd buffer */
 extern int draw_window; /* 20181009 */
 extern int need_rebuild_selected_array;
@@ -563,6 +564,7 @@ extern int horizontal_move; /*  20171023 */
 extern int vertical_move; /*  20171023 */
 
 extern void set_snap(double); /*  20161212 */
+extern void set_grid(double); /*  20161212 */
 extern double *character[256];
 extern int netlist_show;
 extern int flat_netlist;

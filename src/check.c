@@ -318,8 +318,6 @@ void break_wires_at_pins(void)
         x0=inst_ptr[k].x0+rx1;
         y0=inst_ptr[k].y0+ry1;
         get_square(x0, y0, &sqx, &sqy);
-  
-        /* name instance nodes that touch named nets */
         for(wptr=wiretable[sqx][sqy]; wptr; wptr=wptr->next) {
           i = wptr->n;
           if( touch(wire[i].x1, wire[i].y1,
@@ -343,8 +341,8 @@ void break_wires_at_pins(void)
               wire[lastwire].node=NULL;
               hash_wire(1, lastwire);
               my_strdup(32, &wire[lastwire].node, wire[i].node);
+              need_rebuild_selected_array=1;
               lastwire++;
-      
               wire[i].x1 = x0;
               wire[i].y1 = y0;
             }
@@ -355,7 +353,6 @@ void break_wires_at_pins(void)
   }
   /* prepared_hash_wires=0; */
   /* hash_wires(); */
-  need_rebuild_selected_array=1;
   rebuild_selected_array();
   for(j=0;j<lastselected;j++) if(selectedgroup[j].type==WIRE) {
   /* for(k=0; k < lastwire; k++) { */
@@ -400,6 +397,7 @@ void break_wires_at_pins(void)
               wire[lastwire].bus=0;
             wire[lastwire].node=NULL;
             hash_wire(1, lastwire);
+            need_rebuild_selected_array=1;
             lastwire++;
             wire[i].x1 = x0;
             wire[i].y1 = y0;

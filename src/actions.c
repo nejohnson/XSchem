@@ -31,8 +31,8 @@ void set_modify(int mod)
     prev = mod;
     if(has_x) {
       if(mod == 1) {
-        tcleval( "wm title . \"* xschem - [file tail [xschem get schname]]\"");    /* 20161207 */
-        tcleval( "wm iconname . \"* xschem - [file tail [xschem get schname]]\""); /* 20161207 */
+        tcleval( "wm title . \"xschem - [file tail [xschem get schname]]*\"");    /* 20161207 */
+        tcleval( "wm iconname . \"xschem - [file tail [xschem get schname]]*\""); /* 20161207 */
       } else {
         tcleval( "wm title . \"xschem - [file tail [xschem get schname]]\"");    /* 20161207 */
         tcleval( "wm iconname . \"xschem - [file tail [xschem get schname]]\""); /* 20161207 */
@@ -50,15 +50,42 @@ void print_version()
   printf("warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n");
   exit(EXIT_SUCCESS);
 }
+
 void set_snap(double newsnap) /*  20161212 set new snap factor and just notify new value */
 {
     char str[256];
-    cadsnap = newsnap;
-    sprintf(str, "%.16g", newsnap);
-    if(newsnap == CADSNAP) {
+    static double default_snap = -1.0;
+
+    if(default_snap == -1.0) {
+      default_snap = atof(tclgetvar("snap"));
+      if(default_snap==0.0) default_snap = CADSNAP;
+    }
+    cadsnap = newsnap ? newsnap : default_snap;
+    sprintf(str, "%.16g", cadsnap);
+    if(cadsnap == default_snap) {
       tcleval(".statusbar.3 configure -disabledbackground PaleGreen");
     } else {
       tcleval(".statusbar.3 configure -disabledbackground OrangeRed");
+    }
+    tclsetvar("snap", str);
+}
+
+void set_grid(double newgrid)
+{
+    char str[256];
+    static double default_grid = -1.0;
+
+    if(default_grid == -1.0) {
+      default_grid = atof(tclgetvar("grid"));
+      if(default_grid==0.0) default_grid = CADGRID;
+    }
+    cadgrid = newgrid ? newgrid : default_grid;
+    sprintf(str, "%.16g", cadgrid);
+    if(debug_var>=1) fprintf(errfp, "set_grid(): default_grid = %.16g, cadgrid=%.16g\n", default_grid, cadgrid);
+    if(cadgrid == default_grid) {
+      tcleval(".statusbar.5 configure -disabledbackground PaleGreen");
+    } else {
+      tcleval(".statusbar.5 configure -disabledbackground OrangeRed");
     }
     tclsetvar("grid", str);
 }
@@ -1279,6 +1306,20 @@ void draw_stuff(void)
    }
 }
 
+void restore_selection(double x1, double y1, double x2, double y2)
+{
+  double xx1,yy1,xx2,yy2;
+  xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
+  RECTORDER(xx1,yy1,xx2,yy2);
+  rebuild_selected_array();
+  if(!lastselected) return;
+  bbox(BEGIN,0.0, 0.0, 0.0, 0.0);
+  bbox(ADD, xx1, yy1, xx2, yy2);
+  bbox(SET,0.0, 0.0, 0.0, 0.0);
+  draw_selection(gc[SELLAYER], 0);
+  bbox(END,0.0, 0.0, 0.0, 0.0);
+}
+
 void new_wire(int what, double mx_snap, double my_snap)
 {
  static double x1,y1,x2,y2;
@@ -1367,6 +1408,7 @@ void new_wire(int what, double mx_snap, double my_snap)
        xx1=x1;yy1=y1;xx2=x2;yy2=y2;
        ORDER(xx2,yy1,xx2,yy2);
        drawtempline(gctiled, NOW, xx2,yy1,xx2,yy2);
+       restore_selection(x1, y1, x2, y2);
        x2 = mx_snap; y2 = my_snap;
        if(!(what & CLEAR)) {
          xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
@@ -1383,6 +1425,7 @@ void new_wire(int what, double mx_snap, double my_snap)
        xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
        ORDER(xx1,yy2,xx2,yy2);
        drawtempline(gctiled, NOW, xx1,yy2,xx2,yy2);
+       restore_selection(x1, y1, x2, y2);
        x2 = mx_snap; y2 = my_snap;
        if(!(what & CLEAR)) {
          xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
@@ -1396,6 +1439,7 @@ void new_wire(int what, double mx_snap, double my_snap)
        xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
        ORDER(xx1,yy1,xx2,yy2);
        drawtempline(gctiled, NOW, xx1,yy1,xx2,yy2);
+       restore_selection(x1, y1, x2, y2);
        x2 = mx_snap; y2 = my_snap;
        if(!(what & CLEAR)) {
          xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
@@ -1502,7 +1546,6 @@ void new_arc(int what, double sweep)
     }
   }
 }
-
 void new_line(int what)
 {
  static double x1,y1,x2,y2;
@@ -1563,6 +1606,7 @@ void new_line(int what)
        xx1=x1;yy1=y1;xx2=x2;yy2=y2;
        ORDER(xx2,yy1,xx2,yy2);
        drawtempline(gctiled, NOW, xx2,yy1,xx2,yy2);
+       restore_selection(x1, y1, x2, y2);
        x2 = mousex_snap; y2 = mousey_snap;
        if(!(what & CLEAR)) {
          xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
@@ -1579,6 +1623,7 @@ void new_line(int what)
        xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
        ORDER(xx1,yy2,xx2,yy2);
        drawtempline(gctiled, NOW, xx1,yy2,xx2,yy2);
+       restore_selection(x1, y1, x2, y2);
        x2 = mousex_snap; y2 = mousey_snap;
        if(!(what & CLEAR)) {
          xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
@@ -1592,6 +1637,7 @@ void new_line(int what)
        xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
        ORDER(xx1,yy1,xx2,yy2);
        drawtempline(gctiled, NOW, xx1,yy1,xx2,yy2);
+       restore_selection(x1, y1, x2, y2);
        x2 = mousex_snap; y2 = mousey_snap;
        if(!(what & CLEAR)) {
          xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;

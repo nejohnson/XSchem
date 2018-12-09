@@ -37,15 +37,53 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
-2.8.1_RC4
-- option for in memory undo (IN_MEMORY_UNDO in makefile)
-- c89 portability: eliminated snprintf, strtok*, Variable length arrays,
-  getopt, 
-- more error checking on malformed input fieles
-- added circles / arcs to pdf export
-- better window titles
-- untitled.sch default file name if xschem launched without a file name.
-- long options (--version, --help, etc)
+2.8.1:
+- connecting dots are highlighted together with the hilight net.
+- avoid shebangs when launching scripts, rely on host PATH variable 
+  to lookup the correct (awk) interpreter
+- extensive debug to catch and fix memory leaks / pointer deallocation
+- search function improved, if empty value is given then look 
+  for objects that *have* search key in property string.
+- 'DELETE' attribute can be used to erase an attribute from a 
+  multiple selection of etherogeneus objects, if 'preserve unchanged props'
+  is enabled.
+- Added a 'dim color' slider (View menu) to adjust brightness.
+- xschem - tcl API improvements for spice operating point current / voltages backannotation
+- ability to do block deletion of a specific set of attributes on selected set
+  (set attribute values to 'DELETE') 
+- when drawing selected elements do not display bbox of empty symbol strings
+- xschem tcl API improvements:
+  * xschem set no_draw 1|0   --> used to disable screen redraw, to speed up complex scripts
+  * xschem set no_undo 1|0   --> used to disable undo, to speed up complex scripts
+    it is wise to do a 'xschem push_undo' before doing this
+  * xschem get expandlabel <net label> --> expands bus notation:
+    example: xschem get expandlabel S[4,2:0] will return S[4],S[2],S[1],S[0] 4
+    that is the expanded bits and the number of bits.
+  * xschem get sch_path --> return the current hierarchy path:
+    example: xinput.xreg.xlat
+  * subst_token() now allows to set a token to an empty value (new_val="") or delete the token
+    (new_val = NULL)
+- tcl command 'xschem set renumber [1|0]' allows to do automatic renumbering
+  of instance names (refdes) when loading schematics with duplicated inst names
+- View->Change current layer color' menu added allows to change layer colors
+  changes are saved in ${USER_CONF_DIR}/colors
+- added '--rcfile <filename>' for custom rc file loading
+- 'about xschem' dialog added
+- add '*' in window title bar / icon when schematic is in modified state and need save
+- default file name to 'untitled.sch' when creating a new schematic
+- long option syntax (--version etc)
+- make xschem compile with std=c89 -pedantic
+  no snprintf(), no // comments, no VLAs, no getopt(), no strtok*()
+- cirles / arcs in pdf / svg export
+- option for in-memory undo in addition to file backed undo (#define IN_MEMORY_UNDO)
+- Menu 'Tools->Remember last command' and 'set persistent_command [1|0] in xschemrc
+  to repeat last wire/line command just with a mouse click
+- removed copyrighted material (sample spice models) 
+- keybinding changes: Corl-Q for exit, Ctrl-N for 'New schematic'
+- better checking on malformed input (discard vs crash) 
+- Menu command Tools->Join/Trim wires (remove overlapping wires, join parallel wires etc)
+- Menu command Tools->Break wires (break wires at component pins, or 'T/Y intersections)
+                      this will work on *selected* wires.
 
 2.8.0
 - draw connecting dots automatically on T or Y connected wires,

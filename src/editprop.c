@@ -484,11 +484,11 @@ void edit_text_property(int x)
 
                if(
                    /* 20171206 20171221 */
-                   (fabs( (yy1+yy2)/2 - pcy) < CADGRID/2 && 
-                   (fabs(xx1 - pcx) < CADGRID*6 || fabs(xx2 - pcx) < CADGRID*6) )
+                   (fabs( (yy1+yy2)/2 - pcy) < cadgrid/2 && 
+                   (fabs(xx1 - pcx) < cadgrid*6 || fabs(xx2 - pcx) < cadgrid*6) )
                    || 
-                   (fabs( (xx1+xx2)/2 - pcx) < CADGRID/2 && 
-                   (fabs(yy1 - pcy) < CADGRID*6 || fabs(yy2 - pcy) < CADGRID*6) )
+                   (fabs( (xx1+xx2)/2 - pcx) < cadgrid/2 && 
+                   (fabs(yy1 - pcy) < cadgrid*6 || fabs(yy2 - pcy) < cadgrid*6) )
                ) {
                  if(x==0)  /* 20080804 */
                    my_strdup(71, &rect[PINLAYER][l].prop_ptr, 
@@ -715,7 +715,7 @@ void update_symbol(const char *result, int x)
      /* 20110325 only modify prefix if prefix not NUL */
      if(prefix) name[0]=prefix; /* change prefix if changing symbol type; */
 
-     if(debug_var>=1) fprintf(errfp, "update_symbol(): name=%s\n", name);
+     if(debug_var>=1) fprintf(errfp, "update_symbol(): name=%s, inst_ptr[i].prop_ptr=%s\n", name, inst_ptr[i].prop_ptr);
      my_strdup(89, &ptr,subst_token(inst_ptr[i].prop_ptr, "name", name) );
                     /* set name of current inst */
      new_prop_string(&inst_ptr[i].prop_ptr, ptr,0); /* set new prop_ptr */

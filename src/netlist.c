@@ -548,7 +548,7 @@ void record_global_node(int what, FILE *fp, char *node)
     max_globals++;
  } else if(what == 0 || what == 2) {
     for(i=0;i<max_globals;i++) {
-       if(what == 0 ) fprintf(fp, ".GLOBAL %s\n", globals[i]);
+       if(what == 0 && netlist_type == CAD_SPICE_NETLIST) fprintf(fp, ".GLOBAL %s\n", globals[i]);
        my_free(&globals[i]);
     }
     my_free(&globals);

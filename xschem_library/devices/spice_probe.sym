@@ -1,6 +1,7 @@
 G {type=probe
 vhdl_ignore=true
 verilog_ignore=true
+tedax_ignore=true
 format=".probe @analysis v( @@p )"
 template="name=p1 analysis=tran"}
 V {}
@@ -17,4 +18,5 @@ L 5 21.25 -23.75 21.25 -20 {}
 L 5 21.25 -20 25 -20 {}
 L 5 25 -23.75 25 -20 {}
 L 5 25 -23.75 27.8125 -23.75 {}
-B 5 -0.15625 -0.15625 0.15625 0.15625 {name=p dir=xxx}
+B 5 -0.46875 -0.46875 0.46875 0.46875 {name=p dir=xxx}
+T {@voltage} 12.5 -37.5 0 0 0.2 0.2 {layer=15}

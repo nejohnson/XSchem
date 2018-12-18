@@ -44,9 +44,9 @@ S {* LM324 OPERATIONAL AMPLIFIER "MACROMODEL" SUBCIRCUIT
 .MODEL DX D(IS=800.0E-18)
 .MODEL QX PNP(IS=800.0E-18 BF=250)
 * .ENDS} 
-C {devices/ipin} 580 -210 0 0 {name=p1 lab=1} 
-C {devices/ipin} 580 -190 0 0 {name=p2 lab=2} 
-C {devices/ipin} 580 -170 0 0 {name=p3 lab=3} 
-C {devices/ipin} 580 -150 0 0 {name=p4 lab=4} 
-C {devices/opin} 720 -190 0 0 {name=p5 lab=5} 
-C {devices/title} 160 -30 0 0 {name=l1 author="Stefan Schippers"} 
+C {ipin} 580 -210 0 0 {name=p1 lab=1} 
+C {ipin} 580 -190 0 0 {name=p2 lab=2} 
+C {ipin} 580 -170 0 0 {name=p3 lab=3} 
+C {ipin} 580 -150 0 0 {name=p4 lab=4} 
+C {opin} 720 -190 0 0 {name=p5 lab=5} 
+C {title} 160 -30 0 0 {name=l1 author="Stefan Schippers"} 

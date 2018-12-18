@@ -4,7 +4,7 @@ S {}
 E {}
 T {NE555 TIMER IC EXAMPLE} 360 -490 0 0 0.4 0.4 {}
 N 130 -150 200 -150 {lab=TRIG}
-C {devices/code} 710 -190 0 0 {
+C {code} 710 -190 0 0 {
 name=STIMULI 
 value=".option SCALE=1e-6 PARHIER=LOCAL RUNLVL=6 post MODMONTE=1
 .option sampling_method = SRS
@@ -13,27 +13,27 @@ vvss vss 0 dc 0
 
 .temp 30
 .tran 1n 1m uic"}
-C {examples/ne555} 490 -220 0 0 {name=x1}
-C {devices/res} 130 -180 0 0 {name=r3 m=1 value=2k}
-C {devices/capa} 130 -120 0 0 {name=c6 m=1 value=2n}
-C {devices/vsource} 130 -360 0 1 {name=v1 value=5}
-C {devices/lab_pin} 130 -330 0 0 {name=p16 lab=VSS}
-C {devices/lab_pin} 130 -390 0 1 {name=p6 lab=VSUPPLY}
-C {devices/lab_pin} 570 -340 0 1 {name=p8 lab=VSUPPLY}
-C {devices/lab_pin} 410 -340 0 0 {name=p9 lab=VSS}
-C {devices/lab_pin} 410 -260 0 0 {name=p11 lab=TRIG}
-C {devices/lab_pin} 410 -180 0 0 {name=p12 lab=OUT}
-C {devices/lab_pin} 570 -180 0 1 {name=p15 lab=TRIG}
-C {devices/lab_pin} 200 -150 0 1 {name=p19 lab=TRIG}
-C {devices/lab_pin} 130 -270 0 0 {name=p20 lab=VSUPPLY}
-C {devices/lab_pin} 130 -90 0 0 {name=p21 lab=VSS}
-C {devices/lab_pin} 570 -100 0 1 {name=p14 lab=CTRL}
-C {devices/lab_pin} 410 -100 0 0 {name=p13 lab=VSUPPLY}
-C {devices/lab_pin} 570 -260 0 1 {name=p17 lab=DIS}
-C {devices/res} 130 -240 0 0 {name=r5 m=1 value=2k}
-C {devices/lab_pin} 130 -210 0 0 {name=p18 lab=DIS}
-C {devices/title} 160 -30 0 0 {name=l1 author="Stefan Schippers"}
-C {devices/code} 710 -360 0 0 {name=MODELS 
+C {ne555} 490 -220 0 0 {name=x1}
+C {res} 130 -180 0 0 {name=r3 m=1 value=2k}
+C {capa} 130 -120 0 0 {name=c6 m=1 value=2n}
+C {vsource} 130 -360 0 1 {name=v1 value=5}
+C {lab_pin} 130 -330 0 0 {name=p16 lab=VSS}
+C {lab_pin} 130 -390 0 1 {name=p6 lab=VSUPPLY}
+C {lab_pin} 570 -340 0 1 {name=p8 lab=VSUPPLY}
+C {lab_pin} 410 -340 0 0 {name=p9 lab=VSS}
+C {lab_pin} 410 -260 0 0 {name=p11 lab=TRIG}
+C {lab_pin} 410 -180 0 0 {name=p12 lab=OUT}
+C {lab_pin} 570 -180 0 1 {name=p15 lab=TRIG}
+C {lab_pin} 200 -150 0 1 {name=p19 lab=TRIG}
+C {lab_pin} 130 -270 0 0 {name=p20 lab=VSUPPLY}
+C {lab_pin} 130 -90 0 0 {name=p21 lab=VSS}
+C {lab_pin} 570 -100 0 1 {name=p14 lab=CTRL}
+C {lab_pin} 410 -100 0 0 {name=p13 lab=VSUPPLY}
+C {lab_pin} 570 -260 0 1 {name=p17 lab=DIS}
+C {res} 130 -240 0 0 {name=r5 m=1 value=2k}
+C {lab_pin} 130 -210 0 0 {name=p18 lab=DIS}
+C {title} 160 -30 0 0 {name=l1 author="Stefan Schippers"}
+C {code} 710 -360 0 0 {name=MODELS 
 only_toplevel=true
 value=".MODEL bd139_2 npn
 +IS=1e-09 BF=222.664 NF=0.85 VAF=36.4079

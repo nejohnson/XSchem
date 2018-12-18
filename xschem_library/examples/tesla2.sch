@@ -100,7 +100,7 @@ N 1380 -630 1380 -570 {lab=#net1}
 N 1410 -420 1410 -380 {lab=VSS}
 N 1670 -420 1670 -350 {lab=#net6}
 N 1410 -390 1410 -260 {lab=VSS}
-C {devices/code} 1850 -510 0 0 {
+C {code} 1850 -510 0 0 {
 name=STIMULI 
 value=".option PARHIER=LOCAL RUNLVL=6 post MODMONTE=1
 .option sampling_method = SRS
@@ -120,95 +120,95 @@ vvss vss 0 dc 0
 .meas tran pavg_mos2 AVG p(xm2) from=950u to=990u
 .meas tran pavg_d1 AVG p(d1) from=950u to=990u
 .meas tran pavg_d2 AVG p(d2) from=950u to=990u"}
-C {devices/launcher} 1920 -770 0 0 {name=h2 
+C {launcher} 1920 -770 0 0 {name=h2 
 descr="BJT MODELS" 
 url="http://www.zen22142.zen.co.uk/ltspice/standard.bjt"}
-C {devices/launcher} 1920 -720 0 0 {name=h1 
+C {launcher} 1920 -720 0 0 {name=h1 
 descr="NPN MODELS" 
 url="http://web.mit.edu/Magic/Public/ckt/npn.mod"}
-C {devices/launcher} 1920 -820 0 0 {name=h3 
+C {launcher} 1920 -820 0 0 {name=h3 
 descr="COIL CALCULATION" 
 url="http://hamwaves.com/antennas/inductance.html"}
-C {devices/launcher} 1920 -870 0 0 {name=h4 
+C {launcher} 1920 -870 0 0 {name=h4 
 descr="ltwiki BJT MODELS" 
 url="http://ltwiki.org/?title=Standard.bjt"}
-C {devices/lab_pin} 1230 -230 0 0 {name=p1 lab=VSS}
-C {devices/ammeter} 1290 -570 3 0 {name=vmeasure}
-C {devices/vsource} 310 -940 0 0 {name=v1 value=12}
-C {devices/lab_pin} 310 -910 0 0 {name=p4 lab=VSS}
-C {devices/vsource} 310 -880 0 0 {name=v2 value=12}
-C {devices/lab_pin} 500 -990 0 1 {name=p5 lab=VPP}
-C {devices/lab_pin} 500 -830 0 1 {name=p6 lab=VNN}
-C {devices/lab_pin} 1010 -750 0 0 {name=p7 lab=VPP}
-C {devices/lab_pin} 1010 -400 0 0 {name=p9 lab=VNN}
-C {devices/lab_pin} 1010 -560 0 0 {name=p11 lab=D}
-C {devices/vsource_arith} 370 -160 0 0 {name=E1 VOL=(i(rfb)-v(offset))*200 MAX=5 MIN=0}
-C {devices/lab_pin} 370 -130 0 0 {name=p15 lab=VSS}
-C {devices/lab_pin} 320 -220 0 0 {name=p16 lab=CURSENSE2}
-C {devices/ind} 1440 -540 2 1 {name=L1 value=9.8u}
-C {devices/res} 1440 -450 0 1 {name=r1 m=1 value=0.22}
-C {devices/capa} 1380 -540 0 0 {name=c5 m=1 value=13p}
-C {devices/ind} 1650 -540 0 1 {name=L2 value=9.1m}
-C {devices/k} 1540 -540 0 0 {name=K1 K=0.15 L1=L1 L2=L2}
-C {devices/res} 1650 -450 0 0 {name=r4 m=1 value=.32}
-C {devices/capa} 1710 -540 0 1 {name=c7 m=1 value=4.1p}
-C {devices/lab_pin} 1780 -610 0 1 {name=p71 lab=HV}
-C {devices/vsource_arith} 600 -160 0 0 {name=E11 VOL=(i(rfb)+v(offset))*20000 MAX=5 MIN=0}
-C {devices/lab_pin} 600 -130 0 0 {name=p0 lab=VSS}
-C {devices/lab_pin} 550 -220 0 0 {name=p8 lab=CURSENSE1}
-C {devices/vsource} 350 -290 0 0 {name=v3 value="pwl 0 0 280u 0 600u 1.2"
+C {lab_pin} 1230 -230 0 0 {name=p1 lab=VSS}
+C {ammeter} 1290 -570 3 0 {name=vmeasure}
+C {vsource} 310 -940 0 0 {name=v1 value=12}
+C {lab_pin} 310 -910 0 0 {name=p4 lab=VSS}
+C {vsource} 310 -880 0 0 {name=v2 value=12}
+C {lab_pin} 500 -990 0 1 {name=p5 lab=VPP}
+C {lab_pin} 500 -830 0 1 {name=p6 lab=VNN}
+C {lab_pin} 1010 -750 0 0 {name=p7 lab=VPP}
+C {lab_pin} 1010 -400 0 0 {name=p9 lab=VNN}
+C {lab_pin} 1010 -560 0 0 {name=p11 lab=D}
+C {vsource_arith} 370 -160 0 0 {name=E1 VOL=(i(rfb)-v(offset))*200 MAX=5 MIN=0}
+C {lab_pin} 370 -130 0 0 {name=p15 lab=VSS}
+C {lab_pin} 320 -220 0 0 {name=p16 lab=CURSENSE2}
+C {ind} 1440 -540 2 1 {name=L1 value=9.8u}
+C {res} 1440 -450 0 1 {name=r1 m=1 value=0.22}
+C {capa} 1380 -540 0 0 {name=c5 m=1 value=13p}
+C {ind} 1650 -540 0 1 {name=L2 value=9.1m}
+C {k} 1540 -540 0 0 {name=K1 K=0.15 L1=L1 L2=L2}
+C {res} 1650 -450 0 0 {name=r4 m=1 value=.32}
+C {capa} 1710 -540 0 1 {name=c7 m=1 value=4.1p}
+C {lab_pin} 1780 -610 0 1 {name=p71 lab=HV}
+C {vsource_arith} 600 -160 0 0 {name=E11 VOL=(i(rfb)+v(offset))*20000 MAX=5 MIN=0}
+C {lab_pin} 600 -130 0 0 {name=p0 lab=VSS}
+C {lab_pin} 550 -220 0 0 {name=p8 lab=CURSENSE1}
+C {vsource} 350 -290 0 0 {name=v3 value="pwl 0 0 280u 0 600u 1.2"
 }
-C {devices/lab_pin} 350 -260 0 0 {name=p25 lab=VSS}
-C {devices/lab_pin} 350 -320 0 0 {name=p27 lab=OFFSET}
-C {devices/vsource_arith} 600 -290 0 0 {name=E2 VOL=i(rfb)*20000 MAX=5 MIN=0}
-C {devices/lab_pin} 600 -260 0 0 {name=p13 lab=VSS}
-C {devices/lab_pin} 550 -350 0 0 {name=p17 lab=CURSENSE}
-C {examples/sr_flop} 340 -430 0 0 {name=x8 VTH=2.5 VHI=5}
-C {devices/lab_pin} 740 -520 0 1 {name=p28 lab=GL}
-C {devices/lab_pin} 250 -420 0 0 {name=p29 lab=CURSENSE1}
-C {devices/lab_pin} 250 -400 0 0 {name=p30 lab=VSS}
-C {examples/inv} 150 -490 0 0 {name=E7 TABLE="2.3 5 2.7 0.0"}
-C {devices/lab_pin} 150 -460 0 0 {name=p35 lab=VSS}
-C {devices/lab_pin} 110 -490 0 0 {name=p36 lab=CURSENSE}
-C {examples/sr_flop} 340 -650 0 0 {name=x5 VTH=2.5 VHI=5}
-C {devices/lab_pin} 740 -680 0 1 {name=p37 lab=GH}
-C {devices/lab_pin} 250 -660 0 0 {name=p38 lab=CURSENSE}
-C {examples/inv} 150 -590 0 0 {name=E12 TABLE="2.3 5 2.7 0.0"}
-C {devices/lab_pin} 150 -560 0 0 {name=p39 lab=VSS}
-C {devices/lab_pin} 250 -620 0 0 {name=p40 lab=VSS}
-C {devices/lab_pin} 110 -590 0 0 {name=p41 lab=CURSENSE2}
-C {devices/diode} 1210 -500 2 1 {name=D1 model=d1n5400 area=1
+C {lab_pin} 350 -260 0 0 {name=p25 lab=VSS}
+C {lab_pin} 350 -320 0 0 {name=p27 lab=OFFSET}
+C {vsource_arith} 600 -290 0 0 {name=E2 VOL=i(rfb)*20000 MAX=5 MIN=0}
+C {lab_pin} 600 -260 0 0 {name=p13 lab=VSS}
+C {lab_pin} 550 -350 0 0 {name=p17 lab=CURSENSE}
+C {sr_flop} 340 -430 0 0 {name=x8 VTH=2.5 VHI=5}
+C {lab_pin} 740 -520 0 1 {name=p28 lab=GL}
+C {lab_pin} 250 -420 0 0 {name=p29 lab=CURSENSE1}
+C {lab_pin} 250 -400 0 0 {name=p30 lab=VSS}
+C {inv} 150 -490 0 0 {name=E7 TABLE="2.3 5 2.7 0.0"}
+C {lab_pin} 150 -460 0 0 {name=p35 lab=VSS}
+C {lab_pin} 110 -490 0 0 {name=p36 lab=CURSENSE}
+C {sr_flop} 340 -650 0 0 {name=x5 VTH=2.5 VHI=5}
+C {lab_pin} 740 -680 0 1 {name=p37 lab=GH}
+C {lab_pin} 250 -660 0 0 {name=p38 lab=CURSENSE}
+C {inv} 150 -590 0 0 {name=E12 TABLE="2.3 5 2.7 0.0"}
+C {lab_pin} 150 -560 0 0 {name=p39 lab=VSS}
+C {lab_pin} 250 -620 0 0 {name=p40 lab=VSS}
+C {lab_pin} 110 -590 0 0 {name=p41 lab=CURSENSE2}
+C {diode} 1210 -500 2 1 {name=D1 model=d1n5400 area=1
 url="http://pdf.datasheetcatalog.com/datasheet/bytes/1N5406.pdf"}
-C {devices/diode} 1230 -670 2 0 {name=D2 model=d1n5400 area=1
+C {diode} 1230 -670 2 0 {name=D2 model=d1n5400 area=1
 url="http://pdf.datasheetcatalog.com/datasheet/bytes/1N5406.pdf"}
-C {devices/capa} 1780 -480 0 1 {name=c1 m=1 value=1p}
-C {devices/capa} 400 -950 0 0 {name=c2 m=1 value=10n}
-C {devices/capa} 400 -870 0 0 {name=c3 m=1 value=10n}
-C {devices/lab_pin} 500 -910 0 1 {name=p3 lab=VSS}
-C {devices/res} 360 -990 1 1 {name=r5 m=1 value=0.3}
-C {devices/res} 360 -830 1 1 {name=r6 m=1 value=0.3}
-C {examples/an2} 680 -680 0 0 {name=E6 TABLE="2 0 6 8"}
-C {devices/lab_pin} 680 -640 0 0 {name=p19 lab=VSS}
-C {devices/delay_hsp} 560 -700 0 0 {name=E4 DEL=5n SCALE=1}
-C {devices/lab_pin} 530 -680 0 0 {name=p20 lab=VSS}
-C {examples/an2} 680 -520 0 0 {name=E5 TABLE="2 0 6 8"}
-C {devices/lab_pin} 680 -480 0 0 {name=p21 lab=VSS}
-C {devices/delay_hsp} 560 -540 0 0 {name=E9 DEL=5n SCALE=1}
-C {devices/lab_pin} 530 -520 0 0 {name=p22 lab=VSS}
-C {devices/nmos3} 990 -640 0 0 {name=xm2 model=irf540 m=1}
-C {devices/nmos3} 990 -520 0 0 {name=xm1 model=irf540 m=1}
-C {devices/lab_pin} 770 -590 0 0 {name=p2 lab=VSS}
-C {devices/lab_pin} 770 -470 0 0 {name=p10 lab=VSS}
-C {devices/res} 940 -640 1 1 {name=r2 m=1 value=1.5}
-C {devices/res} 940 -520 1 1 {name=r3 m=1 value=1.5}
-C {devices/vsource_pwl} 810 -490 0 0 {name=E10 TABLE="1 0 7 8"}
-C {devices/vsource_pwl} 810 -610 0 0 {name=E3 TABLE="1 0 7 8"}
-C {devices/res} 1670 -260 0 1 {name=rfb m=1 value=10}
-C {devices/isource} 1380 -660 0 0 {name=i1 value="pwl 0 0 1u 3 2u 3 3u 0"}
-C {devices/lab_pin} 1380 -690 0 0 {name=p12 lab=VSS}
-C {devices/ammeter} 1670 -320 0 0 {name=vr}
-C {devices/title} 160 -30 0 0 {name=l1 author="Stefan Schippers"}
-C {devices/code} 1850 -660 0 0 {name=MODELS 
+C {capa} 1780 -480 0 1 {name=c1 m=1 value=1p}
+C {capa} 400 -950 0 0 {name=c2 m=1 value=10n}
+C {capa} 400 -870 0 0 {name=c3 m=1 value=10n}
+C {lab_pin} 500 -910 0 1 {name=p3 lab=VSS}
+C {res} 360 -990 1 1 {name=r5 m=1 value=0.3}
+C {res} 360 -830 1 1 {name=r6 m=1 value=0.3}
+C {an2} 680 -680 0 0 {name=E6 TABLE="2 0 6 8"}
+C {lab_pin} 680 -640 0 0 {name=p19 lab=VSS}
+C {delay_hsp} 560 -700 0 0 {name=E4 DEL=5n SCALE=1}
+C {lab_pin} 530 -680 0 0 {name=p20 lab=VSS}
+C {an2} 680 -520 0 0 {name=E5 TABLE="2 0 6 8"}
+C {lab_pin} 680 -480 0 0 {name=p21 lab=VSS}
+C {delay_hsp} 560 -540 0 0 {name=E9 DEL=5n SCALE=1}
+C {lab_pin} 530 -520 0 0 {name=p22 lab=VSS}
+C {nmos3} 990 -640 0 0 {name=xm2 model=irf540 m=1}
+C {nmos3} 990 -520 0 0 {name=xm1 model=irf540 m=1}
+C {lab_pin} 770 -590 0 0 {name=p2 lab=VSS}
+C {lab_pin} 770 -470 0 0 {name=p10 lab=VSS}
+C {res} 940 -640 1 1 {name=r2 m=1 value=1.5}
+C {res} 940 -520 1 1 {name=r3 m=1 value=1.5}
+C {vsource_pwl} 810 -490 0 0 {name=E10 TABLE="1 0 7 8"}
+C {vsource_pwl} 810 -610 0 0 {name=E3 TABLE="1 0 7 8"}
+C {res} 1670 -260 0 1 {name=rfb m=1 value=10}
+C {isource} 1380 -660 0 0 {name=i1 value="pwl 0 0 1u 3 2u 3 3u 0"}
+C {lab_pin} 1380 -690 0 0 {name=p12 lab=VSS}
+C {ammeter} 1670 -320 0 0 {name=vr}
+C {title} 160 -30 0 0 {name=l1 author="Stefan Schippers"}
+C {code} 1850 -660 0 0 {name=MODELS 
 only_toplevel=true
 value=".MODEL bd139_2 npn
 +IS=1e-09 BF=222.664 NF=0.85 VAF=36.4079

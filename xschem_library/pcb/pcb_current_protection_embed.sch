@@ -2,109 +2,317 @@ G {}
 V {}
 S {}
 E {}
-L 18 845 -530 880 -530 {}
-L 18 845 -530 845 -450 {}
-L 18 845 -450 880 -450 {}
-L 18 880 -450 900 -400 {}
-L 18 900 -400 910 -400 {}
-L 18 910 -580 910 -400 {}
-L 18 900 -580 910 -580 {}
-L 18 880 -530 900 -580 {}
-L 18 880 -530 880 -450 {}
-L 18 900 -580 900 -400 {}
-T {actual value
-50u} 410 -820 0 0 0.4 0.4 {}
-T {actual value
-50u} 420 -360 0 0 0.4 0.4 {}
-T {actual value
-50u} 50 -750 0 0 0.4 0.4 {}
-T {actual value
-50u} 80 -290 0 0 0.4 0.4 {}
-T {actual value
-200} 870 -1330 0 0 0.4 0.4 {}
-N 160 -1250 160 -1230 {lab=#net1}
-N 160 -1110 160 -1090 {lab=#net2}
-N 280 -1170 340 -1170 {lab=VSS}
-N 710 -700 860 -700 {lab=OUTM}
-N 510 -1200 580 -1200 {lab=VSS}
-N 580 -1200 580 -1190 {lab=VSS}
-N 580 -1190 620 -1190 {lab=VSS}
-N 550 -1240 580 -1240 {lab=IN}
-N 620 -1250 710 -1250 {lab=REFP}
-N 280 -1180 280 -1170 {lab=VSS}
-N 280 -1250 280 -1240 {lab=VPP}
-N 270 -1100 270 -1090 {lab=VNN}
-N 270 -1170 270 -1160 {lab=VSS}
-N 160 -1090 190 -1090 {lab=#net2}
-N 270 -1090 340 -1090 {lab=VNN}
-N 160 -1250 190 -1250 {lab=#net1}
-N 280 -1250 340 -1250 {lab=VPP}
-N 270 -1170 280 -1170 {lab=VSS}
-N 250 -1250 280 -1250 {lab=VPP}
-N 250 -1090 270 -1090 {lab=VNN}
-N 160 -1170 270 -1170 {lab=VSS}
-N 550 -950 710 -950 {lab=OUTM}
-N 400 -890 550 -890 {lab=FBN}
-N 550 -770 550 -750 {lab=IN}
-N 350 -890 350 -700 {lab=FBN}
-N 710 -950 710 -700 {lab=OUTM}
-N 710 -240 860 -240 {lab=OUTP}
-N 260 -220 350 -220 {lab=INX}
-N 550 -490 710 -490 {lab=OUTP}
-N 400 -430 550 -430 {lab=FB}
-N 350 -430 350 -240 {lab=FB}
-N 710 -490 710 -240 {lab=OUTP}
-N 240 -370 240 -350 {lab=VPP}
-N 240 -290 240 -220 {lab=INX}
-N 260 -220 260 -190 {lab=INX}
-N 260 -130 260 -110 {lab=VSS}
-N 510 -1120 580 -1120 {lab=VSS}
-N 550 -1160 580 -1160 {lab=IN}
-N 620 -1170 710 -1170 {lab=REFM}
-N 200 -220 240 -220 {lab=INX}
-N 550 -310 550 -290 {lab=VSS}
-N 650 -700 710 -700 {lab=OUTM}
-N 650 -240 710 -240 {lab=OUTP}
-N 240 -220 260 -220 {lab=INX}
-N 260 -680 350 -680 {lab=VSSX}
-N 240 -830 240 -810 {lab=VPP}
-N 240 -750 240 -680 {lab=VSSX}
-N 260 -680 260 -650 {lab=VSSX}
-N 260 -590 260 -570 {lab=VSS}
-N 240 -680 260 -680 {lab=VSSX}
-N 180 -680 240 -680 {lab=VSSX}
-N 880 -1250 900 -1250 {lab=IN_INT}
-N 880 -1250 880 -1220 {lab=IN_INT}
-N 400 -1000 400 -980 {lab=VPP}
-N 400 -920 400 -890 {lab=FBN}
-N 400 -540 400 -520 {lab=VPP}
-N 400 -460 400 -430 {lab=FB}
-N 860 -700 860 -520 {lab=OUTM}
-N 860 -460 860 -240 {lab=OUTP}
-N 350 -890 400 -890 {lab=FBN}
-N 350 -430 400 -430 {lab=FB}
-N 580 -1110 620 -1110 {lab=VSS}
-N 580 -1120 580 -1110 {lab=VSS}
-C {code} 1050 -540 0 0 {name=STIMULI
+N 770 -490 770 -390 {lab=VCC}
+N 600 -360 730 -360 {lab=G}
+N 770 -300 860 -300 {lab=VOUT}
+N 770 -160 770 -130 {lab=VSS}
+N 770 -300 770 -220 {lab=VOUT}
+N 330 -310 330 -220 {lab=Z}
+N 330 -390 560 -390 {lab=B}
+N 330 -160 330 -130 {lab=VSS}
+N 330 -430 330 -390 {lab=B}
+N 600 -490 600 -420 {lab=VCC}
+N 600 -260 600 -220 {lab=#net1}
+N 600 -160 600 -130 {lab=VSS}
+N 330 -390 330 -370 {lab=B}
+N 770 -330 770 -300 {lab=VOUT}
+N 600 -360 600 -320 {lab=G}
+N 250 -160 250 -130 {lab=VSS}
+N 250 -220 330 -220 {lab=Z}
+N 550 -320 650 -320 {lab=G}
+N 550 -260 650 -260 {lab=#net1}
+C {conn_3x1} 150 -360 0 0 {name=C1 embed=true}
+[
+G {type=connector
+format="*connector(3,1) @pinlist"
+tedax_format="footprint @name @footprint"
+template="name=C1 footprint=connector(3,1)"
+}
+V {}
+S {}
+E {}
+B 5 18.75 -21.25 21.25 -18.75 {name=conn_1 dir=inout pinnumber=1}
+B 5 18.75 -1.25 21.25 1.25 {name=conn_2 dir=inout pinnumber=2}
+B 5 18.75 18.75 21.25 21.25 {name=conn_3 dir=inout pinnumber=3}
+A 4 15 -20 5 270 360 {}
+A 4 15 0 5 270 360 {}
+A 4 15 20 5 270 360 {}
+T {@#0:pinnumber} 6.25 -21.25 0 1 0.1 0.1 {}
+T {@#1:pinnumber} 6.25 -1.25 0 1 0.1 0.1 {}
+T {@#2:pinnumber} 6.25 18.75 0 1 0.1 0.1 {}
+T {@name} -18.75 -43.75 0 0 0.2 0.2 {}
+P 4 5 10 30 -10 30 -10 -30 10 -30 10 30 {}
+]
+C {vdd} 770 -490 0 0 {name=l6 lab=VCC embed=true}
+[
+G {type=label
+global=1
+format="*.alias @lab"
+template="name=l1 lab=VDD"}
+V {}
+S {}
+E {}
+L 4 0 -20 0 0 {}
+L 4 -10 -20 10 -20 {}
+B 5 -2.5 -2.5 2.5 2.5 {name=p dir=inout verilog_type=wire}
+T {@lab} -12.5 -35 0 0 0.2 0.2 {}
+]
+C {lab_pin} 860 -300 0 1 {name=p0 lab=VOUT embed=true}
+[
+G {type=label
+format="*.alias @lab"
+template="name=l1 sig_type=std_logic lab=xxx"}
+V {}
+S {}
+E {}
+B 5 -1.25 -1.25 1.25 1.25 {name=p dir=in}
+T {@lab} -7.5 -7.5 0 1 0.36 0.33 {}
+]
+C {lab_wire} 660 -360 0 0 {name=l9 lab=G embed=true}
+[
+G {type=label
+format="*.alias @lab"
+template="name=l1 sig_type=std_logic lab=xxx"}
+V {}
+S {}
+E {}
+B 5 -1.25 -1.25 1.25 1.25 {name=p dir=in}
+T {@lab} -3.75 -18.75 0 1 0.33 0.27 {}
+]
+C {res} 770 -190 0 0 {name=Rload m=1 value=100 footprint=1206 device=resistor
+tedax_ignore=true embed=true}
+[
+G {type=resistor
+format="@name @pinlist @value m=@m"
+verilog_format="tran @name ( @#0 , @#1 ) ;"
+tedax_format="footprint @name @footprint
+value @name @value
+device @name @device"
+template="name=R0 m=1 value=1k footprint=1206 device=resistor"}
+V {}
+S {}
+E {}
+L 4 0 20 0 30 {}
+L 4 0 20 7.5 17.5 {}
+L 4 -7.5 12.5 7.5 17.5 {}
+L 4 -7.5 12.5 7.5 7.5 {}
+L 4 -7.5 2.5 7.5 7.5 {}
+L 4 -7.5 2.5 7.5 -2.5 {}
+L 4 -7.5 -7.5 7.5 -2.5 {}
+L 4 -7.5 -7.5 7.5 -12.5 {}
+L 4 -7.5 -17.5 7.5 -12.5 {}
+L 4 -7.5 -17.5 0 -20 {}
+L 4 0 -30 0 -20 {}
+L 4 2.5 -22.5 7.5 -22.5 {}
+L 4 5 -25 5 -20 {}
+B 5 -2.5 -32.5 2.5 -27.5 {name=p dir=inout propagate_to=1 pinnumber=1}
+B 5 -2.5 27.5 2.5 32.5 {name=m dir=inout propagate_to=0 pinnumber=2}
+T {@name} 15 -18.75 0 0 0.2 0.2 {}
+T {@value} 15 -3.75 0 0 0.2 0.2 {}
+T {m=@m} 15 11.25 0 0 0.2 0.2 {}
+T {@#0:pinnumber} -5 -25 0 1 0.12 0.12 {}
+T {@#1:pinnumber} -5 20 0 1 0.12 0.12 {}
+]
+C {gnd} 770 -130 0 0 {name=l10 lab=VSS embed=true}
+[
+G {type=label
+global=1
+format="*.alias @lab"
+template="name=l1 lab=GND"}
+V {}
+S {}
+E {}
+L 4 0 0 0 12.5 {}
+L 4 -5 12.5 5 12.5 {}
+L 4 0 17.5 5 12.5 {}
+L 4 -5 12.5 0 17.5 {}
+B 5 -2.5 -2.5 2.5 2.5 {name=p dir=inout}
+T {@lab} 7.5 5 0 0 0.2 0.2 {}
+]
+C {code} 950 -430 0 0 {name=STIMULI
+tedax_ignore=true
 only_toplevel=true
 tclcommand="xschem edit_vi_prop"
-value=".option PARHIER=LOCAL RUNLVL=6 post MODMONTE=1 warn maxwarns=400
-.option ITL4=20000 ITL5=0
-* .option sampling_method = SRS 
-* .option method=gear
-vvss vss 0 dc 0 
-.temp 30
+value="
 
-.param freq=20k
-.param gain=42
-.tran '2m/freq' '1m + 160/freq' uic
+.option PARHIER=LOCAL RUNLVL=5 post MODMONTE=1 warn maxwarns=400 ingold=1
 
+vvcc vcc 0 dc 0 pwl 0 0 1m 6 2m 6 3m 5 4m 5 5m 0
+vvss vss 0 dc 0
+* .tran 5u 7m uic
+.dc VVCC 0 8 0.004
 .save all
-* .FOUR 20k v(outm,outp)
-* .probe i(*) 
-* .probe p(r*) p(v*)
+" embed=true}
+[
+G {type=netlist_commands
+template="name=s1 only_toplevel=false value=blabla"
+tedax_ignore=true
+format="
+@value
 "}
-C {code} 1050 -690 0 0 {name=MODELS 
+V {}
+S {}
+E {}
+L 3 20 30 60 30 {}
+L 3 20 40 40 40 {}
+L 3 20 50 60 50 {}
+L 3 20 60 50 60 {}
+L 3 20 70 50 70 {}
+L 3 20 80 90 80 {}
+L 3 20 90 40 90 {}
+L 3 20 20 70 20 {}
+L 3 20 10 40 10 {}
+L 5 100 10 110 10 {}
+L 5 110 10 110 110 {}
+L 5 20 110 110 110 {}
+L 5 20 100 20 110 {}
+L 5 100 0 100 100 {}
+L 5 10 100 100 100 {}
+L 5 10 0 10 100 {}
+L 5 10 0 100 0 {}
+T {@name} 15 -25 0 0 0.3 0.3 {}
+]
+C {pnp} 580 -390 0 0 {name=Q6 model=BC857 device=BC857 area=1 footprint=SOT23
+url="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&cad=rja&uact=8&ved=2ahUKEwijlfagu4zfAhUN0xoKHTPBAb0QFjAAegQIAhAC&url=http%3A%2F%2Fwww.onsemi.com%2Fpub%2FCollateral%2FPN2907-D.PDF&usg=AOvVaw2wgr87fGZgGfBRhXzHGwZM" embed=true}
+[
+G {type=pnp
+format="@name @pinlist @model area=@area"
+tedax_format="footprint @name @footprint
+device @name @device"
+template="name=Q1 model=Q2N2907 device=2N2907 area=1"}
+V {}
+S {}
+E {}
+L 4 0 -30 0 30 {}
+L 4 -20 0 0 0 {}
+L 4 10 -20 20 -30 {}
+L 4 0 10 20 30 {}
+B 5 17.5 27.5 22.5 32.5 {name=C dir=inout pinnumber=3}
+B 5 -22.5 -2.5 -17.5 2.5 {name=B dir=in pinnumber=1}
+B 5 17.5 -32.5 22.5 -27.5 {name=E dir=inout pinnumber=2}
+T {@device} 20 -12.5 0 0 0.2 0.2 {}
+T {@name} 20 2.5 0 0 0.2 0.2 {}
+T {@#2:pinnumber} 25 -28.75 0 0 0.12 0.12 {}
+T {@#0:pinnumber} 25 23.75 0 0 0.12 0.12 {}
+T {@#1:pinnumber} -20 6.25 0 1 0.12 0.12 {}
+P 4 4 0 -10 15 -15 5 -25 0 -10 {fill=true}
+]
+C {zener} 330 -190 2 0 {name=x3 model=BZX5V1 device=BZX5V1 area=1 footprint=acy(300) embed=true}
+[
+G {type=diode
+format="@name @pinlist @model"
+tedax_format="footprint @name @footprint
+device @name @device"
+template="name=x1 model=XXX device=XXX"}
+V {}
+S {}
+E {}
+L 4 0 5 0 30 {}
+L 4 0 -30 0 -5 {}
+L 4 -20 5 20 5 {}
+L 4 20 -5 20 5 {}
+L 4 -20 5 -20 15 {}
+B 5 -2.5 -32.5 2.5 -27.5 {name=p dir=inout pinnumber=1}
+B 5 -2.5 27.5 2.5 32.5 {name=m dir=inout pinnumber=2}
+T {@name} 2.5 -20 0 0 0.2 0.2 {}
+T {@device} 2.5 12.5 0 0 0.2 0.2 {}
+T {@#0:pinnumber} -5 -25 0 1 0.12 0.12 {}
+T {@#1:pinnumber} -5 20 0 1 0.12 0.12 {}
+P 4 4 -0 5 -10 -5 10 -5 -0 5 {fill=true}
+]
+C {gnd} 330 -130 0 0 {name=l13 lab=VSS embed=true}
+C {res} 330 -460 0 0 {name=R4 m=1 value=4.7K footprint=1206 device=resistor embed=true}
+C {vdd} 330 -490 0 0 {name=l14 lab=VCC embed=true}
+C {vdd} 600 -490 0 0 {name=l15 lab=VCC embed=true}
+C {res} 600 -190 0 0 {name=R5 m=1 value=470 footprint=1206 device=resistor embed=true}
+C {gnd} 600 -130 0 0 {name=l16 lab=VSS embed=true}
+C {lab_wire} 360 -390 0 0 {name=l0 lab=B embed=true}
+C {res} 330 -340 0 0 {name=R2 m=1 value=510 footprint=1206 device=resistor embed=true}
+C {pmos} 750 -360 0 0 {name=M2 m=1 model=IRLML6402 device=IRLML6402 footprint=SOT23
+url="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&ved=2ahUKEwjs8pzxuozfAhWpz4UKHR4CDnMQFjAAegQIAhAC&url=https%3A%2F%2Fwww.infineon.com%2Fdgdl%2Firlml6402.pdf%3FfileId%3D5546d462533600a401535668c9822638&usg=AOvVaw21fCRax-ssVpLqDeGK8KiC" embed=true}
+[
+G {type=pmos
+format="x@name @pinlist @model m=@m"
+tedax_format="footprint @name @footprint
+device @name @device"
+template="name=M1 model=DMP2035U device=DMP2035U m=1"
+verilog_format="@symname #@del @name ( @@d , @@s , @@g );"}
+V {}
+S {}
+E {}
+L 4 5 -27.5 5 27.5 {}
+L 4 5 20 20 20 {}
+L 4 20 20 20 30 {}
+L 4 5 -20 20 -20 {}
+L 4 20 -30 20 -20 {}
+L 4 -5 -15 -5 15 {}
+L 4 -20 0 -12.5 0 {}
+B 5 17.5 27.5 22.5 32.5 {name=d dir=inout pinnumber=3}
+B 5 -22.5 -2.5 -17.5 2.5 {name=g dir=in pinnumber=1}
+B 5 17.5 -32.5 22.5 -27.5 {name=s dir=inout pinnumber=2}
+A 4 -8.75 0 3.75 270 360 {}
+T {@device} 10 -17.5 0 0 0.2 0.2 {}
+T {@name} 10 0 0 0 0.2 0.2 {}
+T {D} 22.5 12.5 0 0 0.2 0.2 {}
+T {@#2:pinnumber} 25 -28.75 0 0 0.12 0.12 {}
+T {@#0:pinnumber} 25 23.75 0 0 0.12 0.12 {}
+T {@#1:pinnumber} -20 6.25 0 1 0.12 0.12 {}
+]
+C {led} 650 -290 0 0 {name=x1 model=D1N5765 device=D1N5765 area=1 footprint=acy(300) embed=true}
+[
+G {type=diode
+format="@name @pinlist @model"
+tedax_format="footprint @name @footprint
+device @name @device"
+template="name=x1 model=XXX device=XXX"}
+V {}
+S {}
+E {}
+L 4 0 5 0 30 {}
+L 4 0 -30 0 -5 {}
+L 4 -20 5 20 5 {}
+L 4 -30 0 -20 -10 {}
+L 4 -30 -10 -30 0 {}
+L 4 -45 5 -30 -10 {}
+L 4 -35 12.5 -25 2.5 {}
+L 4 -35 2.5 -35 12.5 {}
+L 4 -50 17.5 -35 2.5 {}
+B 5 -2.5 -32.5 2.5 -27.5 {name=p dir=inout pinnumber=1}
+B 5 -2.5 27.5 2.5 32.5 {name=m dir=inout pinnumber=2}
+T {@name} 7.5 -20 0 0 0.2 0.2 {}
+T {@model} 7.5 12.5 0 0 0.25 0.2 {}
+T {@#0:pinnumber} -5 -25 0 1 0.12 0.12 {}
+T {@#1:pinnumber} -5 20 0 1 0.12 0.12 {}
+P 4 4 -0 5 -10 -5 10 -5 -0 5 {fill=true}
+]
+C {title} 160 -30 0 0 {name=l2 author="Stefan" embed=true}
+[
+G {type=logo
+template="name=l1 author=\\"Stefan Schippers\\""
+verilog_ignore=true
+vhdl_ignore=true
+spice_ignore=true
+tedax_ignore=true}
+V {}
+S {}
+E {}
+L 6 225 0 1020 0 {}
+L 6 -160 0 -95 0 {}
+T {@schname} 235 5 0 0 0.4 0.4 {}
+T {@author} 235 -25 0 0 0.4 0.4 {}
+T {@time_last_modified} 1020 -20 0 1 0.4 0.3 {}
+T {SCHEM} 5 -25 0 0 1 1 {}
+P 5 13 5 -30 -25 0 5 30 -15 30 -35 10 -55 30 -75 30 -45 0 -75 -30 -55 -30 -35 -10 -15 -30 5 -30 {fill=true}
+]
+C {lab_pin} 170 -340 0 1 {name=p6 lab=VOUT embed=true}
+C {lab_pin} 170 -360 0 1 {name=p7 lab=VSS embed=true}
+C {lab_pin} 170 -380 0 1 {name=p8 lab=VCC embed=true}
+C {zener} 250 -190 2 0 {name=x4 model=BZX5V1 device=BZX5V1 area=1 footprint=minimelf spice_ignore=true embed=true}
+C {gnd} 250 -130 0 0 {name=l1 lab=VSS embed=true}
+C {res} 550 -290 0 0 {name=R1 m=1 value=47K footprint=1206 device=resistor embed=true}
+C {lab_wire} 330 -260 0 0 {name=l3 lab=Z embed=true}
+C {code} 950 -260 0 0 {name=MODELS 
+tedax_ignore=true
 only_toplevel=true
 value=".MODEL bd139_2 npn
 +IS=1e-09 BF=222.664 NF=0.85 VAF=36.4079
@@ -118,6 +326,12 @@ value=".MODEL bd139_2 npn
 +FC=0.5 CJS=0 VJS=0.75 MJS=0.5
 +TR=1e-07 PTF=0 KF=0 AF=1
 
+*SRC=BC817-16;DI_BC817-16;BJTs NPN; Si;  45.0V  0.800A  220MHz   Diodes Inc. BJTs
+.MODEL BC817  NPN (IS=4.04n NF=1.00 BF=342 VAF=121
++ IKF=0.273 ISE=6.86n NE=2.00 BR=4.00 NR=1.00
++ VAR=20.0 IKR=0.675 RE=0.227 RB=0.907 RC=90.7m
++ XTB=1.5 CJE=107p VJE=1.10 MJE=0.500 CJC=34.7p VJC=0.300 MJC=0.300 
++ TF=651p TR=111n EG=1.12 )
 
 .MODEL BD139 NPN (
 +IS=2.3985E-13 Vceo=80 Icrating=1500m
@@ -182,6 +396,164 @@ value=".MODEL bd139_2 npn
 + VCEO=40 ICRATING=500M 
 +              vce_max=45 vbe_max=6 )
 
+
+
+
+
+* PINOUT ORDER +IN -IN +V -V OUT
+* PINOUT ORDER  1   2   3  4  5
+.SUBCKT LM358 1 2 3 4 5
+R44 4 6 4E4
+I1 4 7 0.5E-6
+Q1 4 8 9 QPI
+Q2 4 2 10 QPA
+Q3 9 9 11 QPI
+Q4 10 10 11 QPI
+Q5 12 13 4 QNQ
+Q6 13 13 4 QNQ
+Q7 4 12 14 QPQ
+Q8 3 14 6 QNQ
+Q9 15 6 4 QNQ
+Q10 3 15 16 QNQ
+Q11 3 16 17 QNQ
+R67 17 16 4E4
+R68 5 17 18
+Q12 4 15 5 QPQ
+Q13 15 17 5 QNQ
+I2 18 3 120E-9
+I3 19 3 60E-9
+I4 20 3 1E-6
+Q14 11 18 3 QPQ
+Q15 14 19 3 QPQ
+Q16 5 7 4 QNQ
+Q17 15 20 3 QPQ
+C15 21 22 4.8E-12
+R69 12 21 3
+R70 12 15 3E9
+E2 23 8 3 0 -10E-6
+V51 23 1 1.56E-3
+I6 3 4 5E-6
+R71 4 3 4.5E5
+Q18 12 9 11 QPQ
+Q19 13 10 11 QPQ
+C17 12 13 8E-12
+C18 6 15 1E-12
+C21 3 24 100E-15
+R78 11 24 3E5
+C22 1 2 0.23E-12
+C23 2 0 0.79E-12
+C24 1 0 0.79E-12
+E3 22 0 15 0 2
+C25 5 0 50E-15
+Q20 25 25 0 QNQ
+G1 3 4 VT 0 3E-4
+I7 0 25 1E-3
+V53 25 26 0.25
+R79 0 26 1E6
+E4 VT 0 27 26 1
+R80 0 VT 1E6
+V54 27 0 0.55
+R81 0 27 1E6
+.MODEL QPQ PNP IKF=3E-3 RC=300 KF=4.8E-17 BR=1
+.MODEL QPA PNP IKF=3E-3 RC=380 IS=1.01E-16 VAF=245 RE=5 RB=1700 BF=300 KF=4.8E-17 BR=1
+.MODEL QPI PNP IKF=3E-3 RC=380 IS=1.01E-16 VAF=290 RE=5 RB=1700 BF=306 KF=4.8E-17 BR=1
+.MODEL QNQ NPN IKF=5E-3 RC=25  KF=4.8E-17 BR=1
+.ENDS
+* END SPICE MODEL LM358
+
+.SUBCKT irlml6402 1 2 3
+* Node 1 -> Drain
+* Node 2 -> Gate
+* Node 3 -> Source
+M1 9 7 8 8 MM L=100u W=100u
+.MODEL MM PMOS LEVEL=1 IS=1e-32
++VTO=-1 LAMBDA=0.0111358 KP=12.788
++CGSO=5.36099e-06 CGDO=5.54234e-08
+RS 8 3 0.0246704
+D1 1 3 MD
+.MODEL MD D IS=2.03395e-08 RS=0.0432758 N=1.5 BV=20
++IBV=0.00025 EG=1 XTI=4 TT=1e-07
++CJO=1.11974e-10 VJ=0.5 M=0.3 FC=0.5
+RDS 3 1 5e+07
+RD 9 1 0.0001
+RG 2 7 29.2227
+D2 5 4 MD1
+* Default values used in MD1:
+*   RS=0 EG=1.11 XTI=3.0 TT=0
+*   BV=infinite IBV=1mA
+.MODEL MD1 D IS=1e-32 N=50
++CJO=1.68841e-10 VJ=1.50027 M=0.3 FC=1e-08
+D3 5 0 MD2
+* Default values used in MD2:
+*   EG=1.11 XTI=3.0 TT=0 CJO=0
+*   BV=infinite IBV=1mA
+.MODEL MD2 D IS=1e-10 N=0.4 RS=3e-06
+RL 5 10 1
+FI2 7 9 VFI2 -1
+VFI2 4 0 0
+EV16 10 0 9 7 1
+CAP 11 10 9.68769e-10
+FI1 7 9 VFI1 -1
+VFI1 11 6 0
+RCAP 6 10 1
+D4 6 0 MD3
+* Default values used in MD3:
+*   EG=1.11 XTI=3.0 TT=0 CJO=0
+*   RS=0 BV=infinite IBV=1mA
+.MODEL MD3 D IS=1e-10 N=0.4
+.ENDS irlml6402
+
+.SUBCKT irf5305s 1 2 3
+* Node 1 -> Drain
+* Node 2 -> Gate
+* Node 3 -> Source
+M1 9 7 8 8 MM L=100u W=100u
+* Default values used in MM:
+* The voltage-dependent capacitances are
+* not included. Other default values are:
+*   RS=0 RD=0 LD=0 CBD=0 CBS=0 CGBO=0
+.MODEL MM PMOS LEVEL=1 IS=1e-32
++VTO=-3.45761 LAMBDA=0 KP=10.066
++CGSO=1.03141e-05 CGDO=1e-11
+RS 8 3 0.0262305
+D1 1 3 MD
+.MODEL MD D IS=8.90854e-09 RS=0.00921723 N=1.5 BV=55
++IBV=0.00025 EG=1.2 XTI=3.13635 TT=1e-07
++CJO=1.30546e-09 VJ=0.663932 M=0.419045 FC=0.5
+RDS 3 1 2.2e+06
+RD 9 1 0.0001
+RG 2 7 11.0979
+D2 5 4 MD1
+* Default values used in MD1:
+*   RS=0 EG=1.11 XTI=3.0 TT=0
+*   BV=infinite IBV=1mA
+.MODEL MD1 D IS=1e-32 N=50
++CJO=1.63729e-09 VJ=0.791199 M=0.552278 FC=1e-08
+D3 5 0 MD2
+* Default values used in MD2:
+*   EG=1.11 XTI=3.0 TT=0 CJO=0
+*   BV=infinite IBV=1mA
+.MODEL MD2 D IS=1e-10 N=0.400245 RS=3e-06
+RL 5 10 1
+FI2 7 9 VFI2 -1
+VFI2 4 0 0
+EV16 10 0 9 7 1
+CAP 11 10 1.89722e-09
+FI1 7 9 VFI1 -1
+VFI1 11 6 0
+RCAP 6 10 1
+D4 6 0 MD3
+* Default values used in MD3:
+*   EG=1.11 XTI=3.0 TT=0 CJO=0
+*   RS=0 BV=infinite IBV=1mA
+.MODEL MD3 D IS=1e-10 N=0.400245
+.ENDS
+
+
+
+
+
+
 *MM3725 MCE 5/13/95
 *Si    1W  40V 500mA 307MHz pkg:TO-39 3,2,1
 .MODEL QMM3725 NPN (IS=50.7F NF=1 BF=162 VAF=113 IKF=.45 ISE=38.2P NE=2
@@ -213,6 +585,17 @@ value=".MODEL bd139_2 npn
 + RE=0.6 RC=0.25 CJE=1.3E-11 TF=6.4E-10 CJC=4E-12 VJC=0.54 TR=5.072E-8 
 +     vce_max=65 vbe_max=6 )
 
+.MODEL BC857 PNP(
++       AF= 1.00E+00    BF= 1.96E+02    BR= 3.38E+00   CJC= 9.80E-12
++      CJE= 1.56E-11   CJS= 0.00E+00    EG= 1.11E+00    FC= 8.28E-01
++      IKF= 8.35E-01   IKR= 1.60E-02   IRB= 1.31E-06    IS= 1.32E-14
++      ISC= 7.71E-14   ISE= 8.44E-13   ITF= 2.14E-01    KF= 0.00E+00
++      MJC= 3.49E-01   MJE= 4.18E-01   MJS= 3.30E-01    NC= 1.19E+00
++       NE= 1.83E+00    NF= 1.00E+00    NR= 1.00E+00   PTF= 0.00E+00
++       RB= 1.00E-02   RBM= 1.00E-02    RC= 1.52E+00    RE= 3.00E-02
++       TF= 6.05E-10    TR= 0.00E+00   VAF= 5.90E+01   VAR= 1.74E+01
++      VJC= 3.00E-01   VJE= 8.00E-01   VJS= 7.50E-01   VTF= 4.39E+00
++     XCJC= 1.00E+00   XTB= 0.00E+00   XTF= 5.81E+00   XTI= 3.00E+00)
 
 .MODEL BC556 PNP( 
 +     IS=2.059E-14
@@ -343,6 +726,50 @@ D1 2 1 DIODE
 + XTI = 3 
 .ENDS
 
+.SUBCKT   D1N5765       2   99
+*                      |    |
+*                      |    |
+*                      |    CATHODE
+*                      ANODE
+I1  99  4   7.0
+D1  2   99   DLOW
+D2  2   4   DHIGH
+R1  4   99  .1   TC=-6.27E-3,-2.33E-7
+*
+.MODEL DLOW     D       (
++         IS = 1.0E-15
++         RS = 100
++          N = 2.15
++         TT = 10.0E-09
++        CJO = 8.285237E-11
++         VJ = 1.2076937
++          M = 0.4053107
++         EG = 1.664
++        XTI = 10.78
++         KF = 0
++         AF = 1
++         FC = 0.4340008
++         BV = 5.0
++        IBV = 1E-4
++ )
+.MODEL DHIGH    D       (
++         IS = 9.0E-15
++         RS = 0.30
++          N = 1.2
++         TT = 0
++        CJO = 0
++         VJ = 1
++          M = .5
++         EG = 0.1
++        XTI = -3.84
++         KF = 0
++         AF = 1
++         FC = .5
++         BV = 9.9999E+13
++        IBV = .001
++ )
+.ENDS
+
 .model D1N4007 D(IS=7.02767n RS=0.0341512 N=1.80803 EG=1.05743 XTI=5 BV=1000 IBV=5e-08 CJO=1e-11 VJ=0.7 M=0.5 FC=0.5 TT=1e-07 )
 
 .MODEL D1N4148 D 
@@ -364,6 +791,155 @@ D1 2 1 DIODE
 +KF=0 AF=1
 * Model generated on October 12, 2003
 * Model format: PSpice
+
+
+*SYM=POWMOSP
+.SUBCKT DMP2035U   10 20 30
+*     TERMINALS:  D  G  S
+M1   1  2  3  3  PMOS L=0.6U W=0.9
+RD  10  1  15m
+RS  30  3  4m
+RG  20  2  9.45
+CGS  2  3  1.42n
+EGD 12  30  2  1  1
+VFB 14  30  0
+FFB  2  1  VFB  1
+CGD 13 14  598p
+R1  13  30  1.00
+D1  13 12  DLIM
+DDG 14 15  DCGD
+R2  12 15  1.00
+D2  30  15  DLIM
+DSD 10  3  DSUB
+.MODEL PMOS PMOS LEVEL=3 U0=300 VMAX=40k
++ ETA=0.1m VTO=-1.02 TOX=16.8n NSUB=2e17
+.MODEL DCGD D CJO=598p VJ=0.150 M=0.340
+.MODEL DSUB D IS=36.1n N=1.50 RS=21.8m BV=20
++ CJO=40p VJ=0.500 M=0.450
+.MODEL DLIM D IS=100U
+.ENDS
+
+
+*March 14, 2005
+*Doc. ID: 77621, S-50395, Rev. A
+.SUBCKT Si2306BDS 4 1 2
+M1  3 1 2 2 NMOS W=573319u L=0.50u  
+M2  2 1 2 4 PMOS W=573319u L=0.35u  
+R1  4 3     RTEMP 15E-3
+CGS 1 2     110E-12
+DBD 2 4     DBD
+**************************************************************** 
+.MODEL  NMOS        NMOS ( LEVEL  = 3           TOX    = 5E-8
++ RS     = 19.5E-3         RD     = 0           NSUB   = 1.7E17   
++ kp     = 3.3E-5          UO     = 650             
++ VMAX   = 0               XJ     = 5E-7        KAPPA  = 5E-1
++ ETA    = 1E-4            TPG    = 1  
++ IS     = 0               LD     = 0                             
++ CGSO   = 0               CGDO   = 0           CGBO   = 0 
++ TLEV   = 1               BEX    = -1.5        TCV    = 3.9E-3
++ NFS    = 0.8E12          DELTA  = 0.1)
+**************************************************************** 
+.MODEL  PMOS        PMOS ( LEVEL  = 3           TOX    = 5E-8
++NSUB    = 2E16            TPG    = -1)   
+**************************************************************** 
+.MODEL DBD D (CJO=95E-12 VJ=0.38 M=0.20 
++FC=0.1 IS=1E-12 TT=9.3E-8 N=1 BV=30.2)
+**************************************************************** 
+.MODEL RTEMP R (TC1=7E-3 TC2=5.5E-6)
+**************************************************************** 
+.ENDS
+
+
+* Fairchild model
+* 2N7002 ELECTRICAL MODEL (SOT-23 Single N-Ch DMOS)
+* -----------------------
+.SUBCKT  M2N7002  20  10  30
+Rg     10    1    1
+M1      2    1    3    3    DMOS    L=1u   W=1u
+.MODEL DMOS NMOS (VTO='2.1*(-0.0016*TEMPER+1.04)'  KP=0.35  THETA=0.086 VMAX=2.2E5  LEVEL=3)
+Cgs     1    3    60p
+Rd     20    4    0.3 TC=0.0075
+Dds     3    4    DDS
+.MODEL     DDS    D(BV='60*(0.00072*TEMPER+0.982)'   M=0.36  CJO=23p   VJ=0.8)
+Dbody   3   20    DBODY
+.MODEL   DBODY    D(IS=1.4E-13   N=1   RS=40m   TT=100n)
+Ra      4    2    0.4 TC=0.0075
+Rs      3    5    10m
+Ls      5    30   .5n
+M2      1    8    6    6   INTER
+E2      8    6    4    1   2
+.MODEL   INTER    NMOS(VTO=0  KP=10   LEVEL=1)
+Cgdmax  7    4    85p
+Rcgd    7    4    10meg
+Dgd     6    4    DGD
+Rdgd    4    6    10meg
+.MODEL     DGD    D(M=0.53   CJO=85p   VJ=0.12)
+M3      7    9    1    1   INTER
+E3      9    1    4    1   -2
+.ENDS M2N7002
+
+*SRC=1N4732A;DI_1N4732A;Diodes;Zener <=10V; 4.70V  1.00W   Diodes Inc.  Zener
+*SYM=HZEN
+.SUBCKT D1N4732A  1   2
+*    Terminals    A   K
+D1 1 2 DF
+DZ 3 1 DR
+VZ 2 3 2.99
+.MODEL DF D ( IS=87.7p RS=0.620 N=1.10
++ CJO=214p VJ=0.750 M=0.330 TT=50.1n )
+.MODEL DR D ( IS=17.5f RS=0.333 N=2.28 )
+.ENDS
+
+* Technology:        DISCRETE DEVICE			
+* Device:            Zener Diode BZX 55C 5V1			
+* Type:              Typical (nom)			
+* Model established: 12.11.1996, by S.Reuter, TM1iC63-HN			
+* Wafer:			
+* Remarks:           Macro model			
+* Revision:			
+* Simulator:         PSPICE			
+.SUBCKT BZX5V1 a c			
+
+ DF a c DFOR			
+ DR c a DREV			
+ DB b a DBRE			
+ EB c b POLY(1) d 0 3.6 1
+ IB 0 d 1m
+ RB 0 d 1k TC=3m
+
+.MODEL DFOR D
+ + IS =   1p  RS =  3.5  N  =  1.4  CJO= 178p
+ + VJ = 610m  M  = 335m  FC = 700m  XTI=    3
+ + EG =1.186
+
+.MODEL DREV D
+ + IS = 100f  N  =   30  XTI=    3  EG =1.186
+
+.MODEL DBRE D
+ + IS =  10f  RS =    6  N  =    1  XTI=    0
+ + EG =1.186
+
+.ENDS BZX5V1			
+
+.model D1N751_2 D(Is=1.004f Rs=.5875 Ikf=0 N=1 Xti=3 Eg=1.11 Cjo=160p M=.5484 Vj=.75 Fc=.5 Isr=1.8n Nr=2 Bv=5.1 Ibv=27.721m Nbv=1.1779 Ibvl=1.1646m Nbvl=21.894 Tbv1=176.47u Vpk=5.1 )
+
+
+
+*(+) 1N751     5.1 V  0.5W  CASE DO-35
+.model D1N751  D(Is=1.004f Rs=.5875 Ikf=0 N=1 Xti=3 Eg=1.11 Cjo=160p M=.5484
++		Vj=.75 Fc=.5 Isr=1.8n Nr=2 Bv=5.1 Ibv=27.721m Nbv=1.1779
++		Ibvl=1.1646m Nbvl=21.894 Tbv1=176.47u)
+*		Motorola	pid=1N751	case=DO-35
+*		89-9-18-gjg
+*		Vz = 5.1 @ 20mA, Zz = 175 @ 1mA, Zz = 8.2 @ 5mA, Zz = 2.2 @ 20mA
+
+* 1N5230    4.7 Volt zener diode
+.model D1N5230  D(Is=880.5E-18 Rs=.25 Ikf=0 N=1 Xti=3 Eg=1.11 Cjo=175p M=.5516
++               Vj=.75 Fc=.5 Isr=1.859n Nr=2 Bv=4.7 Ibv=20.245m Nbv=1.6989
++               Ibvl=1.9556m Nbvl=14.976 Tbv1=-21.28u)
+*               Motorola        pid=1N5230      case=DO-35
+*               89-9-18 gjg
+*               Vz = 4.7 @ 20mA, Zz = 300 @ 1mA, Zz = 12.5 @ 5mA, Zz =2.6  @ 20mA
 
 *1N758
 *Ref: Motorola
@@ -475,6 +1051,9 @@ D1 5 3 N3306D
 *
 
 .SUBCKT irf540 1 2 3
+* Node 1 -> Drain
+* Node 2 -> Gate
+* Node 3 -> Source
 M1 9 7 8 8 MM L=100u W=100u
 * Default values used in MM:
 * The voltage-dependent capacitances are
@@ -520,6 +1099,8 @@ D4 0 6 MD3
 
 
 
+*LM5134A
+*****************************************************************************
 .SUBCKT LM5134A VDD PILOT OUT IN INB VSS
 E_E2         INB_INT 0 INB VSS 1
 C_U3_C1         U3_N16789866 U3_N16789873  5p  
@@ -736,6 +1317,50 @@ vsense 106 102 0   $$ sense iout
 *$
 
 
+* (REV N/A)    SUPPLY VOLTAGE: 5V
+* CONNECTIONS: NON-INVERTING INPUT
+*              | INVERTING INPUT
+*              | | POSITIVE POWER SUPPLY
+*              | | | NEGATIVE POWER SUPPLY
+*              | | | | OUTPUT
+*              | | | | |
+.SUBCKT LM324  1 2 3 4 5
+*
+  C1   11 12 5.544E-12
+  C2    6  7 20.00E-12
+  DC    5 53 DX
+  DE   54  5 DX
+  DLP  90 91 DX
+  DLN  92 90 DX
+  DP    4  3 DX
+  EGND 99  0 POLY(2) (3,0) (4,0) 0 .5 .5
+  FB    7 99 POLY(5) VB VC VE VLP VLN 0 15.91E6 -20E6 20E6 20E6 -20E6
+  GA    6  0 11 12 125.7E-6
+  GCM   0  6 10 99 7.067E-9
+  IEE   3 10 DC 10.04E-6
+  HLIM 90  0 VLIM 1K
+  Q1   11  2 13 QX
+  Q2   12  1 14 QX
+  R2    6  9 100.0E3
+  RC1   4 11 7.957E3
+  RC2   4 12 7.957E3
+  RE1  13 10 2.773E3
+  RE2  14 10 2.773E3
+  REE  10 99 19.92E6
+  RO1   8  5 50
+  RO2   7 99 50
+  RP    3  4 30.31E3
+  VB    9  0 DC 0
+  VC 3 53 DC 2.100
+  VE   54  4 DC .6
+  VLIM  7  8 DC 0
+  VLP  91  0 DC 40
+  VLN   0 92 DC 40
+.MODEL DX D(IS=800.0E-18)
+.MODEL QX PNP(IS=800.0E-18 BF=250)
+.ENDS
+
+
 *LM317 TI voltage regulator - pin order: In, Adj, Out
 *TI adjustable voltage regulator pkg:TO-3
 .SUBCKT LM317 1 2 3 **Changes my be required on this line**
@@ -865,108 +1490,4 @@ D1 8 7 D2
 D2 8 6 DN
 V1 18 19 1.25
 .ENDS
-" tclcommand="xschem edit_vi_prop"}
-C {launcher} 1120 -800 0 0 {name=h2 
-descr="BJT MODELS" 
-url="http://www.zen22142.zen.co.uk/ltspice/standard.bjt"}
-C {launcher} 1120 -750 0 0 {name=h1 
-descr="NPN MODELS" 
-url="http://web.mit.edu/Magic/Public/ckt/npn.mod"}
-C {launcher} 1120 -850 0 0 {name=h3 
-descr="COIL CALCULATION" 
-url="http://hamwaves.com/antennas/inductance.html"}
-C {launcher} 1120 -900 0 0 {name=h4 
-descr="ltwiki BJT MODELS" 
-url="http://ltwiki.org/?title=Standard.bjt"}
-C {launcher} 1120 -400 0 0 {name=h5 
-descr="hspice manual" 
-program=evince
-url="/home/schippes/hspice_2013/docs_help/hspice_sa.pdf"
-}
-C {launcher} 1120 -350 0 0 {name=h6 
-descr="hspice cmdref" 
-program=evince
-url="/home/schippes/hspice_2013/docs_help/hspice_cmdref.pdf"
-}
-C {launcher} 1120 -300 0 0 {name=h7 
-descr="hspice aasa" 
-program=evince
-url="/home/schippes/hspice_2013/docs_help/hspice_aasa.pdf"
-}
-C {vsource} 160 -1200 0 0 {name=v1 value="pwl 0 0 1m 50"}
-C {vsource} 160 -1140 0 0 {name=v0 value="pwl 0 0 1m 50"}
-C {lab_pin} 340 -1250 0 1 {name=p5 lab=VPP}
-C {lab_pin} 340 -1090 0 1 {name=p6 lab=VNN}
-C {lab_pin} 340 -1170 0 1 {name=p3 lab=VSS}
-C {launcher} 1120 -950 0 0 {name=h8 
-descr="DIODE LIB" 
-url="/home/schippes/simulations/diode.lib"
-}
-C {lab_pin} 860 -240 0 1 {name=p14 lab=OUTP}
-C {res} 860 -490 0 1 {name=r1 m=1 value=8}
-C {lab_pin} 510 -1200 0 0 {name=p26 lab=VSS}
-C {lab_pin} 550 -1240 0 0 {name=p31 lab=IN}
-C {vcvs} 620 -1220 0 0 {name=E3 value='gain*0.99'}
-C {lab_pin} 710 -1250 0 1 {name=p32 lab=REFP}
-C {capa} 280 -1210 0 0 {name=c2 m=1 value="100u"}
-C {capa} 270 -1130 0 0 {name=c3 m=1 value="100u"}
-C {res} 220 -1250 1 1 {name=r11 m=1 value=0.3}
-C {res} 220 -1090 1 1 {name=r9 m=1 value=0.3}
-C {res} 550 -920 0 1 {name=r19 m=1 value='100k'}
-C {res} 550 -860 0 1 {name=r0 m=1 value="'100k/gain'"}
-C {lab_pin} 550 -750 0 0 {name=p108 lab=IN}
-C {mos_power_ampli} 500 -660 0 0 {name=x1}
-C {lab_pin} 350 -640 0 0 {name=p2 lab=VPP}
-C {lab_pin} 350 -620 0 0 {name=p4 lab=VNN}
-C {lab_pin} 860 -700 0 1 {name=p9 lab=OUTM}
-C {mos_power_ampli} 500 -200 0 0 {name=x0}
-C {lab_pin} 350 -180 0 0 {name=p12 lab=VPP}
-C {lab_pin} 350 -160 0 0 {name=p13 lab=VNN}
-C {res} 240 -320 0 1 {name=r6 m=1 value=100k}
-C {lab_pin} 240 -370 0 0 {name=p7 lab=VPP}
-C {res} 260 -160 0 1 {name=r7 m=1 value=100k}
-C {lab_pin} 260 -110 0 0 {name=p15 lab=VSS}
-C {lab_pin} 510 -1120 0 0 {name=p20 lab=VSS}
-C {lab_pin} 550 -1160 0 0 {name=p21 lab=IN}
-C {vcvs} 620 -1140 0 0 {name=E0 value='-gain*0.99'}
-C {lab_pin} 710 -1170 0 1 {name=p23 lab=REFM}
-C {lab_pin} 240 -250 0 0 {name=p8 lab=INX}
-C {lab_pin} 880 -1100 0 0 {name=p126 lab=VSS}
-C {lab_pin} 960 -1250 0 1 {name=p127 lab=IN}
-C {capa} 550 -800 0 0 {name=c5 m=1 value=100n}
-C {lab_pin} 550 -290 0 0 {name=p11 lab=VSS}
-C {capa} 550 -340 0 0 {name=c6 m=1 value=100n}
-C {lab_pin} 350 -200 0 0 {name=p28 lab=VSS}
-C {lab_pin} 350 -660 0 0 {name=p1 lab=VSS}
-C {res} 550 -460 0 1 {name=r2 m=1 value='100k'}
-C {res} 550 -400 0 1 {name=r3 m=1 value="'100k/(gain-2)'"}
-C {vsource} 880 -1190 0 0 {name=v3 
-xvalue="pulse -.1 .1 1m .1u .1u 10.1u 20u" 
-value="sin 0 1 freq 1m"
-}
-C {res} 240 -780 0 1 {name=r4 m=1 value=100k}
-C {lab_pin} 240 -830 0 0 {name=p18 lab=VPP}
-C {res} 260 -620 0 1 {name=r5 m=1 value=100k}
-C {lab_pin} 260 -570 0 0 {name=p10 lab=VSS}
-C {res} 400 -950 0 1 {name=r8 m=1 value=100k}
-C {capa} 170 -220 1 0 {name=c4 m=1 value="100n"}
-C {lab_pin} 140 -220 0 0 {name=p0 lab=IN}
-C {capa} 150 -680 1 0 {name=c1 m=1 value="100n"}
-C {lab_pin} 120 -680 0 0 {name=p17 lab=VSS}
-C {lab_pin} 240 -710 0 0 {name=p22 lab=VSSX}
-C {res} 930 -1250 1 1 {name=r10 m=1 value=2}
-C {lab_pin} 400 -1000 0 0 {name=p24 lab=VPP}
-C {res} 400 -490 0 1 {name=r13 m=1 value=100k}
-C {lab_pin} 400 -540 0 0 {name=p16 lab=VPP}
-C {launcher} 1120 -1000 0 0 {name=h9 
-descr="REGULATORS LIB" 
-url="http://ltwiki.org/files/LTspiceIV/lib/sub/regulators.lib"
-program=firefox}
-C {lab_pin} 260 -110 0 0 {name=p30 lab=VSS}
-C {lab_pin} 260 -110 0 0 {name=p33 lab=VSS}
-C {vsource} 880 -1130 0 0 {name=v4 value=0 xvalue="pwl 0 .1 1m .1 1.01m 0"
-}
-C {lab_pin} 350 -270 0 0 {name=p19 lab=FB}
-C {lab_pin} 350 -730 0 0 {name=p25 lab=FBN}
-C {title} 160 -30 0 0 {name=l2 author="Stefan Schippers"}
-C {lab_pin} 880 -1250 0 0 {name=p27 lab=IN_INT}
+" tclcommand="xschem edit_vi_prop" embed=true}

@@ -1,0 +1,19 @@
+G {type=connector
+format="*connector(3,1) @pinlist"
+tedax_format="footprint @name @footprint"
+template="name=C1 footprint=connector(3,1)"
+}
+V {}
+S {}
+E {}
+B 5 18.75 -21.25 21.25 -18.75 {name=conn_1 dir=inout pinnumber=1}
+B 5 18.75 -1.25 21.25 1.25 {name=conn_2 dir=inout pinnumber=2}
+B 5 18.75 18.75 21.25 21.25 {name=conn_3 dir=inout pinnumber=3}
+A 4 15 -20 5 270 360 {}
+A 4 15 0 5 270 360 {}
+A 4 15 20 5 270 360 {}
+P 4 5 10 30 -10 30 -10 -30 10 -30 10 30 {}
+T {@#0:pinnumber} 6.25 -21.25 0 1 0.1 0.1 {}
+T {@#1:pinnumber} 6.25 -1.25 0 1 0.1 0.1 {}
+T {@#2:pinnumber} 6.25 18.75 0 1 0.1 0.1 {}
+T {@name} -18.75 -43.75 0 0 0.2 0.2 {}

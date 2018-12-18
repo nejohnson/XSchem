@@ -17,9 +17,10 @@ END  { endfile(_filename_) }
 BEGIN{
 }
 
-{
-  replace_pattern("modified *= *1", "set_modify(1)")
-  replace_pattern("modified *= *0", "set_modify(0)")
+/^C {pcb/{
+   
+   sub(/pcb\//,"")
+   found=1
 }
 
 

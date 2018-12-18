@@ -228,6 +228,7 @@ void save_inst(FILE *fd)
  Instance *ptr;
 
  ptr=inst_ptr;
+ for(i=0;i<lastinstdef;i++) instdef[i].flags=0;
  for(i=0;i<lastinst;i++)
  {
   fprintf(fd, "C ");
@@ -236,8 +237,11 @@ void save_inst(FILE *fd)
   fprintf(fd, " %.16g %.16g %d %d ",ptr[i].x0, ptr[i].y0, ptr[i].rot, ptr[i].flip ); 
   save_ascii_string(ptr[i].prop_ptr,fd);
   fputc('\n' ,fd);
-  if( !strcmp(get_tok_value(ptr[i].prop_ptr, "embed", 0), "true")) {
+  if( !strcmp(get_tok_value(ptr[i].prop_ptr, "embed", 0), "true") 
+     && instdef[ptr[i].ptr].flags==0
+    ) {
     save_embedded_symbol( instdef+ptr[i].ptr, fd, 1);
+    instdef[ptr[i].ptr].flags = EMBEDDED;
   }
  }
 }
@@ -658,6 +662,7 @@ void read_xschem_file(FILE *fd) /* 20180912 */
       my_snprintf(name_embedded, S(name_embedded),
          "%s/.xschem_embedded_%d_%s.sym", tclgetvar("XSCHEM_TMP_DIR"), getpid(), get_cell(inst_ptr[lastinst-1].name, 0));
       found=0;
+      /* if loading file coming back from embedded symbol delete temporary file */
       for(i=0;i<lastinstdef;i++)
       {
        if(strcmp(name_embedded, instdef[i].name) == 0)

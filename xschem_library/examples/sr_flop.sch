@@ -28,25 +28,25 @@ N 300 -260 310 -260 {lab=#net3}
 N 380 -220 580 -220 {lab=#net5} 
 N 580 -260 580 -220 {lab=#net5} 
 N 580 -260 650 -260 {lab=#net5} 
-C {devices/ipin} 280 -130 0 0 {name=p0 lab=S} 
-C {devices/opin} 580 -130 0 0 {name=p2 lab=Q} 
-C {devices/ipin} 280 -80 0 0 {name=p4 lab=VSS} 
-C {devices/ipin} 280 -110 0 0 {name=p1 lab=R} 
-C {examples/flop} 210 -400 0 0 {name=x1 VTH=VTH VHI=VHI} 
-C {examples/flop} 210 -250 0 0 {name=x2 VTH=VTH VHI=VHI} 
-C {devices/lab_pin} 340 -190 0 0 {name=p13 lab=VSS} 
-C {devices/lab_pin} 120 -220 0 0 {name=p3 lab=VSS} 
-C {devices/lab_pin} 120 -370 0 0 {name=p5 lab=VSS} 
-C {examples/an2} 690 -390 0 0 {name=E2 TABLE="'VTH-0.1' 0.0 'VTH+0.1' VHI"} 
-C {examples/nr2} 690 -280 0 0 {name=E3 TABLE="'VTH-0.1' VHI 'VTH+0.1' 0.0"} 
-C {examples/or2} 820 -340 0 0 {name=E4 TABLE="'VTH-0.1' 0.0 'VTH+0.1' VHI"} 
-C {devices/lab_pin} 690 -240 0 0 {name=p6 lab=VSS} 
-C {devices/lab_pin} 690 -350 0 0 {name=p7 lab=VSS} 
-C {devices/lab_pin} 820 -300 0 0 {name=p8 lab=VSS} 
-C {devices/lab_pin} 340 -340 0 0 {name=p9 lab=VSS} 
-C {devices/lab_pin} 930 -340 0 1 {name=l2 lab=Q} 
-C {devices/lab_pin} 120 -390 0 0 {name=l3 lab=R} 
-C {devices/lab_pin} 120 -240 0 0 {name=l4 lab=S} 
-C {examples/inv} 340 -370 0 0 {name=E5 TABLE="'VTH-0.1' VHI 'VTH+0.1' 0"} 
-C {examples/inv} 340 -220 0 0 {name=E1 TABLE="'VTH-0.1' VHI 'VTH+0.1' 0"} 
-C {devices/title} 160 -30 0 0 {name=l1 author="Stefan Schippers"} 
+C {ipin} 280 -130 0 0 {name=p0 lab=S} 
+C {opin} 580 -130 0 0 {name=p2 lab=Q} 
+C {ipin} 280 -80 0 0 {name=p4 lab=VSS} 
+C {ipin} 280 -110 0 0 {name=p1 lab=R} 
+C {flop} 210 -400 0 0 {name=x1 VTH=VTH VHI=VHI} 
+C {flop} 210 -250 0 0 {name=x2 VTH=VTH VHI=VHI} 
+C {lab_pin} 340 -190 0 0 {name=p13 lab=VSS} 
+C {lab_pin} 120 -220 0 0 {name=p3 lab=VSS} 
+C {lab_pin} 120 -370 0 0 {name=p5 lab=VSS} 
+C {an2} 690 -390 0 0 {name=E2 TABLE="'VTH-0.1' 0.0 'VTH+0.1' VHI"} 
+C {nr2} 690 -280 0 0 {name=E3 TABLE="'VTH-0.1' VHI 'VTH+0.1' 0.0"} 
+C {or2} 820 -340 0 0 {name=E4 TABLE="'VTH-0.1' 0.0 'VTH+0.1' VHI"} 
+C {lab_pin} 690 -240 0 0 {name=p6 lab=VSS} 
+C {lab_pin} 690 -350 0 0 {name=p7 lab=VSS} 
+C {lab_pin} 820 -300 0 0 {name=p8 lab=VSS} 
+C {lab_pin} 340 -340 0 0 {name=p9 lab=VSS} 
+C {lab_pin} 930 -340 0 1 {name=l2 lab=Q} 
+C {lab_pin} 120 -390 0 0 {name=l3 lab=R} 
+C {lab_pin} 120 -240 0 0 {name=l4 lab=S} 
+C {inv} 340 -370 0 0 {name=E5 TABLE="'VTH-0.1' VHI 'VTH+0.1' 0"} 
+C {inv} 340 -220 0 0 {name=E1 TABLE="'VTH-0.1' VHI 'VTH+0.1' 0"} 
+C {title} 160 -30 0 0 {name=l1 author="Stefan Schippers"} 

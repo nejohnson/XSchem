@@ -1,0 +1,10 @@
+G {type=subcircuit
+format="@name @pinlist @symname"
+template="name=x0"
+}
+T {@symname} -99 -6 0 0 0.3 0.3 {}
+T {@name} 135 -22 0 0 0.2 0.2 {}
+L 4 -130 -10 130 -10 {}
+L 4 -130 10 130 10 {}
+L 4 -130 -10 -130 10 {}
+L 4 130 -10 130 10 {}

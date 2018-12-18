@@ -1,4 +1,3 @@
-#!/usr/bin/wish
 #
 #  File: xschem.tcl
 #  
@@ -220,7 +219,7 @@ proc edit_file {filename} {
 proc simulate {filename} {
  global env netlist_dir netlist_type
  global task_output task_error
- global iverilog_path vvp_path hspice_path hspicerf_path spice_simulator 
+ global iverilog_path vvp_path ngspice_path hspice_path hspicerf_path spice_simulator 
  global modelsim_path verilog_simulator
  global vhdl_simulator ghdl_path ghdl_elaborate_opts ghdl_run_opts
  global finesim_path finesim_opts
@@ -263,6 +262,13 @@ proc simulate {filename} {
      if { $spice_simulator == "hspicerf" } {
        # added computerfarm
        task "$terminal -e \"$computerfarm $hspicerf_path $filename ; bash\"" $netlist_dir bg
+     } elseif { $spice_simulator == "ngspice"} {
+       task "$terminal -e \"$computerfarm $ngspice_path -i $filename -a \""  $netlist_dir bg
+       if {$task_error} {viewdata $task_output; return}
+     } elseif { $spice_simulator == "ngspice_batch"} {
+       set rawfile [ file tail [ file rootname $filename] ].raw
+       task "$computerfarm $ngspice_path -b -r $rawfile  -o ${schname}.out $filename "  $netlist_dir bg
+       if {$task_error} {viewdata $task_output; return}
      } elseif { $spice_simulator == "hspice"} {
        task "$terminal -e \"$computerfarm $hspice_path -i $filename | tee hspice.out ; bash\""  $netlist_dir bg
      } elseif {$spice_simulator == "finesim"} {
@@ -1891,7 +1897,9 @@ set pathlist {}
 if { [info exists XSCHEM_LIBRARY_PATH] } {
   set pathlist_orig [split $XSCHEM_LIBRARY_PATH :]
   foreach i $pathlist_orig {
-    lappend pathlist [string replace [file normalize ${i}/__xxx__] end-7 end {}]
+    if { [ file exists $i] } {
+      lappend pathlist [string replace [file normalize ${i}/__xxx__] end-7 end {}]
+    }
   }
 }
 
@@ -1927,7 +1935,8 @@ set tclcmd_txt {}
 set_ne netlist_dir {}
 set_ne hspice_netlist 0
 set_ne verilog_2001 1
-set_ne spice_simulator hspice
+set_ne spice_simulator ngspice
+set_ne ngspice_opts {}
 set_ne finesim_opts {}
 set_ne verilog_simulator iverilog
 set_ne vhdl_simulator ghdl ;# 20170921
@@ -1976,18 +1985,18 @@ set_ne terminal xterm
 set_ne analog_viewer cosmoscope
 set_ne computerfarm {} ;# 20151007
 ## icarus verilog compiler and simulator 20140404
-set_ne iverilog_path $env(HOME)/verilog/bin/iverilog
-set_ne vvp_path $env(HOME)/verilog/bin/vvp
+set_ne iverilog_path iverilog
+set_ne vvp_path vvp
 set_ne iverilog_opts {} ;# 20161118 allows to add -g2012 for example 
 ## ghdl 20170921
-set_ne ghdl_path $env(HOME)/ghdl/bin/ghdl
+set_ne ghdl_path ghdl
 set_ne ghdl_elaborate_opts {}
 set_ne ghdl_run_opts {}
 ## gtkwave
-set_ne gtkwave_path $env(HOME)/gtkwave/bin/gtkwave
+set_ne gtkwave_path gtkwave
 
 ## waveview
-set_ne waveview_path $env(HOME)/waveview/bin/wv
+set_ne waveview_path wv
 
 ## utile
 set_ne utile_gui_path ${XSCHEM_SHAREDIR}/utile/utile3
@@ -1995,12 +2004,13 @@ set_ne utile_cmd_path ${XSCHEM_SHAREDIR}/utile/utile
 
 ## modelsim
 set_ne modelsim_path $env(HOME)/modeltech/bin
-
+## ngspice simulator path
+set_ne ngspice_path ngspice 
 ## hspice license 20140404
 set_ne env(LM_LICENSE_FILE) $env(HOME)/hspice/license.dat
 ## hspice simulator path 20140404
-set_ne hspice_path $env(HOME)/hspice/hspice_2010.03
-set_ne hspicerf_path $env(HOME)/hspice/hspicerf_2010.03
+set_ne hspice_path hspice
+set_ne hspicerf_path hspicerf
 
 ## cscope waveform viewer
 set_ne cscope_path $env(HOME)/cosmoscope/linux/ai_bin/cscope
@@ -2123,19 +2133,18 @@ regsub -all {#} $svg_colors  {0x} svg_colors
 # schematic to preload in new windows 20090708
 set_ne XSCHEM_START_WINDOW {}
 
-###
-### now its time to load user preferences ...20121110
-###
-# if { [file exists $env(HOME)/.xschem]} {  
-#   source $env(HOME)/.xschem
-# }
 
-set INITIALLOADDIR [lindex $pathlist 0]
-set INITIALINSTDIR [lindex $pathlist 0]
-set INITIALPROPDIR [lindex $pathlist 0]
+
+foreach i $pathlist  {
+  if { [file exists $i] } {
+    set INITIALLOADDIR $i
+    set INITIALINSTDIR $i
+    set INITIALPROPDIR $i
+    break
+  }
+}
+
 set txt ""
-#. configure -cursor left_ptr
-# used in the tools-search menu
 set custom_token {lab}
 set search_value {}
 set search_substring 0
@@ -2522,6 +2531,8 @@ font configure Underline-Font -underline true -size 24
    .menubar.simulation.menu add radiobutton -label "GHDL VHDL simulator" -variable vhdl_simulator -value ghdl
    #20170410
    .menubar.simulation.menu add separator
+   .menubar.simulation.menu add radiobutton -label "Ngspice Interactive Spice simulator" -variable spice_simulator -value ngspice
+   .menubar.simulation.menu add radiobutton -label "Ngspice Batch Spice simulator" -variable spice_simulator -value ngspice_batch
    .menubar.simulation.menu add radiobutton -label "Hspicerf Spice simulator" -variable spice_simulator -value hspicerf
    .menubar.simulation.menu add radiobutton -label "Hspice Spice simulator" -variable spice_simulator -value hspice
    .menubar.simulation.menu add radiobutton -label "Finesim Spice simulator" -variable spice_simulator -value finesim

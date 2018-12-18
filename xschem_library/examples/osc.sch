@@ -16,7 +16,7 @@ N 550 -240 550 -200 {lab=E}
 N 550 -140 550 -100 {lab=VSS}
 N 380 -210 400 -210 {lab=E}
 N 400 -210 550 -210 {lab=E}
-C {devices/code} 750 -190 0 0 {
+C {code} 750 -190 0 0 {
 name=STIMULI 
 value=".option RUNLVL=6 post 
 vvss vss 0 dc 0
@@ -24,23 +24,23 @@ vvss vss 0 dc 0
 .temp 30
 .tran 1n 100u 
 .probe tran i1(Q1) i2(Q1) i3(Q1) i(L1) i(c1) i(c2) i(r1) i(r2) i(r3)"}
-C {devices/npn} 360 -270 0 0 {name=Q1 model=q2n2222a area=1
+C {npn} 360 -270 0 0 {name=Q1 model=q2n2222a area=1
 }
-C {devices/vsource} 250 -430 0 1 {name=v2 value="5 pwl 0 5 1n 6 2n 6 3n 5"}
-C {devices/lab_pin} 250 -400 0 0 {name=p0 lab=VSS}
-C {devices/lab_pin} 690 -300 0 1 {name=p3 lab=OUT}
-C {devices/lab_pin} 380 -80 0 0 {name=p5 lab=VSS}
-C {devices/lab_pin} 250 -460 0 0 {name=p6 lab=VCC}
-C {devices/ind} 380 -430 2 0 {name=L1 value=100u}
-C {devices/capa} 550 -270 0 1 {name=c1 m=1 value=100p}
-C {devices/lab_pin} 380 -230 0 0 {name=p2 lab=E}
-C {devices/vsource} 240 -240 0 1 {name=v1 value=1}
-C {devices/lab_pin} 240 -210 0 0 {name=p1 lab=VSS}
-C {devices/lab_pin} 240 -270 0 0 {name=p4 lab=B}
-C {devices/res} 380 -130 0 1 {name=r1 m=1 value=1k}
-C {devices/res} 380 -370 0 1 {name=r2 m=1 value=2}
-C {devices/capa} 550 -170 0 1 {name=c2 m=1 value=100p}
-C {devices/code} 750 -340 0 0 {name=MODELS 
+C {vsource} 250 -430 0 1 {name=v2 value="5 pwl 0 5 1n 6 2n 6 3n 5"}
+C {lab_pin} 250 -400 0 0 {name=p0 lab=VSS}
+C {lab_pin} 690 -300 0 1 {name=p3 lab=OUT}
+C {lab_pin} 380 -80 0 0 {name=p5 lab=VSS}
+C {lab_pin} 250 -460 0 0 {name=p6 lab=VCC}
+C {ind} 380 -430 2 0 {name=L1 value=100u}
+C {capa} 550 -270 0 1 {name=c1 m=1 value=100p}
+C {lab_pin} 380 -230 0 0 {name=p2 lab=E}
+C {vsource} 240 -240 0 1 {name=v1 value=1}
+C {lab_pin} 240 -210 0 0 {name=p1 lab=VSS}
+C {lab_pin} 240 -270 0 0 {name=p4 lab=B}
+C {res} 380 -130 0 1 {name=r1 m=1 value=1k}
+C {res} 380 -370 0 1 {name=r2 m=1 value=2}
+C {capa} 550 -170 0 1 {name=c2 m=1 value=100p}
+C {code} 750 -340 0 0 {name=MODELS 
 only_toplevel=true
 value=".MODEL bd139_2 npn
 +IS=1e-09 BF=222.664 NF=0.85 VAF=36.4079

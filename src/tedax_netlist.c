@@ -204,7 +204,7 @@ void tedax_netlist(FILE *fd, int tedax_stop )
   
     my_strdup(423, &type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
     my_strdup(424, &place,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"place",0));  /* 20121223 */
-    if( type && (strcmp(type,"label")&&strcmp(type,"ipin")&& strcmp(type,"opin")&&strcmp(type,"iopin")))
+    if( type && (/* strcmp(type,"label")&& */ strcmp(type,"ipin")&& strcmp(type,"opin")&&strcmp(type,"iopin")))
     {
       if(!strcmp(type,"netlist_commands") && netlist_count==0) continue; /* already done in global_tedax_netlist */
       if(netlist_count && 

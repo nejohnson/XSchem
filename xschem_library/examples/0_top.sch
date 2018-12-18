@@ -16,7 +16,7 @@ A 7 934.1666666666666 -90 39.58991173406564 210.3432488842396 198.9246444160511 
 P 1 10 930 -370 920 -430 1000 -410 960 -390 990 -360 970 -360 960 -340 940 -380 930 -360 930 -370 {}
 P 4 6 880 -350 880 -440 870 -390 870 -430 860 -400 860 -370 {}
 P 15 11 920 -400 930 -440 950 -410 960 -430 970 -400 990 -410 970 -370 940 -380 910 -360 890 -410 920 -400 {fill=true}
-T {Welcome to XSCHEM!} 60 -950 0 0 1 1 {layer=5}
+T {Welcome to XSCHEM!} 110 -990 0 0 1 1 {layer=5}
 T {This is the start schematic window specified in your .xschem file. 
 You may change this to any different schematic file or even start
 with an empty window. Just set the XSCHEM_START_WINDOW variable: 
@@ -32,7 +32,7 @@ of these by selecting one with a left mouse button click and
 pressing the 'e' key, or by menu 'Edit -> Push Schematic'.
 You can return here after descending into a schematic by hitting 
 '<Ctrl>-e' or by menu 'Edit -> Pop'.
-} 10 -880 0 0 0.4 0.4 {}
+} 60 -920 0 0 0.4 0.4 {}
 T {Select the components here under
 and press'<Ctrl>-h' or <Alt>-click
 them to visit xschem websites
@@ -54,34 +54,33 @@ N 870 -300 990 -300 {lab=#net1}
 N 910 -340 910 -250 {lab=#net2}
 N 910 -270 970 -270 {lab=#net2}
 N 930 -310 960 -300 {lab=#net1}
-C {examples/poweramp} 160 -310 0 0 {name=x1}
-C {examples/tesla} 160 -230 0 0 {name=x2}
-C {examples/test_ne555} 160 -190 0 0 {name=x3}
-C {examples/test_lm324} 160 -150 0 0 {name=x4}
-C {examples/osc} 160 -270 0 0 {name=x5}
-C {examples/tesla2} 160 -110 0 0 {name=x7}
-C {devices/title} 160 -30 0 0 {name=l1 author="Stefan Schippers"}
-C {devices/launcher} 450 -290 0 0 {name=h8 
+C {poweramp} 160 -310 0 0 {name=x1}
+C {tesla} 160 -230 0 0 {name=x2}
+C {test_ne555} 160 -190 0 0 {name=x3}
+C {test_lm324} 160 -150 0 0 {name=x4}
+C {osc} 160 -270 0 0 {name=x5}
+C {tesla2} 160 -110 0 0 {name=x7}
+C {title} 160 -30 0 0 {name=l1 author="Stefan Schippers"}
+C {launcher} 450 -290 0 0 {name=h8 
 descr="XSCHEM WEBSITE" 
 url="https://xschem.sourceforge.io/stefan/xschem.html"
 program=x-www-browser}
-C {devices/launcher} 450 -190 0 0 {name=h1 
+C {launcher} 450 -190 0 0 {name=h1 
 descr="XSCHEM ON SOURCEFORGE" 
 url="https://sourceforge.net/projects/xschem/"
 program=x-www-browser}
-C {examples/cmos_example} 160 -350 0 0 {name=x6}
-C {devices/launcher} 450 -240 0 0 {name=h2 
+C {cmos_example} 160 -350 0 0 {name=x6}
+C {launcher} 450 -240 0 0 {name=h2 
 descr="LOCAL DOCUMENTATION" 
 url="$env(HOME)/share/doc/xschem/xschem.html"
 program=x-www-browser
 
 }
-C {examples/greycnt} 160 -390 0 0 {name=x8}
-C {examples/loading} 160 -430 0 0 {name=x9}
-C {devices/launcher} 450 -140 0 0 {name=h3 
+C {greycnt} 160 -390 0 0 {name=x8}
+C {loading} 160 -430 0 0 {name=x9}
+C {launcher} 450 -140 0 0 {name=h3 
 descr="Toggle light/dark 
 colorscheme" 
 tclcommand="xschem toggle_colorscheme"
 }
-C {examples/inv} 930 -200 0 0 {name=E1 TABLE="1.4 3.0 1.6 0.0"}
-C {examples/pcb_test1} 160 -470 0 0 {name=x0}
+C {inv} 930 -200 0 0 {name=E1 TABLE="1.4 3.0 1.6 0.0"}

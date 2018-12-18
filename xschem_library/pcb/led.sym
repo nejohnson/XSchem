@@ -1,0 +1,24 @@
+G {type=diode
+format="@name @pinlist @model"
+tedax_format="footprint @name @footprint
+device @name @device"
+template="name=x1 model=XXX device=XXX"}
+V {}
+S {}
+E {}
+L 4 0 5 0 30 {}
+L 4 0 -30 0 -5 {}
+L 4 -20 5 20 5 {}
+L 4 -30 0 -20 -10 {}
+L 4 -30 -10 -30 0 {}
+L 4 -45 5 -30 -10 {}
+L 4 -35 12.5 -25 2.5 {}
+L 4 -35 2.5 -35 12.5 {}
+L 4 -50 17.5 -35 2.5 {}
+B 5 -2.5 -32.5 2.5 -27.5 {name=p dir=inout pinnumber=1}
+B 5 -2.5 27.5 2.5 32.5 {name=m dir=inout pinnumber=2}
+P 4 4 -0 5 -10 -5 10 -5 -0 5 {fill=true}
+T {@name} 7.5 -20 0 0 0.2 0.2 {}
+T {@model} 7.5 12.5 0 0 0.25 0.2 {}
+T {@#0:pinnumber} -5 -25 0 1 0.12 0.12 {}
+T {@#1:pinnumber} -5 20 0 1 0.12 0.12 {}

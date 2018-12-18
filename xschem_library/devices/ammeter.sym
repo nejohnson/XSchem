@@ -1,12 +1,14 @@
-G {type=vsource
+G {type=current_probe
 format="@name @pinlist 0
 .probe i( @name )"
-template="name=vmeasure"} 
+template="name=vmeasure"}
 V {}
 S {}
-L 4 -7.5 0 -0 10 {} 
-L 4 -0 10 7.5 0 {} 
-L 13 0 -30 0 30 {} 
-B 5 -2.5 -32.5 2.5 -27.5 {name=p dir=inout propagate_to=1} 
-B 5 -2.5 27.5 2.5 32.5 {name=m dir=inout propagate_to=0} 
-T {@name} 10 -17.5 0 0 0.2 0.2 {} 
+E {}
+L 4 -7.5 0 -0 10 {}
+L 4 -0 10 7.5 0 {}
+L 13 0 -30 0 30 {}
+B 5 -2.5 -32.5 2.5 -27.5 {name=p dir=inout propagate_to=1}
+B 5 -2.5 27.5 2.5 32.5 {name=m dir=inout propagate_to=0}
+T {@name} 10 -17.5 0 0 0.2 0.2 {}
+T {@current} 10 12.5 0 0 0.2 0.2 {layer=15}

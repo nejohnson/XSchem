@@ -22,9 +22,6 @@
 
 #include "xschem.h"
 
-#define SPACE(c) (c=='=' || c=='\n' || c==' ' || c=='\t' || \
-                    c=='\0' || c==';' || c=='/')
-
 static struct node_hashentry *table[HASHSIZE];
 
 static unsigned int hash(char *tok)

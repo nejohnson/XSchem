@@ -36,7 +36,7 @@ N 470 -910 470 -800 {lab=VX2}
 N 810 -680 830 -680 {lab=VXS} 
 N 1200 -680 1230 -680 {lab=SP} 
 N 340 -800 470 -800 {lab=VX2} 
-C {devices/code} 600 -200 0 0 {name=CODE
+C {code} 600 -200 0 0 {name=CODE
 vhdl_ignore=false
 value="
 -- these assignments are done to have the voltage values available
@@ -110,7 +110,7 @@ end process;
 
 "
 } 
-C {devices/use} 840 -220 0 0 {library ieee;
+C {use} 840 -220 0 0 {library ieee;
 use std.TEXTIO.all;
 use ieee.std_logic_1164.all;
 
@@ -118,26 +118,26 @@ library work;
 use work.rrreal.all;
 
 } 
-C {examples/pump} 250 -680 0 0 {name=x4 conduct="1.0/20000.0" val=4.5} 
-C {devices/lab_pin} 150 -680 0 0 {name=l4  lab=ING} 
-C {examples/switch_rreal} 660 -670 0 0 {name=x5 del="2 ns"} 
-C {devices/lab_pin} 510 -660 0 0 {name=l5  lab=SW} 
-C {examples/real_capa} 450 -540 0 0 {name=x3 cap=30.0} 
-C {examples/real_capa} 830 -540 0 0 {name=x1 cap=100.0} 
-C {examples/switch_rreal} 1050 -670 0 0 {name=x2 del="2 ns"} 
-C {devices/lab_pin} 900 -660 0 0 {name=l2  lab=SW1} 
-C {devices/lab_pin} 1240 -680 0 1 {name=l3  lab=SP sig_type=rrreal} 
-C {examples/real_capa} 1230 -540 0 0 {name=x6 cap=20.0} 
-C {devices/lab_wire} 860 -680 0 1 {name=l6  lab=VXS sig_type=rrreal
+C {pump} 250 -680 0 0 {name=x4 conduct="1.0/20000.0" val=4.5} 
+C {lab_pin} 150 -680 0 0 {name=l4  lab=ING} 
+C {switch_rreal} 660 -670 0 0 {name=x5 del="2 ns"} 
+C {lab_pin} 510 -660 0 0 {name=l5  lab=SW} 
+C {real_capa} 450 -540 0 0 {name=x3 cap=30.0} 
+C {real_capa} 830 -540 0 0 {name=x1 cap=100.0} 
+C {switch_rreal} 1050 -670 0 0 {name=x2 del="2 ns"} 
+C {lab_pin} 900 -660 0 0 {name=l2  lab=SW1} 
+C {lab_pin} 1240 -680 0 1 {name=l3  lab=SP sig_type=rrreal} 
+C {real_capa} 1230 -540 0 0 {name=x6 cap=20.0} 
+C {lab_wire} 860 -680 0 1 {name=l6  lab=VXS sig_type=rrreal
 } 
-C {examples/pump} 250 -800 0 0 {name=x7 conduct="1.0/40000.0" val=3.0} 
-C {devices/lab_pin} 150 -800 0 0 {name=l7  lab=ING1} 
-C {examples/switch_rreal} 630 -790 0 0 {name=x8 del="2 ns"} 
-C {devices/lab_pin} 480 -780 0 0 {name=l0  lab=SW2} 
-C {devices/lab_wire} 400 -800 0 1 {name=l8  lab=VX2 sig_type=rrreal
+C {pump} 250 -800 0 0 {name=x7 conduct="1.0/40000.0" val=3.0} 
+C {lab_pin} 150 -800 0 0 {name=l7  lab=ING1} 
+C {switch_rreal} 630 -790 0 0 {name=x8 del="2 ns"} 
+C {lab_pin} 480 -780 0 0 {name=l0  lab=SW2} 
+C {lab_wire} 400 -800 0 1 {name=l8  lab=VX2 sig_type=rrreal
 } 
-C {examples/real_capa} 350 -880 0 0 {name=x9 cap=40.0} 
-C {devices/package_not_shown} 830 -340 0 0 {
+C {real_capa} 350 -880 0 0 {name=x9 cap=40.0} 
+C {package_not_shown} 830 -340 0 0 {
     library ieee, std;
     use std.textio.all;
  
@@ -349,9 +349,9 @@ end procedure;
 
     end rrreal; -- end package body
 } 
-C {devices/title} 160 -40 0 0 {name=l9 author="Stefan Schippers"} 
-C {devices/arch_declarations} 830 -280 0 0 {
+C {title} 160 -40 0 0 {name=l9 author="Stefan Schippers"} 
+C {arch_declarations} 830 -280 0 0 {
 signal V_VX, V_VX2, V_VXS, V_SP: real;
 
 } 
-C {devices/lab_wire} 430 -680 0 1 {name=l1  lab=VX sig_type=rrreal } 
+C {lab_wire} 430 -680 0 1 {name=l1  lab=VX sig_type=rrreal } 

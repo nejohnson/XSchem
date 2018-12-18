@@ -14,7 +14,8 @@
 #### XSCHEM_LIBRARY_PATH $env(HOME/xschem_library):${XSCHEM_SHAREDIR}/xschem_library
 #### you may overide the default system-wide library here and append in user's .xschem
 #### the user's libraries.
-# set XSCHEM_LIBRARY_PATH ${XSCHEM_SHAREDIR}/xschem_library
+set XSCHEM_LIBRARY_PATH ../xschem_library/examples:../xschem_library/pcb:../xschem_library/devices
+# set XSCHEM_LIBRARY_PATH $env(HOME)//xschem_library/examples:$env(HOME)/xschem_library/pcb:${XSCHEM_SHAREDIR}/xschem_library/devices
 
 #### directory where simulations, netlist and simulator outputs are placed
 #### if unset xschem asks user to choose one when doing a netlist

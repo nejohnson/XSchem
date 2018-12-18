@@ -33,9 +33,9 @@ end process;
 
 } 
 V {} 
-C {devices/iopin} 50 -90 0 0 {name=p1 lab=USC sig_type="rreal"} 
-C {devices/ipin} -80 -90 0 0 {name=p2 lab=ING} 
-C {devices/use} -150 -260 0 0 {library ieee;
+C {iopin} 50 -90 0 0 {name=p1 lab=USC sig_type="rreal"} 
+C {ipin} -80 -90 0 0 {name=p2 lab=ING} 
+C {use} -150 -260 0 0 {library ieee;
 use std.TEXTIO.all;
 use ieee.std_logic_1164.all;
 use work.rrreal.all;

@@ -4,19 +4,12 @@ S {
 .probe v(ga,sa) v(gb,sb)
 .probe p(q*) p(r*) i(r*) p(xm1) p(xm2) i(d*)}
 E {}
-P 4 7 1180 -140 1140 -140 1140 -150 1120 -140 1140 -130 1140 -140 1180 -140 {fill=true}
 T {CURRENT
 MEASURE} 1040 -660 0 0 0.2 0.2 {}
 T {CURRENT
 MEASURE} 1040 -560 0 0 0.2 0.2 {}
 T {ANALOG AUDIO AMPLIFIER
 N-Channel only power stage} 430 -275 0 0 0.5 0.5 {layer=8 font="Liberation Sans"}
-T {IRF540 spice models are not free so can
-not be distributed with XSCHEM.
-However you can download a suitable model 
-by <Alt> <Left button> clicking the following link
-and placing the relevant lines in the MODELS
-component} 1190 -300 0 0 0.5 0.5 {}
 N 1110 -1180 1110 -790 {lab=VPP}
 N 180 -500 180 -470 {lab=E9}
 N 260 -470 340 -470 {lab=E9}
@@ -25,25 +18,23 @@ N 1110 -700 1110 -670 {lab=SA}
 N 840 -1020 840 -980 {lab=E4}
 N 1110 -590 1110 -570 {lab=OUT}
 N 1110 -510 1110 -470 {lab=#net1}
-N 570 -950 800 -950 {lab=C7}
-N 350 -950 550 -950 {lab=C7}
-N 330 -950 335 -955 {lab=C7}
-N 335 -955 345 -955 {lab=C7}
-N 345 -955 350 -950 {lab=C7}
-N 550 -950 555 -955 {lab=C7}
-N 555 -955 565 -955 {lab=C7}
-N 565 -955 570 -950 {lab=C7}
-N 560 -1020 560 -820 {lab=E6}
+N 570 -950 800 -950 {lab=#net2}
+N 350 -950 550 -950 {lab=#net2}
+N 330 -950 335 -955 {lab=#net2}
+N 335 -955 345 -955 {lab=#net2}
+N 345 -955 350 -950 {lab=#net2}
+N 550 -950 555 -955 {lab=#net2}
+N 555 -955 565 -955 {lab=#net2}
+N 565 -955 570 -950 {lab=#net2}
 N 180 -1020 180 -980 {lab=E1}
-N 230 -950 330 -950 {lab=C7}
-N 340 -1020 340 -820 {lab=E2}
+N 230 -950 330 -950 {lab=#net2}
 N 390 -790 520 -790 {lab=C2}
-N 230 -950 230 -900 {lab=C7}
-N 180 -900 230 -900 {lab=C7}
+N 230 -950 230 -900 {lab=#net2}
+N 180 -900 230 -900 {lab=#net2}
 N 390 -790 390 -740 {lab=C2}
 N 340 -740 390 -740 {lab=C2}
-N 180 -920 180 -900 {lab=C7}
-N 220 -950 230 -950 {lab=C7}
+N 180 -920 180 -900 {lab=#net2}
+N 220 -950 230 -950 {lab=#net2}
 N 340 -760 340 -740 {lab=C2}
 N 380 -790 390 -790 {lab=C2}
 N 180 -1120 180 -1080 {lab=VBOOST}
@@ -66,16 +57,13 @@ N 1105 -1125 1115 -1125 {lab=VBOOST}
 N 1115 -1125 1120 -1120 {lab=VBOOST}
 N 840 -1120 1100 -1120 {lab=VBOOST}
 N 560 -1180 1110 -1180 {lab=VPP}
-N 940 -440 1070 -440 {lab=GB}
-N 560 -440 880 -440 {lab=C8}
+N 900 -440 1070 -440 {lab=GB}
 N 560 -460 560 -440 {lab=C8}
-N 1200 -1120 1360 -1120 {lab=VBOOST}
-N 1200 -900 1200 -870 {lab=#net2}
-N 1200 -810 1200 -590 {lab=OUT}
-N 1110 -1180 1360 -1180 {lab=VPP}
-N 560 -540 560 -520 {lab=E8}
-N 560 -760 560 -600 {lab=C6}
-N 690 -730 690 -600 {lab=OUT}
+N 1200 -1120 1330 -1120 {lab=VBOOST}
+N 1200 -900 1200 -870 {lab=#net3}
+N 1110 -1180 1330 -1180 {lab=VPP}
+N 560 -580 560 -520 {lab=E8}
+N 560 -760 560 -640 {lab=C6}
 N 840 -780 840 -760 {lab=GA}
 N 690 -810 690 -790 {lab=B1}
 N 690 -810 800 -810 {lab=B1}
@@ -83,13 +71,12 @@ N 690 -1120 690 -880 {lab=VBOOST}
 N 570 -1120 690 -1120 {lab=VBOOST}
 N 690 -820 690 -810 {lab=B1}
 N 260 -470 260 -460 {lab=E9}
-N 180 -100 260 -100 {lab=VNN}
-N 260 -340 260 -270 {lab=C3}
-N 50 -240 220 -240 {lab=B3}
-N 260 -210 260 -160 {lab=E3}
-N 180 -180 180 -100 {lab=VNN}
-N 50 -180 50 -100 {lab=VNN}
-N 50 -100 180 -100 {lab=VNN}
+N 180 -70 260 -70 {lab=VNN}
+N 50 -210 220 -210 {lab=B3}
+N 260 -180 260 -130 {lab=E3}
+N 180 -150 180 -70 {lab=VNN}
+N 50 -150 50 -70 {lab=VNN}
+N 50 -70 180 -70 {lab=VNN}
 N 690 -600 1110 -600 {lab=OUT}
 N 180 -470 260 -470 {lab=E9}
 N 1110 -610 1110 -600 {lab=OUT}
@@ -100,60 +87,76 @@ N 1110 -410 1110 -380 {lab=SB}
 N 1110 -730 1110 -700 {lab=SA}
 N 1120 -1120 1200 -1120 {lab=VBOOST}
 N 840 -760 1070 -760 {lab=GA}
-N 840 -920 840 -840 {lab=E11}
 N 340 -740 340 -690 {lab=C2}
 N 340 -630 340 -560 {lab=C9}
 N 220 -630 340 -630 {lab=C9}
-N 180 -900 180 -660 {lab=C7}
 N 180 -600 180 -560 {lab=C5}
 N 1110 -320 1110 -280 {lab=VNN}
-N 1200 -590 1460 -590 {lab=OUT}
+N 1200 -590 1290 -590 {lab=OUT}
 N 1110 -590 1200 -590 {lab=OUT}
 N 1110 -600 1110 -590 {lab=OUT}
-C {devices/ipin} 530 -170 0 0 {name=p0 lab=PLUS}
-C {devices/ipin} 530 -150 0 0 {name=p1 lab=MINUS}
-C {devices/ipin} 530 -130 0 0 {name=p2 lab=VPP}
-C {devices/ipin} 530 -110 0 0 {name=p3 lab=VNN}
-C {devices/ipin} 530 -90 0 0 {name=p4 lab=VSS}
-C {devices/opin} 600 -130 0 0 {name=p5 lab=OUT}
-C {devices/nmos3} 1090 -440 0 0 {name=xm2 model=irf540 m=1
+N 340 -860 340 -820 {lab=#net4}
+N 560 -860 560 -820 {lab=#net5}
+N 560 -1020 560 -920 {lab=E6}
+N 340 -1020 340 -920 {lab=E2}
+N 260 -280 260 -240 {lab=C3}
+N 800 -440 840 -440 {lab=#net6}
+N 560 -440 740 -440 {lab=C8}
+N 690 -650 690 -600 {lab=OUT}
+N 690 -730 690 -710 {lab=#net7}
+N 180 -840 180 -660 {lab=C7}
+N 840 -860 840 -840 {lab=E11}
+N 1200 -810 1200 -590 {lab=OUT}
+N 930 -760 930 -750 {lab=GA}
+N 930 -710 930 -700 {lab=SA}
+N 930 -700 1030 -700 {lab=SA}
+N 930 -440 930 -430 {lab=GB}
+N 930 -390 930 -380 {lab=SB}
+N 930 -380 1030 -380 {lab=SB}
+C {ipin} 530 -170 0 0 {name=p0 lab=PLUS}
+C {ipin} 530 -150 0 0 {name=p1 lab=MINUS}
+C {ipin} 530 -130 0 0 {name=p2 lab=VPP}
+C {ipin} 530 -110 0 0 {name=p3 lab=VNN}
+C {ipin} 530 -90 0 0 {name=p4 lab=VSS}
+C {opin} 600 -130 0 0 {name=p5 lab=OUT}
+C {nmos3} 1090 -440 0 0 {name=xm2 model=irf540 m=1
 url="http://www.ece.usu.edu/ece_store/spec/IRF540.pdf"}
-C {devices/res} 1030 -410 0 1 {name=r7 m=1 value=195}
-C {devices/nmos3} 1090 -760 0 0 {name=xm1 model=irf540 m=1
+C {res} 1030 -410 0 1 {name=r7 m=1 value=190}
+C {nmos3} 1090 -760 0 0 {name=xm1 model=irf540 m=1
 url="http://www.ece.usu.edu/ece_store/spec/IRF540.pdf"}
-C {devices/res} 1030 -730 0 1 {name=r8 m=1 value=195}
-C {devices/lab_pin} 1460 -590 0 1 {name=p14 lab=OUT}
-C {devices/lab_pin} 1110 -280 0 0 {name=p18 lab=VNN}
-C {devices/lab_wire} 990 -440 0 0 {name=l8 lab=GB}
-C {devices/res} 340 -1050 0 1 {name=r2 m=1 value=50}
-C {devices/res} 180 -1050 0 1 {name=r3 m=1 value=50}
-C {devices/lab_pin} 340 -1080 0 0 {name=p10 lab=VPP}
-C {devices/npn} 160 -530 0 0 {name=Q5 model=q2n2222 area=1}
-C {devices/pnp} 820 -950 0 0 {name=Q4 model=q2n2907p area=1}
-C {devices/res} 840 -1050 0 1 {name=r9 m=1 value=50}
-C {devices/pnp} 540 -790 0 0 {name=Q6 model=q2n2907p area=1}
-C {devices/res} 560 -1050 0 1 {name=r4 m=1 value=50}
-C {devices/lab_pin} 180 -580 0 0 {name=p15 lab=C5}
-C {devices/lab_pin} 340 -580 0 1 {name=p16 lab=C9}
-C {devices/lab_pin} 180 -1000 0 0 {name=p17 lab=E1}
-C {devices/lab_pin} 560 -1080 0 0 {name=p25 lab=VPP}
-C {devices/lab_pin} 340 -970 0 1 {name=p23 lab=E2}
-C {devices/lab_pin} 560 -970 0 1 {name=p28 lab=E6}
-C {devices/lab_pin} 840 -1000 0 1 {name=p29 lab=E4}
-C {devices/lab_pin} 180 -1120 0 0 {name=p34 lab=VBOOST}
-C {devices/ammeter} 1110 -540 0 0 {name=vd}
-C {devices/ammeter} 1110 -640 0 0 {name=vu}
-C {devices/lab_pin} 60 -1180 0 0 {name=p27 lab=VPP}
-C {devices/pnp} 200 -950 0 1 {name=Q1 model=q2n2907p area=1}
-C {devices/pnp} 360 -790 0 1 {name=Q2 model=q2n2907p area=1}
-C {devices/lab_pin} 140 -530 0 0 {name=p6 lab=PLUS}
-C {devices/lab_pin} 380 -530 0 1 {name=p24 lab=MINUS}
-C {devices/npn} 360 -530 0 1 {name=Q9 model=q2n2222 area=1}
-C {devices/lab_pin} 560 -630 0 0 {name=p9 lab=C6}
-C {devices/code} 780 -180 0 0 {name=STIMULI
+C {res} 1030 -730 0 1 {name=r0 m=1 value=190}
+C {lab_pin} 1290 -590 0 1 {name=p14 lab=OUT}
+C {lab_pin} 1110 -280 0 0 {name=p18 lab=VNN}
+C {lab_wire} 990 -440 0 0 {name=l8 lab=GB}
+C {res} 340 -1050 0 1 {name=r2 m=1 value=50}
+C {res} 180 -1050 0 1 {name=r3 m=1 value=50}
+C {lab_pin} 340 -1080 0 0 {name=p10 lab=VPP}
+C {npn} 160 -530 0 0 {name=Q5 model=q2n2222 area=1}
+C {pnp} 820 -950 0 0 {name=Q4 model=q2n2907p area=1}
+C {res} 840 -1050 0 1 {name=r9 m=1 value=50}
+C {pnp} 540 -790 0 0 {name=Q6 model=q2n2907p area=1}
+C {res} 560 -1050 0 1 {name=r4 m=1 value=50}
+C {lab_pin} 180 -580 0 0 {name=p15 lab=C5}
+C {lab_pin} 340 -580 0 1 {name=p16 lab=C9}
+C {lab_pin} 180 -1000 0 0 {name=p17 lab=E1}
+C {lab_pin} 560 -1080 0 0 {name=p25 lab=VPP}
+C {lab_pin} 340 -970 0 1 {name=p23 lab=E2}
+C {lab_pin} 560 -970 0 1 {name=p28 lab=E6}
+C {lab_pin} 840 -1000 0 1 {name=p29 lab=E4}
+C {lab_pin} 180 -1120 0 0 {name=p34 lab=VBOOST}
+C {ammeter} 1110 -540 0 0 {name=vd current=0.2535}
+C {ammeter} 1110 -640 0 0 {name=vu current=0.2608}
+C {lab_pin} 60 -1180 0 0 {name=p27 lab=VPP}
+C {pnp} 200 -950 0 1 {name=Q1 model=q2n2907p area=1}
+C {pnp} 360 -790 0 1 {name=Q2 model=q2n2907p area=1}
+C {lab_pin} 140 -530 0 0 {name=p6 lab=PLUS}
+C {lab_pin} 380 -530 0 1 {name=p24 lab=MINUS}
+C {npn} 360 -530 0 1 {name=Q9 model=q2n2222 area=1}
+C {lab_pin} 560 -670 0 0 {name=p9 lab=C6}
+C {code} 1040 -180 0 0 {name=STIMULI
 only_toplevel=true
 value=".option PARHIER=LOCAL RUNLVL=6 post MODMONTE=1 warn maxwarn=6000
-.option sampling_method = SRS
+.option sampling_method = SRS ingold=1
 .option method=gear
 .temp 30
 
@@ -176,34 +179,36 @@ vplus plus vdc dc 0
 evboost vboost 0 vol='v(out)>=40 ? v(out)+10 : 50'
 rload out 0 4
 .dc vplus '-1.5' '1.5' 0.001
-
-.probe dc v(plus,vdc)"}
-C {devices/lab_wire} 990 -760 0 0 {name=l1 lab=GA}
-C {devices/res} 910 -440 1 1 {name=r11 m=1 value=1300}
-C {devices/pnp} 540 -490 0 0 {name=Q8 model=q2n2907p area=1}
-C {devices/capa} 1200 -930 0 0 {name=c12 m=1 value=40u}
-C {devices/diode} 1200 -1150 0 0 {name=D0 model=d1n4148 area=1
+.save all
+*.op
+*.probe dc v(plus,vdc)
+"}
+C {lab_wire} 990 -760 0 0 {name=l1 lab=GA}
+C {res} 870 -440 1 1 {name=r11 m=1 value=1300}
+C {pnp} 540 -490 0 0 {name=Q8 model=q2n2907p area=1}
+C {capa} 1200 -930 0 0 {name=c12 m=1 value="40u"}
+C {diode} 1200 -1150 0 0 {name=D0 model=d1n4148 area=1
 url="http://pdf.datasheetcatalog.com/datasheet/bytes/1N5406.pdf"}
-C {devices/res} 1200 -840 0 1 {name=r18 m=1 value=200}
-C {devices/zener} 1360 -1150 0 0 {name=D1 model=d1n758 area=1
+C {res} 1200 -840 0 1 {name=r18 m=1 value=200}
+C {zener} 1330 -1150 0 0 {name=D1 model=d1n758 area=1
 url="http://www.futurlec.com/Datasheet/Diodes/1N746-1N759.pdf"}
-C {devices/res} 690 -760 0 1 {name=r14 m=1 value=4k}
-C {devices/pnp} 820 -810 0 0 {name=Q11 model=q2n2907p area=1}
-C {devices/res} 690 -850 0 1 {name=r15 m=1 value=4k}
-C {devices/res} 260 -430 0 1 {name=r5 m=1 value=600}
-C {devices/res} 260 -370 0 1 {name=r6 m=1 value=700}
-C {devices/zener} 180 -210 2 0 {name=D2 model=d1n755 area=1
+C {res} 690 -760 0 1 {name=r14 m=1 value=4k}
+C {pnp} 820 -810 0 0 {name=Q11 model=q2n2907p area=1}
+C {res} 690 -850 0 1 {name=r15 m=1 value=4k}
+C {res} 260 -430 0 1 {name=r5 m=1 value=600}
+C {res} 260 -370 0 1 {name=r6 m=1 value=700}
+C {zener} 180 -180 2 0 {name=D2 model=d1n755 area=1
 url="http://www.futurlec.com/Datasheet/Diodes/1N746-1N759.pdf"
 }
-C {devices/npn} 240 -240 0 0 {name=Q3 model=q2n2222 area=1}
-C {devices/res} 180 -270 0 1 {name=r1 m=1 value=10k}
-C {devices/lab_pin} 180 -300 0 0 {name=p7 lab=VSS}
-C {devices/res} 260 -130 0 1 {name=r10 m=1 value=170}
-C {devices/lab_pin} 50 -100 0 0 {name=p11 lab=VNN}
-C {devices/capa} 50 -210 0 0 {name=c3 m=1 value=100n}
-C {devices/res} 560 -570 0 1 {name=r12 m=1 value=1300}
-C {devices/lab_pin} 690 -800 0 0 {name=p12 lab=B1}
-C {devices/code} 1000 -180 0 0 {name=MODELS 
+C {npn} 240 -210 0 0 {name=Q3 model=q2n2222 area=1}
+C {res} 180 -240 0 1 {name=r1 m=1 value=10k}
+C {lab_pin} 180 -270 0 0 {name=p7 lab=VSS}
+C {res} 260 -100 0 1 {name=r10 m=1 value=170}
+C {lab_pin} 50 -70 0 0 {name=p11 lab=VNN}
+C {capa} 50 -180 0 0 {name=c3 m=1 value=100n}
+C {res} 560 -610 0 1 {name=r12 m=1 value=1300}
+C {lab_pin} 690 -800 0 0 {name=p12 lab=B1}
+C {code} 880 -180 0 0 {name=MODELS 
 only_toplevel=true
 value=".MODEL bd139_2 npn
 +IS=1e-09 BF=222.664 NF=0.85 VAF=36.4079
@@ -573,6 +578,175 @@ D1 5 3 N3306D
 .ENDS BS170
 *
 
+.SUBCKT irf540 1 2 3
+M1 9 7 8 8 MM L=100u W=100u
+* Default values used in MM:
+* The voltage-dependent capacitances are
+* not included. Other default values are:
+* RS=0 RD=0 LD=0 CBD=0 CBS=0 CGBO=0
+.MODEL MM NMOS LEVEL=1 IS=1e-32
++VTO=3.56362 LAMBDA=0.00291031 KP=25.0081
++CGSO=1.60584e-05 CGDO=4.25919e-07
+RS 8 3 0.0317085
+D1 3 1 MD
+.MODEL MD D IS=1.02194e-10 RS=0.00968022 N=1.21527 BV=100
++IBV=0.00025 EG=1.2 XTI=3.03885 TT=1e-07
++CJO=1.81859e-09 VJ=1.1279 M=0.449161 FC=0.5
+RDS 3 1 4e+06
+RD 9 1 0.0135649
+RG 2 7 5.11362
+D2 4 5 MD1
+* Default values used in MD1:
+* RS=0 EG=1.11 XTI=3.0 TT=0
+* BV=infinite IBV=1mA
+.MODEL MD1 D IS=1e-32 N=50
++CJO=2.49697e-09 VJ=0.5 M=0.9 FC=1e-08
+D3 0 5 MD2
+* Default values used in MD2:
+* EG=1.11 XTI=3.0 TT=0 CJO=0
+* BV=infinite IBV=1mA
+.MODEL MD2 D IS=1e-10 N=0.4 RS=3e-06
+RL 5 10 1
+FI2 7 9 VFI2 -1
+VFI2 4 0 0
+EV16 10 0 9 7 1
+CAP 11 10 2.49697e-09
+FI1 7 9 VFI1 -1
+VFI1 11 6 0
+RCAP 6 10 1
+D4 0 6 MD3
+* Default values used in MD3:
+* EG=1.11 XTI=3.0 TT=0 CJO=0
+* RS=0 BV=infinite IBV=1mA
+.MODEL MD3 D IS=1e-10 N=0.4
+.ENDS
+
+
+.SUBCKT LM5134A VDD PILOT OUT IN INB VSS
+E_E2         INB_INT 0 INB VSS 1
+C_U3_C1         U3_N16789866 U3_N16789873  5p  
+X_U3_U5         VDD U3_N16789873 U3_N16790218 0 RVAR  RREF=1
+C_U3_C3         OUT U3_N16789866  1p  
+
+* E_U3_E1         U3_N16790231 OUT vol=' V(MGATE, 0) > 0.5? 5: -5'
+E_U3_E1         U3_N16790231 OUT pwl(1) MGATE 0 0.49 -5 0.51 5
+
+X_U3_U6         U3_N24836 VSS U3_N31827 0 RVAR   RREF=1
+R_U3_R1         U3_N16790231 U3_N16789866  20  
+M_U3_M2         U3_N24836 U3_N16789871 OUT OUT PMOS01           
+E_U3_E4         U3_N16790218 0 pwl(1) VDD_INT 0 
++ 0 0, 4.5 0.9, 10  0.09, 12.6 0.08   
+X_U3_U10         VSS OUT d_d1 
+R_U3_R2         U3_N16789868 U3_N16789871  20  
+C_U3_C2         U3_N24836 U3_N16789871  5p  
+X_U3_U9         OUT VDD d_d1 
+C_U3_C5         OUT VDD  10p  
+C_U3_C6         OUT U3_N16789871  10p  
+C_U3_C4         VSS OUT  10p  
+M_U3_M1         U3_N16789873 U3_N16789866 OUT OUT NMOS01           
+E_U3_E3         U3_N31827 0 pwl(1) VDD_INT 0 
++    0 0, 4.5  0.26, 10  0.01, 12.6 0.01   
+E_U3_E2         OUT U3_N16789868 vol= 'V(MGATE, 0) > 0.5? -5: 5'
+E_U4_ABM4         U4_N14683241 0 vol= 'V(U4_ON_INT) >=0.5?V(VDD_INT):0'
+C_U4_C3         U4_N14683221 0  1n  
+V_U4_V6         U4_N155225261 0 80m
+R_U4_R2         U4_N14683241 U4_N14683221  1 
+X_U4_U47         U4_N14683247 U4_N14683251 d_d1 
+E_U4_ABM5         U4_N14683301 0 vol= 'V(U4_ON_INT)<0.5? V(VDD_INT):0'
+C_U4_C1         U4_N14683247 0  1n  
+X_U4_S1    U4_N14683159 0 U4_N14683247 0 PTON_TOFF_U4_S1 
+X_U4_U44         U4_ON_INT PGATE U4_N14683147 AND2_BASIC_GEN  VDD=1
++  VSS=0 VTHRESH=500E-3
+X_U4_U43         U4_N14683247 PGATE BUF_BASIC_GEN VDD=1 VSS=0
++  VTHRESH=0.5
+R_U4_R3         U4_N14683301 U4_N14683281  1 
+X_U4_U7         N18232068 U4_N15541612 INV_BASIC_GEN  VDD=1 VSS=0
++  VTHRESH=500E-3
+G_U4_G1         U4_N14683251 U4_N14683247 pwl(1) U4_N14683221 0 
++    0 0, 4.5 140m, 10 500m, 12.6 600m   
+G_U4_G2         U4_N14683247 0 pwl(1) U4_N14683281 0 
++    0 0, 4.5 70m, 10 800m, 12.6 900m 
+X_U4_U8         MGATE U4_N15541600 INV_BASIC_GEN  VDD=1 VSS=0
++  VTHRESH=500E-3
+C_U4_C4         U4_N14683281 0  1n  
+X_U4_S2    U4_N14683147 0 U4_N14683251 U4_N14683247 PTON_TOFF_U4_S2 
+X_U4_U48         U4_N155225261 U4_N14683247 d_d1 
+X_U4_U45         U4_N15541600 U4_N15541612 U4_ON_INT AND2_BASIC_GEN 
++  VDD=1 VSS=0 VTHRESH=500E-3
+V_U4_V5         U4_N14683251 0 1V
+X_U4_U46         PGATE U4_ON_INT U4_N14683159 NOR2_BASIC_GEN  VDD=1
++  VSS=0 VTHRESH=500E-3
+E_E1         IN_INT 0 IN VSS 1
+E_E3         VDD_INT 0 VDD VSS 1
+C_U2_C1         U2_N14683247 0  1n  
+X_U2_U46         MGATE U2_ON_INT U2_N14683159 NOR2_BASIC_GEN  VDD=1
++  VSS=0 VTHRESH=500E-3
+X_U2_U7         PGATE U2_N15532894 INV_BASIC_GEN  VDD=1 VSS=0
++  VTHRESH=500E-3
+G_U2_G1         U2_N14683251 U2_N14683247 pwl(1)  U2_N14683221 0 
++    0 0,  4.5 58m,  10 140m,  12.6 230m   
+
+E_U2_ABM5         U2_N14683301 0 vol= 'V(U2_ON_INT) <0.5? V(VDD_INT):0'
+
+X_U2_U43         U2_N14683247 MGATE BUF_BASIC_GEN VDD=1 VSS=0
++  VTHRESH=0.5
+X_U2_U48         U2_N147032561 U2_N14683247 d_d1 
+V_U2_V6         U2_N147032561 0 80m
+X_U2_S2    U2_N14683147 0 U2_N14683251 U2_N14683247 MTON_TOFF_U2_S2 
+
+E_U2_ABM4         U2_N14683241 0 vol='V(U2_ON_INT) >=0.5? V(VDD_INT):0  '
+
+R_U2_R2         U2_N14683241 U2_N14683221  1 
+G_U2_G2         U2_N14683247 0 PWL(1) U2_N14683281 0 
++    0 0, 4.5 32m, 10 90m, 12.6 160m   
+V_U2_V5         U2_N14683251 0 1V
+X_U2_U44         U2_ON_INT MGATE U2_N14683147 AND2_BASIC_GEN  VDD=1
++  VSS=0 VTHRESH=500E-3
+C_U2_C3         U2_N14683221 0  1n  
+X_U2_U45         N18232068 U2_N15532894 U2_ON_INT AND2_BASIC_GEN  VDD=1
++  VSS=0 VTHRESH=500E-3
+X_U2_S1    U2_N14683159 0 U2_N14683247 0 MTON_TOFF_U2_S1 
+R_U2_R3         U2_N14683301 U2_N14683281  1 
+C_U2_C4         U2_N14683281 0  1n  
+X_U2_U47         U2_N14683247 U2_N14683251 d_d1 
+X_U1_U6         INB_INT U1_VIH U1_VHYS U1_N15517298 COMPHYS_BASIC_GEN 
++  VDD=1 VSS=0 VTHRESH=0.5
+R_U1_R1         U1_N15521766 U1_VDD_UVLO  721.5 
+X_U1_U7         U1_N15517298 U1_INB_OUT INV_BASIC_GEN  VDD=1 VSS=0
++  VTHRESH=500E-3
+X_U1_U9         U1_IN_OUT U1_INB_OUT U1_VDD_UVLO N18232068 AND3_BASIC_GEN
++   VDD=1 VSS=0 VTHRESH=500E-3
+C_U1_C1         U1_VDD_UVLO 0  1n  
+X_U1_U5         IN_INT U1_VIH U1_VHYS U1_IN_OUT COMPHYS_BASIC_GEN  VDD=1
++  VSS=0 VTHRESH=0.5
+X_U1_U8         VDD_INT U1_N15521824 U1_N15521760 U1_N15521766
++  COMPHYS_BASIC_GEN  VDD=1 VSS=0 VTHRESH=0.5
+V_U1_V1         U1_N15521824 0 3.6
+E_U1_ABM3         U1_VHYS 0 vol= '0.34*V(VDD_INT)'
+E_U1_ABM1         U1_VIH 0 vol='0.67*V(VDD_INT)'
+V_U1_V2         U1_N15521760 0 0.36
+X_U1_U35         U1_VDD_UVLO U1_N15521766 d_d1 
+M_U5_M2         U5_N16789896 U5_N23038 PILOT PILOT PMOS02           
+R_U5_R1         U5_N16790231 U5_N16789866  20  
+X_U5_U6         U5_N16789896 VSS U5_N16802670 0 RVAR  RREF=1
+M_U5_M1         U5_N08221 U5_N16789866 PILOT PILOT NMOS02           
+C_U5_C4         VSS PILOT  10p  
+C_U5_C2         U5_N16789896 U5_N23038  5p  
+R_U5_R2         U5_N16789868 U5_N23038  20  
+E_U5_E3         U5_N16802670 0 pwl(1) VDD_INT 0 
++    0 0, 4.5 2.8, 10 1.9, 12.6 1.6   
+X_U5_U5         VDD U5_N08221 U5_N26349 0 RVAR RREF=1
+C_U5_C1         U5_N08221 U5_N16789866  5p  
+C_U5_C5         PILOT VDD  10p  
+E_U5_E4         U5_N26349 0 pwl(1) VDD_INT 0 
++    0 0, 4.5 9.5, 10 2.88, 12.6 2.8   
+X_U5_U9         PILOT VDD d_d1 
+C_U5_C3         PILOT U5_N16789866  10p  
+X_U5_U10         VSS PILOT d_d1 
+E_U5_E2         PILOT U5_N16789868 vol= ' V(PGATE, 0) > 0.5? -5: 5'
+E_U5_E1         U5_N16790231 PILOT vol= ' V(PGATE, 0) > 0.5? 5: -5'
+C_U5_C6         PILOT U5_N23038  10p  
+.ENDS LM5134A
 *$
 .SUBCKT PTON_TOFF_U4_S1 1 2 3 4  
 G_Switch 3 4 VCR PWL(1) 1 2 0.2 100e6 0.8 1m
@@ -794,23 +968,26 @@ D2 8 6 DN
 V1 18 19 1.25
 .ENDS
 "}
-C {devices/lab_pin} 340 -470 0 1 {name=p13 lab=E9}
-C {devices/lab_pin} 560 -440 0 0 {name=p19 lab=C8}
-C {devices/lab_pin} 560 -530 0 1 {name=p20 lab=E8}
-C {devices/lab_pin} 840 -880 0 1 {name=p21 lab=E11}
-C {devices/lab_pin} 260 -190 0 1 {name=p22 lab=E3}
-C {devices/lab_pin} 260 -300 0 1 {name=p26 lab=C3}
-C {devices/lab_pin} 50 -240 0 0 {name=p30 lab=B3}
-C {devices/lab_pin} 520 -490 0 0 {name=p33 lab=VSS}
-C {devices/res} 340 -660 0 1 {name=r13 m=1 value=300}
-C {devices/npn} 200 -630 0 1 {name=Q7 model=q2n2222 area=1}
-C {devices/lab_pin} 180 -690 0 0 {name=p8 lab=C7}
-C {devices/lab_pin} 340 -690 0 1 {name=p31 lab=C2}
-C {devices/title} 160 -30 0 0 {name=l2 author="Stefan Schippers"}
-C {devices/lab_pin} 1030 -700 0 0 {name=p32 lab=SA}
-C {devices/ammeter} 1110 -350 0 0 {name=v0}
-C {devices/lab_pin} 1030 -380 0 0 {name=p35 lab=SB}
-C {devices/launcher} 1390 -90 0 0 {name=h1 
-descr="IRF540 model" 
-url="http://espice.ugr.es/espice/src/modelos_subckt/spice_complete/other_models/ir_lib/irf540.spi"
-}
+C {lab_pin} 340 -470 0 1 {name=p13 lab=E9}
+C {lab_pin} 560 -440 0 0 {name=p19 lab=C8}
+C {lab_pin} 560 -530 0 1 {name=p20 lab=E8}
+C {lab_pin} 840 -850 0 1 {name=p21 lab=E11}
+C {lab_pin} 260 -160 0 1 {name=p22 lab=E3}
+C {lab_pin} 260 -270 0 1 {name=p26 lab=C3}
+C {lab_pin} 50 -210 0 0 {name=p30 lab=B3}
+C {lab_pin} 520 -490 0 0 {name=p33 lab=VSS}
+C {res} 340 -660 0 1 {name=r13 m=1 value=300}
+C {npn} 200 -630 0 1 {name=Q7 model=q2n2222 area=1}
+C {lab_pin} 180 -690 0 0 {name=p8 lab=C7}
+C {lab_pin} 340 -690 0 1 {name=p31 lab=C2}
+C {title} 160 -30 0 0 {name=l2 author="Stefan Schippers"}
+C {lab_pin} 930 -700 0 0 {name=p32 lab=SA}
+C {ammeter} 1110 -350 0 0 {name=v0 current=0.2729}
+C {lab_pin} 930 -380 0 0 {name=p35 lab=SB}
+C {ammeter} 560 -890 0 0 {name=v1 current=0.0196}
+C {ammeter} 340 -890 0 0 {name=v2 current=0.01951}
+C {ammeter} 260 -310 0 0 {name=v3 current=0.0393}
+C {ammeter} 770 -440 3 0 {name=v4 current=0.01946}
+C {ammeter} 690 -680 0 0 {name=v5 current=0.006279}
+C {ammeter} 180 -870 0 1 {name=v6 current=0.01956}
+C {ammeter} 840 -890 0 0 {name=v7 current=0.01951}

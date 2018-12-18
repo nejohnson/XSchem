@@ -39,7 +39,7 @@ N 240 -150 240 -120 {}
 N 220 -150 240 -150 {} 
 N 220 -180 220 -150 {} 
 N 220 -180 240 -180 {} 
-C {devices/code} 870 -190 0 0 {name=STIMULI
+C {code} 870 -190 0 0 {name=STIMULI
 only_toplevel=true
 value=".option PARHIER=LOCAL RUNLVL=6 post MODMONTE=1 warn maxwarns=400
 .option sampling_method = SRS 
@@ -50,9 +50,9 @@ value=".option PARHIER=LOCAL RUNLVL=6 post MODMONTE=1 warn maxwarns=400
 .dc VPLUS 1.3 1.7 0.001
 .probe i(*) 
 "} 
-C {devices/lab_pin} 60 -150 0 0 {name=p17 lab=0} 
-C {devices/title} 160 -30 0 0 {name=l1 author="Stefan Schippers"} 
-C {devices/code} 1010 -190 0 0 {name=MOSIS_MODELS value="
+C {lab_pin} 60 -150 0 0 {name=p17 lab=0} 
+C {title} 160 -30 0 0 {name=l1 author="Stefan Schippers"} 
+C {code} 1010 -190 0 0 {name=MOSIS_MODELS value="
 
 * hdif    = 0.5e-6
 .MODEL CMOSN NMOS (
@@ -127,32 +127,32 @@ C {devices/code} 1010 -190 0 0 {name=MOSIS_MODELS value="
 +LKETA   = 7.702974E-3     )
 "
 } 
-C {devices/nmos4} 480 -180 0 0 {name=m1 model=cmosn w=5u l=2u m=1} 
-C {devices/pmos4} 550 -430 0 0 {name=m2 model=cmosp w=5u l=2u m=1} 
-C {devices/vsource} 60 -180 0 0 {name=VVCC value=3} 
-C {devices/lab_pin} 500 -120 0 0 {name=p1 lab=0} 
-C {devices/lab_pin} 90 -240 0 1 {name=p2 lab=VCC} 
-C {devices/nmos4} 260 -180 0 1 {name=m3 model=cmosn w=5u l=2u m=1} 
-C {devices/lab_pin} 240 -120 0 0 {name=p3 lab=0} 
-C {devices/isource} 240 -290 0 0 {name=IBIAS value=10u} 
-C {devices/lab_pin} 240 -320 0 0 {name=p4 lab=0} 
-C {devices/nmos4} 410 -280 0 0 {name=m4 model=cmosn w=10u l=1u m=1} 
-C {devices/lab_pin} 450 -280 0 1 {name=p5 lab=0} 
-C {devices/nmos4} 590 -280 0 1 {name=m5 model=cmosn w=10u l=1u m=1} 
-C {devices/lab_pin} 550 -280 0 0 {name=p0 lab=0} 
-C {devices/lab_pin} 590 -430 0 1 {name=p6 lab=VCC} 
-C {devices/pmos4} 450 -430 0 1 {name=m6 model=cmosp w=5u l=2u m=1} 
-C {devices/lab_pin} 410 -430 0 0 {name=p7 lab=VCC} 
-C {devices/lab_pin} 500 -520 0 0 {name=p8 lab=VCC} 
-C {devices/lab_pin} 370 -280 0 0 {name=p9 lab=PLUS} 
-C {devices/lab_pin} 630 -280 0 1 {name=p10 lab=MINUS} 
-C {devices/lab_pin} 690 -360 0 1 {name=p11 lab=DIFFOUT} 
-C {devices/lab_pin} 430 -380 0 0 {name=p12 lab=GP} 
-C {devices/lab_pin} 240 -230 0 0 {name=p13 lab=GN} 
-C {devices/lab_pin} 60 -280 0 0 {name=p14 lab=0} 
-C {devices/vsource} 60 -310 0 0 {name=VPLUS value=1.5} 
-C {devices/lab_pin} 90 -370 0 1 {name=p15 lab=PLUS} 
-C {devices/lab_pin} 60 -430 0 0 {name=p16 lab=0} 
-C {devices/vsource} 60 -460 0 0 {name=V1 value=1.5} 
-C {devices/lab_pin} 90 -520 0 1 {name=p18 lab=MINUS} 
-C {devices/lab_pin} 500 -230 0 0 {name=p19 lab=SN} 
+C {nmos4} 480 -180 0 0 {name=m1 model=cmosn w=5u l=2u m=1} 
+C {pmos4} 550 -430 0 0 {name=m2 model=cmosp w=5u l=2u m=1} 
+C {vsource} 60 -180 0 0 {name=VVCC value=3} 
+C {lab_pin} 500 -120 0 0 {name=p1 lab=0} 
+C {lab_pin} 90 -240 0 1 {name=p2 lab=VCC} 
+C {nmos4} 260 -180 0 1 {name=m3 model=cmosn w=5u l=2u m=1} 
+C {lab_pin} 240 -120 0 0 {name=p3 lab=0} 
+C {isource} 240 -290 0 0 {name=IBIAS value=10u} 
+C {lab_pin} 240 -320 0 0 {name=p4 lab=0} 
+C {nmos4} 410 -280 0 0 {name=m4 model=cmosn w=10u l=1u m=1} 
+C {lab_pin} 450 -280 0 1 {name=p5 lab=0} 
+C {nmos4} 590 -280 0 1 {name=m5 model=cmosn w=10u l=1u m=1} 
+C {lab_pin} 550 -280 0 0 {name=p0 lab=0} 
+C {lab_pin} 590 -430 0 1 {name=p6 lab=VCC} 
+C {pmos4} 450 -430 0 1 {name=m6 model=cmosp w=5u l=2u m=1} 
+C {lab_pin} 410 -430 0 0 {name=p7 lab=VCC} 
+C {lab_pin} 500 -520 0 0 {name=p8 lab=VCC} 
+C {lab_pin} 370 -280 0 0 {name=p9 lab=PLUS} 
+C {lab_pin} 630 -280 0 1 {name=p10 lab=MINUS} 
+C {lab_pin} 690 -360 0 1 {name=p11 lab=DIFFOUT} 
+C {lab_pin} 430 -380 0 0 {name=p12 lab=GP} 
+C {lab_pin} 240 -230 0 0 {name=p13 lab=GN} 
+C {lab_pin} 60 -280 0 0 {name=p14 lab=0} 
+C {vsource} 60 -310 0 0 {name=VPLUS value=1.5} 
+C {lab_pin} 90 -370 0 1 {name=p15 lab=PLUS} 
+C {lab_pin} 60 -430 0 0 {name=p16 lab=0} 
+C {vsource} 60 -460 0 0 {name=V1 value=1.5} 
+C {lab_pin} 90 -520 0 1 {name=p18 lab=MINUS} 
+C {lab_pin} 500 -230 0 0 {name=p19 lab=SN} 

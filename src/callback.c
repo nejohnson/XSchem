@@ -1202,11 +1202,7 @@ int callback(int event, int mx, int my, KeySym key,
     char * tmp;
     tmp = (char *) tclgetvar("XSCHEM_START_WINDOW"); /* 20121110 */
     if(tmp && tmp[0]) new_window(tmp,0); /* 20090708 */
-    else {
-      if(debug_var>=1) { /* 20121110 */
-        fprintf(errfp, "callback(): can not start new xschem session: XSCHEM_START_WINDOW unset");
-      }
-    }
+    else new_window(NULL, 0);
     break;
    }
    if(key==';' && state & ControlMask )         /* testmode 20171203 */
@@ -1239,8 +1235,8 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='~' && state & ControlMask)    /* testmode:  for performance testing */
    {
-   fprintf(errfp, "%s\n",  subst_token("embed=true name=R4 m=1 value=47k footprint=1206 device=resistor", "embed", "DELETE"));
-    fprintf(errfp, "%s\n", subst_token("name=R4 m=1 value=47k footprint=1206 device=resistor", "name", "R4"));
+    fprintf(errfp, "1: %s\n", get_tok_value("name=x4 w = 0.8 l=0.1 model=pch m=1", "w", 0));
+    fprintf(errfp, "2: %s\n", get_tok_value("name=x4 w= 0.8 l=0.1 model=pch m=1", "w", 0));
     break;
    }
    if(key=='#' && !(state&ControlMask))         /* testmode */

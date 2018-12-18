@@ -11,9 +11,9 @@ N 360 -360 360 -310 {lab=QBAR}
 N 260 -350 260 -330 {lab=Q} 
 N 260 -350 360 -400 {lab=Q} 
 N 360 -450 360 -400 {lab=Q} 
-C {mylib/nand2} 310 -450 0 0 {name=x1} 
-C {devices/lab_pin} 390 -450 0 1 {name=p1 lab=Q} 
-C {devices/lab_pin} 220 -470 0 0 {name=p2 lab=SET_BAR} 
-C {devices/lab_pin} 220 -290 0 0 {name=p3 lab=CLEAR_BAR} 
-C {mylib/nand2} 310 -310 2 1 {name=x2} 
-C {devices/lab_pin} 390 -310 0 1 {name=p4 lab=QBAR} 
+C {nand2} 310 -450 0 0 {name=x1} 
+C {lab_pin} 390 -450 0 1 {name=p1 lab=Q} 
+C {lab_pin} 220 -470 0 0 {name=p2 lab=SET_BAR} 
+C {lab_pin} 220 -290 0 0 {name=p3 lab=CLEAR_BAR} 
+C {nand2} 310 -310 2 1 {name=x2} 
+C {lab_pin} 390 -310 0 1 {name=p4 lab=QBAR} 

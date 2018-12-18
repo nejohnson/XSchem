@@ -258,8 +258,8 @@ void new_window(const char *cell, int symbol)
      pid_t pid1;
      pid_t pid2;
      int status;
-
-     if(debug_var>=1) fprintf(errfp, "new_window(): cell=%s, symbol=%d\n", cell, symbol);
+    
+     if(debug_var>=1) fprintf(errfp, "new_window(): executable: %s, cell=%s, symbol=%d\n", xschem_executable, cell, symbol);
      if(stat(xschem_executable,&buf)) { /*  20121110 */
        fprintf(errfp, "new_window(): executable not found\n");
        return;
@@ -278,7 +278,10 @@ void new_window(const char *cell, int symbol)
          freopen("/dev/null","w",stdout);
          freopen("/dev/null","r",stdin);
          freopen("/dev/null","w",stderr);
-         if(!symbol) {
+         if(!cell || !cell[0]) {
+           execl(xschem_executable,xschem_executable,"-r", NULL);
+         }
+         else if(!symbol) {
 
 
            my_strncpy(f, abs_sym_path(cell, ".sch"), S(f));
@@ -987,6 +990,9 @@ void go_back(int confirm) /*  20171006 add confirm */
   remove_symbols();
   from_embedded_sym=0;
   if(strstr(schematic[currentsch], ".xschem_embedded_")) {
+    /* when returning after editing an embedded symbol
+     * load immediately symbol definition before going back (.xschem_embedded... file will be lost) 
+     */
     load_symbol_definition(schematic[currentsch], NULL);
     from_embedded_sym=1;
   }

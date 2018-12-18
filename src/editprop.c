@@ -365,7 +365,7 @@ void set_inst_prop(int i)
   char *tmp;
 
   ptr = (inst_ptr[i].ptr+instdef)->templ; /*20150409 */
-  fprintf(errfp, "set_inst_prop(): i=%d, name=%s, prop_ptr = %s, template=%s\n", 
+  if(debug_var>=1) fprintf(errfp, "set_inst_prop(): i=%d, name=%s, prop_ptr = %s, template=%s\n", 
      i, inst_ptr[i].name, inst_ptr[i].prop_ptr, ptr);
   if(!inst_ptr[i].prop_ptr && get_tok_value(ptr,"name",0)[0]) 
   {

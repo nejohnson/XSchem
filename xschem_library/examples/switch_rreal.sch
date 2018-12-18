@@ -81,15 +81,15 @@ end process;
 } 
 V {} 
 S {} 
-C {devices/use} 0 -310 0 0 {    library ieee,work;
+C {use} 0 -310 0 0 {    library ieee,work;
     use ieee.std_logic_1164.all;
     use work.rrreal.all;
     use std.textio.all;
 } 
-C {devices/ipin} 80 -120 0 0 {name=p3 lab=ENAB} 
-C {devices/iopin} 170 -40 0 0 {name=p1 lab=B sig_type=rreal} 
-C {devices/iopin} 40 -40 0 1 {name=p2 lab=A sig_type=rreal} 
-C {devices/arch_declarations} 20 -190 0 0 {
+C {ipin} 80 -120 0 0 {name=p3 lab=ENAB} 
+C {iopin} 170 -40 0 0 {name=p1 lab=B sig_type=rreal} 
+C {iopin} 40 -40 0 1 {name=p2 lab=A sig_type=rreal} 
+C {arch_declarations} 20 -190 0 0 {
 
 signal SCHEDULE : integer ;
 

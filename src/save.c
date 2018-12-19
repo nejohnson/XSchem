@@ -902,6 +902,8 @@ void load_schematic(int load_symbols, const char *abs_name, int reset_undo) /* 2
       my_snprintf(msg, S(msg), "alert_ {Unable to open file: %s}", abs_name ? abs_name: "(null)");
       tcleval(msg);
     } else {
+      my_snprintf(msg, S(msg), "set current_dirname [file dirname %s]", name);
+      tcleval(msg);
       if(debug_var>=1) fprintf(errfp, "load_schematic(): reading file: %s\n", name);
       read_xschem_file(fd);
       fclose(fd); /* 20150326 moved before load symbols */

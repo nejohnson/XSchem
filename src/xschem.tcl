@@ -1496,7 +1496,7 @@ proc viewdata {data} {
 # given an absolute path of a symbol/schematic remove the path prefix
 # if file is in a library directory (a $pathlist dir)
 proc rel_sym_path {symbol} {
-  global pathlist
+  global pathlist current_dirname
 
   set extension 1
   set symbol_orig [file rootname $symbol]
@@ -1510,6 +1510,9 @@ proc rel_sym_path {symbol} {
   set cell [file rootname [file tail $symbol]]
   set name {}
   foreach path_elem $pathlist {
+    if { ![string compare $path_elem .]  && [info exist current_dirname]} {
+      set path_elem $current_dirname
+    }
     # libname/symname[.ext] and libname in $path_elem 
     # --> libname/symname
     if { [file exists [file dirname "${path_elem}/${lib_cell}"]] && 
@@ -1525,8 +1528,7 @@ proc rel_sym_path {symbol} {
     } 
     # symname[.ext]
     # --> symname.ext
-    if { [file exists "${path_elem}/${cell}${ext}"] && 
-       (![string compare $symbol_orig $cell ]) } {
+    if { [file exists "${path_elem}/${cell}${ext}"] } {
       set name ${cell}${ext}
       break
     # /.../path/.../libname/symname[.ext] and libname in XSCHEM_LIBRARY_PATH 
@@ -1551,20 +1553,16 @@ proc rel_sym_path {symbol} {
 
 # given a library/symbol return its absolute path
 proc abs_sym_path {fname {required_ext {}} } {
-  global pathlist
+  global pathlist current_dirname
 
   set name {}
-
-  # 20181029
-  if { [file exists $fname] } {
-    set fname [file normalize $fname]
-  }
-
-
   # fname is of type libname/cellname[.ext] but not ./cellname[.ext] or
   # ../cellname[.ext] and has a slash, so no cellname[.ext] 
   if {![string compare [file rootname $fname] [get_cell $fname] ] } {
     foreach path_elem $pathlist {
+      if { ![string compare $path_elem .]  && [info exist current_dirname]} {
+        set path_elem $current_dirname
+      }
       # libname/cellname[.ext] and libname is in pathlist
       # --> normalized $pathlist/libname/cellname$required_ext
       # cellname[.ext] and $pathlist/cellname$required_ext exists
@@ -1585,6 +1583,7 @@ proc abs_sym_path {fname {required_ext {}} } {
       }
     }
   }
+
   if { ![string compare $name {}] } {
     #puts here3
     set name [file rootname [file normalize $fname]]$required_ext
@@ -1897,7 +1896,9 @@ set pathlist {}
 if { [info exists XSCHEM_LIBRARY_PATH] } {
   set pathlist_orig [split $XSCHEM_LIBRARY_PATH :]
   foreach i $pathlist_orig {
-    if { [ file exists $i] } {
+    if { ![string compare $i .] } {
+      lappend pathlist $i
+    } elseif { [ file exists $i] } {
       lappend pathlist [string replace [file normalize ${i}/__xxx__] end-7 end {}]
     }
   }

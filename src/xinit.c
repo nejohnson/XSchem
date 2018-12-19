@@ -738,7 +738,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
  tclsetvar("XSCHEM_LIBRARY_PATH", ""); /* avoid errors if uninitialized and used in .xschem */
  if( !stat("./xschem.tcl", &buf)) {
    tclsetvar("XSCHEM_SHAREDIR",pwd_dir); /* for testing xschem builds in src dir*/
-   my_snprintf(tmp, S(tmp), "file normalize %s/../xschem_library", pwd_dir);
+   my_snprintf(tmp, S(tmp), "subst .:[file normalize %s/../xschem_library/devices]", pwd_dir);
    tcleval(tmp);
    tclsetvar("XSCHEM_LIBRARY_PATH", Tcl_GetStringResult(interp));
  } else if( !stat(XSCHEM_SHAREDIR, &buf) ) {  /* 20180918 */

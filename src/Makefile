@@ -8,7 +8,8 @@ userconfdir=$(prefix)/.xschem
 
 ## specify user schematic/symbol libraries; 
 ## you may redefine it later in .xschem or xschemrc startup files
-user_library_dir=$(HOME)/xschem_library
+#user_library_dir=$(HOME)/xschem_library
+user_library_dir=.
 
 ## specify system-wide symbol libraries;
 ## you may redefine it later in .xschem or xschemrc startup files
@@ -123,9 +124,10 @@ install: xschem
 	cp vhdl.awk $(prefix)/share/xschem
 	cp -r ../doc/* $(prefix)/share/doc/xschem/
 	cp ../utile/* $(prefix)/share/xschem/utile
+	cp -ru ../xschem_library/mylib $(user_library_dir)
 	cp -ru ../xschem_library/devices $(system_library_dir)
 	cp -ru ../xschem_library/examples $(user_library_dir)
-	cp -ru ../xschem_library/pcb $(user_library_dir)
+	cp -ru ../xschem_library/pcb $(system_library_dir)
 
 .PHONY: uninstall
 uninstall:

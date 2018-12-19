@@ -17,9 +17,8 @@ END  { endfile(_filename_) }
 BEGIN{
 }
 
-/^C {pcb/{
-   
-   sub(/pcb\//,"")
+/^C {devices\//{
+   sub(/devices\//,"")
    found=1
 }
 

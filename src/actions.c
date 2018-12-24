@@ -490,6 +490,7 @@ void clear_drawing(void)
  my_free(&schtedaxprop);
  my_free(&schprop);
  my_free(&schvhdlprop);
+ my_free(&xschem_version_string);
  my_free(&schverilogprop); /* 09112003 */
  for(i=0;i<lastwire;i++)
  {

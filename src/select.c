@@ -544,7 +544,7 @@ void select_wire(int i,unsigned short select_mode, int fast)
            wire[i].prop_ptr? wire[i].prop_ptr: "(null)");
     statusmsg(str,2);
    /* 20070323 */
-   my_snprintf(str, S(str), "x = %.16g  y = %.16g  w = %.16g h = %.16g",wire[i].x1, wire[i].y1,
+   my_snprintf(str, S(str), "n=%4d x = %.16g  y = %.16g  w = %.16g h = %.16g",i, wire[i].x1, wire[i].y1,
       wire[i].x2-wire[i].x1, wire[i].y2-wire[i].y1
    );
    statusmsg(str,1);
@@ -595,7 +595,7 @@ void select_element(int i,unsigned short select_mode, int fast)
      statusmsg(str,2);
     }
    }
-   my_snprintf(str, S(str), "x = %.16g  y = %.16g  w = %.16g h = %.16g",inst_ptr[i].xx1, inst_ptr[i].yy1,
+   my_snprintf(str, S(str), "n=%4d x = %.16g  y = %.16g  w = %.16g h = %.16g",i, inst_ptr[i].xx1, inst_ptr[i].yy1,
       inst_ptr[i].xx2-inst_ptr[i].xx1, inst_ptr[i].yy2-inst_ptr[i].yy1
    );
    statusmsg(str,1);
@@ -626,6 +626,8 @@ void select_text(int i,unsigned short select_mode, int fast)
     my_strncpy(s,textelement[i].prop_ptr!=NULL?textelement[i].prop_ptr:"<NULL>",S(s));
     my_snprintf(str, S(str), "selected text %d: properties: %s", i,s);
     statusmsg(str,2);
+    my_snprintf(str, S(str), "n=%4d x = %.16g  y = %.16g", i, textelement[i].x0, textelement[i].y0);
+    statusmsg(str,1);
   }
   textelement[i].sel = select_mode;
 
@@ -658,7 +660,7 @@ void select_box(int c, int i, unsigned short select_mode, int fast)
    my_snprintf(str, S(str), "selected box : layer=%d, n=%d properties: %s",c-4,i,s);
    statusmsg(str,2);
    /* 20070323 */
-   my_snprintf(str, S(str), "x = %.16g  y = %.16g  w = %.16g h = %.16g",rect[c][i].x1, rect[c][i].y1,
+   my_snprintf(str, S(str), "n=%4d x = %.16g  y = %.16g  w = %.16g h = %.16g", i, rect[c][i].x1, rect[c][i].y1,
       rect[c][i].x2-rect[c][i].x1, rect[c][i].y2-rect[c][i].y1
    );
    statusmsg(str,1);
@@ -693,8 +695,8 @@ void select_arc(int c, int i, unsigned short select_mode, int fast)
    my_snprintf(str, S(str), "selected arc : layer=%d, n=%d properties: %s",c-4,i,s);
    statusmsg(str,2);
    /* 20070323 */
-   my_snprintf(str, S(str), "x = %.16g  y = %.16g  r = %.16g a = %.16g b = %.16g",
-      arc[c][i].x, arc[c][i].y, arc[c][i].r, arc[c][i].a, arc[c][i].b);
+   my_snprintf(str, S(str), "n=%4d x = %.16g  y = %.16g  r = %.16g a = %.16g b = %.16g",
+      i, arc[c][i].x, arc[c][i].y, arc[c][i].r, arc[c][i].a, arc[c][i].b);
    statusmsg(str,1);
   }
   if(select_mode) {
@@ -722,7 +724,7 @@ void select_polygon(int c, int i, unsigned short select_mode, int fast )
    my_snprintf(str, S(str), "selected polygon: layer=%d, n=%d properties: %s",c-4,i,s);
    statusmsg(str,2);
    /* 20070323 */
-   my_snprintf(str, S(str), "x0 = %.16g  y0 = %.16g ...",polygon[c][i].x[0], polygon[c][i].y[0]);
+   my_snprintf(str, S(str), "n=%4d x0 = %.16g  y0 = %.16g ...", i, polygon[c][i].x[0], polygon[c][i].y[0]);
    statusmsg(str,1);
   }
   polygon[c][i].sel = select_mode;
@@ -744,7 +746,7 @@ void select_line(int c, int i, unsigned short select_mode, int fast )
    my_snprintf(str, S(str), "selected line: layer=%d, n=%d properties: %s",c-4,i,s);
    statusmsg(str,2);
    /* 20070323 */
-   my_snprintf(str, S(str), "x = %.16g  y = %.16g  w = %.16g h = %.16g",line[c][i].x1, line[c][i].y1,
+   my_snprintf(str, S(str), "n=%4d x = %.16g  y = %.16g  w = %.16g h = %.16g",i, line[c][i].x1, line[c][i].y1,
       line[c][i].x2-line[c][i].x1, line[c][i].y2-line[c][i].y1
    );
    statusmsg(str,1);

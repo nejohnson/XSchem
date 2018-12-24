@@ -1,3 +1,4 @@
+v {xschem version=2.8.2_RC1 file_version=1.0}
 G {
 
 process 
@@ -31,10 +32,12 @@ end process;
 
 
 
-} 
-V {} 
-C {iopin} 50 -90 0 0 {name=p1 lab=USC sig_type="rreal"} 
-C {ipin} -80 -90 0 0 {name=p2 lab=ING} 
+}
+V {}
+S {}
+E {}
+C {iopin} 50 -90 0 0 {name=p1 lab=USC sig_type="rreal"}
+C {ipin} -80 -90 0 0 {name=p2 lab=ING}
 C {use} -150 -260 0 0 {library ieee;
 use std.TEXTIO.all;
 use ieee.std_logic_1164.all;
@@ -43,4 +46,4 @@ use work.rrreal.all;
 library work;
 use work.rrreal.all;
 
-} 
+}

@@ -1,3 +1,4 @@
+v {xschem version=2.8.1 file_version=1.0}
 G {}
 V {}
 S {}
@@ -30,6 +31,7 @@ N 580 -420 580 -350 {lab=B}
 N 520 -350 580 -350 {lab=B}
 C {title} 160 -30 0 0 {name=l2 author="Stefan" embed=true}
 [
+v {xschem version=2.8.1 file_version=1.0}
 G {type=logo
 template="name=l1 author=\\"Stefan Schippers\\""
 verilog_ignore=true
@@ -49,6 +51,7 @@ P 5 13 5 -30 -25 0 5 30 -15 30 -35 10 -55 30 -75 30 -45 0 -75 -30 -55 -30 -35 -1
 ]
 C {74ls00} 420 -350 0 0 {name=U1:2  risedel=100 falldel=200 embed=true}
 [
+v {xschem version=2.8.1 file_version=1.0}
 G {type=nand
 verilog_format="nand #(@risedel , @falldel ) @name ( @#2 , @#0 , @#1 );"
 tedax_format="footprint @name @footprint
@@ -80,6 +83,7 @@ C {74ls00} 870 -440 0 0 {name=U1:1  risedel=100 falldel=200}
 C {lab_pin} 970 -440 0 1 {name=p0 lab=OUTPUT_Y}
 C {capa} 590 -160 0 0 {name=C0 m=1 value=100u device="electrolitic capacitor" embed=true}
 [
+v {xschem version=2.8.1 file_version=1.0}
 G {type=capacitor
 format="@name @pinlist @value m=@m"
 tedax_format="footprint @name @footprint 
@@ -108,6 +112,7 @@ C {74ls00} 420 -460 0 0 {name=U1:4 risedel=100 falldel=200 power=VCC5
 url="http://www.engrcs.com/components/74LS00.pdf"}
 C {7805} 730 -190 0 0 {name=U0 url="https://www.sparkfun.com/datasheets/Components/LM7805.pdf" embed=true}
 [
+v {xschem version=2.8.1 file_version=1.0}
 G {type=regulator
 format="x@name @pinlist r@symname"
 verilog_format="assign @#2 = @#0 ;"
@@ -139,6 +144,7 @@ C {lab_pin} 590 -110 0 0 {name=p23 lab=ANALOG_GND}
 C {capa} 890 -160 0 0 {name=C4 m=1 value=10u device="tantalium capacitor"}
 C {res} 520 -190 1 0 {name=R0 m=1 value=4.7 device="carbon resistor" embed=true}
 [
+v {xschem version=2.8.1 file_version=1.0}
 G {type=resistor
 format="@name @pinlist @value m=@m"
 verilog_format="tran @name ( @#0 , @#1 ) ;"
@@ -174,6 +180,7 @@ C {lab_wire} 700 -460 0 0 {name=l3 lab=A}
 C {lab_wire} 700 -420 0 0 {name=l0 lab=B}
 C {lab_wire} 650 -190 0 0 {name=l1 lab=VCCFILT embed=true}
 [
+v {xschem version=2.8.1 file_version=1.0}
 G {type=label
 format="*.alias @lab"
 template="name=l1 sig_type=std_logic lab=xxx"}
@@ -192,6 +199,7 @@ C {lab_pin} 40 -310 0 1 { name=lONN9 lab=VCC12 }
 C {lab_pin} 40 -290 0 1 { name=lONN14 lab=ANALOG_GND  verilog_type=reg}
 C {lab_pin} 40 -270 0 1 { name=lONN15 lab=GND  verilog_type=reg embed=true}
 [
+v {xschem version=2.8.1 file_version=1.0}
 G {type=label
 format="*.alias @lab"
 template="name=l1 sig_type=std_logic lab=xxx"}
@@ -227,6 +235,7 @@ assign VCC12=1;
 
 " embed=true}
 [
+v {xschem version=2.8.1 file_version=1.0}
 G {type=netlist_commands
 template="name=s1 only_toplevel=false value=blabla"
 tedax_ignore=true
@@ -257,6 +266,7 @@ T {@name} 15 -25 0 0 0.3 0.3 {}
 ]
 C {verilog_timescale} 1050 -100 0 0 {name=s1 timestep="1ns" precision="1ns"  embed=true}
 [
+v {xschem version=2.8.1 file_version=1.0}
 G {type=timescale
 spice_ignore=true
 template="name=s1 timestep=\\"100ps\\" precision=\\"100ps\\" "
@@ -271,6 +281,7 @@ T {`timescale @timestep/@precision} 15 -5 0 0 0.3 0.3 {}
 ]
 C {conn_8x1} 20 -390 0 0 {name=C1 footprint=connector(8,1) embed=true}
 [
+v {xschem version=2.8.1 file_version=1.0}
 G {type=connector
 verilog_ignore=true
 format="*connector(8,1) @pinlist"

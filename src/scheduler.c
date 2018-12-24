@@ -40,6 +40,24 @@ void statusmsg(char str[],int n)
  }
 }
 
+int get_instance(const char *s)
+{
+     int i, found=0;
+     for(i=0;i<lastinst;i++) {
+       if(!strcmp(inst_ptr[i].instname, s)) {
+         found=1;
+         break;
+       }
+     }
+     if(!found) i=atol(s);
+     if(i<0 || i>lastinst) {
+       Tcl_AppendResult(interp, "Index out of range", NULL);
+       return -1;
+     }
+     return i;
+}
+
+
 /* can be used to reach C functions from the Tk shell. */
 int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * argv[])
 {       
@@ -315,7 +333,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
   }
 
  } else if(!strcmp(argv[1], "setprop")) {
-   int found=0, i, inst, fast=0;
+   int inst, fast=0;
 
    if(argc == 7) {
      if(!strcmp(argv[6], "fast")) {
@@ -328,42 +346,35 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
      return TCL_ERROR;
    }
    if(!strcmp(argv[2],"instance")) {
-     for(i=0;i<lastinst;i++) {
-       if(!strcmp(inst_ptr[i].instname, argv[3])) {
-         found=1;
-         inst = i;
-         break;
+     if( (inst = get_instance(argv[3])) < 0 ) {
+       Tcl_AppendResult(interp, "xschem setprop: instance not found", NULL);
+       return TCL_ERROR;
+     } else {
+       bbox(BEGIN,0.0,0.0,0.0,0.0);
+       symbol_bbox(inst, &inst_ptr[inst].x1, &inst_ptr[inst].y1, &inst_ptr[inst].x2, &inst_ptr[inst].y2);
+       bbox(ADD, inst_ptr[inst].x1, inst_ptr[inst].y1, inst_ptr[inst].x2, inst_ptr[inst].y2);
+       push_undo();
+       set_modify(1);
+       if(!fast) {
+         prepared_hash_instances=0;
+         prepared_netlist_structs=0;
+         prepared_hilight_structs=0;
        }
+       hash_proplist(inst_ptr[inst].prop_ptr , 1); /* remove old props from hash table */
+       new_prop_string(&inst_ptr[inst].prop_ptr, subst_token(inst_ptr[inst].prop_ptr, argv[4], argv[5]),0); 
+       my_strdup2(367, &inst_ptr[inst].instname, get_tok_value(inst_ptr[inst].prop_ptr, "name",0));
+       hash_proplist(inst_ptr[inst].prop_ptr , 0); /* put new props in hash table */
+       /* new symbol bbox after prop changes (may change due to text length) */
+       symbol_bbox(inst, &inst_ptr[inst].x1, &inst_ptr[inst].y1, &inst_ptr[inst].x2, &inst_ptr[inst].y2);
+       bbox(ADD, inst_ptr[inst].x1, inst_ptr[inst].y1, inst_ptr[inst].x2, inst_ptr[inst].y2);
+       /* redraw symbol with new props */
+       bbox(SET,0.0,0.0,0.0,0.0);
+       draw();
+       bbox(END,0.0,0.0,0.0,0.0);
      }
-   } else if(!strcmp(argv[2],"instance_n")) {
-     found=1;
-     inst=atol(argv[3]);
-   }
-   if(found) {
-     bbox(BEGIN,0.0,0.0,0.0,0.0);
-     symbol_bbox(inst, &inst_ptr[inst].x1, &inst_ptr[inst].y1, &inst_ptr[inst].x2, &inst_ptr[inst].y2);
-     bbox(ADD, inst_ptr[inst].x1, inst_ptr[inst].y1, inst_ptr[inst].x2, inst_ptr[inst].y2);
-     push_undo();
-     set_modify(1);
-     if(!fast) {
-       prepared_hash_instances=0;
-       prepared_netlist_structs=0;
-       prepared_hilight_structs=0;
-     }
-     hash_proplist(inst_ptr[inst].prop_ptr , 1); /* remove old props from hash table */
-     new_prop_string(&inst_ptr[inst].prop_ptr, subst_token(inst_ptr[inst].prop_ptr, argv[4], argv[5]),0); 
-     my_strdup2(367, &inst_ptr[inst].instname, get_tok_value(inst_ptr[inst].prop_ptr, "name",0));
-     hash_proplist(inst_ptr[inst].prop_ptr , 0); /* put new props in hash table */
-     /* new symbol bbox after prop changes (may change due to text length) */
-     symbol_bbox(inst, &inst_ptr[inst].x1, &inst_ptr[inst].y1, &inst_ptr[inst].x2, &inst_ptr[inst].y2);
-     bbox(ADD, inst_ptr[inst].x1, inst_ptr[inst].y1, inst_ptr[inst].x2, inst_ptr[inst].y2);
-     /* redraw symbol with new props */
-     bbox(SET,0.0,0.0,0.0,0.0);
-     draw();
-     bbox(END,0.0,0.0,0.0,0.0);
    }
  } else if(!strcmp(argv[1], "replace_symbol")) {
-   int found=0, i, inst, fast = 0;
+   int inst, fast = 0;
    if(argc == 6) {
      if(!strcmp(argv[5], "fast")) {
        fast = 1;
@@ -375,120 +386,95 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
      return TCL_ERROR;
    }
    if(!strcmp(argv[2],"instance")) {
-     for(i=0;i<lastinst;i++) {
-       if(!strcmp(inst_ptr[i].instname, argv[3])) {
-         found=1;
-         inst = i;
-         break;
+     if( (inst = get_instance(argv[3])) < 0 ) {
+       Tcl_AppendResult(interp, "xschem getprop: instance not found", NULL);
+       return TCL_ERROR;
+     } else {
+       char symbol[PATH_MAX];
+       int sym_number, prefix, cond;
+       char *type;
+       static char *name=NULL;
+       static char *ptr=NULL;
+       static char *template=NULL;
+  
+       bbox(BEGIN,0.0,0.0,0.0,0.0);
+       my_strncpy(symbol, rel_sym_path(argv[4]), S(symbol));
+       push_undo();
+       set_modify(1);
+       if(!fast) {
+         prepared_hash_instances=0; /* 20171224 */
+         prepared_netlist_structs=0;
+         prepared_hilight_structs=0;
        }
+       sym_number=match_symbol(symbol);
+       if(sym_number>=0)
+       {
+         my_strdup(368, &template, (instdef+sym_number)->templ); /* 20150409 */
+         prefix=(get_tok_value(template, "name",0))[0]; /* get new symbol prefix  */
+       }
+       else prefix = 'x';
+       delete_inst_node(inst); /* 20180208 fix crashing bug: delete node info if changing symbol */
+                            /* if number of pins is different we must delete these data *before* */
+                            /* changing ysmbol, otherwise i might end up deleting non allocated data. */
+       my_strdup(369, &inst_ptr[inst].name,symbol);
+       inst_ptr[inst].ptr=sym_number;
+       bbox(ADD, inst_ptr[inst].x1, inst_ptr[inst].y1, inst_ptr[inst].x2, inst_ptr[inst].y2);
+       hash_proplist(inst_ptr[inst].prop_ptr , 1); /* remove old props from hash table */
+  
+       my_strdup(370, &name, inst_ptr[inst].instname);
+       if(name && name[0] )  /* 30102003 */
+       {
+         /* 20110325 only modify prefix if prefix not NUL */
+         if(prefix) name[0]=prefix; /* change prefix if changing symbol type; */
+  
+         my_strdup(371, &ptr,subst_token(inst_ptr[inst].prop_ptr, "name", name) );
+         new_prop_string(&inst_ptr[inst].prop_ptr, ptr,0); /* set new prop_ptr */
+         my_strdup2(372, &inst_ptr[inst].instname, get_tok_value(inst_ptr[inst].prop_ptr, "name",0)); /* 20150409 */
+  
+         type=instdef[inst_ptr[inst].ptr].type; /* 20150409 */
+         cond= !type || (strcmp(type,"label") && strcmp(type,"ipin") &&
+             strcmp(type,"opin") &&  strcmp(type,"iopin"));
+         if(cond) inst_ptr[inst].flags|=2;
+         else inst_ptr[inst].flags &=~2;
+       }
+       hash_proplist(inst_ptr[inst].prop_ptr , 0); /* put new props in hash table */
+       /* new symbol bbox after prop changes (may change due to text length) */
+       symbol_bbox(inst, &inst_ptr[inst].x1, &inst_ptr[inst].y1, &inst_ptr[inst].x2, &inst_ptr[inst].y2);
+       bbox(ADD, inst_ptr[inst].x1, inst_ptr[inst].y1, inst_ptr[inst].x2, inst_ptr[inst].y2);
+       /* redraw symbol */
+       bbox(SET,0.0,0.0,0.0,0.0);
+       draw();
+       bbox(END,0.0,0.0,0.0,0.0);
      }
-   } else if(!strcmp(argv[2],"instance_n")) {
-     found=1;
-     inst=atol(argv[3]);
    }
-   if(found) {
-     char symbol[PATH_MAX];
-     int sym_number, prefix, cond;
-     char *type;
-     static char *name=NULL;
-     static char *ptr=NULL;
-     static char *template=NULL;
-
-     bbox(BEGIN,0.0,0.0,0.0,0.0);
-     my_strncpy(symbol, rel_sym_path(argv[4]), S(symbol));
-     push_undo();
-     set_modify(1);
-     if(!fast) {
-       prepared_hash_instances=0; /* 20171224 */
-       prepared_netlist_structs=0;
-       prepared_hilight_structs=0;
-     }
-     sym_number=match_symbol(symbol);
-     if(sym_number>=0)
-     {
-       my_strdup(368, &template, (instdef+sym_number)->templ); /* 20150409 */
-       prefix=(get_tok_value(template, "name",0))[0]; /* get new symbol prefix  */
-     }
-     else prefix = 'x';
-     delete_inst_node(inst); /* 20180208 fix crashing bug: delete node info if changing symbol */
-                          /* if number of pins is different we must delete these data *before* */
-                          /* changing ysmbol, otherwise i might end up deleting non allocated data. */
-     my_strdup(369, &inst_ptr[inst].name,symbol);
-     inst_ptr[inst].ptr=sym_number;
-     bbox(ADD, inst_ptr[inst].x1, inst_ptr[inst].y1, inst_ptr[inst].x2, inst_ptr[inst].y2);
-     hash_proplist(inst_ptr[inst].prop_ptr , 1); /* remove old props from hash table */
-
-     my_strdup(370, &name, inst_ptr[inst].instname);
-     if(name && name[0] )  /* 30102003 */
-     {
-       /* 20110325 only modify prefix if prefix not NUL */
-       if(prefix) name[0]=prefix; /* change prefix if changing symbol type; */
-
-       my_strdup(371, &ptr,subst_token(inst_ptr[inst].prop_ptr, "name", name) );
-       new_prop_string(&inst_ptr[inst].prop_ptr, ptr,0); /* set new prop_ptr */
-       my_strdup2(372, &inst_ptr[inst].instname, get_tok_value(inst_ptr[inst].prop_ptr, "name",0)); /* 20150409 */
-
-       type=instdef[inst_ptr[inst].ptr].type; /* 20150409 */
-       cond= !type || (strcmp(type,"label") && strcmp(type,"ipin") &&
-           strcmp(type,"opin") &&  strcmp(type,"iopin"));
-       if(cond) inst_ptr[inst].flags|=2;
-       else inst_ptr[inst].flags &=~2;
-     }
-     hash_proplist(inst_ptr[inst].prop_ptr , 0); /* put new props in hash table */
-     /* new symbol bbox after prop changes (may change due to text length) */
-     symbol_bbox(inst, &inst_ptr[inst].x1, &inst_ptr[inst].y1, &inst_ptr[inst].x2, &inst_ptr[inst].y2);
-     bbox(ADD, inst_ptr[inst].x1, inst_ptr[inst].y1, inst_ptr[inst].x2, inst_ptr[inst].y2);
-     /* redraw symbol */
-     bbox(SET,0.0,0.0,0.0,0.0);
-     draw();
-     bbox(END,0.0,0.0,0.0,0.0);
-   }
-
 
  } else if( !strcmp(argv[1],"getprop")) { /* 20171028 */
 
 
-   if(!strcmp(argv[2], "instance") || !strcmp(argv[2], "instance_n")) {
-     int i, found=0;
-     if(argc!=5) {
-       Tcl_AppendResult(interp, "xschem getprop needs 3 additional arguments", NULL);
+   if(!strcmp(argv[2], "instance")) {
+     int i;
+     char *tmp;
+     if(argc!=5 && argc !=4) {
+       Tcl_AppendResult(interp, "xschem getprop needs 2 or 3 additional arguments", NULL);
        return TCL_ERROR;
      }
      Tcl_ResetResult(interp);
-     if(!strcmp(argv[2],"instance_n")) {
-       i=atol(argv[3]);
-       if(i<0 || i>lastinst) {
-         Tcl_AppendResult(interp, "Index out of range", NULL);
-         return TCL_ERROR;
-       }
-       found = 1;
-     } else if(!strcmp(argv[2],"instance")) {
-       for(i=0;i<lastinst;i++) {
-         if(!strcmp(inst_ptr[i].instname, argv[3])) {
-           found=1;
-           break;
-         }
-       }
-     }
-     if(!found) {
-       Tcl_AppendResult(interp, "--> Instance not found", NULL);
+     if( (i = get_instance(argv[3])) < 0 ) {
+       Tcl_AppendResult(interp, "xschem getprop: instance not found", NULL);
        return TCL_ERROR;
-     } else {
-       char *tmp;
-       if(!strcmp(argv[4],"cell__name")) {
-         tmp = inst_ptr[i].name;
-         Tcl_AppendResult(interp, tmp, NULL);
-       } else if(strstr(argv[4], "cell__") ) {
-         tmp = get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, argv[4]+6, 0);
-         if(debug_var>=1) fprintf(errfp, "xschem getprop: looking up instance %d prop cell__|%s| : |%s|\n", i, argv[4]+6, tmp);
-         Tcl_AppendResult(interp, tmp, NULL);
-       } else {
-         Tcl_AppendResult(interp, get_tok_value(inst_ptr[i].prop_ptr, argv[4], 0), NULL);
-       }
      }
-
-
-
+     if(argc == 4) {
+       Tcl_AppendResult(interp, inst_ptr[i].prop_ptr, NULL);
+     } else if(!strcmp(argv[4],"cell__name")) {
+       tmp = inst_ptr[i].name;
+       Tcl_AppendResult(interp, tmp, NULL);
+     } else if(strstr(argv[4], "cell__") ) {
+       tmp = get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, argv[4]+6, 0);
+       if(debug_var>=1) fprintf(errfp, "xschem getprop: looking up instance %d prop cell__|%s| : |%s|\n", i, argv[4]+6, tmp);
+       Tcl_AppendResult(interp, tmp, NULL);
+     } else {
+       Tcl_AppendResult(interp, get_tok_value(inst_ptr[i].prop_ptr, argv[4], 0), NULL);
+     }
    } else if( !strcmp(argv[2],"symbol")) { /* 20171028 */
      int i, found=0;
      if(argc!=5) {
@@ -511,27 +497,48 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
 
 
 
-   } else if(!strcmp(argv[2],"instance_net")) { /* 20171029 */
-     int no_of_pins, i, p, mult;
-     const char *str_ptr;
-     i=atol(argv[3]);
-     if(i<0 || i>lastinst) {
-       Tcl_AppendResult(interp, "Index out of range", NULL);
-       return TCL_ERROR;
-     }
-     prepare_netlist_structs(1);
-     no_of_pins= (inst_ptr[i].ptr+instdef)->rects[PINLAYER];
-     for(p=0;p<no_of_pins;p++) {
-       if(!strcmp( get_tok_value((inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][p].prop_ptr,"name",0), argv[4])) {
-         /*str_ptr =  inst_ptr[i].node[p] ? inst_ptr[i].node[p]: "<UNCONNECTED PIN>"; */
-         str_ptr =  pin_node(i,p,&mult, 0);
-         break;
-       }
-     } /* /20171029 */
-     Tcl_AppendResult(interp, str_ptr, NULL);
    }
+ } else if(!strcmp(argv[1],"pinlist")) { /* 20171029 */
+   int i, p, no_of_pins;
+   if( (i = get_instance(argv[2])) < 0 ) {
+     Tcl_AppendResult(interp, "xschem getprop: instance not found", NULL);
+     return TCL_ERROR;
+   }
+   no_of_pins= (inst_ptr[i].ptr+instdef)->rects[PINLAYER];
+   for(p=0;p<no_of_pins;p++) {
+     char s[10];
+     my_snprintf(s, S(s), "%d", p);
+     if(argc == 4 && argv[3][0]) {
+       Tcl_AppendResult(interp, "{ {", s, "} {",
+         get_tok_value((inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][p].prop_ptr, argv[3], 0),
+         "} } ", NULL);
+     } else {
+       Tcl_AppendResult(interp, "{ {", s, "} {", (inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][p].prop_ptr, "} } ", NULL);
+     }
+     
+   }
+ } else if(!strcmp(argv[1],"instance_net")) { /* 20171029 */
+   int no_of_pins, i, p, mult;
+   const char *str_ptr;
 
-
+   if( (i = get_instance(argv[2])) < 0 ) {
+     Tcl_AppendResult(interp, "xschem getprop: instance not found", NULL);
+     return TCL_ERROR;
+   }
+   prepare_netlist_structs(1);
+   no_of_pins= (inst_ptr[i].ptr+instdef)->rects[PINLAYER];
+   for(p=0;p<no_of_pins;p++) {
+     if(!strcmp( get_tok_value((inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][p].prop_ptr,"name",0), argv[3])) {
+       /*str_ptr =  inst_ptr[i].node[p] ? inst_ptr[i].node[p]: "<UNCONNECTED PIN>"; */
+       str_ptr =  pin_node(i,p,&mult, 0);
+       break;
+     }
+   } /* /20171029 */
+   if(p>=no_of_pins) {
+     Tcl_AppendResult(interp, "Not found", NULL);
+     return TCL_ERROR;
+   } 
+   Tcl_AppendResult(interp, str_ptr, NULL);
  } else if(!strcmp(argv[1],"selected_set")) {
    int n, i;
    char *res = NULL;

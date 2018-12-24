@@ -308,6 +308,9 @@ void merge_file(int selection_load, const char ext[])
       if(fscanf(fd,"%4095s",name1)==EOF) break;
       switch(name1[0])
       {
+       case 'v':
+        load_ascii_string(&xschem_version_string, fd);
+        break;
        case 'V':
         load_ascii_string(&aux_ptr, fd);
         break;
@@ -349,6 +352,8 @@ void merge_file(int selection_load, const char ext[])
         /* if(debug_var>=1) fprintf(errfp, "merge_file(): unknown line, assuming EOF\n"); */
         /* endfile=1; */
         read_line(fd); /* read rest of line and discard */
+        fprintf(errfp, "merge_file(): skipping: %s", read_line(fd)); /* read rest of line and discard */
+
         break;
       }
      }

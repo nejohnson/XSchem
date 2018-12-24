@@ -1,3 +1,4 @@
+v {xschem version=2.8.1 file_version=1.0}
 G {}
 V {}
 S {}
@@ -23,6 +24,7 @@ N 550 -320 650 -320 {lab=G}
 N 550 -260 650 -260 {lab=#net1}
 C {conn_3x1} 150 -360 0 0 {name=C1 embed=true}
 [
+v {xschem version=2.8.1 file_version=1.0}
 G {type=connector
 format="*connector(3,1) @pinlist"
 tedax_format="footprint @name @footprint"
@@ -45,6 +47,7 @@ P 4 5 10 30 -10 30 -10 -30 10 -30 10 30 {}
 ]
 C {vdd} 770 -490 0 0 {name=l6 lab=VCC embed=true}
 [
+v {xschem version=2.8.1 file_version=1.0}
 G {type=label
 global=1
 format="*.alias @lab"
@@ -59,6 +62,7 @@ T {@lab} -12.5 -35 0 0 0.2 0.2 {}
 ]
 C {lab_pin} 860 -300 0 1 {name=p0 lab=VOUT embed=true}
 [
+v {xschem version=2.8.1 file_version=1.0}
 G {type=label
 format="*.alias @lab"
 template="name=l1 sig_type=std_logic lab=xxx"}
@@ -70,6 +74,7 @@ T {@lab} -7.5 -7.5 0 1 0.36 0.33 {}
 ]
 C {lab_wire} 660 -360 0 0 {name=l9 lab=G embed=true}
 [
+v {xschem version=2.8.1 file_version=1.0}
 G {type=label
 format="*.alias @lab"
 template="name=l1 sig_type=std_logic lab=xxx"}
@@ -82,6 +87,7 @@ T {@lab} -3.75 -18.75 0 1 0.33 0.27 {}
 C {res} 770 -190 0 0 {name=Rload m=1 value=100 footprint=1206 device=resistor
 tedax_ignore=true embed=true}
 [
+v {xschem version=2.8.1 file_version=1.0}
 G {type=resistor
 format="@name @pinlist @value m=@m"
 verilog_format="tran @name ( @#0 , @#1 ) ;"
@@ -115,6 +121,7 @@ T {@#1:pinnumber} -5 20 0 1 0.12 0.12 {}
 ]
 C {gnd} 770 -130 0 0 {name=l10 lab=VSS embed=true}
 [
+v {xschem version=2.8.1 file_version=1.0}
 G {type=label
 global=1
 format="*.alias @lab"
@@ -144,6 +151,7 @@ vvss vss 0 dc 0
 .save all
 " embed=true}
 [
+v {xschem version=2.8.1 file_version=1.0}
 G {type=netlist_commands
 template="name=s1 only_toplevel=false value=blabla"
 tedax_ignore=true
@@ -175,6 +183,7 @@ T {@name} 15 -25 0 0 0.3 0.3 {}
 C {pnp} 580 -390 0 0 {name=Q6 model=BC857 device=BC857 area=1 footprint=SOT23
 url="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&cad=rja&uact=8&ved=2ahUKEwijlfagu4zfAhUN0xoKHTPBAb0QFjAAegQIAhAC&url=http%3A%2F%2Fwww.onsemi.com%2Fpub%2FCollateral%2FPN2907-D.PDF&usg=AOvVaw2wgr87fGZgGfBRhXzHGwZM" embed=true}
 [
+v {xschem version=2.8.1 file_version=1.0}
 G {type=pnp
 format="@name @pinlist @model area=@area"
 tedax_format="footprint @name @footprint
@@ -199,6 +208,7 @@ P 4 4 0 -10 15 -15 5 -25 0 -10 {fill=true}
 ]
 C {zener} 330 -190 2 0 {name=x3 model=BZX5V1 device=BZX5V1 area=1 footprint=acy(300) embed=true}
 [
+v {xschem version=2.8.1 file_version=1.0}
 G {type=diode
 format="@name @pinlist @model"
 tedax_format="footprint @name @footprint
@@ -231,6 +241,7 @@ C {res} 330 -340 0 0 {name=R2 m=1 value=510 footprint=1206 device=resistor embed
 C {pmos} 750 -360 0 0 {name=M2 m=1 model=IRLML6402 device=IRLML6402 footprint=SOT23
 url="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&ved=2ahUKEwjs8pzxuozfAhWpz4UKHR4CDnMQFjAAegQIAhAC&url=https%3A%2F%2Fwww.infineon.com%2Fdgdl%2Firlml6402.pdf%3FfileId%3D5546d462533600a401535668c9822638&usg=AOvVaw21fCRax-ssVpLqDeGK8KiC" embed=true}
 [
+v {xschem version=2.8.1 file_version=1.0}
 G {type=pmos
 format="x@name @pinlist @model m=@m"
 tedax_format="footprint @name @footprint
@@ -260,6 +271,7 @@ T {@#1:pinnumber} -20 6.25 0 1 0.12 0.12 {}
 ]
 C {led} 650 -290 0 0 {name=x1 model=D1N5765 device=D1N5765 area=1 footprint=acy(300) embed=true}
 [
+v {xschem version=2.8.1 file_version=1.0}
 G {type=diode
 format="@name @pinlist @model"
 tedax_format="footprint @name @footprint
@@ -287,6 +299,7 @@ P 4 4 -0 5 -10 -5 10 -5 -0 5 {fill=true}
 ]
 C {title} 160 -30 0 0 {name=l2 author="Stefan" embed=true}
 [
+v {xschem version=2.8.1 file_version=1.0}
 G {type=logo
 template="name=l1 author=\\"Stefan Schippers\\""
 verilog_ignore=true

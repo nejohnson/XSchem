@@ -1,3 +1,4 @@
+v {xschem version=2.8.2_RC1 file_version=1.0}
 G {type=npn
 format="@name @pinlist  @model area=@area"
 template="name=Q1 model=T11 area=1"}

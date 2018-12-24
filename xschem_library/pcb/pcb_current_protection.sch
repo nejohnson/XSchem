@@ -1,3 +1,4 @@
+v {xschem version=2.8.2_RC1 file_version=1.0}
 G {}
 V {}
 S {}
@@ -1244,12 +1245,17 @@ C {ammeter} 950 -550 0 0 {name=vmeasure}
 C {lab_wire} 890 -270 0 0 {name=l12 lab=G}
 C {lab_pin} 950 -320 0 0 {name=p3 lab=D}
 C {res} 690 -270 1 0 {name=R2 m=1 value=20k footprint=1206}
-C {npn} 720 -150 0 0 {name=Q1 model=q2n2222 area=1}
+C {npn} 720 -150 0 0 {name=Q1 model=q2n2222 area=1
+url="http://html.alldatasheet.com/html-pdf/17919/PHILIPS/MMBT2222/499/2/MMBT2222.html"
+pinnumber_1=2
+pinnumber_2=1}
 C {gnd} 740 -120 0 0 {name=l16 lab=VSS}
 C {lab_pin} 590 -150 0 0 {name=p4 lab=RST}
 C {res} 650 -150 1 0 {name=R6 m=1 value=20k footprint=1206}
 C {lab_pin} 90 -240 0 1 {name=p5 lab=RST}
-C {npn} 790 -200 0 0 {name=Q2 model=q2n2222 area=1}
+C {npn} 790 -200 0 0 {name=Q2 model=q2n2222 area=1
+url="http://html.alldatasheet.com/html-pdf/17919/PHILIPS/MMBT2222/499/2/MMBT2222.html"
+}
 C {gnd} 810 -170 0 0 {name=l11 lab=VSS}
 C {res} 810 -280 2 0 {name=R1 m=1 value=20k footprint=1206}
 C {vdd} 810 -310 0 0 {name=l13 lab=VCC}

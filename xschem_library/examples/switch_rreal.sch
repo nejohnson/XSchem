@@ -1,3 +1,4 @@
+v {xschem version=2.8.2_RC1 file_version=1.0}
 G {
 
 -- process
@@ -78,17 +79,18 @@ elsif SCHEDULE'transaction'event  and SCHEDULE=1 then -- A event
   B <= bb ;
 end if; -- now = 0
 end process;
-} 
-V {} 
-S {} 
+}
+V {}
+S {}
+E {}
 C {use} 0 -310 0 0 {    library ieee,work;
     use ieee.std_logic_1164.all;
     use work.rrreal.all;
     use std.textio.all;
-} 
-C {ipin} 80 -120 0 0 {name=p3 lab=ENAB} 
-C {iopin} 170 -40 0 0 {name=p1 lab=B sig_type=rreal} 
-C {iopin} 40 -40 0 1 {name=p2 lab=A sig_type=rreal} 
+}
+C {ipin} 80 -120 0 0 {name=p3 lab=ENAB}
+C {iopin} 170 -40 0 0 {name=p1 lab=B sig_type=rreal}
+C {iopin} 40 -40 0 1 {name=p2 lab=A sig_type=rreal}
 C {arch_declarations} 20 -190 0 0 {
 
 signal SCHEDULE : integer ;
@@ -100,4 +102,4 @@ begin
   print("       " & x'SIMPLE_NAME & ".cap=" & real'image(x.cap) & " t= " & time'image(now));
   print("       " & x'SIMPLE_NAME & ".conduct=" & real'image(x.conduct) & " t= " & time'image(now));
 end print2;
-} 
+}

@@ -1,3 +1,4 @@
+v {xschem version=2.8.2_RC1 file_version=1.0}
 G {type=use
 template="
     library ieee;
@@ -5,7 +6,10 @@ template="
     use ieee.std_logic_arith.all;
     use ieee.std_logic_unsigned.all;
 
-"} 
-L 4 -0 -10 355 -10 {} 
-T {VHDL USE} 5 -25 0 0 0.3 0.3 {} 
-T {@prop_ptr} 45 5 0 0 0.2 0.2 {} 
+"}
+V {}
+S {}
+E {}
+L 4 -0 -10 355 -10 {}
+T {VHDL USE} 5 -25 0 0 0.3 0.3 {}
+T {@prop_ptr} 45 5 0 0 0.2 0.2 {}

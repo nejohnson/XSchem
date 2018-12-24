@@ -22,7 +22,8 @@
 
 #ifndef CADGLOBALS
 #define CADGLOBALS
-#define XSCHEM_VERSION "2.8.1"
+#define XSCHEM_VERSION "2.8.2_RC1"
+#define XSCHEM_FILE_VERSION "1.0"
 
 #if HAS_PIPE == 1
 /* fdopen() */
@@ -513,6 +514,7 @@ extern int currentsch;
 extern char *schtedaxprop; 
 extern char *schprop; 
 extern char *schvhdlprop; 
+extern char *xschem_version_string; 
 extern char *schverilogprop; 
 extern int max_texts;
 extern int max_wires;

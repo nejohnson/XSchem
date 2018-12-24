@@ -151,6 +151,7 @@ void save_embedded_symbol(Instdef *s, FILE *fd, int brackets)
   int c, i, j;
   
   if(brackets) fprintf(fd, "[\n");
+  fprintf(fd, "v {xschem version=%s file_version=%s}\n", XSCHEM_VERSION, XSCHEM_FILE_VERSION);
   fprintf(fd, "G ");
   save_ascii_string(s->prop_ptr,fd);
   fputc('\n' ,fd);
@@ -350,7 +351,7 @@ void save_line(FILE *fd)
 
 void write_xschem_file(FILE *fd, int type)
 {
-
+  fprintf(fd, "v {xschem version=%s file_version=%s}\n", XSCHEM_VERSION, XSCHEM_FILE_VERSION);
   if(type==SYMBOL) {
     fprintf(fd, "G ");
     /* 20171025 for symbol only put G {} field and look for format or type props in the 3 global prop strings. */
@@ -621,6 +622,9 @@ void read_xschem_file(FILE *fd) /* 20180912 */
     if(fscanf(fd," %c",c)==EOF) break;
     switch(c[0])
     {
+     case 'v':
+      load_ascii_string(&xschem_version_string, fd);
+      break;
      case 'E':
       load_ascii_string(&schtedaxprop,fd); /*20100217 */
       break;
@@ -680,7 +684,7 @@ void read_xschem_file(FILE *fd) /* 20180912 */
      default:
       /*if(debug_var>=2) fprintf(errfp, "read_xschem_file(): end file reached\n"); */
       /*endfile=1; */
-      read_line(fd); /* read rest of line and discard */
+      fprintf(errfp, "read_xschem_file(): skipping: %s", read_line(fd)); /* read rest of line and discard */
       break;
     }
   }
@@ -890,9 +894,8 @@ void load_schematic(int load_symbols, const char *abs_name, int reset_undo) /* 2
 
     my_strncpy(name, abs_sym_path(abs_name, ".sch"), S(name));
     my_strncpy(schematic[currentsch], rel_sym_path(name), S(schematic[currentsch]));
-    clear_drawing();
   
-    if(debug_var>=1) fprintf(errfp, "load_schematic(): opening file for loading:%s\n",name);
+    if(debug_var>=1) fprintf(errfp, "load_schematic(): opening file for loading:%s, abs_name=%s\n", name, abs_name);
   
     if(!name[0]) return;
     if( (fd=fopen(name,"r"))== NULL) {
@@ -901,7 +904,9 @@ void load_schematic(int load_symbols, const char *abs_name, int reset_undo) /* 2
       /* my_snprintf(msg, S(msg), "tk_messageBox -type ok -message {Unable to open file: %s}", abs_name ? abs_name: "(null)");*/
       my_snprintf(msg, S(msg), "alert_ {Unable to open file: %s}", abs_name ? abs_name: "(null)");
       tcleval(msg);
+      clear_drawing();
     } else {
+      clear_drawing();
       my_snprintf(msg, S(msg), "set current_dirname [file dirname %s]", name);
       tcleval(msg);
       if(debug_var>=1) fprintf(errfp, "load_schematic(): reading file: %s\n", name);
@@ -1174,6 +1179,9 @@ int load_symbol_definition(char *name, FILE *embed_fd)
     if(fscanf(fd," %c",aux_str)==EOF) break;
     switch(aux_str[0])
     {
+     case 'v':
+      load_ascii_string(&aux_ptr, fd);
+      break;
      case 'E':
       load_ascii_string(&aux_ptr,fd);
       break;
@@ -1321,7 +1329,7 @@ int load_symbol_definition(char *name, FILE *embed_fd)
      default:
       /* if(debug_var>=1) fprintf(errfp, "load_symbol_definition(): unknown line, assuming EOF\n"); */
       /* endfile=1; */
-      read_line(fd); /* read rest of line and discard */
+      fprintf(errfp, "load_symbol_definition(): skipping: %s", read_line(fd)); /* read rest of line and discard */
       break;
     }
    }
@@ -1462,6 +1470,7 @@ void create_sch_from_sym(void)
       tcleval("alert_ {file opening for write failed!} {}"); /* 20171020 */
       return;
     }
+    fprintf(fd, "v {xschem version=%s file_version=%s}\n", XSCHEM_VERSION, XSCHEM_FILE_VERSION);
     fprintf(fd, "G {}");
     fputc('\n', fd);
     fprintf(fd, "V {}");
@@ -1691,6 +1700,7 @@ void save_selection(int what)
     tcleval("alert_ {file opening for write failed!} {}"); /* 20171020 */
     return;
  }
+ fprintf(fd, "v {xschem version=%s file_version=%s}\n", XSCHEM_VERSION, XSCHEM_FILE_VERSION);
  fprintf(fd, "G { %.16g %.16g }\n", mousex_snap, mousey_snap);
  for(i=0;i<lastselected;i++)
  {

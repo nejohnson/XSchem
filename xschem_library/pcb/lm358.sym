@@ -1,3 +1,4 @@
+v {xschem version=2.8.1 file_version=1.0}
 G {type=opamp
 format="X@name @#0 @#1 @VCC @VNN @#2 @model"
 tedax_format="footprint @name @footprint

@@ -216,6 +216,7 @@ int currentsch = 0;
 char *schprop=NULL;  /* spice */
 char *schtedaxprop=NULL;  /* tEDAx */
 char *schvhdlprop=NULL; /* vhdl and symbol property string */
+char *xschem_version_string=NULL; /* vhdl and symbol property string */
 char *schverilogprop=NULL;/* verilog */
 int show_erc=1;
 int hilight_nets=0;

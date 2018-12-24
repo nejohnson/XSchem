@@ -1219,7 +1219,8 @@ void print_tedax_element(FILE *fd, int inst)
 
 
  my_strdup(489, &extra, get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"extra",2));
- my_strdup(490, &extra_pinnumber, get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"extra_pinnumber",2));
+ my_strdup(41, &extra_pinnumber, get_tok_value(inst_ptr[inst].prop_ptr,"extra_pinnumber",2));
+ if(!extra_pinnumber) my_strdup(490, &extra_pinnumber, get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"extra_pinnumber",2));
  my_strdup(491, &template,
      (inst_ptr[inst].ptr+instdef)->templ); /* 20150409 */
  my_strdup(492, &numslots, get_tok_value(inst_ptr[inst].prop_ptr,"numslots",2));
@@ -1237,23 +1238,15 @@ void print_tedax_element(FILE *fd, int inst)
 
  fprintf(fd, "begin_inst %s numslots %s\n", name, numslots);
  for(i=0;i<no_of_pins; i++) {
-   /*
-    * char *ss; 
-    * int slot;
-    * char *pinnumber_ptr;
-   */
+   char pnumber[100];
+   my_snprintf(pnumber, S(pnumber), "pinnumber_%d", i);
    my_strdup(498, &pinname, get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"name",0));
    if(!pinname) my_strdup(499, &pinnumber, "--UNDEF--");
-   else
-     my_strdup(500, &pinnumber, get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"pinnumber",0));
+   else {
+     my_strdup(40, &pinnumber, get_tok_value(inst_ptr[inst].prop_ptr, pnumber, 0));
+     if(!pinnumber) my_strdup(500, &pinnumber, get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"pinnumber",0));
+   }
    if(!pinnumber) my_strdup(501, &pinnumber, "--UNDEF--");
-   /*
-    * pinnumber_ptr = pinnumber;
-    * if( (ss=strchr(name, ':')) ) {
-    *   sscanf(ss+1, "%d", &slot);
-    *   pinnumber_ptr = find_nth(pinnumber_ptr, ':', slot);
-    * }
-   */
    fprintf(fd, "conn %s %s %s %s %d\n", name, pin_node(inst,i, &mult, 0), pinname, pinnumber, i+1);
  }
 
@@ -1304,7 +1297,7 @@ void print_tedax_element(FILE *fd, int inst)
     sizetok+=CADCHUNKALLOC;
     my_realloc(502, &token,sizetok);
    }
- 
+  
    if(state==XTOKEN) {
      if(c!='\\' || escape) token[token_pos++]=c; /* 20171029 remove escaping backslashes */
    }
@@ -1367,12 +1360,15 @@ void print_tedax_element(FILE *fd, int inst)
 
         int n;
         char *subtok = my_malloc(503, sizetok * sizeof(char));
+        char *subtok2 = my_malloc(42, sizetok * sizeof(char)+20);
         subtok[0]='\0';
         n=-1;
         sscanf(token+2, "%d:%s", &n, subtok);
         if(n!=-1 && subtok[0]) {
-          value = get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr,subtok,0);
-          if(value[0] != 0) {
+          my_snprintf(subtok2, sizetok * sizeof(char)+20, "%s_%d", subtok, n);
+          value = get_tok_value(inst_ptr[inst].prop_ptr,subtok2,0);
+          if(!value[0]) value = get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr,subtok,0);
+          if(value[0]) {
             char *ss;
             int slot;
             if( (ss=strchr(inst_ptr[inst].instname, ':')) ) {
@@ -1383,6 +1379,7 @@ void print_tedax_element(FILE *fd, int inst)
           }
         }
         my_free(&subtok);
+        my_free(&subtok2);
       } else {
         /* reference by pin number instead of pin name, allows faster lookup of the attached net name 20180911 */
         /* @#n --> return net name attached to pin of index 'n' */
@@ -2050,12 +2047,15 @@ char *translate(int inst, char* s)
    } else if(token[0]=='@' && token[1]=='#') {  /* 20180911 */
      int n; 
      char *subtok = my_malloc(532, sizetok * sizeof(char));
+     char *subtok2 = my_malloc(43, sizetok * sizeof(char)+20);
 
      subtok[0]='\0';
      n=-1;
      sscanf(token+2, "%d:%s", &n, subtok);
      if(n!=-1 && subtok[0]) {
-       value = get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr,subtok,0);
+       my_snprintf(subtok2, sizetok * sizeof(char)+20, "%s_%d", subtok, n);
+       value = get_tok_value(inst_ptr[inst].prop_ptr,subtok2,0);
+       if(!value[0]) value = get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr,subtok,0);
        if(value[0] != 0) {
          char *ss;
          int slot;
@@ -2073,6 +2073,7 @@ char *translate(int inst, char* s)
        }
      }
      my_free(&subtok);
+     my_free(&subtok2);
    } else if(strcmp(token,"@sch_last_modified")==0) {
 
     my_strncpy(file_name, abs_sym_path(inst_ptr[inst].name, ".sch"), S(file_name));

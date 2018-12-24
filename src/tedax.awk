@@ -75,7 +75,7 @@ $1=="device"||$1=="footprint"{
   pin_name = $4
   net_name=$3
   slotted=nn>1? 1:0
-  # even for unsed slots initialize the arr[] array.
+  # even for unused slots initialize the arr[] array.
   # conn lines need not to be printed but pinslot and pinidx lines do.
   for(i=1; i<=numslots;i++) {
     curr_pin = (nn>1) ? pinlist_arr[i]: pinlist_arr[1]

@@ -1,3 +1,4 @@
+v {xschem version=2.8.1 file_version=1.0}
 G {type=pmos
 format="x@name @pinlist @model m=@m"
 tedax_format="footprint @name @footprint

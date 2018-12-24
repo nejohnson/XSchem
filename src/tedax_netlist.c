@@ -111,110 +111,94 @@ void global_tedax_netlist(int global)  /* netlister driver */
 
 void tedax_block_netlist(FILE *fd, int i)  /*20081223 */
 {
- int j;
- int tedax_stop=0; /* 20111113 */
- char netl[PATH_MAX];
- char netl2[PATH_MAX];  /* 20081202 */
- char netl3[PATH_MAX];  /* 20081202 */
- const char *str_tmp;
- int mult;
- static char *extra=NULL;
-
-     /* 20111113 */
-     if(!strcmp( get_tok_value(instdef[i].prop_ptr,"tedax_stop",0),"true") )
-        tedax_stop=1;
-     else
-        tedax_stop=0;
-
-     fprintf(fd, "\n* expanding   symbol:  %s # of pins=%d\n\n", 
-           instdef[i].name,instdef[i].rects[PINLAYER] );
-  
-     fprintf(fd, ".subckt %s ",skip_dir(instdef[i].name));
-     for(j=0;j<instdef[i].rects[PINLAYER];j++)
-     {
-       str_tmp=
-         expandlabel(get_tok_value(instdef[i].boxptr[PINLAYER][j].prop_ptr,"name",0), &mult);
-       if(str_tmp)
-         fprintf(fd,"%s ",str_tmp);
-       else 
-         fprintf(fd,"<NULL> ");
-     }
-     my_strdup(420, &extra, get_tok_value(instdef[i].prop_ptr,"extra",0) ); /* 20081206 */
-     fprintf(fd, "%s ", extra ? extra : "" );
-     
-     /* 20081206 new get_sym_template does not return token=value pairs where token listed in extra */
-     fprintf(fd, "%s", get_sym_template(instdef[i].templ, extra)); /* 20150409 */
-     fprintf(fd, "\n");
-  
-     /*clear_drawing(); */
-     load_schematic(1,instdef[i].name,0);
-     tedax_netlist(fd, tedax_stop);  /* 20111113 added tedax_stop */
-     netlist_count++;
-
-     /* 20100217 */
-     fprintf(fd,"**** begin user architecture code\n");
-     if(schprop && schprop[0]) fprintf(fd, "%s\n", schprop);
-     fprintf(fd,"**** end user architecture code\n");
-     /* /20100217 */
-
-     fprintf(fd, ".ends\n\n");
-     if(split_files) { /* 20081204 */
-       fclose(fd);
-       my_snprintf(netl2, S(netl2), "netlist {%s} noshow {%s.tdx}", netl3, netl3);
-       tcleval(netl2);
-       if(debug_var==0) unlink(netl);
-     }
-
+  int j;
+  int tedax_stop=0; /* 20111113 */
+  char netl[PATH_MAX];
+  char netl2[PATH_MAX];  /* 20081202 */
+  char netl3[PATH_MAX];  /* 20081202 */
+  const char *str_tmp;
+  int mult;
+  static char *extra=NULL;
+  if(!strcmp( get_tok_value(instdef[i].prop_ptr,"tedax_stop",0),"true") )
+     tedax_stop=1;
+  else
+     tedax_stop=0;
+  fprintf(fd, "\n* expanding   symbol:  %s # of pins=%d\n\n", 
+        instdef[i].name,instdef[i].rects[PINLAYER] );
+  fprintf(fd, ".subckt %s ",skip_dir(instdef[i].name));
+  for(j=0;j<instdef[i].rects[PINLAYER];j++)
+  {
+    str_tmp=
+      expandlabel(get_tok_value(instdef[i].boxptr[PINLAYER][j].prop_ptr,"name",0), &mult);
+    if(str_tmp)
+      fprintf(fd,"%s ",str_tmp);
+    else 
+      fprintf(fd,"<NULL> ");
+  }
+  my_strdup(420, &extra, get_tok_value(instdef[i].prop_ptr,"extra",0) ); /* 20081206 */
+  fprintf(fd, "%s ", extra ? extra : "" );
+  /* 20081206 new get_sym_template does not return token=value pairs where token listed in extra */
+  fprintf(fd, "%s", get_sym_template(instdef[i].templ, extra)); /* 20150409 */
+  fprintf(fd, "\n");
+  /*clear_drawing(); */
+  load_schematic(1,instdef[i].name,0);
+  tedax_netlist(fd, tedax_stop);  /* 20111113 added tedax_stop */
+  netlist_count++;
+  fprintf(fd,"**** begin user architecture code\n");
+  if(schprop && schprop[0]) fprintf(fd, "%s\n", schprop);
+  fprintf(fd,"**** end user architecture code\n");
+  fprintf(fd, ".ends\n\n");
+  if(split_files) { /* 20081204 */
+    fclose(fd);
+    my_snprintf(netl2, S(netl2), "netlist {%s} noshow {%s.tdx}", netl3, netl3);
+    tcleval(netl2);
+    if(debug_var==0) unlink(netl);
+  }
 }
 
 void tedax_netlist(FILE *fd, int tedax_stop )
 {
- int i;
- static char *type=NULL;
- static char *place=NULL;  /* 20121223 */
-
- prepare_netlist_structs(0);
- set_modify(1); /* 20160302 prepare_netlist_structs could change schematic (wire node naming for example) */
- traverse_node_hash();  /* print all warnings about unconnected floatings etc */
-
-
- if(!tedax_stop) {  /* 20111113 */
-   for(i=0;i<lastinst;i++) /* print first ipin/opin defs ... */
-   {
-    if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"tedax_ignore",0),"true")==0 ) continue; /* 20140416 */
-    if(inst_ptr[i].ptr<0) continue;
-    if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "tedax_ignore",0 ), "true") ) {
-      continue;
-    }
-    my_strdup(421, &type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
-    my_strdup(422, &place,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"place",0));  /* 20121223 */
-    if( type && (/*strcmp(type,"label") && */ strcmp(type,"ipin")&&strcmp(type,"opin")&&strcmp(type,"iopin") )==0)
+  int i;
+  static char *type=NULL;
+  static char *place=NULL;  /* 20121223 */
+ 
+  prepare_netlist_structs(0);
+  set_modify(1); /* 20160302 prepare_netlist_structs could change schematic (wire node naming for example) */
+  traverse_node_hash();  /* print all warnings about unconnected floatings etc */
+  if(!tedax_stop) {
+    for(i=0;i<lastinst;i++) /* print first ipin/opin defs ... */
     {
-      print_tedax_element(fd, i) ;  /* this is the element line  */
+     if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"tedax_ignore",0),"true")==0 ) continue; /* 20140416 */
+     if(inst_ptr[i].ptr<0) continue;
+     if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "tedax_ignore",0 ), "true") ) {
+       continue;
+     }
+     my_strdup(421, &type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
+     my_strdup(422, &place,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"place",0));  /* 20121223 */
+     if( type && (/*strcmp(type,"label") && */ strcmp(type,"ipin")&&strcmp(type,"opin")&&strcmp(type,"iopin") )==0)
+     {
+       print_tedax_element(fd, i) ;  /* this is the element line  */
+     }
     }
-   }
-  
-   for(i=0;i<lastinst;i++) /* ... then print other lines */
-   {
-    if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"tedax_ignore",0),"true")==0 ) continue; /* 20140416 */
-    if(inst_ptr[i].ptr<0) continue;
-    if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "tedax_ignore",0 ), "true") ) {/*20070726 */
-      continue;                                                                                   /*20070726 */
-    }                                                                                             /*20070726 */
-  
-    my_strdup(423, &type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
-    my_strdup(424, &place,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"place",0));  /* 20121223 */
-    if( type && (/* strcmp(type,"label")&& */ strcmp(type,"ipin")&& strcmp(type,"opin")&&strcmp(type,"iopin")))
+    for(i=0;i<lastinst;i++) /* ... then print other lines */
     {
-      if(!strcmp(type,"netlist_commands") && netlist_count==0) continue; /* already done in global_tedax_netlist */
-      if(netlist_count && 
-         !strcmp(get_tok_value(inst_ptr[i].prop_ptr, "only_toplevel", 0), "true")) continue; /* 20160418 */
-      print_tedax_element(fd, i) ;  /* this is the element line  */
+     if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"tedax_ignore",0),"true")==0 ) continue; /* 20140416 */
+     if(inst_ptr[i].ptr<0) continue;
+     if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "tedax_ignore",0 ), "true") ) {/*20070726 */
+       continue;                                                                                   /*20070726 */
+     }                                                                                             /*20070726 */
+     my_strdup(423, &type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
+     my_strdup(424, &place,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"place",0));  /* 20121223 */
+     if( type && (/* strcmp(type,"label")&& */ strcmp(type,"ipin")&& strcmp(type,"opin")&&strcmp(type,"iopin")))
+     {
+       if(!strcmp(type,"netlist_commands") && netlist_count==0) continue; /* already done in global_tedax_netlist */
+       if(netlist_count && 
+          !strcmp(get_tok_value(inst_ptr[i].prop_ptr, "only_toplevel", 0), "true")) continue; /* 20160418 */
+       print_tedax_element(fd, i) ;  /* this is the element line  */
+     }
     }
-   }
- }
- if(!netlist_count) draw_hilight_net(1);
-
+  }
+  if(!netlist_count) draw_hilight_net(1);
 }
 
 

@@ -1854,13 +1854,13 @@ proc input_number {txt cmd} {
 
 ## 20161102
 proc launcher {} {
-  global launcher_var launcher_default_program launcher_program 
+  global launcher_var launcher_default_program launcher_program env XSCHEM_SHAREDIR XSCHEM_LIBRARY_PATH
   
-  ## puts ">>> $launcher_program $launcher_var &"
+  ## puts ">>> $launcher_program $launcher_var "
   # 20170413
   if { ![string compare $launcher_program {}] } { set launcher_program $launcher_default_program}
 
-  eval exec  $launcher_program {$launcher_var} &
+  eval exec  [subst $launcher_program] {[subst $launcher_var]} &
 }
 
 
@@ -2262,10 +2262,6 @@ font configure Underline-Font -underline true -size 24
       -command {
          if { $menu_tcl_debug==1 } {xschem debug 1} else { xschem debug 0}
       }
-   .menubar.option.menu add checkbutton -label "Fullscreen" -variable fullscreen \
-      -command {
-         xschem fullscreen
-      }
    .menubar.option.menu add checkbutton -label "Enable stretch" -variable enable_stretch \
       -accelerator Y \
       -command {
@@ -2411,11 +2407,13 @@ font configure Underline-Font -underline true -size 24
      
    }
    .menubar.zoom.menu add command -label "Redraw" -command "xschem redraw" -accelerator Esc
-   .menubar.zoom.menu add command -label "Full" -command "xschem zoom_full" -accelerator F
-
-
-   .menubar.zoom.menu add command -label "In" -command "xschem zoom_in" -accelerator Shift+Z
-   .menubar.zoom.menu add command -label "Out" -command "xschem zoom_out" -accelerator Ctrl+Z
+   .menubar.zoom.menu add checkbutton -label "Fullscreen" -variable fullscreen \
+      -accelerator {Alt+Shift+F} -command {
+         xschem fullscreen
+      }
+   .menubar.zoom.menu add command -label "Zoom Full" -command "xschem zoom_full" -accelerator F
+   .menubar.zoom.menu add command -label "Zoom In" -command "xschem zoom_in" -accelerator Shift+Z
+   .menubar.zoom.menu add command -label "Zoom Out" -command "xschem zoom_out" -accelerator Ctrl+Z
    .menubar.zoom.menu add command -label "Zoom box" -command "xschem zoom_box" -accelerator Z
    .menubar.zoom.menu add command -label "Half Snap Threshold" -accelerator G -command {
           xschem set cadsnap [expr [xschem get cadsnap] / 2.0 ]
@@ -2435,7 +2433,7 @@ font configure Underline-Font -underline true -size 24
    .menubar.zoom.menu add checkbutton -label "View only Probes" -variable only_probes \
           -accelerator {5} \
           -command { xschem only_probes }
-   .menubar.zoom.menu add command -label "Toggle colorscheme"  -accelerator {Shift+C} -command {
+   .menubar.zoom.menu add command -label "Toggle colorscheme"  -accelerator {Shift+O} -command {
            xschem toggle_colorscheme
            xschem change_colors
         }

@@ -49,6 +49,7 @@ int get_instance(const char *s)
          break;
        }
      }
+     if(debug_var>=1) fprintf(errfp, "get_instance(): found=%d, i=%d\n", found, i);
      if(!found) i=atol(s);
      if(i<0 || i>lastinst) {
        Tcl_AppendResult(interp, "Index out of range", NULL);
@@ -138,6 +139,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
  else if(!strcmp(argv[1],"fullscreen"))
  {
    if(debug_var>=1) fprintf(errfp, "scheduler: xschem fullscreen, fullscreen=%d\n", fullscreen);
+   if(fullscreen>=1) fullscreen=2;
    toggle_fullscreen();
  }
 
@@ -387,7 +389,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
    }
    if(!strcmp(argv[2],"instance")) {
      if( (inst = get_instance(argv[3])) < 0 ) {
-       Tcl_AppendResult(interp, "xschem getprop: instance not found", NULL);
+       Tcl_AppendResult(interp, "xschem replace_symbol: instance not found", NULL);
        return TCL_ERROR;
      } else {
        char symbol[PATH_MAX];
@@ -477,8 +479,8 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
      }
    } else if( !strcmp(argv[2],"symbol")) { /* 20171028 */
      int i, found=0;
-     if(argc!=5) {
-       Tcl_AppendResult(interp, "xschem getprop needs 3 additional arguments", NULL);
+     if(argc!=5 && argc !=4) {
+       Tcl_AppendResult(interp, "xschem getprop needs 2 or 3 additional arguments", NULL);
        return TCL_ERROR;
      }
      Tcl_ResetResult(interp);
@@ -492,11 +494,10 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
        Tcl_AppendResult(interp, "Symbol not found", NULL);
        return TCL_ERROR;
      }
-     Tcl_AppendResult(interp, get_tok_value(instdef[i].prop_ptr, argv[4], 0), NULL);
-
-
-
-
+     if(argc == 4) 
+       Tcl_AppendResult(interp, instdef[i].prop_ptr, NULL);
+     else 
+       Tcl_AppendResult(interp, get_tok_value(instdef[i].prop_ptr, argv[4], 0), NULL);
    }
  } else if(!strcmp(argv[1],"pinlist")) { /* 20171029 */
    int i, p, no_of_pins;
@@ -1122,10 +1123,10 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
    char *pins = NULL;
    int p, i, no_of_pins;
    prepare_netlist_structs(1);
-   for(i=0;i<lastinst;i++) {
-     if(!strcmp(inst_ptr[i].instname, argv[2])) {
-       break;
-     }
+
+   if( (i = get_instance(argv[2])) < 0 ) {
+     Tcl_AppendResult(interp, "xschem setprop: instance not found", NULL);
+     return TCL_ERROR;
    }
    no_of_pins= (inst_ptr[i].ptr+instdef)->rects[PINLAYER];
    for(p=0;p<no_of_pins;p++) {

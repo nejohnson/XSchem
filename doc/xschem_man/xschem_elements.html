@@ -25,7 +25,7 @@ p{padding: 15px  30px 10px;}
   <h3> WIRES </H3>
   <p>
    Wires in XSCHEM are the equivalent of copper traces in printed circuit boards or electrical conductors.
-   wires are drawn as lines but the electrical connectivity graph is built by XSCHEM.
+   Wires are drawn as lines but the electrical connectivity graph is built by XSCHEM.
    To draw a wire segment point the mouse somewhere in the drawing window and press the <kbd>'w'</kbd> key. 
    A rubber wire is shown with one end following the mouse. Clicking the left mouse button
    finishes the placement. The following picture shows a set of connected wires. There are many 
@@ -39,7 +39,7 @@ p{padding: 15px  30px 10px;}
   <h3> LINES </h3>
   <p>
    Lines are just segments that are used for drawing. Lines do not have any electrical meaning, in fact
-   when building the circuit netlist lines are completely ignored. XSCHEM uses different layers to draw 
+   when building the circuit netlist, lines are completely ignored. XSCHEM uses different layers to draw 
    lines. Each layer has its own color, allowing to draw with different colors. Lines are placed like
    wires, but using the <kbd>'l'</kbd> key. The 'Layers' menu allows to select various different layers (colors) 
    for the line.
@@ -60,17 +60,17 @@ p{padding: 15px  30px 10px;}
    <ul>
    <li> the last point is coincident to the first point.</li>
    <li>  or by clicking the <kbd>right mouse button</kbd>,  for an open polygon. </li>
-   <li>  or by hitting the <kbd>Return</kbd> key, for a closed polygon. 
+   <li>  or by hitting the <kbd>Return</kbd> key, for a closed polygon
          (this can be done also by clicking the last point coincident to the first polygon point).</li>
    </ul>
   </p>
   <img src="xschem_polygons.png">
   <h3> CIRCLES / ARCS </h3>
   <p> 
-   Arcs may be placed by hitting the <kbd>Shift-C</kbd> key. first click the start point then the end point. 
+   Arcs may be placed by hitting the <kbd>Shift-C</kbd> key. First click the start point, then the end point. 
    Moving the mouse will show the arc passing thru the 2 points and the mouse waypoint. 
    Clicking will place the arc.
-   Arcs may be modified after creation by selecting in stretch mode (<kbd> Ctrl-Button1-drag</kbd>) one of the arc ends
+   Arcs may be modified after creation by selecting in stretch mode (<kbd> Ctrl-Button1-drag </kbd>) one of the arc ends
    or the arc center:<br>
    - (end point selected in stretch mode): by starting a move (<kbd>m</kbd>) 
       operation and moving the mouse the arc sweep may be changed.<br>
@@ -98,7 +98,7 @@ p{padding: 15px  30px 10px;}
   <h3> SYMBOLS </h3>
   <p>
    Symbols are graphical elements that represent electrical components. A symbol represents an electronic
-   device, like for example a resistor a bipolar transistor, an amplifier etc. As you can see graphically 
+   device, like for example a resistor, a bipolar transistor, an amplifier etc. As you can see graphically 
    symbols are built with lines, rectangles, polygons and texts, the graphical primitives shown before.
    In the picture below some components are placed in a schematic window. Components are instances of symbols.
    For example you see three placements of the 'npn' bipolar transistor symbol. 
@@ -139,7 +139,7 @@ generic_pin.sym            nmos4.sym              switch_hsp_pwl.sym
    To place a symbol in the schematic window press the <kbd>'Insert'</kbd> key. A file chooser pops up, 
    go to the xschem design root directory (<kbd>${HOME}/xschem_library</kbd> in the distribution
    by default), descend in one of the xschem design directories (devices for example)
-   and select a symbol (res.sym for example)
+   and select a symbol (res.sym for example).
    The selected symbol will be instantiated as a component in the schematic at the mouse
    pointer coordinates.
   </p>

@@ -279,17 +279,17 @@ void new_window(const char *cell, int symbol)
          freopen("/dev/null","r",stdin);
          freopen("/dev/null","w",stderr);
          if(!cell || !cell[0]) {
-           execl(xschem_executable,xschem_executable,"-r", NULL);
+           execlp(xschem_executable,xschem_executable,"-r", NULL);
          }
          else if(!symbol) {
 
 
            my_strncpy(f, abs_sym_path(cell, ".sch"), S(f));
-           execl(xschem_executable,xschem_executable,"-r",f, NULL);
+           execlp(xschem_executable,xschem_executable,"-r",f, NULL);
          }
          else {
            my_strncpy(f, abs_sym_path(cell, ".sym"), S(f));
-           execl(xschem_executable,xschem_executable,"-r",f, NULL);
+           execlp(xschem_executable,xschem_executable,"-r",f, NULL);
          }
        } else {
          /* error */
@@ -386,8 +386,12 @@ void ask_new_file(void)
      currentsch = 0;
      unselect_all(); /* 20180929 */
      remove_symbols();
-     if(strstr(fullname,".sym")) load_symbol( rel_sym_path(fullname)); /* 20180925.1 */
-     else load_schematic(1, rel_sym_path(fullname),1); /* 20180925.1 */
+     /*
+     if(strstr(fullname,".sym")) load_symbol( rel_sym_path(fullname));
+     else load_schematic(1, rel_sym_path(fullname),1);
+     */
+     if(strstr(fullname,".sym")) load_symbol( fullname); /* 20180925.1 */
+     else load_schematic(1, fullname,1); /* 20180925.1 */
      my_strdup(1, &sch_prefix[currentsch],".");
      zoom_full(1);
     }

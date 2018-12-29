@@ -8,14 +8,13 @@ userconfdir=$(prefix)/.xschem
 
 ## specify user schematic/symbol libraries; 
 ## you may redefine it later in .xschem or xschemrc startup files
-#user_library_dir=$(HOME)/xschem_library
-user_library_dir=.
+user_library_dir=$(HOME)/xschem_library
 
 ## specify system-wide symbol libraries;
 ## you may redefine it later in .xschem or xschemrc startup files
-system_library_dir=${prefix}/share/xschem/xschem_library
+system_library_dir=${sharedir}/xschem_library
 
-xschem_library_path=$(user_library_dir):$(system_library_dir)
+xschem_library_path=.:$(system_library_dir)/devices
 
 OBJ = icon.o callback.o actions.o move.o check.o clip.o draw.o \
       globals.o main.o netlist.o hash_iterator.o in_memory_undo.o \
@@ -124,10 +123,9 @@ install: xschem
 	cp vhdl.awk $(prefix)/share/xschem
 	cp -r ../doc/* $(prefix)/share/doc/xschem/
 	cp ../utile/* $(prefix)/share/xschem/utile
-	cp -ru ../xschem_library/mylib $(user_library_dir)
 	cp -ru ../xschem_library/devices $(system_library_dir)
 	cp -ru ../xschem_library/examples $(user_library_dir)
-	cp -ru ../xschem_library/pcb $(system_library_dir)
+	cp -ru ../xschem_library/pcb $(user_library_dir)
 
 .PHONY: uninstall
 uninstall:

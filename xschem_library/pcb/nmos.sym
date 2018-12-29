@@ -1,9 +1,9 @@
-v {xschem version=2.8.1 file_version=1.0}
+v {xschem version=2.8.2_RC1 file_version=1.0}
 G {type=nmos
 format="X@name @pinlist @model m=@m "
 tedax_format="footprint @name @footprint
 device @name @device"
-template="name=M1 model=M2N7002 device=2N7002 footprint=SO23 device=2N7002 m=1"
+template="name=M1 model=M2N7002 device=2N7002 footprint=SOT23 m=1"
 verilog_format="@symname #@del @name ( @@d , @@s , @@g );"}
 V {}
 S {}

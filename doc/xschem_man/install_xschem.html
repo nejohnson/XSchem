@@ -51,7 +51,7 @@ p{padding: 15px  30px 10px;}
 #### xschem system-wide design library paths
 #### if unset xschem starts with following default:
 #### XSCHEM_LIBRARY_PATH $env(HOME/xschem_library):${XSCHEM_SHAREDIR}/xschem_library
-#### you may overide the default system-wide library here and append in user's .xschem
+#### you may overide the default system-wide library here and append in user's xschemrc
 #### the user's libraries.
 # set XSCHEM_LIBRARY_PATH ${XSCHEM_SHAREDIR}/xschem_library
 
@@ -78,28 +78,27 @@ set initial_geometry {800x600}
   any xschemrc definitions.<br>
  </p>
  <p>
-  When xschem is running, type <kbd>puts $XSCHEM_DESIGN_PATH</kbd> in the xschem tcl prompt to 
+  When xschem is running, type <kbd>puts $XSCHEM_LIBRARY_PATH</kbd> in the xschem tcl prompt to 
   know the library search path.<br>
-  Type <kbd>puts $XSCHEM_HOME_DIR</kbd> to see the installation path.
+  Type <kbd>puts $XSCHEM_SHAREDIR</kbd> to see the installation path.
  </p>
- <img src="install_xschem1.png">
 
  <p>
   Note that the <kbd>xschemrc</kbd> is a TCL file, so use the TCL syntax for setting
   variables and accessing environment variables.
-  The <kbd>XSCHEM_DESIGN_PATH</kbd> contains a list of library directories separated by colons.
+  The <kbd>XSCHEM_LIBRARY_PATH</kbd> contains a list of library directories separated by colons.
   These directories contain all xschem symbols and schematics. Normally you should append
-  <kbd>${XSCHEM_DESIGN_PATH}</kbd> to this list to avoid loosing system-wide definitions contained in 
-  the <kbd>${XSCHEM_HOME_DIR}/xschemrc</kbd> startup file which is read before user's 
-  <kbd>.xschem</kbd> file. All system-wide definitions can be overridden in user's 
-  <kbd>.xschem</kbd> file, which is read after xschemrc.
+  <kbd>${XSCHEM_LIBRARY_PATH}</kbd> to this list to avoid loosing system-wide definitions contained in 
+  the <kbd>${XSCHEM_SHAREDIR}/xschemrc</kbd> startup file which is read before user's 
+  <kbd>xschemrc</kbd> file. All system-wide definitions can be overridden in user's 
+  <kbd>xschemrc</kbd> file, which is read instead of the system xschemrc if existing.
   A sample user design library is provided and installed in the path 
   specified by the <kbd>Makefile</kbd>'s variable <kbd>user_library_prefix</kbd>, you can use it 
   as a starting point.<br>
   XSCHEM installation creates also a sample system-wide symbol library by default at: 
   <kbd>${prefix}/share/xschem/xschem_library</kbd>, where <kbd>prefix</kbd> is specified in the <kbd>Makefile</kbd>.<br>
   The XSCHEM_START_WINDOW specifies a schematic to preload at startup, to avoid absolute paths use a path that
-  is relative to one of the <kbd>XSCHEM_DESIGN_PATH</kbd> directories. XSCHEM will figure out the actual location.
+  is relative to one of the <kbd>XSCHEM_LIBRARY_PATH</kbd> directories. XSCHEM will figure out the actual location.
   You may comment the definition if you don't want any schematic on startup.
   
   

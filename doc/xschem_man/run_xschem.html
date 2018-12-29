@@ -31,6 +31,13 @@ user:~$ xschem
  </p>
  <img src="xschem_home.png"> 
 
+ <p> if a filename is given that file will be loaded on startup: </p>
+ <pre class="code">
+user:~$ xschem ../xschem_library/examples/0_examples_top.sch
+ </pre>
+ <img src="xschem_home1.png">
+
+
 
  <h3>XSCHEM COMMAND LINE OPTIONS </H3>
  <p>
@@ -59,7 +66,7 @@ Options:
                       necessary if stdin and stdout are to be redirected
                       for example to /dev/null).
   -c  --color_ps      set color postscript
-  --rcfile file&gt;      use &lt;file&gt; as a rc file for startup instead of the
+  --rcfile &lt;file&gt;     use &lt;file&gt; as a rc file for startup instead of the
                       default xschemrc.
   -p  --postscript    export pdf schematic
       --png           export png schematic

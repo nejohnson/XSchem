@@ -1,3 +1,4 @@
+v {xschem version=2.8.2_RC1 file_version=1.0}
 G {}
 V {}
 S {}
@@ -56,7 +57,7 @@ C {res} 330 -340 0 0 {name=R2 m=1 value=510 footprint=1206 device=resistor}
 C {pmos} 750 -360 0 0 {name=M2 m=1 model=IRLML6402 device=IRLML6402 footprint=SOT23
 url="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&ved=2ahUKEwjs8pzxuozfAhWpz4UKHR4CDnMQFjAAegQIAhAC&url=https%3A%2F%2Fwww.infineon.com%2Fdgdl%2Firlml6402.pdf%3FfileId%3D5546d462533600a401535668c9822638&usg=AOvVaw21fCRax-ssVpLqDeGK8KiC"}
 C {led} 650 -290 0 0 {name=x1 model=D1N5765 device=D1N5765 area=1 footprint=acy(300)}
-C {title} 160 -30 0 0 {name=l2 author="Stefan"}
+C {title} 160 -30 0 0 {name=l2 author="Igor2"}
 C {lab_pin} 170 -340 0 1 {name=p6 lab=VOUT}
 C {lab_pin} 170 -360 0 1 {name=p7 lab=VSS}
 C {lab_pin} 170 -380 0 1 {name=p8 lab=VCC}

@@ -18,15 +18,7 @@ P 1 10 930 -370 920 -430 1000 -410 960 -390 990 -360 970 -360 960 -340 940 -380 
 P 4 6 880 -350 880 -440 870 -390 870 -430 860 -400 860 -370 {}
 P 15 11 920 -400 930 -440 950 -410 960 -430 970 -400 990 -410 970 -370 940 -380 910 -360 890 -410 920 -400 {fill=true}
 T {Welcome to XSCHEM!} 110 -990 0 0 1 1 {layer=5}
-T {This is the start schematic window specified in your .xschem file. 
-You may change this to any different schematic file or even start
-with an empty window. Just set the XSCHEM_START_WINDOW variable: 
-
-- set XSCHEM_START_WINDOW \{mylib/0_top\}
-
-or, if you want to start with an empty window: 
-
-- set XSCHEM_START_WINDOW \{\}
+T {This is a test schematic window 
 
 On the left you see some sample circuits. You may descend into any
 of these by selecting one with a left mouse button click and

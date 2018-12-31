@@ -1235,8 +1235,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='~' && state & ControlMask)    /* testmode:  for performance testing */
    {
-    fprintf(errfp, "%s\n", get_tok_value(xschem_version_string, "file_version", 0));
-    fprintf(errfp, "%s\n", get_tok_value(xschem_version_string, "version", 0));
+    *(int *)0 = 3;
     break;
    }
    if(key=='#' && !(state&ControlMask))         /* testmode */

@@ -282,6 +282,7 @@ void xwin_exit(void)
  
  delete_undo(); /* 20150327 */
  my_free(&netlist_dir);
+ my_free(&xschem_executable);
  record_global_node(2, NULL, NULL); /* delete global node array */
  if(debug_var>=1) fprintf(errfp, "xwin_exit(): deleted undo buffer\n");
  if(errfp!=stderr) fclose(errfp);
@@ -734,8 +735,10 @@ int Tcl_AppInit(Tcl_Interp *inter)
 
  Tcl_CreateExitHandler(tclexit, 0);
 
+ my_snprintf(tmp, S(tmp),"regsub -all {~} {.:%s} {%s}", XSCHEM_LIBRARY_PATH, home_dir);
+ tcleval(tmp);
+ tclsetvar("XSCHEM_LIBRARY_PATH", Tcl_GetStringResult(interp));
  
- tclsetvar("XSCHEM_LIBRARY_PATH", ""); /* avoid errors if uninitialized and used in .xschem */
  if( !stat("./xschem.tcl", &buf)) {
    tclsetvar("XSCHEM_SHAREDIR",pwd_dir); /* for testing xschem builds in src dir*/
    my_snprintf(tmp, S(tmp), "subst .:[file normalize %s/../xschem_library/devices]", pwd_dir);
@@ -786,6 +789,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
 
  /* create USER_CONF_DIR if it was not installed */
  my_snprintf(tmp, S(tmp),"regsub {^~} {%s} {%s}", USER_CONF_DIR, home_dir);
+ tclsetvar("USER_CONF_DIR",USER_CONF_DIR);
  tcleval(tmp);
  if(stat(Tcl_GetStringResult(interp), &buf)) {
    if(!mkdir(Tcl_GetStringResult(interp), 0700)) {
@@ -825,13 +829,6 @@ int Tcl_AppInit(Tcl_Interp *inter)
  /*  END LOOKING FOR xschem.tcl */
  /* */
 
- if( !tclgetvar("XSCHEM_LIBRARY_PATH")  || !tclgetvar("XSCHEM_LIBRARY_PATH")[0]) {
-
-   my_snprintf(tmp, S(tmp),"regsub -all {~} {%s} {%s}", XSCHEM_LIBRARY_PATH, home_dir);
-   tcleval(tmp);
-   tclsetvar("XSCHEM_LIBRARY_PATH", Tcl_GetStringResult(interp));
- }
-
  if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): XSCHEM_SHAREDIR=%s  XSCHEM_LIBRARY_PATH=%s\n",
        tclgetvar("XSCHEM_SHAREDIR"), 
        tclgetvar("XSCHEM_LIBRARY_PATH") ? tclgetvar("XSCHEM_LIBRARY_PATH") : "NULL"
@@ -870,6 +867,10 @@ int Tcl_AppInit(Tcl_Interp *inter)
  /* */
  /*  END EXECUTE xschem.tcl */
  /* */
+
+ /* resolve absolute pathname of xschem (argv[0]) for future usage */
+ my_strdup(44, &xschem_executable, get_file_path(xschem_executable));
+ if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): resolved xschem_executable=%s\n", xschem_executable);
 
  /* READ COLORS */
  my_snprintf(tmp, S(tmp),"regsub {^~} {%s} {%s}", USER_CONF_DIR, home_dir);

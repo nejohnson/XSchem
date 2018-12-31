@@ -978,6 +978,7 @@ void push_undo(void) /* 20150327 */
     my_snprintf(diff_name, S(diff_name), "%s/undo%d", undo_dirname, cur_undo_ptr%max_undo);
     pipe(pd); 
     if((pid = fork()) ==0) {                                    /* child process */
+      static char f[PATH_MAX] = "";
       close(pd[1]);                                     /* close write side of pipe */
       if(!(diff_fd=freopen(diff_name,"w", stdout)))     /* redirect stdout to file diff_name */
       {
@@ -990,9 +991,10 @@ void push_undo(void) /* 20150327 */
        * in between we are in trouble */
       close(0); /* close stdin */
       dup(pd[0]); /* duplicate read side of pipe to stdin */
-      execlp("gzip", "gzip", "-c", NULL);       /* replace current process with comand */
+      if(!f[0]) my_strncpy(f, get_file_path("gzip"), S(f));
+      execl(f, f, "-c", NULL);       /* replace current process with comand */
       /* never gets here */
-      fprintf(errfp, "push_undo(): problems with execlp\n");
+      fprintf(errfp, "push_undo(): problems with execl\n");
       Tcl_Eval(interp, "exit");
     }
     close(pd[0]);                                       /* close read side of pipe */
@@ -1066,6 +1068,7 @@ void pop_undo(int redo)  /* 20150327 */
   my_snprintf(diff_name, S(diff_name), "%s/undo%d", undo_dirname, cur_undo_ptr%max_undo);
   pipe(pd);
   if((pid = fork())==0) {                                     /* child process */
+    static char f[PATH_MAX] = "";
     close(pd[0]);                                    /* close read side of pipe */
     if(!(diff_fd=freopen(diff_name,"r", stdin)))     /* redirect stdin from file name */
     {
@@ -1075,9 +1078,10 @@ void pop_undo(int redo)  /* 20150327 */
     /* connect write side of pipe to stdout */
     close(1);    /* close stdout */
     dup(pd[1]);  /* write side of pipe --> stdout */
-    execlp("gunzip", "gunzip", "-c", NULL);       /* replace current process with command */
+    if(!f[0]) my_strncpy(f, get_file_path("gunzip"), S(f));
+    execl(f, f, "-c", NULL);       /* replace current process with command */
     /* never gets here */
-    if(debug_var>=1) fprintf(errfp, "pop_undo(): problems with execlp\n");
+    if(debug_var>=1) fprintf(errfp, "pop_undo(): problems with execl\n");
     Tcl_Eval(interp, "exit");
   }
   close(pd[1]);                                       /* close write side of pipe */

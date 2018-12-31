@@ -1887,9 +1887,23 @@ proc reconfigure_layers_menu {} {
    .menubar.layers configure -background [lindex $colors [xschem get rectcolor]]
 }
 
+proc get_file_path {ff} {
+  global env
+  if { [regexp {\/} $ff] } { return $ff } 
+  set pathlist [split $env(PATH) :]
+  foreach i $pathlist {
+    set ii [string cat $i / $ff] 
+    if { [file exists $ii]} {return $ii}
+  }
+  return $ff
+}
+
 ### 
 ###   MAIN PROGRAM
 ###
+
+
+
 
 # tcl variable XSCHEM_LIBRARY_PATH  should already be set in xschemrc
 set pathlist {}

@@ -279,17 +279,17 @@ void new_window(const char *cell, int symbol)
          freopen("/dev/null","r",stdin);
          freopen("/dev/null","w",stderr);
          if(!cell || !cell[0]) {
-           execlp(xschem_executable,xschem_executable,"-r", NULL);
+           execl(xschem_executable,xschem_executable,"-r", NULL);
          }
          else if(!symbol) {
 
 
            my_strncpy(f, abs_sym_path(cell, ".sch"), S(f));
-           execlp(xschem_executable,xschem_executable,"-r",f, NULL);
+           execl(xschem_executable,xschem_executable,"-r",f, NULL);
          }
          else {
            my_strncpy(f, abs_sym_path(cell, ".sym"), S(f));
-           execlp(xschem_executable,xschem_executable,"-r",f, NULL);
+           execl(xschem_executable,xschem_executable,"-r",f, NULL);
          }
        } else {
          /* error */
@@ -301,6 +301,14 @@ void new_window(const char *cell, int symbol)
        fprintf(errfp, "new_window(): fork error 2\n");
        tcleval( "exit");
      }
+}
+
+const char *get_file_path(char *f)
+{
+  char tmp[2*PATH_MAX+100];
+  my_snprintf(tmp, S(tmp),"get_file_path %s", f);
+  tcleval(tmp);
+  return Tcl_GetStringResult(interp);
 }
 
 int save(int confirm) /* 20171006 add confirm */

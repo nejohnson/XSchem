@@ -92,7 +92,7 @@ Options:
   use the TCL fileselector to go to a XSCHEM library
   (we will cover libraries more in detail later, XSCHEM libraries are just directories where 
   schematic files (.sch) or symbol files (.sym) are stored).
-  in XSCHEM all design libraries are placed in the locations specified by <kbd>XSCHEM_DESIGN_PATH</kbd> defined in the 
+  in XSCHEM all design libraries are placed in the locations specified by <kbd>XSCHEM_LIBRARY_PATH</kbd> defined in the 
   <kbd>xschemrc</kbd> file. Choose for example <kbd> ~/xschem_library/mylib</kbd> and write <kbd>test.sch</kbd>
   as the schematic name.
  </p>
@@ -104,7 +104,7 @@ Options:
   all equivalent.
  <pre class="code">
 # xschem defaults its search to the 
-# XSCHEM_DESIGN_PATH root path
+# XSCHEM_LIBRARY_PATH root path
 # .sch may be omitted, it is added by default ...
 xschem mylib/test
 # or ...

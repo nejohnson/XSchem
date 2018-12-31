@@ -147,7 +147,7 @@ unsigned char pixdata_init[22][32]={    /* fill patterns... indexed by laynumb. 
 
 char **color_array;
 
-const char *xschem_executable=NULL;
+char *xschem_executable=NULL;
 Pixmap cad_icon_pixmap=0, *pixmap,save_pixmap;  /* save_pixmap used to restore window */
 int areax1,areay1,areax2,areay2,areaw,areah; /* window corners / size */
 GC *gcstipple,*gc, gctiled;

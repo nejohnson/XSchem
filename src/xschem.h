@@ -544,7 +544,7 @@ extern int draw_single_layer; /*  20151117 */
 
 extern Window window;
 extern Window parent_of_topwindow;
-extern const char *xschem_executable;
+extern char *xschem_executable;
 extern Pixmap cad_icon_pixmap, *pixmap,save_pixmap;
 extern int depth;
 extern int *fill_type; /* 20171117 for every layer: 0: no fill, 1, solid fill, 2: stipple fill */
@@ -612,6 +612,7 @@ extern void symbol_in_new_window(void);
 extern void new_window(const char *cell, int symbol);
 extern void ask_new_file(void);
 extern void saveas(void);
+extern const char *get_file_path(char *f);
 extern int save(int confirm);
 extern struct hilight_hashentry *bus_hilight_lookup(const char *token, int value, int remove) ;
 extern int  name_strcmp(char *s, char *d) ;

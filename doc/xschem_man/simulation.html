@@ -40,13 +40,13 @@ p{padding: 15px  30px 10px;}
  <h3> VERILOG SIMULATION</h3>
  <p> This is a tutorial showing how to run a simulation with XSCHEM. The first important thing to
   note is that XSCHEM is just a schematic editor, so we need to setup valid bindings to
-  simulators in the <kbd>~/.xschem</kbd> file. For this tutorial we plan to do a <kbd>Verilog</kbd>
+  simulators in the <kbd>~/xschemrc</kbd> file. For this tutorial we plan to do a <kbd>Verilog</kbd>
   simulation since there is a very good open source simulator available, called
   <a href="http://iverilog.icarus.com">Icarus Verilog</a>.
   There is also a good waveform viewer called 
   <a href="https://sourceforge.net/projects/gtkwave">gtkwave</a>
   that is able to show simulator results. Install these two valuable tools and setup
-  installation paths in <kbd>.xschem</kbd>: 
+  installation paths in <kbd>xschemrc</kbd>: 
  </p>
  <pre class="code">
 ...
@@ -102,7 +102,7 @@ user:~$ xschem examples/greycnt
   the <kbd>Netlist</kbd> button on the right side of the menu bar (or <kbd>&lt;Shift&gt;N</kbd>
   key) a <kbd>greycnt.v</kbd> file will be generated in the simulation directory
   (<kbd>${HOME}/xschem_library/simulations</kbd> is the default path in the XSCHEM distribution, but
-  can be changed with the <kbd>set netlist_dir $env(HOME)/simulations</kbd> in ~/.xschem file):
+  can be changed with the <kbd>set netlist_dir $env(HOME)/simulations</kbd> in <kbd>xschemrc</kbd> file):
  </p>
  <pre class="code">
 `timescale 1ps/1ps

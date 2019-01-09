@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
  * simulation.
- * Copyright (C) 1998-2018 Stefan Frederik Schippers
+ * Copyright (C) 1998-2019 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -85,12 +85,8 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
  }
 
  else if(!strcmp(argv[1],"set_netlist_dir") && argc==3) {
-     char s[30]; /* overflow safe 20161122 */
-     int force;
-   
-     force = atoi(argv[2]);
-     my_snprintf(s, S(s), "%d", set_netlist_dir(force) );
-     Tcl_AppendResult(interp, s,NULL);
+     if(debug_var>=1) fprintf(errfp, "xschem set_netlist_dir: argv[2] = %s\n", argv[2]);
+     my_strdup(0, &netlist_dir, argv[2]);
  }
 
  else if(!strcmp(argv[1],"copy"))
@@ -833,7 +829,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
  }
 
  else if(!strcmp(argv[1],"netlist") ) {
-    if( set_netlist_dir(0) ) {
+    if( set_netlist_dir(0, NULL) ) {
       if(netlist_type == CAD_SPICE_NETLIST)
         global_spice_netlist(1);                  /* 1 means global netlist */
       else if(netlist_type == CAD_VHDL_NETLIST)
@@ -846,7 +842,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
  }
 
  else if(!strcmp(argv[1],"simulate") ) {
-   if( set_netlist_dir(0) ) {
+   if( set_netlist_dir(0, NULL) ) {
 
      /* 20140404 added CAD_SPICE_NETLIST */
      if(netlist_type==CAD_VERILOG_NETLIST) {
@@ -1436,9 +1432,6 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
     } else {
       persistent_command=0;
     }
-  }
-  else if(!strcmp(argv[2],"netlist_dir"))  {
-        my_strdup(379, &netlist_dir, argv[3]);
   }
   else if(!strcmp(argv[2],"incr_hilight"))  {
         incr_hilight=atoi(argv[3]);

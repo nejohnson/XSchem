@@ -1,6 +1,6 @@
-v {xschem version=2.8.1 file_version=1.0}
+v {xschem version=2.8.2_RC3 file_version=1.0}
 G {type=diode
-format="@name @pinlist @model"
+format="@spiceprefix@name @pinlist @model"
 tedax_format="footprint @name @footprint
 device @name @device"
 template="name=x1 model=XXX device=XXX"}

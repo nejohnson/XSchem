@@ -1,4 +1,4 @@
-v {xschem version=2.8.2_RC1 file_version=1.0}
+v {xschem version=2.8.2_RC3 file_version=1.0}
 G {type=inductor
 format="@name @pinlist @value"
 template="name=l1 value=10n"}
@@ -56,5 +56,5 @@ L 4 7.5 -26.25 7.5 -21.25 {}
 L 4 5 -23.75 10 -23.75 {}
 B 5 -2.5 -32.5 2.5 -27.5 {name=p dir=inout}
 B 5 -2.5 27.5 2.5 32.5 {name=m dir=inout}
-T {@value} 20 0 0 0 0.25 0.2 {}
-T {@name} 20 -17.5 0 0 0.2 0.2 {}
+T {@value} 10 0 0 0 0.25 0.2 {}
+T {@name} 10 -17.5 0 0 0.2 0.2 {}

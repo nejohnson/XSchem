@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
  * simulation.
- * Copyright (C) 1998-2018 Stefan Frederik Schippers
+ * Copyright (C) 1998-2019 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -203,7 +203,6 @@ void push_undo(void)
   }
   slot = cur_undo_ptr%max_undo;
 
-  /* <<< save */
   my_strdup(173, &uslot[slot].gptr, schvhdlprop);
   my_strdup(174, &uslot[slot].vptr, schverilogprop);
   my_strdup(175, &uslot[slot].sptr, schprop);

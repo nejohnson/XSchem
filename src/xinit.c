@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
  * simulation.
- * Copyright (C) 1998-2018 Stefan Frederik Schippers
+ * Copyright (C) 1998-2019 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -741,7 +741,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
  
  if( !stat("./xschem.tcl", &buf)) {
    tclsetvar("XSCHEM_SHAREDIR",pwd_dir); /* for testing xschem builds in src dir*/
-   my_snprintf(tmp, S(tmp), "subst .:[file normalize %s/../xschem_library/devices]", pwd_dir);
+   my_snprintf(tmp, S(tmp), "subst .:[file normalize \"%s/../xschem_library/devices\"]", pwd_dir);
    tcleval(tmp);
    tclsetvar("XSCHEM_LIBRARY_PATH", Tcl_GetStringResult(interp));
  } else if( !stat(XSCHEM_SHAREDIR, &buf) ) {  /* 20180918 */
@@ -957,6 +957,10 @@ int Tcl_AppInit(Tcl_Interp *inter)
  xrect[0].height = CADHEIGHT;
 
  compile_font();
+ /* restore current dir after loading font */
+ my_snprintf(tmp, S(tmp), "set current_dirname \"%s\"", pwd_dir);
+ tcleval(tmp);
+
 
  /* */
  /*  X INITIALIZATION */
@@ -1127,6 +1131,11 @@ int Tcl_AppInit(Tcl_Interp *inter)
  /*  START PROCESSING USER OPTIONS */
  /* */
 
+ if(netlist_dir) {
+   set_netlist_dir(1, netlist_dir);
+ } else {
+   my_strdup(50, &netlist_dir, tclgetvar("netlist_dir"));
+ }
  if(filename) {
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): filename %s given, removing symbols\n", filename);
     remove_symbols();
@@ -1189,7 +1198,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
      fprintf(errfp, "xschem: can't show simulation waves without a filename\n");
      tcleval( "exit");
    }
-   tcleval( "waves [file tail [xschem get schname]]");
+   tcleval( "waves [file tail \"[xschem get schname]\"]");
  }
 
  if(quit) {

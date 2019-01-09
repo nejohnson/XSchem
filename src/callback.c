@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
  * simulation.
- * Copyright (C) 1998-2018 Stefan Frederik Schippers
+ * Copyright (C) 1998-2019 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -160,7 +160,7 @@ int callback(int event, int mx, int my, KeySym key,
     if(ui_state & STARTPAN)    pan(RUBBER);
     if(ui_state & STARTZOOM)   zoom_box(RUBBER);
     if(ui_state & STARTSELECT) {
-      if(state & Button3Mask) { /* 20171026 added unselect by area  */
+      if( (state & Button1Mask)  && (state & Mod1Mask)) { /* 20171026 added unselect by area  */
           select_rect(RUBBER,0);
       } else if(state & Button1Mask) {
           select_rect(RUBBER,1);
@@ -199,7 +199,7 @@ int callback(int event, int mx, int my, KeySym key,
     }
 
     if(!(ui_state & STARTPOLYGON) && (state&Button1Mask) && !(ui_state & STARTWIRE) &&
-        !(state & ShiftMask))  /* start of a mouse area selection */
+         !(state & Mod1Mask) && !(state & ShiftMask))  /* start of a mouse area selection */
     {
       static int onetime=0;
       if(mx != mx_save || my != my_save) {
@@ -217,13 +217,12 @@ int callback(int event, int mx, int my, KeySym key,
       }
     }
  
-    if((state&Button3Mask) && (state & ShiftMask)) { /* 20150927 unselect area */
+    if((state & Button1Mask)  && (state & Mod1Mask) && !(state & ShiftMask)) { /* 20150927 unselect area */
       if( !(ui_state & STARTSELECT)) {
         select_rect(BEGIN,0);
       }
     }
- 
-    if((state&Button1Mask) && (state & ShiftMask)) {
+    else if((state&Button1Mask) && (state & ShiftMask)) {
       if(mx != mx_save || my != my_save) {
         if( !(ui_state & STARTSELECT)) {
           select_rect(BEGIN,1);
@@ -310,21 +309,25 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key == 'j'  && state==0 )                 /* print list of highlight nets */
    {
+     if(semaphore==2) break;
      print_hilight_net(1);
      break;
    }
    if(key == 'j'  && state==ControlMask)        /* create ipins from highlight nets */
    {
+     if(semaphore==2) break;
      print_hilight_net(0);
      break;
    }
    if(key == 'j'  && state==Mod1Mask)   /* create labels without i prefix from hilight nets */
    {
+     if(semaphore==2) break;
      print_hilight_net(4);
      break;
    }
    if(key == 'J'  && state==(Mod1Mask | ShiftMask) )    /* create labels with i prefix from hilight nets 20120913 */
    {
+     if(semaphore==2) break;
      print_hilight_net(2);
      break;
    }
@@ -545,6 +548,7 @@ int callback(int event, int mx, int my, KeySym key,
    if(key== 'W' && state == ShiftMask) {                        /* 20171022 create wire snapping to closest instance pin */
      double x, y;
      int xx, yy;
+     if(semaphore==2) break;
      if(!(ui_state & STARTWIRE)){
        find_closest_net_or_symbol_pin(mousex, mousey, &x, &y);
        xx = X_TO_SCREEN(x);
@@ -565,8 +569,9 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key == 'w'&& state==0)    /* place wire. */
    {
+     if(semaphore==2) break;
      start_wire(mx, my); 
-    break;
+     break;
    }
    if(key == XK_Return && (state == 0 ) && ui_state & STARTPOLYGON) { /* close polygon */
     new_polygon(ADD|END);
@@ -574,6 +579,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key == XK_Escape )                        /* abort & redraw */
    {
+    if(semaphore==2) break;
     tcleval("set vertical_move 0; set horizontal_move 0" );
     last_command=0;
     horizontal_move = vertical_move = 0; /* 20171023 */
@@ -609,10 +615,12 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='w' && !ui_state && state==ControlMask)              /* start polygon, 20171115 */
    {
+     if(semaphore==2) break;
      if(debug_var>=1) fprintf(errfp, "callback(): start polygon\n");
      mx_save = mx; my_save = my;       /* 20070323 */
      mx_double_save=mousex_snap;
      my_double_save=mousey_snap;
+     last_command = 0;
      new_polygon(PLACE);
      break;
    }
@@ -638,7 +646,8 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key==XK_Delete && (ui_state & SELECTION) )        /* delete objects */
    {
-    delete();break;
+     if(semaphore==2) break;
+     delete();break;
    }
    if(key==XK_Right)                    /* left */
    {
@@ -666,6 +675,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='q' && state == ControlMask) /* exit */
    {
+     if(semaphore==2) break;
      if(modified) {
        tcleval("tk_messageBox -type okcancel -message {UNSAVED data: want to exit?}");
        if(strcmp(Tcl_GetStringResult(interp),"ok")==0) {
@@ -679,8 +689,10 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='t' && state == 0)                        /* place text */
    {
-    place_text(1, mousex_snap, mousey_snap); /* 1 = draw text 24122002 */
-    break;
+     if(semaphore==2) break;
+     last_command = 0;
+     place_text(1, mousex_snap, mousey_snap); /* 1 = draw text 24122002 */
+     break;
    }
    if(key=='r' && !ui_state && state==0)              /* start rect */
    {
@@ -688,6 +700,7 @@ int callback(int event, int mx, int my, KeySym key,
     mx_save = mx; my_save = my; /* 20070323 */
     mx_double_save=mousex_snap;
     my_double_save=mousey_snap;
+    last_command = 0;
     new_rect(PLACE);
     break;
    }
@@ -696,22 +709,18 @@ int callback(int event, int mx, int my, KeySym key,
     netlist_type++; if(netlist_type==5) netlist_type=1;
     if(netlist_type == CAD_VHDL_NETLIST)
     {
-     tcleval("alert_ { netlist type set to VHDL} {}");
      tclsetvar("netlist_type","vhdl");
     }
     else if(netlist_type == CAD_SPICE_NETLIST)
     {
-     tcleval("alert_ { netlist type set to SPICE} {}");
      tclsetvar("netlist_type","spice");
     }
     else if(netlist_type == CAD_VERILOG_NETLIST)
     {
-     tcleval("alert_ { netlist type set to VERILOG} {}");
      tclsetvar("netlist_type","verilog");
     }
     else if(netlist_type == CAD_TEDAX_NETLIST)
     {
-     tcleval("alert_ { netlist type set to tEDAx} {}");
      tclsetvar("netlist_type","tedax");
     }
     break;
@@ -804,25 +813,30 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='c' && state == ControlMask)   /* save clipboard */
    {
-    rebuild_selected_array();
-    if(lastselected) {  /* 20071203 check if something selected */
-      save_selection(2);
-    }
+     if(semaphore==2) break;
+     rebuild_selected_array();
+     if(lastselected) {  /* 20071203 check if something selected */
+       save_selection(2);
+     }
     break;
    }
    if(key=='C' && state == ShiftMask)   /* place arc */
    {
+     if(semaphore==2) break;
      mx_save = mx; my_save = my;
      mx_double_save=mousex_snap;
      my_double_save=mousey_snap;
+     last_command = 0;
      new_arc(PLACE, 180.);
      break;
    }
    if(key=='C' && state == (ControlMask|ShiftMask))   /* place circle */
    {
+     if(semaphore==2) break;
      mx_save = mx; my_save = my;
      mx_double_save=mousex_snap;
      my_double_save=mousey_snap;
+     last_command = 0;
      new_arc(PLACE, 360.);
      break;
    }
@@ -853,6 +867,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='q' && state==Mod1Mask)                      /* edit .sch file (DANGER!!) */
    {
+    if(semaphore==2) break;
     rebuild_selected_array();
     if(lastselected==0 ) {
       if(current_type==SCHEMATIC) {
@@ -884,6 +899,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key==XK_Insert)                   /* insert sym */
    {
+    last_command = 0;
     place_symbol(-1,NULL,mousex_snap, mousey_snap, 0, 0, NULL,3, 1);
     break;
    }
@@ -908,12 +924,14 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='S' && state == ShiftMask)   /* change element order */
    {
+    if(semaphore==2) break;
     change_elem_order();
     break;
    }
    if(key=='k' && state==ControlMask)                           /* unhilight net */
    {
     /* 20160413 */
+    if(semaphore==2) break;
     unhilight_net();
     undraw_hilight_net(1);
     /* draw(); */
@@ -922,6 +940,7 @@ int callback(int event, int mx, int my, KeySym key,
    if(key=='K' && state==(ControlMask|ShiftMask))       /* hilight net drilling thru elements  */
                                                         /* with 'propagate_to' prop set on pins */
    {
+    if(semaphore==2) break;
     enable_drill=1;
     hilight_net();
     draw_hilight_net(1);
@@ -929,6 +948,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='k' && state==0)                             /* hilight net */
    {
+    if(semaphore==2) break;
     enable_drill=0;
     hilight_net();
     draw_hilight_net(1);
@@ -936,6 +956,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='K' && state == ShiftMask)                           /* delete hilighted nets */
    {
+    if(semaphore==2) break;
     enable_drill=0;
     delete_hilight_net();
     /* 20160413 */
@@ -963,21 +984,25 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='*' && state==(Mod1Mask|ShiftMask) )         /* svg print , 20121108 */
    {
+    if(semaphore==2) break;
     svg_draw();
     break;
    }
    if(key=='*' && state==ShiftMask )                    /* postscript print */
    {
+    if(semaphore==2) break;
     ps_draw();
     break;
    }
    if(key=='*' && state==(ControlMask|ShiftMask) )      /* xpm print */
    {
+    if(semaphore==2) break;
     print_image();
     break;
    }
    if(key=='u' && state==Mod1Mask)                      /* align to grid */
    {
+    if(semaphore==2) break;
     push_undo(); /* 20150327 */
     round_schematic_to_grid(cadsnap);
     set_modify(1);
@@ -1022,18 +1047,21 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='u' && state==0)                             /* undo */
    {
+    if(semaphore==2) break;
     pop_undo(0);
     draw();
     break;
    }
    if(key=='U' && state==ShiftMask)                     /* redo */
    {
+    if(semaphore==2) break;
     pop_undo(1);
     draw();
     break;
    }
    if(key=='&')                         /* check wire connectivity */
    {
+    if(semaphore==2) break;
     push_undo(); /* 20150327 */
     trim_wires();
     draw();
@@ -1041,6 +1069,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='l' && state == ControlMask) { /* create schematic from selected symbol 20171004 */
      
+     if(semaphore==2) break;
      create_sch_from_sym();
      break;
    }
@@ -1052,7 +1081,17 @@ int callback(int event, int mx, int my, KeySym key,
    if(key=='F' && state==ShiftMask)                     /* Flip */
    {
     if(ui_state & STARTMOVE) move_objects(FLIP,0,0,0);
-    if(ui_state & STARTCOPY) copy_objects(FLIP);
+    else if(ui_state & STARTCOPY) copy_objects(FLIP);
+    else {
+      rebuild_selected_array();
+      mx_save = mx; my_save = my; /* 20070323 */
+      mx_double_save=mousex_snap;
+      my_double_save=mousey_snap;
+      move_objects(BEGIN,0,0,0);
+      if(lastselected>1) move_objects(FLIP,0,0,0);
+      else               move_objects(FLIP|ROTATELOCAL,0,0,0);
+      move_objects(END,0,0,0);
+    }
     break;
    }
    if(key=='F' && state==(ShiftMask|Mod1Mask))          /* Fullscreen */
@@ -1070,7 +1109,18 @@ int callback(int event, int mx, int my, KeySym key,
    if(key=='R' && state==ShiftMask)             /* Rotate */
    {
     if(ui_state & STARTMOVE) move_objects(ROTATE,0,0,0);
-    if(ui_state & STARTCOPY) copy_objects(ROTATE);
+    else if(ui_state & STARTCOPY) copy_objects(ROTATE);
+    else {
+      rebuild_selected_array();
+      mx_save = mx; my_save = my; /* 20070323 */
+      mx_double_save=mousex_snap;
+      my_double_save=mousey_snap;
+      move_objects(BEGIN,0,0,0);
+      if(lastselected>1) move_objects(ROTATE,0,0,0);
+      else               move_objects(ROTATE|ROTATELOCAL,0,0,0);
+      move_objects(END,0,0,0);
+    }
+
     break;
    }
    if(key=='r' && state==Mod1Mask)              /* Rotate objects around their anchor points 20171208 */
@@ -1091,6 +1141,7 @@ int callback(int event, int mx, int my, KeySym key,
    if(key=='c' && state==0 &&           /* copy selected obj.  */
      !(ui_state & (STARTMOVE | STARTCOPY)))
    {
+    if(semaphore==2) break;
     mx_save = mx; my_save = my; /* 20070323 */
     mx_double_save=mousex_snap;
     my_double_save=mousey_snap;
@@ -1099,16 +1150,19 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='n' && state==ControlMask)              /* New schematic */
    {
+     if(semaphore==2) break;
      tcleval("xschem clear SCHEMATIC");
    }
    if(key=='N' && state==(ShiftMask|ControlMask) )    /* New symbol */
    {
+     if(semaphore==2) break;
      tcleval("xschem clear SYMBOL");
    }
    if(key=='N' && state==ShiftMask)              /* hierarchical netlist */
    {
+    if(semaphore==2) break;
     unselect_all(); /* 20180929 */
-    if(set_netlist_dir(0)) {
+    if(set_netlist_dir(0, NULL)) {
       if(debug_var>=1) fprintf(errfp, "callback(): -------------\n");
       if(netlist_type == CAD_SPICE_NETLIST)
         global_spice_netlist(1);
@@ -1124,8 +1178,9 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='n' && state==0)              /* netlist */
    {
+    if(semaphore==2) break;
     unselect_all(); /* 20180929 */
-    if( set_netlist_dir(0) ) {
+    if( set_netlist_dir(0, NULL) ) {
       if(debug_var>=1) fprintf(errfp, "callback(): -------------\n");
       if(netlist_type == CAD_SPICE_NETLIST)
         global_spice_netlist(0);
@@ -1153,11 +1208,13 @@ int callback(int event, int mx, int my, KeySym key,
     break;
    }
    if(key=='>') { /* 20151117 */
+     if(semaphore==2) break;
      if(draw_single_layer< cadlayers-1) draw_single_layer++; 
      draw();
      break;
    }
    if(key=='<') { /* 20151117 */
+     if(semaphore==2) break;
      if(draw_single_layer>=0 ) draw_single_layer--; 
      draw();
      break;
@@ -1271,6 +1328,7 @@ int callback(int event, int mx, int my, KeySym key,
 
    if(key=='f' && state == ControlMask)         /* search */
    {
+    if(semaphore==2) break;
     tcleval("property_search");
     break;
    }
@@ -1286,6 +1344,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='!')
    {
+     if(semaphore==2) break;
      break_wires_at_pins();
      break;
    }
@@ -1293,6 +1352,19 @@ int callback(int event, int mx, int my, KeySym key,
   case ButtonPress:                     /* end operation */
    if(debug_var>=1) fprintf(errfp, "callback(): ButtonPress  ui_state=%ld state=%d\n",ui_state,state);
    if(button==Button5 && state == 0 ) view_unzoom(CADZOOMSTEP);
+   else if(button == Button3 && semaphore <2) {
+     if(!(ui_state & STARTPOLYGON) && !(state & Mod1Mask) ) {
+       last_command = 0;
+       unselect_all();
+       select_object(mousex,mousey,SELECTED);
+       if(state & ShiftMask) {
+         edit_property(1);
+       } else {
+         edit_property(0);
+       }
+     }
+
+   }
    else if(button==Button4 && state == 0 ) view_zoom(CADZOOMSTEP);
    /* 20111114 */
    else if(button==Button4 && (state & ShiftMask) && !(state & Button2Mask)) {
@@ -1311,17 +1383,21 @@ int callback(int event, int mx, int my, KeySym key,
     yorigin-=-CADMOVESTEP*zoom/2.;
     draw();
    }
-   else if(button==Button3) {
+   else if(button==Button1 && (state & Mod1Mask) ) {
+     last_command = 0;
      mx_save = mx; my_save = my;        /* 20171218 */
      mx_double_save=mousex_snap;
      my_double_save=mousey_snap;
-     if(state==0) {
-       if(semaphore<2) { /* 20160425 */
-         rebuild_selected_array();
-         if(lastselected==0) ui_state &=~SELECTION;
-       }
-       select_object(mousex, mousey, 0);
+     if(semaphore<2) { /* 20160425 */
+       rebuild_selected_array();
+       if(lastselected==0) ui_state &=~SELECTION;
      }
+     select_object(mousex, mousey, 0);
+   }
+   else if(button==Button2 && (state == 0)) {
+     pan2(BEGIN, mx, my);
+     ui_state |= STARTPAN2;
+     break;
    }
    else if(semaphore==2) {
      if(button==Button1 && state==0) {
@@ -1334,6 +1410,7 @@ int callback(int event, int mx, int my, KeySym key,
      if(persistent_command && last_command) {
        if(last_command == STARTLINE)  start_line(mx, my);
        if(last_command == STARTWIRE)  start_wire(mx, my);
+       break;
      }
      if(!(ui_state & STARTPOLYGON) && !(ui_state & STARTWIRE) && !(ui_state & STARTLINE) ) {
        horizontal_move = vertical_move=0; /* 20171023 */
@@ -1487,19 +1564,18 @@ int callback(int event, int mx, int my, KeySym key,
        mx_save = mx; my_save = my;
        mx_double_save=mousex_snap; /* 20070322 */
        my_double_save=mousey_snap; /* 20070322 */
-       if( !(state & ShiftMask) ) {
+       if( !(state & ShiftMask) && !(state & Mod1Mask) ) {
          unselect_all();
        }
        sel = select_object(mousex,mousey,SELECTED);
  
-       if(sel && state ==Mod1Mask) { /* 20170416 */
+       if(sel && state == ControlMask) { /* 20170416 */
          launcher();
        }
        if( !(state & ShiftMask) )  {
          if(auto_hilight && hilight_nets && sel == 0 ) { /* 20160413 20160503 */
            delete_hilight_net();
            undraw_hilight_net(1);
-           
          }
        }
        if(auto_hilight) { /* 20160413 */
@@ -1511,10 +1587,6 @@ int callback(int event, int mx, int my, KeySym key,
        break;
      }
    } /* button==Button1 */
-   else if(button==Button2 && (state == 0)) {
-     pan2(BEGIN, mx, my);
-     ui_state |= STARTPAN2;
-   }
    break;
   case ButtonRelease:
    if(debug_var>=1) fprintf(errfp, "callback(): ButtonRelease  ui_state=%ld state=%d\n",ui_state,state);
@@ -1544,25 +1616,24 @@ int callback(int event, int mx, int my, KeySym key,
      if(ui_state == STARTLINE) {
        ui_state &= ~STARTLINE;
      }
-     if((state == ControlMask) && !(ui_state & STARTPOLYGON)) {
-       unselect_all();
-       select_object(mousex,mousey,SELECTED);
-       edit_property(0);
-     } else if( (ui_state & STARTPOLYGON) && (state ==0 ) ) {
+     if( (ui_state & STARTPOLYGON) && (state ==0 ) ) {
        new_polygon(SET);
      }
-   } else if(button==Button3) {
-     if(state==0 || state == ShiftMask) {
-        select_object(mousex,mousey,SELECTED);
-        rebuild_selected_array();
-        if(lastselected ==1 &&  selectedgroup[0].type==ELEMENT) {
-          if(state==0) descend_schematic();
-          if(state==ShiftMask) descend_symbol();
-        }
-        else  go_back(1);
-      }
-      
    }
+/*
+ * else if(button==Button3) {
+ *   if(state==0 || state == ShiftMask) {
+ *      select_object(mousex,mousey,SELECTED);
+ *      rebuild_selected_array();
+ *      if(lastselected ==1 &&  selectedgroup[0].type==ELEMENT) {
+ *        if(state==0) descend_schematic();
+ *        if(state==ShiftMask) descend_symbol();
+ *      }
+ *      else  go_back(1);
+ *    }
+ *    
+ * }
+ */
    break;
     
   default:

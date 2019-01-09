@@ -14,7 +14,7 @@ user_library_dir=$(HOME)/xschem_library
 ## you may redefine it later in .xschem or xschemrc startup files
 system_library_dir=${sharedir}/xschem_library
 
-xschem_library_path=.:$(system_library_dir)/devices
+xschem_library_path=$(user_library_dir):$(system_library_dir)
 
 OBJ = icon.o callback.o actions.o move.o check.o clip.o draw.o \
       globals.o main.o netlist.o hash_iterator.o in_memory_undo.o \
@@ -122,8 +122,8 @@ install: xschem
 	cp xschemrc $(prefix)/share/xschem
 	cp vhdl.awk $(prefix)/share/xschem
 	cp -r ../doc/* $(prefix)/share/doc/xschem/
-	cp ../utile/* $(prefix)/share/xschem/utile
-	cp -ru ../xschem_library/devices $(system_library_dir)
+	cp utile/* $(prefix)/share/xschem/utile
+	cp -ru ../xschem_library/devices/* $(system_library_dir)
 	cp -ru ../xschem_library/examples $(user_library_dir)
 	cp -ru ../xschem_library/pcb $(user_library_dir)
 

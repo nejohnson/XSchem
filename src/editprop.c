@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
  * simulation.
- * Copyright (C) 1998-2018 Stefan Frederik Schippers
+ * Copyright (C) 1998-2019 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -380,6 +380,108 @@ void set_inst_prop(int i)
   my_strdup2(70, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name",0)); /* 20150409 */
 }
 
+void edit_rect_property(void) 
+{
+  int i;
+  int preserve;
+  char *oldprop=NULL;
+  if(rect[selectedgroup[0].col][selectedgroup[0].n].prop_ptr!=NULL) {
+    my_strdup(46, &oldprop, rect[selectedgroup[0].col][selectedgroup[0].n].prop_ptr);
+    tclsetvar("retval",oldprop);
+  } else { /* 20161208 */
+    tclsetvar("retval","");
+  }
+
+  tcleval("text_line {Input property:} 0 normal");
+  preserve = atoi(tclgetvar("rbutton2"));
+  if(strcmp(tclgetvar("rcode"),"") )
+  {
+    for(i=0; i<lastselected; i++) {
+      if(selectedgroup[i].type != RECT) continue;
+      if(!modified) push_undo();
+      set_modify(1);
+
+      if(preserve == 1) {
+        set_different_token(&rect[selectedgroup[i].col][selectedgroup[i].n].prop_ptr, 
+               (char *) tclgetvar("retval"), oldprop);
+      } else {
+        my_strdup(99, &rect[selectedgroup[i].col][selectedgroup[i].n].prop_ptr,
+               (char *) tclgetvar("retval"));
+      }
+    }
+  }
+  my_free(&oldprop);
+}
+
+
+void edit_line_property(void)
+{
+  int i;
+  int preserve;
+  char *oldprop=NULL;
+  if(line[selectedgroup[0].col][selectedgroup[0].n].prop_ptr!=NULL) {
+    my_strdup(46, &oldprop, line[selectedgroup[0].col][selectedgroup[0].n].prop_ptr);
+    tclsetvar("retval", oldprop);
+  } else { /* 20161208 */
+    tclsetvar("retval","");
+  }
+  tcleval("text_line {Input property:} 0 normal");
+  preserve = atoi(tclgetvar("rbutton2"));
+  if(strcmp(tclgetvar("rcode"),"") )
+  {
+    for(i=0; i<lastselected; i++) {
+      if(selectedgroup[i].type != LINE) continue;
+      if(!modified) push_undo();
+      set_modify(1);
+
+      if(preserve == 1) {
+        set_different_token(&line[selectedgroup[i].col][selectedgroup[i].n].prop_ptr, 
+               (char *) tclgetvar("retval"), oldprop);
+      } else {
+        my_strdup(102, &line[selectedgroup[i].col][selectedgroup[i].n].prop_ptr,
+               (char *) tclgetvar("retval"));
+      }
+    }
+  }
+  my_free(&oldprop);
+}
+
+
+void edit_wire_property(void)
+{
+  int i;
+  int preserve;
+  char *oldprop=NULL;
+
+  if(wire[selectedgroup[0].n].prop_ptr!=NULL) {
+    my_strdup(47, &oldprop, wire[selectedgroup[0].n].prop_ptr);
+    tclsetvar("retval", oldprop);
+  } else { /* 20161208 */
+    tclsetvar("retval","");
+  }
+  tcleval("text_line {Input property:} 0 normal");
+  preserve = atoi(tclgetvar("rbutton2"));
+  if(strcmp(tclgetvar("rcode"),"") )
+  {
+    for(i=0; i<lastselected; i++) {
+      if(selectedgroup[i].type != WIRE) continue; 
+      if(!modified) push_undo(); /* 20150327 */
+      prepared_hash_wires=0; /* 20181025 */
+      prepared_netlist_structs=0;
+      prepared_hilight_structs=0;
+      set_modify(1); 
+      if(preserve == 1) {
+        set_different_token(&wire[selectedgroup[i].n].prop_ptr, 
+               (char *) tclgetvar("retval"), oldprop);
+      } else {
+        my_strdup(100, &wire[selectedgroup[i].n].prop_ptr,(char *) tclgetvar("retval"));
+      }
+      if(get_tok_value(wire[selectedgroup[i].n].prop_ptr,"bus",0)[0]) wire[selectedgroup[i].n].bus=1; /* 20171201 */
+      else wire[selectedgroup[i].n].bus=0;
+    }
+  }
+  my_free(&oldprop);
+}
 
 /* x=0 use text widget   x=1 use vim editor */
 void edit_text_property(int x)
@@ -962,38 +1064,10 @@ void edit_property(int x)
    break;
 
   case RECT:
-   if(debug_var>=1) fprintf(errfp, "edit_property(), modified=%d\n", modified);
-   if(rect[selectedgroup[0].col][selectedgroup[0].n].prop_ptr!=NULL) {
-     tclsetvar("retval",rect[selectedgroup[0].col][selectedgroup[0].n].prop_ptr);
-   } else { /* 20161208 */
-     tclsetvar("retval","");
-   }
-   tcleval("text_line {Input property:} 0");
-   if(strcmp(tclgetvar("rcode"),"") )
-   {
-    set_modify(1); push_undo(); /* 20150327 */
-    my_strdup(99, &rect[selectedgroup[0].col][selectedgroup[0].n].prop_ptr,
-           (char *) tclgetvar("retval"));
-   }
+   edit_rect_property();
    break;
   case WIRE:
-   if(debug_var>=1) fprintf(errfp, "edit_property(): input property:\n");
-   if(wire[selectedgroup[0].n].prop_ptr!=NULL) {
-     tclsetvar("retval",wire[selectedgroup[0].n].prop_ptr);
-   } else { /* 20161208 */
-     tclsetvar("retval","");
-   }
-   tcleval("text_line {Input property:} 0");
-   if(strcmp(tclgetvar("rcode"),"") )
-   {
-    prepared_hash_wires=0; /* 20181025 */
-    prepared_netlist_structs=0;
-    prepared_hilight_structs=0;
-    set_modify(1); push_undo(); /* 20150327 */
-    my_strdup(100, &wire[selectedgroup[0].n].prop_ptr,(char *) tclgetvar("retval"));
-    if(get_tok_value(wire[selectedgroup[0].n].prop_ptr,"bus",0)[0]) wire[selectedgroup[0].n].bus=1; /* 20171201 */
-    else wire[selectedgroup[0].n].bus=0;
-   }
+   edit_wire_property();
    break;
   case POLYGON: /* 20171115 */
    if(debug_var>=1) fprintf(errfp, "edit_property(): input property:\n");
@@ -1038,18 +1112,7 @@ void edit_property(int x)
    break;
 
   case LINE:
-   if(debug_var>=1) fprintf(errfp, "edit_property(): input property:\n");
-   if(line[selectedgroup[0].col][selectedgroup[0].n].prop_ptr!=NULL) {
-     tclsetvar("retval",line[selectedgroup[0].col][selectedgroup[0].n].prop_ptr);
-   } else { /* 20161208 */
-     tclsetvar("retval","");
-   }
-   tcleval("text_line {Input property:} 0");
-   if(strcmp(tclgetvar("rcode"),"") )
-   {
-    set_modify(1); push_undo(); /* 20150327 */
-    my_strdup(102, &line[selectedgroup[0].col][selectedgroup[0].n].prop_ptr, (char *) tclgetvar("retval"));
-   }
+   edit_line_property();
    break;
   case TEXT:
    edit_text_property(x);

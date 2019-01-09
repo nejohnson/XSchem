@@ -4,7 +4,7 @@
 #  This file is part of XSCHEM,
 #  a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
 #  simulation.
-#  Copyright (C) 1998-2018 Stefan Frederik Schippers
+#  Copyright (C) 1998-2019 Stefan Frederik Schippers
 # 
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -216,6 +216,8 @@ proc edit_file {filename} {
  return {}
 }
 
+# filename here is rootname of schematic without extension
+# as returned by 'xschem simulate'
 proc simulate {filename} {
  global env netlist_dir netlist_type
  global task_output task_error
@@ -227,7 +229,7 @@ proc simulate {filename} {
  global iverilog_opts ;# 20161118
  global computerfarm ;# 20151007
 
- if { [xschem set_netlist_dir 0] ne "" } {
+ if { [select_dir 0] ne "" } {
 
    if { $netlist_type=="verilog" } {
      # 20150916 added modelsim
@@ -263,7 +265,7 @@ proc simulate {filename} {
        # added computerfarm
        task "$terminal -e \"$computerfarm $hspicerf_path $filename ; bash\"" $netlist_dir bg
      } elseif { $spice_simulator == "ngspice"} {
-       task "$terminal -e \"$computerfarm $ngspice_path -i $filename -a \""  $netlist_dir bg
+       task "$terminal -e \"$computerfarm $ngspice_path -i $filename -a || sh\""  $netlist_dir bg
        if {$task_error} {viewdata $task_output; return}
      } elseif { $spice_simulator == "ngspice_batch"} {
        set rawfile [ file tail [ file rootname $filename] ].raw
@@ -304,35 +306,32 @@ proc modelsim {schname} {
 proc utile_translate {schname} { 
   global netlist_dir netlist_type tcl_debug XSCHEM_SHAREDIR
   global utile_gui_path utile_cmd_path
-  exec sh -c "cd $netlist_dir; XSCHEM_SHAREDIR=$XSCHEM_SHAREDIR $utile_cmd_path stimuli.$schname"
+  set tmpname [file rootname "$schname"]
+  exec sh -c "cd $netlist_dir; XSCHEM_SHAREDIR=$XSCHEM_SHAREDIR $utile_cmd_path \"stimuli.$tmpname\""
 }
 
 proc utile_gui {schname} { 
   global netlist_dir netlist_type tcl_debug XSCHEM_SHAREDIR
   global utile_gui_path utile_cmd_path
-  exec sh -c "cd $netlist_dir; XSCHEM_SHAREDIR=$XSCHEM_SHAREDIR $utile_gui_path stimuli.$schname" &
+  set tmpname [file rootname "$schname"]
+  exec sh -c "cd $netlist_dir; XSCHEM_SHAREDIR=$XSCHEM_SHAREDIR $utile_gui_path \"stimuli.$tmpname\"" &
 }
 
 proc utile_edit {schname} { 
   global netlist_dir netlist_type tcl_debug editor XSCHEM_SHAREDIR
   global utile_gui_path utile_cmd_path 
-  exec sh -c "cd $netlist_dir; $editor stimuli.$schname ; 
+  set tmpname [file rootname "$schname"]
+  exec sh -c "cd $netlist_dir; $editor stimuli.$tmpname ; 
         cd $netlist_dir; 
-        XSCHEM_SHAREDIR=$XSCHEM_SHAREDIR $utile_cmd_path stimuli.$schname" &
+        XSCHEM_SHAREDIR=$XSCHEM_SHAREDIR $utile_cmd_path \"stimuli.$tmpname\"" &
 }
 
 proc waveview {schname} {
   global netlist_dir netlist_type tcl_debug
   global waveview_path
-  task "$waveview_path -k -x $schname.sx" $netlist_dir bg
+  set tmpname [file rootname "$schname"]
+  task "$waveview_path -k -x \"$tmpname.sx\"" $netlist_dir bg
 }
-
-proc cosmoscope { schname } {
-  global netlist_dir netlist_type tcl_debug
-  global cscope_path
-  task "$cscope_path" $netlist_dir bg
-}
-
 
 proc gtkwave {schname} {
   global netlist_dir netlist_type tcl_debug
@@ -342,23 +341,22 @@ proc gtkwave {schname} {
 
 proc waves {schname} {
  global netlist_dir netlist_type tcl_debug
- global cscope_path gtkwave_path analog_viewer waveview_path
+ global gtkwave_path analog_viewer waveview_path
 
- if { [xschem set_netlist_dir 0] ne "" } {
+ set tmpname [file rootname "$schname"]
+ if { [select_dir 0] ne "" } {
    if { $netlist_type=="verilog" } {
-     task "$gtkwave_path dumpfile.vcd $schname.sav 2>/dev/null" $netlist_dir bg
+     task "$gtkwave_path dumpfile.vcd \"$tmpname.sav\" 2>/dev/null" $netlist_dir bg
 
    } elseif { $netlist_type=="spice" } {
 
-     if { $analog_viewer == "cosmoscope" } { 
-       task $cscope_path $netlist_dir bg
-     } elseif { $analog_viewer == "waveview" } { 
-       task "$waveview_path -k -x $schname.sx" $netlist_dir bg ; # 20170415 bg instead of tk_init exec mode
+     if { [info exists analog_viewer] && $analog_viewer == "waveview" } { 
+       task "$waveview_path -k -x \"$tmpname.sx\"" $netlist_dir bg ; # 20170415 bg instead of tk_init exec mode
      } else {
        alert_ { Unsupported default wiever... } 
      }
    } elseif { $netlist_type=="vhdl" } { 
-     task "$gtkwave_path ${schname}.ghw $schname.sav 2>/dev/null" $netlist_dir bg
+     task "$gtkwave_path \"${tmpname}.ghw\" \"${tmpname}.sav\" 2>/dev/null" $netlist_dir bg
    }
  }
  return {}
@@ -366,26 +364,27 @@ proc waves {schname} {
 
 proc get_shell { curpath } {
  global netlist_dir netlist_type tcl_debug
- global cscope_path gtkwave_path analog_viewer waveview_path terminal
+ global gtkwave_path waveview_path terminal
 
- task "$terminal" $curpath bg
+ task "$terminal" "$curpath" bg
 }
 
 proc edit_netlist {schname } {
  global netlist_dir netlist_type tcl_debug
- global cscope_path gtkwave_path analog_viewer waveview_path editor terminal
+ global gtkwave_path waveview_path editor terminal
+ set tmpname [file rootname "$schname"]
 
  if { [regexp vim $editor] } { set ftype "-c \":set filetype=$netlist_type\"" } else { set ftype {} }
- if { [xschem set_netlist_dir 0] ne "" } {
+ if { [select_dir 0] ne "" } {
    # puts "edit_netlist: \"$editor $ftype  ${schname}.v\" $netlist_dir bg"
    if { $netlist_type=="verilog" } {
-     task "$editor $ftype  ${schname}.v" $netlist_dir bg
+     task "$editor $ftype  \"${tmpname}.v\"" $netlist_dir bg
    } elseif { $netlist_type=="spice" } {
-     task "$editor $ftype ${schname}.spice" $netlist_dir bg
+     task "$editor $ftype \"${tmpname}.spice\"" $netlist_dir bg
    } elseif { $netlist_type=="tedax" } {
-     task "$editor $ftype ${schname}.tdx" $netlist_dir bg
+     task "$editor $ftype \"${tmpname}.tdx\"" $netlist_dir bg
    } elseif { $netlist_type=="vhdl" } { 
-     task "$editor $ftype ${schname}.vhdl" $netlist_dir bg
+     task "$editor $ftype \"${tmpname}.vhdl\"" $netlist_dir bg
    }
  }
  return {}
@@ -612,16 +611,21 @@ proc make_symbol {name} {
  return {}
 }
 
-proc select_dir {} {
+proc select_dir { force {dir {} }} {
    global netlist_dir env
 
-   if { $netlist_dir ne {} }  { 
-     set initdir $netlist_dir
+   if { ( $force == 0 )  && ( $netlist_dir ne {} ) } { return $netlist_dir } 
+   if { $dir eq {} } {
+     if { $netlist_dir ne {} }  { 
+       set initdir $netlist_dir
+     } else {
+       set initdir  $env(PWD) 
+     }
+     # 20140409 do not change netlist_dir if user Cancels action
+     set new_dir [tk_chooseDirectory -initialdir $initdir -parent . -title {Select netlist DIR} -mustexist false]
    } else {
-     set initdir  $env(PWD) 
+     set new_dir $dir
    }
-   # 20140409 do not change netlist_dir if user Cancels action
-   set new_dir [tk_chooseDirectory -initialdir $initdir -parent . -title {Select netlist DIR} -mustexist false]
 
    if {$new_dir ne {} } {
      if {![file exist $new_dir]} {
@@ -629,6 +633,7 @@ proc select_dir {} {
      }
      set netlist_dir $new_dir  
    }
+   xschem set_netlist_dir $netlist_dir
    return $netlist_dir
 }
 
@@ -779,7 +784,7 @@ proc about {} {
   label .about.descr -text "Schematic editor / netlister for VHDL, Verilog, SPICE, tEDAx"
   button .about.link -text "http://repo.hu/projects/xschem" -font Underline-Font -fg blue -relief flat
   button .about.link2 -text "http://repo.hu/projects/coraleda" -font Underline-Font -fg blue -relief flat
-  label .about.copyright -text "\n Copyright 1998-2018 Stefan Schippers (stefan.schippers@gmail.com) \n
+  label .about.copyright -text "\n Copyright 1998-2019 Stefan Schippers (stefan.schippers@gmail.com) \n
  This is free software; see the source for copying conditions.  There is NO warranty;
  not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE\n"
   button .about.close -text Close -command {destroy .about} -font {Sans 18}
@@ -1249,8 +1254,8 @@ proc write_data {data f} {
  return {}
 }
 
-proc text_line {txtlabel clear} {
-   global text_line_default_geometry
+proc text_line {txtlabel clear {preserve_disabled disabled} } {
+   global text_line_default_geometry rbutton2
    global retval rcode tcl_debug
    if $clear==1 then {set retval ""}
    if $tcl_debug<=-1 then {puts " text_line{}: clear=$clear"}
@@ -1283,8 +1288,9 @@ proc text_line {txtlabel clear} {
    if { $::wm_fix } { tkwait visibility .ent2 }
    wm geometry .ent2 "${text_line_default_geometry}+$X+$Y"
 
+   frame .ent2.f0
    frame .ent2.f1
-   label .ent2.l1  -text $txtlabel
+   label .ent2.f0.l1  -text $txtlabel
 
    text .ent2.e1 -relief sunken -bd 2 -yscrollcommand ".ent2.yscroll set" -setgrid 1 \
         -xscrollcommand ".ent2.xscroll set" -wrap none -width 90 -height 40
@@ -1317,7 +1323,10 @@ proc text_line {txtlabel clear} {
    {
      .ent2.e1 delete 1.0 end
    }
-   pack .ent2.l1 
+   checkbutton .ent2.f0.l2 -text "preserve unchanged props" -variable rbutton2 -state $preserve_disabled
+   pack .ent2.f0 -fill x
+   pack .ent2.f0.l2 -side left
+   pack .ent2.f0.l1 -side left -expand yes
    pack .ent2.f1  -fill x
    pack .ent2.f1.b1 -side left -fill x -expand yes
    pack .ent2.f1.b2 -side left -fill x -expand yes
@@ -1947,7 +1956,7 @@ set tclcmd_txt {}
 ###
 ### user preferences: set default values
 ###
-set_ne netlist_dir {}
+set_ne netlist_dir {.}
 set_ne hspice_netlist 0
 set_ne verilog_2001 1
 set_ne spice_simulator ngspice
@@ -1997,7 +2006,7 @@ set_ne edit_prop_default_geometry 80x12
 set_ne text_line_default_geometry 80x12
 set_ne terminal xterm
 
-set_ne analog_viewer cosmoscope
+# set_ne analog_viewer waveview
 set_ne computerfarm {} ;# 20151007
 ## icarus verilog compiler and simulator 20140404
 set_ne iverilog_path iverilog
@@ -2011,24 +2020,27 @@ set_ne ghdl_run_opts {}
 set_ne gtkwave_path gtkwave
 
 ## waveview
-set_ne waveview_path wv
+# set_ne waveview_path wv
 
 ## utile
 set_ne utile_gui_path ${XSCHEM_SHAREDIR}/utile/utile3
 set_ne utile_cmd_path ${XSCHEM_SHAREDIR}/utile/utile
 
 ## modelsim
-set_ne modelsim_path $env(HOME)/modeltech/bin
+# set_ne modelsim_path $env(HOME)/modeltech/bin
+
 ## ngspice simulator path
 set_ne ngspice_path ngspice 
-## hspice license 20140404
-set_ne env(LM_LICENSE_FILE) $env(HOME)/hspice/license.dat
-## hspice simulator path 20140404
-set_ne hspice_path hspice
-set_ne hspicerf_path hspicerf
 
-## cscope waveform viewer
-set_ne cscope_path $env(HOME)/cosmoscope/linux/ai_bin/cscope
+## hspice license 20140404
+# set_ne env(LM_LICENSE_FILE) $env(HOME)/hspice/license.dat
+
+## hspice simulator path 20140404
+# set_ne hspice_path hspice
+# set_ne hspicerf_path hspicerf
+
+## finesim simulator path 20140404
+# set_ne finesim_path finesim
 
 ## cairo stuff 20171112
 set_ne cairo_font_scale 1.0
@@ -2168,9 +2180,6 @@ set search_substring 0
 # 20171005
 set custom_label_prefix {}
 
-# 20121111
-xschem set netlist_dir $netlist_dir
-
 # 20171112 cairo stuff
 xschem set cairo_font_scale $cairo_font_scale
 xschem set cairo_font_line_spacing $cairo_font_line_spacing
@@ -2296,7 +2305,7 @@ font configure Underline-Font -underline true -size 24
       -command {
          if { $split_files==1 } {xschem set split_files 1} else { xschem set split_files 0} 
       }
-   .menubar.option.menu add checkbutton -label "Hspice netlist" -variable hspice_netlist \
+   .menubar.option.menu add checkbutton -label "hspice / ngspice netlist" -variable hspice_netlist \
       -accelerator {} \
       -command {
          if { $hspice_netlist==1 } {xschem set hspice_netlist 1} else { xschem set hspice_netlist 0} 
@@ -2333,17 +2342,17 @@ font configure Underline-Font -underline true -size 24
         }
 
    .menubar.option.menu add separator
+   .menubar.option.menu add radiobutton -label "Spice netlist" -variable netlist_type -value spice \
+        -accelerator {Shift+V} \
+        -command "xschem netlist_type spice"
    .menubar.option.menu add radiobutton -label "VHDL netlist" -variable netlist_type -value vhdl \
-        -accelerator {V} \
+        -accelerator {Shift+V} \
         -command "xschem netlist_type vhdl"
    .menubar.option.menu add radiobutton -label "Verilog netlist" -variable netlist_type -value verilog \
-        -accelerator {V} \
+        -accelerator {Shift+V} \
         -command "xschem netlist_type verilog"
-   .menubar.option.menu add radiobutton -label "Spice netlist" -variable netlist_type -value spice \
-        -accelerator {V} \
-        -command "xschem netlist_type spice"
    .menubar.option.menu add radiobutton -label "tEDAx netlist" -variable netlist_type -value tedax \
-        -accelerator {V} \
+        -accelerator {Shift+V} \
         -command "xschem netlist_type tedax"
    .menubar.edit.menu add command -label "Undo" -state disabled -accelerator U
    .menubar.edit.menu add command -label "Redo" -state disabled -accelerator {Ctrl+R}
@@ -2513,42 +2522,53 @@ font configure Underline-Font -underline true -size 24
 
    .menubar.simulation.menu add command -label "Set netlist Dir" \
      -command {
-           # xschem clear_netlist_dir
-           xschem set_netlist_dir 1
+           select_dir 1
      }
-   .menubar.simulation.menu add command -label {CosmoScope} -command {cosmoscope [file tail [xschem get schname]]}
-   .menubar.simulation.menu add command -label {WaveView} -command {waveview [file tail [xschem get schname]]}
+   if { [info exists waveview_path] } {
+     .menubar.simulation.menu add command -label {WaveView} -command {waveview [file tail [xschem get schname]]}
+   } 
    .menubar.simulation.menu add command -label {Gtkwave} -command {gtkwave [file tail [xschem get schname]]}
    .menubar.simulation.menu add command -label {Utile Stimuli Editor (GUI)} -command {utile_gui [file tail [xschem get schname]]}
-   .menubar.simulation.menu add command -label {Utile Stimuli Editor (Vim)} -command {utile_edit [file tail [xschem get schname]]}
-   .menubar.simulation.menu add command -label {Utile Stimuli Translate)} -command {utile_translate [file tail [xschem get schname]]}
-   .menubar.simulation.menu add command -label {Modelsim} -command {modelsim [file tail [xschem get schname]]}
-   .menubar.simulation.menu add command -label {Shell [current schematic library path]} \
-      -command {get_shell [file dirname [abs_sym_path [xschem get schname]]]}
+   .menubar.simulation.menu add command -label "Utile Stimuli Editor ([lindex $editor 0])" -command {utile_edit [file tail [xschem get schname]]}
+   .menubar.simulation.menu add command -label {Utile Stimuli Translate} -command {utile_translate [file tail [xschem get schname]]}
+   if { [info exists modelsim_path] } {
+     .menubar.simulation.menu add command -label {Modelsim} -command {modelsim [file tail [xschem get schname]]}
+   }
    .menubar.simulation.menu add command -label {Shell [simulation path]} \
       -command {
-         if { [xschem set_netlist_dir 0] ne "" } {
+         if { [select_dir 0] ne "" } {
            get_shell $netlist_dir
          }
        }
    .menubar.simulation.menu add command -label {Edit Netlist} -command {edit_netlist [file tail [xschem get schname]]}
    .menubar.simulation.menu add separator
-   .menubar.simulation.menu add radiobutton -label "CosmoScope viewer" -variable analog_viewer -value cosmoscope
-   .menubar.simulation.menu add radiobutton -label "WaveView viewer" -variable analog_viewer -value waveview
-   .menubar.simulation.menu add separator
-   .menubar.simulation.menu add radiobutton -label "Modelsim Verilog simulator" -variable verilog_simulator -value modelsim
+   if { [info exists waveview_path] } {
+     .menubar.simulation.menu add radiobutton -label "WaveView viewer" -variable analog_viewer -value waveview
+     .menubar.simulation.menu add separator
+   } 
+   if { [info exists modelsim_path] } {
+     .menubar.simulation.menu add radiobutton -label "Modelsim Verilog simulator" -variable verilog_simulator -value modelsim
+   }
    .menubar.simulation.menu add radiobutton -label "Icarus Verilog simulator" -variable verilog_simulator -value iverilog
    #20170921
    .menubar.simulation.menu add separator
-   .menubar.simulation.menu add radiobutton -label "Modelsim VHDL simulator" -variable vhdl_simulator -value modelsim
+   if { [info exists modelsim_path] } {
+     .menubar.simulation.menu add radiobutton -label "Modelsim VHDL simulator" -variable vhdl_simulator -value modelsim
+   }
    .menubar.simulation.menu add radiobutton -label "GHDL VHDL simulator" -variable vhdl_simulator -value ghdl
    #20170410
    .menubar.simulation.menu add separator
    .menubar.simulation.menu add radiobutton -label "Ngspice Interactive Spice simulator" -variable spice_simulator -value ngspice
    .menubar.simulation.menu add radiobutton -label "Ngspice Batch Spice simulator" -variable spice_simulator -value ngspice_batch
-   .menubar.simulation.menu add radiobutton -label "Hspicerf Spice simulator" -variable spice_simulator -value hspicerf
-   .menubar.simulation.menu add radiobutton -label "Hspice Spice simulator" -variable spice_simulator -value hspice
-   .menubar.simulation.menu add radiobutton -label "Finesim Spice simulator" -variable spice_simulator -value finesim
+   if { [info exists hspicerf_path] } {
+     .menubar.simulation.menu add radiobutton -label "Hspicerf Spice simulator" -variable spice_simulator -value hspicerf
+   }
+   if { [info exists hspice_path] } {
+     .menubar.simulation.menu add radiobutton -label "Hspice Spice simulator" -variable spice_simulator -value hspice
+   }
+   if { [info exists finesim_path] } {
+     .menubar.simulation.menu add radiobutton -label "Finesim Spice simulator" -variable spice_simulator -value finesim
+   }
 
    pack .menubar.file -side left
    pack .menubar.edit -side left
@@ -2583,10 +2603,15 @@ font configure Underline-Font -underline true -size 24
    label .statusbar.4   -text "GRID:"
    entry .statusbar.5 -textvariable grid -relief sunken -bg white \
           -width 10 -state disabled -disabledforeground black 
+   label .statusbar.6   -text "NETLIST MODE:"
+   entry .statusbar.7 -textvariable netlist_type -relief sunken -bg white \
+          -width 10 -state disabled -disabledforeground black 
    pack .statusbar.2 -side left 
    pack .statusbar.3 -side left 
    pack .statusbar.4 -side left 
    pack .statusbar.5 -side left 
+   pack .statusbar.6 -side left 
+   pack .statusbar.7 -side left 
    pack .statusbar.1 -side left -fill x
    pack .drw -anchor n -side top -fill both -expand true
    pack .menubar -anchor n -side top -fill x  -before .drw

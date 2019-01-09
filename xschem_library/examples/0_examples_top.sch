@@ -1,4 +1,4 @@
-v {xschem version=2.8.2_RC1 file_version=1.0}
+v {xschem version=2.8.2_RC3 file_version=1.0}
 G {}
 V {}
 S {}
@@ -52,7 +52,6 @@ C {tesla} 160 -230 0 0 {name=x2}
 C {test_ne555} 160 -190 0 0 {name=x3}
 C {test_lm324} 160 -150 0 0 {name=x4}
 C {osc} 160 -270 0 0 {name=x5}
-C {tesla2} 160 -110 0 0 {name=x7}
 C {title} 160 -30 0 0 {name=l1 author="Stefan Schippers"}
 C {cmos_example} 160 -350 0 0 {name=x6}
 C {greycnt} 160 -390 0 0 {name=x8}
@@ -73,3 +72,4 @@ url="$\{XSCHEM_SHAREDIR\}/../doc/xschem/index.html"
 program=x-www-browser
 
 }
+C {rlc.sym} 160 -470 0 0 {name=x0}

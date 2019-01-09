@@ -57,6 +57,9 @@ p{
   text-align: justify;
 }
 
+.faq {
+  padding-left: 4em;
+}
 .filler{ 
   min-height: 35px;
   height: 35px;

@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
  * simulation.
- * Copyright (C) 1998-2018 Stefan Frederik Schippers
+ * Copyright (C) 1998-2019 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -520,8 +520,7 @@ char *subst_token(const char *s, const char *tok, const char *new_val)
  if(new_val && !strcmp(new_val, "DELETE")) {
     if(!strcmp(tok,"name")) {
       fprintf(errfp,"subst_token(): Can not DELETE name attribute\n");
-      size = my_strdup(450, &result, s);
-      size+=1;
+      my_strdup(450, &result, s);
       return result;
     }
     new_val = NULL;
@@ -561,7 +560,7 @@ char *subst_token(const char *s, const char *tok, const char *new_val)
        token[token_pos] = '\0'; 
        if(!strcmp(token,tok) && !new_val) {
          result_pos = result_save_pos;
-         if(debug_var>=3) fprintf(errfp, "subst_token(): result_pos=%d\n", result_pos);/* <<< */
+         if(debug_var>=3) fprintf(errfp, "subst_token(): result_pos=%d\n", result_pos);
        } else {
          result[result_pos++] = c;
        }
@@ -1095,7 +1094,7 @@ void print_spice_element(FILE *fd, int inst)
   if( state==XBEGIN && c=='@' && !escape) state=XTOKEN;
 
   /* 20171029 added !escape, !quote */
-  else if( state==XTOKEN && space && !escape && !quote) state=XSEPARATOR;
+  else if( state==XTOKEN && (space || c == '@')  && token_pos > 1 && !escape && !quote) state=XSEPARATOR;
 
   if(token_pos>=sizetok)
   {
@@ -1178,7 +1177,8 @@ void print_spice_element(FILE *fd, int inst)
      my_free(&tclcmd);
    } /* /20171029 */
                  /* 20151028 dont print escaping backslashes */
-   if(c!='\0' && (c!='\\'  || escape) ) fputc(c,fd);
+   if(c != '@' && c!='\0' && (c!='\\'  || escape) ) fputc(c,fd);
+   if(c == '@') s--;
    state=XBEGIN;
   }
                  /* 20151028 dont print escaping backslashes */
@@ -1238,16 +1238,21 @@ void print_tedax_element(FILE *fd, int inst)
 
  fprintf(fd, "begin_inst %s numslots %s\n", name, numslots);
  for(i=0;i<no_of_pins; i++) {
-   char pnumber[100];
-   my_snprintf(pnumber, S(pnumber), "pinnumber_%d", i);
+   char pnumber[100], *pname=NULL,*pnumber_ptr;
+   my_snprintf(pnumber, S(pnumber), "pinnumber(%d)", i);
    my_strdup(498, &pinname, get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"name",0));
+   pname =my_malloc(49, get_tok_value_size+30);
+   my_snprintf(pname, get_tok_value_size+30, "pinnumber(%s)", pinname);
    if(!pinname) my_strdup(499, &pinnumber, "--UNDEF--");
    else {
-     my_strdup(40, &pinnumber, get_tok_value(inst_ptr[inst].prop_ptr, pnumber, 0));
+     pnumber_ptr = get_tok_value(inst_ptr[inst].prop_ptr, pname, 0);
+     if(pnumber_ptr[0]) my_strdup(51, &pinnumber, pnumber_ptr);
+     else my_strdup(40, &pinnumber, get_tok_value(inst_ptr[inst].prop_ptr, pnumber, 0));
      if(!pinnumber) my_strdup(500, &pinnumber, get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"pinnumber",0));
    }
    if(!pinnumber) my_strdup(501, &pinnumber, "--UNDEF--");
    fprintf(fd, "conn %s %s %s %s %d\n", name, pin_node(inst,i, &mult, 0), pinname, pinnumber, i+1);
+   my_free(&pname);
  }
 
  if(extra){ 
@@ -1290,7 +1295,7 @@ void print_tedax_element(FILE *fd, int inst)
    if( state==XBEGIN && c=='@' && !escape) state=XTOKEN;
  
    /* 20171029 added !escape, !quote */
-   else if( state==XTOKEN && space && !escape && !quote) state=XSEPARATOR;
+   else if( state==XTOKEN && (space || c == '@')  && token_pos > 1 && !escape && !quote) state=XSEPARATOR;
  
    if(token_pos>=sizetok)
    {
@@ -1406,7 +1411,8 @@ void print_tedax_element(FILE *fd, int inst)
  
  
                   /* 20151028 dont print escaping backslashes */
-    if(c!='\0' && (c!='\\'  || escape) ) fputc(c,fd);
+    if(c!='@' && c!='\0' && (c!='\\'  || escape) ) fputc(c,fd);
+    if(c == '@') s--;
     state=XBEGIN;
    }
                   /* 20151028 dont print escaping backslashes */
@@ -1661,7 +1667,7 @@ void print_vhdl_primitive(FILE *fd, int inst) /* netlist  primitives, 20071217 *
                                /* 20171029 */
   if( state==XBEGIN && c=='@' && !escape ) state=XTOKEN;
   /* 20171029 added !escape, !quote */
-  else if( state==XTOKEN && space && !escape && !quote) state=XSEPARATOR;
+  else if( state==XTOKEN && (space || c=='@') && token_pos > 1 && !escape && !quote) state=XSEPARATOR;
 
   if(token_pos>=sizetok)
   {
@@ -1755,7 +1761,8 @@ void print_vhdl_primitive(FILE *fd, int inst) /* netlist  primitives, 20071217 *
    }
 
                  /* 20180911 dont print escaping backslashes */
-   if(c!='\0' && (c!='\\'  || escape) ) fputc(c,fd);
+   if(c!='@' && c!='\0' && (c!='\\'  || escape) ) fputc(c,fd);
+   if(c == '@') s--;
    state=XBEGIN;
   }
                  /* 20180911 dont print escaping backslashes */
@@ -1821,7 +1828,7 @@ void print_verilog_primitive(FILE *fd, int inst) /* netlist switch level primiti
                                  /*20171029 */
   if( state==XBEGIN && c=='@'  && !escape ) state=XTOKEN;
   /* 20171029 added !escape, !quote */
-  else if( state==XTOKEN && space && !escape && !quote) state=XSEPARATOR;
+  else if( state==XTOKEN && (space || c == '@') && token_pos > 1 && !escape && !quote) state=XSEPARATOR;
 
   if(token_pos>=sizetok)
   {
@@ -1914,8 +1921,8 @@ void print_verilog_primitive(FILE *fd, int inst) /* netlist switch level primiti
      my_free(&tclcmd);
    }
                  /* 20180911 dont print escaping backslashes */
-   if(c!='\0' && (c!='\\'  || escape) ) fputc(c,fd);
-
+   if(c!='@' && c!='\0' && (c!='\\'  || escape) ) fputc(c,fd);
+   if(c == '@') s--;
    state=XBEGIN;
   }
                  /* 20180911 dont print escaping backslashes */
@@ -2004,7 +2011,7 @@ char *translate(int inst, char* s)
 
   space=SPACE3(c); /* 20150418 use SPACE3 */
   if( state==XBEGIN && c=='@' && !escape  ) state=XTOKEN; /* 20161210 escape */
-  else if( state==XTOKEN && space) state=XSEPARATOR;
+  else if( state==XTOKEN && (space || c == '@') && token_pos > 1 ) state=XSEPARATOR;
 
   if(result_pos>=size)
   {
@@ -2045,16 +2052,21 @@ char *translate(int inst, char* s)
     memcpy(result+result_pos,tmp_sym_name, tmp+1); /* 20180923 */
     result_pos+=tmp;
    } else if(token[0]=='@' && token[1]=='#') {  /* 20180911 */
-     int n; 
+     int n;
      char *subtok = my_malloc(532, sizetok * sizeof(char));
      char *subtok2 = my_malloc(43, sizetok * sizeof(char)+20);
+     char *subtok3=NULL, *pinname;
 
      subtok[0]='\0';
      n=-1;
      sscanf(token+2, "%d:%s", &n, subtok);
      if(n!=-1 && subtok[0]) {
-       my_snprintf(subtok2, sizetok * sizeof(char)+20, "%s_%d", subtok, n);
-       value = get_tok_value(inst_ptr[inst].prop_ptr,subtok2,0);
+       pinname = get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr,"name",0);
+       subtok3 = my_malloc(52, 100+sizetok+get_tok_value_size);
+       my_snprintf(subtok3, 100+sizetok+get_tok_value_size, "%s(%s)", subtok, pinname);
+       my_snprintf(subtok2, sizetok * sizeof(char)+20, "%s(%d)", subtok, n);
+       value = get_tok_value(inst_ptr[inst].prop_ptr,subtok3,0);
+       if(!value[0]) value = get_tok_value(inst_ptr[inst].prop_ptr,subtok2,0);
        if(!value[0]) value = get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr,subtok,0);
        if(value[0] != 0) {
          char *ss;
@@ -2074,6 +2086,7 @@ char *translate(int inst, char* s)
      }
      my_free(&subtok);
      my_free(&subtok2);
+     my_free(&subtok3);
    } else if(strcmp(token,"@sch_last_modified")==0) {
 
     my_strncpy(file_name, abs_sym_path(inst_ptr[inst].name, ".sch"), S(file_name));
@@ -2178,7 +2191,8 @@ char *translate(int inst, char* s)
      result_pos+=tmp;
    }
 
-   result[result_pos++]=c;
+   if(c=='@') s--;
+   else result[result_pos++]=c;
    state=XBEGIN;
   }
   else if(state==XBEGIN) result[result_pos++]=c; 

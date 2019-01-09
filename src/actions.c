@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
  * simulation.
- * Copyright (C) 1998-2018 Stefan Frederik Schippers
+ * Copyright (C) 1998-2019 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ void set_modify(int mod)
 void print_version()
 {
   printf("XSCHEM V%s\n", XSCHEM_VERSION);
-  printf("Copyright 1998-2018 Stefan Schippers\n");
+  printf("Copyright 1998-2019 Stefan Schippers\n");
   printf("\n");
   printf("This is free software; see the source for copying conditions.  There is NO\n");
   printf("warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n");
@@ -90,16 +90,16 @@ void set_grid(double newgrid)
     tclsetvar("grid", str);
 }
 
-int set_netlist_dir(int force) /*  20081210 */
+int set_netlist_dir(int force, char *dir)
 {
-    if( !netlist_dir || force ) {
-      tcleval( "select_dir"); /*  20081210 */
-      if(!strcmp("", Tcl_GetStringResult(interp)) ) {
-        return 0;
-      }
-      my_strdup(0, &netlist_dir, Tcl_GetStringResult(interp)); /*  20081210 */
-    }
-    return 1;
+  char cmd[PATH_MAX+200];
+  if(dir) my_snprintf(cmd, S(cmd), "select_dir %d %s", force, dir);
+  else    my_snprintf(cmd, S(cmd), "select_dir %d", force);
+  tcleval(cmd);
+  if(!strcmp("", Tcl_GetStringResult(interp)) ) {
+    return 0;
+  }
+  return 1;
 }
 
 /* wrapper to TCL function */

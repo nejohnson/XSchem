@@ -33,7 +33,7 @@ user:~$ xschem
 
  <p> if a filename is given that file will be loaded on startup: </p>
  <pre class="code">
-user:~$ xschem ../xschem_library/examples/0_examples_top.sch
+user:~$ xschem .../xschem_library/examples/0_examples_top.sch
  </pre>
  <img src="xschem_home1.png">
 
@@ -44,39 +44,50 @@ user:~$ xschem ../xschem_library/examples/0_examples_top.sch
   xschem accepts short (-h) or long (--help) options:
  </p>
  <pre class="code">
-   usage: xschem [options] [schematic | symbol ]
+
+
+usage: xschem [options] [schematic | symbol ]
 Options:
-  -h  --help          print this help
-  -n  --netlist       do a netlist of the given schematic cell
-  -v  --version       print version information and exit.
-  -V  --vhdl          set netlist type to VHDL
-  -S  --simulate      run a simulation of the current schematc file 
-                      (spice/Verilog/VHDL, depending on the netlist 
-                      type chosen).
-  -w  --verilog       set netlist type to Verilog
-  -i  --no_rcload     do not load any xschemrc file
-  -t  --tedax         set netlist type to tEDAx
-  -s  --spice         set netlist type to SPICE
-  -3  --a3page        set page size for pdf export to A3
-  -x  --no_x          dont use X (only command mode)
-  -z  --rainbow       use a raibow-looking layer color table
-  -W  --waves         show simulation waveforms
-  -f  --flat_netlist  set flat netlist (for spice format only)
-  -r  --no_readline   start without the tclreadline package ( this is
-                      necessary if stdin and stdout are to be redirected
-                      for example to /dev/null).
-  -c  --color_ps      set color postscript
-  --rcfile &lt;file&gt;     use &lt;file&gt; as a rc file for startup instead of the
-                      default xschemrc.
-  -p  --postscript    export pdf schematic
-      --png           export png schematic
-      --svg           export svg schematic
-  -q  --quit          quit after doing things (no interactive mode)
+  -h  --help           print this help
+  -n  --netlist        do a netlist of the given schematic cell
+  -v  --version        print version information and exit.
+  -V  --vhdl           set netlist type to VHDL
+  -S  --simulate       run a simulation of the current schematc file 
+                       (spice/Verilog/VHDL, depending on the netlist 
+                       type chosen).
+  -w  --verilog        set netlist type to Verilog
+  -i  --no_rcload      do not load any xschemrc file
+  -o  --netlist_path   set output for netlist
+  -t  --tedax          set netlist type to tEDAx
+  -s  --spice          set netlist type to SPICE
+  -3  --a3page         set page size for pdf export to A3
+  -x  --no_x           dont use X (only command mode)
+  -z  --rainbow        use a raibow-looking layer color table
+  -W  --waves          show simulation waveforms
+  -f  --flat_netlist   set flat netlist (for spice format only)
+  -r  --no_readline    start without the tclreadline package ( this is
+                       necessary if stdin and stdout are to be redirected
+                       for example to /dev/null).
+  -c  --color_ps       set color postscript
+  --rcfile &lt;file&gt;      use &lt;file&gt; as a rc file for startup instead of the
+                       default xschemrc.
+  -p  --postscript     export pdf schematic
+      --png            export png schematic
+      --svg            export svg schematic
+  -q  --quit           quit after doing things (no interactive mode)
   -l &lt;file&gt;
-  --log &lt;file&gt;        set a log file
+  --log &lt;file&gt;         set a log file
   -d &lt;n&gt;
-  --debug &lt;n&gt;         set debug level:  1,  2,  3,..  C program debug
+  --debug &lt;n&gt;          set debug level:  1,  2,  3,..  C program debug
                                        -1, -2, -3...  TCL frontend debug
+
+xschem: interactive schematic capture program
+
+Example:   xschem counter.sch
+the schematic file `counter' will be loaded searching in the
+list of library paths provided by TCL variable XSCHEM_LIBRARY_PATH
+This variable is set in user or system xschem startup file 
+(&lt;install root&gt;/share/xschem/xschemrc or ~/.xschem/xschemrc)
 
  </pre>
  <h3> CREATING A NEW SCHEMATIC</H3>
@@ -94,7 +105,9 @@ Options:
   schematic files (.sch) or symbol files (.sym) are stored).
   in XSCHEM all design libraries are placed in the locations specified by <kbd>XSCHEM_LIBRARY_PATH</kbd> defined in the 
   <kbd>xschemrc</kbd> file. Choose for example <kbd> ~/xschem_library/mylib</kbd> and write <kbd>test.sch</kbd>
-  as the schematic name.
+  as the schematic name.<br>
+  Another possibility is to just launch xschem with a filename from the command line: <kbd>xschem test.sch</kbd>
+
  </p>
  <img src="xschem_saveas.png"> 
  <p>

@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
  * simulation.
- * Copyright (C) 1998-2018 Stefan Frederik Schippers
+ * Copyright (C) 1998-2019 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 
 #ifndef CADGLOBALS
 #define CADGLOBALS
-#define XSCHEM_VERSION "2.8.2_RC1"
+#define XSCHEM_VERSION "2.8.2_RC3"
 #define XSCHEM_FILE_VERSION "1.0"
 
 #if HAS_PIPE == 1
@@ -602,7 +602,7 @@ extern int renumber_instances;
 
 /*  functions */
 extern void print_version(void);
-extern int set_netlist_dir(int force);
+extern int set_netlist_dir(int force, char *dir);
 extern int  check_lib(char * s);
 extern void select_all(void);
 extern void change_linewidth(double w);

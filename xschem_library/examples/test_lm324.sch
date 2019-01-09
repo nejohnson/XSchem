@@ -1,3 +1,4 @@
+v {xschem version=2.8.2_RC1 file_version=1.0}
 G {}
 V {}
 S {}
@@ -22,6 +23,10 @@ vvcc vcc 0 dc VCC
 vvss vss 0 dc VSS
 vp p 0 pwl 0 0 100n 2 200u 2 201u 3 400u 3 401u 1
 
+** models are generally not free: you must download
+** SPICE models for active devices and put them  into the below 
+** referenced file in netlist/simulation directory.
+.include model_lm324.txt
 .tran 0.1u 500u
 "}
 C {lm324} 640 -300 0 0 {name=x1}

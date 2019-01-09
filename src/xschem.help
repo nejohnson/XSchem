@@ -1,35 +1,36 @@
 usage: xschem [options] [schematic | symbol ]
 Options:
-  -h  --help          print this help
-  -n  --netlist       do a netlist of the given schematic cell
-  -v  --version       print version information and exit.
-  -V  --vhdl          set netlist type to VHDL
-  -S  --simulate      run a simulation of the current schematc file 
-                      (spice/Verilog/VHDL, depending on the netlist 
-                      type chosen).
-  -w  --verilog       set netlist type to Verilog
-  -i  --no_rcload     do not load any xschemrc file
-  -t  --tedax         set netlist type to tEDAx
-  -s  --spice         set netlist type to SPICE
-  -3  --a3page        set page size for pdf export to A3
-  -x  --no_x          dont use X (only command mode)
-  -z  --rainbow       use a raibow-looking layer color table
-  -W  --waves         show simulation waveforms
-  -f  --flat_netlist  set flat netlist (for spice format only)
-  -r  --no_readline   start without the tclreadline package ( this is
-                      necessary if stdin and stdout are to be redirected
-                      for example to /dev/null).
-  -c  --color_ps      set color postscript
-  --rcfile <file>     use <file> as a rc file for startup instead of the
-                      default xschemrc.
-  -p  --postscript    export pdf schematic
-      --png           export png schematic
-      --svg           export svg schematic
-  -q  --quit          quit after doing things (no interactive mode)
+  -h  --help           print this help
+  -n  --netlist        do a netlist of the given schematic cell
+  -v  --version        print version information and exit.
+  -V  --vhdl           set netlist type to VHDL
+  -S  --simulate       run a simulation of the current schematc file 
+                       (spice/Verilog/VHDL, depending on the netlist 
+                       type chosen).
+  -w  --verilog        set netlist type to Verilog
+  -i  --no_rcload      do not load any xschemrc file
+  -o  --netlist_path   set output for netlist
+  -t  --tedax          set netlist type to tEDAx
+  -s  --spice          set netlist type to SPICE
+  -3  --a3page         set page size for pdf export to A3
+  -x  --no_x           dont use X (only command mode)
+  -z  --rainbow        use a raibow-looking layer color table
+  -W  --waves          show simulation waveforms
+  -f  --flat_netlist   set flat netlist (for spice format only)
+  -r  --no_readline    start without the tclreadline package ( this is
+                       necessary if stdin and stdout are to be redirected
+                       for example to /dev/null).
+  -c  --color_ps       set color postscript
+  --rcfile <file>      use <file> as a rc file for startup instead of the
+                       default xschemrc.
+  -p  --postscript     export pdf schematic
+      --png            export png schematic
+      --svg            export svg schematic
+  -q  --quit           quit after doing things (no interactive mode)
   -l <file>
-  --log <file>        set a log file
+  --log <file>         set a log file
   -d <n>
-  --debug <n>         set debug level:  1,  2,  3,..  C program debug
+  --debug <n>          set debug level:  1,  2,  3,..  C program debug
                                        -1, -2, -3...  TCL frontend debug
 
 xschem: interactive schematic capture program

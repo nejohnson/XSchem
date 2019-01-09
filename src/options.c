@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
  * simulation.
- * Copyright (C) 1998-2018 Stefan Frederik Schippers
+ * Copyright (C) 1998-2019 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,6 +79,11 @@ void check_opt(char *opt, char *optval, int type)
     } else if( (type == SHORT && *opt == 'l') || (type == LONG && !strcmp("log", opt)) ) {
         if(optval) errfp = fopen(optval, "w");
 
+    } else if( (type == SHORT && *opt == 'o') || (type == LONG && !strcmp("netlist_path", opt)) ) {
+        if(optval) {
+          my_strdup(48, &netlist_dir, optval);
+        }
+
     } else if( (type == SHORT && *opt == 's') || (type == LONG && !strcmp("spice", opt)) ) {
         if(debug_var>=1) fprintf(errfp, "process_options(): set netlist type to spice\n");
         netlist_type=CAD_SPICE_NETLIST;
@@ -140,6 +145,9 @@ int process_options(int argc, char *argv[])
             else if(!strcmp("log", opt)) {
               optval = argv[++i];
             }
+            else if(!strcmp("netlist_path", opt)) {
+              optval = argv[++i];
+            }
             else if(!strcmp("rcfile", opt)) {
               optval = argv[++i];
             }
@@ -156,6 +164,9 @@ int process_options(int argc, char *argv[])
             optval = argv[++i];
           }
           else if(*opt == 'd') {
+            optval = argv[++i];
+          }
+          else if(*opt == 'o') {
             optval = argv[++i];
           }
           check_opt(opt, optval, SHORT);

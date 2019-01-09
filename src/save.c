@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
  * simulation.
- * Copyright (C) 1998-2018 Stefan Frederik Schippers
+ * Copyright (C) 1998-2019 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -907,7 +907,7 @@ void load_schematic(int load_symbols, const char *abs_name, int reset_undo) /* 2
       clear_drawing();
     } else {
       clear_drawing();
-      my_snprintf(msg, S(msg), "set current_dirname [file dirname %s]", name);
+      my_snprintf(msg, S(msg), "set current_dirname \"[file dirname %s]\"", name);
       tcleval(msg);
       if(debug_var>=1) fprintf(errfp, "load_schematic(): reading file: %s\n", name);
       read_xschem_file(fd);

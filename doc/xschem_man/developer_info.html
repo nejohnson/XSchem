@@ -117,6 +117,7 @@ p{padding: 15px  30px 10px;}
   A single character at the beginning of a line, separated by white space from subsequent fields marks the type of object:
  </p>
  <ul>
+  <li><kbd>v</kbd> : XSCHEM Version string
   <li><kbd>S</kbd> : Global property associated the .sch/.sym file for SPICE netlisting</li>
   <li><kbd>V</kbd> : Global property associated the .sch/.sym file for VERILOG netlisting</li>
   <li><kbd>G</kbd> : Global property associated the .sch/.sym file for VHDL netlisting</li>
@@ -176,6 +177,15 @@ T {NF=@nf} -5 -15 0 1 0.15 0.15 {}
  </ul>
  <p>
   the object tag in column 1 is followed by space separated fields that completely define the corresponding object.
+ </p>
+ <h3>VERSION STRING</h3>
+ <p>
+  Example: <kbd><br>
+v {xschem version=2.8.2_RC3 file_version=1.0}</kbd>
+ </p>
+ <p>
+  Two attributes are defined, the xschem version and the file format version.
+  Current file format version is 1.0. This string is guaranteed to be the first one in XSCHEM .sch and .sym files.
  </p>
  <h3>GLOBAL SCHEMATIC/SYMBOL PROPERTIES</h3>
  <p>

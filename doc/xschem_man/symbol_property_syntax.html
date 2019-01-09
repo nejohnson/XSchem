@@ -125,10 +125,11 @@ type=nmos
     behavioral VHDL code in the global schematic property that describes the block in a way
     the VHDL simulator can understand.</p>
   <li><kbd>place</kbd></li>
-  <p> this attribute is only useable in <kbd>netlist_commands</kbd> type symbols and tells XSCHEM that 
+  <p> this attribute is only useable in <kbd>netlist_commands</kbd> type symbols (<kbd>netlist.sym, code.sym,...</kbd>) 
+    if set to <kbd>end</kbd> it tells XSCHEM that 
     the component instance of that symbol must be netlisted at the end, after all the other elements.
     This is sometimes needed for SPICE commands that must ge given at the end of the netlist.
-    This will be explained more in detil in the <a href="...">netlisting</a> slide.</p>
+    This will be explained more in detail in the <a href="...">netlisting</a> slide.</p>
   <li><kbd>generic_type</kbd></li>
   <p><kbd>generic_type</kbd> defines the type of parameters passed to VHDL components. Consider the following
     MOS symbol definition; the <kbd>model</kbd> attribute is declared as <kbd>string</kbd> and it will be

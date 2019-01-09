@@ -12,7 +12,7 @@ user_library_dir=$(HOME)/xschem_library
 
 ## specify system-wide symbol libraries;
 ## you may redefine it later in .xschem or xschemrc startup files
-system_library_dir=${sharedir}/xschem_library
+system_library_dir=${sharedir}/xschem_library/devices
 
 xschem_library_path=$(user_library_dir):$(system_library_dir)
 
@@ -124,8 +124,8 @@ install: xschem
 	cp -r ../doc/* $(prefix)/share/doc/xschem/
 	cp utile/* $(prefix)/share/xschem/utile
 	cp -ru ../xschem_library/devices/* $(system_library_dir)
-	cp -ru ../xschem_library/examples $(user_library_dir)
-	cp -ru ../xschem_library/pcb $(user_library_dir)
+	cp -ru ../xschem_library/examples $(prefix)/share/doc/xschem/
+	cp -ru ../xschem_library/pcb $(prefix)/share/doc/xschem/
 
 .PHONY: uninstall
 uninstall:

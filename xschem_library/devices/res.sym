@@ -5,7 +5,7 @@ verilog_format="tran @name ( @#0 , @#1 ) ;"
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device"
-template="name=R0 m=1 value=1k footprint=1206 device=resistor"}
+template="name=R1 m=1 value=1k footprint=1206 device=resistor"}
 V {}
 S {}
 E {}

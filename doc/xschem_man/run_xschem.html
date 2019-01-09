@@ -92,25 +92,17 @@ This variable is set in user or system xschem startup file
  </pre>
  <h3> CREATING A NEW SCHEMATIC</H3>
  <p>
-  To create a new schematic one possible approach is to delete the whole drawing window and save with a 
-  different name (Save As). If you hit <kbd>&lt;ctrl&gt;a</kbd> all elements will be selected (select All
-  function).
+  To create a new schematic  run xschem and give a non existent filename:<br>
+  <kbd>xschem aaa.sch</kbd>
  </p>
- <img src="xschem_all_selected.png"> 
- <p> 
-  Use the <kbd>Delete</kbd> key to delete all selected objects.
-  Now press the <kbd>'&lt;ctrl shift&gt;s'</kbd> key or use the menu <kbd>'Save As'</kbd> function, 
-  use the TCL fileselector to go to a XSCHEM library
-  (we will cover libraries more in detail later, XSCHEM libraries are just directories where 
-  schematic files (.sch) or symbol files (.sym) are stored).
-  in XSCHEM all design libraries are placed in the locations specified by <kbd>XSCHEM_LIBRARY_PATH</kbd> defined in the 
-  <kbd>xschemrc</kbd> file. Choose for example <kbd> ~/xschem_library/mylib</kbd> and write <kbd>test.sch</kbd>
-  as the schematic name.<br>
-  Another possibility is to just launch xschem with a filename from the command line: <kbd>xschem test.sch</kbd>
-
+ <img src="xschem_new_file.png"> 
+ <p>
+   You can save the schematic by pressing <kbd>'&lt;ctrl shift&gt;s'</kbd> or
+   by using the menu <kbd>File - Save As</kbd>:
  </p>
  <img src="xschem_saveas.png"> 
  <p>
+  If no filename change is needed you can just use <kbd>File - Save</kbd>.
   Now a new empty schematic file is created. You can use this <kbd>test.sch</kbd> for testing while
   reading the manual.
   After exiting XSCHEM you can load directly this schematic with the following commands, they are
@@ -119,11 +111,11 @@ This variable is set in user or system xschem startup file
 # xschem defaults its search to the 
 # XSCHEM_LIBRARY_PATH root path
 # .sch may be omitted, it is added by default ...
-xschem mylib/test
+xschem test
 # or ...
-xschem mylib/test.sch
-# full paths are OK
-xschem ${HOME}/xschem_library/mylib/test.sch
+xschem /home/schippes/x/test.sch
+# or ...
+xschem ${HOME}/schippes/x/test
  </pre>
  </p>
  <p>

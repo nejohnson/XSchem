@@ -38,38 +38,73 @@ p{padding: 15px  30px 10px;}
 
  </p>
  <pre class="code" style="height: 400px;">
-####
-#### xschemrc system configuration file
-#### values may be overridden by user's ~/.xschem/xschemrc configuration file
-####
+# xschemrc system configuration file
+# values may be overridden by user's ~/.xschem/xschemrc configuration file
+# or by project-local ./xschemrc
 
-#### xschem installation directory
-#### normally there is no reason to set this variable if using standard installation.
-#### location of files is set at compile time but may be overridden with following line
+###########################################################################
+# xschem installation directory XSCHEM_SHAREDIR
+###########################################################################
+
+# normally there is no reason to set this variable if using standard
+# installation. Location of files is set at compile time but may be overridden
+# with following line:
+#
 # set XSCHEM_SHAREDIR $env(HOME)/share/xschem
 
-#### xschem system-wide design library paths
-#### if unset xschem starts with following default:
-#### XSCHEM_LIBRARY_PATH $env(HOME/xschem_library):${XSCHEM_SHAREDIR}/xschem_library
-#### you may overide the default system-wide library here and append in user's xschemrc
-#### the user's libraries.
-# set XSCHEM_LIBRARY_PATH ${XSCHEM_SHAREDIR}/xschem_library
+###########################################################################
+# xschem system-wide design library paths XSCHEM_LIBRARY_PATH
+###########################################################################
 
-#### directory where simulations, netlist and simulator outputs are placed
-#### if unset xschem asks user to choose one when doing a netlist
+# If unset xschem starts with the default set compile time, typically:
+# XSCHEM_LIBRARY_PATH .:~/.xschem/xschem_library:${XSCHEM_SHAREDIR}/xschem_library/devices
+
+# For testing in build src directory
+#
+# set XSCHEM_LIBRARY_PATH .:../xschem_library/devices
+
+# for testing after installation:
+#
+# set XSCHEM_LIBRARY_PATH .:~/.xschem/xschem_library
+# append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/examples
+# append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/pcb
+# append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/xschem_library/devices
+
+
+###########################################################################
+# Window to open on startup XSCHEM_START_WINDOW
+###########################################################################
+
+# Start without a design:
+#
+# set XSCHEM_START_WINDOW {}
+
+# Start with a design
+# To avoid absolute paths, use a path that is relative to one of the
+# XSCHEM_LIBRARY_PATH directories.
+#
+# set XSCHEM_START_WINDOW {0_examples_top}
+
+
+###########################################################################
+# Directory where simulations, netlist and simulator outputs are placed
+###########################################################################
+# If unset xschem asks user to choose one when doing a netlist
+#
 # set netlist_dir $env(HOME)/xschem_library/simulations
 
-#### Window to open on startup
-#set XSCHEM_START_WINDOW {mylib/0_top}
-#### some default behavior
+###########################################################################
+# some default behavior
+###########################################################################
+
 set netlist_type spice ;# allowed : spice, verilog, vhdl, tedax
-set hspice_netlist 1 ;# tuning spice netlist syntax for synopsys Hspice (1) or ELDO (8)
+set hspice_netlist 1
 set verilog_2001 1
 # set line_width 2
 set change_lw 1
 set color_ps 1
 set initial_geometry {800x600}
-
+# set unzoom_nodrift 0
 
  </pre><br>
  <p class="important">

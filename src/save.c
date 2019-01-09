@@ -923,8 +923,10 @@ void load_schematic(int load_symbols, const char *abs_name, int reset_undo) /* 2
     my_strncpy(schematic[currentsch], "untitled.sch", S(schematic[currentsch]));
   }
   if(has_x) { /* 20161207 moved after if( (fd=..))  */
-    tcleval( "wm title . \"xschem - [file tail [xschem get schname]]\""); /* 20150417 set window and icon title */
-    tcleval( "wm iconname . \"xschem - [file tail [xschem get schname]]\"");
+    if(strcmp(get_cell(schematic[currentsch],1), "systemlib/font")) {
+      tcleval( "wm title . \"xschem - [file tail [xschem get schname]]\""); /* 20150417 set window and icon title */
+      tcleval( "wm iconname . \"xschem - [file tail [xschem get schname]]\"");
+    }
   }
   update_conn_cues(0, 0);
 }

@@ -112,11 +112,11 @@ p{padding: 15px  30px 10px;}
    A symbol is stored in a .sym file.
   </p>
    <pre class=code style="height: 240px;">
-user:~$ cd xschem_library/
-user:~/xschem_library$ ls
-devices  examples  mylib  simulations
-user:~/xschem_library$ cd devices
-user:~/xschem_library/devices$ ls *.sym
+user:~$ cd .../share/xschem/xschem_library/
+user:xschem_library$ ls
+devices
+user:xschem_library$ cd devices
+user:devices$ ls *.sym
 ammeter.sym                generic.sym            noconn.sym             switch_hsp.sym
 arch_declarations.sym      gnd.sym                npn.sym                switch.sym
 architecture.sym           ind.sym                opin.sym               title.sym
@@ -134,12 +134,14 @@ delay.sym                  netlist_not_shown.sym  res.sym                vsource
 diode.sym                  netlist.sym            spice_probe.sym        zener.sym
 flash_cell.sym             nmos3.sym              spice_probe_vdiff.sym
 generic_pin.sym            nmos4.sym              switch_hsp_pwl.sym
+user:devices$ cd ...share/doc/xschem/
+user:xschem$ ls
+examples  pcb
    </pre>
   <p>
    To place a symbol in the schematic window press the <kbd>'Insert'</kbd> key. A file chooser pops up, 
-   go to the xschem design root directory (<kbd>${HOME}/xschem_library</kbd> in the distribution
-   by default), descend in one of the xschem design directories (devices for example)
-   and select a symbol (res.sym for example).
+   go to the xschem devices directory (<kbd>.../share/xschem/xschem_library/devices</kbd> in the distribution
+   by default) and select a symbol (res.sym for example).
    The selected symbol will be instantiated as a component in the schematic at the mouse
    pointer coordinates.
   </p>

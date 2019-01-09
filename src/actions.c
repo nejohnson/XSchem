@@ -29,7 +29,7 @@ void set_modify(int mod)
   modified = mod;
   if(mod != prev) {
     prev = mod;
-    if(has_x) {
+    if(has_x && strcmp(get_cell(schematic[currentsch],1), "systemlib/font")) {
       if(mod == 1) {
         tcleval( "wm title . \"xschem - [file tail [xschem get schname]]*\"");    /* 20161207 */
         tcleval( "wm iconname . \"xschem - [file tail [xschem get schname]]*\""); /* 20161207 */

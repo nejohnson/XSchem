@@ -1,6 +1,6 @@
 G {type=vcvs
 format="@name @pinlist @vnam @value"
-template="name=f1 vnam=v1 value=1"} 
+template="name=F1 vnam=v1 value=1"} 
 L 4 0 -20 20 -0 {} 
 L 4 -20 0 0 -20 {} 
 L 4 -20 0 0 20 {} 

@@ -1,7 +1,7 @@
 v {xschem version=2.8.2_RC3 file_version=1.0}
 G {type=inductor
 format="@name @pinlist @value"
-template="name=l1 value=10n"}
+template="name=L1 value=10n"}
 V {}
 S {}
 E {}

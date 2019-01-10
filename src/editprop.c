@@ -820,7 +820,7 @@ void update_symbol(const char *result, int x)
      if(debug_var>=1) fprintf(errfp, "update_symbol(): name=%s, inst_ptr[i].prop_ptr=%s\n", name, inst_ptr[i].prop_ptr);
      my_strdup(89, &ptr,subst_token(inst_ptr[i].prop_ptr, "name", name) );
                     /* set name of current inst */
-     new_prop_string(&inst_ptr[i].prop_ptr, ptr,0); /* set new prop_ptr */
+     new_prop_string(&inst_ptr[i].prop_ptr, ptr, k); /* set new prop_ptr */
      my_strdup2(90, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name",0)); /* 20150409 */
  
      type=instdef[inst_ptr[i].ptr].type; /* 20150409 */

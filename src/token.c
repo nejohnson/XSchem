@@ -451,11 +451,10 @@ void new_prop_string(char **new_prop,const char *old_prop, int fast)
  const char *tmp2;
  int q,qq;
  static int last[256];
- static int not_zero=0;
  int old_name_len; /* 20180926 */
  int new_name_len;
 
- if(!fast && not_zero) {for(q=1;q<=255;q++) last[q]=1;not_zero=0;}
+ if(!fast) {for(q=1;q<=255;q++) last[q]=1;}
  
  if(old_prop==NULL) 
  { 
@@ -488,7 +487,7 @@ void new_prop_string(char **new_prop,const char *old_prop, int fast)
   new_name_len = my_snprintf(new_name, old_name_len + 40, "%c%d%s", prefix,q, tmp); /* added new_name_len 20180926 */
   if(hash_lookup(new_name, NULL, 0, new_name_len) == NULL) 
   {
-   if(fast) {last[(int)prefix]=q+1;not_zero=1;}
+   last[(int)prefix]=q+1;
    break;
   }
  } 

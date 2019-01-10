@@ -17,9 +17,9 @@ END  { endfile(_filename_) }
 BEGIN{
 }
 
-/Copyright \(C\) 1998-2018/{
-  replace_pattern("2018", "2019")
-  found=1
+/template *= *"name=/{
+  sub(/=./, toupper("&"))
+  print
 }
 
 

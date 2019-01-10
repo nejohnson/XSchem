@@ -1189,9 +1189,9 @@ void zoom_full(int dr)
   yorigin=(areah-4*lw)*zoom-boundbox.y2 - (areah-4*lw)/40*zoom;
   if(debug_var>=1) fprintf(errfp, "zoom_full(): areaw=%d, areah=%d\n", areaw, areah);
 
+  change_linewidth(-1.);
   if(dr)
   { 
-   change_linewidth(-1.);
    if(!has_x) return;
    draw();
   }

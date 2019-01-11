@@ -154,11 +154,12 @@ proc task { cmd {dir .}  {background fg}} {
 
 
 # 20161121
-proc convert_to_pdf {filename} {
+proc convert_to_pdf {filename dest} {
   global a3page
   if { $a3page == 1 } { set paper a3 } else { set paper a4 }
   if { ![catch "exec ps2pdf -sPAPERSIZE=$paper $filename" msg] } {
     # ps2pdf succeeded, so remove original .ps file
+    file rename -force [file rootname $filename].pdf $dest
     if { ![xschem get debug_var] } {
       file delete $filename
     }
@@ -166,11 +167,10 @@ proc convert_to_pdf {filename} {
 }
 
 # 20161121
-proc convert_to_png {filename} {
+proc convert_to_png {filename dest} {
   global to_png tcl_debug
-  set destfile [file rootname $filename].png
   # puts "---> $to_png $filename $destfile"
-  if { ![catch "exec $to_png $filename $destfile" msg] } {
+  if { ![catch "exec $to_png $filename $dest" msg] } {
     # conversion succeeded, so remove original .xpm file
     if {$tcl_debug>=0} { 
       file delete $filename

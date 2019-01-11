@@ -427,7 +427,8 @@ void svg_draw(void)
  trim_wires();    /* 20161121 add connection boxes on wires but undo at end */
  
   
- fd=fopen("plot.svg", "w");
+ if(plotfile[0]) fd=fopen(plotfile, "w");
+ else fd=fopen("plot.svg", "w");
 
  fprintf(fd, "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"%g\" height=\"%g\" version=\"1.1\">\n", dx, dy);
 

@@ -53,9 +53,13 @@ void check_opt(char *opt, char *optval, int type)
         if(debug_var>=1) fprintf(errfp, "process_options(): will print postscript\n");
         do_print=1;
 
+    } else if( (type == LONG && !strcmp("plotfile", opt)) ) {
+        if(debug_var>=1) fprintf(errfp, "process_options(): user plotfile specified: %s\n", optval ? optval : "NULL");
+        if(optval) my_strncpy(plotfile, optval, S(plotfile));
+
     } else if( (type == LONG && !strcmp("rcfile", opt)) ) {
         if(debug_var>=1) fprintf(errfp, "process_options(): user rcfile specified: %s\n", optval ? optval : "NULL");
-        if(optval) strcpy(rcfile, optval);
+        if(optval) my_strncpy(rcfile, optval, S(rcfile));
 
     } else if( (type == LONG && !strcmp("png", opt)) ) {
         if(debug_var>=1) fprintf(errfp, "process_options(): will print png\n");
@@ -149,6 +153,9 @@ int process_options(int argc, char *argv[])
               optval = argv[++i];
             }
             else if(!strcmp("rcfile", opt)) {
+              optval = argv[++i];
+            }
+            else if(!strcmp("plotfile", opt)) {
               optval = argv[++i];
             }
           }

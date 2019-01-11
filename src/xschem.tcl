@@ -172,7 +172,7 @@ proc convert_to_png {filename dest} {
   # puts "---> $to_png $filename $destfile"
   if { ![catch "exec $to_png $filename $dest" msg] } {
     # conversion succeeded, so remove original .xpm file
-    if {$tcl_debug>=0} { 
+    if { ![xschem get debug_var] } {
       file delete $filename
     }
   }

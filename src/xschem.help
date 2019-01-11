@@ -21,6 +21,7 @@ Options:
                        necessary if stdin and stdout are to be redirected
                        for example to /dev/null).
   -c  --color_ps       set color postscript
+  --plotfile <file>    use <file> as output for plot (png, svg, ps)
   --rcfile <file>      use <file> as a rc file for startup instead of the
                        default xschemrc.
   -p  --postscript     export pdf schematic

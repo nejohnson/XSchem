@@ -43,6 +43,7 @@ void print_image()
 {
   int w, h, tmp, ww, hh;
   int modified_save; /* 20161121 */
+  char cmd[PATH_MAX+100];
   if(!has_x) return ;
 
   modified_save=modified; /* 20161121 save state */
@@ -114,7 +115,10 @@ void print_image()
   XpmWriteFileFromPixmap(display, "plot.xpm", save_pixmap,0, NULL ); /* .gz ???? */
   if(debug_var>=1) fprintf(errfp, "print_image(): Window image saved\n");
 
-  tcleval( "convert_to_png plot.xpm"); /* 20161121 */
+  if(plotfile[0]) {
+    my_snprintf(cmd, S(cmd), "convert_to_png plot.xpm %s", plotfile);
+    tcleval(cmd); /* 20161121 */
+  } else tcleval( "convert_to_png plot.xpm plot.png"); /* 20161121 */
   pop_undo(0); /* 20161121 restore state */
   modified=modified_save;  /* 20161121 */
 

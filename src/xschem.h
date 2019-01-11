@@ -464,6 +464,7 @@ extern char home_dir[PATH_MAX]; /* home dir obtained via getpwuid */
 extern char pwd_dir[PATH_MAX]; /* obtained via getcwd() */
 extern int load_initfile;
 extern char rcfile[PATH_MAX];
+extern char plotfile[PATH_MAX];
 extern int persistent_command;
 
 extern int debug_var; 

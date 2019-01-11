@@ -519,13 +519,18 @@ void ps_draw(void)
 
 
 
- if(debug_var>=1) fprintf(errfp, "ps_draw(): lw=%d\n",lw);
+ if(debug_var>=1) fprintf(errfp, "ps_draw(): lw=%d plotfile=%s\n",lw, plotfile);
  fprintf(fd, "showpage\n\n");
  fprintf(fd, "%%%%EOF\n");
  fclose(fd);
  draw_grid=old_grid;
  my_free(&ps_colors);
- my_strdup(312, &tmp, "convert_to_pdf plot.ps"); /* 20161121 */
+ if(plotfile[0]) {
+   my_strdup(53, &tmp, "convert_to_pdf plot.ps "); /* 20161121 */
+   my_strcat(54, &tmp, plotfile);
+ } else {
+   my_strdup(312, &tmp, "convert_to_pdf plot.ps plot.pdf"); /* 20161121 */
+ }
  tcleval( tmp);
  my_free(&tmp);
  pop_undo(0); /* 20161121 */

@@ -122,21 +122,21 @@ C {ipin} 530 -90 0 0 {name=p4 lab=VSS}
 C {opin} 600 -130 0 0 {name=p5 lab=OUT}
 C {nmos3} 1090 -440 0 0 {name=xm2 model=irf540 m=1
 url="http://www.ece.usu.edu/ece_store/spec/IRF540.pdf"}
-C {res} 1030 -410 0 1 {name=r7 m=1 value=190}
+C {res} 1030 -410 0 1 {name=R7 m=1 value=190}
 C {nmos3} 1090 -760 0 0 {name=xm1 model=irf540 m=1
 url="http://www.ece.usu.edu/ece_store/spec/IRF540.pdf"}
-C {res} 1030 -730 0 1 {name=r0 m=1 value=190}
+C {res} 1030 -730 0 1 {name=R0 m=1 value=190}
 C {lab_pin} 1290 -590 0 1 {name=p14 lab=OUT}
 C {lab_pin} 1110 -280 0 0 {name=p18 lab=VNN}
 C {lab_wire} 990 -440 0 0 {name=l8 lab=GB}
-C {res} 340 -1050 0 1 {name=r2 m=1 value=50}
-C {res} 180 -1050 0 1 {name=r3 m=1 value=50}
+C {res} 340 -1050 0 1 {name=R2 m=1 value=50}
+C {res} 180 -1050 0 1 {name=R3 m=1 value=50}
 C {lab_pin} 340 -1080 0 0 {name=p10 lab=VPP}
 C {npn} 160 -530 0 0 {name=Q5 model=q2n2222 area=1}
 C {pnp} 820 -950 0 0 {name=Q4 model=q2n2907p area=1}
-C {res} 840 -1050 0 1 {name=r9 m=1 value=50}
+C {res} 840 -1050 0 1 {name=R9 m=1 value=50}
 C {pnp} 540 -790 0 0 {name=Q6 model=q2n2907p area=1}
-C {res} 560 -1050 0 1 {name=r4 m=1 value=50}
+C {res} 560 -1050 0 1 {name=R4 m=1 value=50}
 C {lab_pin} 180 -580 0 0 {name=p15 lab=C5}
 C {lab_pin} 340 -580 0 1 {name=p16 lab=C9}
 C {lab_pin} 180 -1000 0 0 {name=p17 lab=E1}
@@ -190,29 +190,29 @@ rload out 0 4
 *.probe dc v(plus,vdc)
 "}
 C {lab_wire} 990 -760 0 0 {name=l1 lab=GA}
-C {res} 870 -440 1 1 {name=r11 m=1 value=1300}
+C {res} 870 -440 1 1 {name=R11 m=1 value=1300}
 C {pnp} 540 -490 0 0 {name=Q8 model=q2n2907p area=1}
-C {capa} 1200 -930 0 0 {name=c12 m=1 value="40u"}
+C {capa} 1200 -930 0 0 {name=C12 m=1 value="40u"}
 C {diode} 1200 -1150 0 0 {name=D0 model=d1n4148 area=1
 url="http://pdf.datasheetcatalog.com/datasheet/bytes/1N5406.pdf"}
-C {res} 1200 -840 0 1 {name=r18 m=1 value=200}
+C {res} 1200 -840 0 1 {name=R18 m=1 value=200}
 C {zener} 1330 -1150 0 0 {name=D1 model=d1n758 area=1
 url="http://www.futurlec.com/Datasheet/Diodes/1N746-1N759.pdf"}
-C {res} 690 -760 0 1 {name=r14 m=1 value=4k}
+C {res} 690 -760 0 1 {name=R14 m=1 value=4k}
 C {pnp} 820 -810 0 0 {name=Q11 model=q2n2907p area=1}
-C {res} 690 -850 0 1 {name=r15 m=1 value=4k}
-C {res} 260 -430 0 1 {name=r5 m=1 value=600}
-C {res} 260 -370 0 1 {name=r6 m=1 value=700}
+C {res} 690 -850 0 1 {name=R15 m=1 value=4k}
+C {res} 260 -430 0 1 {name=R5 m=1 value=600}
+C {res} 260 -370 0 1 {name=R6 m=1 value=700}
 C {zener} 180 -180 2 0 {name=D2 model=d1n755 area=1
 url="http://www.futurlec.com/Datasheet/Diodes/1N746-1N759.pdf"
 }
 C {npn} 240 -210 0 0 {name=Q3 model=q2n2222 area=1}
-C {res} 180 -240 0 1 {name=r1 m=1 value=10k}
+C {res} 180 -240 0 1 {name=R1 m=1 value=10k}
 C {lab_pin} 180 -270 0 0 {name=p7 lab=VSS}
-C {res} 260 -100 0 1 {name=r10 m=1 value=170}
+C {res} 260 -100 0 1 {name=R10 m=1 value=170}
 C {lab_pin} 50 -70 0 0 {name=p11 lab=VNN}
-C {capa} 50 -180 0 0 {name=c3 m=1 value=100n}
-C {res} 560 -610 0 1 {name=r12 m=1 value=1300}
+C {capa} 50 -180 0 0 {name=C3 m=1 value=100n}
+C {res} 560 -610 0 1 {name=R12 m=1 value=1300}
 C {lab_pin} 690 -800 0 0 {name=p12 lab=B1}
 C {lab_pin} 340 -470 0 1 {name=p13 lab=E9}
 C {lab_pin} 560 -440 0 0 {name=p19 lab=C8}
@@ -222,7 +222,7 @@ C {lab_pin} 260 -160 0 1 {name=p22 lab=E3}
 C {lab_pin} 260 -270 0 1 {name=p26 lab=C3}
 C {lab_pin} 50 -210 0 0 {name=p30 lab=B3}
 C {lab_pin} 520 -490 0 0 {name=p33 lab=VSS}
-C {res} 340 -660 0 1 {name=r13 m=1 value=300}
+C {res} 340 -660 0 1 {name=R13 m=1 value=300}
 C {npn} 200 -630 0 1 {name=Q7 model=q2n2222 area=1}
 C {lab_pin} 180 -690 0 0 {name=p8 lab=C7}
 C {lab_pin} 340 -690 0 1 {name=p31 lab=C2}

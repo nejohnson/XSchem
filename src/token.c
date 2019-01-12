@@ -2053,12 +2053,24 @@ char *translate(int inst, char* s)
    } else if(token[0]=='@' && token[1]=='#') {  /* 20180911 */
      int n;
      char *subtok = my_malloc(532, sizetok * sizeof(char));
+     char *subtok4 = my_malloc(55, sizetok * sizeof(char));
      char *subtok2 = my_malloc(43, sizetok * sizeof(char)+20);
      char *subtok3=NULL, *pinname;
 
+     subtok4[0]='\0';
      subtok[0]='\0';
      n=-1;
-     sscanf(token+2, "%d:%s", &n, subtok);
+     sscanf(token+2, "%[^:]:%[^:]", subtok4, subtok);
+     if(subtok4[0]) {
+       for(n = 0 ; n < (inst_ptr[inst].ptr+instdef)->rects[PINLAYER]; n++) {
+         printf("subtok4=%s, pin name=%s\n", subtok4, get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr,"name",0));
+         if(!strcmp(get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr,"name",0), subtok4)) break;
+       }
+     }
+
+     if( n==-1  || n>= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER])  {
+       sscanf(token+2, "%d:%s", &n, subtok);
+     }
      if(n!=-1 && subtok[0]) {
        pinname = get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr,"name",0);
        subtok3 = my_malloc(52, 100+sizetok+get_tok_value_size);
@@ -2086,6 +2098,7 @@ char *translate(int inst, char* s)
      my_free(&subtok);
      my_free(&subtok2);
      my_free(&subtok3);
+     my_free(&subtok4);
    } else if(strcmp(token,"@sch_last_modified")==0) {
 
     my_strncpy(file_name, abs_sym_path(inst_ptr[inst].name, ".sch"), S(file_name));

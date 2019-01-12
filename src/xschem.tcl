@@ -1606,7 +1606,7 @@ proc abs_sym_path {fname {required_ext {}} } {
 
 proc gensch {cell {selected {}} } {
   global gensch_res gensch_body gensch_aggressive gensch_cellname
-  global gensch_i_pin gensch_o_pin gensch_io_pin 
+  global gensch_i_pin gensch_o_pin gensch_io_pin
   global gensch_pinarray gensch_names gensch_coord
 
   array unset gensch_pinarray
@@ -1684,7 +1684,7 @@ proc gensch {cell {selected {}} } {
 #C {devices/ipin} 190 80 0 0 {name=p29 sig_type=std_logic lab=ADD_P1[9:0] }
 proc gensch_load_sym {} {
   global gensch_pinarray gensch_body gensch_names gensch_coord
-  set gensch_cellname [.gensch.name get]
+  set gensch_cellname [.gensch.name.name get]
   set gensch_body {}
   .gensch.ipin.ipin delete 0 end
   .gensch.opin.opin delete 0 end
@@ -1734,7 +1734,7 @@ proc gensch_load_sym {} {
 proc gensch_create_sym {} {
   global gensch_res gensch_pinarray gensch_body gensch_names gensch_coord
   global gensch_aggressive gensch_cellname gensch_create_sym_interactive
-  global gensch_i_pin gensch_o_pin gensch_io_pin 
+  global gensch_i_pin gensch_o_pin gensch_io_pin
   set gensch_i [llength $gensch_i_pin ]
   set gensch_o [llength $gensch_o_pin ]
   set gensch_io [llength $gensch_io_pin ]
@@ -1901,7 +1901,7 @@ proc get_file_path {ff} {
   if { [regexp {\/} $ff] } { return $ff } 
   set pathlist [split $env(PATH) :]
   foreach i $pathlist {
-    set ii [string cat $i / $ff] 
+    set ii $i/$ff
     if { [file exists $ii]} {return $ii}
   }
   return $ff

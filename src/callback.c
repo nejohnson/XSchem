@@ -1292,7 +1292,6 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='~' && state & ControlMask)    /* testmode:  for performance testing */
    {
-    *(int *)0 = 3;
     break;
    }
    if(key=='#' && !(state&ControlMask))         /* testmode */

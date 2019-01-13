@@ -1587,6 +1587,7 @@ void descend_symbol(void)
 
 void load_symbol(const char *abs_name) /* function called when opening a symbol */
 {
+  static char msg[PATH_MAX+100];
   FILE *fd;
   char name[PATH_MAX];   /* overflow safe 20161122 */
   /* char cmd[PATH_MAX+200]; */
@@ -1608,16 +1609,19 @@ void load_symbol(const char *abs_name) /* function called when opening a symbol 
   if(!name[0]) return;
   if( (fd=fopen(name,"r"))== NULL) {
     fprintf(errfp, "load_symbol(): can not open file: %s\n", name);
-    return;
+    my_snprintf(msg, S(msg), "alert_ {Unable to open file: %s}", abs_name ? abs_name: "(null)");
+    tcleval(msg);
+
+  } else {
+    read_xschem_file(fd);
+    fclose(fd);
+    link_symbols_to_instances(); /* 20180921 */
+    set_modify(0);
   }
   if(has_x) {
     tcleval( "wm title . \"xschem - [file tail [xschem get schname]]\""); /* 20150417 set window and icon title */
     tcleval( "wm iconname . \"xschem - [file tail [xschem get schname]]\"");
   }
-  read_xschem_file(fd);
-  fclose(fd);
-  link_symbols_to_instances(); /* 20180921 */
-  set_modify(0);
 }
 
 
@@ -1629,7 +1633,7 @@ void round_schematic_to_grid(double cadsnap)
  rebuild_selected_array();
  for(i=0;i<lastselected;i++)
  {
-   c = selectedgroup[i].col;n = selectedgroup[i].n;
+   c = selectedgroup[i].col; n = selectedgroup[i].n;
    switch(selectedgroup[i].type)
    {
      case TEXT:
@@ -1638,10 +1642,25 @@ void round_schematic_to_grid(double cadsnap)
      break;
 
      case RECT:
-       SNAP_TO_GRID(rect[c][n].x1);
-       SNAP_TO_GRID(rect[c][n].y1);
-       SNAP_TO_GRID(rect[c][n].x2);
-       SNAP_TO_GRID(rect[c][n].y2);
+       if(c == PINLAYER) {
+         double midx, midx_round, deltax;
+         double midy, midy_round, deltay;
+         midx_round = midx = (rect[c][n].x1 + rect[c][n].x2) / 2;
+         midy_round = midy = (rect[c][n].y1 + rect[c][n].y2) / 2;
+         SNAP_TO_GRID(midx_round);
+         SNAP_TO_GRID(midy_round);
+         deltax = midx_round - midx;
+         deltay = midy_round - midy;
+         rect[c][n].x1 += deltax;
+         rect[c][n].x2 += deltax;
+         rect[c][n].y1 += deltay;
+         rect[c][n].y2 += deltay;
+       } else {
+         SNAP_TO_GRID(rect[c][n].x1);
+         SNAP_TO_GRID(rect[c][n].y1);
+         SNAP_TO_GRID(rect[c][n].x2);
+         SNAP_TO_GRID(rect[c][n].y2);
+       }
      break;
 
      case WIRE:

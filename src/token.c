@@ -2063,7 +2063,6 @@ char *translate(int inst, char* s)
      sscanf(token+2, "%[^:]:%[^:]", subtok4, subtok);
      if(subtok4[0]) {
        for(n = 0 ; n < (inst_ptr[inst].ptr+instdef)->rects[PINLAYER]; n++) {
-         printf("subtok4=%s, pin name=%s\n", subtok4, get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr,"name",0));
          if(!strcmp(get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr,"name",0), subtok4)) break;
        }
      }

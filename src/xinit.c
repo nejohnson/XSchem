@@ -1150,7 +1150,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
    load_schematic(1, tmp, 1);
  }
  zoom_full(0);   /* Necessary to tell xschem the 
-                                                            * initial area to display
+                  * initial area to display
                   */
  pending_fullzoom=1; /* 20121111 */
  if(do_netlist) {

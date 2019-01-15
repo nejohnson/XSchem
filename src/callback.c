@@ -390,54 +390,7 @@ int callback(int event, int mx, int my, KeySym key,
      print_hilight_net(3);
      break;
    }
-   if(key == 'J' && state==ShiftMask) { /* create cell and symbol from pin list */
-    static char schname[PATH_MAX+1000]; /* overflow safe 20161122 */
-    static char symname[PATH_MAX+1000]; /* overflow safe 20161122 */
-    int mx,my;
-    int found,i;
-    mx = mousex_snap;
-    my = mousey_snap;
-    rebuild_selected_array();
-    if(lastselected && selectedgroup[0].type==ELEMENT) {
-      my_snprintf(str, S(str), "gensch {%s} {%s}", schematic[currentsch], inst_ptr[selectedgroup[0].n].name);
-      if(debug_var>=1) fprintf(errfp,"selected %s\n", inst_ptr[selectedgroup[0].n].name);
-    }
-    else {
-      my_snprintf(str, S(str), "gensch {%s} {}", schematic[currentsch]); 
-    }
-    tcleval(str);
-    if(debug_var>=1) fprintf(errfp, "gensch return val=%s\n", Tcl_GetStringResult(interp));
-    /* gensch returns lib/cell if under XSCHEM_DESIGN_PATH or /path/cell.sch if not */
-    if(strcmp(Tcl_GetStringResult(interp), "") ) {
-      my_strncpy(schname, Tcl_GetStringResult(interp), S(schname));
-      if(debug_var>=1) fprintf(errfp, "TCL gensch returned: %s\n", schname);
-      push_undo(); /* 20150327 */
-      my_snprintf(str, S(str), "make_symbol {%s}", schname);
-      if(debug_var>=1) fprintf(errfp, "make_symbol(): making symbol: name=%s\n", str);
-      tcleval(str);
-      found=0;
-      if( strcmp(schname, get_cell(schname, 1)) ) {
-        my_snprintf(symname, S(symname), "%s.sym", get_cell(schname, 99999)); /* change trailing .sch in .sym */
-      } else {
-        my_snprintf(symname, S(symname), "%s", schname);
-      }
-      for(i=0;i<lastinstdef;i++)
-      {
-       if(strcmp(symname, instdef[i].name) == 0)
-       {
-        found=1;break;
-       }
-      }
-      if(!lastselected || selectedgroup[0].type!=ELEMENT) {
-        place_symbol(-1,symname,mx, my, 0, 0, NULL,3, 1);
-      }
-      if(found) {
-        save_schematic(schematic[currentsch]);
-        remove_symbols();
-        load_schematic(1,schematic[currentsch], 0);
-        draw();
-      }
-    }
+   if(key == 'J' && state==ShiftMask) { /* testmode */
     break;
    }
    if(key == '$'  && ( state == ShiftMask) )            /* toggle pixmap  saving */

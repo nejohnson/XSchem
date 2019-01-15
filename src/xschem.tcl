@@ -2400,7 +2400,7 @@ font configure Underline-Font -underline true -size 24
    .menubar.edit.menu add command -label "Paste" -command "xschem paste" -accelerator Ctrl+V
    .menubar.edit.menu add command -label "Delete" -command "xschem delete" -accelerator Del
    .menubar.edit.menu add command -label "Select all" -command "xschem select_all" -accelerator Ctrl+A
-   .menubar.edit.menu add command -label "Edit selected element" -command "xschem schematic_in_new_window" -accelerator Alt+E
+   .menubar.edit.menu add command -label "Edit selected schematic" -command "xschem schematic_in_new_window" -accelerator Alt+E
    .menubar.edit.menu add command -label "Edit selected symbol" -command "xschem symbol_in_new_window" -accelerator Alt+I
    .menubar.edit.menu add command -label "Duplicate objects" -command "xschem copy_objects" -accelerator C
    .menubar.edit.menu add command -label "Move objects" -command "xschem move_objects" -accelerator M
@@ -2410,7 +2410,7 @@ font configure Underline-Font -underline true -size 24
       -command "xschem set vertical_move" -accelerator V
    # added collapse/join/break wires menu command  (& key) 20171022
    .menubar.edit.menu add command -label "Push schematic" -command "xschem descend" -accelerator E
-   .menubar.edit.menu add command -label "Push symbol" -command "xschem edit_symbol" -accelerator I
+   .menubar.edit.menu add command -label "Push symbol" -command "xschem descend_symbol" -accelerator I
    .menubar.edit.menu add command -label "Pop" -command "xschem go_back" -accelerator Ctrl+E
    button .menubar.waves -text "Waves"  -activebackground red  -takefocus 0\
      -command {

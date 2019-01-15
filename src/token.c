@@ -1252,6 +1252,7 @@ void print_tedax_element(FILE *fd, int inst)
  char *extra_token, *extra_ptr, *extra_token_val;
  char *extra_pinnumber_token, *extra_pinnumber_ptr;
  char *saveptr1, *saveptr2;
+ const char *tmp;
  int instance_based=0;
  int sizetok=0;
  int token_pos=0, escape=0;
@@ -1293,7 +1294,10 @@ void print_tedax_element(FILE *fd, int inst)
      if(!pinnumber) my_strdup(500, &pinnumber, get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"pinnumber",0));
    }
    if(!pinnumber) my_strdup(501, &pinnumber, "--UNDEF--");
-   fprintf(fd, "conn %s %s %s %s %d\n", name, pin_node(inst,i, &mult, 0), pinname, pinnumber, i+1);
+   tmp = pin_node(inst,i, &mult, 0);
+   if(tmp && strcmp(tmp, "<UNCONNECTED_PIN>")) {
+     fprintf(fd, "conn %s %s %s %s %d\n", name, tmp, pinname, pinnumber, i+1);
+   }
    my_free(&pname);
  }
 
@@ -1412,9 +1416,11 @@ void print_tedax_element(FILE *fd, int inst)
         n=-1;
         sscanf(token+2, "%d:%s", &n, subtok);
         if(n!=-1 && subtok[0]) {
-          my_snprintf(subtok2, sizetok * sizeof(char)+20, "%s_%d", subtok, n);
+          my_snprintf(subtok2, sizetok * sizeof(char)+20, "%s(%d)", subtok, n);
           value = get_tok_value(inst_ptr[inst].prop_ptr,subtok2,0);
-          if(!value[0]) value = get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr,subtok,0);
+          if( n>=0 && n < (inst_ptr[inst].ptr+instdef)->rects[PINLAYER]) {
+            if(!value[0]) value = get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr,subtok,0);
+          } 
           if(value[0]) {
             char *ss;
             int slot;
@@ -1615,7 +1621,7 @@ const char *pin_node(int i, int j, int *mult, int hash_prefix_unnamed_net)
 {
  int tmp;
  char errstr[2048];
- static const char unconn[]="<UNCONNECTED PIN>";
+ static const char unconn[]="<UNCONNECTED_PIN>";
  char str_node[40]; /* 20161122 overflow safe */
  if(inst_ptr[i].node[j]!=NULL)
  {
@@ -2109,7 +2115,7 @@ char *translate(int inst, char* s)
      if( n==-1  || n>= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER])  {
        sscanf(token+2, "%d:%s", &n, subtok);
      }
-     if(n!=-1 && subtok[0]) {
+     if(n>=0  && subtok[0] && n < (inst_ptr[inst].ptr+instdef)->rects[PINLAYER]) {
        pinname = get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr,"name",0);
        subtok3 = my_malloc(52, 100+sizetok+get_tok_value_size);
        my_snprintf(subtok3, 100+sizetok+get_tok_value_size, "%s(%s)", subtok, pinname);

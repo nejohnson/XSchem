@@ -41,6 +41,7 @@ int load_initfile=1;
 char plotfile[PATH_MAX] = {'\0'};
 char rcfile[PATH_MAX] = {'\0'};
 int persistent_command=0; /* remember last command 20181022 */
+int disable_unique_names=0; /* if set allow instances with duplicate names */
 int quit=0;  /* set from process_options (ex netlist from cmdline and quit) */
 int debug_var=-10;  /* will be set to 0 in xinit.c */
 int do_print=0;

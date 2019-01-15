@@ -358,10 +358,10 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
          prepared_netlist_structs=0;
          prepared_hilight_structs=0;
        }
-       hash_proplist(inst_ptr[inst].prop_ptr , 1); /* remove old props from hash table */
-       new_prop_string(&inst_ptr[inst].prop_ptr, subst_token(inst_ptr[inst].prop_ptr, argv[4], argv[5]),0); 
+       hash_proplist(inst, 1); /* remove old props from hash table */
+       new_prop_string(&inst_ptr[inst].prop_ptr, subst_token(inst_ptr[inst].prop_ptr, argv[4], argv[5]),0, disable_unique_names); 
        my_strdup2(367, &inst_ptr[inst].instname, get_tok_value(inst_ptr[inst].prop_ptr, "name",0));
-       hash_proplist(inst_ptr[inst].prop_ptr , 0); /* put new props in hash table */
+       hash_proplist(inst, 0); /* put new props in hash table */
        /* new symbol bbox after prop changes (may change due to text length) */
        symbol_bbox(inst, &inst_ptr[inst].x1, &inst_ptr[inst].y1, &inst_ptr[inst].x2, &inst_ptr[inst].y2);
        bbox(ADD, inst_ptr[inst].x1, inst_ptr[inst].y1, inst_ptr[inst].x2, inst_ptr[inst].y2);
@@ -417,7 +417,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
        my_strdup(369, &inst_ptr[inst].name,symbol);
        inst_ptr[inst].ptr=sym_number;
        bbox(ADD, inst_ptr[inst].x1, inst_ptr[inst].y1, inst_ptr[inst].x2, inst_ptr[inst].y2);
-       hash_proplist(inst_ptr[inst].prop_ptr , 1); /* remove old props from hash table */
+       hash_proplist(inst, 1); /* remove old props from hash table */
   
        my_strdup(370, &name, inst_ptr[inst].instname);
        if(name && name[0] )  /* 30102003 */
@@ -426,7 +426,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
          if(prefix) name[0]=prefix; /* change prefix if changing symbol type; */
   
          my_strdup(371, &ptr,subst_token(inst_ptr[inst].prop_ptr, "name", name) );
-         new_prop_string(&inst_ptr[inst].prop_ptr, ptr,0); /* set new prop_ptr */
+         new_prop_string(&inst_ptr[inst].prop_ptr, ptr,0, disable_unique_names); /* set new prop_ptr */
          my_strdup2(372, &inst_ptr[inst].instname, get_tok_value(inst_ptr[inst].prop_ptr, "name",0)); /* 20150409 */
   
          type=instdef[inst_ptr[inst].ptr].type; /* 20150409 */
@@ -435,7 +435,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
          if(cond) inst_ptr[inst].flags|=2;
          else inst_ptr[inst].flags &=~2;
        }
-       hash_proplist(inst_ptr[inst].prop_ptr , 0); /* put new props in hash table */
+       hash_proplist(inst, 0); /* put new props in hash table */
        /* new symbol bbox after prop changes (may change due to text length) */
        symbol_bbox(inst, &inst_ptr[inst].x1, &inst_ptr[inst].y1, &inst_ptr[inst].x2, &inst_ptr[inst].y2);
        bbox(ADD, inst_ptr[inst].x1, inst_ptr[inst].y1, inst_ptr[inst].x2, inst_ptr[inst].y2);
@@ -967,6 +967,14 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
   push_undo();
  }
 
+ else if(!strcmp(argv[1],"check_unique_names")) {
+   if(!strcmp(argv[2],"1")) {
+     check_unique_names(1);
+   } else {
+     check_unique_names(0);
+   }
+ }
+
  else if(!strcmp(argv[1],"new_window"))
  {
   if(argc==2) new_window("",0);
@@ -1431,6 +1439,13 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
       persistent_command=1;
     } else {
       persistent_command=0;
+    }
+  }
+  else if(!strcmp(argv[2],"disable_unique_names")) { /* 20171025 */
+    if(!strcmp(argv[3],"1")) {
+      disable_unique_names=1;
+    } else {
+      disable_unique_names=0;
     }
   }
   else if(!strcmp(argv[2],"incr_hilight"))  {

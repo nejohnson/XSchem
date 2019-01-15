@@ -1014,7 +1014,7 @@ int callback(int event, int mx, int my, KeySym key,
     draw();
     break;
    }
-   if(key=='u' && state==ControlMask)                   /* testmode */
+   if(0 & (key=='u') && (state==ControlMask))                   /* testmode */
    {
      int i;
      double x1, y1, x2, y2;
@@ -1262,39 +1262,31 @@ int callback(int event, int mx, int my, KeySym key,
     else new_window(NULL, 0);
     break;
    }
-   if(key==';' && state & ControlMask )         /* testmode 20171203 */
+   if((key=='#') && !(state & ControlMask) )
    {
-    int j;
-    unsigned short parallel, breaks, broken, touches, included, includes;
-    double xt, yt;
-    rebuild_selected_array();
-    if(lastselected==1 && selectedgroup[0].type==WIRE) {
-      int i;
-      j = selectedgroup[0].n;
-      printf("j=%d\n", j);
-      for(i=0; i<lastwire;i++) {
-        if(i==j) continue;
-        check_touch(i, j, &parallel, &breaks, &broken, &touches, &included, &includes, &xt, &yt);
-        if(touches) {
-          printf("touches: %d\n", i);
-          select_wire(i, SELECTED,1);
-        }
-      }
-      draw();
-    }
+    check_unique_names(0);
     break;
    }
-   if(key==';' && (state & ControlMask) )    /* testmode:  for performance testing */
+   if((key=='#') && (state & ControlMask) )
+   {
+    check_unique_names(1);
+    break;
+   }
+   if((key==';') && (state & ControlMask) )         /* testmode 20171203 */
+   {
+    break;
+   }
+   if(0 && (key==';') && (state & ControlMask) )    /* testmode:  for performance testing */
    {
     draw_stuff(); 
     draw();
     break;
    }
-   if(key=='~' && state & ControlMask)    /* testmode:  for performance testing */
+   if(0 && (key=='~') && (state & ControlMask))    /* testmode:  for performance testing */
    {
     break;
    }
-   if(key=='#' && !(state&ControlMask))         /* testmode */
+   if(0 && (key=='|') && !(state&ControlMask))         /* testmode */
    {
     double w, x1, y1, x2, y2;
     int i;

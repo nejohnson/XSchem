@@ -371,13 +371,13 @@ void set_inst_prop(int i)
   {
     my_strdup(69, &inst_ptr[i].prop_ptr, ptr);
   }
-  if(get_tok_value(inst_ptr[i].prop_ptr, "name", 0)[0] ) {
+  my_strdup2(70, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name",0)); /* 20150409 */
+  if(inst_ptr[i].instname[0]) {
     tmp = NULL;
-    new_prop_string(&tmp, inst_ptr[i].prop_ptr, 0);
+    new_prop_string(&tmp, inst_ptr[i].prop_ptr, 0, disable_unique_names);
     my_free(&inst_ptr[i].prop_ptr);
     inst_ptr[i].prop_ptr = tmp;
   }
-  my_strdup2(70, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name",0)); /* 20150409 */
 }
 
 void edit_rect_property(void) 
@@ -775,7 +775,7 @@ void update_symbol(const char *result, int x)
 
     bbox(ADD, inst_ptr[i].x1, inst_ptr[i].y1, inst_ptr[i].x2, inst_ptr[i].y2);
 
-    hash_proplist(inst_ptr[i].prop_ptr , 1); /* remove old props from hash table */
+    hash_proplist(i, 1); /* remove old props from hash table */
     /* update property string from tcl dialog */
     if(!no_change_props)
     {
@@ -820,7 +820,7 @@ void update_symbol(const char *result, int x)
      if(debug_var>=1) fprintf(errfp, "update_symbol(): name=%s, inst_ptr[i].prop_ptr=%s\n", name, inst_ptr[i].prop_ptr);
      my_strdup(89, &ptr,subst_token(inst_ptr[i].prop_ptr, "name", name) );
                     /* set name of current inst */
-     new_prop_string(&inst_ptr[i].prop_ptr, ptr, k); /* set new prop_ptr */
+     new_prop_string(&inst_ptr[i].prop_ptr, ptr, k, disable_unique_names); /* set new prop_ptr */
      my_strdup2(90, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name",0)); /* 20150409 */
  
      type=instdef[inst_ptr[i].ptr].type; /* 20150409 */
@@ -829,7 +829,7 @@ void update_symbol(const char *result, int x)
      if(cond) inst_ptr[i].flags|=2;
      else inst_ptr[i].flags &=~2;
     }
-    hash_proplist(inst_ptr[i].prop_ptr , 0); /* put new props in hash table */
+    hash_proplist(i, 0); /* put new props in hash table */
     /* new symbol bbox after prop changes (may change due to text length) */
     symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1, &inst_ptr[i].x2, &inst_ptr[i].y2);
  

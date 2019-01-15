@@ -22,8 +22,6 @@
 
 #include "xschem.h"
 
-
-
 static void instdelete(int n, int x, int y)
 {
   struct instentry *saveptr, **prevptr, *ptr;

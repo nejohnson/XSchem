@@ -418,6 +418,33 @@ proc save_file_dialog { msg ext global_initdir {initialfile {}} } {
   return [file normalize $r]
 }
 
+
+proc list_dirs { } {
+  global pathlist list_dirs_selected_dir
+  toplevel .list -class dialog
+  wm title .list {Select Library:}
+  wm protocol .list WM_DELETE_WINDOW { set list_dirs_selected_dir {} } 
+  set X [expr [winfo pointerx .list] - 30]
+  set Y [expr [winfo pointery .list] - 25]
+  if { $::wm_fix } { tkwait visibility .list }
+  wm geometry .list "+$X+$Y"
+
+  set x 0
+  set dir {}
+  foreach elem $pathlist {
+    button .list.$x -text $elem -command "set list_dirs_selected_dir $elem"
+    pack .list.$x -fill x -expand yes
+    incr x
+  }
+  frame .list.f
+  button .list.f.cancel -text Cancel -command {set list_dirs_selected_dir {} }
+  pack .list.f.cancel
+  pack .list.f -fill x -expand yes
+  vwait list_dirs_selected_dir
+  destroy .list
+  return $list_dirs_selected_dir
+}
+
 # 20180924
 # global_initdir should be set to:
 #   INITIALLOADDIR  for load
@@ -430,6 +457,12 @@ proc load_file_dialog { msg ext global_initdir} {
   set types(.sch) { {{Schematic files} {.sch}} }
   set types(.sch.sym) { {{Schematic files} {.sch}} {{Symbol files} {.sym}} }
   set types(.sym.sch) { {{Symbol files} {.sym}} {{Schematic files} {.sch}} }
+
+  if { $ext eq {.sym} } {
+    set initdir [list_dirs]
+  }
+  if { $initdir eq {} } { return {} } 
+
   set r [tk_getOpenFile  -title $msg -initialdir $initdir -filetypes $types($ext)]
   set dir [file dirname $r]
   # 20181011 no change initdir if operation cancelled by user
@@ -1984,6 +2017,7 @@ set_ne draw_grid 1
 set_ne snap 10
 set_ne grid 20
 set_ne persistent_command 0
+set_ne disable_unique_names 1
 set_ne sym_txt 1
 set_ne show_infowindow 0 
 set_ne symbol_width 150
@@ -2185,6 +2219,7 @@ xschem set cairo_font_scale $cairo_font_scale
 xschem set cairo_font_line_spacing $cairo_font_line_spacing
 xschem set cairo_vert_correct $cairo_vert_correct
 xschem set persistent_command $persistent_command
+xschem set disable_unique_names $disable_unique_names
 # font name can not be set here as we need to wait for X-initialization 
 # to complete. Done in xinit.c
 
@@ -2340,6 +2375,10 @@ font configure Underline-Font -underline true -size 24
         -command {
           input_number "Enter Symbol width ($symbol_width)" "set symbol_width"
         }
+   .menubar.option.menu add checkbutton -label "Allow duplicated instance names (refdes)" \
+       -variable disable_unique_names -command {
+          xschem set disable_unique_names $disable_unique_names
+       }
 
    .menubar.option.menu add separator
    .menubar.option.menu add radiobutton -label "Spice netlist" -variable netlist_type -value spice \
@@ -2505,9 +2544,11 @@ font configure Underline-Font -underline true -size 24
    .menubar.tools.menu add command -label "Break wires" \
       -command "xschem break_wires" -accelerator {!}
 
+   .menubar.hilight.menu add command -label {Highlight duplicate instance names} -command "xschem check_unique_names 0" -accelerator {#} 
+   .menubar.hilight.menu add command -label {Rename duplicate instance names} -command "xschem check_unique_names 1" -accelerator {Ctrl+#}
    .menubar.hilight.menu add command -label {Highlight selected net/pins} -command "xschem hilight" -accelerator K
    .menubar.hilight.menu add command -label {Un-highlight all net/pins} \
-        -command "xschem delete_hilight_net" -accelerator Shift-K
+        -command "xschem clear_hilights" -accelerator Shift+K
    .menubar.hilight.menu add command -label {Un-highlight selected net/pins} \
         -command "xschem unhilight" -accelerator Ctrl+K
    # 20160413

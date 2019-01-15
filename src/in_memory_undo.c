@@ -391,7 +391,7 @@ void pop_undo(int redo)
     my_strdup(214, &inst_ptr[i].prop_ptr, uslot[slot].iptr[i].prop_ptr);
     my_strdup(215, &inst_ptr[i].name, uslot[slot].iptr[i].name);
     my_strdup(216, &inst_ptr[i].instname, uslot[slot].iptr[i].instname);
-    hash_proplist(inst_ptr[i].prop_ptr,0);
+    hash_proplist(i, 0);
   }
 
   /* texts */

@@ -89,7 +89,8 @@ static struct hashentry *hash_lookup(char *token, char *value,int remove, size_t
  char *ptr;
  int s ;
  
-if(token==NULL) return NULL;
+
+  if(token==NULL) return NULL;
   hashcode=hash(token); 
   index=hashcode % HASHSIZE; 
   entry=table[index];
@@ -168,11 +169,53 @@ void free_hash(void) /* remove the whole hash table  */
 }
 
 /* insert **only** name in hash table */
-void hash_proplist(char *s,int remove) /* 20171205 */
+void hash_proplist(int i, int remove) /* 20171205 */
 {
-  char *name=get_tok_value(s, "name",0);
-  if(name[0]) hash_lookup(name, "", remove, get_tok_value_size);
+  char *name=inst_ptr[i].instname;
+  
+  if(name && name[0]) hash_lookup(name, "", remove, strlen(name));
 }
+
+void check_unique_names(int rename)
+{
+  int i;
+  char *tmp = NULL;
+  int newpropcnt = 0;
+  /* int save_draw; */
+
+  if(rename == 1) {
+    /* save_draw = draw_window;*/
+    /* draw_window=1; */
+    bbox(BEGIN,0.0,0.0,0.0,0.0);
+    set_modify(1); push_undo();
+    prepared_hash_instances=0;
+    prepared_netlist_structs=0;
+    prepared_hilight_structs=0;
+  }
+  free_hash();
+  for(i=0;i<lastinst;i++) {
+    if(inst_ptr[i].instname[0] && hash_lookup(inst_ptr[i].instname, "", 0, strlen(inst_ptr[i].instname))) {
+      if(rename == 1) bbox(ADD, inst_ptr[i].x1, inst_ptr[i].y1, inst_ptr[i].x2, inst_ptr[i].y2);
+      inst_ptr[i].flags |=4;
+      hilight_nets=1;
+      my_strdup(511, &tmp, inst_ptr[i].prop_ptr);
+      new_prop_string(&inst_ptr[i].prop_ptr, tmp, newpropcnt++, !rename);
+      my_strdup2(512, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); /* 20150409 */
+      hash_proplist(i, 0);
+      if(rename == 1) bbox(ADD, inst_ptr[i].x1, inst_ptr[i].y1, inst_ptr[i].x2, inst_ptr[i].y2);
+    }
+  }
+  if(rename == 1) {
+    bbox(SET,0.0,0.0,0.0,0.0);
+    draw();
+    bbox(END,0.0,0.0,0.0,0.0);
+  }
+  my_free(&tmp);
+  draw_hilight_net(1);
+  /* draw_window = save_draw; */
+}
+
+
 
 int match_symbol(char *name)  /* never returns -1, if symbol not found load systemlib/missing.sym */
 {
@@ -438,7 +481,7 @@ const char *find_bracket(const char *s)
  return s;
 }
 
-void new_prop_string(char **new_prop,const char *old_prop, int fast)
+void new_prop_string(char **new_prop,const char *old_prop, int fast, int disable_unique_names)
 {
 /* given a old_prop property string, return a new */
 /* property string in new_prop such that the element name is */
@@ -472,7 +515,7 @@ void new_prop_string(char **new_prop,const char *old_prop, int fast)
  }
  prefix=old_name[0];
  /* don't change old_prop if name does not conflict. */
- if(hash_lookup(old_name, NULL, 0, old_name_len) == NULL)
+ if(disable_unique_names || hash_lookup(old_name, NULL, 0, old_name_len) == NULL)
  {
   my_strdup(447, new_prop, old_prop);
   if(debug_var>=1) fprintf(errfp, "new_prop_string():-1-  new=%s old=%s fast=%d\n",*new_prop, old_prop,fast);
@@ -1573,7 +1616,6 @@ const char *pin_node(int i, int j, int *mult, int hash_prefix_unnamed_net)
  int tmp;
  char errstr[2048];
  static const char unconn[]="<UNCONNECTED PIN>";
- static char *name=NULL;
  char str_node[40]; /* 20161122 overflow safe */
  if(inst_ptr[i].node[j]!=NULL)
  {
@@ -1609,10 +1651,7 @@ const char *pin_node(int i, int j, int *mult, int hash_prefix_unnamed_net)
  {
    *mult=1;
 
-   my_strdup(511, &name, inst_ptr[i].instname); /* 20161210 */
-   /* my_strdup(512, &name , get_tok_value(inst_ptr[i].prop_ptr,"name",0) ); */
-
-   my_snprintf(errstr, S(errstr), "error: unconnected pin,  inst %d -- %s\n", i,  name ) ;
+   my_snprintf(errstr, S(errstr), "error: unconnected pin,  inst %d -- %s\n", i,  inst_ptr[i].instname ) ;
    statusmsg(errstr,2);
    if(!netlist_count) {
      inst_ptr[i].flags |=4;

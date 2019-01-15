@@ -419,8 +419,8 @@ proc save_file_dialog { msg ext global_initdir {initialfile {}} } {
 }
 
 
-proc list_dirs { } {
-  global pathlist list_dirs_selected_dir
+proc list_dirs {pathlist } {
+  global list_dirs_selected_dir
   toplevel .list -class dialog
   wm title .list {Select Library:}
   wm protocol .list WM_DELETE_WINDOW { set list_dirs_selected_dir {} } 
@@ -452,6 +452,7 @@ proc list_dirs { } {
 # ext:  .sch or .sym or .sch.sym
 #
 proc load_file_dialog { msg ext global_initdir} {
+  global pathlist
   upvar #0 $global_initdir initdir
   set types(.sym) { {{Symbol files} {.sym}} }
   set types(.sch) { {{Schematic files} {.sch}} }
@@ -459,7 +460,7 @@ proc load_file_dialog { msg ext global_initdir} {
   set types(.sym.sch) { {{Symbol files} {.sym}} {{Schematic files} {.sch}} }
 
   if { $ext eq {.sym} } {
-    set initdir [list_dirs]
+    set initdir [list_dirs $pathlist]
   }
   if { $initdir eq {} } { return {} } 
 
@@ -1633,232 +1634,6 @@ proc abs_sym_path {fname {required_ext {}} } {
   return $name
 }
 
-################## GENSCH procedure  #########################
-
-# gensch bonelli/0_top hiace5/hmicro_rom_ptrif
-
-proc gensch {cell {selected {}} } {
-  global gensch_res gensch_body gensch_aggressive gensch_cellname
-  global gensch_i_pin gensch_o_pin gensch_io_pin
-  global gensch_pinarray gensch_names gensch_coord
-
-  array unset gensch_pinarray
-  array unset gensch_names
-  array unset gensch_coord
-  set gensch_aggressive 0
-  set gensch_body {}
-  set gensch_res {}
-  toplevel .gensch -class Dialog 
-  wm title .gensch {Symbol creation tool}
-
-  ## not honored by fvwm ... 20110322
-  # wm attributes .gensch -topmost 1
-  ## ... use alternate method instead 20110322
-  #bind .gensch <Visibility> { if { [regexp Obscured %s] } {raise .gensch; wm attributes  .gensch -topmost 1} }
-  ## 
-
-  frame .gensch.but 
-  frame .gensch.ipin
-  frame .gensch.opin
-  frame .gensch.iopin
-  frame .gensch.name
-  label .gensch.name.namedescr -text "File:" -width 8
-  entry .gensch.name.name -width 60 
-  label .gensch.ipin.ipindescr   -text "IPIN:" -width 8
-  label .gensch.opin.opindescr   -text "OPIN:" -width 8
-  label .gensch.iopin.iopindescr -text "IOPIN:" -width 8
-  entry .gensch.ipin.ipin   -width 60
-  entry .gensch.opin.opin   -width 60
-  entry .gensch.iopin.iopin -width 60
-  set cell [file dirname $cell]
-  if {$cell ne {}} { set cell "${cell}/" }
-  if { [ string compare $selected {} ] } { 
-    .gensch.name.name insert 0 [file rootname $selected]
-    gensch_load_sym
-  } else {
-    .gensch.name.name insert 0 [file rootname ${cell}]xxxx
-  }
-  button .gensch.but.create -text CREATE -command {
-    set gensch_i_pin [.gensch.ipin.ipin get] 
-    set gensch_o_pin [.gensch.opin.opin get] 
-    set gensch_io_pin [.gensch.iopin.iopin get] 
-    set gensch_cellname [.gensch.name.name get]
-    gensch_create_sym
-  }
-  button .gensch.but.load -text LOAD -command gensch_load_sym
-  button .gensch.but.canc -text Cancel -command { set gensch_res {}; destroy .gensch; }
-  checkbutton .gensch.but.aggr -text {Do not clone schematic}  -variable gensch_aggressive
-
-  pack .gensch.name.name -side right -fill x -expand y
-  pack .gensch.name.namedescr  -side left
-  pack .gensch.ipin.ipin -side right -fill x -expand y
-  pack .gensch.ipin.ipindescr  -side left
-  pack .gensch.opin.opin -side right  -fill x -expand y
-  pack .gensch.opin.opindescr  -side left
-  pack .gensch.iopin.iopin -side right -fill x -expand y
-  pack .gensch.iopin.iopindescr -side left
-  pack .gensch.name .gensch.ipin .gensch.opin .gensch.iopin -fill x
-
-  pack .gensch.but.create .gensch.but.canc .gensch.but.load .gensch.but.aggr -side right 
-  pack .gensch.but 
-  bind .gensch <Escape> {.gensch.but.canc  invoke}
-  tkwait window .gensch
-
-  if { $gensch_res ne {} } {
-    if {![regexp {\.sch$} $gensch_res] } {
-      append gensch_res .sch
-    }
-    return [rel_sym_path $gensch_res]
-  } else {
-    return {}
-  }
-}
-
-#C {devices/ipin} 190 80 0 0 {name=p29 sig_type=std_logic lab=ADD_P1[9:0] }
-proc gensch_load_sym {} {
-  global gensch_pinarray gensch_body gensch_names gensch_coord
-  set gensch_cellname [.gensch.name.name get]
-  set gensch_body {}
-  .gensch.ipin.ipin delete 0 end
-  .gensch.opin.opin delete 0 end
-  .gensch.iopin.iopin delete 0 end
-  array unset gensch_pinarray
-  array unset gensch_names
-  array unset gensch_coord
-  
-  set fname [abs_sym_path $gensch_cellname .sch]
-  if { [ file exists $fname] } {
-    set data  [read_data_nonewline $fname]
-    set lines [split $data \n]
-    for { set i 0 } { $i < [llength $lines] } { incr i } {
-      set line [lindex $lines $i]
-      ###regsub -all -- {[[:space:]]+} $line " " line   ;# 20120926
-      set linelist [split $line]
-
-      if { [regexp "^C.* \{name=(\[^ \}\]*)\[ \}\]"  $line allmatch name] } {
-        array set gensch_names [list $name 1]
-        array set gensch_coord [list [join [lrange $linelist 2 3]] 1]
-        # puts "---> [lrange $line 2 3]"
-      }
-      if { [regexp "^C \{devices/(i|o|io)pin\}.* lab=(\[^ \}\]*)\[ \}\]" $line allmatch type lab] } {
-        array set gensch_pinarray [list $lab $line]
-        if { ![string compare $type i] } {
-          .gensch.ipin.ipin insert end "$lab "
-        } elseif { ![string compare $type o] } {
-          .gensch.opin.opin insert end "$lab "
-        } elseif { ![string compare $type io] } {
-          .gensch.iopin.iopin insert end "$lab "
-        }
-        
-      } else {
-        if { [string compare $gensch_body {} ]} { 
-          set gensch_body "$gensch_body\n$line"
-        } else {
-          set gensch_body "$line"
-        }
-      }
-      .gensch.ipin.ipin xview moveto 1 
-      .gensch.opin.opin xview moveto 1 
-      .gensch.iopin.iopin xview moveto 1 
-    }
-  }
-}
-
-proc gensch_create_sym {} {
-  global gensch_res gensch_pinarray gensch_body gensch_names gensch_coord
-  global gensch_aggressive gensch_cellname gensch_create_sym_interactive
-  global gensch_i_pin gensch_o_pin gensch_io_pin
-  set gensch_i [llength $gensch_i_pin ]
-  set gensch_o [llength $gensch_o_pin ]
-  set gensch_io [llength $gensch_io_pin ]
-  set gensch_res $gensch_cellname
-
-  set fname [abs_sym_path $gensch_cellname .sch]
-  set symfname [abs_sym_path $gensch_cellname .sym]
-  if { $gensch_create_sym_interactive && ([file exists $fname] || [file exists $symfname]) }  {
-   set ask_s [ask_save "File exists: overwrite ? "]
-   if { [string compare $ask_s yes] } {
-     set gensch_res {}
-     return
-   }
-  }
-  set fp [open $fname w] 
-  if { [ string compare $gensch_body {} ] } {
-   puts $fp $gensch_body
-  } else {
-    puts $fp "G \{\}"
-    puts $fp "V \{\}"
-  }
-
-  set pin 0
-  set y1 0
-  for { set l 0 } { $l < $gensch_i } { incr l } {
-      set name [lindex $gensch_i_pin $l]
-      regsub -all {<} $name {[} name
-      regsub -all {>} $name {]} name
-      regsub -all {([\[\]])} $name {\\\1} name_esc
-      if { !$gensch_aggressive && [ string compare  [ array names gensch_pinarray $name_esc ] {} ] } {
-        puts $fp $gensch_pinarray($name)
-      } else {
-        while { [ string compare  [ array names gensch_names p$pin ] {} ] } {
-          incr pin
-        }
-        set y1 [expr $y1+20]
-
-        while { [ string compare  [ array names gensch_coord "-500 *${y1}" ] {} ] } {
-          set y1 [expr $y1+20]
-        }
-        puts $fp "C \{devices/ipin\} -500 $y1 0 0 \{name=p$pin lab=$name\}"
-      }
-      incr pin
-  }
-  set y1 0
-  for { set l 0 } { $l < $gensch_o } { incr l } {
-      set name [lindex $gensch_o_pin $l]
-      regsub -all {<} $name {[} name
-      regsub -all {>} $name {]} name
-      regsub -all {([\[\]])} $name {\\\1} name_esc
-      if { !$gensch_aggressive && [ string compare  [ array names gensch_pinarray $name_esc ] {} ] } {
-        puts $fp $gensch_pinarray($name)
-      } else {
-        while { [ string compare  [ array names gensch_names p$pin ] {} ] } {
-          incr pin
-        }
-        set y1 [expr $y1+20]
-
-        while { [ string compare  [ array names gensch_coord "-200 *${y1}" ] {} ] } {
-          set y1 [expr $y1+20]
-        }
-        puts $fp "C \{devices/opin\} -200 $y1 0 0 \{name=p$pin lab=$name\}"
-      }
-      incr pin
-  }
-  for { set l 0 } { $l < $gensch_io } { incr l } {
-      set name [lindex $gensch_io_pin $l]
-      regsub -all {<} $name {[} name
-      regsub -all {>} $name {]} name
-      regsub -all {([\[\]])} $name {\\\1} name_esc
-      if { !$gensch_aggressive && [ string compare  [ array names gensch_pinarray $name_esc ] {} ] } {
-        puts $fp $gensch_pinarray($name)
-      } else {
-        while { [ string compare  [ array names gensch_names p$pin ] {} ] } {
-          incr pin
-        }
-        set y1 [expr $y1+20]
-
-        while { [ string compare  [ array names gensch_coord "-200 *${y1}" ] {} ] } {
-          set y1 [expr $y1+20]
-        }
-        puts $fp "C \{devices/iopin\} -200 $y1 0 0 \{name=p$pin lab=$name\}"
-      }
-      incr pin
-  }
-  close $fp     
-  destroy .gensch
-}
-
-################## END GENSCH        #########################
-
 proc input_number {txt cmd} {
           global xx
           toplevel .lw -class Dialog
@@ -2023,7 +1798,6 @@ set_ne show_infowindow 0
 set_ne symbol_width 150
 set_ne editprop_semaphore 0
 set_ne editor {gvim -f}
-set_ne gensch_create_sym_interactive 1
 set_ne rainbow_colors 0
 set_ne initial_geometry {700x448+10+10}
 #20161102
@@ -2167,14 +1941,6 @@ set_ne colors $dark_colors
 set rbutton1 0
 set rbutton2 0
 set search_select 0
-
-# gensch variables
-array unset gensch_pinarray
-array unset gensch_names
-array unset gensch_coord
-set gensch_aggressive 0
-set gensch_body {}
-set gensch_res {}
 
 # 20111106 these vars are overwritten by caller with mktemp file names
 set filetmp1 $env(PWD)/.tmp1

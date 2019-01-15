@@ -86,7 +86,6 @@ ctrl        'h'         Follow http link or execute command (url, tclcommand pro
 shift       'H'         Attach net labels to selected instance
 -           'i'         Descend to  symbol
 alt         'i'         Edit selected symbol in a new window
-shift       'J'         Create symbol from pin list
 alt+shift   'J'         Create labels with 'i' prefix from highlighted nets/pins
 alt         'j'         Create labels without 'i' prefix from highlighted nets/pins
 ctrl        'j'         Create ports from highlight nets

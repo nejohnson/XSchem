@@ -37,6 +37,137 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+
+2.8.2_RC4
+removed gensch procedure (create sym from pinlist, un-maintainable mess)
+
+do not print 'conn' lines for unconnecteds in tedax netlist
+
+Edit -> Push Symbol menu was not functional.
+
+fix segfault when placing symbols with off-bound @#<n>:<attr> attributes (n referencing a non existent pin)
+
+allow/forbid duplicated refdes, highlight/rename duplicates, directory chooser when inserting symbols
+
+xschemrc variable 'disable_unique_names' may be set to 0 in xschemrc to forbid duplicated refdes
+- default is to allow duplicates (1)
+- menu 'Highlight -> (Highlight|Rename) duplicate instance names' can be used to flag / correct duplicate names.
+- when inserting components (Insert key) present a list of directories to start fileselector from.
+
+disabled all testmodes
+
+align to grid function: for pin objects align the center point of the rectangle instead of the (x1,y1)-(x2,y2) points.
+
+Create symbol tutorial in xschem docs
+
+alert if trying to open non existent symbol
+
+allow @#drain:pinnumber to be used in sybols to print 'pinnumber' attribute of pin with 'name=drain' in addition to 
+@#3:pinnumber (print 'pinnumber' attribute of 3rd pin of symbol)
+
+removed 'string cat' as it is a tcl8.6 addition (not needed anyway)
+
+Add $DESTDIR prefix to system_library_dir in Makefile.conf.in as it is used in trunk/xschem_library/Makefile to install files.
+
+--plotfile on cmdline to specify image export output file. Valid for all formats (png, svg, pdf)
+
+calculate correct line widths before rendering to screen / plot images
+
+fix: start numbering new instances from 1 instead of 0 
+xschem.1.in manpage and expand $PREFIX
+
+fix rotate /flip without moving when multiple objects selected.
+(in this case do not rotate individual objects around their anchor points)
+doc fixes
+
+doc and symbol updates
+
+Allow pinnumber(name) in instance attributes to change symbol pinnumber, 
+in addition to pinnumber(n) where n is xschem pin index number. Syntax changed from pinnumber_n.
+
+Allow mouse panning schematic while editing properties.
+Do not allow some command nesting combinations  that could be dangerous.
+
+
+Tutorial on creating a simple schematic and running a simulation with ngspice
+Some fixes on UI (bindkeys) 
+
+generic, 'light' models created for testing tedax moved from pcb/ to devices/
+
+added @spiceprefix to symbols that might need a different spice prefix
+if spiceprefix unspecified at instance level no change wrt previous behavior.
+
+netlist_dir default set to '.' (current directory, where xschem is launched) if not defined in xschemrc
+
+option -o <dir> (--netlist_path=<dir>) can be used to set output netlist *directory* with cmdline
+
+Token subsitution now correctly replaces @token1@token2 with their values 
+(no separators needed, second @ is an implied token separator and next token start)
+
+allow set / change selected attributes on multiple wselected ires/rects/lines
+
+leave post mortem shell open in case of ngspice fatal errors, in interactive ngspice sims.
+
+trunk/utile dir moved under trunk/src/utile so it will be in the same
+relative position wrt XSCHEM_SHAREDIR whether xschem is run from
+build trunk/src directory or after installation.
+
+make uninstall fixes.
+
+2.8.2_RC3
+- commercial simulators/viewers not available in xschem menus if their 
+  *_path variables not defined in xschemrc. Better quoting for allowing filenames with spaces
+- removed potentially proprietary models from example schematics.
+- copyright info updated to 2019
+- objects can now be flipped/rotated (R,F keys) without initiating a move operation.
+- Right mouse button brings up edit attributes of object under mouse,
+  ctrl-button1 unselects object, ctrl-shift-button1 drag unselects by area
+  netlisting mode shown in status line, no more alert box when switching
+- fix some inaccuracies in menu keybindings
+- doc cleanup, added first annoying FAQ: http://repo.hu/projects/xschem/xschem_man/faq.html
+- step-by-step tutorial for installing xschem: http://repo.hu/projects/xschem/xschem_man/tutorial_install_xschem.html
+- xschemrc comments and sample lines aligned to current xschem behavior
+
+2.8.2_RC1:
+- improvements of xschem TCL API for backannotation
+- refdes (instance name) automatic numbering starts from 1 instead of
+  0 (D1, D2, ...) 
+- ngspice integration
+- documentation updates
+- save only one copy of embedded symbols even if multiple instances of it have the
+  'embed=true' attribute set
+- allow arbitrary spaces around '=' in attribute assignments 
+  (name = x1 footprint=  TO220 model= IRF540)
+
+- '.' in path search list is now the location of the containing schematic, not the
+  directory from where xschem was launched (thanks to Igor2 for consulting).
+- Default search list if running xschem from build directory is 
+  '.:<path>/xschem/trunk/xschem_library/devices', so all examples will run out
+  of the box with no config file tweaking.
+- tedax netlist: instance property 'pinnumber_n' where n is the index of pin (0, 1, 2, ...) may override pin 'pinnumber' 
+  of symbol pin with index 'n'
+- tedax netlist: instance property extra_pinnumber="idx1 idx2" may override symbol inherited
+  connections (usually supply and ground pins for slotted devices) 
+- improvements and cleanup in xschem query language (xschem pinlist)
+- print index number (order in xschem array) of selected objects
+  in status line
+- version info added as first line when saving .sch/.sym files.
+  v {xschem version=2.8.2_RC1 file_version=1.0}
+  for now no checks are made when loading files, version string from file 
+  is just stored for later usage.
+- documentation updates, example files updates, variable expansion in launcher() 
+  so XSCHEM_SHAREDIR and HOME can be used in url attributes
+- fullscreen moved from options to View menu, more appropriate.
+- make default compile time XSCHEM_LIBRARY_PATH definition available 
+  to xschemrc so a directory can be prepended or appended to it
+- replaced execlp with execl everywhere
+- hooks.c: default to ~/.xschem/xschem_library if no --user-lib-path given in configure.
+- examples/diode.* renamed to examples/diode_1.* to avoud clashing with devices/diode.sym.
+- If no search path (XSCHEM_LIBRARY_PATH) defined in xschemrc default to compile time 
+  with '.' prepended
+- Template xschemrc with better comments by Richard Lucassen (thanks!)
+- xschem_library/Makefile: use $system_library_dir for system libraries (devices)
+
 2.8.1:
 - connecting dots are highlighted together with the hilight net.
 - avoid shebangs when launching scripts, rely on host PATH variable 

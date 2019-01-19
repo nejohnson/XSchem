@@ -38,6 +38,16 @@ If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
 
+2.8.2
+faq about automatic rename / allow duplicate refdes.
+
+remove references to 'Shift-J' in docs (removed messy code), better appearance for 'list_dirs' dialog.
+
+added License/Copyright info for scconfig (GNU LGPL2).
+
+no save schematic before editing disk file - this is 
+an expert command so user should decide himself what to do.
+
 2.8.2_RC4
 removed gensch procedure (create sym from pinlist, un-maintainable mess)
 

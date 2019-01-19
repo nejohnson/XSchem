@@ -1657,7 +1657,7 @@ const char *pin_node(int i, int j, int *mult, int hash_prefix_unnamed_net)
  {
    *mult=1;
 
-   my_snprintf(errstr, S(errstr), "error: unconnected pin,  inst %d -- %s\n", i,  inst_ptr[i].instname ) ;
+   my_snprintf(errstr, S(errstr), "Warning: unconnected pin,  Inst idx: %d, Pin idx: %d  Inst:%s\n", i, j, inst_ptr[i].instname ) ;
    statusmsg(errstr,2);
    if(!netlist_count) {
      inst_ptr[i].flags |=4;

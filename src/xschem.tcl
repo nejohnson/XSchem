@@ -431,15 +431,24 @@ proc list_dirs {pathlist } {
 
   set x 0
   set dir {}
+  label .list.title \
+      -text "Choose path to start from. You can navigate anywhere\n with the file selector from there \n" \
+      -background {#77dddd}
+  pack .list.title -fill x -side top
   foreach elem $pathlist {
-    button .list.$x -text $elem -command "set list_dirs_selected_dir $elem"
-    pack .list.$x -fill x -expand yes
+    frame .list.${x}
+    label .list.${x}.l -text [expr $x+1] -width 4
+    button .list.${x}.b -text $elem -command "set list_dirs_selected_dir $elem"
+    pack .list.${x}.l -side left
+    pack .list.${x}.b -side left -fill x -expand yes
+    pack .list.${x} -side top -fill x 
     incr x
   }
-  frame .list.f
-  button .list.f.cancel -text Cancel -command {set list_dirs_selected_dir {} }
-  pack .list.f.cancel
-  pack .list.f -fill x -expand yes
+  frame .list.but
+  button .list.but.cancel -text Cancel -command {set list_dirs_selected_dir {} }
+  
+  pack .list.but.cancel -side bottom
+  pack .list.but -fill x -side top
   vwait list_dirs_selected_dir
   destroy .list
   return $list_dirs_selected_dir
@@ -2166,8 +2175,10 @@ font configure Underline-Font -underline true -size 24
    .menubar.edit.menu add command -label "Paste" -command "xschem paste" -accelerator Ctrl+V
    .menubar.edit.menu add command -label "Delete" -command "xschem delete" -accelerator Del
    .menubar.edit.menu add command -label "Select all" -command "xschem select_all" -accelerator Ctrl+A
-   .menubar.edit.menu add command -label "Edit selected schematic" -command "xschem schematic_in_new_window" -accelerator Alt+E
-   .menubar.edit.menu add command -label "Edit selected symbol" -command "xschem symbol_in_new_window" -accelerator Alt+I
+   .menubar.edit.menu add command -label "Edit selected schematic in new window" \
+       -command "xschem schematic_in_new_window" -accelerator Alt+E
+   .menubar.edit.menu add command -label "Edit selected symbol in new window" \
+       -command "xschem symbol_in_new_window" -accelerator Alt+I
    .menubar.edit.menu add command -label "Duplicate objects" -command "xschem copy_objects" -accelerator C
    .menubar.edit.menu add command -label "Move objects" -command "xschem move_objects" -accelerator M
    .menubar.edit.menu add checkbutton -label "Constrained Horizontal move" -variable horizontal_move \

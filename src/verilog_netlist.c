@@ -432,6 +432,7 @@ void verilog_netlist(FILE *fd , int verilog_stop)
  int i;
  static char *type=NULL;
 
+ prepared_netlist_structs = 0;
  prepare_netlist_structs(0);
  set_modify(1); /* 20160302 prepare_netlist_structs could change schematic (wire node naming for example) */
  if(debug_var>=2) fprintf(errfp, "verilog_netlist(): end prepare_netlist_structs\n");

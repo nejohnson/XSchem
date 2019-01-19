@@ -19,6 +19,21 @@ p{padding: 15px  30px 10px;}
  <!-- slide title -->
  <h1> FAQ </h1>
  
+ <h3> I want new instances to get assigned a new unique name automatically.</h3>
+ <p>
+  Add this to your .xschemrc file:
+ </p>
+  <pre class="code">set disable_unique_names 0</pre>
+ <p>
+  By default XSCHEM allows instance name (Refdes) duplicates in the schematic.
+  This must be resolved by the user normally, before exporting any netlist.
+  The <kbd>Hilight - Highlight duplicate instance names</kbd> (<kbd>k</kbd> key) menu entry
+  can be used to mark the components that need to be renamed.
+  The <kbd>Highlight - Rename duplicate instance names</kbd> menu entry can be used to automatically 
+  rename the last added components so that they have an unique name.
+  Using the above mentioned xschemrc option will automatically rename any added refdes
+  that clashes with existing names.
+ </p>
  <h3> Why do i have to press 'm' to move a component instead of just click and drag? </h3>
  <p class="faq">
   XSCHEM is intended to handle very big schematics, mouse drags are used to select a rectangular portion 

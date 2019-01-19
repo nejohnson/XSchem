@@ -824,10 +824,10 @@ int callback(int event, int mx, int my, KeySym key,
     rebuild_selected_array();
     if(lastselected==0 ) {
       if(current_type==SCHEMATIC) {
-        save_schematic(schematic[currentsch]); /* sync data with disk file before editing file */
+        /* save_schematic(schematic[currentsch]); */ /* sync data with disk file before editing file */
         my_snprintf(str, S(str), "edit_file {%s}", abs_sym_path(schematic[currentsch], ".sch"));
       } else { /* symbol */
-        save_symbol(schematic[currentsch]); /* sync data with disk file before editing file */
+        /* save_symbol(schematic[currentsch]); */ /* sync data with disk file before editing file */
         my_snprintf(str, S(str), "edit_file {%s}", abs_sym_path(schematic[currentsch], ".sym"));
       }
       tcleval(str);

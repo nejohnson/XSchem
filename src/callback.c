@@ -391,6 +391,8 @@ int callback(int event, int mx, int my, KeySym key,
      break;
    }
    if(key == 'J' && state==ShiftMask) { /* testmode */
+    fprintf(errfp, "%s|\n", "name=s1 string=`include\\ \\\"blabla\\\"");
+    fprintf(errfp, "%s|\n", get_tok_value("name=s1 string=`include\\ \\\"blabla\\\"", "string", 2));
     break;
    }
    if(key == '$'  && ( state == ShiftMask) )            /* toggle pixmap  saving */

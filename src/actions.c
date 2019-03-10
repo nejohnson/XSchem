@@ -275,9 +275,10 @@ void new_window(const char *cell, int symbol)
          exit(0); /* --> child of child will be reparented to init */
        } else if (!pid2) {
          /* child of child */
-         freopen("/dev/null","w",stdout);
-         freopen("/dev/null","r",stdin);
-         freopen("/dev/null","w",stderr);
+         if(!(freopen("/dev/null","w",stdout) && freopen("/dev/null","r",stdin)&& freopen("/dev/null","w",stderr))){
+           fprintf(errfp, "new_window(): freopen error\n");
+           tcleval("exit");
+         }
          if(!cell || !cell[0]) {
            execl(xschem_executable,xschem_executable,"-r", NULL);
          }
@@ -788,8 +789,7 @@ void place_symbol(int pos, const char *symbol_name, double x, double y, int rot,
 
   symbol_bbox(n, &inst_ptr[n].x1, &inst_ptr[n].y1,
                     &inst_ptr[n].x2, &inst_ptr[n].y2);
-  bbox(ADD, inst_ptr[n].x1, inst_ptr[n].y1, 
-            inst_ptr[n].x2, inst_ptr[n].y2);
+  bbox(ADD, inst_ptr[n].x1, inst_ptr[n].y1, inst_ptr[n].x2, inst_ptr[n].y2);
   lastinst++;
   set_modify(1);
   prepared_hash_instances=0; /*  20171224 */
@@ -801,13 +801,16 @@ void place_symbol(int pos, const char *symbol_name, double x, double y, int rot,
     bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
   }
   /*   hilight new element 24122002 */
-  drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
-  drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
-  drawtemparc(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
-  select_element(n, SELECTED,0);
-  drawtemparc(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0, 0.0);
-  drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
-  drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
+
+  if(draw_sym) {
+    drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
+    drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
+    drawtemparc(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
+    select_element(n, SELECTED,0);
+    drawtemparc(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0, 0.0);
+    drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
+    drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
+  }
 
  }
 }

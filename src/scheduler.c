@@ -330,6 +330,16 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
      tclsetvar("tcl_debug",argv[2]);
   }
 
+ } else if(!strcmp(argv[1], "bbox")) {
+   if(argc == 3) {
+     if(!strcmp(argv[2], "end")) {
+       bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
+       draw();
+       bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
+     } else if(!strcmp(argv[2], "begin")) {
+       bbox(BEGIN,0.0, 0.0, 0.0, 0.0); 
+     }
+   }
  } else if(!strcmp(argv[1], "setprop")) {
    int inst, fast=0;
 
@@ -583,8 +593,12 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
  } else if(!strcmp(argv[1],"instance")) {
    if(argc==7)
      place_symbol(-1, argv[2], atof(argv[3]), atof(argv[4]), atoi(argv[5]), atoi(argv[6]),NULL, 3, 1);
-   if(argc==8)
+   else if(argc==8)
      place_symbol(-1, argv[2], atof(argv[3]), atof(argv[4]), atoi(argv[5]), atoi(argv[6]), argv[7], 3, 1);
+   else if(argc==9) {
+     int x = !(atoi(argv[8]));
+     place_symbol(-1, argv[2], atof(argv[3]), atof(argv[4]), atoi(argv[5]), atoi(argv[6]), argv[7], 0, x);
+   }
  } else if(!strcmp(argv[1],"arc")) { /* 20171022 */
    ui_state |= MENUSTARTARC;
  } else if(!strcmp(argv[1],"circle")) { /* 20171022 */

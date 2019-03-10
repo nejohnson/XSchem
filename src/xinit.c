@@ -717,7 +717,9 @@ int Tcl_AppInit(Tcl_Interp *inter)
  xcb_render_query_pict_formats_cookie_t formats_cookie;
  #endif
  /* get PWD and HOME */
- getcwd(pwd_dir, PATH_MAX);
+ if(!getcwd(pwd_dir, PATH_MAX)) {
+   fprintf(errfp, "Tcl_AppInit(): getcwd() failed\n");
+ }
  if ((home_buff = getenv("HOME")) == NULL) {
    home_buff = getpwuid(getuid())->pw_dir;
  }

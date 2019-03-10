@@ -37,7 +37,4 @@ Options:
 xschem: interactive schematic capture program
 
 Example:   xschem counter.sch
-the schematic file `counter' will be loaded searching in the
-list of library paths provided by TCL variable XSCHEM_LIBRARY_PATH
-This variable is set in user or system xschem startup file 
-(<install root>/share/xschem/xschemrc or ~/.xschem/xschemrc)
+the schematic file `counter.sch' will be loaded.

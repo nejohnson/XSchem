@@ -999,7 +999,9 @@ void print_hilight_net(int show)
    }
  }
  fclose(fd);
- system(cmd2);
+ if(system(cmd2)==-1) {
+   fprintf(errfp, "print_hilight_net(): error executing cmd2\n");
+ }
  if(show==2) {
    tcleval(b);
  }
@@ -1014,7 +1016,9 @@ void print_hilight_net(int show)
    tcleval("viewdata $::retval");
  }
  if(show==3) {
-   system(cmd3);
+   if(system(cmd3)==-1) {
+     fprintf(errfp, "print_hilight_net(): error executing cmd3\n");
+   }
    my_strdup(162, &cmd, "set ::retval [ read_data_nonewline ");
    my_strcat(163, &cmd, filetmp1);
    my_strcat(164, &cmd, " ]");

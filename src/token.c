@@ -343,7 +343,7 @@ char *get_tok_value(const char *s,const char *tok, int with_quotes)
     else if( state==XTOKEN && space) state=XENDTOK;
     else if( (state==XTOKEN || state==XENDTOK) && c=='=') state=XSEPARATOR;
     else if( state==XSEPARATOR && !space) state=XVALUE;
-    else if( state==XVALUE && space && !quote) state=XEND;
+    else if( state==XVALUE && space && !quote && !escape ) state=XEND;
 
     if(value_pos>=size) {
       size+=CADCHUNKALLOC;
@@ -2075,8 +2075,8 @@ char *translate(int inst, char* s)
    token[token_pos]='\0'; 
    token_pos=0;
 
-   value = get_tok_value(inst_ptr[inst].prop_ptr, token+1, 0); /* 20171205 use get_tok_value instead of hash_lookup */
-   if(!value[0]) value=get_tok_value((inst_ptr[inst].ptr+instdef)->templ, token+1, 0);
+   value = get_tok_value(inst_ptr[inst].prop_ptr, token+1, 2); /* 20171205 use get_tok_value instead of hash_lookup */
+   if(!value[0]) value=get_tok_value((inst_ptr[inst].ptr+instdef)->templ, token+1, 2); /* 20190310 2 instead of 0 */
 
    if(value[0] != 0) {
     tmp=get_tok_value_size;  /* strlen(value); */  /* 20180926 */

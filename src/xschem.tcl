@@ -461,14 +461,14 @@ proc list_dirs {pathlist } {
 # ext:  .sch or .sym or .sch.sym
 #
 proc load_file_dialog { msg ext global_initdir} {
-  global pathlist
+  global pathlist use_list_dirs
   upvar #0 $global_initdir initdir
   set types(.sym) { {{Symbol files} {.sym}} }
   set types(.sch) { {{Schematic files} {.sch}} }
   set types(.sch.sym) { {{Schematic files} {.sch}} {{Symbol files} {.sym}} }
   set types(.sym.sch) { {{Symbol files} {.sym}} {{Schematic files} {.sch}} }
 
-  if { $ext eq {.sym} } {
+  if { $use_list_dirs && $ext eq {.sym} } {
     set initdir [list_dirs $pathlist]
   }
   if { $initdir eq {} } { return {} } 
@@ -1773,6 +1773,7 @@ set tclcmd_txt {}
 ###
 ### user preferences: set default values
 ###
+set_ne use_list_dirs {1}
 set_ne netlist_dir {.}
 set_ne hspice_netlist 0
 set_ne verilog_2001 1

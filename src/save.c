@@ -1585,7 +1585,7 @@ void descend_symbol(void)
 }
 
 
-void load_symbol(const char *abs_name) /* function called when opening a symbol */
+void load_symbol(const char *filename) /* function called when opening a symbol */
 {
   static char msg[PATH_MAX+100];
   FILE *fd;
@@ -1595,8 +1595,8 @@ void load_symbol(const char *abs_name) /* function called when opening a symbol 
   current_type=SYMBOL;
   clear_undo();
 
-  my_snprintf(name, S(name), "%s", abs_sym_path(abs_name, ".sym"));
-  my_strncpy(schematic[currentsch], rel_sym_path(abs_name), S(schematic[currentsch]));
+  my_snprintf(name, S(name), "%s", abs_sym_path(filename, ".sym"));
+  my_strncpy(schematic[currentsch], rel_sym_path(filename), S(schematic[currentsch]));
 
   if(debug_var>=1) fprintf(errfp, "load_symbol(): opening file for loading:%s\n",name);
 
@@ -1609,7 +1609,7 @@ void load_symbol(const char *abs_name) /* function called when opening a symbol 
   if(!name[0]) return;
   if( (fd=fopen(name,"r"))== NULL) {
     fprintf(errfp, "load_symbol(): can not open file: %s\n", name);
-    my_snprintf(msg, S(msg), "alert_ {Unable to open file: %s}", abs_name ? abs_name: "(null)");
+    my_snprintf(msg, S(msg), "alert_ {Unable to open file: %s}", filename ? filename: "(null)");
     tcleval(msg);
 
   } else {

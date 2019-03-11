@@ -1,8 +1,10 @@
 v {xschem version=2.8.2 file_version=1.0}
 G {type=timescale
 spice_ignore=true
-template="name=s1 string=`include\\\\ \\\\\\"file\\\\\\""
-format="@string"}
+xtemplate="name=s1 string=`include\\\\ \\\\\\"file\\\\\\""
+template="name=s1 string=\\"`include \\\\\\"file\\\\\\"\\""
+format="@string"
+}
 V {}
 S {}
 E {}

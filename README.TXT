@@ -37,6 +37,9 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.8.3
+added verilog_preprocessor.sym for inserting verilog preprocessor directives or anything else at netlist beginning 
+synced with repo.hu, use return value for checking errors in system(), freopen(), getcwd().
 
 2.8.2
 faq about automatic rename / allow duplicate refdes.

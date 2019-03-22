@@ -315,6 +315,7 @@ void verilog_block_netlist(FILE *fd, int i)  /*20081205 */
  static char *sig_type = NULL;
  static char *port_value = NULL;
  static char *type = NULL; /* 20180124 */
+ static char *tmp_string = NULL; /* 20190322 */
  char netl[PATH_MAX];
  char netl2[PATH_MAX];  /* 20081202 */
  char netl3[PATH_MAX];  /* 20081202 */
@@ -339,6 +340,27 @@ void verilog_block_netlist(FILE *fd, int i)  /*20081205 */
            instdef[i].name,instdef[i].rects[PINLAYER] );
 
      verilog_stop? load_schematic(0,instdef[i].name,0) :  load_schematic(1,instdef[i].name,0);
+
+     /* print verilog timescale 10102004 */
+
+      for(j=0;j<lastinst;j++)
+      {
+       if( strcmp(get_tok_value(inst_ptr[j].prop_ptr,"verilog_ignore",0),"true")==0 ) continue;
+       if(inst_ptr[j].ptr<0) continue;
+       if(!strcmp(get_tok_value( (inst_ptr[j].ptr+instdef)->prop_ptr, "verilog_ignore",0 ), "true") ) {
+         continue;
+       }
+       my_strdup(544, &type,(inst_ptr[j].ptr+instdef)->type);
+       if( type && (strcmp(type,"timescale"))==0)
+       {
+        str_tmp = get_tok_value( (inst_ptr[j].ptr+instdef)->prop_ptr ,"format",0);
+        my_strdup(545, &tmp_string, str_tmp);
+        fprintf(fd, "%s\n", str_tmp ? translate(j, tmp_string) : "(NULL)");
+       }
+      }
+
+
+
 
      fprintf(fd, "module %s (\n", skip_dir(instdef[i].name));
      /*print_generic(fd, "entity", i); */ /* 02112003 */

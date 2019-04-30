@@ -37,6 +37,10 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.8.4
+use_list_dirs can be set in xschemrc to enable or disable directory
+avoid printing spice_ignore, tedax_ignore or vhdl_ignore as parameters in verilog netlists.
+
 2.8.3
 added verilog_preprocessor.sym for inserting verilog preprocessor directives or anything else at netlist beginning 
 synced with repo.hu, use return value for checking errors in system(), freopen(), getcwd().

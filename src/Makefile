@@ -13,7 +13,7 @@ user_library_dir=$(userconfdir)/xschem_library
 
 ## specify system-wide symbol libraries;
 ## you may redefine it later in .xschem or xschemrc startup files
-system_library_dir=${prefix}/share/xschem/xschem_library
+system_library_dir=${prefix}/share/xschem/xschem_library/devices
 
 xschem_library_path=$(user_library_dir):$(system_library_dir)
 
@@ -69,7 +69,7 @@ endif
 
 ## to fix rendering problems due to bugs in the exceed turboX server
 ## add -DTURBOX_FIX
-MOREFLAGS= -g -std=c89 -pedantic
+MOREFLAGS= -g -std=c89 -pedantic 
 
 CFLAGS  = -Wall  $(MOREFLAGS)  -I/usr/include/tcl${TCLVER} $(CAIRO_INCLUDES) -I/home/sschippe/include \
            $(IN_MEMORY_UNDO) -DXSCHEM_SHAREDIR='"${sharedir}"'  -DUSER_CONF_DIR='"${userconfdir}"' \
@@ -123,11 +123,10 @@ install: xschem
 	cp xschemrc $(prefix)/share/xschem
 	cp vhdl.awk $(prefix)/share/xschem
 	cp -r ../doc/* $(prefix)/share/doc/xschem/
-	cp ../utile/* $(prefix)/share/xschem/utile
-	cp -ru ../xschem_library/mylib $(user_library_dir)
-	cp -ru ../xschem_library/devices $(system_library_dir)
-	cp -ru ../xschem_library/examples $(user_library_dir)
-	cp -ru ../xschem_library/pcb $(system_library_dir)
+	cp ./utile/* $(prefix)/share/xschem/utile
+	cp -ru ../xschem_library/devices/* $(system_library_dir)
+	cp -ru ../xschem_library/examples $(prefix)/share/doc/xschem/
+	cp -ru ../xschem_library/pcb $(prefix)/share/doc/xschem/
 
 .PHONY: uninstall
 uninstall:

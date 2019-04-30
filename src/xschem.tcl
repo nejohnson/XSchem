@@ -1193,6 +1193,8 @@ proc edit_prop {txtlabel} {
            # puts "file copy [file rootname $prev_symbol].sym [file rootname $symbol].sym"
          }
        }
+       ## 20190326
+       set symbol [rel_sym_path $symbol] 
      }
      # puts "symbol: $symbol , prev_symbol: $prev_symbol"
      set copy_cell 0 ;# 20120919

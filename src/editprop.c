@@ -340,8 +340,9 @@ void my_free(void *ptr)
 
 /* n characters at most are copied, *d will be always NUL terminated if *s does
  *   not fit(d[n-1]='\0')
+ * return # of copied characters
  */
-void my_strncpy(char *d, const char *s, int n)
+int my_strncpy(char *d, const char *s, int n)
 {
   int i = 0;
   n -= 1;
@@ -352,10 +353,11 @@ void my_strncpy(char *d, const char *s, int n)
     if(i == n) { 
       if(s[i] != '\0') if(debug_var>=1)  fprintf(errfp, "my_strncpy(): overflow, n=%d, s=%s\n", n+1, s);
       d[i] = '\0';
-      return; 
+      return i; 
     }
    i++;
   }
+  return i;
 }
 
 
@@ -730,9 +732,6 @@ void update_symbol(const char *result, int x)
    {
     if(debug_var>=1) fprintf(errfp, "update_symbol(): changing symbol: %s --> %s\n", symbol, inst_ptr[i].name);
 
-     my_strncpy(symbol, rel_sym_path(symbol), S(symbol));
-
-     
     /* 20150911 */
     /*     | */
     if(strcmp(symbol, inst_ptr[i].name)) {

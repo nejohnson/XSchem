@@ -243,7 +243,7 @@ int callback(int event, int mx, int my, KeySym key,
   break;
   case KeyPress: /* 20161118 */
    if(key==' ') {
-     if(ui_state==STARTWIRE) {
+     if(ui_state & STARTWIRE) { /*  & instead of == 20190409 */
        new_wire(RUBBER|CLEAR, mousex_snap, mousey_snap);
        manhattan_lines++;
        manhattan_lines %=3;

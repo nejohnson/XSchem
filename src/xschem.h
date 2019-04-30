@@ -819,7 +819,7 @@ extern size_t my_strdup(int id, char **dest, const char *src);
 extern void my_strndup(int id, char **dest, const char *src, int n);
 extern size_t my_strdup2(int id, char **dest, const char *src);
 extern char *my_strtok_r(char *str, const char *delim, char **saveptr);
-extern void my_strncpy(char *d, const char *s, int n);
+extern int my_strncpy(char *d, const char *s, int n);
 extern void *my_malloc(int id, size_t size);
 extern void my_realloc(int id, void *ptr,size_t size);
 extern void *my_calloc(int id, size_t nmemb, size_t size);

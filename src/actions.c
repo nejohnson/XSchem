@@ -111,7 +111,7 @@ const char *abs_sym_path(const char *s, const char *required_ext)
   return Tcl_GetStringResult(interp);
 }
 
-/* wrapper to Tcl function */
+/* Wrapper to Tcl function */
 const char *rel_sym_path(const char *s)
 {
   char c[PATH_MAX+1000];

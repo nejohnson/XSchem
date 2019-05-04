@@ -159,7 +159,7 @@ function beginfile(f)
 #    #print $0 "--> " sig_type
 #   }
 
-/^C {.*generic_pin}/{
+/^C {.*generic_pin(\.sym)?}/{
   type_pin[n_pin]=generic_type
   dir_pin[n_pin]="generic"
   y_pin[n_pin] = $4+0 # y coordinate of pin 20140519
@@ -170,7 +170,7 @@ function beginfile(f)
   ip++
 }
 
-/^C {.*ipin}/{
+/^C {.*ipin(\.sym)?}/{
   type_pin[n_pin]=sig_type
   verilog_pin[n_pin]=verilog_type
   dir_pin[n_pin]="ipin"
@@ -182,7 +182,7 @@ function beginfile(f)
   ip++
 }
 
-/^C {.*[^i]opin}/{
+/^C {.*[^i]opin(\.sym)?}/{
   type_pin[n_pin]=sig_type
   verilog_pin[n_pin]=verilog_type
   dir_pin[n_pin]="opin"
@@ -194,7 +194,7 @@ function beginfile(f)
   op++
 }
 
-/^C {.*iopin}/{
+/^C {.*iopin(\.sym)?}/{
   type_pin[n_pin]=sig_type
   verilog_pin[n_pin]=verilog_type
   dir_pin[n_pin]="iopin"

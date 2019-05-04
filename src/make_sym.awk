@@ -182,7 +182,7 @@ function beginfile(f)
   ip++
 }
 
-/^C {.*[^i]opin(\.sym)?}/{
+/^C {.*[^i]?opin(\.sym)?}/{
   type_pin[n_pin]=sig_type
   verilog_pin[n_pin]=verilog_type
   dir_pin[n_pin]="opin"

@@ -729,6 +729,7 @@ void place_symbol(int pos, const char *symbol_name, double x, double y, int rot,
    my_strncpy(name, symbol_name, S(name));
  }
 
+ if(debug_var>=1) fprintf(errfp, "place_symbol(): load_file_dialog returns:  name=%s\n",name);
  my_strncpy(name, rel_sym_path(name), S(name));
 
  if(name[0]) push_undo(); /*  20150327 */

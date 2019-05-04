@@ -2171,8 +2171,8 @@ font configure Underline-Font -underline true -size 24
    .menubar.option.menu add radiobutton -label "tEDAx netlist" -variable netlist_type -value tedax \
         -accelerator {Shift+V} \
         -command "xschem netlist_type tedax"
-   .menubar.edit.menu add command -label "Undo" -state disabled -accelerator U
-   .menubar.edit.menu add command -label "Redo" -state disabled -accelerator {Ctrl+R}
+   .menubar.edit.menu add command -label "Undo" -command "xschem undo; xschem redraw" -accelerator U
+   .menubar.edit.menu add command -label "Redo" -command "xschem redo; xschem redraw" -accelerator {Shift+U}
    .menubar.edit.menu add command -label "Copy" -command "xschem copy" -accelerator Ctrl+C
    .menubar.edit.menu add command -label "Cut" -command "xschem cut"   -accelerator Ctrl+X
    .menubar.edit.menu add command -label "Paste" -command "xschem paste" -accelerator Ctrl+V

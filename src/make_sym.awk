@@ -114,7 +114,7 @@ function beginfile(f)
   generic_type=$0
   sub(/^.*generic_type=/,"",generic_type)
   sub(/[}].*$/,"",generic_type)
-  sub(/[a-zA-z0-9]+=.*$/,"",generic_type)	#03062002, allow spaces
+  sub(/[a-zA-Z0-9]+=.*$/,"",generic_type)	#03062002, allow spaces
   print "------------------------" $0 "-->" generic_type
  }
 

@@ -415,6 +415,7 @@ void saveas(const char *f) /*  changed name from ask_save_file to saveas 2012120
     if(!res[0]) return; /* 20071104 */
     if(debug_var >= 1) fprintf(errfp, "saveas(): res = %s\n", res);
     save_schematic(res);
+    my_strncpy(current_name, rel_sym_path(res), S(current_name)); /* 20190519 */
     return;
 }
 void ask_new_file(void)

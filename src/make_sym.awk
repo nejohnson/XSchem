@@ -69,7 +69,7 @@ function beginfile(f)
  ip=op=n_pin=0
  if(template=="") {
   printf "%s", "G {type=subcircuit\nformat=\"@name @pinlist @symname\"\n"  >sym
-  printf "%s\n", "template=\"name=x0\""  >sym
+  printf "%s\n", "template=\"name=x1\""  >sym
   printf "%s", "}\n"  >sym
  } 
  else print template >sym

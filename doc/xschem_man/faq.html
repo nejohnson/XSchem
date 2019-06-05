@@ -19,11 +19,16 @@ p{padding: 15px  30px 10px;}
  <!-- slide title -->
  <h1> FAQ </h1>
  
+ <h3> When placing a new component i want a dialog showing the defined libraries before opening
+      the TCL file selector</h3>
+ <p class="faq"> Add this to your xschemrc file:</p>
+ <pre class="code">set use_list_dirs 1</pre>
+
  <h3> I want new instances to get assigned a new unique name automatically.</h3>
  <p class="faq">
   Add this to your xschemrc file:
  </p>
-  <pre class="code">set disable_unique_names 0</pre>
+ <pre class="code">set disable_unique_names 0</pre>
  <p class="faq">
   By default XSCHEM allows instance name (Refdes) duplicates in the schematic.
   This must be resolved by the user normally, before exporting any netlist.
@@ -34,6 +39,7 @@ p{padding: 15px  30px 10px;}
   Using the above mentioned xschemrc option will automatically rename any added refdes
   that clashes with existing names.
  </p>
+
  <h3> Why do i have to press 'm' to move a component instead of just click and drag? </h3>
  <p class="faq">
   XSCHEM is intended to handle very big schematics, mouse drags are used to select a rectangular portion 

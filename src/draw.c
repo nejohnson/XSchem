@@ -109,7 +109,7 @@ void print_image()
 
   draw_grid=0;
   draw_pixmap=1;
-  /* zoom_full(0); */
+  /* zoom_full(0, 0); */
   draw();
 
   XpmWriteFileFromPixmap(display, "plot.xpm", save_pixmap,0, NULL ); /* .gz ???? */

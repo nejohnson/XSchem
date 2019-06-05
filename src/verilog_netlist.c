@@ -41,22 +41,9 @@ void global_verilog_netlist(int global)  /* netlister driver */
  /* top sch properties used for library use declarations and type definitions */
  /* to be printed before any entity declarations */
 
- if(!strcmp(schematic[currentsch],""))
- {
-   char name[PATH_MAX];
-   my_snprintf(name, S(name), "savefile {%s.sch} .sch",schematic[currentsch]);
-   if(debug_var>=1) fprintf(errfp, "global_spice_netlist(): saving: %s\n",name);
-   tcleval(name);
-   my_strncpy(schematic[currentsch], Tcl_GetStringResult(interp), S(schematic[currentsch]));
-   if(!strcmp(schematic[currentsch],"")) return;
-   save_schematic(schematic[currentsch]);
- }
-
  my_snprintf(netl, S(netl), "%s/%s", netlist_dir, skip_dir(schematic[currentsch]) );
  fd=fopen(netl, "w");
  my_snprintf(netl3, S(netl3), "%s", skip_dir(schematic[currentsch]));
-
-
 
  if(fd==NULL){ 
    if(debug_var>=1) fprintf(errfp, "global_verilog_netlist(): problems opening netlist file\n");
@@ -90,7 +77,10 @@ void global_verilog_netlist(int global)  /* netlister driver */
  /* flush data structures (remove unused symbols) */
  if(modified) save_schematic(schematic[currentsch]);
  remove_symbols();  /* removed 25122002, readded 04112003 */
- load_schematic(1,schematic[currentsch],0);  /* 20180927 */
+
+ if(debug_var>=1) fprintf(errfp, "global_verilog_netlist(): schematic[currentsch]=%s\n", schematic[currentsch]);
+ 
+ load_schematic(0, 1,schematic[currentsch] ,0);  /* 20180927 */
 
 
  /* print top subckt port directions */
@@ -266,7 +256,9 @@ void global_verilog_netlist(int global)  /* netlister driver */
                                  /* may change wire node labels, so save. */
 
    remove_symbols(); /* 20161205 ensure all unused symbols purged before descending hierarchy */
-   load_schematic(1,schematic[currentsch],0); /* 20180927 */
+
+   
+   load_schematic(0, 1, schematic[currentsch], 0); /* 20180927 */
 
    currentsch++;
    if(debug_var>=2) fprintf(errfp, "global_verilog_netlist(): last defined symbol=%d\n",lastinstdef);
@@ -288,7 +280,7 @@ void global_verilog_netlist(int global)  /* netlister driver */
    my_strncpy(schematic[currentsch] , "", S(schematic[currentsch]));
    currentsch--;
    remove_symbols();
-   load_schematic(1,schematic[currentsch],0);
+   load_schematic(0, 1,schematic[currentsch], 0);
  }
 
  if(debug_var>=1) fprintf(errfp, "global_verilog_netlist(): starting awk on netlist!\n");
@@ -315,6 +307,7 @@ void verilog_block_netlist(FILE *fd, int i)  /*20081205 */
  static char *sig_type = NULL;
  static char *port_value = NULL;
  static char *type = NULL; /* 20180124 */
+ char filename[PATH_MAX];
  static char *tmp_string = NULL; /* 20190322 */
  char netl[PATH_MAX];
  char netl2[PATH_MAX];  /* 20081202 */
@@ -339,7 +332,15 @@ void verilog_block_netlist(FILE *fd, int i)  /*20081205 */
      fprintf(fd, "\n// expanding   symbol:  %s # of pins=%d\n\n", 
            instdef[i].name,instdef[i].rects[PINLAYER] );
 
-     verilog_stop? load_schematic(0,instdef[i].name,0) :  load_schematic(1,instdef[i].name,0);
+
+     if((str_tmp = get_tok_value(instdef[i].prop_ptr, "schematic",0 ))[0]) {
+       my_strncpy(filename, abs_sym_path(str_tmp, ""), S(filename));
+       load_schematic(0, 1,filename, 0);
+     } else {
+       verilog_stop? load_schematic(0, 0, abs_sym_path(instdef[i].name, ".sch"), 0) :   /* 20190518 */
+                     load_schematic(0, 1, abs_sym_path(instdef[i].name, ".sch"), 0);
+     }
+
 
      /* print verilog timescale 10102004 */
 
@@ -358,9 +359,6 @@ void verilog_block_netlist(FILE *fd, int i)  /*20081205 */
         fprintf(fd, "%s\n", str_tmp ? translate(j, tmp_string) : "(NULL)");
        }
       }
-
-
-
 
      fprintf(fd, "module %s (\n", skip_dir(instdef[i].name));
      /*print_generic(fd, "entity", i); */ /* 02112003 */

@@ -58,7 +58,7 @@ void symbol_bbox(int i, double *x1,double *y1, double *x2, double *y2)
    inst_ptr[i].yy1 = *y1;               /* for easier select */
    inst_ptr[i].xx2 = *x2;
    inst_ptr[i].yy2 = *y2;
-    if(debug_var>=1) fprintf(errfp, "symbol_bbox(): instance=%d %.16g %.16g %.16g %.16g\n",i,*x1, *y1, *x2, *y2);
+    if(debug_var>=2) fprintf(errfp, "symbol_bbox(): instance=%d %.16g %.16g %.16g %.16g\n",i,*x1, *y1, *x2, *y2);
    
    /* strings bbox */
    for(j=0;j< (inst_ptr[i].ptr+instdef)->texts;j++)
@@ -579,12 +579,19 @@ void select_element(int i,unsigned short select_mode, int fast)
   my_strncpy(s,inst_ptr[i].prop_ptr!=NULL?inst_ptr[i].prop_ptr:"<NULL>",S(s));
   if( !fast )
   {
+   prepare_netlist_structs(0); /* 20190526 */
+   if(event_reporting) { 
+     char n[PATH_MAX];
+     printf("xschem search exact 1 name %s\n", escape_chars(n, inst_ptr[i].instname, PATH_MAX)); 
+     fflush(stdout);
+   }
    my_snprintf(str, S(str), "selected element %d: %s properties: %s", i, inst_ptr[i].name,s);
    statusmsg(str,2);
    my_snprintf(str, S(str), "symbol .name=%s", inst_ptr[i].name==NULL?"(null)":inst_ptr[i].name);
    statusmsg(str,2);
    for(j=0;j< (inst_ptr[i].ptr+instdef)->rects[PINLAYER] ;j++) 
    {
+    if(debug_var>=1) fprintf(errfp, "i=%d, inst_prop[i].node=%p\n", i, (void *)inst_ptr[i].node);
     /*                                         --------20170323 check prop_ptr---------------------------- */
     if(inst_ptr[i].node && inst_ptr[i].node[j] && (inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][j].prop_ptr)
     {

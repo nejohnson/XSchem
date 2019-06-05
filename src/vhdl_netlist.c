@@ -26,7 +26,7 @@
 void global_vhdl_netlist(int global)  /* netlister driver */
 {
  FILE *fd;
- char *str_tmp;
+ const char *str_tmp;
  char *dir_tmp = NULL;
  static char *sig_type = NULL;
  static char *port_value = NULL;
@@ -35,6 +35,7 @@ void global_vhdl_netlist(int global)  /* netlister driver */
  char netl2[PATH_MAX];  /* 20081202 overflow safe 20161122 */
  char netl3[PATH_MAX];  /* 20081202 overflow safe 20161122 */
  static char *type=NULL;
+ struct stat buf;
 
  statusmsg("",2);  /* clear infowindow */
  /* top sch properties used for library use declarations and type definitions */
@@ -42,16 +43,6 @@ void global_vhdl_netlist(int global)  /* netlister driver */
 
  if(current_type==SYMBOL) return;
  netlist_count=0;
- if(!strcmp(schematic[currentsch],""))
- {
-   char name[PATH_MAX];
-   my_snprintf(name, S(name), "savefile {%s.sch} .sch",schematic[currentsch]);
-   if(debug_var>=1) fprintf(errfp, "global_spice_netlist(): saving: %s\n",name);
-   tcleval(name);
-   my_strncpy(schematic[currentsch], Tcl_GetStringResult(interp), S(schematic[currentsch]));
-   if(!strcmp(schematic[currentsch],"")) return;
-   save_schematic(schematic[currentsch]);
- }
  my_snprintf(netl, S(netl), "%s/%s", netlist_dir, skip_dir(schematic[currentsch]) );
  fd=fopen(netl, "w"); 
  my_snprintf(netl3, S(netl3), "%s", skip_dir(schematic[currentsch]));
@@ -107,13 +98,19 @@ void global_vhdl_netlist(int global)  /* netlister driver */
  /* flush data structures (remove unused symbols) */
  if(modified) save_schematic(schematic[currentsch]); /* save and flush unused symbols */
  remove_symbols();  /* removed 25122002, readded 04112003.. this removes unused symbols */
- load_schematic(1,schematic[currentsch],0);  /* 20180927 */
+ load_schematic(0, 1, schematic[currentsch], 0);  /* 20180927 */
 
 
  /* 20071009 print top level generics if defined in symbol */
- load_symbol_definition( schematic[currentsch], NULL );
- print_generic(fd,"entity", lastinstdef-1);  /* added print top level params */
- remove_symbol();
+
+ str_tmp = add_ext(schematic[currentsch], ".sym");
+ if(!stat(str_tmp, &buf)) {
+   load_symbol_definition(str_tmp, NULL );
+   print_generic(fd,"entity", lastinstdef-1);  /* added print top level params */
+   remove_symbol();
+ } else {
+    fprintf(fd,"entity %s is\n", skip_dir( schematic[currentsch]) );
+ }
  /* 20071009 end */
 
 
@@ -303,7 +300,7 @@ void global_vhdl_netlist(int global)  /* netlister driver */
                                  /* may change wire node labels, so save. */
 
    remove_symbols(); /* 20161205 ensure all unused symbols purged before descending hierarchy */
-   load_schematic(1,schematic[currentsch],0); /* 20180927 */
+   load_schematic(0, 1, schematic[currentsch], 0); /* 20180927 */
 
    currentsch++;
     if(debug_var>=2) fprintf(errfp, "global_vhdl_netlist(): last defined symbol=%d\n",lastinstdef);
@@ -324,7 +321,7 @@ void global_vhdl_netlist(int global)  /* netlister driver */
    my_strncpy(schematic[currentsch] , "", S(schematic[currentsch]));
    currentsch--;
    remove_symbols();
-   load_schematic(1,schematic[currentsch],0); /* 20180927 */
+   load_schematic(0, 1, schematic[currentsch], 0); /* 20180927 */
  }
  if(debug_var>=1) fprintf(errfp, "global_vhdl_netlist(): starting awk on netlist!\n");
  if(!split_files) {
@@ -350,6 +347,7 @@ void  vhdl_block_netlist(FILE *fd, int i)  /*20081204 */
  static char *sig_type = NULL;
  static char *port_value = NULL;
  static char *type=NULL;
+ char filename[PATH_MAX];
  char netl[PATH_MAX];
  char netl2[PATH_MAX];  /* 20081202 */
  char netl3[PATH_MAX];  /* 20081202 */
@@ -370,7 +368,14 @@ void  vhdl_block_netlist(FILE *fd, int i)  /*20081204 */
      if(debug_var>=1) fprintf(errfp, "vhdl_block_netlist(): expanding %s\n",  instdef[i].name);
      fprintf(fd, "\n-- expanding   symbol:  %s # of pins=%d\n\n", 
            instdef[i].name,instdef[i].rects[PINLAYER] );
-     load_schematic(1,instdef[i].name,0); /* !stop_vhdl does not print use/packages !!!!!! 27052002 */
+
+
+     if((str_tmp = get_tok_value(instdef[i].prop_ptr, "schematic",0 ))[0]) {
+       my_strncpy(filename, abs_sym_path(str_tmp, ""), S(filename));
+       load_schematic(0, 1,filename, 0);
+     } else {
+       load_schematic(0, 1, abs_sym_path(instdef[i].name, ".sch"), 0); /* 20190518 */
+     }
 
 
      if(debug_var>=1) fprintf(errfp, "vhdl_block_netlist():       packages\n");

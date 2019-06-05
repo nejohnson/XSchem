@@ -64,6 +64,7 @@ ctrl        'a'         Select all
 shift       'A'         Toggle show netlist
 -           'b'         Merge file
 ctrl        'b'         Toggle show text in symbol
+shift       'B'         Delete files
 -           'c'         Copy selected obj. 
 ctrl        'c'         Save to clipboard
 shift       'C'         Start arc placement

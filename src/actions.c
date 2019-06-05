@@ -51,6 +51,50 @@ void print_version()
   exit(EXIT_SUCCESS);
 }
 
+
+char *escape_chars(char *dest, const char *source, int size)
+{
+  int s=0;
+  int d=0;
+  size--; /* reserve space for \0 */
+  while(source && source[s]) {
+    switch(source[s]) {
+      case '\n':
+        if(d < size-1) {
+          dest[d++] = '\\';
+          dest[d++] = 'n';
+        }
+        break;
+      case '\t':
+        if(d < size-1) {
+          dest[d++] = '\\';
+          dest[d++] = 't';
+        }
+        break;
+      case '\\':
+      case ' ':
+      case ';':
+      case '$':
+      case '!':
+      case '#':
+      case '{':
+      case '}':
+      case '[':
+      case ']':
+        if(d < size-1) {
+           dest[d++] = '\\';
+           dest[d++] = source[s];
+        }
+        break;
+      default:
+        if(d < size) dest[d++] = source[s];
+    }
+    s++;
+  }
+  dest[d] = '\0';
+  return dest;
+}
+
 void set_snap(double newsnap) /*  20161212 set new snap factor and just notify new value */
 {
     char str[256];
@@ -103,10 +147,10 @@ int set_netlist_dir(int force, char *dir)
 }
 
 /* wrapper to TCL function */
-const char *abs_sym_path(const char *s, const char *required_ext)
+const char *abs_sym_path(const char *s, const char *ext)
 {
   char c[PATH_MAX+1000];
-  my_snprintf(c, S(c), "abs_sym_path {%s} %s", s, required_ext);
+  my_snprintf(c, S(c), "abs_sym_path {%s} {%s}", s, ext);
   tcleval(c);
   return Tcl_GetStringResult(interp);
 }
@@ -115,10 +159,30 @@ const char *abs_sym_path(const char *s, const char *required_ext)
 const char *rel_sym_path(const char *s)
 {
   char c[PATH_MAX+1000];
-  
   my_snprintf(c, S(c), "rel_sym_path {%s}", s);
   tcleval(c);
   return Tcl_GetStringResult(interp);
+}
+
+const char *add_ext(const char *f, const char *ext)
+{
+  static char ff[PATH_MAX];
+  char *p;
+  int i;
+
+  if(debug_var>=1) fprintf(errfp, "add_ext(): f=%s ext=%s\n", f, ext);
+  if((p=strrchr(f,'.'))) {
+    my_strncpy(ff, f, (p-f)+1);
+    p = ff + (p-f);
+    if(debug_var>=1) fprintf(errfp, "add_ext() 1: ff=%s\n", ff);
+  } else {
+    i = my_strncpy(ff, f, S(ff));
+    p = ff+i;
+    if(debug_var>=1) fprintf(errfp, "add_ext() 2: ff=%s\n", ff);
+  } 
+  my_strncpy(p, ext, S(ff)-(p-ff));
+  if(debug_var>=1) fprintf(errfp, "add_ext() 3: ff=%s\n", ff);
+  return ff;
 }
 
 void resetwin(void)
@@ -191,7 +255,7 @@ void resetwin(void)
     } 
 
     if(pending_fullzoom) {
-      zoom_full(0);
+      zoom_full(0, 0);
       pending_fullzoom=0;
     } 
     /* debug ... */
@@ -285,11 +349,11 @@ void new_window(const char *cell, int symbol)
          else if(!symbol) {
 
 
-           my_strncpy(f, abs_sym_path(cell, ".sch"), S(f));
+           my_strncpy(f, cell, S(f));
            execl(xschem_executable,xschem_executable,"-r",f, NULL);
          }
          else {
-           my_strncpy(f, abs_sym_path(cell, ".sym"), S(f));
+           my_strncpy(f, cell, S(f));
            execl(xschem_executable,xschem_executable,"-r",f, NULL);
          }
        } else {
@@ -319,62 +383,39 @@ int save(int confirm) /* 20171006 add confirm */
 
      save_ok=0;
      cancel=0;
-     if(current_type==SCHEMATIC)
+     if(modified)
      {
-       if(modified)
-       {
-         if(confirm) {
-           tcleval("ask_save");
-           if(!strcmp(Tcl_GetStringResult(interp), "") ) cancel=1;
-           if(!strcmp(Tcl_GetStringResult(interp), "yes") ) save_ok = save_schematic(schematic[currentsch]);
-         } else {
-           save_ok = save_schematic(schematic[currentsch]);
-         }
-       }
-     }
-     else
-     {
-       if(modified)
-       {
-         if(confirm) {
-           tcleval("ask_save");
-           if(!strcmp(Tcl_GetStringResult(interp), "") ) cancel=1;
-           if(!strcmp(Tcl_GetStringResult(interp), "yes") ) save_ok = save_symbol(schematic[currentsch]);
-         } else {
-           save_ok = save_symbol(schematic[currentsch]);
-         }
+       if(confirm) {
+         tcleval("ask_save");
+         if(!strcmp(Tcl_GetStringResult(interp), "") ) cancel=1;
+         if(!strcmp(Tcl_GetStringResult(interp), "yes") ) save_ok = save_schematic(schematic[currentsch]);
+       } else {
+         save_ok = save_schematic(schematic[currentsch]);
        }
      }
      if(save_ok==-1) return 1;
      return cancel;
 }
-void saveas(void) /*  changed name from ask_save_file to saveas 20121201 */
+
+void saveas(const char *f) /*  changed name from ask_save_file to saveas 20121201 */
 {
     char name[PATH_MAX+1000];
     char filename[PATH_MAX];
     char res[PATH_MAX];
-    if(current_type==SYMBOL)
-    {
-      my_strncpy(filename , abs_sym_path(schematic[currentsch], ".sym"), S(filename));
-      my_snprintf(name, S(name), "save_file_dialog {Save file} .sym.sch INITIALLOADDIR {%s}", filename);
-      tcleval(name);
-      my_strncpy(res, Tcl_GetStringResult(interp), S(res));
-      if(!res[0]) return; /* 20071104 */
-      if( strstr(res, ".sym") ) save_symbol(res);
-      else save_schematic(res);
-      return;
-    }
-    else /* SCHEMATIC */
-    {
-      my_strncpy(filename , abs_sym_path(schematic[currentsch], ".sch"), S(filename));
+    if(!f) {
+      my_strncpy(filename , abs_sym_path(schematic[currentsch], ""), S(filename));
       my_snprintf(name, S(name), "save_file_dialog {Save file} .sch.sym INITIALLOADDIR {%s}", filename);
       tcleval(name);
       my_strncpy(res, Tcl_GetStringResult(interp), S(res));
-      if(!res[0]) return; /* 20071104 */
-      if( strstr(res, ".sym") ) save_symbol(res);
-      else save_schematic(res);
-      return;
     }
+    else {
+      my_strncpy(res, f, S(res));
+    }
+
+    if(!res[0]) return; /* 20071104 */
+    if(debug_var >= 1) fprintf(errfp, "saveas(): res = %s\n", res);
+    save_schematic(res);
+    return;
 }
 void ask_new_file(void)
 {
@@ -395,14 +436,12 @@ void ask_new_file(void)
      currentsch = 0;
      unselect_all(); /* 20180929 */
      remove_symbols();
-     /*
-     if(strstr(fullname,".sym")) load_symbol( rel_sym_path(fullname));
-     else load_schematic(1, rel_sym_path(fullname),1);
-     */
-     if(strstr(fullname,".sym")) load_symbol( fullname); /* 20180925.1 */
-     else load_schematic(1, fullname,1); /* 20180925.1 */
+     if(strstr(fullname,".sym"))
+       /*  load_symbol( fullname); */
+       load_schematic(1, 0, fullname,1);
+     else load_schematic(0, 1, fullname,1); /* 20180925.1 */
      my_strdup(1, &sch_prefix[currentsch],".");
-     zoom_full(1);
+     zoom_full(1, 0);
     }
 }
 
@@ -564,8 +603,8 @@ void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
   Box *rect;
   static char *labname=NULL;
   static char *prop=NULL; /*  20161122 overflow safe */
-  char symname_pin[] = "devices/lab_pin";
-  char symname_wire[] = "devices/lab_wire"; /*  20171005 */
+  char symname_pin[] = "devices/lab_pin.sym";
+  char symname_wire[] = "devices/lab_wire.sym"; /*  20171005 */
   static char *type=NULL;
   int dir;
   int k,ii, skip;
@@ -728,10 +767,8 @@ void place_symbol(int pos, const char *symbol_name, double x, double y, int rot,
  } else {
    my_strncpy(name, symbol_name, S(name));
  }
-
  if(debug_var>=1) fprintf(errfp, "place_symbol(): load_file_dialog returns:  name=%s\n",name);
  my_strncpy(name, rel_sym_path(name), S(name));
-
  if(name[0]) push_undo(); /*  20150327 */
  else  return;
 
@@ -825,7 +862,7 @@ void symbol_in_new_window(void)
  }
  else
  {
-  new_window(inst_ptr[selectedgroup[0].n].name,1);
+  new_window(abs_sym_path(inst_ptr[selectedgroup[0].n].name, ""),1);
  }
 
 }
@@ -833,6 +870,7 @@ void symbol_in_new_window(void)
 
 void schematic_in_new_window(void)
 {
+ char filename[PATH_MAX];
  rebuild_selected_array();
  if(lastselected !=1 || selectedgroup[0].type!=ELEMENT) 
  {
@@ -852,7 +890,15 @@ void schematic_in_new_window(void)
          "primitive"
      ) 
   ) return;
-  new_window(inst_ptr[selectedgroup[0].n].name,0);
+
+  my_strncpy(filename, abs_sym_path(get_tok_value(
+    (inst_ptr[selectedgroup[0].n].ptr+instdef)->prop_ptr, "schematic",0 ), "")
+    , S(filename));
+  if(!filename[0]) {
+    my_strncpy(filename, abs_sym_path(inst_ptr[selectedgroup[0].n].name, ".sch"), S(filename));
+  }
+
+  new_window(filename, 0);
  }
 }
 
@@ -888,6 +934,7 @@ void launcher(void) /*  20161102 */
 void descend_schematic(void)
 {
  char *str;
+ char filename[PATH_MAX];
  int save_ok; /*  20171020 */
  save_ok=0;
 
@@ -909,14 +956,13 @@ void descend_schematic(void)
     char filename[PATH_MAX];
     char res[PATH_MAX];
 
-    my_strncpy(filename, abs_sym_path(schematic[currentsch], ".sch"), S(filename));
+    my_strncpy(filename, schematic[currentsch], S(filename));
     my_snprintf(cmd, S(cmd), "save_file_dialog {Save file} .sch.sym INITIALLOADDIR {%s}", filename);
     tcleval(cmd);
     my_strncpy(res, Tcl_GetStringResult(interp), S(res));
     if(!res[0]) return; /* 20071104 */
     if(debug_var>=1) fprintf(errfp, "descend_schematic(): saving: %s\n",res);
-    if( strstr(res, ".sym") ) save_ok = save_symbol(res);
-    else save_ok = save_schematic(res);
+    save_ok = save_schematic(res);
     if(save_ok==-1) return; /*  20171020 */
   }
 
@@ -951,17 +997,27 @@ void descend_schematic(void)
   zoom_array[currentsch].y=yorigin;
   zoom_array[currentsch].zoom=zoom;
   hilight_child_pins(previous_instance[currentsch]);
+
+  my_strncpy(filename, abs_sym_path(get_tok_value(
+     (inst_ptr[selectedgroup[0].n].ptr+instdef)->prop_ptr, "schematic",0 ), "")
+     , S(filename));
+
   currentsch++;
   unselect_all();
   remove_symbols();
-  load_schematic(1,inst_ptr[selectedgroup[0].n].name,1);
+  if(filename[0]) {
+    load_schematic(0, 1,filename, 1);
+  } else {
+    my_strncpy(filename, abs_sym_path(inst_ptr[selectedgroup[0].n].name, ".sch"), S(filename));
+    load_schematic(0, 1, filename, 1);
+  }
   if(hilight_nets) 
   {
     prepare_netlist_structs(1);
     if(enable_drill) drill_hilight(); /*  20171212 */
   }
   if(debug_var>0) fprintf(errfp, "descend_schematic(): before zoom(): prepared_hash_instances=%d\n", prepared_hash_instances);
-  zoom_full(1);
+  zoom_full(1, 0);
  }
 }
 
@@ -971,36 +1027,22 @@ void go_back(int confirm) /*  20171006 add confirm */
  int save_ok;  /*  20171020 */
  int from_embedded_sym;
  int save_modified;
+ char filename[PATH_MAX];
 
  save_ok=0;
  if(currentsch>0)
  {
+  prev_curr_type=current_type; /* 20190521 */
   /* if current sym/schematic is changed ask save before going up */
-  if( (prev_curr_type=current_type)==SCHEMATIC)
+  if(modified)
   {
-   if(modified)
-   {
-     if(confirm) {
-       tcleval("ask_save");
-       if(!strcmp(Tcl_GetStringResult(interp), "yes") ) save_ok = save_schematic(schematic[currentsch]);
-       else if(!strcmp(Tcl_GetStringResult(interp), "") ) return;
-     } else {
-       save_ok = save_schematic(schematic[currentsch]);
-     }
-   }
-  }
-  else
-  {
-   if(modified)
-   {
-     if(confirm) {
-       tcleval("ask_save");
-       if(!strcmp(Tcl_GetStringResult(interp), "yes") ) save_ok = save_symbol(schematic[currentsch]);
-       else if(!strcmp(Tcl_GetStringResult(interp), "") ) return;
-     } else {
-       save_ok = save_symbol(schematic[currentsch]);
-     }
-   }
+    if(confirm) {
+      tcleval("ask_save");
+      if(!strcmp(Tcl_GetStringResult(interp), "yes") ) save_ok = save_schematic(schematic[currentsch]);
+      else if(!strcmp(Tcl_GetStringResult(interp), "") ) return;
+    } else {
+      save_ok = save_schematic(schematic[currentsch]);
+    }
   }
   if(save_ok==-1) return; /*  20171020 */
   unselect_all();
@@ -1018,7 +1060,8 @@ void go_back(int confirm) /*  20171006 add confirm */
   save_modified = modified; /* we propagate modified flag (cleared by load_schematic */
                             /* by default) to parent schematic if going back from embedded symbol */
 
-  load_schematic(1,schematic[currentsch],1);
+  my_strncpy(filename, abs_sym_path(schematic[currentsch], ""), S(filename));
+  load_schematic(0, 1, filename, 1);
   if(from_embedded_sym) modified=save_modified; /* to force ask save embedded sym in parent schematic */
 
   if(prev_curr_type==SCHEMATIC) {
@@ -1071,7 +1114,7 @@ void change_linewidth(double w)
   areah = areay2 - areay1;
 }
 
-void calc_drawing_bbox(Box *boundbox)
+void calc_drawing_bbox(Box *boundbox, int selected)
 {
 
  Box tmp;
@@ -1089,6 +1132,8 @@ void calc_drawing_bbox(Box *boundbox)
  {
   for(i=0;i<lastline[c];i++)
   {
+   if(selected == 1 && !line[c][i].sel) continue;
+   if(selected == 2) continue;
    tmp.x1=line[c][i].x1;
    tmp.x2=line[c][i].x2;
    tmp.y1=line[c][i].y1;
@@ -1101,6 +1146,8 @@ void calc_drawing_bbox(Box *boundbox)
   {
     double x1=0., y1=0., x2=0., y2=0.;
     int k;
+    if(selected == 1 && !polygon[c][i].sel) continue;
+    if(selected == 2) continue;
     count++;
     for(k=0; k<polygon[c][i].points; k++) {
       /* fprintf(errfp, "  poly: point %d: %.16g %.16g\n", k, pp[c][i].x[k], pp[c][i].y[k]); */
@@ -1115,6 +1162,8 @@ void calc_drawing_bbox(Box *boundbox)
 
   for(i=0;i<lastarc[c];i++)
   {
+    if(selected == 1 && !arc[c][i].sel) continue;
+    if(selected == 2) continue;
     arc_bbox(arc[c][i].x, arc[c][i].y, arc[c][i].r, arc[c][i].a, arc[c][i].b,
              &tmp.x1, &tmp.y1, &tmp.x2, &tmp.y2);
     count++;
@@ -1123,6 +1172,8 @@ void calc_drawing_bbox(Box *boundbox)
 
   for(i=0;i<lastrect[c];i++)
   {
+   if(selected == 1 && !rect[c][i].sel) continue;
+   if(selected == 2) continue;
    tmp.x1=rect[c][i].x1;
    tmp.x2=rect[c][i].x2;
    tmp.y1=rect[c][i].y1;
@@ -1133,6 +1184,12 @@ void calc_drawing_bbox(Box *boundbox)
  }
  for(i=0;i<lastwire;i++)
  { 
+   if(selected == 1 && !wire[i].sel) continue;
+   if(selected == 2) {
+     char *str;
+     str = get_tok_value(wire[i].prop_ptr, "lab",0);
+     if(!str[0] || !bus_hilight_lookup(str, 0,2)) continue;
+   }
    tmp.x1=wire[i].x1;
    tmp.x2=wire[i].x2;
    tmp.y1=wire[i].y1;
@@ -1142,6 +1199,8 @@ void calc_drawing_bbox(Box *boundbox)
  }
  for(i=0;i<lasttext;i++)
  {
+   if(selected == 1 && !textelement[i].sel) continue;
+   if(selected == 2) continue;
    #ifdef HAS_CAIRO
    customfont = set_text_custom_font(&textelement[i]);
    #endif
@@ -1158,6 +1217,29 @@ void calc_drawing_bbox(Box *boundbox)
  }
  for(i=0;i<lastinst;i++)
  {
+  char *type;
+  struct hilight_hashentry *entry;
+
+  if(selected == 1 && !inst_ptr[i].sel) continue;
+  
+  if(selected == 2) {
+    type = (inst_ptr[i].ptr+instdef)->type; /* 20150409 */
+    if( type &&
+        !(strcmp(type,"label") && strcmp(type,"ipin") &&
+          strcmp(type,"iopin") && strcmp(type,"opin") )
+      )
+    {
+     entry=bus_hilight_lookup( get_tok_value(inst_ptr[i].prop_ptr,"lab",0) , 0, 2 );
+     if(!entry) continue;
+    }
+    else if( !(inst_ptr[i].flags & 4) ) {
+      continue;
+    }
+  }
+
+
+
+
   /* cpu hog 20171206 */
   /*  symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1, &inst_ptr[i].x2, &inst_ptr[i].y2); */
   tmp.x1=inst_ptr[i].x1;
@@ -1170,7 +1252,7 @@ void calc_drawing_bbox(Box *boundbox)
 
 }
 
-void zoom_full(int dr)
+void zoom_full(int dr, int sel)
 {
   Box boundbox;
   double yy1;
@@ -1183,7 +1265,7 @@ void zoom_full(int dr)
   areaw = areax2-areax1;
   areah = areay2 - areay1;
 
-  calc_drawing_bbox(&boundbox);
+  calc_drawing_bbox(&boundbox, sel);
   zoom=(boundbox.x2-boundbox.x1)/(areaw-4*lw);
   yy1=(boundbox.y2-boundbox.y1)/(areah-4*lw);
   if(yy1>zoom) zoom=yy1;

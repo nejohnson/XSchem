@@ -416,7 +416,7 @@ void svg_draw(void)
  old_grid=draw_grid;
  draw_grid=0;
 
- calc_drawing_bbox(&bb);
+ calc_drawing_bbox(&bb, 0);
  dx=areax2-areax1;
  dy=areay2-areay1;
  if(debug_var>=1) fprintf(errfp, "svg_draw(): dx=%g  dy=%g\n", dx, dy);

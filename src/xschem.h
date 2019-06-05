@@ -22,8 +22,9 @@
 
 #ifndef CADGLOBALS
 #define CADGLOBALS
-#define XSCHEM_VERSION "2.8.4"
-#define XSCHEM_FILE_VERSION "1.0"
+
+#define XSCHEM_VERSION "2.9.0"
+#define XSCHEM_FILE_VERSION "1.1"
 
 #if HAS_PIPE == 1
 /* fdopen() */
@@ -352,7 +353,7 @@ typedef struct
    char *prop_ptr;
    char *type; /*  20150409 */
    char *templ; /*  20150409 */
-   int flags;
+   unsigned int flags;
 } Instdef;
 
 typedef struct
@@ -456,6 +457,7 @@ extern int prepared_hash_wires;
 extern int has_x; 
 extern int no_draw;
 extern int sym_txt;
+extern int event_reporting; 
 extern int rainbow_colors; 
 extern FILE *errfp;
 extern int no_readline;
@@ -472,6 +474,7 @@ extern int debug_var;
 extern char **color_array;
 extern Colormap colormap;
 extern int current_type;
+extern char current_name[PATH_MAX];
 extern unsigned int color_index[];
 extern int lw; /*  line width */
 extern double lw_double; /*  line width */
@@ -517,6 +520,7 @@ extern char *schtedaxprop;
 extern char *schprop; 
 extern char *schvhdlprop; 
 extern char *xschem_version_string; 
+extern char file_version[100];
 extern char *schverilogprop; 
 extern int max_texts;
 extern int max_wires;
@@ -600,7 +604,6 @@ extern struct instpinentry *instpintable[NBOXES][NBOXES];
 extern double mx_double_save, my_double_save; /*  20070322 */
 extern struct instentry *insttable[NBOXES][NBOXES];
 extern size_t get_tok_value_size;
-extern int renumber_instances;
 
 /*  functions */
 extern void print_version(void);
@@ -613,14 +616,14 @@ extern void schematic_in_new_window(void);
 extern void symbol_in_new_window(void);
 extern void new_window(const char *cell, int symbol);
 extern void ask_new_file(void);
-extern void saveas(void);
+extern void saveas(const char *f);
 extern const char *get_file_path(char *f);
 extern int save(int confirm);
 extern struct hilight_hashentry *bus_hilight_lookup(const char *token, int value, int remove) ;
 extern int  name_strcmp(char *s, char *d) ;
 extern void search_inst(const char *tok, const char *val, int sub, int sel, int what);
 extern int process_options(int argc, char **argv);
-extern void calc_drawing_bbox(Box *boundbox);
+extern void calc_drawing_bbox(Box *boundbox, int selected);
 extern void ps_draw(void);
 extern void svg_draw(void);
 extern void print_image();
@@ -628,10 +631,11 @@ extern const char *skip_dir(const char *str);
 extern const char *get_cell(const char *str, int no_of_dir);
 extern const char *get_cell_w_ext(const char *str, int no_of_dir);
 extern const char *rel_sym_path(const char *s);
-extern const char *abs_sym_path(const char *s, const char *required_ext);
+extern const char *abs_sym_path(const char *s, const char *ext);
+extern const char *add_ext(const char *f, const char *ext);
 extern void make_symbol(void);
 extern char *get_sym_template(char *s, char *extra);
-extern void zoom_full(int draw);
+extern void zoom_full(int draw, int sel);
 extern void updatebbox(int count,Box *boundbox,Box *tmp);
 extern void draw_selection(GC g, int interruptable);
 extern void delete(void);
@@ -747,12 +751,10 @@ extern void vhdl_block_netlist(FILE *fd, int i);
 extern void verilog_block_netlist(FILE *fd, int i);
 extern void spice_block_netlist(FILE *fd, int i);
 extern void tedax_block_netlist(FILE *fd, int i);
-extern int save_symbol(char *);
 extern void remove_symbols(void);
 extern void remove_symbol(void);
 extern void clear_drawing(void);
-extern int load_symbol_definition(char name[], FILE *embed_fd);
-extern void load_symbol(const char *abs_name);
+extern int load_symbol_definition(const char name[], FILE *embed_fd);
 extern void descend_symbol(void);
 extern void place_symbol(int pos, const char *symbol_name, double x, double y, int rot, int flip, 
                          const char *inst_props, int draw_sym, int first_call);
@@ -763,7 +765,7 @@ extern void push_undo(void);
 extern void pop_undo(int redo);
 extern void delete_undo(void);
 extern void clear_undo(void);
-extern void load_schematic(int load_symbol, const char *abs_name, int reset_undo);
+extern void load_schematic(int symbol, int load_symbol, const char *abs_name, int reset_undo);
 extern void link_symbols_to_instances(void);
 extern void load_ascii_string(char **ptr, FILE *fd);
 extern void read_xschem_file(FILE *fd); /*  20180912 */
@@ -828,6 +830,8 @@ extern size_t my_strcat(int id, char **, const char *);
 extern char *subst_token(const char *s, const char *tok, const char *new_val);
 extern void new_prop_string(char **new_prop,const char *old_prop,int fast, int disable_unique_names);
 extern void symbol_bbox(int i, double *x1,double *y1, double *x2, double *y2);
+extern char *escape_chars(char *dest, const char *source, int size);
+
 extern void set_inst_prop(int i);
 extern void unselect_wire(int i);
 extern void check_wire_storage(void);
@@ -905,14 +909,14 @@ extern void child_handler(int signum);
 #include <cairo-xlib.h>
 #include "cairo-xlib-xrender.h"
 
-  #if HAS_XCB==1
-  #include <X11/Xlib-xcb.h>  /*  20171125 */
-  #include <cairo-xcb.h>
+#  if HAS_XCB==1
+#  include <X11/Xlib-xcb.h>  /*  20171125 */
+#  include <cairo-xcb.h>
   extern xcb_connection_t *xcbconn; /*  20171125 */
   extern xcb_screen_t *screen_xcb;
   extern xcb_render_pictforminfo_t format_rgb, format_rgba;
   extern xcb_visualtype_t *visual_xcb;
-  #endif  /*  HAS_XCB */
+#  endif  /*  HAS_XCB */
 
 extern cairo_surface_t *sfc, *save_sfc;
 extern cairo_t *ctx, *save_ctx;

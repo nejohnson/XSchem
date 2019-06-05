@@ -37,6 +37,85 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.9.0 
+
+- 1.1 file format allowing symbol names without implied '.sym'
+
+Detailed changelog:
+
+- template symbol name set to x1 instead of x0 (newly placed subcircuits will be 
+  named x1, x2, ... instead of x0, x1, ...).
+
+- prepare instdef[].flags for additional flags (not only EMBEDDED flag) 
+- update filename shown in status line after a 'save-as'
+
+- Fix- edit in new window (alt-E) erroneously opened symbol view
+
+- fix change symbol not detected (proc edit_prop)
+
+- fix edit symbol property, symbol was flagged as changed even if no changes were done
+
+- starting event reporting features
+- example files migrated to new format
+
+- index updated
+
+- remote 'xschem saveas filename'
+- scheleton for xschem remote control docs
+
+- added 'xschem zoom_selected' and 'xschem zoom_hilighted' to focus on selection or probed nets/insts
+- added 'xschem zoom_box x1 y1 x2 y2 magfactor'
+
+- Various fixes of regression introduced since 'filenames' merge
+- automatic schematic generation from symbol
+- generating pins/labels from highlighted nets
+
+- cleanups in the xschem tcl query interface
+- cell:: prefix (replacing old cell__) used to query symbol attributes (example cell::template) 
+- xschem search function: exact search or regex search (exact replaces substring search)
+                        when doing a selection there is no more implied highlight
+
+- fix: add_ext() incorrectly searched for first occurrence of '.' instead of last
+- attach_labels_to_inst() updated to new symbol naming scheme (true label name with .eym extension)
+
+- regression fix- highlight parent nets when returning from hierarchy was broken.
+
+- [scconfig] -Add: enable xcb only if cairo-xcb is also detected
+
+- proc edit_prop, fix symbol variable assignment
+
+- correctly print relative path (wrt XSCHEM_DESIGN_PATH) of current schematic 
+  in status bar/title symbol/window title.
+
+- changing symbol name with edit property + copy file now does not assume .sym extension
+  "schematic" attribute in symbol tells which schematic to load when descendig, as opposed to default symname.sym
+
+- [scconfig] -Tune: line up help texts
+
+- [scconfig] -Add: include generic scconfig help
+
+- Fix: C doesn't allow indentation before preprocessor tokens
+
+- fix descend to symbol
+
+- merged in branches/filenames --> 1.1 file format
+
+- doc updates (faq)
+
+- fix rev numbers, comments on some xschemrc options, 
+- some default config changed (enforce different refdes on placed components, 
+  do not pop-up the directory list chooser when adding components, go
+  straight with file selector).
+
+- better opin / iopin regex matching
+
+- Compatibility - quote { and } in regular expressions as they are metacharacters
+
+- make_sym.awk: fix schematic pin regex pattern, when .sym is saved for pin references.
+  Thanks to Curt for pointing out the issue
+
+- enabled Undo/Redo Edit menu entries
+
 2.8.4
 use_list_dirs can be set in xschemrc to enable or disable directory
 avoid printing spice_ignore, tedax_ignore or vhdl_ignore as parameters in verilog netlists.

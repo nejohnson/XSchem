@@ -714,6 +714,7 @@ void update_symbol(const char *result, int x)
    }
 
    my_strncpy(symbol, (char *) tclgetvar("symbol") , S(symbol));
+   if(debug_var>=1) fprintf(errfp, "update_symbol(): symbol=%s\n", symbol);
    no_change_props=atoi(tclgetvar("rbutton1") );
    only_different=atoi(tclgetvar("rbutton2") );
    copy_cell=atoi(tclgetvar("user_wants_copy_cell") ); /* 20150911 */

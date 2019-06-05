@@ -962,6 +962,7 @@ void prepare_netlist_structs(int for_hilight_only)
  rebuild_selected_array();
  if(!for_hilight_only) prepared_netlist_structs=1;
  else prepared_hilight_structs=1;
+ if(debug_var>=1) fprintf(errfp, "prepare_netlist_structs(): returning\n");
 }
 
 void delete_inst_node(int i)

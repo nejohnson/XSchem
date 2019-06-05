@@ -1,3 +1,4 @@
+v {xschem version=2.8.2 file_version=1.1}
 G {font file}
 V {}
 S {}

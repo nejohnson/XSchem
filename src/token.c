@@ -224,9 +224,10 @@ int match_symbol(char *name)  /* never returns -1, if symbol not found load syst
  found=0;
  for(i=0;i<lastinstdef;i++)
  {
+  /* if(debug_var>=1) fprintf(errfp, "match_symbol(): name=%s, instdef[i].name=%s\n",name, instdef[i].name);*/
   if(strcmp(name, instdef[i].name) == 0)
   {
-   if(debug_var>=1) fprintf(errfp, "match_symbol(): found matching symbol:%s\n",name);
+   if(debug_var>=2) fprintf(errfp, "match_symbol(): found matching symbol:%s\n",name);
    found=1;break;
   }
  }
@@ -235,7 +236,7 @@ int match_symbol(char *name)  /* never returns -1, if symbol not found load syst
   if(debug_var>=1) fprintf(errfp, "match_symbol(): matching symbol not found:%s, loading\n",name);
   if(load_symbol_definition(name, NULL)==-1) return -1;
  }
- if(debug_var>=1) fprintf(errfp, "match_symbol(): returning %d\n",i);
+ if(debug_var>=2) fprintf(errfp, "match_symbol(): returning %d\n",i);
  return i;
 }
 
@@ -699,7 +700,6 @@ const char *skip_dir(const char *str)
     
 const char *get_cell(const char *str, int no_of_dir)
 { 
-  if(debug_var>=2) fprintf(errfp, "get_cell(): returning: %s\n", get_trailing_path(str, no_of_dir, 1));
   return get_trailing_path(str, no_of_dir, 1);
 }
 
@@ -1173,7 +1173,8 @@ void print_spice_element(FILE *fd, int inst)
    else if(strcmp(token,"@schname")==0) /* of course schname must not be present  */
                                         /* in hash table */
    {
-    fputs(schematic[currentsch],fd);
+     /* fputs(schematic[currentsch],fd); */
+     fputs(current_name, fd); /* 20190519 */
    }
    else if(strcmp(token,"@pinlist")==0) /* of course pinlist must not be present  */
                                         /* in hash table. print multiplicity */
@@ -1373,7 +1374,8 @@ void print_tedax_element(FILE *fd, int inst)
     else if(strcmp(token,"@schname")==0)        /* of course schname must not be present  */
                                         /* in hash table */
     {
-     fputs(schematic[currentsch],fd);
+     /* fputs(schematic[currentsch],fd); */
+     fputs(current_name, fd); /* 20190519 */
     }
     else if(strcmp(token,"@pinlist")==0)        /* of course pinlist must not be present  */
                                         /* in hash table. print multiplicity */
@@ -1759,7 +1761,8 @@ void print_vhdl_primitive(FILE *fd, int inst) /* netlist  primitives, 20071217 *
    else if(strcmp(token,"@schname")==0) /* of course schname must not be present  */
                                         /* in hash table */
    {
-    fputs(schematic[currentsch],fd);
+     /* fputs(schematic[currentsch],fd); */
+     fputs(current_name, fd); /* 20190519 */
    }
    else if(strcmp(token,"@pinlist")==0) /* of course pinlist must not be present  */
                                         /* in hash table. print multiplicity */
@@ -1920,7 +1923,8 @@ void print_verilog_primitive(FILE *fd, int inst) /* netlist switch level primiti
    else if(strcmp(token,"@schname")==0) /* of course schname must not be present  */
                                         /* in hash table */
    {
-    fputs(schematic[currentsch],fd);
+     /* fputs(schematic[currentsch],fd); */
+     fputs(current_name, fd); /* 20190519 */
    }
    else if(strcmp(token,"@pinlist")==0) /* of course pinlist must not be present  */
                                         /* in hash table. print multiplicity */
@@ -2147,7 +2151,7 @@ char *translate(int inst, char* s)
      my_free(&subtok4);
    } else if(strcmp(token,"@sch_last_modified")==0) {
 
-    my_strncpy(file_name, abs_sym_path(inst_ptr[inst].name, ".sch"), S(file_name));
+    my_strncpy(file_name, abs_sym_path(inst_ptr[inst].name, ""), S(file_name));
     stat(file_name , &time_buf);
     tm=localtime(&(time_buf.st_mtime) );
     tmp=strlen( asctime(tm));
@@ -2158,7 +2162,7 @@ char *translate(int inst, char* s)
     memcpy(result+result_pos,asctime(tm), tmp+1); /* 20180923 */
     result_pos+=tmp;
    } else if(strcmp(token,"@sym_last_modified")==0) {
-    my_strncpy(file_name, abs_sym_path(inst_ptr[inst].name, ".sym"), S(file_name));
+    my_strncpy(file_name, abs_sym_path(inst_ptr[inst].name, ""), S(file_name));
     stat(file_name , &time_buf);
     tm=localtime(&(time_buf.st_mtime) );
     tmp=strlen( asctime(tm));
@@ -2169,7 +2173,7 @@ char *translate(int inst, char* s)
     memcpy(result+result_pos,asctime(tm), tmp+1); /* 20180923 */
     result_pos+=tmp;
    } else if(strcmp(token,"@time_last_modified")==0) {
-    my_strncpy(file_name, abs_sym_path(schematic[currentsch], ".sch"), S(file_name));
+    my_strncpy(file_name, abs_sym_path(schematic[currentsch], ""), S(file_name));
     if(!stat(file_name , &time_buf)) {  /* 20161211 */
       tm=localtime(&(time_buf.st_mtime) );
       tmp=strlen( asctime(tm));
@@ -2181,12 +2185,14 @@ char *translate(int inst, char* s)
       result_pos+=tmp;
     }
    } else if(strcmp(token,"@schname")==0) {
-     tmp=strlen(schematic[currentsch]);
+     /* tmp=strlen(schematic[currentsch]);*/
+     tmp = strlen(current_name); /* 20190519 */
      if(result_pos + tmp>=size) {
       size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
       my_realloc(537, &result,size);
      }
-     memcpy(result+result_pos,schematic[currentsch], tmp+1); /* 20180923 */
+     /* memcpy(result+result_pos,schematic[currentsch], tmp+1); */ /* 20180923 */
+     memcpy(result+result_pos, current_name, tmp+1); /* 20190519 */
      result_pos+=tmp;
    }
    else if(strcmp(token,"@prop_ptr")==0 && inst_ptr[inst].prop_ptr) {

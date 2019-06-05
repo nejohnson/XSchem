@@ -397,18 +397,22 @@ proc edit_netlist {schname } {
 #   INITIALINSTDIR  for instance placement
 # ext:  .sch or .sym or .sch.sym or .sym.sch
 #
-proc save_file_dialog { msg ext global_initdir {initialfile {}} } {
+proc save_file_dialog { msg ext global_initdir {initialfile {}} {overwrt 1} } {
   global tcl_version
   upvar #0 $global_initdir initdir
-
-  set initialdir [file dirname $initialfile]
-  set initialfile [file tail $initialfile]
-  set types(.sym) { {{Symbol files} {.sym}} }
-  set types(.sch) { {{Schematic files} {.sch}} }
-  set types(.sch.sym) { {{Schematic files} {.sch}} {{Symbol files} {.sym}} }
-  set types(.sym.sch) { {{Symbol files} {.sym}} {{Schematic files} {.sch}} }
+  if { $initialfile ne {}} {
+    set initialdir [file dirname $initialfile]
+    set initialfile [file tail $initialfile]
+  } else {
+    set initialdir $initdir
+    set initialfile {}
+  }
+  set types(.sym) { {{All Files} * } {{Symbol files} {.sym}} }
+  set types(.sch) { {{All Files} * } {{Schematic files} {.sch}} }
+  set types(.sch.sym) { {{All Files} * } {{Schematic files} {.sch}} {{Symbol files} {.sym}} }
+  set types(.sym.sch) { {{All Files} * } {{Symbol files} {.sym}} {{Schematic files} {.sch}} }
   if {$tcl_version > 8.5} {
-    set r [tk_getSaveFile -title $msg -initialfile $initialfile -filetypes $types($ext) -initialdir $initialdir -confirmoverwrite 1]
+    set r [tk_getSaveFile -title $msg -initialfile $initialfile -filetypes $types($ext) -initialdir $initialdir -confirmoverwrite $overwrt]
   } else {
     set r [tk_getSaveFile -title $msg -initialfile $initialfile -filetypes $types($ext) -initialdir $initialdir]
   }
@@ -463,10 +467,10 @@ proc list_dirs {pathlist } {
 proc load_file_dialog { msg ext global_initdir} {
   global pathlist use_list_dirs
   upvar #0 $global_initdir initdir
-  set types(.sym) { {{Symbol files} {.sym}} }
-  set types(.sch) { {{Schematic files} {.sch}} }
-  set types(.sch.sym) { {{Schematic files} {.sch}} {{Symbol files} {.sym}} }
-  set types(.sym.sch) { {{Symbol files} {.sym}} {{Schematic files} {.sch}} }
+  set types(.sym) { {{All Files} * } {{Symbol files} {.sym}} }
+  set types(.sch) { {{All Files} * } {{Schematic files} {.sch}} }
+  set types(.sch.sym) { {{All Files} * } {{Schematic files} {.sch}} {{Symbol files} {.sym}} }
+  set types(.sym.sch) { {{All Files} * } {{Symbol files} {.sym}} {{Schematic files} {.sch}} }
 
   if { $use_list_dirs && $ext eq {.sym} } {
     set initdir [list_dirs $pathlist]
@@ -483,7 +487,7 @@ proc load_file_dialog { msg ext global_initdir} {
 # used in scheduler.c  20121111
 # get last 2 path components: example /aaa/bbb/ccc/ddd.sch -> ccc/ddd
 # optionally with extension if present and $ext==1
-proc get_cell {s {ext 0} } {
+proc get_cell {s {ext 1} } {
   set slist [file split $s]
   if { [llength $slist] >1 } {
     if {$ext} {
@@ -523,12 +527,12 @@ proc create_pins {} {
   # viewdata $retval
   set pcnt 0
   set y 0
-  set fd [open $env(HOME)/.clipboard.sch "w"]
+  set fd [open $env(HOME)/.xschem_clipboard.sch "w"]
   foreach i $lines { 
-    puts $fd "C \{devices/[lindex $i 1]\} 0 [set y [expr $y-20]]  0 0 \{ name=p[incr pcnt] lab=[lindex $i 0] \}"
+    puts $fd "C \{[rel_sym_path devices/[lindex $i 1].sym]\} 0 [set y [expr $y-20]]  0 0 \{ name=p[incr pcnt] lab=[lindex $i 0] \}"
   }
   close $fd
-  xschem merge $env(HOME)/.clipboard.sch
+  xschem merge $env(HOME)/.xschem_clipboard.sch
 }
 
 proc rectorder {x1 y1 x2 y2} {
@@ -556,9 +560,9 @@ proc schpins_to_sympins {} {
   global env
   set pinhsize 2.5
   xschem copy
-  set clipboard [read_data_nonewline $env(HOME)/.clipboard.sch]
+  set clipboard [read_data_nonewline $env(HOME)/.xschem_clipboard.sch]
   set lines [split $clipboard \n]
-  set fd [open $env(HOME)/.clipboard.sch "w"]
+  set fd [open $env(HOME)/.xschem_clipboard.sch "w"]
   foreach i $lines {
     if {[regexp {devices/(i|o|io)pin} [lindex $i 1]]} {
       if {[regexp {devices/ipin} [lindex $i 1]]} { set dir in }
@@ -617,12 +621,12 @@ proc add_lab_no_prefix {} {
   # viewdata $retval
   set pcnt 0
   set y 0
-  set fd [open $env(HOME)/.clipboard.sch "w"]
+  set fd [open $env(HOME)/.xschem_clipboard.sch "w"]
   foreach i $lines {
-    puts $fd "C \{devices/lab_pin\} 0 [set y [expr $y+20]]  0 0 \{ name=p[incr pcnt] verilog_type=wire lab=[lindex $i 0] \}"
+    puts $fd "C \{[rel_sym_path devices/lab_pin.sym]\} 0 [set y [expr $y+20]]  0 0 \{ name=p[incr pcnt] verilog_type=wire lab=[lindex $i 0] \}"
   }
   close $fd
-  xschem merge $env(HOME)/.clipboard.sch
+  xschem merge $env(HOME)/.xschem_clipboard.sch
 }
 
 
@@ -637,18 +641,18 @@ proc add_lab_prefix {} {
   # viewdata $retval
   set pcnt 0
   set y 0
-  set fd [open $env(HOME)/.clipboard.sch "w"]
+  set fd [open $env(HOME)/.xschem_clipboard.sch "w"]
   foreach i $lines {
-    puts $fd "C \{devices/lab_pin\} 0 [set y [expr $y+20]]  0 0 \{ name=p[incr pcnt] verilog_type=reg lab=i[lindex $i 0] \}"
+    puts $fd "C \{[rel_sym_path devices/lab_pin.sym]\} 0 [set y [expr $y+20]]  0 0 \{ name=p[incr pcnt] verilog_type=reg lab=i[lindex $i 0] \}"
   }
   close $fd
-  xschem merge $env(HOME)/.clipboard.sch
+  xschem merge $env(HOME)/.xschem_clipboard.sch
 }
 
 
 proc make_symbol {name} {
  global XSCHEM_SHAREDIR symbol_width
- set name [abs_sym_path $name .sch]
+ set name [abs_sym_path $name ]
  # puts "make_symbol{}, executing: ${XSCHEM_SHAREDIR}/make_sym.awk $symbol_width ${name}"
  eval exec "awk -f ${XSCHEM_SHAREDIR}/make_sym.awk $symbol_width {$name}"
  return {}
@@ -843,7 +847,7 @@ proc about {} {
 
 proc property_search {} {
   global search_value
-  global search_substring
+  global search_exact
   global search_select
   global custom_token
 
@@ -879,13 +883,13 @@ proc property_search {} {
         set custom_token [.lw.custom.e get]
         if $tcl_debug<=-1 then { puts stderr "|$custom_token|" }
         set token $custom_token
-        if { $search_substring==1 } { xschem search sub $search_select $token $search_value
-        } else { xschem search nosub $search_select $token $search_value }
+        if { $search_exact==1 } { xschem search exact $search_select $token $search_value
+        } else { xschem search regex $search_select $token $search_value }
         destroy .lw 
   }
   button .lw.but.cancel -text Cancel -command { destroy .lw }
-  checkbutton .lw.but.sub -text Substring -variable search_substring
-  radiobutton .lw.but.nosel -text {No selection} -variable search_select -value 0
+  checkbutton .lw.but.sub -text Exact_search -variable search_exact
+  radiobutton .lw.but.nosel -text {Highlight} -variable search_select -value 0
   radiobutton .lw.but.sel -text {Select} -variable search_select -value 1
   # 20171211 added unselect
   radiobutton .lw.but.unsel -text {Unselect} -variable search_select -value -1
@@ -1147,7 +1151,10 @@ proc edit_prop {txtlabel} {
    ## not honored by fvwm ... 20110322
    # wm attributes .ent2 -topmost 1
    ## ... use alternate method instead 20110322
-   bind .ent2 <Visibility> { if { [regexp Obscured %s] } {raise .ent2; if { $tcl_version > 8.4 } {wm attributes  .ent2 -topmost 1} } } 
+
+   
+   #bind .ent2 <Visibility> { if { [regexp Obscured %s] } {raise .ent2; if { $tcl_version > 8.4 } {wm attributes  .ent2 -topmost 1} } } 
+   bind .ent2 <Visibility> { if { [regexp Obscured %s] } {raise .ent2}  }
    ## 
 
    # 20160325 change and remember widget size
@@ -1172,31 +1179,43 @@ proc edit_prop {txtlabel} {
    label .ent2.f1.l2 -text "Symbol"
    entry .ent2.f1.e2 -width 30
    .ent2.f1.e2 insert 0 $symbol
+   button .ent2.f1.b5 -text "BROWSE" -command {
+     bind .ent2 <Visibility> {}
+     set r [save_file_dialog  {New symbol} .sym INITIALINSTDIR {} 0]
+     if {$r ne {} } {
+       .ent2.f1.e2 delete 0 end
+       .ent2.f1.e2 insert 0 $r
+     }
+     raise .ent2
+     bind .ent2 <Visibility> { if { [regexp Obscured %s] } {raise .ent2}  }
+
+
+   }
    button .ent2.f1.b1 -text "OK" -command   {
      set retval [.ent2.e1 get 1.0 {end - 1 chars}] 
-     set symbol [ .ent2.f1.e2 get]
+     set abssymbol [abs_sym_path [ .ent2.f1.e2 get]]
+     set symbol [.ent2.f1.e2 get]
      set rcode {ok}
      set editprop_semaphore 0
      set user_wants_copy_cell $copy_cell
-     if { ($symbol ne $prev_symbol) && $copy_cell } {
-       set symbol [abs_sym_path $symbol .sym]
-       set prev_symbol [abs_sym_path $prev_symbol .sym]
+     set prev_symbol [abs_sym_path $prev_symbol]
+     if { ($abssymbol ne $prev_symbol) && $copy_cell } {
+       # puts "$abssymbol   $prev_symbol"
        if { [file exists "[file rootname $prev_symbol].sch"] } {
-         if { ! [file exists "[file rootname ${symbol}].sch"] } {
-           file copy "[file rootname $prev_symbol].sch" "[file rootname $symbol].sch"
-           # puts "file copy [file rootname $prev_symbol].sch [file rootname $symbol].sch"
+         if { ! [file exists "[file rootname ${abssymbol}].sch"] } {
+           file copy "[file rootname $prev_symbol].sch" "[file rootname $abssymbol].sch"
+           # puts "file copy [file rootname $prev_symbol].sch [file rootname $abssymbol].sch"
          }
        }
        if { [file exists "$prev_symbol"] } {
-         if { ! [file exists "$symbol"] } {
-           file copy "[file rootname $prev_symbol].sym" "[file rootname $symbol].sym"
-           # puts "file copy [file rootname $prev_symbol].sym [file rootname $symbol].sym"
+         if { ! [file exists "$abssymbol"] } {
+           file copy "$prev_symbol" "$abssymbol"
+           # puts "file copy [file rootname $prev_symbol].sym [file rootname $abssymbol].sym"
          }
        }
        ## 20190326
-       set symbol [rel_sym_path $symbol] 
      }
-     # puts "symbol: $symbol , prev_symbol: $prev_symbol"
+     #puts "symbol: $symbol , prev_symbol: $prev_symbol"
      set copy_cell 0 ;# 20120919
    }
    button .ent2.f1.b2 -text "Cancel" -command  {
@@ -1218,7 +1237,7 @@ proc edit_prop {txtlabel} {
    checkbutton .ent2.f2.r2 -text "preserve unchanged props" -variable rbutton2 -state normal
    checkbutton .ent2.f2.r3 -text "copy cell" -variable copy_cell -state normal
 
-   pack .ent2.f1.l2 .ent2.f1.e2 .ent2.f1.b1 .ent2.f1.b2 .ent2.f1.b3 .ent2.f1.b4 -side left -expand 1
+   pack .ent2.f1.l2 .ent2.f1.e2 .ent2.f1.b1 .ent2.f1.b2 .ent2.f1.b3 .ent2.f1.b4 .ent2.f1.b5 -side left -expand 1
    pack .ent2.l1 -side top -fill x 
    pack .ent2.f1 .ent2.f2 -side top -fill x 
    pack .ent2.f2.r1 -side left
@@ -1552,16 +1571,10 @@ proc viewdata {data} {
 proc rel_sym_path {symbol} {
   global pathlist current_dirname
 
-  set extension 1
-  set symbol_orig [file rootname $symbol]
-  set ext [file extension $symbol]
-  if {![string compare $ext {}] } { 
-    set ext .sym  
-    set extension 0
-  }
-  set symbol [file rootname [file normalize $symbol]]
+  set symbol_orig $symbol
+  set symbol [file normalize $symbol]
   set lib_cell [get_cell $symbol]
-  set cell [file rootname [file tail $symbol]]
+  set cell [file tail $symbol]
   set name {}
   foreach path_elem $pathlist {
     if { ![string compare $path_elem .]  && [info exist current_dirname]} {
@@ -1572,78 +1585,88 @@ proc rel_sym_path {symbol} {
     if { [file exists [file dirname "${path_elem}/${lib_cell}"]] && 
        (![string compare $symbol_orig $lib_cell ]) } {
       set name ${lib_cell}
-      break
     # /.../path/.../libname/cellname[.ext] and libname in $path_elem 
     # --> libname/cellname
     } elseif { (![string compare $symbol  [file normalize "${path_elem}/${lib_cell}"] ]) 
              && [file exists [file dirname "${path_elem}/${lib_cell}"]] } {
       set name ${lib_cell}
-      break
-    } 
-    # symname[.ext]
-    # --> symname.ext
-    if { [file exists "${path_elem}/${cell}${ext}"] } {
-      set name ${cell}${ext}
-      break
-    # /.../path/.../libname/symname[.ext] and libname in XSCHEM_LIBRARY_PATH 
-    # --> symname.ext
+    # symname
+    # --> symname
+    } elseif { [file exists "${path_elem}/${cell}"] } {
+      set name ${cell}
+    # /.../path/.../libname/symname and libname in XSCHEM_LIBRARY_PATH 
+    # --> symname
     } elseif { (![string compare $symbol [file normalize "${path_elem}/${cell}"] ]) 
-             && [file exists "${path_elem}/${cell}${ext}"] } {
-      set name ${cell}${ext}
-      break
+             && [file exists "${path_elem}/${cell}"] } {
+      set name ${cell}
     } 
+    if {$name ne {} } { break} 
   }
   if { ![string compare $name {} ] } {
     # no known lib, so return full path
-    set name ${symbol}$ext
+    set name ${symbol}
   }
-  if {$extension == 0 } {
-    return [file rootname $name] 
-  } else {
-    return $name
-  }
+  return $name
 }
 
 
 # given a library/symbol return its absolute path
-proc abs_sym_path {fname {required_ext {}} } {
+proc abs_sym_path {fname {ext {} } } {
   global pathlist current_dirname
 
+  # add extension for 1.0 file format compatibility
+  if { $ext ne {} } { 
+    set fname [file rootname $fname]$ext
+  }
+
+  if {$fname eq {} } return {}
   set name {}
   # fname is of type libname/cellname[.ext] but not ./cellname[.ext] or
   # ../cellname[.ext] and has a slash, so no cellname[.ext] 
-  if {![string compare [file rootname $fname] [get_cell $fname] ] } {
+  if {![string compare $fname [get_cell $fname] ] } {
     foreach path_elem $pathlist {
       if { ![string compare $path_elem .]  && [info exist current_dirname]} {
         set path_elem $current_dirname
       }
-      # libname/cellname[.ext] and libname is in pathlist
-      # --> normalized $pathlist/libname/cellname$required_ext
-      # cellname[.ext] and $pathlist/cellname$required_ext exists
-      # --> normalized $pathlist/cellname.$required_ext
+      # libname/cellname and libname is in pathlist
+      # --> normalized $pathlist/libname/cellname
+      # cellname and $pathlist/cellname exists
+      # --> normalized $pathlist/cellname
       if { ([file exists "${path_elem}/[file dirname $fname]"] ) &&
         [regexp {\/} $fname] 
       } {
         #puts here1
-        set name  [file normalize "$path_elem/[get_cell $fname]$required_ext"]
+        set name  [file normalize "$path_elem/[get_cell $fname]"]
         break
       }
-      if { [file exists "${path_elem}/[file rootname ${fname}]${required_ext}"] &&
+      if { [file exists "${path_elem}/${fname}"] &&
         ![regexp {\/} $fname] 
       } {
         #puts here2
-        set name  [file normalize "$path_elem/[get_cell $fname]$required_ext"]
+        set name  [file normalize "$path_elem/[get_cell $fname]"]
         break
       }
     }
   }
 
   if { ![string compare $name {}] } {
-    #puts here3
-    set name [file rootname [file normalize $fname]]$required_ext
+    if { ![string compare $fname [file tail $fname]] } {
+      set name [file normalize ${current_dirname}/$fname]
+    } else {
+      set name [file normalize $fname]
+    }
   }
   return $name
 }
+
+proc add_ext {fname ext} {
+#  if {![string match "*$ext" $fname]} {
+#    set fname ${fname}$ext
+#  }
+#  return $fname
+  return [file rootname $fname]$ext
+}
+ 
 
 proc input_number {txt cmd} {
           global xx
@@ -1729,8 +1752,6 @@ proc get_file_path {ff} {
 ### 
 ###   MAIN PROGRAM
 ###
-
-
 
 
 # tcl variable XSCHEM_LIBRARY_PATH  should already be set in xschemrc
@@ -1986,7 +2007,7 @@ foreach i $pathlist  {
 set txt ""
 set custom_token {lab}
 set search_value {}
-set search_substring 0
+set search_exact 0
 
 
 # 20171005

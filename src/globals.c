@@ -31,6 +31,7 @@ int a3page=-1;
 int has_x=1;
 int no_draw=0;
 int sym_txt=1;
+int event_reporting=0;
 int rainbow_colors=0;
 int manhattan_lines=0;
 FILE *errfp; 
@@ -55,6 +56,7 @@ int draw_window=0; /* 20181009 */
 int draw_grid=1;
 double cadgrid = CADGRID;
 int current_type=SCHEMATIC;
+char current_name[PATH_MAX]; /* 20190519 */
 int change_lw=0; /* allow change linewidth */
 int incr_hilight=1;
 int auto_hilight=0;
@@ -219,6 +221,7 @@ char *schprop=NULL;  /* spice */
 char *schtedaxprop=NULL;  /* tEDAx */
 char *schvhdlprop=NULL; /* vhdl and symbol property string */
 char *xschem_version_string=NULL; /* vhdl and symbol property string */
+char file_version[100];
 char *schverilogprop=NULL;/* verilog */
 int show_erc=1;
 int hilight_nets=0;
@@ -245,7 +248,6 @@ struct instpinentry *instpintable[NBOXES][NBOXES];
 struct wireentry *wiretable[NBOXES][NBOXES];
 struct instentry *insttable[NBOXES][NBOXES];
 size_t get_tok_value_size;
-int renumber_instances = 0;
 
 
 #ifdef HAS_CAIRO

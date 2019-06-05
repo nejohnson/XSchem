@@ -958,6 +958,8 @@ int Tcl_AppInit(Tcl_Interp *inter)
  xrect[0].width = CADWIDTH;
  xrect[0].height = CADHEIGHT;
 
+
+ my_strncpy(file_version, "1.1", S(file_version));
  compile_font();
  /* restore current dir after loading font */
  my_snprintf(tmp, S(tmp), "set current_dirname \"%s\"", pwd_dir);
@@ -1141,17 +1143,17 @@ int Tcl_AppInit(Tcl_Interp *inter)
  if(filename) {
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): filename %s given, removing symbols\n", filename);
     remove_symbols();
-    
-    if(strstr(filename,".sym")) load_symbol( filename); /* 20180925.1 */
-    else load_schematic(1, filename, 1); /* 20180925.1 */
+    load_schematic(0, 1, filename, 1); /* 20180925.1 */
  }
  else { 
    char * tmp; /* 20121110 */
+   char filename[PATH_MAX];
    tmp = (char *) tclgetvar("XSCHEM_START_WINDOW"); /* 20121110 */
    if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): tmp=%s\n", tmp? tmp: "NULL");
-   load_schematic(1, tmp, 1);
+   my_strncpy(filename, abs_sym_path(tmp, ""), S(filename));
+   load_schematic(0, 1, filename, 1);
  }
- zoom_full(0);   /* Necessary to tell xschem the 
+ zoom_full(0, 0);   /* Necessary to tell xschem the 
                   * initial area to display
                   */
  pending_fullzoom=1; /* 20121111 */

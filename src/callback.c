@@ -94,7 +94,7 @@ int callback(int event, int mx, int my, KeySym key,
  mousex_snap=ROUND(mousex / cadsnap) * cadsnap;
  mousey_snap=ROUND(mousey / cadsnap) * cadsnap;
  my_snprintf(str, S(str), "mouse = %.16g %.16g - %s  selected: %d", 
-   mousex_snap, mousey_snap, schematic[currentsch], lastselected );
+   mousex_snap, mousey_snap, current_name, lastselected );
  statusmsg(str,1);
  switch(event)
  {
@@ -151,7 +151,7 @@ int callback(int event, int mx, int my, KeySym key,
       #endif
       if(ui_state & SELECTION) rebuild_selected_array(); /* 20171129 */
       my_snprintf(str, S(str), "mouse = %.16g %.16g - %s  selected: %d w=%.16g h=%.16g", 
-        mousex_snap, mousey_snap, schematic[currentsch], 
+        mousex_snap, mousey_snap, current_name, 
         lastselected ,
         mousex_snap-mx_double_save, mousey_snap-my_double_save /* 20070322 */
       );
@@ -683,7 +683,7 @@ int callback(int event, int mx, int my, KeySym key,
    {
      if(semaphore==2) break;
      if(!strcmp(schematic[currentsch],"")) { /* 20170622 check if unnamed schematic, use saveas in this case... */
-       saveas();
+       saveas(NULL);
      } else {
        save(1);
      }
@@ -693,13 +693,13 @@ int callback(int event, int mx, int my, KeySym key,
    {
      if(semaphore==2) break;
      current_type=SYMBOL;
-     saveas();
+     saveas(NULL);
      break;
    }
    if(key=='S' && state == (ShiftMask | ControlMask)) /* save as schematic */
    {
      if(semaphore==2) break;
-     saveas();
+     saveas(NULL);
      break;
    }
    if(key=='e' && state == 0)           /* descend to schematic */
@@ -726,13 +726,14 @@ int callback(int event, int mx, int my, KeySym key,
    if(key=='a' && state == 0)   /* make symbol */
    {
     if(semaphore==2) break; /* 20180914 */
-    tcleval("tk_messageBox -type okcancel -message {do you want to make symbol view ?}");
-    if(strcmp(Tcl_GetStringResult(interp),"ok")==0) 
-      if(current_type==SCHEMATIC)
+    if(current_type==SCHEMATIC) {
+      tcleval("tk_messageBox -type okcancel -message {do you want to make symbol view ?}");
+      if(strcmp(Tcl_GetStringResult(interp),"ok")==0) 
       {
        save_schematic(schematic[currentsch]);
        make_symbol();
       }
+    }
     break;
    }
    if(key=='a' && state == ControlMask)         /* select all */
@@ -823,18 +824,12 @@ int callback(int event, int mx, int my, KeySym key,
     if(semaphore==2) break;
     rebuild_selected_array();
     if(lastselected==0 ) {
-      if(current_type==SCHEMATIC) {
-        /* save_schematic(schematic[currentsch]); */ /* sync data with disk file before editing file */
-        my_snprintf(str, S(str), "edit_file {%s}", abs_sym_path(schematic[currentsch], ".sch"));
-      } else { /* symbol */
-        /* save_symbol(schematic[currentsch]); */ /* sync data with disk file before editing file */
-        my_snprintf(str, S(str), "edit_file {%s}", abs_sym_path(schematic[currentsch], ".sym"));
-      }
+      my_snprintf(str, S(str), "edit_file {%s}", abs_sym_path(schematic[currentsch], ""));
       tcleval(str);
     }
     else if(selectedgroup[0].type==ELEMENT) {
       my_snprintf(str, S(str), "edit_file {%s}", 
-         abs_sym_path(inst_ptr[selectedgroup[0].n].name, ".sch"));
+         abs_sym_path(inst_ptr[selectedgroup[0].n].name, ""));
       tcleval(str);
  
     }
@@ -861,10 +856,15 @@ int callback(int event, int mx, int my, KeySym key,
     if(semaphore==2) break;
      tcleval("tk_messageBox -type okcancel -message {Are you sure you want to reload from disk?}");
      if(strcmp(Tcl_GetStringResult(interp),"ok")==0) {
+        char filename[PATH_MAX];
         remove_symbols();
-        if(current_type==SCHEMATIC) load_schematic(1,schematic[currentsch], 1);
-        else load_symbol(schematic[currentsch]); /* 20171206 */
-        /* zoom_full(1); */
+        my_strncpy(filename, abs_sym_path(schematic[currentsch], ""), S(filename));
+        if(current_type==SCHEMATIC) 
+          load_schematic(0, 1, filename, 1);
+        else 
+          /* load_symbol(abs_sym_path(schematic[currentsch], "")); */
+          load_schematic(1, 0, filename, 1);
+        /* zoom_full(1, 0); */
         draw();
      }
      break;
@@ -1198,10 +1198,10 @@ int callback(int event, int mx, int my, KeySym key,
     rebuild_selected_array();
     if(lastselected && selectedgroup[0].type==ELEMENT) {
       my_snprintf(str, S(str), "delete_files {%s}",  
-           abs_sym_path(inst_ptr[selectedgroup[0].n].name, ".sym"));
+           abs_sym_path(inst_ptr[selectedgroup[0].n].name, ""));
     } else {
       my_snprintf(str, S(str), "delete_files {%s}",  
-           abs_sym_path(schematic[currentsch], ".sym"));
+           abs_sym_path(schematic[currentsch], ""));
     }
 
     tcleval(str);
@@ -1211,7 +1211,7 @@ int callback(int event, int mx, int my, KeySym key,
    {
     char * tmp;
     tmp = (char *) tclgetvar("XSCHEM_START_WINDOW"); /* 20121110 */
-    if(tmp && tmp[0]) new_window(tmp,0); /* 20090708 */
+    if(tmp && tmp[0]) new_window(abs_sym_path(tmp, "") ,0); /* 20090708 */
     else new_window(NULL, 0);
     break;
    }
@@ -1227,6 +1227,11 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if((key==';') && (state & ControlMask) )         /* testmode 20171203 */
    {
+    /*
+     * rebuild_selected_array();
+     * printf("inst_ptr[%d].name=%s\n", selectedgroup[0].n, inst_ptr[selectedgroup[0].n].name);
+     *
+     */
     break;
    }
    if(0 && (key==';') && (state & ControlMask) )    /* testmode:  for performance testing */
@@ -1266,7 +1271,7 @@ int callback(int event, int mx, int my, KeySym key,
     }
 
 
-    zoom_full(1);
+    zoom_full(1, 0);
     break;
    }
 
@@ -1278,7 +1283,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='f' && state == 0 )                  /* full zoom */
    {
-    zoom_full(1);
+    zoom_full(1, 0);
     break;
    }
    if((key=='z' && state==ControlMask))                         /* zoom out */

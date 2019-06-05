@@ -294,17 +294,18 @@ void search_inst(const char *tok, const char *val, int sub, int sel, int what)
  }
  if(what==ADD || what==NOW) {
    
-    col=hilight_color;
-    if(incr_hilight) hilight_color++;
-
+    if(!sel) { /* 20190525 */
+      col=hilight_color;
+      if(incr_hilight) hilight_color++;
+    }
     has_token = 0;
     prepare_netlist_structs(1);
     bus=bus_search(val);
     for(i=0;i<lastinst;i++) {
-      if(!strcmp(tok,"cell__name")) {
+      if(!strcmp(tok,"cell::name")) {
         has_token = (inst_ptr[i].name != NULL) && inst_ptr[i].name[0];
         str = inst_ptr[i].name;
-      } else if(!strncmp(tok,"cell__", 6)) {
+      } else if(!strncmp(tok,"cell::", 6)) {
         has_token = (inst_ptr[i].ptr+instdef)->prop_ptr && strstr((inst_ptr[i].ptr+instdef)->prop_ptr, tok + 6) != NULL;
         my_strdup(142, &tmpname,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,tok+6,0)); /* flexible cell__ search 20140408 */
         if(tmpname) {
@@ -327,29 +328,31 @@ void search_inst(const char *tok, const char *val, int sub, int sel, int what)
       }
       if(str && has_token) {
         if( (!regexec(&re, str,0 , NULL, 0) && !sub) ||           /* 20071120 regex instead of strcmp */
-            (strstr(str,val) && sub) ) 
+            (!strcmp(str,val) && sub) ) 
         {
-          type = (inst_ptr[i].ptr+instdef)->type;
-          if( type && 
-              !(strcmp(type,"label") && strcmp(type,"ipin") &&
-                strcmp(type,"iopin") && strcmp(type,"opin")) && (str = get_tok_value(inst_ptr[i].prop_ptr, "lab",0))[0] 
-            ) {
-            if(!bus_hilight_lookup(str, col,0)) hilight_nets = 1;
-            if(what==NOW) for(c=0;c<cadlayers;c++)
-              draw_symbol_outline(NOW,col%(cadlayers-7)+7, i,c,0,0,0.0,0.0);
+          if(!sel) { /*20190525 */
+            type = (inst_ptr[i].ptr+instdef)->type;
+            if( type && 
+                !(strcmp(type,"label") && strcmp(type,"ipin") &&
+                  strcmp(type,"iopin") && strcmp(type,"opin")) && (str = get_tok_value(inst_ptr[i].prop_ptr, "lab",0))[0] 
+              ) {
+              if(!bus_hilight_lookup(str, col,0)) hilight_nets = 1;
+              if(what==NOW) for(c=0;c<cadlayers;c++)
+                draw_symbol_outline(NOW,col%(cadlayers-7)+7, i,c,0,0,0.0,0.0);
+            }
+            else {
+              if(debug_var>=1) fprintf(errfp, "search_inst(): setting hilight flag on inst %d\n",i);
+              hilight_nets=1;
+              inst_ptr[i].flags |= 4;
+              if(what==NOW) for(c=0;c<cadlayers;c++)
+                draw_symbol_outline(NOW,col%(cadlayers-7)+7, i,c,0,0,0.0,0.0);  /* 20150804 */
+            }
           }
-          else {
-            if(debug_var>=1) fprintf(errfp, "search_inst(): setting hilight flag on inst %d\n",i);
-            hilight_nets=1;
-            inst_ptr[i].flags |= 4;
-            if(what==NOW) for(c=0;c<cadlayers;c++)
-              draw_symbol_outline(NOW,col%(cadlayers-7)+7, i,c,0,0,0.0,0.0);  /* 20150804 */
-          }
-  
           if(sel==1) {
             select_element(i, SELECTED, 1);
             ui_state|=SELECTION;
           }
+          
           if(sel==-1) { /* 20171211 unselect */
             select_element(i, 0, 1);
          }
@@ -366,7 +369,7 @@ void search_inst(const char *tok, const char *val, int sub, int sel, int what)
           ) {
             str = get_tok_value(wire[i].prop_ptr, "lab",0);
             if(debug_var>=2) fprintf(errfp, "search_inst(): wire=%d, tok=%s, val=%s \n", i,tok, str);
-            if(str[0]) {
+            if(!sel && str[0]) { /* !sel 20190525 */
               bus_hilight_lookup(str, col, 0);
               if(what == NOW) {
                 if(wire[i].bus) /* 20171201 */
@@ -385,9 +388,12 @@ void search_inst(const char *tok, const char *val, int sub, int sel, int what)
                 }
               }
             }
-            if(sel) {
+            if(sel==1) {
               select_wire(i,SELECTED, 1);
               ui_state|=SELECTION;
+            }
+            if(sel==-1) {
+              select_wire(i,0, 1);
             }
         }
         else {
@@ -693,114 +699,6 @@ void draw_hilight_net(int on_window)
  }
  draw_window = save_draw;
 }
-
-
-void xdraw_hilight_net(int on_window)
-{
- char *str;
- int save_draw;
- char *type=NULL;
- int i,c;
- struct hilight_hashentry *entry;
- register double x1,y1,x2,y2; /* 20150409 */
- Instdef *symptr; /* 20160414 */
-
-  if(!hilight_nets) return;
-  save_draw = draw_window; /* 20181009 */
-  draw_window = on_window;
-  for(i=0;i<lastwire;i++)
-  {
-    /* 20150409 */
-    x1=X_TO_SCREEN(wire[i].x1);
-    x2=X_TO_SCREEN(wire[i].x2);
-    y1=Y_TO_SCREEN(wire[i].y1);
-    y2=Y_TO_SCREEN(wire[i].y2);
-    if( LINE_OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2)) {
-      continue;
-    }
-    /* /20150409 */
-
-    str = get_tok_value(wire[i].prop_ptr, "lab",0);
-    /*str = wire[i].node; */
-    if(str && str[0]) {
-      if( (entry = bus_hilight_lookup(str, 0,2)) ) {
-        if(wire[i].bus) /* 20171201 */
-          drawline(7+entry->value%(cadlayers-7), THICK, 
-             wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
-        else
-          drawline(7+entry->value%(cadlayers-7), NOW, 
-             wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
-      }
-    }
-
-  }
-
- my_realloc(145, &inst_color,lastinst*sizeof(int)); 
- for(i=0;i<lastinst;i++)
- {
-   /* 20150409 */
-   x1=X_TO_SCREEN(inst_ptr[i].x1);
-   x2=X_TO_SCREEN(inst_ptr[i].x2);
-   y1=Y_TO_SCREEN(inst_ptr[i].y1);
-   y2=Y_TO_SCREEN(inst_ptr[i].y2);
-   inst_color[i]=0;
-   if(OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2)) continue;
-   /* /20150409 */
-
-  type = (inst_ptr[i].ptr+instdef)->type; /* 20150409 */
-  if( type &&
-      !(strcmp(type,"label") && strcmp(type,"ipin") &&
-        strcmp(type,"iopin") && strcmp(type,"opin") )
-    )
-  {
-   entry=bus_hilight_lookup( get_tok_value(inst_ptr[i].prop_ptr,"lab",0) , 0, 2 );
-   if(entry) inst_color[i]=7+entry->value%(cadlayers-7);
-  }
-  else if( inst_ptr[i].flags & 4) {
-    if(debug_var>=1) fprintf(errfp, "draw_hilight_net(): instance %d flags &4 true\n", i);
-    inst_color[i]=PINLAYER;
-  }
- }
-
- for(c=0;c<cadlayers;c++) {
-  /* 20160414 from draw() */
-  if(draw_single_layer!=-1 && c != draw_single_layer) continue; /* 20151117 */
-
-  for(i=0;i<lastinst;i++)
-  {
-    if(inst_color[i] )
-    {
-     /* 20150409 */
-     x1=X_TO_SCREEN(inst_ptr[i].x1);
-     x2=X_TO_SCREEN(inst_ptr[i].x2);
-     y1=Y_TO_SCREEN(inst_ptr[i].y1);
-     y2=Y_TO_SCREEN(inst_ptr[i].y2);
-     if(OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2)) continue;
-     if(debug_var>=1) fprintf(errfp, "draw_hilight_net(): instance:%d\n",i);
-     drawline(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0);
-     drawrect(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0);
-     filledrect(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0);
-     drawarc(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
-     /* 20160414 from draw() */
-     symptr = (inst_ptr[i].ptr+instdef);
-     if( c==0 || /*draw_symbol_outline call is needed on layer 0 to avoid redundant work (outside check) */
-         symptr->lines[c] ||
-         symptr->rects[c] ||
-         symptr->arcs[c] ||
-         symptr->polygons[c] ||
-         ((c==TEXTWIRELAYER || c==TEXTLAYER) && symptr->texts)) {
-       draw_symbol_outline(ADD, inst_color[i], i,c,0,0,0.0,0.0);
-     }
-     filledrect(inst_color[i], END, 0.0, 0.0, 0.0, 0.0);
-     drawarc(inst_color[i], END, 0.0, 0.0, 0.0, 0.0, 0.0);
-     drawrect(inst_color[i], END, 0.0, 0.0, 0.0, 0.0);
-     drawline(inst_color[i], END, 0.0, 0.0, 0.0, 0.0);
-    }
-  }
- }
- draw_window = save_draw;
-}
-
 
 void undraw_hilight_net(int on_window) /* 20160413 */
 {

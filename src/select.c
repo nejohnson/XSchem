@@ -468,6 +468,11 @@ void unselect_all(void)
       inst_ptr[i].sel = 0;
       for(c=0;c<cadlayers;c++)
         draw_temp_symbol_outline(ADD, gctiled, i, c,0,0,0.0,0.0);
+      if(event_reporting) { 
+        char n[PATH_MAX];
+        printf("xschem search exact %d name %s\n", -1, escape_chars(n, inst_ptr[i].instname, PATH_MAX)); 
+        fflush(stdout);
+      }
      }
     }
     for(i=0;i<lasttext;i++)
@@ -582,7 +587,7 @@ void select_element(int i,unsigned short select_mode, int fast)
    prepare_netlist_structs(0); /* 20190526 */
    if(event_reporting) { 
      char n[PATH_MAX];
-     printf("xschem search exact 1 name %s\n", escape_chars(n, inst_ptr[i].instname, PATH_MAX)); 
+     printf("xschem search exact %d name %s\n", select_mode? 1:-1, escape_chars(n, inst_ptr[i].instname, PATH_MAX)); 
      fflush(stdout);
    }
    my_snprintf(str, S(str), "selected element %d: %s properties: %s", i, inst_ptr[i].name,s);

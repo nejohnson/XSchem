@@ -300,7 +300,10 @@ void hash_wire(int what, int n)
   double x1, y1, x2, y2;
   int x1a, x2a, y1a, y2a;
 
-  wire[n].node=NULL;
+  /* 20190606 */
+  /* wire[n].node=NULL; */ 
+  my_strdup(58, &wire[n].node, NULL);
+
   wire[n].end1 = wire[n].end2=-1;
   x1=wire[n].x1;
   x2=wire[n].x2;

@@ -1227,11 +1227,6 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if((key==';') && (state & ControlMask) )         /* testmode 20171203 */
    {
-    /*
-     * rebuild_selected_array();
-     * printf("inst_ptr[%d].name=%s\n", selectedgroup[0].n, inst_ptr[selectedgroup[0].n].name);
-     *
-     */
     break;
    }
    if(0 && (key==';') && (state & ControlMask) )    /* testmode:  for performance testing */

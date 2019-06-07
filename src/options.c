@@ -57,6 +57,11 @@ void check_opt(char *opt, char *optval, int type)
         if(debug_var>=1) fprintf(errfp, "process_options(): user plotfile specified: %s\n", optval ? optval : "NULL");
         if(optval) my_strncpy(plotfile, optval, S(plotfile));
 
+    } else if( (type == LONG && !strcmp("events", opt)) ) {
+        if(debug_var>=1) fprintf(errfp, "process_options(): event reporting on stdout enabled\n");
+        event_reporting = 1;
+        no_readline = 1;
+
     } else if( (type == LONG && !strcmp("rcfile", opt)) ) {
         if(debug_var>=1) fprintf(errfp, "process_options(): user rcfile specified: %s\n", optval ? optval : "NULL");
         if(optval) my_strncpy(rcfile, optval, S(rcfile));

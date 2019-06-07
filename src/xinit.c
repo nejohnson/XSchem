@@ -1134,7 +1134,10 @@ int Tcl_AppInit(Tcl_Interp *inter)
  /* */
  /*  START PROCESSING USER OPTIONS */
  /* */
-
+ if(event_reporting) {
+   tcleval("set tcl_prompt1 {}");
+   tcleval("set tcl_prompt2 {}");
+ }
  if(netlist_dir) {
    set_netlist_dir(1, netlist_dir);
  } else {

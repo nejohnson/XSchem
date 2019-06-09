@@ -582,14 +582,14 @@ void select_element(int i,unsigned short select_mode, int fast)
   char str[1024];       /* overflow safe */
   char s[256];          /* overflow safe */
   my_strncpy(s,inst_ptr[i].prop_ptr!=NULL?inst_ptr[i].prop_ptr:"<NULL>",S(s));
+  if(event_reporting) { 
+    char n[PATH_MAX];
+    printf("xschem search exact %d name %s\n", select_mode? 1:-1, escape_chars(n, inst_ptr[i].instname, PATH_MAX)); 
+    fflush(stdout);
+  }
   if( !fast )
   {
    prepare_netlist_structs(0); /* 20190526 */
-   if(event_reporting) { 
-     char n[PATH_MAX];
-     printf("xschem search exact %d name %s\n", select_mode? 1:-1, escape_chars(n, inst_ptr[i].instname, PATH_MAX)); 
-     fflush(stdout);
-   }
    my_snprintf(str, S(str), "selected element %d: %s properties: %s", i, inst_ptr[i].name,s);
    statusmsg(str,2);
    my_snprintf(str, S(str), "symbol .name=%s", inst_ptr[i].name==NULL?"(null)":inst_ptr[i].name);

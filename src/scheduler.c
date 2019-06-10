@@ -217,7 +217,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
  else if(!strcmp(argv[1],"zoom_box"))
  {
     double x1, y1, x2, y2, yy1, factor;
-    if(debug_var>=0) fprintf(errfp, "xschem zoom_box: argc=%d, argv[2]=%s\n", argc, argv[2]);
+    if(debug_var>=1) fprintf(errfp, "xschem zoom_box: argc=%d, argv[2]=%s\n", argc, argv[2]);
     if(argc==6 || argc == 7) {
       x1 = atof(argv[2]);
       y1 = atof(argv[3]);
@@ -354,14 +354,6 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
    remove_symbols();
    load_schematic(0, 1, schematic[currentsch], 1);
    zoom_full(1, 0);
- }
-
- else if(!strcmp(argv[1],"gensch"))
- {
-   char str[1024]; /* overflow safe 20161122 */
-   if(argc==3) my_snprintf(str, S(str), "gensch {%s}", argv[2]);
-   else if(argc==4) my_snprintf(str, S(str), "gensch {%s} {%s}", argv[2], argv[3]);
-   tcleval(str);
  }
 
  else if(!strcmp(argv[1],"debug"))
@@ -773,8 +765,6 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
   printf("                   print information about global variables\n");
   printf("      xschem inst_ptr n\n");
   printf("                   return inst_ptr of inst_ptr[n]\n");
-  printf("      xschem gensch\n");
-  printf("                   create new schematic cell from pin names\n");
   printf("      xschem netlist\n");
   printf("                   perform a global netlist on current schematic\n");
   printf("      xschem netlist_type type\n");
@@ -1181,7 +1171,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
    prepare_netlist_structs(1);
 
    if( (i = get_instance(argv[2])) < 0 ) {
-     Tcl_AppendResult(interp, "xschem setprop: instance not found", NULL);
+     Tcl_AppendResult(interp, "xschem instance_pins: instance not found", NULL);
      return TCL_ERROR;
    }
    no_of_pins= (inst_ptr[i].ptr+instdef)->rects[PINLAYER];

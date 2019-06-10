@@ -183,6 +183,11 @@ void delete_hilight_net(void)
 {
  int i;
  free_hilight_hash();
+ if(event_reporting) {
+   printf("xschem clear_hilights\n");
+   fflush(stdout);
+ }
+
  hilight_nets=0;
  for(i=0;i<lastinst;i++) {
    inst_ptr[i].flags &= ~4 ;
@@ -480,6 +485,12 @@ void hilight_net(void)
       str = get_tok_value(wire[n].prop_ptr, "lab",0);
       if(str && str[0])
       {
+        if(event_reporting) {
+          char n[PATH_MAX];
+          printf("xschem search exact %d lab %s\n", 0, escape_chars(n, str, PATH_MAX));
+          fflush(stdout);
+        }
+
         hilight_nets=1;
         if(!bus_hilight_lookup(str, hilight_color,0)) {
           if(incr_hilight) hilight_color++;
@@ -494,12 +505,22 @@ void hilight_net(void)
       str = get_tok_value(inst_ptr[n].prop_ptr, "lab",0);
       if(str && str[0])
       {
+       if(event_reporting) {
+         char n[PATH_MAX];
+         printf("xschem search exact %d lab %s\n", 0, escape_chars(n, str, PATH_MAX));
+         fflush(stdout);
+       }
        if(!bus_hilight_lookup(str, hilight_color,0)) {
          hilight_nets=1;
          if(incr_hilight) hilight_color++;
        }
       }
       else {
+       if(event_reporting) {
+         char nn[PATH_MAX];
+         printf("xschem search exact %d name %s\n", 0, escape_chars(nn, inst_ptr[n].instname, PATH_MAX));
+         fflush(stdout);
+       }
        if(debug_var>=1) fprintf(errfp, "hilight_net(): setting hilight flag on inst %d\n",n);
        hilight_nets=1;
        inst_ptr[n].flags |= 4;
@@ -540,6 +561,12 @@ void unhilight_net(void)
       /*str = wire[n].node; */
       if(str && str[0])
       {
+       if(event_reporting) {
+         char n[PATH_MAX];
+         printf("xschem search exact %d lab %s\n", 1, escape_chars(n, str, PATH_MAX));
+         printf("xschem unhilight\n");
+         fflush(stdout);
+       }
        bus_hilight_lookup(str, hilight_color,1);
 
       }
@@ -554,7 +581,18 @@ void unhilight_net(void)
       inst_ptr[n].flags &= ~4;
       if(str && str[0])
       {
+       if(event_reporting) {
+         printf("xschem unhilight\n");
+         fflush(stdout);
+       }
        bus_hilight_lookup(str, hilight_color,1);
+      } else {
+       if(event_reporting) {
+         char nn[PATH_MAX];
+         printf("xschem search exact %d name %s\n", 1, escape_chars(nn, inst_ptr[n].instname, PATH_MAX));
+         printf("xschem unhilight\n");
+         fflush(stdout);
+       }
       }
      }
      break;

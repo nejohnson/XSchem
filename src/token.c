@@ -243,7 +243,7 @@ int match_symbol(char *name)  /* never returns -1, if symbol not found load syst
 /* update **s modifying only the token values that are */
 /* different between *new and *old */
 /* return 1 if s modified 20081221 */
-int set_different_token(char **s,char *new, char *old)
+int set_different_token(char **s,char *new, char *old, int object, int n)
 {
  register int c, state=XBEGIN, space;
  static char *token=NULL, *value=NULL;
@@ -254,7 +254,7 @@ int set_different_token(char **s,char *new, char *old)
  int mod;
 
  mod=0;
- if(debug_var>=1) fprintf(errfp, "set_different_token(): new=%s, old=%s\n", new, old);
+ if(debug_var>=1) fprintf(errfp, "set_different_token(): *s=%s, new=%s, old=%s\n",*s, new, old);
  if(new==NULL) return 0;
  sizetok=CADCHUNKALLOC;
  if(token==NULL) token=my_malloc(427, sizetok);
@@ -297,6 +297,19 @@ int set_different_token(char **s,char *new, char *old)
    value[value_pos]='\0';
    value_pos=0;
    if(strcmp(value, get_tok_value(old,token,1))) {
+
+    if(event_reporting && object == ELEMENT) {
+      char n1[PATH_MAX];
+      char n2[PATH_MAX];
+      char n3[PATH_MAX];
+      printf("xschem setprop instance %s %s %s\n", 
+           escape_chars(n1, inst_ptr[n].instname, PATH_MAX), 
+           escape_chars(n2, token, PATH_MAX), 
+           escape_chars(n3, value, PATH_MAX)
+      );
+      fflush(stdout);
+    }
+
     mod=1;
     my_strdup(433, s, subst_token(*s, token, value) );
    }

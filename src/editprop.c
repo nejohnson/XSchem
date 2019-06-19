@@ -769,7 +769,7 @@ void update_symbol(const char *result, int x)
     delete_inst_node(i); /* 20180208 fix crashing bug: delete node info if changing symbol */
                          /* if number of pins is different we must delete these data *before* */
                          /* changing ysmbol, otherwise i might end up deleting non allocated data. */
-    my_strdup(82, &inst_ptr[i].name,symbol);
+    my_strdup(82, &inst_ptr[i].name, rel_sym_path(symbol));
 
 
    if(event_reporting) {

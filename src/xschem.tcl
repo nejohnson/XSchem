@@ -424,7 +424,7 @@ proc save_file_dialog { msg ext global_initdir {initialfile {}} {overwrt 1} } {
 
 
 proc list_dirs {pathlist } {
-  global list_dirs_selected_dir
+  global list_dirs_selected_dir INITIALINSTDIR
   toplevel .list -class dialog
   wm title .list {Select Library:}
   wm protocol .list WM_DELETE_WINDOW { set list_dirs_selected_dir {} } 
@@ -448,6 +448,12 @@ proc list_dirs {pathlist } {
     pack .list.${x} -side top -fill x 
     incr x
   }
+  frame .list.${x}
+  label .list.${x}.l -text [expr $x+1] -width 4
+  button .list.${x}.b -text {Last used dir} -command "set list_dirs_selected_dir $INITIALINSTDIR"
+  pack .list.${x}.l -side left
+  pack .list.${x}.b -side left -fill x -expand yes
+  pack .list.${x} -side top -fill x 
   frame .list.but
   button .list.but.cancel -text Cancel -command {set list_dirs_selected_dir {} }
   
@@ -464,7 +470,7 @@ proc list_dirs {pathlist } {
 #   INITIALINSTDIR  for instance placement
 # ext:  .sch or .sym or .sch.sym
 #
-proc load_file_dialog { msg ext global_initdir} {
+proc xxload_file_dialog { msg ext global_initdir} {
   global pathlist use_list_dirs
   upvar #0 $global_initdir initdir
   set types(.sym) { {{All Files} * } {{Symbol files} {.sym}} }
@@ -483,6 +489,176 @@ proc load_file_dialog { msg ext global_initdir} {
   if { $r ne {} } { set initdir $dir }
   return [file normalize $r]
 }
+
+proc myload_set_colors {} {
+  global myload_index1 myload_files2
+  update
+  set dir1 [abs_sym_path [.myload.l.listbox1.list get $myload_index1]]
+  for {set i 0} { $i< [.myload.l.listbox2.list index end] } { incr i} {
+    if {[ file isdirectory "$dir1/[lindex $myload_files2 $i]"]} {
+      .myload.l.listbox2.list itemconfigure $i -foreground blue
+    } else {
+      .myload.l.listbox2.list itemconfigure $i -foreground black
+    }
+  }
+}
+proc myload_set_home {dir} {
+  global pathlist  myload_files1 myload_index1
+
+  set i [lsearch -exact $pathlist $dir]
+  if { $i>=0 } {
+    set myload_files1 $pathlist
+    set myload_index1 $i
+    .myload.l.listbox1.list selection set $myload_index1
+
+  } else {
+    set myload_files1 $dir
+    set myload_index1 0
+    .myload.l.listbox1.list selection set 0
+  }
+
+}
+
+proc load_file_dialog {{msg {}}  {ext {}} {global_initdir {INITIALINSTDIR}}} {
+  global myload_index1 myload_files2 myload_files1 myload_retval myload_dir1 pathlist
+  global myload_default_geometry
+  upvar #0 $global_initdir initdir
+  toplevel .myload -class dialog
+  
+  set_ne myload_index1 0
+  if { ![info exists myload_files1]} {
+    set myload_files1 $pathlist
+    set myload_index1 0
+  }
+  set_ne myload_files2 {}
+
+  # return value
+  set myload_retval {} 
+
+  # set files [lsort [glob -directory . -tails \{.*,*\}]]
+  
+  panedwindow  .myload.l -orient horizontal
+
+  frame .myload.l.listbox1
+  listbox .myload.l.listbox1.list -width 50 -listvariable myload_files1 \
+    -yscrollcommand ".myload.l.listbox1.yscroll set" -selectmode browse \
+    -xscrollcommand ".myload.l.listbox1.xscroll set"
+  scrollbar .myload.l.listbox1.yscroll -command ".myload.l.listbox1.list yview" 
+  scrollbar .myload.l.listbox1.xscroll -command ".myload.l.listbox1.list xview" -orient horiz
+  pack  .myload.l.listbox1.yscroll -side right -fill y
+  pack  .myload.l.listbox1.xscroll -side bottom -fill x
+  pack  .myload.l.listbox1.list -fill both -expand true
+  bind .myload.l.listbox1.list <<ListboxSelect>> { 
+    set sel [.myload.l.listbox1.list curselection]
+    if { $sel ne {} } {
+      set myload_dir1 [abs_sym_path [.myload.l.listbox1.list get $sel]]
+      set myload_index1 $sel
+      set myload_files2 [lsort [glob -directory $myload_dir1 -tails \{.*,*\}]]
+      myload_set_colors
+    }
+  }
+
+  frame .myload.l.listbox2
+  listbox .myload.l.listbox2.list -listvariable myload_files2 \
+    -yscrollcommand ".myload.l.listbox2.yscroll set" -selectmode browse
+  scrollbar .myload.l.listbox2.yscroll -command ".myload.l.listbox2.list yview"
+  pack  .myload.l.listbox2.yscroll -side right -fill y
+  pack  .myload.l.listbox2.list -side right  -fill both -expand true
+
+  # pack  .myload.l.listbox1 .myload.l.listbox2 -side left -fill both -expand true
+  .myload.l  add .myload.l.listbox1 -minsize 100
+  .myload.l  add .myload.l.listbox2 -minsize 100
+ 
+  frame .myload.buttons
+  button .myload.buttons.ok -text OK -command { set myload_retval [.myload.buttons.entry get]; destroy .myload} 
+  button .myload.buttons.cancel -text Cancel -command {set myload_retval {}; destroy .myload}
+  button .myload.buttons.home -text Home -command {
+    set myload_files1 $pathlist
+    set myload_index1 0
+    set myload_dir1 [abs_sym_path [.myload.l.listbox1.list get $myload_index1]]
+    set myload_files2 [lsort [glob -directory $myload_dir1 -tails \{.*,*\}]]
+    myload_set_colors
+    .myload.buttons.entry delete 0 end
+    .myload.l.listbox1.list selection set $myload_index1
+  }
+  label .myload.buttons.label  -text {File:}
+  entry .myload.buttons.entry
+  button .myload.buttons.up -text UP -command {
+    set dir2 {..}
+    set d [string replace [file normalize "$myload_dir1/$dir2/__xxx__"] end-7 end {}]
+    if { [file isdirectory $d]} {
+      myload_set_home $d
+      set myload_files2 [lsort [glob -directory $d -tails \{.*,*\}]]
+      myload_set_colors
+      set myload_dir1 $d
+      .myload.buttons.entry delete 0 end
+    }
+  }
+  pack .myload.buttons.ok .myload.buttons.up .myload.buttons.cancel \
+       .myload.buttons.home .myload.buttons.label -side left
+  pack .myload.buttons.entry -side left -fill x -expand true
+  pack .myload.l -side top -expand true -fill both
+  pack .myload.buttons -side top -fill x
+  myload_set_home $initdir
+  bind .myload <Return> { 
+    set myload_retval [.myload.buttons.entry get]
+    if {$myload_retval ne {} } {
+      destroy .myload
+    }
+  }
+  bind .myload.l.listbox2.list <Double-Button-1> {
+    set myload_retval [.myload.buttons.entry get]
+    if {$myload_retval ne {} } {
+      destroy .myload
+    }
+  }
+  bind .myload <Escape> { set myload_retval {}; destroy .myload}
+
+
+  bind .myload <Configure> {
+    set myload_default_geometry [wm geometry .myload]
+    regsub {\+.*} $myload_default_geometry {} myload_default_geometry
+  }
+
+
+  wm geometry .myload "${myload_default_geometry}"
+  update
+  set myload_dir1 [abs_sym_path [.myload.l.listbox1.list get $myload_index1]]
+  set myload_files2 [lsort [glob -directory $myload_dir1 -tails \{.*,*\}]]
+  myload_set_colors
+  bind .myload.l.listbox2.list <<ListboxSelect>> {
+    set sel [.myload.l.listbox2.list curselection]
+    if { $sel ne {} } {
+      set myload_dir1 [abs_sym_path [.myload.l.listbox1.list get $myload_index1]]
+      set dir2 [.myload.l.listbox2.list get $sel]
+      set d [string replace [file normalize "$myload_dir1/$dir2/__xxx__"] end-7 end {}]
+
+
+
+
+      if { [file isdirectory $d]} {
+        myload_set_home $d
+        set myload_files2 [lsort [glob -directory $d -tails \{.*,*\}]]
+        myload_set_colors
+        set myload_dir1 $d
+        .myload.buttons.entry delete 0 end
+      } else {
+        .myload.buttons.entry delete 0 end
+        .myload.buttons.entry insert 0 $dir2
+      }
+    }
+  }
+
+  tkwait window .myload
+
+  if { $myload_retval ne {} } {
+    set initdir "$myload_dir1"
+    return [file normalize "$myload_dir1/$myload_retval"]
+  } else {
+    return {}
+  }
+}
+
 
 # used in scheduler.c  20121111
 # get last 2 path components: example /aaa/bbb/ccc/ddd.sch -> ccc/ddd
@@ -1845,6 +2021,7 @@ set_ne to_png {gm convert}
 ## 20160325 remember edit_prop widget size
 set_ne edit_prop_default_geometry 80x12
 set_ne text_line_default_geometry 80x12
+set_ne myload_default_geometry 600x300
 set_ne terminal xterm
 
 # set_ne analog_viewer waveview

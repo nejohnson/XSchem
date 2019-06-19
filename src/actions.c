@@ -72,6 +72,7 @@ char *escape_chars(char *dest, const char *source, int size)
         }
         break;
       case '\\':
+      case '\'':
       case ' ':
       case ';':
       case '$':
@@ -81,6 +82,7 @@ char *escape_chars(char *dest, const char *source, int size)
       case '}':
       case '[':
       case ']':
+      case '"':
         if(d < size-1) {
            dest[d++] = '\\';
            dest[d++] = source[s];

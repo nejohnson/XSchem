@@ -524,6 +524,7 @@ proc load_file_dialog {{msg {}}  {ext {}} {global_initdir {INITIALINSTDIR}}} {
   global myload_default_geometry
   upvar #0 $global_initdir initdir
   toplevel .myload -class dialog
+  wm title .myload $msg
   
   set_ne myload_index1 0
   if { ![info exists myload_files1]} {

@@ -677,24 +677,25 @@ void read_xschem_file(FILE *fd) /* 20180912 */
      case '[':
       my_strdup(324, &inst_ptr[lastinst-1].prop_ptr, subst_token(inst_ptr[lastinst-1].prop_ptr, "embed", "true"));
 
-
-      my_snprintf(name_embedded, S(name_embedded),
-         "%s/.xschem_embedded_%d_%s.sym", tclgetvar("XSCHEM_TMP_DIR"), getpid(), get_cell(inst_ptr[lastinst-1].name, 0));
-      found=0;
-      /* if loading file coming back from embedded symbol delete temporary file */
-      for(i=0;i<lastinstdef;i++)
-      {
-       if(debug_var>=1) fprintf(errfp, "read_xschem_file(): instdef[i].name=%s, name_embedded=%s\n", instdef[i].name, name_embedded);
-       if(strcmp(name_embedded, instdef[i].name) == 0)
-       {
-        my_strdup(325, &instdef[i].name, inst_ptr[lastinst-1].name);
-        unlink(name_embedded);
-        found=1;break;
-       }
-      }
-      if(!found) load_symbol_definition(inst_ptr[lastinst-1].name, fd);
-      else {
-        while( strcmp( read_line(fd) , "]\n") ) ; /* skip embedded [ ... ] */
+      if(inst_ptr[lastinst-1].name) {
+        my_snprintf(name_embedded, S(name_embedded),
+           "%s/.xschem_embedded_%d_%s.sym", tclgetvar("XSCHEM_TMP_DIR"), getpid(), get_cell(inst_ptr[lastinst-1].name, 0));
+        found=0;
+        /* if loading file coming back from embedded symbol delete temporary file */
+        for(i=0;i<lastinstdef;i++)
+        {
+         if(debug_var>=1) fprintf(errfp, "read_xschem_file(): instdef[i].name=%s, name_embedded=%s\n", instdef[i].name, name_embedded);
+         if(strcmp(name_embedded, instdef[i].name) == 0)
+         {
+          my_strdup(325, &instdef[i].name, inst_ptr[lastinst-1].name);
+          unlink(name_embedded);
+          found=1;break;
+         }
+        }
+        if(!found) load_symbol_definition(inst_ptr[lastinst-1].name, fd);
+        else {
+          while( strcmp( read_line(fd) , "]\n") ) ; /* skip embedded [ ... ] */
+        }
       }
       break;
      default:

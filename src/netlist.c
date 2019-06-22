@@ -262,6 +262,7 @@ void hash_inst_pin(int what, int i, int j)
    
 {
   Box *rect;
+  char *prop_ptr;
   double x0, y0, rx1, ry1;
   int rot, flip, sqx, sqy;
   int rects;
@@ -278,6 +279,20 @@ void hash_inst_pin(int what, int i, int j)
     rect=(inst_ptr[i].ptr+instdef)->boxptr[PINLAYER];
     x0=(rect[j].x1+rect[j].x2)/2;
     y0=(rect[j].y1+rect[j].y2)/2;
+  }
+
+  prop_ptr = rect[j].prop_ptr;
+
+  if(!prop_ptr || !get_tok_value(prop_ptr, "name",0)[0] || !get_tok_value(prop_ptr, "dir",0)[0]) {
+    char str[2048];
+
+    my_snprintf(str, S(str), "symbol %s: missing all or name or dir attributes on pin %d\n", 
+        inst_ptr[i].name, j);
+    statusmsg(str,2);
+    if(!netlist_count) {
+      inst_ptr[i].flags |=4;
+      hilight_nets=1;
+    }
   }
   rot=inst_ptr[i].rot;
   flip=inst_ptr[i].flip;

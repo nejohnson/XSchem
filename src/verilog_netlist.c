@@ -371,7 +371,6 @@ void verilog_block_netlist(FILE *fd, int i)  /*20081205 */
      {
        my_strdup(562, &port_value, get_tok_value(
                  instdef[i].boxptr[PINLAYER][j].prop_ptr,"value",2) );
-       my_strdup(563, &dir_tmp, get_tok_value(instdef[i].boxptr[PINLAYER][j].prop_ptr,"dir",0) );
        str_tmp = get_tok_value(instdef[i].boxptr[PINLAYER][j].prop_ptr,"name",0);
        if(tmp) fprintf(fd, " ,\n"); 
        tmp++;

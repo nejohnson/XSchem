@@ -1297,7 +1297,7 @@ void print_tedax_element(FILE *fd, int inst)
  for(i=0;i<no_of_pins; i++) {
    char pnumber[100], *pname=NULL,*pnumber_ptr;
    my_snprintf(pnumber, S(pnumber), "pinnumber(%d)", i);
-   my_strdup(498, &pinname, get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"name",0));
+   my_strdup2(498, &pinname, get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"name",0));
    pname =my_malloc(49, get_tok_value_size+30);
    my_snprintf(pname, get_tok_value_size+30, "pinnumber(%s)", pinname);
    if(!pinname) my_strdup(499, &pinnumber, "--UNDEF--");

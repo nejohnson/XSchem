@@ -811,6 +811,7 @@ extern char *find_nth(char *str, char sep, int n);
 extern char *translate(int inst, char* s);
 extern void print_tedax_element(FILE *fd, int inst);
 extern void print_spice_element(FILE *fd, int inst);
+extern void print_spice_subckt(FILE *fd, int symbol);
 extern void print_vhdl_element(FILE *fd, int inst);
 extern void print_verilog_element(FILE *fd, int inst);
 extern void print_verilog_primitive(FILE *fd, int inst);

@@ -188,6 +188,15 @@ proc key_binding {  s  d } {
 #                          ButtonPress-4
 #
   regsub {.*-} $d {} key
+
+
+  switch $key {
+     Insert { set keysym 65379 } 
+     Escape { set keysym 65307 } 
+     Return { set keysym 65293 } 
+     BackSpace { set keysym 65288 } 
+     default { set keysym [scan "$key" %c] }
+  }
   set state 0
   # not found any portable way to get modifier constants ...
   if { [regexp {(Mod1|Alt)-} $d] } { set state [expr $state +8] }
@@ -203,7 +212,7 @@ proc key_binding {  s  d } {
     if {![string compare $d {} ] } {
       bind .drw "<${s}>" {}
     } else {
-      bind .drw  "<${s}>" "xschem callback %T %x %y [scan "$key" %c] 0 0 $state"
+      bind .drw  "<${s}>" "xschem callback %T %x %y $keysym 0 0 $state"
     }
   }
 

@@ -191,14 +191,14 @@ void global_spice_netlist(int global)  /* netlister driver */
 
 void spice_block_netlist(FILE *fd, int i)  /*20081223 */
 {
- int j;
  int spice_stop=0; /* 20111113 */
  char netl[PATH_MAX];
  char netl2[PATH_MAX];  /* 20081202 */
  char netl3[PATH_MAX];  /* 20081202 */
  char filename[PATH_MAX];
  const char *str_tmp;
- int mult;
+ /* int j; */
+ /* int mult; */
  static char *extra=NULL;
 
      /* 20111113 */
@@ -218,15 +218,20 @@ void spice_block_netlist(FILE *fd, int i)  /*20081223 */
            instdef[i].name,instdef[i].rects[PINLAYER] );
   
      fprintf(fd, ".subckt %s ",skip_dir(instdef[i].name));
-     for(j=0;j<instdef[i].rects[PINLAYER];j++)
-     {
-       str_tmp=
-         expandlabel(get_tok_value(instdef[i].boxptr[PINLAYER][j].prop_ptr,"name",0), &mult);
-       if(str_tmp)
-         fprintf(fd,"%s ",str_tmp);
-       else 
-         fprintf(fd,"<NULL> ");
-     }
+     /* 
+      * for(j=0;j<instdef[i].rects[PINLAYER];j++)
+      * {
+      *   str_tmp=
+      *     expandlabel(get_tok_value(instdef[i].boxptr[PINLAYER][j].prop_ptr,"name",0), &mult);
+      *   if(str_tmp)
+      *     fprintf(fd,"%s ",str_tmp);
+      *   else 
+      *     fprintf(fd,"<NULL> ");
+      * }
+      */
+
+     print_spice_subckt(fd, i);
+
      my_strdup(387, &extra, get_tok_value(instdef[i].prop_ptr,"extra",0) ); /* 20081206 */
      fprintf(fd, "%s ", extra ? extra : "" );
      

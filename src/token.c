@@ -1103,6 +1103,88 @@ void print_verilog_param(FILE *fd, int symbol) /*16112003 */
 
 
 
+void print_spice_subckt(FILE *fd, int symbol)
+{
+ int i=0, mult;
+ const char *str_ptr=NULL; 
+ register int c, state=XBEGIN, space;
+ static char *format=NULL,*s, *token=NULL;
+ int pin_number; /* 20180911 */
+ int sizetok=0;
+ int token_pos=0, escape=0;
+ int no_of_pins=0;
+ int quote=0; /* 20171029 */
+ 
+ my_strdup(486, &format, get_tok_value(instdef[symbol].prop_ptr,"format",0));
+ if( (format==NULL) ) return; /* no format */
+ no_of_pins= instdef[symbol].rects[PINLAYER];
+ s=format;
+
+ /* begin parsing format string */
+ while(1)
+ {
+  c=*s++; 
+  if(c=='"' && escape) { 
+    quote=!quote; /* 20171029 */
+  }
+  if(c=='"' && !escape ) c=*s++;
+  if(c=='\n' && escape ) c=*s++; /* 20171030 eat escaped newlines */
+  /* 20150317 use SPACE2() instead of SPACE() */
+  space=SPACE2(c);
+  if( state==XBEGIN && c=='@' && !escape) state=XTOKEN;
+  else if( state==XTOKEN && (space || c == '@')  && token_pos > 1 && !escape && !quote) state=XSEPARATOR;
+  if(token_pos>=sizetok)
+  {
+   sizetok+=CADCHUNKALLOC;
+   my_realloc(487, &token,sizetok);
+  }
+  if(state==XTOKEN) {
+    if(c!='\\' || escape) token[token_pos++]=c; /* 20171029 remove escaping backslashes */
+  }
+  else if(state==XSEPARATOR)                    /* got a token */
+  {
+   token[token_pos]='\0'; 
+   token_pos=0;
+   if(!strcmp(token, "@name")) {
+     /* do nothing */
+   }
+   else if(strcmp(token, "@symname")==0) {
+     return ;
+   }
+   else if(strcmp(token, "@pinlist")==0) {
+    for(i=0;i<no_of_pins;i++)
+    {
+      str_ptr=
+        expandlabel(get_tok_value(instdef[symbol].boxptr[PINLAYER][i].prop_ptr,"name",0), &mult);
+      fprintf(fd, "%s ", str_ptr);
+    }
+   }
+   else if(token[0]=='@' && token[1]=='@') {    /* recognize single pins 15112003 */
+     fprintf(fd, "%s ", expandlabel(token+2, &mult));
+   }
+   /* reference by pin number instead of pin name, allows faster lookup of the attached net name 20180911 */
+   else if(token[0]=='@' && token[1]=='#') {
+       pin_number = atoi(token+2); 
+       if(pin_number < no_of_pins) {
+         str_ptr =  get_tok_value(instdef[symbol].boxptr[PINLAYER][pin_number].prop_ptr,"name",0);
+         fprintf(fd, "%s ",  expandlabel(str_ptr, &mult));
+       }
+   }
+   if(c != '@' && c!='\0' && (c!='\\'  || escape) ) fputc(c,fd);
+   if(c == '@') s--;
+   state=XBEGIN;
+  }
+                 /* 20151028 dont print escaping backslashes */
+  else if(state==XBEGIN && c!='\0' && (c!='\\' || escape)) {
+   /* do nothing */
+  }
+  if(c=='\0') 
+  {
+   return ;
+  }
+  if(c=='\\')  escape=1;  else escape=0;
+ }
+}
 
 
 

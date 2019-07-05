@@ -194,6 +194,19 @@ proc key_binding {  s  d } {
      Insert { set keysym 65379 } 
      Escape { set keysym 65307 } 
      Return { set keysym 65293 } 
+     Delete { set keysym 65535 } 
+     F1 { set keysym  65470 } 
+     F2 { set keysym  65471 } 
+     F3 { set keysym  65472 } 
+     F4 { set keysym  65473 } 
+     F5 { set keysym  65474 } 
+     F6 { set keysym  65475 } 
+     F7 { set keysym  65476 } 
+     F8 { set keysym  65477 } 
+     F9 { set keysym  65478 } 
+     F10 { set keysym  65479 } 
+     F11 { set keysym  65480 } 
+     F12 { set keysym  65481 } 
      BackSpace { set keysym 65288 } 
      default { set keysym [scan "$key" %c] }
   }

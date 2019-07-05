@@ -1146,7 +1146,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
  if(filename) {
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): filename %s given, removing symbols\n", filename);
     remove_symbols();
-    load_schematic(0, 1, filename, 1); /* 20180925.1 */
+    load_schematic(0, 1, abs_sym_path(filename, ""), 1); /* 20180925.1 */
  }
  else { 
    char * tmp; /* 20121110 */

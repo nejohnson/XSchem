@@ -1803,7 +1803,7 @@ proc rel_sym_path {symbol} {
   }
   if { ![string compare $name {} ] } {
     # no known lib, so return full path
-    set name ${symbol}
+    set name ${symbol_orig}
   }
   return $name
 }
@@ -1849,11 +1849,12 @@ proc abs_sym_path {fname {ext {} } } {
   }
 
   if { ![string compare $name {}] } {
-    if { ![string compare $fname [file tail $fname]] } {
-      set name [file normalize ${current_dirname}/$fname]
-    } else {
-      set name [file normalize $fname]
-    }
+#    if { ![string compare $fname [file tail $fname]] } {
+#      set name [file normalize ${current_dirname}/$fname]
+#    } else {
+#      set name [file normalize $fname]
+#    }
+     set name $fname
   }
   return $name
 }

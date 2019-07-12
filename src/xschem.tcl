@@ -1996,6 +1996,9 @@ set tclcmd_txt {}
 ###
 ### user preferences: set default values
 ###
+
+## list of tcl procedures to load at end of xschem.tcl
+set_ne tcl_files {}
 set_ne use_list_dirs {1}
 set_ne netlist_dir {.}
 set_ne hspice_netlist 0
@@ -2689,3 +2692,7 @@ font configure Underline-Font -underline true -size 24
    }
 }
 
+
+foreach i $tcl_files {
+  source $i
+}

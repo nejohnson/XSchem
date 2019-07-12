@@ -197,3 +197,7 @@ set ghdl_run_opts {}
 # set hspice_path "$env(HOME)/hspice_2013/bin/hspice64 -mt 8"
 # set hspicerf_path $env(HOME)/hspice_2013/bin/hspicerf64
 # set cscope_path $env(HOME)/cosmoscope/amd64/ai_bin/cscope
+
+# lappend tcl_files ${XSCHEM_SHAREDIR}/change_index.tcl
+# lappend tcl_files ${XSCHEM_SHAREDIR}/hspice_backannotate.tcl
+

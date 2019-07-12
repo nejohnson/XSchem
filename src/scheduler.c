@@ -414,6 +414,8 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
        bbox(END,0.0,0.0,0.0,0.0);
      }
    }
+   Tcl_ResetResult(interp);
+
  } else if(!strcmp(argv[1], "replace_symbol")) {
    int inst, fast = 0;
    if(argc == 6) {

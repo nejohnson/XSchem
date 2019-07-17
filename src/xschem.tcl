@@ -1471,7 +1471,6 @@ proc edit_prop {txtlabel} {
        set editprop_semaphore 1
        xschem fill_symbol_editprop_form
        set editprop_sympath [file dirname [abs_sym_path $symbol]]
-       puts "$editprop_sympath   $symbol"
     
        # 20160423 no more setected stuff--> close
        if {$editprop_semaphore==0 } {

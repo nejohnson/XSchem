@@ -1332,7 +1332,7 @@ proc change_color {} {
 proc edit_prop {txtlabel} {
    global edit_prop_default_geometry
    global prev_symbol retval symbol rcode rbutton1 rbutton2 copy_cell tcl_debug editprop_semaphore
-   global user_wants_copy_cell
+   global user_wants_copy_cell editprop_sympath
    set user_wants_copy_cell 0
    set rcode {}
    set editprop_semaphore 1
@@ -1365,7 +1365,11 @@ proc edit_prop {txtlabel} {
    }
 
    set prev_symbol $symbol
-   label .ent2.l1  -text $txtlabel
+   set editprop_sympath [file dirname [abs_sym_path $symbol]]
+   frame .ent2.f4
+   label .ent2.f4.l1  -text $txtlabel
+   label .ent2.f4.path  -text "Path:"
+   entry .ent2.f4.e1  -textvariable editprop_sympath -width 0 -state readonly
    text .ent2.e1   -yscrollcommand ".ent2.yscroll set" -setgrid 1 \
                    -xscrollcommand ".ent2.xscroll set" -wrap none
      .ent2.e1 delete 1.0 end
@@ -1387,9 +1391,8 @@ proc edit_prop {txtlabel} {
      }
      raise .ent2
      bind .ent2 <Visibility> { if { [regexp Obscured %s] } {raise .ent2}  }
-
-
    }
+
    button .ent2.f1.b1 -text "OK" -command   {
      set retval [.ent2.e1 get 1.0 {end - 1 chars}] 
      set abssymbol [abs_sym_path [ .ent2.f1.e2 get]]
@@ -1437,7 +1440,10 @@ proc edit_prop {txtlabel} {
    checkbutton .ent2.f2.r3 -text "copy cell" -variable copy_cell -state normal
 
    pack .ent2.f1.l2 .ent2.f1.e2 .ent2.f1.b1 .ent2.f1.b2 .ent2.f1.b3 .ent2.f1.b4 .ent2.f1.b5 -side left -expand 1
-   pack .ent2.l1 -side top -fill x 
+   pack .ent2.f4 -side top  -anchor nw
+   #pack .ent2.f4.path .ent2.f4.e1 .ent2.f4.l1 -side left -fill x 
+   pack .ent2.f4.path -side left
+   pack .ent2.f4.e1 -side left 
    pack .ent2.f1 .ent2.f2 -side top -fill x 
    pack .ent2.f2.r1 -side left
    pack .ent2.f2.r2 -side left
@@ -1464,6 +1470,8 @@ proc edit_prop {txtlabel} {
        xschem update_symbol ok 
        set editprop_semaphore 1
        xschem fill_symbol_editprop_form
+       set editprop_sympath [file dirname [abs_sym_path $symbol]]
+       puts "$editprop_sympath   $symbol"
     
        # 20160423 no more setected stuff--> close
        if {$editprop_semaphore==0 } {

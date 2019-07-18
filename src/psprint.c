@@ -387,7 +387,10 @@ void ps_draw(void)
    tcleval(tmp);
    r = Tcl_GetStringResult(interp);
    if(r[0]) my_strncpy(plotfile, r, S(plotfile));
-   else return;
+   else {
+    my_free(&tmp);
+    return;
+   }
  }
  modified_save=modified;
  push_undo(); /* 20161121 */

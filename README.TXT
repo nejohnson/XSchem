@@ -37,8 +37,20 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
-2.9.0 
 
+2.9.1
+- export png / svg / pdf: ask file name dialog
+- edit property dialog on selected symbol shows absolute directory 
+  the symbols comes from
+- more keysym definitions (Insert, Delete, F1-F12) to be used in
+  replace_key array for custom keybinding
+- better relative / absolute path handling
+- Custom pinlist (@@pin1 @@pin3 @@pin2) can be used
+  also for symbols with associated schematic (type=subcircuit)
+- remote xschem control commands and event reporting (--events option)
+  this will be used for backannotation / 3rd party tools integration
+
+2.9.0 
 - 1.1 file format allowing symbol names without implied '.sym'
 
 Detailed changelog:

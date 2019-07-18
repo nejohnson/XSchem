@@ -170,7 +170,7 @@ proc convert_to_pdf {filename dest} {
 proc convert_to_png {filename dest} {
   global to_png tcl_debug
   # puts "---> $to_png $filename $destfile"
-  if { ![catch "exec $to_png $filename $dest" msg] } {
+  if { ![catch "exec $to_png $filename png:$dest" msg] } {
     # conversion succeeded, so remove original .xpm file
     if { ![xschem get debug_var] } {
       file delete $filename

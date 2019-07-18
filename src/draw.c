@@ -44,7 +44,19 @@ void print_image()
   int w, h, tmp, ww, hh;
   int modified_save; /* 20161121 */
   char cmd[PATH_MAX+100];
+  const char *r;
+  static char *tmpstring=NULL;
+
   if(!has_x) return ;
+  if(!plotfile[0]) {
+    my_strdup(60, &tmpstring, "tk_getSaveFile -title {Select destination file} -initialdir $env(PWD)");
+    tcleval(tmpstring);
+    r = Tcl_GetStringResult(interp);
+    my_free(&tmpstring);
+    if(r[0]) my_strncpy(plotfile, r, S(plotfile));
+    else return;
+  }
+
 
   modified_save=modified; /* 20161121 save state */
   push_undo(); /* 20161121 */

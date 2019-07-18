@@ -50,7 +50,11 @@ void check_opt(char *opt, char *optval, int type)
         no_readline=1;
 
     } else if( (type == SHORT && *opt == 'p') || (type == LONG && !strcmp("postscript", opt)) ) {
-        if(debug_var>=1) fprintf(errfp, "process_options(): will print postscript\n");
+        if(debug_var>=1) fprintf(errfp, "process_options(): will print postscript/pdf\n");
+        do_print=1;
+
+    } else if( (type == LONG && !strcmp("pdf", opt)) ) {
+        if(debug_var>=1) fprintf(errfp, "process_options(): will print postscript/pdf\n");
         do_print=1;
 
     } else if( (type == LONG && !strcmp("plotfile", opt)) ) {

@@ -403,6 +403,18 @@ void svg_draw(void)
  int filledrect;
  int old_grid;
  int modified_save; /* 20161121 */
+ static char *tmpstring=NULL;
+ const char *r;
+
+
+ if(!plotfile[0]) {
+   my_strdup(60, &tmpstring, "tk_getSaveFile -title {Select destination file} -initialdir $env(PWD)");
+   tcleval(tmpstring);
+   r = Tcl_GetStringResult(interp);
+   my_free(&tmpstring);
+   if(r[0]) my_strncpy(plotfile, r, S(plotfile));
+   else return;
+ }
 
  restore_lw();
 

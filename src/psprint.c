@@ -380,7 +380,15 @@ void ps_draw(void)
  static char *tmp=NULL; /* 20161121 */
  int old_grid;
  int modified_save;
+ const char *r;
 
+ if(!plotfile[0]) {
+   my_strdup(59, &tmp, "tk_getSaveFile -title {Select destination file} -initialdir $env(PWD)");
+   tcleval(tmp);
+   r = Tcl_GetStringResult(interp);
+   if(r[0]) my_strncpy(plotfile, r, S(plotfile));
+   else return;
+ }
  modified_save=modified;
  push_undo(); /* 20161121 */
  trim_wires();    /* 20161121 add connection boxes on wires but undo at end */

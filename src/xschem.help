@@ -26,7 +26,8 @@ Options:
   --plotfile <file>    use <file> as output for plot (png, svg, ps)
   --rcfile <file>      use <file> as a rc file for startup instead of the
                        default xschemrc.
-  -p  --postscript     export pdf schematic
+  -p  --postscript
+      --pdf            export pdf schematic
       --png            export png schematic
       --svg            export svg schematic
   -q  --quit           quit after doing things (no interactive mode)

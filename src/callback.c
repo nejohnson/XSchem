@@ -847,6 +847,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key==XK_Insert)                   /* insert sym */
    {
+    if(semaphore==2) break;
     last_command = 0;
     place_symbol(-1,NULL,mousex_snap, mousey_snap, 0, 0, NULL,3, 1);
     break;

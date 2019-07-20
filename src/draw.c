@@ -131,6 +131,7 @@ void print_image()
     my_snprintf(cmd, S(cmd), "convert_to_png plot.xpm %s", plotfile);
     tcleval(cmd); /* 20161121 */
   } else tcleval( "convert_to_png plot.xpm plot.png"); /* 20161121 */
+  my_strncpy(plotfile,"", S(plotfile));
   pop_undo(0); /* 20161121 restore state */
   modified=modified_save;  /* 20161121 */
 

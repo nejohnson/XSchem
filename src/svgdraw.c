@@ -441,6 +441,8 @@ void svg_draw(void)
   
  if(plotfile[0]) fd=fopen(plotfile, "w");
  else fd=fopen("plot.svg", "w");
+ my_strncpy(plotfile,"", S(plotfile));
+
 
  fprintf(fd, "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"%g\" height=\"%g\" version=\"1.1\">\n", dx, dy);
 

@@ -542,6 +542,7 @@ void ps_draw(void)
  } else {
    my_strdup(312, &tmp, "convert_to_pdf plot.ps plot.pdf"); /* 20161121 */
  }
+ my_strncpy(plotfile,"", S(plotfile));
  tcleval( tmp);
  my_free(&tmp);
  pop_undo(0); /* 20161121 */

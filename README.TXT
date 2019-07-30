@@ -38,6 +38,9 @@ If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
 
+2.9.2
+- Misc small bug fix of 2.9.1
+
 2.9.1
 - export png / svg / pdf: ask file name dialog
 - edit property dialog on selected symbol shows absolute directory 

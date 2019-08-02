@@ -441,7 +441,7 @@ proc save_file_dialog { msg ext global_initdir {initialfile {}} {overwrt 1} } {
   set dir [file dirname $r]
   # 20181011 no change initdir if operation cancelled by user
   if { $r ne {} } { set initdir $dir }
-  return [file normalize $r]
+  return $r ;# removed file normalize
 }
 
 
@@ -484,32 +484,6 @@ proc list_dirs {pathlist } {
   vwait list_dirs_selected_dir
   destroy .list
   return $list_dirs_selected_dir
-}
-
-# 20180924
-# global_initdir should be set to:
-#   INITIALLOADDIR  for load
-#   INITIALINSTDIR  for instance placement
-# ext:  .sch or .sym or .sch.sym
-#
-proc xxload_file_dialog { msg ext global_initdir} {
-  global pathlist use_list_dirs
-  upvar #0 $global_initdir initdir
-  set types(.sym) { {{All Files} * } {{Symbol files} {.sym}} }
-  set types(.sch) { {{All Files} * } {{Schematic files} {.sch}} }
-  set types(.sch.sym) { {{All Files} * } {{Schematic files} {.sch}} {{Symbol files} {.sym}} }
-  set types(.sym.sch) { {{All Files} * } {{Symbol files} {.sym}} {{Schematic files} {.sch}} }
-
-  if { $use_list_dirs && $ext eq {.sym} } {
-    set initdir [list_dirs $pathlist]
-  }
-  if { $initdir eq {} } { return {} } 
-
-  set r [tk_getOpenFile  -title $msg -initialdir $initdir -filetypes $types($ext)]
-  set dir [file dirname $r]
-  # 20181011 no change initdir if operation cancelled by user
-  if { $r ne {} } { set initdir $dir }
-  return [file normalize $r]
 }
 
 proc myload_set_colors {} {
@@ -607,8 +581,7 @@ proc load_file_dialog {{msg {}}  {ext {}} {global_initdir {INITIALINSTDIR}}} {
   label .myload.buttons.label  -text {File:}
   entry .myload.buttons.entry
   button .myload.buttons.up -text UP -command {
-    set dir2 {..}
-    set d [string replace [file normalize "$myload_dir1/$dir2/__xxx__"] end-7 end {}]
+    set d [file dirname $myload_dir1]
     if { [file isdirectory $d]} {
       myload_set_home $d
       set myload_files2 [lsort [glob -directory $d -tails \{.*,*\}]]
@@ -654,7 +627,7 @@ proc load_file_dialog {{msg {}}  {ext {}} {global_initdir {INITIALINSTDIR}}} {
     if { $sel ne {} } {
       set myload_dir1 [abs_sym_path [.myload.l.listbox1.list get $myload_index1]]
       set dir2 [.myload.l.listbox2.list get $sel]
-      set d [string replace [file normalize "$myload_dir1/$dir2/__xxx__"] end-7 end {}]
+      set d "$myload_dir1/$dir2" ;# removed file normalize
 
 
 
@@ -676,7 +649,7 @@ proc load_file_dialog {{msg {}}  {ext {}} {global_initdir {INITIALINSTDIR}}} {
 
   if { $myload_retval ne {} } {
     set initdir "$myload_dir1"
-    return [file normalize "$myload_dir1/$myload_retval"]
+    return "$myload_dir1/$myload_retval" ;# removed file normalize
   } else {
     return {}
   }
@@ -1777,8 +1750,6 @@ proc viewdata {data} {
 proc rel_sym_path {symbol} {
   global pathlist current_dirname
 
-  set symbol_orig $symbol
-  set symbol [file normalize $symbol]
   set lib_cell [get_cell $symbol]
   set cell [file tail $symbol]
   set name {}
@@ -1789,20 +1760,20 @@ proc rel_sym_path {symbol} {
     # libname/symname[.ext] and libname in $path_elem 
     # --> libname/symname
     if { [file exists [file dirname "${path_elem}/${lib_cell}"]] && 
-       (![string compare $symbol_orig $lib_cell ]) } {
-      set name ${lib_cell}
+       (![string compare $symbol $lib_cell ]) } {
+      set name ${lib_cell} ;# was lib_cell
     # /.../path/.../libname/cellname[.ext] and libname in $path_elem 
     # --> libname/cellname
-    } elseif { (![string compare $symbol  [file normalize "${path_elem}/${lib_cell}"] ]) 
+    } elseif { (![string compare $symbol  "${path_elem}/${lib_cell}" ]) 
              && [file exists [file dirname "${path_elem}/${lib_cell}"]] } {
-      set name ${lib_cell}
+      set name ${lib_cell} ;# was lib_cell
     # symname
     # --> symname
     } elseif { [file exists "${path_elem}/${cell}"] } {
       set name ${cell}
     # /.../path/.../libname/symname and libname in XSCHEM_LIBRARY_PATH 
     # --> symname
-    } elseif { (![string compare $symbol [file normalize "${path_elem}/${cell}"] ]) 
+    } elseif { (![string compare $symbol "${path_elem}/${cell}" ]) 
              && [file exists "${path_elem}/${cell}"] } {
       set name ${cell}
     } 
@@ -1810,7 +1781,7 @@ proc rel_sym_path {symbol} {
   }
   if { ![string compare $name {} ] } {
     # no known lib, so return full path
-    set name ${symbol_orig}
+    set name ${symbol}
   }
   return $name
 }
@@ -1835,32 +1806,27 @@ proc abs_sym_path {fname {ext {} } } {
         set path_elem $current_dirname
       }
       # libname/cellname and libname is in pathlist
-      # --> normalized $pathlist/libname/cellname
+      # --> $pathlist/libname/cellname
       # cellname and $pathlist/cellname exists
-      # --> normalized $pathlist/cellname
+      # --> $pathlist/cellname
       if { ([file exists "${path_elem}/[file dirname $fname]"] ) &&
         [regexp {\/} $fname] 
       } {
         #puts here1
-        set name  [file normalize "$path_elem/[get_cell $fname]"]
+        set name  "$path_elem/[get_cell $fname]" ;# remove file normalize
         break
       }
       if { [file exists "${path_elem}/${fname}"] &&
         ![regexp {\/} $fname] 
       } {
         #puts here2
-        set name  [file normalize "$path_elem/[get_cell $fname]"]
+        set name  "$path_elem/[get_cell $fname]" ;# remove file normalize
         break
       }
     }
   }
 
   if { ![string compare $name {}] } {
-#    if { ![string compare $fname [file tail $fname]] } {
-#      set name [file normalize ${current_dirname}/$fname]
-#    } else {
-#      set name [file normalize $fname]
-#    }
      set name $fname
   }
   return $name
@@ -1969,7 +1935,7 @@ if { [info exists XSCHEM_LIBRARY_PATH] } {
     if { ![string compare $i .] } {
       lappend pathlist $i
     } elseif { [ file exists $i] } {
-      lappend pathlist [string replace [file normalize ${i}/__xxx__] end-7 end {}]
+      lappend pathlist ${i} ;# removed file normalize
     }
   }
 }

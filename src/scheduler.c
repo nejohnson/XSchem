@@ -245,8 +245,12 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
 
  else if(!strcmp(argv[1],"place_symbol"))
  {
-   place_symbol(-1,NULL,0.0, 0.0, 0, 0, NULL, 3, 1);
-   move_objects(BEGIN,0,0,0);
+   semaphore++;
+   if(semaphore < 2) {
+     place_symbol(-1,NULL,0.0, 0.0, 0, 0, NULL, 3, 1);
+     move_objects(BEGIN,0,0,0);
+   }
+   semaphore--;
  }
 
  else if(!strcmp(argv[1],"place_text"))

@@ -330,8 +330,8 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
   if(!cancel){  /* 20161209 */
      currentsch = 0;
      unselect_all(); /* 20180929 */
-     clear_drawing();
      remove_symbols();
+     clear_drawing();
      if(argc>=3 && !strcmp(argv[2],"SYMBOL")) { /* 20171025 */
        my_strncpy(schematic[currentsch], "untitled.sym", S(schematic[currentsch]));
        current_type=SYMBOL;

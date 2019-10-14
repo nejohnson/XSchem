@@ -115,6 +115,7 @@ void global_spice_netlist(int global)  /* netlister driver */
  {
    if(modified) save_schematic(schematic[currentsch]);
 
+   unselect_all();
    remove_symbols(); /* 20161205 ensure all unused symbols purged before descending hierarchy */
    load_schematic(0, 1, schematic[currentsch], 0); /* 20180927 */
 
@@ -137,6 +138,7 @@ void global_spice_netlist(int global)  /* netlister driver */
    /*clear_drawing(); */
    my_strncpy(schematic[currentsch] , "", S(schematic[currentsch]));
    currentsch--;
+   unselect_all();
    remove_symbols();
    load_schematic(0, 1, schematic[currentsch], 0); /* 20180927 */
  }

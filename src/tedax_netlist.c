@@ -60,6 +60,7 @@ void global_tedax_netlist(int global)  /* netlister driver */
 
  if(0) /* was if(global) ... 20180901 no hierarchical tEDAx netlist for now */
  {
+   unselect_all();
    remove_symbols(); /* 20161205 ensure all unused symbols purged before descending hierarchy */
    load_schematic(0, 1, schematic[currentsch], 0); /* 20180927 */
 
@@ -77,6 +78,7 @@ void global_tedax_netlist(int global)  /* netlister driver */
    /*clear_drawing(); */
    my_strncpy(schematic[currentsch] , "", S(schematic[currentsch]));
    currentsch--;
+   unselect_all();
    remove_symbols();
    load_schematic(0, 1, schematic[currentsch], 0); /* 20180927 */
  }

@@ -858,6 +858,7 @@ int callback(int event, int mx, int my, KeySym key,
      tcleval("tk_messageBox -type okcancel -message {Are you sure you want to reload from disk?}");
      if(strcmp(Tcl_GetStringResult(interp),"ok")==0) {
         char filename[PATH_MAX];
+        unselect_all();
         remove_symbols();
         my_strncpy(filename, abs_sym_path(schematic[currentsch], ""), S(filename));
         if(current_type==SCHEMATIC) 

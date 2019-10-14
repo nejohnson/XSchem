@@ -97,6 +97,7 @@ void global_vhdl_netlist(int global)  /* netlister driver */
 
  /* flush data structures (remove unused symbols) */
  if(modified) save_schematic(schematic[currentsch]); /* save and flush unused symbols */
+ unselect_all();
  remove_symbols();  /* removed 25122002, readded 04112003.. this removes unused symbols */
  load_schematic(0, 1, schematic[currentsch], 0);  /* 20180927 */
 
@@ -299,6 +300,7 @@ void global_vhdl_netlist(int global)  /* netlister driver */
    if(modified) save_schematic(schematic[currentsch]); /* 20160302 prepare_netlist_structs (called above from verilog_netlist()  */
                                  /* may change wire node labels, so save. */
 
+   unselect_all();
    remove_symbols(); /* 20161205 ensure all unused symbols purged before descending hierarchy */
    load_schematic(0, 1, schematic[currentsch], 0); /* 20180927 */
 
@@ -320,6 +322,7 @@ void global_vhdl_netlist(int global)  /* netlister driver */
    }
    my_strncpy(schematic[currentsch] , "", S(schematic[currentsch]));
    currentsch--;
+   unselect_all();
    remove_symbols();
    load_schematic(0, 1, schematic[currentsch], 0); /* 20180927 */
  }

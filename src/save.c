@@ -884,7 +884,6 @@ void load_schematic(int symbol, int load_symbols, const char *filename, int rese
     if(debug_var>=1) fprintf(errfp, "load_schematic(): opening file for loading:%s, filename=%s\n", name, filename);
     if(debug_var>=1) fprintf(errfp, "load_schematic(): schematic[currentsch]=%s\n", schematic[currentsch]);
     if(!name[0]) return;
-    unselect_all();
     if(event_reporting) { 
       char n[PATH_MAX];
       printf("xschem load %s\n", escape_chars(n, name, PATH_MAX));
@@ -1564,6 +1563,8 @@ void descend_symbol(void)
   zoom_array[currentsch].y=yorigin;
   zoom_array[currentsch].zoom=zoom;
   ++currentsch;
+  unselect_all();
+  remove_symbols();
   if((inst_ptr[selectedgroup[0].n].ptr+instdef)->flags & EMBEDDED ||
     !strcmp(get_tok_value(inst_ptr[selectedgroup[0].n].prop_ptr,"embed", 0), "true")) {
     my_snprintf(name_embedded, S(name_embedded),

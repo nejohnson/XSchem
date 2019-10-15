@@ -1081,11 +1081,13 @@ void print_verilog_param(FILE *fd, int symbol) /*16112003 */
     {
 
       /* 20080915 put "" around string params */
-      if( generic_type && !strcmp(get_tok_value(generic_type,token, 2), "string")  ) {
-        fprintf(fd, "  parameter   %s = \"%s\" ;\n", token,  value);
-      }
-      else  {
-        fprintf(fd, "  parameter   %s = %s ;\n", token,  value);
+      if( generic_type && strcmp(get_tok_value(generic_type,token, 2), "time")  ) {
+        if( generic_type && !strcmp(get_tok_value(generic_type,token, 2), "string")  ) {
+          fprintf(fd, "  parameter   %s = \"%s\" ;\n", token,  value);
+        }
+        else  {
+          fprintf(fd, "  parameter   %s = %s ;\n", token,  value);
+        }
       }
     }
    }
@@ -1670,12 +1672,14 @@ void print_verilog_element(FILE *fd, int inst)
       if(strcmp(token,"spice_ignore") && strcmp(token,"vhdl_ignore") && strcmp(token,"tedax_ignore")) {
         if(tmp == 0) {fprintf(fd, "#(\n---- start parameters\n");tmp++;tmp1=0;}
         if(tmp1) fprintf(fd, " ,\n");
-        if( generic_type && !strcmp(get_tok_value(generic_type,token, 2), "string")  ) {
-          fprintf(fd, "  .%s ( \"%s\" )", token, value);
-        } else {
-          fprintf(fd, "  .%s ( %s )", token, value);
+        if( generic_type && strcmp(get_tok_value(generic_type,token, 2), "time")  ) {
+          if( generic_type && !strcmp(get_tok_value(generic_type,token, 2), "string")  ) {
+            fprintf(fd, "  .%s ( \"%s\" )", token, value);
+          } else {
+            fprintf(fd, "  .%s ( %s )", token, value);
+          }
+          tmp1=1;
         }
-        tmp1=1;
       }
     }
    }

@@ -1,0 +1,23 @@
+v {xschem version=2.9.2 file_version=1.1}
+G {type=subcircuit
+vhdl_stop=true
+verilog_stop=true
+format="@name @pinlist @symname"
+template="name=x1 delay=\\"120 ps\\" del=120"
+generic_type="delay=time"}
+V {}
+S {}
+E {}
+L 4 -40 -20 -25 -20 {}
+L 4 -25 -30 -25 30 {}
+L 4 -40 20 -25 20 {}
+L 4 -25 -30 10 -30 {}
+L 4 -25 30 10 30 {}
+L 4 50 0 60 -0 {}
+B 5 57.5 -2.5 62.5 2.5 {name=Y dir=out verilog_type=wire}
+B 5 -42.5 -22.5 -37.5 -17.5 {name=A dir=in}
+B 5 -42.5 17.5 -37.5 22.5 {name=B dir=in}
+A 4 10 0 30 270 180 {}
+A 4 45 -0 5 180 360 {}
+T {ND2} -17.5 -25 0 0 0.3 0.3 {}
+T {@name} -21.25 -5 0 0 0.2 0.2 {}

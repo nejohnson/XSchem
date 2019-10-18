@@ -24,13 +24,8 @@ C {devices/ipin.sym} 60 -150 0 0 {name=p1 lab=D}
 C {devices/opin.sym} 130 -130 0 0 {name=p2 verilog_type=wire lab=Q}
 C {devices/ipin.sym} 60 -130 0 0 {name=p3 lab=CK}
 C {devices/ipin.sym} 60 -110 0 0 {name=p5 lab=RST}
-C {devices/use.sym} 820 -190 0 0 {------------------------------------------------
+C {devices/title.sym} 160 -30 0 0 {name=l2}
+C {devices/use.sym} 100 -440 0 0 {------------------------------------------------
 library ieee;
         use ieee.std_logic_1164.all;
---         use ieee.std_logic_arith.all;
---         use ieee.std_logic_unsigned.all;
-
--- library SYNOPSYS;
---         use SYNOPSYS.ATTRIBUTES.ALL;
-}
-C {devices/title.sym} 160 -30 0 0 {name=l2}
+        use ieee.numeric_std.all;}

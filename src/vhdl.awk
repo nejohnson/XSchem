@@ -268,7 +268,6 @@ primitive==1{primitive_line=primitive_line " " $0; next  } # 20071217
    for(i in arch_signal_dir)
     if(arch_signal_class[i]==ttt[tt])
     {
-
      ## 04062002 dont add _vector if user defined type
      # if(arch_sig_type_array[i] ~ /^(bit|real|std_logic|integer)$/) 
        vector_type=arch_sig_type_array[i] "_vector ("
@@ -323,7 +322,9 @@ primitive==1{primitive_line=primitive_line " " $0; next  } # 20071217
      if(arch_value_array[i] != "") {				#08112004 add quotes on values
        if(tolower( arch_sig_type_array[i]) ~ /std_logic/ ||	#         if not present
           tolower(arch_sig_type_array[i]) ~ /bit/ ) {		# for verilog/VHDL compatiblity
-         if(tolower(arch_sig_type_array[i]) ~ /vector/) sep="\""
+
+         # if(tolower(arch_sig_type_array[i]) ~ /vector/) sep="\""
+         if(n>1 || (arch_index_array[i] !~ /no_index/)  ) sep="\""
          else sep = "'"
          if( arch_value_array[i] !~ sep) 
            arch_value_array[i] = sep arch_value_array[i] sep

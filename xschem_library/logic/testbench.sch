@@ -21,8 +21,11 @@ B<= '1';
 wait for 100 ns;
 A<='Z';
 B<='Z';
+
 wait;
 end process;
+
+BB <= to_integer(signed(AA));
 }
 V {initial begin
   $dumpfile("dumpfile.vcd");
@@ -68,12 +71,6 @@ C {logic/nr2.sym} 510 -330 0 0 {name=x1 }
 C {devices/lab_pin.sym} 440 -350 2 1 {name=p20 lab=A}
 C {devices/lab_pin.sym} 440 -310 2 1 {name=p1 lab=B}
 C {devices/lab_pin.sym} 600 -330 2 0 {name=p2 lab=Y_NOR}
-C {devices/use.sym} 370 -610 0 0 {library ieee;
-use ieee.std_logic_1164.all;
-
-
-
-}
 C {logic/nd2.sym} 510 -440 0 0 {name=x2 }
 C {devices/lab_pin.sym} 440 -460 2 1 {name=p3 lab=A}
 C {devices/lab_pin.sym} 440 -420 2 1 {name=p4 lab=B}
@@ -96,3 +93,15 @@ C {devices/lab_pin.sym} 770 -540 2 1 {name=p15 lab=A}
 C {devices/lab_pin.sym} 770 -500 2 1 {name=p16 lab=B}
 C {devices/lab_pin.sym} 840 -470 2 1 {name=p17 lab=Y_NOR}
 C {devices/lab_pin.sym} 910 -540 2 0 {name=p18 lab=Y_FF}
+C {logic/latch.sym} 870 -250 0 0 {name=x7 del=200}
+C {devices/lab_pin.sym} 800 -270 2 1 {name=p19 lab=A}
+C {devices/lab_pin.sym} 800 -230 2 1 {name=p21 lab=B}
+C {devices/lab_pin.sym} 870 -200 2 1 {name=p22 lab=Y_NOR}
+C {devices/lab_pin.sym} 940 -270 2 0 {name=p23 lab=Y_LATCH}
+C {devices/lab_pin.sym} 940 -230 2 0 {name=p24 lab=YN_LATCH}
+C {devices/use.sym} 290 -590 0 0 {------------------------------------------------
+library ieee;
+        use ieee.std_logic_1164.all;
+        use ieee.numeric_std.all;}
+C {devices/lab_pin.sym} 240 -740 2 1 {name=p25 lab=AA[22:0] verilog_type=reg value=10101010101010101010101}
+C {devices/lab_pin.sym} 240 -710 2 1 {name=p26 lab=BB sig_type=integer}

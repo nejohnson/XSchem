@@ -1,4 +1,4 @@
-v {xschem version=2.8.2 file_version=1.0}
+v {xschem version=2.8.2_RC1 file_version=1.0}
 G {}
 V {}
 S {}
@@ -134,4 +134,3 @@ always begin
   if(A==0) $finish;
 end
 "}
-C {verilog_preprocessor.sym} 260 -370 0 0 {name=s1 string=`include\\ \\"file\\"}

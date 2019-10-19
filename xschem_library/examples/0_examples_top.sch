@@ -1,4 +1,4 @@
-v {xschem version=2.8.2_RC3 file_version=1.0}
+v {xschem version=2.8.4 file_version=1.1}
 G {}
 V {}
 S {}
@@ -47,26 +47,26 @@ N 870 -300 990 -300 {lab=#net1}
 N 910 -340 910 -250 {lab=#net2}
 N 910 -270 970 -270 {lab=#net2}
 N 930 -310 960 -300 {lab=#net1}
-C {poweramp} 160 -310 0 0 {name=x1}
-C {tesla} 160 -230 0 0 {name=x2}
-C {test_ne555} 160 -190 0 0 {name=x3}
-C {test_lm324} 160 -150 0 0 {name=x4}
-C {osc} 160 -270 0 0 {name=x5}
-C {title} 160 -30 0 0 {name=l1 author="Stefan Schippers"}
-C {cmos_example} 160 -350 0 0 {name=x6}
-C {greycnt} 160 -390 0 0 {name=x8}
-C {loading} 160 -430 0 0 {name=x9}
-C {inv} 930 -200 0 0 {name=E1 TABLE="1.4 3.0 1.6 0.0"}
-C {launcher} 460 -210 0 0 {name=h1 
+C {poweramp.sym} 160 -310 0 0 {name=x1}
+C {tesla.sym} 160 -230 0 0 {name=x2}
+C {test_ne555.sym} 160 -190 0 0 {name=x3}
+C {test_lm324.sym} 160 -150 0 0 {name=x4}
+C {osc.sym} 160 -270 0 0 {name=x5}
+C {title.sym} 160 -30 0 0 {name=l1 author="Stefan Schippers"}
+C {cmos_example.sym} 160 -350 0 0 {name=x6}
+C {greycnt.sym} 160 -390 0 0 {name=x8}
+C {loading.sym} 160 -430 0 0 {name=x9}
+C {inv.sym} 930 -200 0 0 {name=E1 TABLE="1.4 3.0 1.6 0.0"}
+C {launcher.sym} 460 -210 0 0 {name=h1 
 descr="XSCHEM ON REPO.HU" 
 url="http://repo.hu/projects/xschem"
 program=x-www-browser}
-C {launcher} 460 -160 0 0 {name=h3 
+C {launcher.sym} 460 -160 0 0 {name=h3 
 descr="Toggle light/dark 
 colorscheme" 
 tclcommand="xschem toggle_colorscheme"
 }
-C {launcher} 460 -260 0 0 {name=h2 
+C {launcher.sym} 460 -260 0 0 {name=h2 
 descr="LOCAL DOCUMENTATION" 
 url="$\{XSCHEM_SHAREDIR\}/../doc/xschem/index.html"
 program=x-www-browser

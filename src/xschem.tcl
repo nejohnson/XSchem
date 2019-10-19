@@ -1767,12 +1767,6 @@ proc rel_sym_path {symbol} {
     } elseif { (![string compare $symbol  "${path_elem}/${lib_cell}" ]) 
              && [file exists [file dirname "${path_elem}/${lib_cell}"]] } {
       set name ${lib_cell} ;# was lib_cell
-    # symname
-    # --> symname
-    } elseif { [file exists "${path_elem}/${cell}"] } {
-      set name ${cell}
-    # /.../path/.../libname/symname and libname in XSCHEM_LIBRARY_PATH 
-    # --> symname
     } elseif { (![string compare $symbol "${path_elem}/${cell}" ]) 
              && [file exists "${path_elem}/${cell}"] } {
       set name ${cell}
@@ -1795,12 +1789,14 @@ proc abs_sym_path {fname {ext {} } } {
   if { $ext ne {} } { 
     set fname [file rootname $fname]$ext
   }
+  set lib_cell [get_cell $fname]
 
   if {$fname eq {} } return {}
   set name {}
   # fname is of type libname/cellname[.ext] but not ./cellname[.ext] or
   # ../cellname[.ext] and has a slash, so no cellname[.ext] 
-  if {![string compare $fname [get_cell $fname] ] } {
+  # no ./cell.sym
+  if {![string compare $fname $lib_cell ]  && ![regexp {^ *\.\/} $lib_cell]} {
     foreach path_elem $pathlist {
       if { ![string compare $path_elem .]  && [info exist current_dirname]} {
         set path_elem $current_dirname
@@ -1813,14 +1809,14 @@ proc abs_sym_path {fname {ext {} } } {
         [regexp {\/} $fname] 
       } {
         #puts here1
-        set name  "$path_elem/[get_cell $fname]" ;# remove file normalize
+        set name  "$path_elem/$lib_cell" ;# remove file normalize
         break
       }
       if { [file exists "${path_elem}/${fname}"] &&
         ![regexp {\/} $fname] 
       } {
         #puts here2
-        set name  "$path_elem/[get_cell $fname]" ;# remove file normalize
+        set name  "$path_elem/$lib_cell" ;# remove file normalize
         break
       }
     }

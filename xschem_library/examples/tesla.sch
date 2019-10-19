@@ -1,4 +1,4 @@
-v {xschem version=2.8.2_RC1 file_version=1.0}
+v {xschem version=2.8.4 file_version=1.1}
 G {}
 V {}
 S {}
@@ -96,7 +96,7 @@ N 470 -280 470 -260 {lab=VCC}
 N 460 -420 460 -400 {lab=VCC}
 N 460 -340 520 -340 {lab=#net3}
 N 720 -280 720 -260 {lab=VSS}
-C {code} 1140 -170 0 0 {
+C {code.sym} 1140 -170 0 0 {
 name=STIMULI 
 value=".option SCALE=1e-6 PARHIER=LOCAL RUNLVL=6 post MODMONTE=1
 .option sampling_method = SRS
@@ -115,52 +115,52 @@ vvss vss 0 dc 0
 .probe tran p(q1) i(d2) i(d1) i(d3) i(l1) i(l2) i(L3)
 .meas tran pavg AVG p(q1) from=950u to=990u
 "}
-C {lab_pin} 140 -640 0 0 {name=p1 lab=VCC}
-C {res} 140 -580 0 1 {name=Rs m=1 value=1}
-C {vsource} 140 -470 0 1 {name=Vvcc value="pwl 0 0 1u 12"}
-C {lab_pin} 140 -420 0 0 {name=p7 lab=VSS}
-C {capa} 230 -470 0 0 {name=Cvcc m=1 value=10u}
-C {launcher} 1180 -530 0 0 {name=h2 
+C {lab_pin.sym} 140 -640 0 0 {name=p1 lab=VCC}
+C {res.sym} 140 -580 0 1 {name=Rs m=1 value=1}
+C {vsource.sym} 140 -470 0 1 {name=Vvcc value="pwl 0 0 1u 12"}
+C {lab_pin.sym} 140 -420 0 0 {name=p7 lab=VSS}
+C {capa.sym} 230 -470 0 0 {name=Cvcc m=1 value=10u}
+C {launcher.sym} 1180 -530 0 0 {name=h2 
 descr="BJT MODELS" 
 url="http://www.zen22142.zen.co.uk/ltspice/standard.bjt"}
-C {launcher} 1180 -480 0 0 {name=h1 
+C {launcher.sym} 1180 -480 0 0 {name=h1 
 descr="NPN MODELS" 
 url="http://web.mit.edu/Magic/Public/ckt/npn.mod"}
-C {launcher} 1180 -580 0 0 {name=h3 
+C {launcher.sym} 1180 -580 0 0 {name=h3 
 descr="COIL CALCULATION" 
 url="http://hamwaves.com/antennas/inductance.html"}
-C {launcher} 1180 -630 0 0 {name=h4 
+C {launcher.sym} 1180 -630 0 0 {name=h4 
 descr="ltwiki BJT MODELS" 
 url="http://ltwiki.org/?title=Standard.bjt"}
-C {lab_pin} 140 -530 0 0 {name=p6 lab=VCCS}
-C {lab_pin} 870 -560 0 1 {name=p4 lab=HV}
-C {capa} 1010 -450 0 0 {name=C1 m=1 value=1p}
-C {lab_pin} 1010 -250 0 0 {name=p3 lab=VSS}
-C {ind} 580 -460 2 1 {name=L1 value=9.8u}
-C {ind} 810 -460 0 1 {name=L2 value=9.1m}
-C {k} 700 -460 0 0 {name=K0 K=0.15 L1=L1 L2=L2}
-C {res} 810 -370 0 0 {name=R0 m=1 value=.32}
-C {capa} 870 -460 0 1 {name=C0 m=1 value=4.1p}
-C {res} 580 -370 0 1 {name=R3 m=1 value=0.22}
-C {capa} 520 -460 0 0 {name=C5 m=1 value=13p}
-C {lab_pin} 580 -260 0 1 {name=p5 lab=D}
-C {lab_pin} 870 -170 0 1 {name=p0 lab=FB}
-C {diode} 800 -110 2 0 {name=D2 model=d1n4148 area=1
+C {lab_pin.sym} 140 -530 0 0 {name=p6 lab=VCCS}
+C {lab_pin.sym} 870 -560 0 1 {name=p4 lab=HV}
+C {capa.sym} 1010 -450 0 0 {name=C1 m=1 value=1p}
+C {lab_pin.sym} 1010 -250 0 0 {name=p3 lab=VSS}
+C {ind.sym} 580 -460 2 1 {name=L1 value=9.8u}
+C {ind.sym} 810 -460 0 1 {name=L2 value=9.1m}
+C {k.sym} 700 -460 0 0 {name=K0 K=0.15 L1=L1 L2=L2}
+C {res.sym} 810 -370 0 0 {name=R0 m=1 value=.32}
+C {capa.sym} 870 -460 0 1 {name=C0 m=1 value=4.1p}
+C {res.sym} 580 -370 0 1 {name=R3 m=1 value=0.22}
+C {capa.sym} 520 -460 0 0 {name=C5 m=1 value=13p}
+C {lab_pin.sym} 580 -260 0 1 {name=p5 lab=D}
+C {lab_pin.sym} 870 -170 0 1 {name=p0 lab=FB}
+C {diode.sym} 800 -110 2 0 {name=D2 model=d1n4148 area=1
 }
-C {lab_pin} 580 -150 0 1 {name=p10 lab=VSS}
-C {diode} 800 -170 2 0 {name=D1 model=d1n4148 area=1
+C {lab_pin.sym} 580 -150 0 1 {name=p10 lab=VSS}
+C {diode.sym} 800 -170 2 0 {name=D1 model=d1n4148 area=1
 }
-C {lab_pin} 800 -220 0 1 {name=p16 lab=VCC}
-C {lab_pin} 460 -200 0 0 {name=p11 lab=FB}
-C {lab_pin} 800 -80 0 0 {name=p12 lab=VSS}
-C {npn} 560 -200 0 0 {name=Q5 model=bd139 area=1}
-C {res} 470 -230 0 0 {name=R1 m=1 value=100k}
-C {lab_pin} 470 -280 0 0 {name=p8 lab=VCC}
-C {diode} 460 -370 2 0 {name=D3 model=d1n5400 area=1
+C {lab_pin.sym} 800 -220 0 1 {name=p16 lab=VCC}
+C {lab_pin.sym} 460 -200 0 0 {name=p11 lab=FB}
+C {lab_pin.sym} 800 -80 0 0 {name=p12 lab=VSS}
+C {npn.sym} 560 -200 0 0 {name=Q5 model=bd139 area=1}
+C {res.sym} 470 -230 0 0 {name=R1 m=1 value=100k}
+C {lab_pin.sym} 470 -280 0 0 {name=p8 lab=VCC}
+C {diode.sym} 460 -370 2 0 {name=D3 model=d1n5400 area=1
 }
-C {lab_pin} 460 -420 0 0 {name=p13 lab=VCC}
-C {ammeter} 580 -310 0 0 {name=vmeasure}
-C {diode} 720 -310 2 0 {name=D4 model=d1n5400 area=1
+C {lab_pin.sym} 460 -420 0 0 {name=p13 lab=VCC}
+C {ammeter.sym} 580 -310 0 0 {name=vmeasure}
+C {diode.sym} 720 -310 2 0 {name=D4 model=d1n5400 area=1
 }
-C {lab_pin} 720 -260 0 0 {name=p14 lab=VSS}
-C {title} 160 -30 0 0 {name=l1 author="Stefan Schippers"}
+C {lab_pin.sym} 720 -260 0 0 {name=p14 lab=VSS}
+C {title.sym} 160 -30 0 0 {name=l1 author="Stefan Schippers"}

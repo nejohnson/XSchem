@@ -1,6 +1,6 @@
 v {xschem version=2.9.2 file_version=1.1}
 G {
-Y <= A after delay ;}
+Y <= not (not A)  after delay ;}
 V {assign #del Y=A;
 }
 S {}

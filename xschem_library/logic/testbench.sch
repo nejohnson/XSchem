@@ -3,25 +3,28 @@ G {process
 begin
 A<='0';
 B<='0';
-wait for 100 ns;
+wait for 1 ns;
 A<='1';
-wait for 100 ns;
+wait for 1 ns;
 B<='1';
-wait for 100 ns;
+wait for 1 ns;
 A<='0';
-wait for 100 ns;
+wait for 1 ns;
 B<='0';
-wait for 100 ns;
+wait for 1 ns;
 B<= '1'; 
-wait for 100 ns;
+wait for 1 ns;
 B<= '0'; 
 A<= '0'; 
-wait for 100 ns;
+wait for 1 ns;
 B<= '1'; 
-wait for 100 ns;
+wait for 1 ns;
+A <='1';
+wait for 20 ns;
+A <= '0';
+wait for 1 ns;
 A<='Z';
 B<='Z';
-
 wait;
 end process;
 
@@ -80,23 +83,25 @@ initial begin
   $dumpvars;
   A=0;
   B=0;
-  #100000;
+  #1000;
   A=1;
-  #100000;
+  #1000;
   B=1;
-  #100000;
+  #1000;
   A=0;
-  #100000;
+  #1000;
   B=0;
-  #100000;
+  #1000;
   B=1;
-  #100000;
+  #1000;
   B=0;
   A=0;
-  #100000;
+  #1000;
   B=1;
-  #100000;
-  
+  #1000;
+  A=1;
+  #20000;
+  A=0;
 end
 
 always begin
@@ -154,6 +159,8 @@ N 450 -150 480 -150 {lab=A}
 N 450 -110 480 -110 {lab=B}
 N 810 -360 840 -360 {lab=A}
 N 920 -360 950 -360 {lab=Y_BUF}
+N 780 -90 810 -90 {lab=B}
+N 890 -90 920 -90 {lab=BN}
 C {devices/title.sym} 160 -30 0 0 {name=l2}
 C {logic/nr2.sym} 510 -330 0 0 {name=x1 }
 C {devices/lab_pin.sym} 440 -350 2 1 {name=p20 lab=A}
@@ -207,3 +214,12 @@ C {devices/lab_pin.sym} 120 -260 0 0 {name=p37 lab=OEN verilog_type=reg}
 C {devices/lab_pin.sym} 120 -240 0 0 {name=p38 lab=CK verilog_type=reg}
 C {devices/lab_pin.sym} 120 -300 0 0 {name=p39 lab=CEN verilog_type=reg}
 C {devices/lab_pin.sym} 120 -340 0 0 {name=p40 lab=M[7:0] verilog_type=reg}
+C {logic/sync_reg.sym} 840 -850 0 0 {name=x8 width=8}
+C {devices/lab_pin.sym} 740 -880 0 0 {name=p33 lab=DIN[7:0]}
+C {devices/lab_pin.sym} 740 -820 0 0 {name=p41 lab=CK}
+C {devices/lab_pin.sym} 740 -840 0 0 {name=p42 lab=BN}
+C {devices/lab_pin.sym} 740 -860 2 1 {name=p43 lab=A}
+C {devices/lab_pin.sym} 940 -880 0 1 {name=p44 lab=DATA_OUT[7:0]}
+C {logic/iv.sym} 850 -90 0 0 {name=x9 }
+C {devices/lab_pin.sym} 780 -90 2 1 {name=p45 lab=B}
+C {devices/lab_pin.sym} 920 -90 2 0 {name=p46 lab=BN}

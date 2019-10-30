@@ -187,6 +187,9 @@ tclcommand="xschem edit_vi_prop"
 value="
 
 .include stimuli.cir
-.tran 1m 100m
 
+.control
+tran 100n 6u
+eprvcd A B din_5_ > zzzz.vcd
+.endc
 "}

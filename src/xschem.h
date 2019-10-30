@@ -535,6 +535,7 @@ extern int previous_instance[];
 extern int split_files;
 extern int hspice_netlist;
 extern char *netlist_dir;
+extern char bus_replacement_char[];
 extern void set_modify(int mod);
 
 extern unsigned long ui_state ; /*  this signals that we are doing a net place, */

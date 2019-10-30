@@ -2,6 +2,11 @@
 # values may be overridden by user's ~/.xschem/xschemrc configuration file
 # or by project-local ./xschemrc
 
+## clear tcl prompts
+# set tcl_prompt1 {}
+# set tcl_prompt2 {}
+
+
 ###########################################################################
 # xschem installation directory XSCHEM_SHAREDIR
 ###########################################################################
@@ -17,7 +22,7 @@
 ###########################################################################
 
 # If unset xschem starts with the default set compile time, typically:
-# XSCHEM_LIBRARY_PATH .:~/.xschem/xschem_library:${XSCHEM_SHAREDIR}/xschem_library/devices
+# set XSCHEM_LIBRARY_PATH .:~/.xschem/xschem_library:${XSCHEM_SHAREDIR}/xschem_library/devices
 
 # For testing in build src directory
 #
@@ -53,6 +58,15 @@
 #
 # set netlist_dir $env(HOME)/xschem_library/simulations
 
+
+###########################################################################
+# change default [] with some other characters for bussed signals 
+# in spice netlists (example: DATA[7] --> DATA<7>) 
+###########################################################################
+
+# set bus_replacement_char {<>}
+
+
 ###########################################################################
 # some default behavior
 ###########################################################################
@@ -73,7 +87,6 @@ set disable_unique_names 0
 ## set to 1 to present a dialog with list of defined library directories
 ## to select symbols / schematics from
 set use_list_dirs 0
-
 
 ###########################################################################
 # custom grid / snap value settings
@@ -166,8 +179,8 @@ set to_png {gm convert}
 # set vvp_path $env(HOME)/verilog/bin/vvp
 set iverilog_opts {-g2012}
 
-#### default analog wiewer (cosmoscope, waveview) 
-set analog_viewer waveview
+#### default analog wiewer (waveview) 
+# set analog_viewer waveview
 
 #### waveview
 # set waveview_path $env(HOME)/waveview/bin/wv
@@ -196,7 +209,6 @@ set ghdl_run_opts {}
 
 # set hspice_path "$env(HOME)/hspice_2013/bin/hspice64 -mt 8"
 # set hspicerf_path $env(HOME)/hspice_2013/bin/hspicerf64
-# set cscope_path $env(HOME)/cosmoscope/amd64/ai_bin/cscope
 
 # lappend tcl_files ${XSCHEM_SHAREDIR}/change_index.tcl
 # lappend tcl_files ${XSCHEM_SHAREDIR}/hspice_backannotate.tcl

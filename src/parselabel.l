@@ -32,6 +32,7 @@ extern int debug_var;
 extern FILE *errfp;
 extern void my_strdup(int id, char **dest, char *src);
 extern void my_free(void *ptr);
+extern char bus_replacement_char[];
 typedef struct          /* used in expandlabel.y */
 {
  char *str;             /* label name */
@@ -46,6 +47,20 @@ Stringptr dest_string={NULL,0};  /*19102004; */
 
 static int bracket=0;
 extern int yyparse(void) ;
+
+
+void strreplace(char s[], char chr, char repl_chr)
+{
+     int i=0;
+     while(s[i]!='\0')
+     {
+           if(s[i]==chr)
+           {
+               s[i]=repl_chr;
+           }  
+           i++; 
+     }
+}
 
 const char *expandlabel(const char *s, int *m)
 {
@@ -64,10 +79,15 @@ const char *expandlabel(const char *s, int *m)
     *m = dest_string.m;
  else
     *m=-1;
- if(dest_string.str)
-  return dest_string.str;
- else
-  return s;
+ if(dest_string.str) {
+   if(bus_replacement_char[0]) {
+     strreplace(dest_string.str, '[', bus_replacement_char[0]);
+     strreplace(dest_string.str, ']', bus_replacement_char[1]);
+   }
+   return dest_string.str;
+ } else {
+   return s;
+ }
 }
 
 

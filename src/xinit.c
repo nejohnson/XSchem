@@ -706,6 +706,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
 {
  char name[PATH_MAX]; /* overflow safe 20161122 */
  char tmp[2*PATH_MAX+100]; /* 20161122 overflow safe */
+ const char *tmp_str_ptr;
  int i;
  struct stat buf;
  const char *home_buff;
@@ -902,6 +903,12 @@ int Tcl_AppInit(Tcl_Interp *inter)
  netlist_show=atoi(tclgetvar("netlist_show"));
  fullscreen=atoi(tclgetvar("fullscreen"));
  unzoom_nodrift=atoi(tclgetvar("unzoom_nodrift"));
+ 
+ tmp_str_ptr = tclgetvar("bus_replacement_char"); 
+ if(tmp_str_ptr && tmp_str_ptr[0] && tmp_str_ptr[1]) {
+   bus_replacement_char[0] = tmp_str_ptr[0];
+   bus_replacement_char[1] = tmp_str_ptr[1];
+ }
  if(color_ps==-1) 
    color_ps=atoi(tclgetvar("color_ps"));
  else  {

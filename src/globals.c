@@ -192,6 +192,7 @@ int netlist_count=0; /* netlist counter incremented at any cell being netlisted 
 int netlist_show=0;
 int flat_netlist=0;
 int netlist_type=-1;
+char bus_replacement_char[3] = {0, 0, 0};
 int prepared_netlist_structs=0;
 int prepared_hilight_structs=0;
 int prepared_hash_instances=0;

@@ -171,8 +171,8 @@ C {devices/lab_pin.sym} 440 -460 2 1 {name=p3 lab=A}
 C {devices/lab_pin.sym} 440 -420 2 1 {name=p4 lab=B}
 C {devices/lab_pin.sym} 600 -440 2 0 {name=p5 lab=Y_NAND}
 C {devices/verilog_timescale.sym} 40 -570 0 0 {name=s1 timestep="1ps" precision="1ps" }
-C {devices/lab_pin.sym} 120 -430 2 1 {name=p6 lab=A verilog_type=reg}
-C {devices/lab_pin.sym} 120 -390 2 1 {name=p7 lab=B verilog_type=reg}
+C {devices/lab_pin.sym} 220 -390 2 0 {name=p6 lab=A verilog_type=reg}
+C {devices/lab_pin.sym} 220 -350 2 0 {name=p7 lab=B verilog_type=reg}
 C {logic/iv.sym} 510 -230 0 0 {name=x3 }
 C {devices/lab_pin.sym} 440 -230 2 1 {name=p8 lab=A}
 C {devices/lab_pin.sym} 580 -230 2 0 {name=p9 lab=Y_INV}
@@ -207,13 +207,13 @@ C {devices/lab_pin.sym} 730 -650 0 0 {name=p29 lab=OEN}
 C {devices/lab_pin.sym} 730 -630 0 0 {name=p30 lab=CK}
 C {devices/lab_pin.sym} 730 -690 0 0 {name=p31 lab=CEN}
 C {devices/lab_pin.sym} 730 -730 0 0 {name=p32 lab=M[7:0]}
-C {devices/lab_pin.sym} 120 -320 0 0 {name=p34 lab=ADD[4:0] verilog_type=reg}
-C {devices/lab_pin.sym} 120 -360 0 0 {name=p35 lab=DIN[7:0] verilog_type=reg}
-C {devices/lab_pin.sym} 120 -280 0 0 {name=p36 lab=WEN verilog_type=reg}
-C {devices/lab_pin.sym} 120 -260 0 0 {name=p37 lab=OEN verilog_type=reg}
-C {devices/lab_pin.sym} 120 -240 0 0 {name=p38 lab=CK verilog_type=reg}
-C {devices/lab_pin.sym} 120 -300 0 0 {name=p39 lab=CEN verilog_type=reg}
-C {devices/lab_pin.sym} 120 -340 0 0 {name=p40 lab=M[7:0] verilog_type=reg}
+C {devices/lab_pin.sym} 220 -280 0 1 {name=p34 lab=ADD[4:0] verilog_type=reg}
+C {devices/lab_pin.sym} 220 -320 0 1 {name=p35 lab=DIN[7:0] verilog_type=reg}
+C {devices/lab_pin.sym} 220 -240 0 1 {name=p36 lab=WEN verilog_type=reg}
+C {devices/lab_pin.sym} 220 -220 0 1 {name=p37 lab=OEN verilog_type=reg}
+C {devices/lab_pin.sym} 220 -200 0 1 {name=p38 lab=CK verilog_type=reg}
+C {devices/lab_pin.sym} 220 -260 0 1 {name=p39 lab=CEN verilog_type=reg}
+C {devices/lab_pin.sym} 220 -300 0 1 {name=p40 lab=M[7:0] verilog_type=reg}
 C {logic/sync_reg.sym} 840 -850 0 0 {name=x8 width=8}
 C {devices/lab_pin.sym} 740 -880 0 0 {name=p33 lab=DIN[7:0]}
 C {devices/lab_pin.sym} 740 -820 0 0 {name=p41 lab=CK}
@@ -223,3 +223,21 @@ C {devices/lab_pin.sym} 940 -880 0 1 {name=p44 lab=DATA_OUT[7:0]}
 C {logic/iv.sym} 850 -90 0 0 {name=x9 }
 C {devices/lab_pin.sym} 780 -90 2 1 {name=p45 lab=B}
 C {devices/lab_pin.sym} 920 -90 2 0 {name=p46 lab=BN}
+C {devices/lab_pin.sym} 160 -390 2 1 {name=p47 lab=A_A verilog_type=reg}
+C {devices/lab_pin.sym} 160 -350 2 1 {name=p48 lab=B_A verilog_type=reg}
+C {devices/lab_pin.sym} 160 -280 0 0 {name=p49 lab=ADD_A[4:0] verilog_type=reg}
+C {devices/lab_pin.sym} 160 -320 0 0 {name=p50 lab=DIN_A[7:0] verilog_type=reg}
+C {devices/lab_pin.sym} 160 -240 0 0 {name=p51 lab=WEN_A verilog_type=reg}
+C {devices/lab_pin.sym} 160 -220 0 0 {name=p52 lab=OEN_A verilog_type=reg}
+C {devices/lab_pin.sym} 160 -200 0 0 {name=p53 lab=CK_A verilog_type=reg}
+C {devices/lab_pin.sym} 160 -260 0 0 {name=p54 lab=CEN_A verilog_type=reg}
+C {devices/lab_pin.sym} 160 -300 0 0 {name=p55 lab=M_A[7:0] verilog_type=reg}
+C {devices/adc_bridge.sym} 190 -390 0 0 {name=v1 delay=1}
+C {devices/adc_bridge.sym} 190 -350 0 0 {name=v2 delay=1}
+C {devices/adc_bridge.sym} 190 -320 0 0 {name=v3 delay=1}
+C {devices/adc_bridge.sym} 190 -300 0 0 {name=v4 delay=1}
+C {devices/adc_bridge.sym} 190 -280 0 0 {name=v5 delay=1}
+C {devices/adc_bridge.sym} 190 -260 0 0 {name=v6 delay=1}
+C {devices/adc_bridge.sym} 190 -240 0 0 {name=v7 delay=1}
+C {devices/adc_bridge.sym} 190 -220 0 0 {name=v8 delay=1}
+C {devices/adc_bridge.sym} 190 -200 0 0 {name=v9 delay=1}

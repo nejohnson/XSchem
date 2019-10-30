@@ -1970,6 +1970,7 @@ set tclcmd_txt {}
 set_ne tcl_files {}
 set_ne use_list_dirs {1}
 set_ne netlist_dir {.}
+set_ne bus_replacement_char {} ;# use {<>} to replace [] with <> in bussed signals
 set_ne hspice_netlist 0
 set_ne verilog_2001 1
 set_ne spice_simulator ngspice

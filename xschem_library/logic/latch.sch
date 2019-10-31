@@ -31,12 +31,12 @@ assign #del QN = ~iQ;
 }
 S {}
 E {}
-C {devices/opin.sym} 280 -320 0 0 {name=p5 lab=Q}
-C {devices/ipin.sym} 120 -320 0 0 {name=p2 lab=G}
-C {devices/use.sym} 70 -720 0 0 {------------------------------------------------
+C {opin.sym} 280 -320 0 0 {name=p5 lab=Q}
+C {ipin.sym} 120 -320 0 0 {name=p2 lab=G}
+C {use.sym} 70 -720 0 0 {------------------------------------------------
 library ieee;
         use ieee.std_logic_1164.all;
         use ieee.numeric_std.all;}
-C {devices/ipin.sym} 120 -440 0 0 {name=p14 lab=RST}
-C {devices/opin.sym} 280 -440 0 0 {name=p1 lab=QN}
-C {devices/title.sym} 160 -30 0 0 {name=l17}
+C {ipin.sym} 120 -440 0 0 {name=p14 lab=RST}
+C {opin.sym} 280 -440 0 0 {name=p1 lab=QN}
+C {title.sym} 160 -30 0 0 {name=l17}

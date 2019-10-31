@@ -116,21 +116,21 @@ T {add0} 230 -425 0 0 0.3 0.3 {}
 T {data0} 310 -365 0 0 0.3 0.3 {}
 T {prech} 215 -550 0 0 0.18 0.3 {}
 T {sense} 260 -550 0 0 0.18 0.3 {}
-C {devices/opin.sym} 340 -220 0 0 {name=p10 lab=DOUT[width-1:0] verilog_type=wire}
-C {devices/ipin.sym} 200 -220 0 0 {name=p8 lab=DIN[width-1:0]}
-C {devices/ipin.sym} 200 -110 0 0 {name=p12 lab=CK}
-C {devices/ipin.sym} 200 -140 0 0 {name=p1 lab=OEN}
-C {devices/ipin.sym} 200 -260 0 0 {name=p3 lab=ADD[dim-1:0]}
-C {devices/ipin.sym} 200 -190 0 0 {name=p2 lab=WEN}
-C {devices/ipin.sym} 200 -170 0 0 {name=p4 lab=CEN}
-C {devices/ipin.sym} 200 -240 0 0 {name=p5 lab=M[width-1:0]}
-C {devices/verilog_timescale.sym} 710 -197.5 0 0 {name=s1 timestep="1ps" precision="1ps" }
-C {devices/title.sym} 160 -30 0 0 {name=l2}
-C {devices/use.sym} 360 -120 0 0 {------------------------------------------------
+C {opin.sym} 340 -220 0 0 {name=p10 lab=DOUT[width-1:0] verilog_type=wire}
+C {ipin.sym} 200 -220 0 0 {name=p8 lab=DIN[width-1:0]}
+C {ipin.sym} 200 -110 0 0 {name=p12 lab=CK}
+C {ipin.sym} 200 -140 0 0 {name=p1 lab=OEN}
+C {ipin.sym} 200 -260 0 0 {name=p3 lab=ADD[dim-1:0]}
+C {ipin.sym} 200 -190 0 0 {name=p2 lab=WEN}
+C {ipin.sym} 200 -170 0 0 {name=p4 lab=CEN}
+C {ipin.sym} 200 -240 0 0 {name=p5 lab=M[width-1:0]}
+C {verilog_timescale.sym} 710 -197.5 0 0 {name=s1 timestep="1ps" precision="1ps" }
+C {title.sym} 160 -30 0 0 {name=l2}
+C {use.sym} 360 -120 0 0 {------------------------------------------------
 library ieee;
         use ieee.std_logic_1164.all;
         use ieee.numeric_std.all;}
-C {devices/arch_declarations.sym} 750 -630 0 0 {    constant RAM_DEPTH :integer := 2**dim;
+C {arch_declarations.sym} 750 -630 0 0 {    constant RAM_DEPTH :integer := 2**dim;
 
 
     type RAM is array (integer range <>)of std_logic_vector (width-1 downto 0);

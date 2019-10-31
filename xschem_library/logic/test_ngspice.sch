@@ -145,8 +145,14 @@ ADD=3;
 end
 }
 S {.model adc_buff adc_bridge(in_low = 0.3 in_high = 0.7)
-}
+
+
+.model nand d_nand(rise_delay = 0.5e-9 fall_delay = 0.3e-9
++ input_load = 5e-15)}
 E {}
+N 610 -670 640 -670 {lab=A}
+N 610 -630 640 -630 {lab=B}
+N 740 -650 770 -650 {lab=Y_NAND}
 C {title.sym} 160 -30 0 0 {name=l2}
 C {verilog_timescale.sym} 40 -570 0 0 {name=s1 timestep="1ps" precision="1ps" }
 C {lab_pin.sym} 220 -390 2 0 {name=p6 lab=A verilog_type=reg}
@@ -182,6 +188,8 @@ C {adc_bridge.sym} 190 -220 0 0 {name=a8 delay=1}
 C {adc_bridge.sym} 190 -200 0 0 {name=a9 delay=1}
 C {code.sym} 380 -210 0 0 {name=STIMULI
 place=end
+vhdl_ignore=true
+verilog_ignore=true
 only_toplevel=true
 tclcommand="xschem edit_vi_prop"
 value="
@@ -189,7 +197,11 @@ value="
 .include stimuli.cir
 
 .control
-tran 100n 6u
-eprvcd A B din_5_ > zzzz.vcd
+tran 100n 26u
+eprvcd A B Y_NAND  > zzzz.vcd
 .endc
 "}
+C {lab_pin.sym} 610 -670 2 1 {name=p3 lab=A}
+C {lab_pin.sym} 610 -630 2 1 {name=p4 lab=B}
+C {lab_pin.sym} 770 -650 2 0 {name=p5 lab=Y_NAND}
+C {nd2.sym} 680 -650 0 0 {name=a3 delay="120 ps" del=120}

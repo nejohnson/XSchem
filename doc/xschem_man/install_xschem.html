@@ -154,8 +154,8 @@ set initial_geometry {800x600}
  <ol>
  <li>If <kbd>../src/xchem.tcl</kbd> with respect to current dir is existing and
      <kbd>../xschem_library</kbd> is also existing then we are starting
-     from a build directory, set <kbd>XSCHEM_SHAREDIR</kbd> to <kbd>`pwd`</kbd> and
-     also set <kbd>XSCHEM_LIBRARY_PATH</kbd> to <kbd>`pwd`/../xschem_library</kbd>.
+     from a build directory, set <kbd>XSCHEM_SHAREDIR</kbd> to <kbd>&lt;current dir&gt;</kbd> and
+     also set <br><kbd>XSCHEM_LIBRARY_PATH</kbd> to <kbd>.:&lt;current dir&gt;/../xschem_library/devices</kbd>.
  <li> else use compile-time (generated from configure script) provided <kbd>XSCHEM_SHAREDIR</kbd>.
  <li> if in current dir there is a <kbd>xschemrc</kbd> file source it.</li>
  <li>else if there is a <kbd>USER_CONF_DIR/xschemrc</kbd> file source it.</li>

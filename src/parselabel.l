@@ -28,6 +28,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define CAD_SPICE_NETLIST 1
+
+extern int netlist_type;
 extern int debug_var;
 extern FILE *errfp;
 extern void my_strdup(int id, char **dest, char *src);
@@ -80,7 +83,7 @@ const char *expandlabel(const char *s, int *m)
  else
     *m=-1;
  if(dest_string.str) {
-   if(bus_replacement_char[0]) {
+   if(netlist_type == CAD_SPICE_NETLIST && bus_replacement_char[0]) {
      strreplace(dest_string.str, '[', bus_replacement_char[0]);
      strreplace(dest_string.str, ']', bus_replacement_char[1]);
    }

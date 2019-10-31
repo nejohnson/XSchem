@@ -30,10 +30,13 @@
 
 # for testing after installation:
 #
-# set XSCHEM_LIBRARY_PATH .:~/.xschem/xschem_library
+# set XSCHEM_LIBRARY_PATH {}
+# append XSCHEM_LIBRARY_PATH :.
+# append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/xschem_library/devices
+# append XSCHEM_LIBRARY_PATH :~/.xschem/xschem_library
+# append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/logic
 # append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/examples
 # append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/pcb
-# append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/xschem_library/devices
 
 
 ###########################################################################
@@ -65,6 +68,9 @@
 ###########################################################################
 
 # set bus_replacement_char {<>}
+
+## for XSPICE
+# set bus_replacement_char {__} 
 
 
 ###########################################################################

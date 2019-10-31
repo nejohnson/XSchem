@@ -273,15 +273,16 @@ void hash_inst_pin(int what, int i, int j)
     rect=(inst_ptr[i].ptr+instdef)->boxptr[GENERICLAYER];
     x0=(rect[j-rects].x1+rect[j-rects].x2)/2;
     y0=(rect[j-rects].y1+rect[j-rects].y2)/2;
+    prop_ptr = rect[j-rects].prop_ptr;
   }
   else
   {
     rect=(inst_ptr[i].ptr+instdef)->boxptr[PINLAYER];
     x0=(rect[j].x1+rect[j].x2)/2;
     y0=(rect[j].y1+rect[j].y2)/2;
+    prop_ptr = rect[j].prop_ptr;
   }
 
-  prop_ptr = rect[j].prop_ptr;
 
   if(!prop_ptr || !get_tok_value(prop_ptr, "name",0)[0] || !get_tok_value(prop_ptr, "dir",0)[0]) {
     char str[2048];

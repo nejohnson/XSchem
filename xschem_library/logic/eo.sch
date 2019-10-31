@@ -5,10 +5,10 @@ V {
 assign #del Y=A^B;}
 S {}
 E {}
-C {devices/ipin.sym} 150 -320 0 0 {name=p2 lab=A}
-C {devices/ipin.sym} 150 -350 0 0 {name=p3 lab=B}
-C {devices/opin.sym} 920 -350 0 0 {name=p0 lab=Y verilog_type=wire}
-C {devices/use.sym} 150 -650 0 0 {------------------------------------------------
+C {ipin.sym} 150 -320 0 0 {name=p2 lab=A}
+C {ipin.sym} 150 -350 0 0 {name=p3 lab=B}
+C {opin.sym} 920 -350 0 0 {name=p0 lab=Y verilog_type=wire}
+C {use.sym} 150 -650 0 0 {------------------------------------------------
 library ieee;
         use ieee.std_logic_1164.all;
 --         use ieee.std_logic_arith.all;
@@ -17,4 +17,4 @@ library ieee;
 -- library SYNOPSYS;
 --         use SYNOPSYS.ATTRIBUTES.ALL;
 }
-C {devices/title.sym} 160 -30 0 0 {name=l2}
+C {title.sym} 160 -30 0 0 {name=l2}

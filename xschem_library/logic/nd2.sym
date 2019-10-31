@@ -1,11 +1,9 @@
 v {xschem version=2.9.2 file_version=1.1}
-G {type=subcircuit
-vhdl_stop=true
-verilog_stop=true
-spice_stop=true
+G {type=gate
+verilog_format="assign #@del @@Y = ~( @@A & @@B );"
+vhdl_format = "@@Y <= @@A nand @@B after @del ps;"
 format="@name [ @@A @@B ] @@Y nand"
-template="name=a1 delay=\\"120 ps\\" del=120"
-generic_type="delay=time"}
+template="name=a1 del=120"}
 V {}
 S {}
 E {}

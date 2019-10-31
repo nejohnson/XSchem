@@ -148,44 +148,30 @@ S {.model adc_buff adc_bridge(in_low = 0.3 in_high = 0.7)
 
 
 .model nand d_nand(rise_delay = 0.5e-9 fall_delay = 0.3e-9
-+ input_load = 5e-15)}
++ input_load = 5e-15)
+
+.model dac_buff  dac_bridge(out_low = 0 out_high = 1.2 out_undef = 0.6
++ input_load = 5.0e-15 t_rise = 0.5e-9
++ t_fall = 0.2e-9)}
 E {}
-N 610 -670 640 -670 {lab=A}
-N 610 -630 640 -630 {lab=B}
-N 740 -650 770 -650 {lab=Y_NAND}
+N 520 -350 550 -350 {lab=A}
+N 520 -310 550 -310 {lab=B}
+N 650 -330 680 -330 {lab=Y_NAND}
+N 650 -330 650 -250 {lab=Y_NAND}
+N 650 -250 680 -250 {lab=Y_NAND}
+N 740 -250 770 -250 {lab=Y_NAND_A}
 C {title.sym} 160 -30 0 0 {name=l2}
-C {verilog_timescale.sym} 40 -570 0 0 {name=s1 timestep="1ps" precision="1ps" }
-C {lab_pin.sym} 220 -390 2 0 {name=p6 lab=A verilog_type=reg}
-C {lab_pin.sym} 220 -350 2 0 {name=p7 lab=B verilog_type=reg}
-C {use.sym} 40 -670 0 0 {------------------------------------------------
+C {verilog_timescale.sym} 50 -320 0 0 {name=s1 timestep="1ps" precision="1ps" }
+C {lab_pin.sym} 200 -260 2 0 {name=p6 lab=A verilog_type=reg}
+C {lab_pin.sym} 200 -220 2 0 {name=p7 lab=B verilog_type=reg}
+C {use.sym} 50 -420 0 0 {------------------------------------------------
 library ieee;
         use ieee.std_logic_1164.all;
         use ieee.numeric_std.all;}
-C {lab_pin.sym} 220 -280 0 1 {name=p34 lab=ADD[4:0] verilog_type=reg}
-C {lab_pin.sym} 220 -320 0 1 {name=p35 lab=DIN[7:0] verilog_type=reg}
-C {lab_pin.sym} 220 -240 0 1 {name=p36 lab=WEN verilog_type=reg}
-C {lab_pin.sym} 220 -220 0 1 {name=p37 lab=OEN verilog_type=reg}
-C {lab_pin.sym} 220 -200 0 1 {name=p38 lab=CK verilog_type=reg}
-C {lab_pin.sym} 220 -260 0 1 {name=p39 lab=CEN verilog_type=reg}
-C {lab_pin.sym} 220 -300 0 1 {name=p40 lab=M[7:0] verilog_type=reg}
-C {lab_pin.sym} 160 -390 2 1 {name=p47 lab=A_A verilog_type=reg}
-C {lab_pin.sym} 160 -350 2 1 {name=p48 lab=B_A verilog_type=reg}
-C {lab_pin.sym} 160 -280 0 0 {name=p49 lab=ADD_A[4:0] verilog_type=reg}
-C {lab_pin.sym} 160 -320 0 0 {name=p50 lab=DIN_A[7:0] verilog_type=reg}
-C {lab_pin.sym} 160 -240 0 0 {name=p51 lab=WEN_A verilog_type=reg}
-C {lab_pin.sym} 160 -220 0 0 {name=p52 lab=OEN_A verilog_type=reg}
-C {lab_pin.sym} 160 -200 0 0 {name=p53 lab=CK_A verilog_type=reg}
-C {lab_pin.sym} 160 -260 0 0 {name=p54 lab=CEN_A verilog_type=reg}
-C {lab_pin.sym} 160 -300 0 0 {name=p55 lab=M_A[7:0] verilog_type=reg}
-C {adc_bridge.sym} 190 -390 0 0 {name=a1 delay=1}
-C {adc_bridge.sym} 190 -350 0 0 {name=a2 delay=1}
-C {adc_bridge.sym} 190 -320 0 0 {name=a3[7:0] delay=1}
-C {adc_bridge.sym} 190 -300 0 0 {name=a4[7:0] delay=1}
-C {adc_bridge.sym} 190 -280 0 0 {name=a5[4:0] delay=1}
-C {adc_bridge.sym} 190 -260 0 0 {name=a6 delay=1}
-C {adc_bridge.sym} 190 -240 0 0 {name=a7 delay=1}
-C {adc_bridge.sym} 190 -220 0 0 {name=a8 delay=1}
-C {adc_bridge.sym} 190 -200 0 0 {name=a9 delay=1}
+C {lab_pin.sym} 140 -260 2 1 {name=p47 lab=A_A verilog_type=reg}
+C {lab_pin.sym} 140 -220 2 1 {name=p48 lab=B_A verilog_type=reg}
+C {adc_bridge.sym} 170 -260 0 0 {name=a1 delay=1}
+C {adc_bridge.sym} 170 -220 0 0 {name=a2 delay=1}
 C {code.sym} 380 -210 0 0 {name=STIMULI
 place=end
 vhdl_ignore=true
@@ -198,10 +184,13 @@ value="
 
 .control
 tran 100n 26u
-eprvcd A B Y_NAND  > zzzz.vcd
+* eprvcd A B Y_NAND  > zzzz.vcd
+eprvcd allv  > zzzz.vcd
 .endc
 "}
-C {lab_pin.sym} 610 -670 2 1 {name=p3 lab=A}
-C {lab_pin.sym} 610 -630 2 1 {name=p4 lab=B}
-C {lab_pin.sym} 770 -650 2 0 {name=p5 lab=Y_NAND}
-C {nd2.sym} 680 -650 0 0 {name=a3 delay="120 ps" del=120}
+C {lab_pin.sym} 520 -350 2 1 {name=p3 lab=A}
+C {lab_pin.sym} 520 -310 2 1 {name=p4 lab=B}
+C {lab_pin.sym} 680 -330 2 0 {name=p5 lab=Y_NAND}
+C {nd2.sym} 590 -330 0 0 {name=a3 delay="120 ps" del=120}
+C {dac_bridge.sym} 710 -250 0 0 {name=a4 }
+C {lab_pin.sym} 770 -250 2 0 {name=p1 lab=Y_NAND_A}

@@ -110,3 +110,4 @@ C {lab_pin.sym} 680 -330 2 0 {name=p5 lab=Y_NAND}
 C {nd2.sym} 590 -330 0 0 {name=a3 delay="120 ps" del=120}
 C {dac_bridge.sym} 710 -250 0 0 {name=a4 }
 C {lab_pin.sym} 770 -250 2 0 {name=p1 lab=Y_NAND_A}
+C {/mnt/x/home/schippes/xschem-repo/trunk/xschem_library/devices/netlist_options.sym} 520 -530 0 0 {bus_replacement_char="xx"}

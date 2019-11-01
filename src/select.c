@@ -307,6 +307,11 @@ void delete(void)
  draw();
  bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
  ui_state &= ~SELECTION;
+ if(event_reporting) {
+   printf("xschem delete\n");
+   fflush(stdout);
+ }
+
 }
 
 
@@ -536,6 +541,11 @@ void unselect_all(void)
     /*\statusmsg("",2); */
     my_snprintf(str, S(str), "%s/%s", home_dir, ".xschem_selection.sch"); /* 20161115  PWD->HOME */
     unlink(str);
+    if(event_reporting) {
+      printf("xschem unselect_all\n");
+      fflush(stdout);
+    }
+
 }
 
 void select_wire(int i,unsigned short select_mode, int fast)

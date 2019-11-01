@@ -1062,9 +1062,19 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
   tclsetvar("netlist_type",argv[2]);
  }
 
- else if(!strcmp(argv[1],"unselect"))
+ else if(!strcmp(argv[1],"unselect_all"))
  {
   if(argc==2) unselect_all();
+ }
+
+ else if(!strcmp(argv[1],"clear_drawing"))
+ {
+  if(argc==2) clear_drawing();
+ }
+
+ else if(!strcmp(argv[1],"remove_symbols"))
+ {
+  if(argc==2) remove_symbols();
  }
 
  else if(!strcmp(argv[1],"view_prop"))
@@ -1075,21 +1085,25 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
  else if(!strcmp(argv[1],"undo"))
  {
   pop_undo(0);
+  Tcl_ResetResult(interp);
  }
 
  else if(!strcmp(argv[1],"redo"))
  {
   pop_undo(1);
+  Tcl_ResetResult(interp);
  }
 
  else if(!strcmp(argv[1],"edit_prop"))
  {
   edit_property(0);
+  Tcl_ResetResult(interp);
  }
 
  else if(!strcmp(argv[1],"edit_vi_prop"))
  {
   edit_property(1);
+  Tcl_ResetResult(interp);
  }
 
  else if(!strcmp(argv[1],"trim_wires")) /* 20171022 */
@@ -1103,6 +1117,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
  else if(!strcmp(argv[1],"delete"))
  {
   if(argc==2) delete();
+  Tcl_ResetResult(interp);
  }
 
  else if(!strcmp(argv[1],"unhilight"))

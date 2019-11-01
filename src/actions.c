@@ -535,6 +535,11 @@ void remove_symbols(void)
    remove_symbol();
  }
   if(debug_var>=1) fprintf(errfp, "remove_symbols(): done\n");
+  if(event_reporting) {
+    printf("xschem remove_symbols\n");
+    fflush(stdout);
+  }
+
 }
 
 void clear_drawing(void)

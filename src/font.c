@@ -61,5 +61,10 @@ void compile_font(void)
  unselect_all();
  currentsch = 0;
  my_strncpy(schematic[currentsch], "", S(schematic[currentsch]));
+ if(event_reporting) {
+   printf("xschem clear_drawing\n");
+   printf("xschem unselect_all\n");
+   fflush(stdout);
+ }
 }
 

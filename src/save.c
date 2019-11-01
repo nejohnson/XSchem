@@ -1105,6 +1105,13 @@ void pop_undo(int redo)  /* 20150327 */
   prepared_hilight_structs=0; /* 20171224 */
   update_conn_cues(0, 0);
   if(debug_var>=2) fprintf(errfp, "pop_undo(): returning\n");
+  if(event_reporting) {
+    if(redo) printf("xschem redo\n");
+    else     printf("xschem undo\n");
+    printf("xschem redraw\n");
+    fflush(stdout);
+  }
+
 }
 
 #endif /* ifndef IN_MEMORY_UNDO */

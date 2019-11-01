@@ -837,6 +837,7 @@ extern char *escape_chars(char *dest, const char *source, int size);
 
 extern void set_inst_prop(int i);
 extern void unselect_wire(int i);
+extern void select_connected_nets(void);
 extern void check_wire_storage(void);
 extern void check_text_storage(void);
 extern void check_inst_storage(void);

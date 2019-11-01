@@ -1120,6 +1120,10 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
   Tcl_ResetResult(interp);
  }
 
+ else if(!strcmp(argv[1],"select_connected_nets"))
+ {
+   select_connected_nets();
+ }
  else if(!strcmp(argv[1],"unhilight"))
  {
     unhilight_net();

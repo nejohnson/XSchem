@@ -883,6 +883,11 @@ int callback(int event, int mx, int my, KeySym key,
     change_elem_order();
     break;
    }
+   if(key=='k' && state==Mod1Mask)        /* select whole net (all attached wires/labels/pins) */
+   {
+     select_connected_nets();
+     break;
+   }
    if(key=='k' && state==ControlMask)                           /* unhilight net */
    {
     /* 20160413 */

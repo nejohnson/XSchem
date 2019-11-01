@@ -1820,6 +1820,11 @@ proc abs_sym_path {fname {ext {} } } {
         break
       }
     }
+    # if no abs path, no existing items elsewhere, 
+    # set name relative to $current_dirname
+    if { ![string compare $name {}] } {
+      set name "$current_dirname/$fname"
+    }
   }
 
   if { ![string compare $name {}] } {

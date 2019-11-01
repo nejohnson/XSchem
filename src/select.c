@@ -734,7 +734,39 @@ void select_arc(int c, int i, unsigned short select_mode, int fast)
   need_rebuild_selected_array=1;
 }
 
-
+void select_connected_nets(void)
+{
+  int i, n;
+  char *str = NULL;
+  prepare_netlist_structs(1);
+  rebuild_selected_array();
+  for(i=0;i<lastselected;i++)
+  {
+    n = selectedgroup[i].n;
+    switch(selectedgroup[i].type)
+    {
+     case WIRE:
+      if(wire[n].sel==SELECTED) {
+        my_strdup(62, &str ,get_tok_value(wire[n].prop_ptr, "lab",0));
+        if(str && str[0]) {
+          search_inst("lab", str,1, 1, NOW);
+        }
+      }
+      break;
+     case ELEMENT:
+      if(inst_ptr[n].sel==SELECTED) {
+        my_strdup(63, &str, get_tok_value(inst_ptr[n].prop_ptr, "lab",0));
+        if(str && str[0]) {
+          search_inst("lab", str,1, 1, NOW);
+        }
+      }
+      break;
+     default:
+      break;
+    }
+  }
+  my_free(&str);
+}
 
 void select_polygon(int c, int i, unsigned short select_mode, int fast )
 {

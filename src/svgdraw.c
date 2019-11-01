@@ -408,7 +408,7 @@ void svg_draw(void)
 
 
  if(!plotfile[0]) {
-   my_strdup(60, &tmpstring, "tk_getSaveFile -title {Select destination file} -initialdir $env(PWD)");
+   my_strdup(61, &tmpstring, "tk_getSaveFile -title {Select destination file} -initialdir $env(PWD)");
    tcleval(tmpstring);
    r = Tcl_GetStringResult(interp);
    my_free(&tmpstring);

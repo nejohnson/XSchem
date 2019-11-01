@@ -396,7 +396,7 @@ void free_node_hash(void) /* remove the whole hash table  */
 {
  int i;
   
- if(debug_var>=2) fprintf(errfp, "free_hash(): removing hash table\n");
+ if(debug_var>=2) fprintf(errfp, "free_node_hash(): removing hash table\n");
  n_elements=0;
  for(i=0;i<HASHSIZE;i++)
  {

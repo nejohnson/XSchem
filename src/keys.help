@@ -96,6 +96,7 @@ alt+ctrl    'j'         Print list of highlighted nets/pins with label expansion
 ctrl+shift  'K'         highlight net passing through elements with 'propagate_to' property set on pins
 shift       'K'         Unhilight all nets
 ctrl        'k'         Unhilight selected nets
+alt         'k'         Select all nets attached to selected wire / label / pin.
 -           'l'         Start line
 ctrl        'l'         Make schematic view from selected symbol
 ctrl        'o'         Load schematic

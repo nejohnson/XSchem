@@ -416,6 +416,11 @@ void search_inst(const char *tok, const char *val, int sub, int sel, int what)
 
  regfree(&re);
  draw_window = save_draw;
+
+ if(event_reporting) {
+   printf("xschem search %s %d %s %s\n", (sub ? "exact" : "regex"), sel, tok, val);
+   fflush(stdout);
+ }
 }
 
 

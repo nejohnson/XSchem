@@ -59,6 +59,9 @@ void global_spice_netlist(int global)  /* netlister driver */
   }
   my_strdup(380, &type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
   if(debug_var>=1) fprintf(errfp, "global_spice_netlist(): >>>>>>> |%s|\n", type);
+  if( type && !strcmp(type,"netlist_options") ) {
+    netlist_options(i);
+  }
   if( type && !(strcmp(type,"ipin")&&strcmp(type,"opin")&&strcmp(type,"iopin")) )
   {
    str_tmp = expandlabel ( get_tok_value(inst_ptr[i].prop_ptr,"lab",0) ,&mult);

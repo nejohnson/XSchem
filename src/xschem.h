@@ -609,6 +609,7 @@ extern size_t get_tok_value_size;
 /*  functions */
 extern void print_version(void);
 extern int set_netlist_dir(int force, char *dir);
+extern void netlist_options(int i);
 extern int  check_lib(char * s);
 extern void select_all(void);
 extern void change_linewidth(double w);

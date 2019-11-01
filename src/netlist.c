@@ -386,6 +386,18 @@ int check_lib(char *s)
  else return 1;
 }
 
+void netlist_options(int i) 
+{
+  char * str;
+  str = get_tok_value(inst_ptr[i].prop_ptr, "bus_replacement_char", 0);
+  if(str[0] && str[1] && strlen(str) ==2) {
+    bus_replacement_char[0] = str[0];
+    bus_replacement_char[1] = str[1];
+    tclsetvar("bus_replacement_char", str);
+  }
+  fprintf(errfp, "netlist_options(): bus_replacement_char=%s\n", str);
+}
+
 void print_wires(void)
 {
  int i,j;

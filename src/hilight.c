@@ -370,7 +370,7 @@ void search_inst(const char *tok, const char *val, int sub, int sel, int what)
       str = get_tok_value(wire[i].prop_ptr, tok,0);
       if(has_token ) {
         if(   (!regexec(&re, str,0 , NULL, 0) && !sub )  ||       /* 20071120 regex instead of strcmp */
-              ( strstr(str, val) &&  sub )
+              ( !strcmp(str, val) &&  sub )
           ) {
             str = get_tok_value(wire[i].prop_ptr, "lab",0);
             if(debug_var>=2) fprintf(errfp, "search_inst(): wire=%d, tok=%s, val=%s \n", i,tok, str);

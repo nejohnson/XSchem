@@ -1,4 +1,4 @@
-v {xschem version=2.8.4 file_version=1.1}
+v {xschem version=2.9.2 file_version=1.1}
 G {}
 V {}
 S {}
@@ -40,7 +40,7 @@ T {TEXT} 990 -660 1 0 0.5 0.5 {}
 T {Text} 1010 -650 0 0 0.6 0.6 {layer=4}
 T {Arcs/Circles} 1010 -120 0 0 0.6 0.6 {layer=4}
 T {Select the components here under
-and press'<Ctrl>-h' or <Alt>-click
+and press'<Ctrl>-h' or <Ctrl>-click
 them to visit xschem websites
 or local docs} 400 -360 0 0 0.3 0.3 {}
 N 870 -300 990 -300 {lab=#net1}

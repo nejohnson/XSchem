@@ -395,7 +395,7 @@ void netlist_options(int i)
     bus_replacement_char[1] = str[1];
     tclsetvar("bus_replacement_char", str);
   }
-  fprintf(errfp, "netlist_options(): bus_replacement_char=%s\n", str);
+  /* fprintf(errfp, "netlist_options(): bus_replacement_char=%s\n", str); */
 }
 
 void print_wires(void)

@@ -1,4 +1,4 @@
-v {xschem version=2.8.2_RC3 file_version=1.0}
+v {xschem version=2.8.4 file_version=1.1}
 G {}
 V {}
 S {}
@@ -29,33 +29,33 @@ N 520 -460 760 -460 {lab=A}
 N 580 -420 760 -420 {lab=B}
 N 580 -420 580 -350 {lab=B}
 N 520 -350 580 -350 {lab=B}
-C {title} 160 -30 0 0 {name=l2 author="Stefan"}
-C {74ls00} 420 -350 0 0 {name=U1:2  risedel=100 falldel=200}
-C {74ls00} 870 -440 0 0 {name=U1:1  risedel=100 falldel=200}
-C {lab_pin} 970 -440 0 1 {name=p0 lab=OUTPUT_Y}
-C {capa} 590 -160 0 0 {name=C0 m=1 value=100u device="electrolitic capacitor"}
-C {74ls00} 420 -460 0 0 {name=U1:4 risedel=100 falldel=200 power=VCC5
+C {title.sym} 160 -30 0 0 {name=l2 author="Stefan"}
+C {74ls00.sym} 420 -350 0 0 {name=U1:2  risedel=100 falldel=200}
+C {74ls00.sym} 870 -440 0 0 {name=U1:1  risedel=100 falldel=200}
+C {lab_pin.sym} 970 -440 0 1 {name=p0 lab=OUTPUT_Y}
+C {capa.sym} 590 -160 0 0 {name=C0 m=1 value=100u device="electrolitic capacitor"}
+C {74ls00.sym} 420 -460 0 0 {name=U1:4 risedel=100 falldel=200 power=VCC5
 url="http://www.engrcs.com/components/74LS00.pdf"}
-C {7805} 730 -190 0 0 {name=U0 
+C {7805.sym} 730 -190 0 0 {name=U0 
 spiceprefix=X
 url="https://www.sparkfun.com/datasheets/Components/LM7805.pdf"}
-C {lab_pin} 490 -190 0 0 {name=p20 lab=VCC12}
-C {lab_pin} 940 -190 0 1 {name=p22 lab=VCC5}
-C {lab_pin} 590 -110 0 0 {name=p23 lab=ANALOG_GND}
-C {capa} 890 -160 0 0 {name=C4 m=1 value=10u device="tantalium capacitor"}
-C {res} 520 -190 1 0 {name=R0 m=1 value=4.7 device="carbon resistor"}
-C {lab_wire} 700 -460 0 0 {name=l3 lab=A}
-C {lab_wire} 700 -420 0 0 {name=l0 lab=B}
-C {lab_wire} 650 -190 0 0 {name=l1 lab=VCCFILT}
-C {lab_pin} 310 -370 0 0 {name=lONN1 lab=INPUT_A verilog_type=reg}
-C {lab_pin} 310 -330 0 0 {name=lONN2 lab=INPUT_B verilog_type=reg}
-C {lab_pin} 40 -330 0 1 { name=lONN3 lab=OUTPUT_Y }
-C {lab_pin} 310 -480 0 0 {name=lONN6 lab=INPUT_E verilog_type=reg}
-C {lab_pin} 310 -440 0 0 {name=lONN8 lab=INPUT_F verilog_type=reg}
-C {lab_pin} 40 -310 0 1 { name=lONN9 lab=VCC12 }
-C {lab_pin} 40 -290 0 1 { name=lONN14 lab=ANALOG_GND  verilog_type=reg}
-C {lab_pin} 40 -270 0 1 { name=lONN15 lab=GND  verilog_type=reg}
-C {code} 1030 -280 0 0 {name=TESTBENCH_CODE only_toplevel=false value="initial begin
+C {lab_pin.sym} 490 -190 0 0 {name=p20 lab=VCC12}
+C {lab_pin.sym} 940 -190 0 1 {name=p22 lab=VCC5}
+C {lab_pin.sym} 590 -110 0 0 {name=p23 lab=ANALOG_GND}
+C {capa.sym} 890 -160 0 0 {name=C4 m=1 value=10u device="tantalium capacitor"}
+C {res.sym} 520 -190 1 0 {name=R0 m=1 value=4.7 device="carbon resistor"}
+C {lab_wire.sym} 700 -460 0 0 {name=l3 lab=A}
+C {lab_wire.sym} 700 -420 0 0 {name=l0 lab=B}
+C {lab_wire.sym} 650 -190 0 0 {name=l1 lab=VCCFILT}
+C {lab_pin.sym} 310 -370 0 0 {name=lONN1 lab=INPUT_A verilog_type=reg}
+C {lab_pin.sym} 310 -330 0 0 {name=lONN2 lab=INPUT_B verilog_type=reg}
+C {lab_pin.sym} 40 -330 0 1 { name=lONN3 lab=OUTPUT_Y }
+C {lab_pin.sym} 310 -480 0 0 {name=lONN6 lab=INPUT_E verilog_type=reg}
+C {lab_pin.sym} 310 -440 0 0 {name=lONN8 lab=INPUT_F verilog_type=reg}
+C {lab_pin.sym} 40 -310 0 1 { name=lONN9 lab=VCC12 }
+C {lab_pin.sym} 40 -290 0 1 { name=lONN14 lab=ANALOG_GND  verilog_type=reg}
+C {lab_pin.sym} 40 -270 0 1 { name=lONN15 lab=GND  verilog_type=reg}
+C {code.sym} 1030 -280 0 0 {name=TESTBENCH_CODE only_toplevel=false value="initial begin
   $dumpfile(\\"dumpfile.vcd\\");
   $dumpvars;
   INPUT_E=0;
@@ -80,9 +80,9 @@ end
 assign VCC12=1;
 
 "}
-C {verilog_timescale} 1050 -100 0 0 {name=s1 timestep="1ns" precision="1ns" }
-C {conn_8x1} 20 -390 0 0 {name=C1 footprint=connector(8,1)}
-C {lab_pin} 40 -370 0 1 {name=l4 lab=INPUT_A verilog_type=reg}
-C {lab_pin} 40 -350 0 1 {name=l5 lab=INPUT_B verilog_type=reg}
-C {lab_pin} 40 -410 0 1 {name=l6 lab=INPUT_E verilog_type=reg}
-C {lab_pin} 40 -390 0 1 {name=l7 lab=INPUT_F verilog_type=reg}
+C {verilog_timescale.sym} 1050 -100 0 0 {name=s1 timestep="1ns" precision="1ns" }
+C {conn_8x1.sym} 20 -390 0 0 {name=C1 footprint=connector(8,1)}
+C {lab_pin.sym} 40 -370 0 1 {name=l4 lab=INPUT_A verilog_type=reg}
+C {lab_pin.sym} 40 -350 0 1 {name=l5 lab=INPUT_B verilog_type=reg}
+C {lab_pin.sym} 40 -410 0 1 {name=l6 lab=INPUT_E verilog_type=reg}
+C {lab_pin.sym} 40 -390 0 1 {name=l7 lab=INPUT_F verilog_type=reg}

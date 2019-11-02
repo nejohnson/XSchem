@@ -1,4 +1,4 @@
-v {xschem version=2.8.2_RC1 file_version=1.0}
+v {xschem version=2.9.2 file_version=1.1}
 G {}
 V {}
 S {}
@@ -27,7 +27,7 @@ You can return here after descending into a schematic by hitting
 '<Ctrl>-e' or by menu 'Edit -> Pop'.
 } 60 -920 0 0 0.4 0.4 {}
 T {Select the components here under
-and press'<Ctrl>-h' or <Alt>-click
+and press'<Ctrl>-h' or <Ctrl>-click
 them to visit xschem websites
 or local docs} 390 -420 0 0 0.3 0.3 {}
 T {Lines} 1010 -560 0 0 0.6 0.6 {layer=4}
@@ -47,23 +47,23 @@ N 870 -300 990 -300 {lab=#net1}
 N 910 -340 910 -250 {lab=#net2}
 N 910 -270 970 -270 {lab=#net2}
 N 930 -310 960 -300 {lab=#net1}
-C {title} 160 -30 0 0 {name=l1 author="Stefan Schippers"}
-C {launcher} 450 -270 0 0 {name=h1 
+C {title.sym} 160 -30 0 0 {name=l1 author="Stefan Schippers"}
+C {launcher.sym} 450 -270 0 0 {name=h1 
 descr="XSCHEM ON REPO.HU" 
 url="http://repo.hu/projects/xschem"
 program=x-www-browser}
-C {launcher} 450 -320 0 0 {name=h2 
+C {launcher.sym} 450 -320 0 0 {name=h2 
 descr="LOCAL DOCUMENTATION" 
 url="$\{XSCHEM_SHAREDIR\}/../doc/xschem/index.html"
 program=x-www-browser
 
 }
-C {launcher} 450 -220 0 0 {name=h3 
+C {launcher.sym} 450 -220 0 0 {name=h3 
 descr="Toggle light/dark 
 colorscheme" 
 tclcommand="xschem toggle_colorscheme"
 }
-C {zener} 920 -190 0 0 {name=x10 model=XXX device=XXX}
-C {pcb_current_protection} 170 -460 0 0 {name=x1}
-C {pcb_voltage_protection} 170 -420 0 0 {name=x0}
-C {pcb_test1} 170 -380 0 0 {name=x2}
+C {zener.sym} 920 -190 0 0 {name=x10 model=XXX device=XXX}
+C {pcb_current_protection.sym} 170 -460 0 0 {name=x1}
+C {pcb_voltage_protection.sym} 170 -420 0 0 {name=x0}
+C {pcb_test1.sym} 170 -380 0 0 {name=x2}

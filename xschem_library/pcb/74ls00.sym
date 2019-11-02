@@ -1,4 +1,4 @@
-v {xschem version=2.8.1 file_version=1.0}
+v {xschem version=2.9.2 file_version=1.1}
 G {type=nand
 verilog_format="nand #(@risedel , @falldel ) @name ( @#2 , @#0 , @#1 );"
 tedax_format="footprint @name @footprint
@@ -20,8 +20,8 @@ B 5 -42.5 17.5 -37.5 22.5 {name=B dir=in pinnumber=2:5:10:13}
 B 5 57.5 -2.5 62.5 2.5 {name=Z dir=out verilog_type=wire pinnumber=3:6:8:11}
 A 4 5 0 30 270 180 {}
 A 4 40 0 5 0 360 {}
-T {@name} -20 -15 0 0 0.2 0.2 {}
-T {@symname} -22.5 0 0 0 0.2 0.2 {}
-T {@#0:pinnumber} -22.5 -22.5 0 0 0.12 0.12 {}
-T {@#1:pinnumber} -22.5 17.5 0 0 0.12 0.12 {}
-T {@#2:pinnumber} 32.5 -2.5 0 1 0.12 0.12 {}
+T {@name} -20 -12.5 0 0 0.2 0.2 {}
+T {@symname} -22.5 2.5 0 0 0.2 0.2 {}
+T {@#0:pinnumber} -22.5 -25 0 0 0.2 0.2 {}
+T {@#1:pinnumber} -22.5 17.5 0 0 0.2 0.2 {}
+T {@#2:pinnumber} 45 7.5 0 0 0.2 0.2 {}

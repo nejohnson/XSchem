@@ -155,6 +155,13 @@ name="mchanged_name" model=\"nmos\" w="20u" l="3u" m="10"
   <li><kbd>class</kbd></li>
   <p>The <kbd>class</kbd> attribute is used to declare the class of a VHDL signal, most used classes are
     <kbd>signal</kbd> and <kbd>constant</kbd>. Default if missing is <kbd>signal</kbd>.</p>
+  <li><kbd>attribute(name)</kbd></li>
+  <p> This will override at instance level the value of attribute <kbd>pinnumber</kbd> of pin <kbd>name</kbd> of the symbol.
+      This is mainly used for tedax, where by back annotation a connection to a symbol must be changed.</p>
+  <li><kbd>attribute(index)</kbd></li>
+  <p> This will override at instance level the value of attribute <kbd>pinnumber</kbd> of <kbd>index</kbd>th pin of the symbol.
+      This is mainly used for tedax, where by back annotation a connection to a symbol must be changed.
+      This notation is faster since xschem does not have to find a pin by string matching.</p>
  </ul><br>
  <!-- end of slide -->
  <div class="filler"></div>

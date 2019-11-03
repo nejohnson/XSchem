@@ -1134,7 +1134,7 @@ void print_spice_subckt(FILE *fd, int symbol)
   /* 20150317 use SPACE2() instead of SPACE() */
   space=SPACE2(c);
   if( state==XBEGIN && c=='@' && !escape) state=XTOKEN;
-  else if( state==XTOKEN && (space || c == '@')  && token_pos > 1 && !escape && !quote) state=XSEPARATOR;
+  else if( state==XTOKEN && (space || c == '@' || c == '\\')  && token_pos > 1 && !escape && !quote) state=XSEPARATOR;
   if(token_pos>=sizetok)
   {
    sizetok+=CADCHUNKALLOC;
@@ -1232,8 +1232,8 @@ void print_spice_element(FILE *fd, int inst)
                               /* 20151028 */
   if( state==XBEGIN && c=='@' && !escape) state=XTOKEN;
 
-  /* 20171029 added !escape, !quote */
-  else if( state==XTOKEN && (space || c == '@')  && token_pos > 1 && !escape && !quote) state=XSEPARATOR;
+  /* 20171029 added !escape, !quote */          /* <<<<< */
+  else if( state==XTOKEN && (space || c == '@' || c == '\\')  && token_pos > 1 && !escape && !quote) state=XSEPARATOR;
 
   if(token_pos>=sizetok)
   {
@@ -1291,7 +1291,7 @@ void print_spice_element(FILE *fd, int inst)
          )
        ) {
        str_ptr =  pin_node(inst,i, &mult, 0);
-       fprintf(fd, "@%d %s ", mult, str_ptr);
+       fprintf(fd, "@%d %s", mult, str_ptr);
        break; /* 20171029 */
      }
     }
@@ -1439,7 +1439,7 @@ void print_tedax_element(FILE *fd, int inst)
    if( state==XBEGIN && c=='@' && !escape) state=XTOKEN;
  
    /* 20171029 added !escape, !quote */
-   else if( state==XTOKEN && (space || c == '@')  && token_pos > 1 && !escape && !quote) state=XSEPARATOR;
+   else if( state==XTOKEN && (space || c == '@' || c == '\\')  && token_pos > 1 && !escape && !quote) state=XSEPARATOR;
  
    if(token_pos>=sizetok)
    {
@@ -1814,7 +1814,7 @@ void print_vhdl_primitive(FILE *fd, int inst) /* netlist  primitives, 20071217 *
                                /* 20171029 */
   if( state==XBEGIN && c=='@' && !escape ) state=XTOKEN;
   /* 20171029 added !escape, !quote */
-  else if( state==XTOKEN && (space || c=='@') && token_pos > 1 && !escape && !quote) state=XSEPARATOR;
+  else if( state==XTOKEN && (space || c=='@' || c == '\\') && token_pos > 1 && !escape && !quote) state=XSEPARATOR;
 
   if(token_pos>=sizetok)
   {
@@ -1976,7 +1976,7 @@ void print_verilog_primitive(FILE *fd, int inst) /* netlist switch level primiti
                                  /*20171029 */
   if( state==XBEGIN && c=='@'  && !escape ) state=XTOKEN;
   /* 20171029 added !escape, !quote */
-  else if( state==XTOKEN && (space || c == '@') && token_pos > 1 && !escape && !quote) state=XSEPARATOR;
+  else if( state==XTOKEN && (space || c == '@' || c == '\\') && token_pos > 1 && !escape && !quote) state=XSEPARATOR;
 
   if(token_pos>=sizetok)
   {
@@ -2160,7 +2160,7 @@ char *translate(int inst, char* s)
 
   space=SPACE3(c); /* 20150418 use SPACE3 */
   if( state==XBEGIN && c=='@' && !escape  ) state=XTOKEN; /* 20161210 escape */
-  else if( state==XTOKEN && (space || c == '@') && token_pos > 1 ) state=XSEPARATOR;
+  else if( state==XTOKEN && (space || c == '@' || escape) && token_pos > 1 ) state=XSEPARATOR;
 
   if(result_pos>=size)
   {

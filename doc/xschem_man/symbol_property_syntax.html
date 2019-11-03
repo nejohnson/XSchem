@@ -308,6 +308,14 @@ verilog_format="xnor #(@risedel , @falldel ) @name ( @@Z , @@A , @@B );"
     information defined in the instance name (example: U1:2, slot number 2 of IC U1).
     These tokens may be placed as text in the symbol graphic window, not in format strings.
   </p>
+  <li><kbd>@#pin_name:pin_attribute</kbd></li>
+  <p> This expands to the value or property <kbd>pin_attribute</kbd> defined in the pin named <kbd>pin_name</kbd>
+    This method of looking up properties is a bit slower since xschem has to do string matching to find out the pin.<br>
+    Example: <kbd>@#A:pinnumber</kbd>: This expands to the value of the pinnumber defined in pin <kbd>A</kbd>.
+    This format is very useful for slotted devices where the actual displayed pin number depends on the slot 
+    information defined in the instance name (example: U1:2, slot number 2 of IC U1).
+    These tokens may be placed as text in the symbol graphic window, not in format strings.
+  </p>
   <li><kbd>@sch_last_modified</kbd></li>
   <p>
    this indicates the last modification time of the <kbd>.sch</kbd> file of the symbol.

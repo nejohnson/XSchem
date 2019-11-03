@@ -129,6 +129,7 @@ install: xschem
 	cp -ru ../xschem_library/devices/* $(system_library_dir)
 	cp -ru ../xschem_library/examples $(prefix)/share/doc/xschem/
 	cp -ru ../xschem_library/pcb $(prefix)/share/doc/xschem/
+	cp -ru ../xschem_library/logic $(prefix)/share/doc/xschem/
 
 .PHONY: uninstall
 uninstall:

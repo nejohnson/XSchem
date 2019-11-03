@@ -627,11 +627,13 @@ proc load_file_dialog {{msg {}}  {ext {}} {global_initdir {INITIALINSTDIR}}} {
     if { $sel ne {} } {
       set myload_dir1 [abs_sym_path [.myload.l.listbox1.list get $myload_index1]]
       set dir2 [.myload.l.listbox2.list get $sel]
-      set d "$myload_dir1/$dir2" ;# removed file normalize
-
-
-
-
+      if {$dir2 eq {..}} {
+        set d [file dirname $myload_dir1]
+      } elseif { $dir2 eq {.} } {
+        set d  $myload_dir1
+      } else {
+        set d "$myload_dir1/$dir2" ;# removed file normalize
+      }
       if { [file isdirectory $d]} {
         myload_set_home $d
         set myload_files2 [lsort [glob -directory $d -tails \{.*,*\}]]
@@ -695,13 +697,21 @@ proc create_pins {} {
   regsub -all {<} $retval {[} retval 
   regsub -all {>} $retval {]} retval 
   set lines [split $retval \n]
-
+  if { [file exists [abs_sym_path devices/ipin.sym]] } {
+    set indirect 1
+  } else {
+    set indirect 0
+  }
   # viewdata $retval
   set pcnt 0
   set y 0
   set fd [open $env(HOME)/.xschem_clipboard.sch "w"]
   foreach i $lines { 
-    puts $fd "C \{[rel_sym_path devices/[lindex $i 1].sym]\} 0 [set y [expr $y-20]]  0 0 \{ name=p[incr pcnt] lab=[lindex $i 0] \}"
+    if {$indirect} {
+      puts $fd "C \{[rel_sym_path devices/[lindex $i 1].sym]\} 0 [set y [expr $y-20]]  0 0 \{ name=p[incr pcnt] lab=[lindex $i 0] \}"
+    } else {
+      puts $fd "C \{[rel_sym_path [lindex $i 1].sym]\} 0 [set y [expr $y-20]]  0 0 \{ name=p[incr pcnt] lab=[lindex $i 0] \}"
+    }
   }
   close $fd
   xschem merge $env(HOME)/.xschem_clipboard.sch
@@ -736,10 +746,10 @@ proc schpins_to_sympins {} {
   set lines [split $clipboard \n]
   set fd [open $env(HOME)/.xschem_clipboard.sch "w"]
   foreach i $lines {
-    if {[regexp {devices/(i|o|io)pin} [lindex $i 1]]} {
-      if {[regexp {devices/ipin} [lindex $i 1]]} { set dir in }
-      if {[regexp {devices/opin} [lindex $i 1]]} { set dir out }
-      if {[regexp {devices/iopin} [lindex $i 1]]} { set dir inout }
+    if {[regexp {^C \{.*(i|o|io)pin} $i ]} {
+      if {[regexp {ipin} [lindex $i 1]]} { set dir in }
+      if {[regexp {opin} [lindex $i 1]]} { set dir out }
+      if {[regexp {iopin} [lindex $i 1]]} { set dir inout }
       set rot [lindex $i 4]
       set flip [lindex $i 5]
       regsub {^.*lab=} $i {} lab
@@ -786,6 +796,11 @@ proc add_lab_no_prefix {} {
   global env retval
   global filetmp1 filetmp2
 
+  if { [file exists [abs_sym_path devices/ipin.sym]] } {
+    set indirect 1
+  } else {
+    set indirect 0
+  }
   set retval [ read_data_nonewline $filetmp2 ]
   regsub -all {<} $retval {[} retval
   regsub -all {>} $retval {]} retval
@@ -795,7 +810,11 @@ proc add_lab_no_prefix {} {
   set y 0
   set fd [open $env(HOME)/.xschem_clipboard.sch "w"]
   foreach i $lines {
-    puts $fd "C \{[rel_sym_path devices/lab_pin.sym]\} 0 [set y [expr $y+20]]  0 0 \{ name=p[incr pcnt] verilog_type=wire lab=[lindex $i 0] \}"
+    if {$indirect} {
+      puts $fd "C \{devices/lab_pin.sym\} 0 [set y [expr $y+20]]  0 0 \{ name=p[incr pcnt] verilog_type=wire lab=[lindex $i 0] \}"
+    } else {
+      puts $fd "C \{lab_pin.sym\} 0 [set y [expr $y+20]]  0 0 \{ name=p[incr pcnt] verilog_type=wire lab=[lindex $i 0] \}"
+    }
   }
   close $fd
   xschem merge $env(HOME)/.xschem_clipboard.sch
@@ -806,6 +825,11 @@ proc add_lab_prefix {} {
   global env retval
   global filetmp1 filetmp2
 
+  if { [file exists [abs_sym_path devices/ipin.sym]] } {
+    set indirect 1
+  } else {
+    set indirect 0
+  }
   set retval [ read_data_nonewline $filetmp2 ]
   regsub -all {<} $retval {[} retval
   regsub -all {>} $retval {]} retval
@@ -815,7 +839,11 @@ proc add_lab_prefix {} {
   set y 0
   set fd [open $env(HOME)/.xschem_clipboard.sch "w"]
   foreach i $lines {
-    puts $fd "C \{[rel_sym_path devices/lab_pin.sym]\} 0 [set y [expr $y+20]]  0 0 \{ name=p[incr pcnt] verilog_type=reg lab=i[lindex $i 0] \}"
+    if {$indirect} {
+      puts $fd "C \{devices/lab_pin.sym\} 0 [set y [expr $y+20]]  0 0 \{ name=p[incr pcnt] verilog_type=reg lab=i[lindex $i 0] \}"
+    } else {
+      puts $fd "C \{lab_pin.sym\} 0 [set y [expr $y+20]]  0 0 \{ name=p[incr pcnt] verilog_type=reg lab=i[lindex $i 0] \}"
+    }
   }
   close $fd
   xschem merge $env(HOME)/.xschem_clipboard.sch

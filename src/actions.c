@@ -613,6 +613,8 @@ void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
   static char *prop=NULL; /*  20161122 overflow safe */
   char symname_pin[] = "devices/lab_pin.sym";
   char symname_wire[] = "devices/lab_wire.sym"; /*  20171005 */
+  char symname_pin2[] = "lab_pin.sym";
+  char symname_wire2[] = "lab_wire.sym"; /*  20171005 */
   static char *type=NULL;
   int dir;
   int k,ii, skip;
@@ -624,6 +626,16 @@ void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
   struct instpinentry *iptr;
   int sqx, sqy;
   int first_call;
+  struct stat buf;
+  int indirect;
+
+
+  if(!stat(abs_sym_path(symname_pin, ""), &buf)) {
+    indirect=1;
+  } else {
+    indirect=0;
+  }
+  printf("indirect=%d\n", indirect);
 
   rebuild_selected_array();
   k = lastselected;
@@ -733,10 +745,16 @@ void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
            rot1=(rot+rotated_text)%4; /*  20111103 20171208 text_rotation */
          }
          if(!strcmp(tclgetvar("use_lab_wire"),"0")) {
-           place_symbol(-1,symname_pin, pinx0, piny0, rot1, dir, prop, 0, first_call);
+           if(indirect) 
+             place_symbol(-1,symname_pin, pinx0, piny0, rot1, dir, prop, 0, first_call);
+           else
+             place_symbol(-1,symname_pin2, pinx0, piny0, rot1, dir, prop, 0, first_call);
            first_call=0;
          } else {
-           place_symbol(-1,symname_wire, pinx0, piny0, rot1, dir, prop, 0, first_call);
+           if(indirect) 
+             place_symbol(-1,symname_wire, pinx0, piny0, rot1, dir, prop, 0, first_call);
+           else
+             place_symbol(-1,symname_wire2, pinx0, piny0, rot1, dir, prop, 0, first_call);
            first_call=0;
          }
 

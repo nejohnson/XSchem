@@ -1450,6 +1450,10 @@ void create_sch_from_sym(void)
   char *pindir[3] = {"in", "out", "inout"};
   char *pinname[3] = {"devices/ipin.sym", "devices/opin.sym", "devices/iopin.sym"};
   char *generic_pin = {"devices/generic_pin.sym"};
+  char *pinname2[3] = {"ipin.sym", "opin.sym", "iopin.sym"};
+  char *generic_pin2 = {"generic_pin.sym"};
+  int indirect;
+
   static char *dir = NULL;
   static char *prop = NULL;
   char schname[PATH_MAX];
@@ -1459,6 +1463,13 @@ void create_sch_from_sym(void)
   static char *str=NULL;
   struct stat buf;
   int ln;
+
+  if(!stat(abs_sym_path(pinname[0], ""), &buf)) {
+    indirect=1;
+  } else {
+    indirect=0;
+  }
+  /* printf("indirect=%d\n", indirect); */
 
   rebuild_selected_array();
   if(lastselected > 1)  return;
@@ -1501,7 +1512,10 @@ void create_sch_from_sym(void)
       ln = 100+strlen(sub_prop);
       my_realloc(357, &str, ln);
       my_snprintf(str, ln, "name=g%d lab=%s", p++, sub_prop);
-      fprintf(fd, "C {%s} %.16g %.16g %.16g %.16g ", rel_sym_path(generic_pin), x, 20.0*(ypos++), 0.0, 0.0 );
+      if(indirect)
+        fprintf(fd, "C {%s} %.16g %.16g %.16g %.16g ", generic_pin, x, 20.0*(ypos++), 0.0, 0.0 );
+      else
+        fprintf(fd, "C {%s} %.16g %.16g %.16g %.16g ", generic_pin2, x, 20.0*(ypos++), 0.0, 0.0 );
       save_ascii_string(str, fd);
       fputc('\n' ,fd);
     } /* for(i) */
@@ -1527,7 +1541,10 @@ void create_sch_from_sym(void)
           ln = 100+strlen(sub2_prop);
           my_realloc(362, &str, ln);
           my_snprintf(str, ln, "name=g%d lab=%s", p++, sub2_prop);
-          fprintf(fd, "C {%s} %.16g %.16g %.16g %.16g ", rel_sym_path(pinname[j]), x, 20.0*(ypos++), 0.0, 0.0);
+          if(indirect)
+            fprintf(fd, "C {%s} %.16g %.16g %.16g %.16g ", pinname[j], x, 20.0*(ypos++), 0.0, 0.0);
+          else
+            fprintf(fd, "C {%s} %.16g %.16g %.16g %.16g ", pinname2[j], x, 20.0*(ypos++), 0.0, 0.0);
           save_ascii_string(str, fd);
           fputc('\n' ,fd);
         } /* if() */

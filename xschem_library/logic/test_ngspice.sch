@@ -63,32 +63,38 @@ S {.model adc_buff adc_bridge(in_low = 0.3 in_high = 0.7)
 .model nand d_nand(rise_delay = 0.5e-9 fall_delay = 0.3e-9
 + input_load = 5e-15)
 
+.model nor d_nor(rise_delay = 0.7e-9 fall_delay = 0.2e-9
++ input_load = 5e-15)
+
 .model dac_buff  dac_bridge(out_low = 0 out_high = 1.2 out_undef = 0.6
 + input_load = 5.0e-15 t_rise = 0.5e-9
-+ t_fall = 0.2e-9)}
++ t_fall = 0.2e-9)
+}
 E {}
-B 21 450 -380 810 -280 {}
-T {XSPICE DOMAIN} 450 -420 0 0 0.6 0.6 {}
-T {A --> D} 300 -280 0 0 0.6 0.6 {}
-T {D --> A} 660 -230 0 0 0.6 0.6 {}
-N 520 -350 550 -350 {lab=A}
-N 520 -310 550 -310 {lab=B}
-N 650 -330 680 -330 {lab=Y_NAND}
-N 650 -330 650 -250 {lab=Y_NAND}
-N 650 -250 680 -250 {lab=Y_NAND}
-N 740 -250 770 -250 {lab=Y_NAND_A}
+B 21 490 -550 1060 -260 {}
+T {XSPICE DOMAIN} 600 -590 0 0 0.6 0.6 {}
+T {A --> D} 510 -320 0 0 0.6 0.6 {}
+T {D --> A} 950 -320 0 0 0.6 0.6 {}
+N 570 -380 700 -380 {lab=A}
+N 570 -340 700 -340 {lab=B}
+N 800 -360 980 -360 {lab=Y_NAND}
+N 1040 -360 1090 -360 {lab=Y_NAND_A}
+N 670 -520 700 -520 {lab=A}
+N 670 -480 700 -480 {lab=~B,~Y_NAND}
+N 800 -500 980 -500 {lab=Y_NOR}
+N 1040 -500 1090 -500 {lab=Y_NOR_A}
+N 460 -380 510 -380 {lab=A_A}
+N 460 -340 510 -340 {lab=B_A}
 C {title.sym} 160 -30 0 0 {name=l2}
 C {verilog_timescale.sym} 50 -320 0 0 {name=s1 timestep="1ps" precision="1ps" }
-C {lab_pin.sym} 380 -350 2 0 {name=p6 lab=A verilog_type=reg}
-C {lab_pin.sym} 380 -310 2 0 {name=p7 lab=B verilog_type=reg}
 C {use.sym} 50 -420 0 0 {------------------------------------------------
 library ieee;
         use ieee.std_logic_1164.all;
         use ieee.numeric_std.all;}
-C {lab_pin.sym} 320 -350 2 1 {name=p47 lab=A_A verilog_type=reg}
-C {lab_pin.sym} 320 -310 2 1 {name=p48 lab=B_A verilog_type=reg}
-C {adc_bridge.sym} 350 -350 0 0 {name=a1 delay=1}
-C {adc_bridge.sym} 350 -310 0 0 {name=a2 delay=1}
+C {lab_pin.sym} 460 -380 2 1 {name=p47 lab=A_A verilog_type=reg}
+C {lab_pin.sym} 460 -340 2 1 {name=p48 lab=B_A verilog_type=reg}
+C {adc_bridge.sym} 540 -380 0 0 {name=a1 delay=1}
+C {adc_bridge.sym} 540 -340 0 0 {name=a2 delay=1}
 C {code.sym} 380 -210 0 0 {name=STIMULI
 place=end
 vhdl_ignore=true
@@ -104,10 +110,16 @@ tran 100n 26u
 eprvcd A B Y_NAND  > zzzz.vcd
 .endc
 "}
-C {lab_pin.sym} 520 -350 2 1 {name=p3 lab=A}
-C {lab_pin.sym} 520 -310 2 1 {name=p4 lab=B}
-C {lab_pin.sym} 680 -330 2 0 {name=p5 lab=Y_NAND}
-C {nd2.sym} 590 -330 0 0 {name=a3 delay="120 ps" del=120}
-C {dac_bridge.sym} 710 -250 0 0 {name=a4 }
-C {lab_pin.sym} 770 -250 2 0 {name=p1 lab=Y_NAND_A}
+C {lab_wire.sym} 670 -380 0 1 {name=l3 lab=A}
+C {lab_wire.sym} 670 -340 0 1 {name=l4 lab=B}
+C {lab_wire.sym} 830 -360 0 1 {name=l5 lab=Y_NAND}
+C {nd2.sym} 740 -360 0 0 {name=a3 delay="120 ps" del=120}
+C {dac_bridge.sym} 1010 -360 0 0 {name=a4 }
+C {lab_pin.sym} 1090 -360 2 0 {name=p1 lab=Y_NAND_A}
 C {/mnt/x/home/schippes/xschem-repo/trunk/xschem_library/devices/netlist_options.sym} 50 -480 0 0 {bus_replacement_char="xx"}
+C {lab_pin.sym} 670 -520 2 1 {name=p13 lab=A}
+C {lab_pin.sym} 670 -480 2 1 {name=p14 lab=~B,~Y_NAND}
+C {lab_wire.sym} 870 -500 0 1 {name=l15 lab=Y_NOR}
+C {dac_bridge.sym} 1010 -500 0 0 {name=a6 }
+C {lab_pin.sym} 1090 -500 2 0 {name=p16 lab=Y_NOR_A}
+C {nr2.sym} 740 -500 0 0 {name=a5 delay="200 ps" del=200}

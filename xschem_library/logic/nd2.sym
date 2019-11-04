@@ -2,7 +2,7 @@ v {xschem version=2.9.2 file_version=1.1}
 G {type=gate
 verilog_format="assign #@del @@Y = ~( @@A & @@B );"
 vhdl_format = "@@Y <= @@A nand @@B after @del ps;"
-format="@name [ @@A @@B ] @@Y nand"
+format="@name [ @@A[max:0] @@B[max:0] ] @@Y nand"
 template="name=a1 del=120"}
 V {}
 S {}
@@ -14,8 +14,8 @@ L 4 -25 -30 10 -30 {}
 L 4 -25 30 10 30 {}
 L 4 50 0 60 -0 {}
 B 5 57.5 -2.5 62.5 2.5 {name=Y dir=out verilog_type=wire}
-B 5 -42.5 -22.5 -37.5 -17.5 {name=A dir=in}
-B 5 -42.5 17.5 -37.5 22.5 {name=B dir=in}
+B 5 -42.5 -22.5 -37.5 -17.5 {name=A[max:0] dir=in}
+B 5 -42.5 17.5 -37.5 22.5 {name=B[max:0] dir=in}
 A 4 10 0 30 270 180 {}
 A 4 45 -0 5 180 360 {}
 T {ND2} -17.5 -25 0 0 0.3 0.3 {}

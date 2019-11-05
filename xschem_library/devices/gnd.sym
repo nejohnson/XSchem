@@ -1,5 +1,5 @@
 G {type=label
-global=1
+global=true
 format="*.alias @lab"
 template="name=l1 lab=GND"} 
 V {} 

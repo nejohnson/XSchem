@@ -563,9 +563,8 @@ void record_global_node(int what, FILE *fp, char *node)
  static char **globals=NULL;
  int i;
 
- if(!node) return;
  if( what==1) {
-
+    if(!node) return;
     for(i=0;i<max_globals;i++) {
       if( !strcmp(node, globals[i] )) return; /* entry found, do nothing */
     }
@@ -705,7 +704,7 @@ void prepare_netlist_structs(int for_hilight_only)
    }
 
    /* handle global nodes (global=1 set as symbol property) 28032003 */
-   if( !strcmp(type,"label") && global_node && global_node[0]=='1') {
+   if( !strcmp(type,"label") && global_node && !strcmp(global_node, "true")) {
       if(debug_var>=1) fprintf(errfp, "prepare_netlist_structs(): global node: %s\n",inst_ptr[i].node[0]);
       record_global_node(1,NULL, inst_ptr[i].node[0]);
    }

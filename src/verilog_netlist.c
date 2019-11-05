@@ -61,11 +61,11 @@ void global_verilog_netlist(int global)  /* netlister driver */
   if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "verilog_ignore",0 ), "true") ) {
     continue;
   }
-  my_strdup(544, &type,(inst_ptr[i].ptr+instdef)->type);
+  my_strdup(105, &type,(inst_ptr[i].ptr+instdef)->type);
   if( type && (strcmp(type,"timescale"))==0)
   {
    str_tmp = get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr ,"format",0);
-   my_strdup(545, &tmp_string, str_tmp);
+   my_strdup(106, &tmp_string, str_tmp);
    fprintf(fd, "%s\n", str_tmp ? translate(i, tmp_string) : "(NULL)");
   }
  }

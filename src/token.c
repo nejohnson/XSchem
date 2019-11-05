@@ -1117,7 +1117,7 @@ void print_spice_subckt(FILE *fd, int symbol)
  int no_of_pins=0;
  int quote=0; /* 20171029 */
  
- my_strdup(486, &format, get_tok_value(instdef[symbol].prop_ptr,"format",0));
+ my_strdup(103, &format, get_tok_value(instdef[symbol].prop_ptr,"format",0));
  if( (format==NULL) ) return; /* no format */
  no_of_pins= instdef[symbol].rects[PINLAYER];
  s=format;
@@ -1138,7 +1138,7 @@ void print_spice_subckt(FILE *fd, int symbol)
   if(token_pos>=sizetok)
   {
    sizetok+=CADCHUNKALLOC;
-   my_realloc(487, &token,sizetok);
+   my_realloc(104, &token,sizetok);
   }
   if(state==XTOKEN) {
     if(c!='\\' || escape) token[token_pos++]=c; /* 20171029 remove escaping backslashes */

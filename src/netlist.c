@@ -563,6 +563,7 @@ void record_global_node(int what, FILE *fp, char *node)
  static char **globals=NULL;
  int i;
 
+ if(!node) return;
  if( what==1) {
 
     for(i=0;i<max_globals;i++) {
@@ -695,6 +696,13 @@ void prepare_netlist_structs(int for_hilight_only)
    }
 
    my_strdup(262, &inst_ptr[i].node[0], get_tok_value(inst_ptr[i].prop_ptr,"lab",0));
+   if(!(inst_ptr[i].node[0]) ) {
+     char *template=NULL;
+     my_strdup(64, &template, get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"template",0));
+     my_strdup(65, &inst_ptr[i].node[0], get_tok_value(template, "lab",0));
+     if(debug_var>=1) fprintf(errfp, "no lab attr on instance, pick from symbol: %s\n", inst_ptr[i].node[0]);
+     my_free(&template);
+   }
 
    /* handle global nodes (global=1 set as symbol property) 28032003 */
    if( !strcmp(type,"label") && global_node && global_node[0]=='1') {

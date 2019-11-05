@@ -60,7 +60,7 @@ void check_symbol_storage(void)
   max_symbols=(1 + lastinstdef / ELEMDEF) * ELEMDEF;
   my_realloc(395, &instdef, sizeof(Instdef)*max_symbols);
   for(i=lastinstdef;i<max_symbols;i++) {
-    instdef[i].polygonptr=my_calloc(396, cadlayers, sizeof(Polygon *));
+    instdef[i].polygonptr=my_calloc(68, cadlayers, sizeof(Polygon *));
     if(instdef[i].polygonptr==NULL){
        fprintf(errfp, "check_symbol_storage(): calloc error\n");tcleval( "exit");
     }
@@ -93,7 +93,7 @@ void check_symbol_storage(void)
     if(instdef[i].polygons==NULL){
       fprintf(errfp, "check_symbol_storage(): calloc error\n");tcleval( "exit");
     }
-    instdef[i].arcs=my_calloc(401, cadlayers, sizeof(int)); /* 20171115 */
+    instdef[i].arcs=my_calloc(66, cadlayers, sizeof(int)); /* 20171115 */
     if(instdef[i].arcs==NULL){
       fprintf(errfp, "check_symbol_storage(): calloc error\n");tcleval( "exit");
     }

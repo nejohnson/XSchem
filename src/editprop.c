@@ -388,7 +388,7 @@ void edit_rect_property(void)
   int preserve;
   char *oldprop=NULL;
   if(rect[selectedgroup[0].col][selectedgroup[0].n].prop_ptr!=NULL) {
-    my_strdup(46, &oldprop, rect[selectedgroup[0].col][selectedgroup[0].n].prop_ptr);
+    my_strdup(67, &oldprop, rect[selectedgroup[0].col][selectedgroup[0].n].prop_ptr);
     tclsetvar("retval",oldprop);
   } else { /* 20161208 */
     tclsetvar("retval","");

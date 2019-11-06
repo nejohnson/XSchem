@@ -1,7 +1,6 @@
 #!/usr/bin/gawk -f
 BEGIN{
   debug = 0
-  ## these 4 sizes will be recalculated based on pin text label lengths
   symbolx1 = 0
   symbolx2 = 700 # recalculated when number of top/bottom pins is known
   symboly1 = 0
@@ -127,11 +126,17 @@ END{
   attrs(attributes)
   firstpinyoffset = round(pincharspacing * pin[1, "maxlength"])
   lastpinyoffset = round(pincharspacing * pin[3, "maxlength"])
-  symboly2 = symboly1 + max(pin[0,"maxcoord"], pin[2, "maxcoord"]) + firstpinyoffset + lastpinyoffset
+  symboly2 = max(pin[0,"maxcoord"], pin[2, "maxcoord"]) + firstpinyoffset + lastpinyoffset
   topbotpinsize = round(max(pin[1,"maxcoord"], pin[3, "maxcoord"]) + firstpinxoffset + lastpinxoffset)
   labsize = round( ( (labelcharspacing * label["maxlength"] + labeloffset)/2 \
              + max(pincharspacing * pin[0, "maxlength"], pincharspacing * pin[2, "maxlength"])) * 2 )
-  symbolx2 = symbolx1 + max(topbotpinsize, labsize)
+  symbolx2 = max(topbotpinsize, labsize)
+  ## center symbol after size calculations are done
+  symbolx1 -= round(symbolx2/2)
+  symbolx2 += symbolx1
+  symboly1 -= round(symboly2/2)
+  symboly2 += symboly1
+
   dbg("labsize: " labsize)
   dbg("topbotpinsize: " topbotpinsize)
   for(p = 0; p < 4; p++) {
@@ -262,7 +267,7 @@ function header()
 
 function round(n)
 {
-  return n==0 ? 0 : n > 0 ? int((n+grid)/grid)*grid : int((n-grid)/grid)*grid
+  return n==0 ? 0 : (n > 0) ? (int( (n-0.001)/grid) +1) * grid : (int( (n+0.001)/grid) -1) * grid
 }
 
 function max(a, b) { return (a > b) ? a : b }

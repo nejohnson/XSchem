@@ -128,8 +128,16 @@ END{
   firstpinyoffset = round(pincharspacing * pin[1, "maxlength"])
   lastpinyoffset = round(pincharspacing * pin[3, "maxlength"])
   symboly2 = symboly1 + max(pin[0,"maxcoord"], pin[2, "maxcoord"]) + firstpinyoffset + lastpinyoffset
-  symbolx2 = symbolx1 + max(pin[1,"maxcoord"], pin[3, "maxcoord"]) + firstpinxoffset + lastpinxoffset \
-             + labelcharspacing * label["maxlength"] + labeloffset
+
+  toppinsize = max(pin[1,"maxcoord"], pin[3, "maxcoord"]) + firstpinxoffset + lastpinxoffset
+  labsize = labelcharspacing * label["maxlength"] + labeloffset + firstpinyoffset + lastpinyoffset
+
+  symbolx2 = symbolx1 + max(toppinsize, labsize);
+  # symbolx2 = symbolx1 + max(pin[1,"maxcoord"], pin[3, "maxcoord"]) + firstpinxoffset + lastpinxoffset \
+  #            + labelcharspacing * label["maxlength"] + labeloffset
+
+  dbg("symbolx2: + " max(pin[1,"maxcoord"], pin[3, "maxcoord"]) " " firstpinxoffset " " lastpinxoffset \
+      " " labelcharspacing * label["maxlength"] " " labeloffset)
   for(p = 0; p < 4; p++) {
     if(p == 0 ) { 
       x = symbolx1 - pinlinelength

@@ -1,5 +1,6 @@
 #!/usr/bin/gawk -f
 BEGIN{
+  debug = 0
   ## these 4 sizes will be recalculated based on pin text label lengths
   symbolx1 = 0
   symbolx2 = 700 # recalculated when number of top/bottom pins is known
@@ -24,12 +25,11 @@ BEGIN{
   labeltextsize = 0.4
   labelspacing = 40 # vertical spacing of label strings
   labelcharspacing = 30 * labeltextsize
-  labeloffset = 60 # extra space to put around labels to avoid collision with pin text labels
+  labeloffset = 20 # extra space to put around labels to avoid collision with pin text labels
   negradius = 5
   triggerxsize = 8
   triggerysize = 8
   grid = 20
-  debug = 1
   start_pin=0
   nlines = 0
   bus = 0
@@ -128,16 +128,12 @@ END{
   firstpinyoffset = round(pincharspacing * pin[1, "maxlength"])
   lastpinyoffset = round(pincharspacing * pin[3, "maxlength"])
   symboly2 = symboly1 + max(pin[0,"maxcoord"], pin[2, "maxcoord"]) + firstpinyoffset + lastpinyoffset
-
-  toppinsize = max(pin[1,"maxcoord"], pin[3, "maxcoord"]) + firstpinxoffset + lastpinxoffset
-  labsize = labelcharspacing * label["maxlength"] + labeloffset + firstpinyoffset + lastpinyoffset
-
-  symbolx2 = symbolx1 + max(toppinsize, labsize);
-  # symbolx2 = symbolx1 + max(pin[1,"maxcoord"], pin[3, "maxcoord"]) + firstpinxoffset + lastpinxoffset \
-  #            + labelcharspacing * label["maxlength"] + labeloffset
-
-  dbg("symbolx2: + " max(pin[1,"maxcoord"], pin[3, "maxcoord"]) " " firstpinxoffset " " lastpinxoffset \
-      " " labelcharspacing * label["maxlength"] " " labeloffset)
+  topbotpinsize = round(max(pin[1,"maxcoord"], pin[3, "maxcoord"]) + firstpinxoffset + lastpinxoffset)
+  labsize = round( ( (labelcharspacing * label["maxlength"] + labeloffset)/2 \
+             + max(pincharspacing * pin[0, "maxlength"], pincharspacing * pin[2, "maxlength"])) * 2 )
+  symbolx2 = symbolx1 + max(topbotpinsize, labsize)
+  dbg("labsize: " labsize)
+  dbg("topbotpinsize: " topbotpinsize)
   for(p = 0; p < 4; p++) {
     if(p == 0 ) { 
       x = symbolx1 - pinlinelength

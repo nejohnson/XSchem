@@ -12,7 +12,7 @@ BEGIN{
   firstpinxoffset = 40
   lastpinyoffset = 40 # recalculated when bottom pin max label length is known
   lastpinxoffset = 40
-  pintextoffset = 15
+  pintextoffset = 11
   pinboxhalfsize = 2.5
   pinlinelength = 40
   pintextsize = 0.3
@@ -25,6 +25,7 @@ BEGIN{
   labelspacing = 40 # vertical spacing of label strings
   labelcharspacing = 30 * labeltextsize
   labeloffset = 20 # extra space to put around labels to avoid collision with pin text labels
+  labelcenteroffset = 8
   negradius = 5
   triggerxsize = 8
   triggerysize = 8
@@ -33,6 +34,12 @@ BEGIN{
   nlines = 0
   bus = 0
   pos = 0 ## default if no [position] field specified
+}
+
+/^--/{
+  if(/^--auto_pinnumber/) { enable_autopinnumber = 1 }
+  if(/^--hide_pinnumber/) { hide_pinnumber = 1 }
+  next
 }
 
 /^[ \t]*#/{
@@ -66,6 +73,7 @@ start_labels == 1 {
 /^[ \t]*\[bottom\]/ { pos = 3 }
 /^[ \t]*\[[^][]*\][ \t]*$/ {
   start_labels = 0
+  posseq[seqidx++] = pos
   pin[pos, "n"] = 0;
   start_pin = 1;
   coord = 0;
@@ -80,6 +88,8 @@ start_labels == 1 {
 ## typical pin line is as follows
 ## 26   i!>   CLK
 start_pin {
+
+  if(enable_autopinnumber) $0 = autopinnumber++ " " $0
   n =  pin[pos, "n"]
   if(NF == 2) { $0 = $1 " b " $2 } ## backward compatibility with 'djboxsym' format
   if(NF == 3) {
@@ -88,9 +98,10 @@ start_pin {
     dir = "inout" ## default if (mandatory) direction forgotten
     if($2 ~ />/) trig = 1
     if($2 ~ /!/) neg = 1
-    if($2 ~ /i/) dir = "in"
-    if($2 ~ /o/) dir = "out"
-    if($2 ~ /b/) dir = "inout"
+    if($2 ~ /io/) dir = "inout"
+    else if($2 ~ /i/) dir = "in"
+    else if($2 ~ /o/) dir = "out"
+    else if($2 ~ /p/) dir = "inout" # xschem has no special attrs for power so set direction as inout
     pinnumber = $1
     pinname = $3
     pin[pos, n, "pinname"] = pinname
@@ -124,13 +135,13 @@ start_pin {
 END{
   header()
   attrs(attributes)
-  firstpinyoffset = round(pincharspacing * pin[1, "maxlength"])
-  lastpinyoffset = round(pincharspacing * pin[3, "maxlength"])
+  firstpinyoffset = round(pincharspacing * pin[1, "maxlength"] + pintextoffset)
+  lastpinyoffset = round(pincharspacing * pin[3, "maxlength"] + pintextoffset)
   symboly2 = max(pin[0,"maxcoord"], pin[2, "maxcoord"]) + firstpinyoffset + lastpinyoffset
-  topbotpinsize = round(max(pin[1,"maxcoord"], pin[3, "maxcoord"]) + firstpinxoffset + lastpinxoffset)
-  labsize = round( ( (labelcharspacing * label["maxlength"] + labeloffset)/2 \
-             + max(pincharspacing * pin[0, "maxlength"], pincharspacing * pin[2, "maxlength"])) * 2 )
-  symbolx2 = max(topbotpinsize, labsize)
+  topbotpinsize = max(pin[1,"maxcoord"], pin[3, "maxcoord"]) + firstpinxoffset + lastpinxoffset
+  labsize = ( (labelcharspacing * label["maxlength"] + labeloffset)/2 \
+             + max(pincharspacing * pin[0, "maxlength"], pincharspacing * pin[2, "maxlength"])) * 2
+  symbolx2 = round( max(topbotpinsize, labsize) / 2) * 2 ## round to double grid so half size is grid-aligned when centering
   ## center symbol after size calculations are done
   symbolx1 -= round(symbolx2/2)
   symbolx2 += symbolx1
@@ -139,7 +150,8 @@ END{
 
   dbg("labsize: " labsize)
   dbg("topbotpinsize: " topbotpinsize)
-  for(p = 0; p < 4; p++) {
+  for(i = 0; i < 4; i++) {
+    p = posseq[i]
     if(p == 0 ) { 
       x = symbolx1 - pinlinelength
       y = symboly1 + firstpinyoffset
@@ -166,22 +178,26 @@ END{
         if(p == 0) {
           line(x, y, x + (neg ? pinlinelength - 2 * negradius : pinlinelength), y, 4, "")
           text(pin[p, n, "pinname"], x + pinlinelength + pintextoffset, y - pintextcenteroffset, 0, 0, pintextsize, "")
-          text(pin[p, n, "pinnumber"], x + pinlinelength - pinnumberoffset, y - pinnumbercenteroffset, 0, 1, pinnumbertextsize, "")
+          if(!hide_pinnumber)text(pin[p, n, "pinnumber"], x + pinlinelength - pinnumberoffset, \
+               y - pinnumbercenteroffset, 0, 1, pinnumbertextsize, "")
           if(neg) circle(x + pinlinelength - negradius, y, negradius, 4, "")
         } else if(p == 1) {
           line(x, y, x, y + (neg ? pinlinelength - 2 * negradius : pinlinelength) , 4, "")
           text(pin[p, n, "pinname"], x + pintextcenteroffset, y + pinlinelength + pintextoffset, 1, 0, pintextsize, "")
-          text(pin[p, n, "pinnumber"], x - pinnumbercenteroffset, y + pinlinelength - pinnumberoffset, 3, 0, pinnumbertextsize, "")
+          if(!hide_pinnumber)text(pin[p, n, "pinnumber"], x - pinnumbercenteroffset, \
+               y + pinlinelength - pinnumberoffset, 3, 0, pinnumbertextsize, "")
           if(neg) circle(x, y + pinlinelength - negradius, negradius, 4, "")
         } else if(p == 2) {
           line(x - (neg ? pinlinelength -2 * negradius :pinlinelength), y, x, y, 4, "")
           text(pin[p, n, "pinname"], x - pinlinelength - pintextoffset, y - pintextcenteroffset, 0, 1, pintextsize, "")
-          text(pin[p, n, "pinnumber"], x - pinlinelength + pinnumberoffset , y - pinnumbercenteroffset, 0, 0, pinnumbertextsize, "")
+          if(!hide_pinnumber)text(pin[p, n, "pinnumber"], x - pinlinelength + pinnumberoffset, \
+               y - pinnumbercenteroffset, 0, 0, pinnumbertextsize, "")
           if(neg) circle(x - pinlinelength + negradius, y, negradius, 4, "")
         } else if(p == 3) {
           line(x, y - (neg ? pinlinelength -2 * negradius :pinlinelength), x, y, 4, "")
           text(pin[p, n, "pinname"], x + pintextcenteroffset, y - pinlinelength - pintextoffset, 1, 1, pintextsize, "")
-          text(pin[p, n, "pinnumber"], x - pinnumbercenteroffset, y - pinlinelength + pinnumberoffset, 3, 1, pinnumbertextsize, "")
+          if(!hide_pinnumber)text(pin[p, n, "pinnumber"], x - pinnumbercenteroffset, \
+               y - pinlinelength + pinnumberoffset, 3, 1, pinnumbertextsize, "")
           if(neg) circle(x, y - pinlinelength + negradius, negradius, 4, "")
         }
         if(trig) trigger(x, y, 4, p)
@@ -198,7 +214,7 @@ END{
   for(l = 0; l < label["n"]; l++) {
     dbg("label: " l " : " label[l])
     labx = (symbolx1 + symbolx2) / 2 - length(label[l]) * labelcharspacing /2 
-    laby = (symboly1 + symboly2) / 2 + l * labelspacing - label["n"] * labelspacing / 2
+    laby = (symboly1 + symboly2) / 2 + l * labelspacing - label["n"] * labelspacing / 2 + labelcenteroffset
     text(label[l], labx, laby, 0, 0, labeltextsize, "")
   }
    

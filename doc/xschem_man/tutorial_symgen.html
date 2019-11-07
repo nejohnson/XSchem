@@ -179,14 +179,25 @@ STEFAN FREDERIK SCHIPPERS
   <li>
    In addition to optional <kbd>!</kbd> (inversion bubble) and <kbd>&gt;</kbd> (edge trigger) specifiers
    XSCHEM's <kbd>symgen.awk</kbd> accepts a pin direction specifier, 
-   <kbd>i</kbd>, <kbd>o</kbd>, <kbd>b</kbd>,
-   for 'input', 'output' or 'inout (bidirectional) direction. These attributes are fundamental
+   <kbd>i</kbd>, <kbd>o</kbd>, <kbd>io</kbd> and <kbd>p</kbd> (latter one for power pins, treated by xschem as inout)
+   for 'input', 'output', 'inout' (bidirectional) direction and 'power'. These attributes are fundamental
    for digital simulations (Verilog, Vhdl). If this specifier is missing (as it is in djboxsym 
-   .symdef files) then the direction is assumed as <kbd>b</kbd> (inout)
+   .symdef files) then the direction is assumed as <kbd>b</kbd> (inout).
+   XSCHEM does not have any specific direction for power pins so they are treated as 'inout' <br>
+   <i>Port direction specifiers are indeed supported also by 'djboxsym' but not documented.</i>
   </li>
   <li>
    <kbd>.bus</kbd> specifier can be used for all pin orientations, left, top, right, bottom. djboxsym 
    does not allow reduced spacing busses on top and bottom sides of the symbol.
+  </li>
+  <li> 
+   Option <kbd>--auto_pinnumber</kbd> given <b>before</b> any pin declaration lets <kbd>symgen.awk</kbd>
+   automatically add pin numbers, so the first field may be omitted
+  </li>
+  <li> 
+   Option <kbd>--hide_pinnumber</kbd> given <b>before</b> any pin declaration avoids
+   pin numbers in generated symbol. If this option is used 
+   it is mostly done together with <kbd>--auto_pinnumber</kbd> to get rid of pin numbers completely.
   </li>
   </ul>
  </p>

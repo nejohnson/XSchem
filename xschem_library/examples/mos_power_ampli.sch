@@ -114,11 +114,11 @@ N 930 -700 1030 -700 {lab=SA}
 N 930 -440 930 -430 {lab=GB}
 N 930 -390 930 -380 {lab=SB}
 N 930 -380 1030 -380 {lab=SB}
-C {ipin.sym} 530 -170 0 0 {name=p0 lab=PLUS}
-C {ipin.sym} 530 -150 0 0 {name=p1 lab=MINUS}
-C {ipin.sym} 530 -130 0 0 {name=p2 lab=VPP}
-C {ipin.sym} 530 -110 0 0 {name=p3 lab=VNN}
-C {ipin.sym} 530 -90 0 0 {name=p4 lab=VSS}
+C {ipin.sym} 530 -160 0 0 {name=p0 lab=PLUS}
+C {ipin.sym} 530 -180 0 0 {name=p1 lab=MINUS}
+C {ipin.sym} 530 -120 0 0 {name=p2 lab=VPP}
+C {ipin.sym} 530 -100 0 0 {name=p3 lab=VNN}
+C {ipin.sym} 530 -140 0 0 {name=p4 lab=VSS}
 C {opin.sym} 600 -130 0 0 {name=p5 lab=OUT}
 C {nmos3.sym} 1090 -440 0 0 {name=xm2 model=irf540 m=1
 url="http://www.ece.usu.edu/ece_store/spec/IRF540.pdf"}

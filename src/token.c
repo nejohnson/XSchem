@@ -330,7 +330,7 @@ int set_different_token(char **s,char *new, char *old, int object, int n)
 /* 0: eat non escaped quotes (") */
 /* 1: return unescaped quotes as part of the token value if they are present */
 /* 2: eat backslashes */
-/* 3: 1+2  :) */
+/* 3: 1+2 : never used, non sense */
 char *get_tok_value(const char *s,const char *tok, int with_quotes)
 {
   static char *result=NULL;
@@ -2093,6 +2093,16 @@ void print_verilog_primitive(FILE *fd, int inst) /* netlist switch level primiti
  }
 }
 
+int isonlydigit(const char *s)
+{
+    char c;
+    if(s == NULL || *s == '\0') return 0;
+    while( (c = *s) ) {
+     if(c < '0' || c > '9') return 0;
+     s++;
+    }
+    return 1;
+}
 
 /* 20180911 */
 char *find_nth(char *str, char sep, int n)
@@ -2211,14 +2221,13 @@ char *translate(int inst, char* s)
      subtok[0]='\0';
      n=-1;
      sscanf(token+2, "%[^:]:%[^:]", subtok4, subtok);
-     if(subtok4[0]) {
+     if(isonlydigit(subtok4)) {
+       n = atoi(subtok4);
+     }
+     else if(subtok4[0]) {
        for(n = 0 ; n < (inst_ptr[inst].ptr+instdef)->rects[PINLAYER]; n++) {
          if(!strcmp(get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr,"name",0), subtok4)) break;
        }
-     }
-
-     if( n==-1  || n>= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER])  {
-       sscanf(token+2, "%d:%s", &n, subtok);
      }
      if(n>=0  && subtok[0] && n < (inst_ptr[inst].ptr+instdef)->rects[PINLAYER]) {
        pinname = get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr,"name",0);
@@ -2243,10 +2252,10 @@ char *translate(int inst, char* s)
          memcpy(result+result_pos, value, tmp+1); /* 20180923 */
          result_pos+=tmp;
        }
+       my_free(&subtok3);
      }
      my_free(&subtok);
      my_free(&subtok2);
-     my_free(&subtok3);
      my_free(&subtok4);
    } else if(strcmp(token,"@sch_last_modified")==0) {
 

@@ -810,6 +810,7 @@ extern struct wireentry *wire_iterator_next();
 extern void check_unique_names(int rename);
 extern void free_hash(void);
 extern char *find_nth(char *str, char sep, int n);
+extern int isonlydigit(const char *s);
 extern char *translate(int inst, char* s);
 extern void print_tedax_element(FILE *fd, int inst);
 extern void print_spice_element(FILE *fd, int inst);

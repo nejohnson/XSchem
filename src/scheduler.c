@@ -498,11 +498,11 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
  } else if( !strcmp(argv[1],"getprop")) { /* 20171028 */
 
 
-   if(!strcmp(argv[2], "instance")) {
+   if( argc > 2 && !strcmp(argv[2], "instance")) {
      int i;
      char *tmp;
      if(argc!=5 && argc !=4) {
-       Tcl_AppendResult(interp, "xschem getprop needs 2 or 3 additional arguments", NULL);
+       Tcl_AppendResult(interp, "'xschem getprop instance' needs 1 or 2 additional arguments", NULL);
        return TCL_ERROR;
      }
      Tcl_ResetResult(interp);
@@ -521,6 +521,57 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
        Tcl_AppendResult(interp, tmp, NULL);
      } else {
        Tcl_AppendResult(interp, get_tok_value(inst_ptr[i].prop_ptr, argv[4], 0), NULL);
+     }
+   } else if(argc > 2 && !strcmp(argv[2], "instance_pin")) {
+     /*   0       1        2         3   4       5     */
+     /* xschem getprop instance_pin X10 PLUS pin_attr  */
+     /* xschem getprop instance_pin X10  1   pin_attr  */
+     int inst, n=-1, tmp;
+     char *subtok=NULL, *value=NULL;
+     Tcl_ResetResult(interp);
+     if(argc != 6 && argc != 5) {
+       Tcl_AppendResult(interp, "xschem getprop instance_pin needs 2 or 3 additional arguments", NULL);
+       return TCL_ERROR;
+     }
+
+     if( (inst = get_instance(argv[3])) < 0 ) {
+       Tcl_AppendResult(interp, "xschem getprop: instance not found", NULL);
+       return TCL_ERROR;
+     }
+     if(isonlydigit(argv[4])) {
+       n = atoi(argv[4]);
+     }
+     else {
+       for(n = 0; n < (inst_ptr[inst].ptr+instdef)->rects[PINLAYER]; n++) {
+         if(!strcmp(get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr,"name",0), argv[4])) break;
+       }
+     }
+     if(n>=0  && n < (inst_ptr[inst].ptr+instdef)->rects[PINLAYER]) {
+       if(argc == 5) {
+        Tcl_AppendResult(interp, (inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr, NULL);
+       } else {
+         tmp = 100 + strlen(argv[4]) + strlen(argv[5]);
+         subtok = my_malloc(83,tmp);
+         my_snprintf(subtok, tmp, "%s(%s)", argv[5], argv[4]);
+         value = get_tok_value(inst_ptr[inst].prop_ptr,subtok,0);
+         if(!value[0]) {
+           my_snprintf(subtok, tmp, "%s(%d)", argv[5], n);
+           value = get_tok_value(inst_ptr[inst].prop_ptr,subtok,0);
+         }
+         if(!value[0]) {
+           value = get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr,argv[5],0);
+         }
+         if(value[0] != 0) {
+           char *ss;
+           int slot;
+           if( (ss = strchr(inst_ptr[inst].instname, ':')) ) {
+             sscanf(ss + 1, "%d", &slot);
+             value = find_nth(value, ':', slot);
+           }
+           Tcl_AppendResult(interp, value, NULL);
+         }
+         my_free(&subtok);
+       }
      }
    } else if( !strcmp(argv[2],"symbol")) { /* 20171028 */
      int i, found=0;
@@ -567,6 +618,10 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
    int no_of_pins, i, p, mult;
    const char *str_ptr;
 
+   if( argc <4) {
+     Tcl_AppendResult(interp, "xschem instance_net needs 2 additional arguments", NULL);
+     return TCL_ERROR;
+   }
    if( (i = get_instance(argv[2])) < 0 ) {
      Tcl_AppendResult(interp, "xschem getprop: instance not found", NULL);
      return TCL_ERROR;

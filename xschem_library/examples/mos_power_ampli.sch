@@ -17,25 +17,25 @@ N 260 -470 340 -470 {lab=E9}
 N 340 -500 340 -470 {lab=E9}
 N 1110 -700 1110 -670 {lab=SA}
 N 840 -1020 840 -980 {lab=E4}
-N 1110 -590 1110 -570 {lab=OUT}
-N 1110 -510 1110 -470 {lab=#net1}
-N 570 -950 800 -950 {lab=#net2}
-N 350 -950 550 -950 {lab=#net2}
-N 330 -950 335 -955 {lab=#net2}
-N 335 -955 345 -955 {lab=#net2}
-N 345 -955 350 -950 {lab=#net2}
-N 550 -950 555 -955 {lab=#net2}
-N 555 -955 565 -955 {lab=#net2}
-N 565 -955 570 -950 {lab=#net2}
+N 1110 -590 1110 -570 {lab=#net1}
+N 1110 -510 1110 -470 {lab=#net2}
+N 570 -950 800 -950 {lab=#net3}
+N 350 -950 550 -950 {lab=#net3}
+N 330 -950 335 -955 {lab=#net3}
+N 335 -955 345 -955 {lab=#net3}
+N 345 -955 350 -950 {lab=#net3}
+N 550 -950 555 -955 {lab=#net3}
+N 555 -955 565 -955 {lab=#net3}
+N 565 -955 570 -950 {lab=#net3}
 N 180 -1020 180 -980 {lab=E1}
-N 230 -950 330 -950 {lab=#net2}
+N 230 -950 330 -950 {lab=#net3}
 N 390 -790 520 -790 {lab=C2}
-N 230 -950 230 -900 {lab=#net2}
-N 180 -900 230 -900 {lab=#net2}
+N 230 -950 230 -900 {lab=#net3}
+N 180 -900 230 -900 {lab=#net3}
 N 390 -790 390 -740 {lab=C2}
 N 340 -740 390 -740 {lab=C2}
-N 180 -920 180 -900 {lab=#net2}
-N 220 -950 230 -950 {lab=#net2}
+N 180 -920 180 -900 {lab=#net3}
+N 220 -950 230 -950 {lab=#net3}
 N 340 -760 340 -740 {lab=C2}
 N 380 -790 390 -790 {lab=C2}
 N 180 -1120 180 -1080 {lab=VBOOST}
@@ -61,7 +61,7 @@ N 560 -1180 1110 -1180 {lab=VPP}
 N 900 -440 1070 -440 {lab=GB}
 N 560 -460 560 -440 {lab=C8}
 N 1200 -1120 1330 -1120 {lab=VBOOST}
-N 1200 -900 1200 -870 {lab=#net3}
+N 1200 -900 1200 -870 {lab=#net4}
 N 1110 -1180 1330 -1180 {lab=VPP}
 N 560 -580 560 -520 {lab=E8}
 N 560 -760 560 -640 {lab=C6}
@@ -78,9 +78,9 @@ N 260 -180 260 -130 {lab=E3}
 N 180 -150 180 -70 {lab=VNN}
 N 50 -150 50 -70 {lab=VNN}
 N 50 -70 180 -70 {lab=VNN}
-N 690 -600 1110 -600 {lab=OUT}
+N 690 -600 1110 -600 {lab=#net1}
 N 180 -470 260 -470 {lab=E9}
-N 1110 -610 1110 -600 {lab=OUT}
+N 1110 -610 1110 -600 {lab=#net1}
 N 1030 -380 1110 -380 {lab=SB}
 N 1030 -700 1110 -700 {lab=SA}
 N 1200 -1120 1200 -960 {lab=VBOOST}
@@ -93,27 +93,28 @@ N 340 -630 340 -560 {lab=C9}
 N 220 -630 340 -630 {lab=C9}
 N 180 -600 180 -560 {lab=C5}
 N 1110 -320 1110 -280 {lab=VNN}
-N 1200 -590 1290 -590 {lab=OUT}
-N 1110 -590 1200 -590 {lab=OUT}
-N 1110 -600 1110 -590 {lab=OUT}
-N 340 -860 340 -820 {lab=#net4}
-N 560 -860 560 -820 {lab=#net5}
+N 1330 -590 1390 -590 {lab=OUT}
+N 1110 -590 1200 -590 {lab=#net1}
+N 1110 -600 1110 -590 {lab=#net1}
+N 340 -860 340 -820 {lab=#net5}
+N 560 -860 560 -820 {lab=#net6}
 N 560 -1020 560 -920 {lab=E6}
 N 340 -1020 340 -920 {lab=E2}
 N 260 -280 260 -240 {lab=C3}
-N 800 -440 840 -440 {lab=#net6}
+N 800 -440 840 -440 {lab=#net7}
 N 560 -440 740 -440 {lab=C8}
-N 690 -650 690 -600 {lab=OUT}
-N 690 -730 690 -710 {lab=#net7}
+N 690 -650 690 -600 {lab=#net1}
+N 690 -730 690 -710 {lab=#net8}
 N 180 -840 180 -660 {lab=C7}
 N 840 -860 840 -840 {lab=E11}
-N 1200 -810 1200 -590 {lab=OUT}
+N 1200 -810 1200 -590 {lab=#net1}
 N 930 -760 930 -750 {lab=GA}
 N 930 -710 930 -700 {lab=SA}
 N 930 -700 1030 -700 {lab=SA}
 N 930 -440 930 -430 {lab=GB}
 N 930 -390 930 -380 {lab=SB}
 N 930 -380 1030 -380 {lab=SB}
+N 1200 -590 1270 -590 {lab=#net1}
 C {ipin.sym} 530 -160 0 0 {name=p0 lab=PLUS}
 C {ipin.sym} 530 -180 0 0 {name=p1 lab=MINUS}
 C {ipin.sym} 530 -120 0 0 {name=p2 lab=VPP}
@@ -126,7 +127,7 @@ C {res.sym} 1030 -410 0 1 {name=R7 m=1 value=190}
 C {nmos3.sym} 1090 -760 0 0 {name=xm1 model=irf540 m=1
 url="http://www.ece.usu.edu/ece_store/spec/IRF540.pdf"}
 C {res.sym} 1030 -730 0 1 {name=R0 m=1 value=190}
-C {lab_pin.sym} 1290 -590 0 1 {name=p14 lab=OUT}
+C {lab_pin.sym} 1390 -590 0 1 {name=p14 lab=OUT}
 C {lab_pin.sym} 1110 -280 0 0 {name=p18 lab=VNN}
 C {lab_wire.sym} 990 -440 0 0 {name=l8 lab=GB}
 C {res.sym} 340 -1050 0 1 {name=R2 m=1 value=50}
@@ -184,9 +185,9 @@ rload out 0 4
 ** SPICE models for active devices and put them  into the below 
 ** referenced file in netlist/simulation directory.
 .include \\"models_poweramp.txt\\"
-.dc vplus '-1.5' '1.5' 0.001
+.dc vplus '-1.5' '1.5' 0.1
 .save all
-*.op
+.op
 *.probe dc v(plus,vdc)
 "}
 C {lab_wire.sym} 990 -760 0 0 {name=l1 lab=GA}
@@ -237,3 +238,22 @@ C {ammeter.sym} 770 -440 3 0 {name=v4 current=0.01946}
 C {ammeter.sym} 690 -680 0 0 {name=v5 current=0.006279}
 C {ammeter.sym} 180 -870 0 1 {name=v6 current=0.01956}
 C {ammeter.sym} 840 -890 0 0 {name=v7 current=0.01951}
+C {spice_probe.sym} 1010 -440 0 0 {name=p36 analysis=tran}
+C {spice_probe_vdiff.sym} 930 -410 0 0 {name=p37 analysis=tran}
+C {spice_probe_vdiff.sym} 930 -730 0 0 {name=p38 analysis=tran}
+C {spice_probe.sym} 1010 -760 0 0 {name=p39 analysis=tran}
+C {spice_probe.sym} 1220 -590 0 0 {name=p40 analysis=tran}
+C {spice_probe.sym} 380 -530 0 0 {name=p41 analysis=tran}
+C {spice_probe.sym} 140 -530 0 1 {name=p42 analysis=tran}
+C {spice_probe.sym} 250 -470 0 1 {name=p43 analysis=tran}
+C {spice_probe.sym} 440 -790 0 0 {name=p44 analysis=tran}
+C {spice_probe.sym} 280 -950 0 0 {name=p45 analysis=tran}
+C {spice_probe.sym} 730 -810 0 0 {name=p46 analysis=tran}
+C {spice_probe.sym} 610 -1180 0 0 {name=p47 analysis=tran}
+C {spice_probe.sym} 760 -1120 0 0 {name=p48 analysis=tran}
+C {ammeter.sym} 1300 -590 3 0 {name=v8 current=0.2535}
+C {spice_probe.sym} 1110 -280 0 0 {name=p49 analysis=tran}
+C {spice_probe.sym} 280 -630 0 1 {name=p50 analysis=tran}
+C {spice_probe.sym} 340 -820 0 1 {name=p51 analysis=tran}
+C {spice_probe.sym} 120 -210 0 1 {name=p52 analysis=tran}
+C {spice_probe.sym} 130 -70 0 1 {name=p53 analysis=tran}

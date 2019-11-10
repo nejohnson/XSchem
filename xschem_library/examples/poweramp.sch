@@ -205,8 +205,6 @@ C {launcher.sym} 1120 -1000 0 0 {name=h9
 descr="REGULATORS LIB" 
 url="http://ltwiki.org/files/LTspiceIV/lib/sub/regulators.lib"
 program=firefox}
-C {lab_pin.sym} 260 -110 0 0 {name=p30 lab=VSS}
-C {lab_pin.sym} 260 -110 0 0 {name=p33 lab=VSS}
 C {vsource.sym} 880 -1130 0 0 {name=V4 value=0 xvalue="pwl 0 .1 1m .1 1.01m 0"
 }
 C {lab_pin.sym} 350 -270 0 0 {name=p19 lab=FB}

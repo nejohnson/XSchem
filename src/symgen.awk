@@ -8,9 +8,9 @@ BEGIN{
 
   pinspacing = 40
   pinbusspacing = 20
-  firstpinyoffset = 40 # recalculated when top pin max label length is known
+  firstpinyoffset = 60 # recalculated when top pin max label length is known
   firstpinxoffset = 40
-  lastpinyoffset = 40 # recalculated when bottom pin max label length is known
+  lastpinyoffset = 60 # recalculated when bottom pin max label length is known
   lastpinxoffset = 40
   pintextoffset = 11
   pinboxhalfsize = 2.5
@@ -160,8 +160,11 @@ start_pin {
 END{
   header()
   attrs(attributes)
-  firstpinyoffset = round(pincharspacing * pin[1, "maxlength"] + pintextoffset)
-  lastpinyoffset = round(pincharspacing * pin[3, "maxlength"] + pintextoffset)
+  
+  if(horizontal !=1) {
+    firstpinyoffset = round(pincharspacing * pin[1, "maxlength"] + pintextoffset)
+    lastpinyoffset = round(pincharspacing * pin[3, "maxlength"] + pintextoffset)
+  }
   dbg("pin[3, maxlength]: " pin[3, "maxlength"] " pin[1, maxlength]: " pin[1, "maxlength"])
   dbg("firstpinyoffset: " firstpinyoffset " lastpinyoffset: " lastpinyoffset)
   if(horizontal) {

@@ -21,16 +21,18 @@ proc read_ngspice_raw {arr fp} {
       set variables 1
     }
   }
-  set bindata [read $fp [expr 8 * $n_vars * $n_points]]
-  binary scan $bindata d[expr $n_vars * $n_points] data
-  for {set p 0} {$p < $n_points} { incr p} {
-    for {set v 0} {$v < $n_vars} { incr v} {
-      lappend var($idx($v)) [lindex $data [expr $p * $n_vars + $v]]
-      # puts "-->|$idx($v)|$var($idx($v))|"
+  if {$variables} {
+    set bindata [read $fp [expr 8 * $n_vars * $n_points]]
+    binary scan $bindata d[expr $n_vars * $n_points] data
+    for {set p 0} {$p < $n_points} { incr p} {
+      for {set v 0} {$v < $n_vars} { incr v} {
+        lappend var($idx($v)) [lindex $data [expr $p * $n_vars + $v]]
+        # puts "-->|$idx($v)|$var($idx($v))|"
+      }
     }
+    set var(n\ vars) $n_vars
+    set var(n\ points) $n_points
   }
-  set var(n\ vars) $n_vars
-  set var(n\ points) $n_points
 }
 
 proc get_voltage {arr n } {
@@ -70,22 +72,22 @@ proc get_current {arr n } {
 
 
 proc annotate {} {
-  ### disable screen redraw and undo when looping to speed up performance
-  ### but save state on undo stack before doing backannotations.
-
   set rawfile "[xschem get netlist_dir]/[file rootname [file tail [xschem get schname]]].raw"
-  
   set fp [open $rawfile r]
   fconfigure $fp -translation binary
-  
+  set op_point_read 0 
   while 1 {
     read_ngspice_raw arr $fp
-    if { [info exists arr(n\ points)] && $arr(n\ points) == 1 } {
-      set op_point_read 1; break
-    }
+    if { [info exists arr(n\ points)] } {
+      if { $arr(n\ points) == 1 } {
+        set op_point_read 1; break
+      }
+    } else break;
   }
   close $fp
   if { $op_point_read } {
+    ### disable screen redraw and undo when looping to speed up performance
+    ### but save state on undo stack before doing backannotations.
     xschem push_undo
     xschem set no_undo 1
     xschem set no_draw 1
@@ -124,5 +126,7 @@ proc annotate {} {
     # xschem rebuild_connectivity
     #
     #
+  } else {
+    puts "no operating point found!"
   }
 }

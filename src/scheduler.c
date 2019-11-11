@@ -65,7 +65,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
  int i;
  char name[1024]; /* overflow safe 20161122 */
  if(argc<2) return TCL_ERROR;
- if(debug_var>=3) {
+ if(debug_var>=1) {
    int i;
    fprintf(errfp, "xschem():");
    for(i=0; i<argc; i++) {
@@ -279,16 +279,19 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
  else if(!strcmp(argv[1],"select_all"))
  {
     select_all();
+    Tcl_ResetResult(interp);
  }
 
  else if(!strcmp(argv[1],"zoom_in"))
  {
     view_zoom(0.0);
+    Tcl_ResetResult(interp);
  }
 
  else if(!strcmp(argv[1],"copy_objects"))
  {
    copy_objects(BEGIN); 
+    Tcl_ResetResult(interp);
  }
 
  else if(!strcmp(argv[1],"move_objects"))
@@ -298,6 +301,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
      move_objects( END,0,atof(argv[2]), atof(argv[3]));
    }
    else move_objects(BEGIN,0,0,0); 
+   Tcl_ResetResult(interp);
  }
 
  else if(!strcmp(argv[1],"log"))
@@ -1119,7 +1123,8 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
 
  else if(!strcmp(argv[1],"unselect_all"))
  {
-  if(argc==2) unselect_all();
+  unselect_all();
+  Tcl_ResetResult(interp);
  }
 
  else if(!strcmp(argv[1],"clear_drawing"))

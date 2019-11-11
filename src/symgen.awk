@@ -1,6 +1,6 @@
 #!/usr/bin/gawk -f
 BEGIN{
-  debug = 0
+  debug = 1
   symbolx1 = 0
   symbolx2 = 700 # recalculated when number of top/bottom pins is known
   symboly1 = 0
@@ -15,9 +15,10 @@ BEGIN{
   pintextoffset = 11
   pinboxhalfsize = 2.5
   pinlinelength = 40
-  pintextsize = 0.3
-  pintextcenteroffset = 6
-  pincharspacing = 40 * pintextsize
+  pintextsize = 0.4
+  pintextcenteroffset = 24 * pintextsize
+  pintextheight = 56.6 * pintextsize
+  pincharspacing = 35 * pintextsize
   pinnumbertextsize = 0.25
   pinnumbercenteroffset = 16
   pinnumberoffset = 12
@@ -34,11 +35,13 @@ BEGIN{
   nlines = 0
   bus = 0
   pos = 0 ## default if no [position] field specified
+  horizontal = 1 # default orient. for top/bottom pins, can be changed with --vertical
 }
 
 /^--/{
   if(/^--auto_pinnumber/) { enable_autopinnumber = 1 }
   if(/^--hide_pinnumber/) { hide_pinnumber = 1 }
+  if(/^--vmode/) { horizontal = 0 } # force horizontal top/bottom labels
   next
 }
 
@@ -91,7 +94,7 @@ start_pin {
 
   if(enable_autopinnumber) $0 = autopinnumber++ " " $0
   n =  pin[pos, "n"]
-  if(NF == 2) { $0 = $1 " b " $2 } ## backward compatibility with 'djboxsym' format
+  if(NF == 2) { $0 = $1 " io " $2 } ## backward compatibility with 'djboxsym' format
   if(NF == 3) {
     trig = 0
     neg = 0
@@ -103,19 +106,26 @@ start_pin {
     else if($2 ~ /o/) dir = "out"
     else if($2 ~ /p/) dir = "inout" # xschem has no special attrs for power so set direction as inout
     pinnumber = $1
-    pinname = $3
+    pinname1 = pinname = $3 
+    if(pinname ~ /^\\_.*\\_$/) {
+      pin[pos, n, "overbar"] = 1
+      sub(/^\\/, "", pinname)
+      sub(/\\_$/, "_", pinname)
+      sub(/^\\_/, "", pinname1)
+      sub(/\\_$/, "", pinname1)
+      dbg("pinname: " pinname " pinname1: " pinname1)
+    }
     pin[pos, n, "pinname"] = pinname
     pin[pos, n, "pinnumber"] = pinnumber
     pin[pos, n, "dir"] = dir
     pin[pos, n, "neg"] = neg
     pin[pos, n, "trigger"] = trig
-    pin[pos, n, "bus"] = bus
-    pin[pos, n, "coord"] = coord
-    dbg("pin " pin[pos, n, "pinname"] " coord=" pin[pos, n, "coord"])
-    if( length(pinname) > pin[pos, "maxlength"] ) pin[pos, "maxlength"] = length(pinname)
+    if( (pos == 1 || pos == 3 ) && horizontal) pin[pos, n, "bus"] = 0
+    else pin[pos, n, "bus"] = bus
+    if( length(pinname1) > pin[pos, "maxlength"] ) pin[pos, "maxlength"] = length(pinname)
     pin[pos, "n"]++
   } else if(NF == 0) {
-    if(bus && n > 1) {
+    if(pin[pos, n, "bus"] && n > 1) {
       dbg("last bus bit: " pin[pos, n-1, "pinname"])
       ## empty line after list of bus pins is not a spacer, it ends bus spacing.
       ## remove bus flag on last bus pin so next pin will be spaced normally
@@ -123,12 +133,27 @@ start_pin {
       coord -= pinbusspacing
     } else {
       pin[pos, n, "spacer"] = 1
+      dbg("spacer1")
       pin[pos, "n"]++
     }
     bus = 0
   }
-  pin[pos, "maxcoord"] = coord
-  coord += (bus) ? pinbusspacing : pinspacing
+ 
+  if((pos == 1 || pos == 3) && horizontal) {
+    if(pin[pos, n, "spacer"] != 1) {
+      pin[pos, "maxcoord"] = coord
+      dbg("horiz top/bot pin: " pin[pos, n, "pinname"]" coord: " coord)
+      coord += round(length(pin[pos, n, "pinname"]) * pincharspacing + pintextoffset)
+    } else {
+      pin[pos, "maxcoord"] = coord
+      coord += pinspacing
+      dbg("spacer2: coord: " coord)
+    }
+  } else {
+    pin[pos, "maxcoord"] = coord
+    coord += (bus) ? pinbusspacing : pinspacing
+  }
+  dbg("pos: " pos " maxcoord: " pin[pos, "maxcoord"])
 }
 
 ## GENERATOR
@@ -137,18 +162,36 @@ END{
   attrs(attributes)
   firstpinyoffset = round(pincharspacing * pin[1, "maxlength"] + pintextoffset)
   lastpinyoffset = round(pincharspacing * pin[3, "maxlength"] + pintextoffset)
+  dbg("pin[3, maxlength]: " pin[3, "maxlength"] " pin[1, maxlength]: " pin[1, "maxlength"])
+  dbg("firstpinyoffset: " firstpinyoffset " lastpinyoffset: " lastpinyoffset)
+  if(horizontal) {
+    firstpinxoffset = max( round(length(pin[1, 0, "pinname"]) * pincharspacing / 2 + pintextoffset), \
+                           round(length(pin[3, 0, "pinname"]) * pincharspacing / 2 + pintextoffset))
+    lp1 = pin[1, "n"] -1
+    lp3 = pin[3, "n"] -1
+    lastpinxoffset = max( round(length(pin[1, lp1, "pinname"]) * pincharspacing / 2 + pintextoffset), \
+                          round(length(pin[3, lp3, "pinname"]) * pincharspacing / 2 + pintextoffset))
+    dbg("firstpinxoffset: " firstpinxoffset)
+    dbg("lastpinxoffset: " lastpinxoffset)
+  }
   symboly2 = max(pin[0,"maxcoord"], pin[2, "maxcoord"]) + firstpinyoffset + lastpinyoffset
+  dbg("pin[3, maxcoord]: " pin[3, "maxcoord"])
+  dbg("pin[1, maxcoord]: " pin[1, "maxcoord"])
+  dbg("pin[0, maxcoord]: " pin[0, "maxcoord"])
+  dbg("pin[2, maxcoord]: " pin[2, "maxcoord"])
   topbotpinsize = max(pin[1,"maxcoord"], pin[3, "maxcoord"]) + firstpinxoffset + lastpinxoffset
   labsize = ( (labelcharspacing * label["maxlength"] + labeloffset)/2 \
              + max(pincharspacing * pin[0, "maxlength"], pincharspacing * pin[2, "maxlength"])) * 2
+  dbg("labsize: " labsize)
+  dbg("topbotpinsize: " topbotpinsize)
   symbolx2 = round( max(topbotpinsize, labsize) / 2) * 2 ## round to double grid so half size is grid-aligned when centering
+  dbg("symbolx2: " symbolx2)
   ## center symbol after size calculations are done
   symbolx1 -= round(symbolx2/2)
   symbolx2 += symbolx1
   symboly1 -= round(symboly2/2)
   symboly2 += symboly1
 
-  dbg("labsize: " labsize)
   dbg("topbotpinsize: " topbotpinsize)
   for(i = 0; i < 4; i++) {
     p = posseq[i]
@@ -175,27 +218,78 @@ END{
         pinbox(p, n, x, y)
         neg = pin[p, n, "neg"]
         trig = pin[p, n, "trigger"]
+        pinname = pin[p, n, "pinname"]
+        if(pin[p, n, "overbar"] == 1) {
+          sub(/^_/,"", pinname)
+          sub(/_$/,"", pinname)
+        }
         if(p == 0) {
           line(x, y, x + (neg ? pinlinelength - 2 * negradius : pinlinelength), y, 4, "")
-          text(pin[p, n, "pinname"], x + pinlinelength + pintextoffset, y - pintextcenteroffset, 0, 0, pintextsize, "")
+          text(pinname, x + pinlinelength + pintextoffset, y - pintextcenteroffset, 0, 0, pintextsize, "")
+          if(pin[p, n, "overbar"] == 1) {
+            obx = x + pinlinelength + pintextoffset
+            oby = y - pintextcenteroffset
+            obl = (length(pin[p, n, "pinname"]) - 2 ) * pincharspacing
+            line(obx, oby, obx + obl, oby, 3, "")
+          }
           if(!hide_pinnumber)text(pin[p, n, "pinnumber"], x + pinlinelength - pinnumberoffset, \
                y - pinnumbercenteroffset, 0, 1, pinnumbertextsize, "")
           if(neg) circle(x + pinlinelength - negradius, y, negradius, 4, "")
         } else if(p == 1) {
           line(x, y, x, y + (neg ? pinlinelength - 2 * negradius : pinlinelength) , 4, "")
-          text(pin[p, n, "pinname"], x + pintextcenteroffset, y + pinlinelength + pintextoffset, 1, 0, pintextsize, "")
+          if(horizontal) {
+            halflabwidth = length(pinname) * pincharspacing / 2
+            text(pinname, x - halflabwidth, y + pinlinelength + pintextoffset, 0, 0, pintextsize, "")
+            if(pin[p, n, "overbar"] == 1) {
+              obx = x - halflabwidth
+              oby = y + pinlinelength + pintextoffset
+              obl = (length(pin[p, n, "pinname"]) - 2 ) * pincharspacing
+              line(obx, oby, obx + obl, oby, 3, "")
+            }
+          } else {
+            text(pinname, x + pintextcenteroffset, y + pinlinelength + pintextoffset, 1, 0, pintextsize, "")
+            if(pin[p, n, "overbar"] == 1) {
+              obx = x + pintextcenteroffset - pintextheight
+              oby = y + pinlinelength + pintextoffset
+              obl = (length(pin[p, n, "pinname"]) - 2 ) * pincharspacing
+              line(obx, oby + obl, obx, oby, 3, "")
+            }
+          }
           if(!hide_pinnumber)text(pin[p, n, "pinnumber"], x - pinnumbercenteroffset, \
                y + pinlinelength - pinnumberoffset, 3, 0, pinnumbertextsize, "")
           if(neg) circle(x, y + pinlinelength - negradius, negradius, 4, "")
         } else if(p == 2) {
           line(x - (neg ? pinlinelength -2 * negradius :pinlinelength), y, x, y, 4, "")
-          text(pin[p, n, "pinname"], x - pinlinelength - pintextoffset, y - pintextcenteroffset, 0, 1, pintextsize, "")
+          text(pinname, x - pinlinelength - pintextoffset, y - pintextcenteroffset, 0, 1, pintextsize, "")
+          if(pin[p, n, "overbar"] == 1) {
+            obx = x - pinlinelength - pintextoffset
+            oby = y - pintextcenteroffset
+            obl = (length(pin[p, n, "pinname"]) - 2) * pincharspacing
+            line(obx - obl, oby, obx, oby, 3, "")
+          }
           if(!hide_pinnumber)text(pin[p, n, "pinnumber"], x - pinlinelength + pinnumberoffset, \
                y - pinnumbercenteroffset, 0, 0, pinnumbertextsize, "")
           if(neg) circle(x - pinlinelength + negradius, y, negradius, 4, "")
         } else if(p == 3) {
           line(x, y - (neg ? pinlinelength -2 * negradius :pinlinelength), x, y, 4, "")
-          text(pin[p, n, "pinname"], x + pintextcenteroffset, y - pinlinelength - pintextoffset, 1, 1, pintextsize, "")
+          if(horizontal) {
+            halflabwidth = length(pinname) * pincharspacing / 2
+            text(pinname, x - halflabwidth, y - pinlinelength - pintextoffset, 2, 1, pintextsize, "")
+            if(pin[p, n, "overbar"] == 1) {
+              obx = x - halflabwidth
+              oby = y - pinlinelength - pintextoffset - pintextheight
+              obl = (length(pin[p, n, "pinname"]) - 2 ) * pincharspacing
+              line(obx, oby, obx + obl, oby, 3, "")
+            }
+          } else {
+            text(pinname, x + pintextcenteroffset, y - pinlinelength - pintextoffset, 1, 1, pintextsize, "")
+            if(pin[p, n, "overbar"] == 1) {
+              obx = x + pintextcenteroffset - pintextheight
+              oby = y - pinlinelength - pintextoffset
+              obl = (length(pin[p, n, "pinname"]) - 2 ) * pincharspacing
+              line(obx, oby, obx, oby - obl, 3, "")
+            }
+          }
           if(!hide_pinnumber)text(pin[p, n, "pinnumber"], x - pinnumbercenteroffset, \
                y - pinlinelength + pinnumberoffset, 3, 1, pinnumbertextsize, "")
           if(neg) circle(x, y - pinlinelength + negradius, negradius, 4, "")
@@ -205,16 +299,24 @@ END{
 
       pin[p, lastcoord] = (p == 0 || p == 2) ? y : x
       if(p == 0 || p == 2) y += pd
-      else x += pd
-    }
+      else {
+        if(horizontal) {
+          if(pin[p, n, "spacer"] != 1) {
+            if(n + 1 < pin[p,"n"]) {
+              x += round( (length(pin[p, n, "pinname"]) + length(pin[p, n + 1, "pinname"]) ) * pincharspacing / 2  + pintextoffset)
+            }
+          } else x += pd
+        } else x += pd
+      }
+    } # for(n)
     dbg("direction " p " last coord=" pin[p, lastcoord])
-  }
+  } # for(p)
   box(symbolx1, symboly1, symbolx2, symboly2, 4, "")
 
   for(l = 0; l < label["n"]; l++) {
     dbg("label: " l " : " label[l])
     labx = (symbolx1 + symbolx2) / 2 - length(label[l]) * labelcharspacing /2 
-    laby = (symboly1 + symboly2) / 2 + l * labelspacing - label["n"] * labelspacing / 2 + labelcenteroffset
+    laby = (symboly1 + symboly2) / 2 + ( l - label["n"] / 2 ) * labelspacing + labelcenteroffset
     text(label[l], labx, laby, 0, 0, labeltextsize, "")
   }
    

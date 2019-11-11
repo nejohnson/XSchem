@@ -62,6 +62,7 @@ DEMO ONLY
 23 !&gt; WR/(R/!W)
 
 25 ! INT
+29  \_RESET\_
 
 [right]
 10 ! RST
@@ -76,17 +77,16 @@ DEMO ONLY
 
 28 XTAL1
 27 XTAL2
-
 [top]
 3 AV+
 8 VDD1
+30 !&gt; \_CLK\_
 19 VDD2
 
 [bottom]
 2 AGND
 9 DGND1
 20 DGND2
-
  </pre>
  <p>
   Creating the symbol is simple: <br>
@@ -112,7 +112,7 @@ STEFAN FREDERIK SCHIPPERS
 ! type=subcircuit
 ! format="@name @pinlist @symname"
 ! template="name=x1"
-
+--vmode
 [left]
 24   i!   CHIP_SELECT
 .bus
@@ -127,8 +127,8 @@ STEFAN FREDERIK SCHIPPERS
 
 21   i&gt;   ALE
 
-22   i!   RD
-23   i!&gt;  WR
+22   i!   \_RD\_
+23   i!&gt;  \_WR\_
 25   i!   INTERRUPT_REQUEST
 [right]
 10   i!   RST
@@ -142,9 +142,9 @@ STEFAN FREDERIK SCHIPPERS
 28   i    XTAL1
 27   i    XTAL2
 [top]
-3    b    AVP
+3    io    AVP
 .bus
-29  o!    DATA0 
+29  o!    DATA0
 30  o!    DATA1
 31  o!    DATA2
 32  o     DATA3
@@ -161,15 +161,15 @@ STEFAN FREDERIK SCHIPPERS
 43  o     DATA14
 44  o     DATA15
 
-8    b    VDD1
-19   b    VDD2
-45   b    VDD_ANALOG
-46   b    VDD_DIGITAL
+8    io    VDD1
+19   io    VDD2
+45   io    VDD_ANALOG
+46   io    VDD_DIGITAL
 [bottom]
-2    b!   GND_ANALOG
-47   b!   GND_DIGITAL
-9    b&gt;   DGND1
-20   b&gt;   GND2
+2    io!   GND_ANALOG
+47   io!   GND_DIGITAL
+9    io&gt;   DGND1
+20   io&gt;   GND2
  </pre>
  <img src = "tutorial_symgen_02.png" style="max-width: 100%;">
  <p>
@@ -187,12 +187,18 @@ STEFAN FREDERIK SCHIPPERS
    <i>Port direction specifiers are indeed supported also by 'djboxsym' but not documented.</i>
   </li>
   <li>
-   <kbd>.bus</kbd> specifier can be used for all pin orientations, left, top, right, bottom. djboxsym 
-   does not allow reduced spacing busses on top and bottom sides of the symbol.
+   Option <kbd>--vmode</kbd> given <b>before</b> any pin declaration like in djboxsym sets vertical orientation for top / bottom pins.
+  </li>
+  <li>
+   <kbd>.bus</kbd> specifier can be used for all pin orientations, left, top, right, bottom if <kbd>--vmode</kbd>
+   is enabled, otherwise it will affect only spacing of left/right pins.
   </li>
   <li> 
    Option <kbd>--auto_pinnumber</kbd> given <b>before</b> any pin declaration lets <kbd>symgen.awk</kbd>
    automatically add pin numbers, so the first field may be omitted
+  </li>
+  <li>
+   Edge trigger (>) and inversion bubble (!) specifiers are drawn on all sides, not only left/right.
   </li>
   <li> 
    Option <kbd>--hide_pinnumber</kbd> given <b>before</b> any pin declaration avoids

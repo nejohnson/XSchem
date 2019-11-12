@@ -5,14 +5,12 @@ BEGIN{
   symbolx2 = 700 # recalculated when number of top/bottom pins is known
   symboly1 = 0
   symboly2 = 700 # recalculated when number of left/right pins is known
-
+  firstpinyoffset = 40 # recalculated when top pin max label length is known
+  lastpinyoffset = 40 # recalculated when bottom pin max label length is known
   pinspacing = 40
   pinbusspacing = 20
-  firstpinyoffset = 60 # recalculated when top pin max label length is known
-  firstpinxoffset = 40
-  lastpinyoffset = 60 # recalculated when bottom pin max label length is known
-  lastpinxoffset = 40
   pintextoffset = 11
+  pintextpadding = 18
   pinboxhalfsize = 2.5
   pinlinelength = 40
   pintextsize = 0.4
@@ -22,11 +20,11 @@ BEGIN{
   pinnumbertextsize = 0.25
   pinnumbercenteroffset = 16
   pinnumberoffset = 12
-  labeltextsize = 0.4
+  labeltextsize = 0.6
   labelspacing = 40 # vertical spacing of label strings
   labelcharspacing = 30 * labeltextsize
   labeloffset = 20 # extra space to put around labels to avoid collision with pin text labels
-  labelcenteroffset = 8
+  labelcenteroffset = 20 * labeltextsize
   negradius = 5
   triggerxsize = 8
   triggerysize = 8
@@ -84,17 +82,28 @@ start_labels == 1 {
 }
 
 /^\./{ 
-  if(/^\.bus/) bus = 1
+  if(/^\.bus/) {
+    if( !horizontal || (pos == 0 || pos == 2) ) {
+      bus = 1
+      firstbus=1
+    }
+  }
   next
 }
 
 ## typical pin line is as follows
 ## 26   i!>   CLK
 start_pin {
-
-  if(enable_autopinnumber) $0 = autopinnumber++ " " $0
+  if(NF > 0 && enable_autopinnumber) $0 = autopinnumber++ " " $0
   n =  pin[pos, "n"]
-  if(NF == 2) { $0 = $1 " io " $2 } ## backward compatibility with 'djboxsym' format
+  if(NF == 0) {
+    if(bus == 1) coord += delta1
+    else coord += pinspacing
+    bus = 0
+    dbg("spacer")
+    pin[pos, n, "spacer"] = 1
+    pin[pos, "n"]++
+  } else if(NF == 2) { $0 = $1 " io " $2 } ## backward compatibility with 'djboxsym' format
   if(NF == 3) {
     trig = 0
     neg = 0
@@ -106,87 +115,70 @@ start_pin {
     else if($2 ~ /o/) dir = "out"
     else if($2 ~ /p/) dir = "inout" # xschem has no special attrs for power so set direction as inout
     pinnumber = $1
-    pinname1 = pinname = $3 
+    pinname = $3
     if(pinname ~ /^\\_.*\\_$/) {
       pin[pos, n, "overbar"] = 1
       sub(/^\\/, "", pinname)
       sub(/\\_$/, "_", pinname)
-      sub(/^\\_/, "", pinname1)
-      sub(/\\_$/, "", pinname1)
-      dbg("pinname: " pinname " pinname1: " pinname1)
     }
     pin[pos, n, "pinname"] = pinname
     pin[pos, n, "pinnumber"] = pinnumber
     pin[pos, n, "dir"] = dir
     pin[pos, n, "neg"] = neg
     pin[pos, n, "trigger"] = trig
-    if( (pos == 1 || pos == 3 ) && horizontal) pin[pos, n, "bus"] = 0
-    else pin[pos, n, "bus"] = bus
-    if( length(pinname1) > pin[pos, "maxlength"] ) pin[pos, "maxlength"] = length(pinname)
-    pin[pos, "n"]++
-  } else if(NF == 0) {
-    if(pin[pos, n, "bus"] && n > 1) {
-      dbg("last bus bit: " pin[pos, n-1, "pinname"])
-      ## empty line after list of bus pins is not a spacer, it ends bus spacing.
-      ## remove bus flag on last bus pin so next pin will be spaced normally
-      pin[pos, n-1,"bus"] = 0
-      coord -= pinbusspacing
+    pin[pos, n, "bus"] = bus
+    if((pos == 1 || pos == 3 ) && horizontal )  {
+      delta1 = delta2 = round((length(pin[pos, n, "pinname"]) * pincharspacing  + pintextpadding)) / 2
     } else {
-      pin[pos, n, "spacer"] = 1
-      dbg("spacer1")
-      pin[pos, "n"]++
+      if(bus) {
+        if(!firstbus) delta1 = pinbusspacing / 2
+        else delta1 = pinspacing / 2
+        delta2 = pinbusspacing / 2
+        firstbus = 0
+      } else {
+        delta1 = delta2 = pinspacing / 2
+      }
     }
-    bus = 0
-  }
- 
-  if((pos == 1 || pos == 3) && horizontal) {
-    if(pin[pos, n, "spacer"] != 1) {
-      pin[pos, "maxcoord"] = coord
-      dbg("horiz top/bot pin: " pin[pos, n, "pinname"]" coord: " coord)
-      coord += round(length(pin[pos, n, "pinname"]) * pincharspacing + pintextoffset)
-    } else {
-      pin[pos, "maxcoord"] = coord
-      coord += pinspacing
-      dbg("spacer2: coord: " coord)
-    }
-  } else {
+    
+    coord += delta1
+    pin[pos, n, "coord"] = round(coord)
+    dbg("pin[" pos ", " n ", coord]: " pin[pos, n, "coord"] " pinname: " pinname " bus: " bus " delta: " delta1 ":" delta2 " coord: " coord)
+    # dbg("delta1: " delta1 " delta2: " delta2)
+    coord += delta2
     pin[pos, "maxcoord"] = coord
-    coord += (bus) ? pinbusspacing : pinspacing
+    if( length(pinname) > pin[pos, "maxlength"] ) pin[pos, "maxlength"] = length(pinname)
+    pin[pos, "n"]++
   }
-  dbg("pos: " pos " maxcoord: " pin[pos, "maxcoord"])
 }
 
 ## GENERATOR
 END{
   header()
   attrs(attributes)
-  
+ 
   if(horizontal !=1) {
-    firstpinyoffset = round(pincharspacing * pin[1, "maxlength"] + pintextoffset)
-    lastpinyoffset = round(pincharspacing * pin[3, "maxlength"] + pintextoffset)
+    firstpinyoffset = round(pintextoffset + pincharspacing * pin[1, "maxlength"])
+    lastpinyoffset = round(pintextoffset + pincharspacing * pin[3, "maxlength"])
   }
-  dbg("pin[3, maxlength]: " pin[3, "maxlength"] " pin[1, maxlength]: " pin[1, "maxlength"])
-  dbg("firstpinyoffset: " firstpinyoffset " lastpinyoffset: " lastpinyoffset)
-  if(horizontal) {
-    firstpinxoffset = max( round(length(pin[1, 0, "pinname"]) * pincharspacing / 2 + pintextoffset), \
-                           round(length(pin[3, 0, "pinname"]) * pincharspacing / 2 + pintextoffset))
-    lp1 = pin[1, "n"] -1
-    lp3 = pin[3, "n"] -1
-    lastpinxoffset = max( round(length(pin[1, lp1, "pinname"]) * pincharspacing / 2 + pintextoffset), \
-                          round(length(pin[3, lp3, "pinname"]) * pincharspacing / 2 + pintextoffset))
-    dbg("firstpinxoffset: " firstpinxoffset)
-    dbg("lastpinxoffset: " lastpinxoffset)
-  }
-  symboly2 = max(pin[0,"maxcoord"], pin[2, "maxcoord"]) + firstpinyoffset + lastpinyoffset
+ 
+  dbg("pin[1, maxlength]: " pin[1, "maxlength"])
+  dbg("pin[3, maxlength]: " pin[3, "maxlength"])
+  dbg("firstpinyoffset: " firstpinyoffset)
+  dbg("lastpinyoffset: " lastpinyoffset)
+  ## round to double grid so half size is grid-aligned when centering
+  symboly2 = round(max(pin[0,"maxcoord"], pin[2, "maxcoord"]) / 2) * 2 + firstpinyoffset + lastpinyoffset
+  dbg("symboly2: " symbolx2)
   dbg("pin[3, maxcoord]: " pin[3, "maxcoord"])
   dbg("pin[1, maxcoord]: " pin[1, "maxcoord"])
   dbg("pin[0, maxcoord]: " pin[0, "maxcoord"])
   dbg("pin[2, maxcoord]: " pin[2, "maxcoord"])
-  topbotpinsize = max(pin[1,"maxcoord"], pin[3, "maxcoord"]) + firstpinxoffset + lastpinxoffset
+  topbotpinsize = max(pin[1,"maxcoord"], pin[3, "maxcoord"]) + pintextpadding / 2
   labsize = ( (labelcharspacing * label["maxlength"] + labeloffset)/2 \
              + max(pincharspacing * pin[0, "maxlength"], pincharspacing * pin[2, "maxlength"])) * 2
-  dbg("labsize: " labsize)
   dbg("topbotpinsize: " topbotpinsize)
+  dbg("labsize: " labsize)
+  dbg("pincharspacing * pin[0, maxlength]: " pincharspacing * pin[0, "maxlength"])
+  dbg("pincharspacing * pin[2, maxlength]: " pincharspacing * pin[2, "maxlength"])
   symbolx2 = round( max(topbotpinsize, labsize) / 2) * 2 ## round to double grid so half size is grid-aligned when centering
   dbg("symbolx2: " symbolx2)
   ## center symbol after size calculations are done
@@ -195,29 +187,29 @@ END{
   symboly1 -= round(symboly2/2)
   symboly2 += symboly1
 
-  dbg("topbotpinsize: " topbotpinsize)
   for(i = 0; i < 4; i++) {
     p = posseq[i]
-    if(p == 0 ) { 
-      x = symbolx1 - pinlinelength
-      y = symboly1 + firstpinyoffset
-    }
-    else if(p == 1 ) { 
-      x = symbolx1 + firstpinxoffset
-      y = symboly1 - pinlinelength
-    }
-    else if(p == 2 ) { 
-      x = symbolx2 + pinlinelength
-      y = symboly1 + firstpinyoffset
-    }
-    else if(p == 3 ) { 
-      x = symbolx1 + firstpinxoffset
-      y = symboly2 + pinlinelength
-    }
     for(n = 0; n < pin[p,"n"]; n++) {
+
+
+      if(p == 0 ) { 
+        x = symbolx1 - pinlinelength
+        y = symboly1 + pin[p, n, "coord"] + firstpinyoffset
+      }
+      else if(p == 1 ) { 
+        x = symbolx1 + pin[p, n, "coord"]
+        y = symboly1 - pinlinelength
+      }
+      else if(p == 2 ) { 
+        x = symbolx2 + pinlinelength
+        y = symboly1 + pin[p, n, "coord"] + firstpinyoffset
+      }
+      else if(p == 3 ) { 
+        x = symbolx1 + pin[p, n, "coord"]
+        y = symboly2 + pinlinelength
+      }
+
       if(pin[p, n, "spacer"] != 1) {
-        if(pin[p, n, "bus"]) pd = pinbusspacing
-        else pd = pinspacing
         pinbox(p, n, x, y)
         neg = pin[p, n, "neg"]
         trig = pin[p, n, "trigger"]
@@ -299,20 +291,7 @@ END{
         }
         if(trig) trigger(x, y, 4, p)
       }
-
-      pin[p, lastcoord] = (p == 0 || p == 2) ? y : x
-      if(p == 0 || p == 2) y += pd
-      else {
-        if(horizontal) {
-          if(pin[p, n, "spacer"] != 1) {
-            if(n + 1 < pin[p,"n"]) {
-              x += round( (length(pin[p, n, "pinname"]) + length(pin[p, n + 1, "pinname"]) ) * pincharspacing / 2  + pintextoffset)
-            }
-          } else x += pd
-        } else x += pd
-      }
     } # for(n)
-    dbg("direction " p " last coord=" pin[p, lastcoord])
   } # for(p)
   box(symbolx1, symboly1, symbolx2, symboly2, 4, "")
 

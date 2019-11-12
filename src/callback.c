@@ -1232,11 +1232,7 @@ int callback(int event, int mx, int my, KeySym key,
     check_unique_names(1);
     break;
    }
-   if((key==';') && (state & ControlMask) )         /* testmode 20171203 */
-   {
-    break;
-   }
-   if(0 && (key==';') && (state & ControlMask) )    /* testmode:  for performance testing */
+   if( 0 && (key==';') && (state & ControlMask) )    /* testmode:  for performance testing */
    {
     draw_stuff(); 
     draw();

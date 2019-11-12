@@ -180,12 +180,6 @@
 
 #define HASHSIZE 31627
 
-/*  20180104 */
-/*  big enouth to contain instances and wires in viewable area when draw() switching */
-/*  to spatial hash iterator. Dont make it too big as clearing big hash tables */
-/*  (and this is done on every redraw) takes time. */
-#define INTHASHSIZE 4177
-
                    /*  parameters passed to action functions, see actions.c */
 #define END      1 /*  endop */
 #define BEGIN    2 /*  begin placing something */

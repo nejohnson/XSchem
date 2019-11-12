@@ -73,6 +73,10 @@ proc get_current {arr n } {
 
 proc annotate {} {
   set rawfile "[xschem get netlist_dir]/[file rootname [file tail [xschem get schname]]].raw"
+  if { ![file exists $rawfile] } {
+    puts "no raw file found: $rawfile"
+    return
+  }
   set fp [open $rawfile r]
   fconfigure $fp -translation binary
   set op_point_read 0 
@@ -130,3 +134,5 @@ proc annotate {} {
     puts "no operating point found!"
   }
 }
+
+bind .drw <Alt-a> {annotate}

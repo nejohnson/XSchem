@@ -532,6 +532,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key == XK_Escape )                        /* abort & redraw */
    {
+    no_draw = 0;
     if(semaphore==2) break;
     tcleval("set vertical_move 0; set horizontal_move 0" );
     last_command=0;

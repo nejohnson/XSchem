@@ -116,6 +116,7 @@ install: xschem
 	cp convert_to_verilog2001.awk $(prefix)/share/xschem
 	cp flatten.awk $(prefix)/share/xschem
 	cp make_sym.awk $(prefix)/share/xschem
+	cp symgen.awk $(prefix)/share/xschem
 	cp order_labels.awk $(prefix)/share/xschem
 	cp sort_labels.awk $(prefix)/share/xschem
 	cp spice.awk $(prefix)/share/xschem

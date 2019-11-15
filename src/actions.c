@@ -1114,12 +1114,14 @@ void change_linewidth(double w)
   /* choose line width automatically based on zoom */
   if(w<0.) {
     if(change_lw)  {
-      lw_double=1/zoom*1.5;
+      lw_double=mooz * 1.5;
+      bus_width = BUS_WIDTH * mooz * 1.5;
       changed=1;
     }
   /* explicitly set line width */
   } else {
     lw_double=w;
+    bus_width = BUS_WIDTH * w;
     changed=1;
   }
   if(!changed) return;
@@ -1283,7 +1285,10 @@ void zoom_full(int dr, int sel)
   Box boundbox;
   double yy1;
 
-  if(change_lw) lw = lw_double=1.;
+  if(change_lw) {
+    lw = lw_double=1.;
+    bus_width = BUS_WIDTH * lw_double;
+  }
   areax1 = -2*lw;
   areay1 = -2*lw;
   areax2 = xrect[0].width+2*lw;

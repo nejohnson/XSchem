@@ -497,8 +497,8 @@ void copy_objects(int what)
       check_wire_storage();
       if(wire[n].bus){ /* 20171201 */
         int ov, y1, y2;
-        bbox(ADD, wire[n].x1-BUS_WIDTH, wire[n].y1-BUS_WIDTH , wire[n].x2+BUS_WIDTH , wire[n].y2+BUS_WIDTH );
-        ov = BUS_WIDTH> CADHALFDOTSIZE ? BUS_WIDTH : CADHALFDOTSIZE;
+        bbox(ADD, wire[n].x1-bus_width, wire[n].y1-bus_width , wire[n].x2+bus_width , wire[n].y2+bus_width );
+        ov = bus_width> CADHALFDOTSIZE ? bus_width : CADHALFDOTSIZE;
         if(wire[n].y1 < wire[n].y2) { y1 = wire[n].y1-ov; y2 = wire[n].y2+ov; }
         else                        { y1 = wire[n].y1+ov; y2 = wire[n].y2-ov; }
         bbox(ADD, wire[n].x1-ov, y1 , wire[n].x2+ov , y2 );
@@ -884,8 +884,8 @@ void move_objects(int what, int merge, double dx, double dy)
       if(k!=WIRELAYER) break;
       if(wire[n].bus){ /* 20171201 */
         int ov, y1, y2;
-        bbox(ADD, wire[n].x1-BUS_WIDTH, wire[n].y1-BUS_WIDTH , wire[n].x2+BUS_WIDTH , wire[n].y2+BUS_WIDTH );
-        ov = BUS_WIDTH> CADHALFDOTSIZE ? BUS_WIDTH : CADHALFDOTSIZE;
+        bbox(ADD, wire[n].x1-bus_width, wire[n].y1-bus_width , wire[n].x2+bus_width , wire[n].y2+bus_width );
+        ov = bus_width> CADHALFDOTSIZE ? bus_width : CADHALFDOTSIZE;
         if(wire[n].y1 < wire[n].y2) { y1 = wire[n].y1-ov; y2 = wire[n].y2+ov; }
         else                        { y1 = wire[n].y1+ov; y2 = wire[n].y2-ov; }
         bbox(ADD, wire[n].x1-ov, y1 , wire[n].x2+ov , y2 );

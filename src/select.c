@@ -749,7 +749,7 @@ void select_connected_nets(void)
       if(wire[n].sel==SELECTED) {
         my_strdup(62, &str ,get_tok_value(wire[n].prop_ptr, "lab",0));
         if(str && str[0]) {
-          search_inst("lab", str,1, 1, NOW);
+          search("lab", str,1, 1, NOW);
         }
       }
       break;
@@ -757,7 +757,7 @@ void select_connected_nets(void)
       if(inst_ptr[n].sel==SELECTED) {
         my_strdup(63, &str, get_tok_value(inst_ptr[n].prop_ptr, "lab",0));
         if(str && str[0]) {
-          search_inst("lab", str,1, 1, NOW);
+          search("lab", str,1, 1, NOW);
         }
       }
       break;

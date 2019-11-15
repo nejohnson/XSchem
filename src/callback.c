@@ -1064,7 +1064,16 @@ int callback(int event, int mx, int my, KeySym key,
    if(key=='f' && state==Mod1Mask)              /* flip objects around their anchor points 20171208 */
    {
     if(ui_state & STARTMOVE) move_objects(FLIP|ROTATELOCAL,0,0,0);
-    if(ui_state & STARTCOPY) copy_objects(FLIP|ROTATELOCAL);
+    else if(ui_state & STARTCOPY) copy_objects(FLIP|ROTATELOCAL);
+    else {
+      rebuild_selected_array();
+      mx_save = mx; my_save = my; /* 20070323 */
+      mx_double_save=mousex_snap;
+      my_double_save=mousey_snap;
+      move_objects(BEGIN,0,0,0);
+      move_objects(FLIP|ROTATELOCAL,0,0,0);
+      move_objects(END,0,0,0);
+    }
     break;
    }
    if(key=='R' && state==ShiftMask)             /* Rotate */
@@ -1087,7 +1096,16 @@ int callback(int event, int mx, int my, KeySym key,
    if(key=='r' && state==Mod1Mask)              /* Rotate objects around their anchor points 20171208 */
    {
     if(ui_state & STARTMOVE) move_objects(ROTATE|ROTATELOCAL,0,0,0);
-    if(ui_state & STARTCOPY) copy_objects(ROTATE|ROTATELOCAL);
+    else if(ui_state & STARTCOPY) copy_objects(ROTATE|ROTATELOCAL);
+    else {
+      rebuild_selected_array();
+      mx_save = mx; my_save = my; /* 20070323 */
+      mx_double_save=mousex_snap;
+      my_double_save=mousey_snap;
+      move_objects(BEGIN,0,0,0);
+      move_objects(ROTATE|ROTATELOCAL,0,0,0);
+      move_objects(END,0,0,0);
+    }
     break;
    }
    if(key=='m' && state==0 && !(ui_state & (STARTMOVE | STARTCOPY)))/* move selected obj. */

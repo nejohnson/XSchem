@@ -17,9 +17,9 @@ END  { endfile(_filename_) }
 BEGIN{
 }
 
-/template *= *"name=/{
-  sub(/=./, toupper("&"))
-  print
+/search_inst\(/ {
+  gsub(/search_inst\(/, "search(")
+  found = 1
 }
 
 

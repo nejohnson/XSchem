@@ -1058,25 +1058,20 @@ proc property_search {} {
   ## ... use alternate method instead 20110322
   bind .lw <Visibility> { if { [regexp Obscured %s] } {raise .lw; if { $tcl_version > 8.4 } {wm attributes  .lw -topmost 1} } }
   ## 
-
-
   # 20100408
   set X [expr [winfo pointerx .lw] - 60]
   set Y [expr [winfo pointery .lw] - 35]
   wm geometry .lw "+$X+$Y"
-
   frame .lw.custom 
   label .lw.custom.l -text "Token"
   entry .lw.custom.e -width 32
   .lw.custom.e insert 0 $custom_token
   pack .lw.custom.e .lw.custom.l -side right
-
   frame .lw.val 
   label .lw.val.l -text "Value"
   entry .lw.val.e -width 32
   .lw.val.e insert 0 $search_value
   pack .lw.val.e .lw.val.l -side right
-
   frame .lw.but
   button .lw.but.ok -text OK -command {
         set search_value [.lw.val.e get]
@@ -1099,11 +1094,9 @@ proc property_search {} {
   pack .lw.but.sel  -side left
   pack .lw.but.unsel  -side left
   pack .lw.but.cancel -anchor e
-
   pack .lw.custom  -anchor e
   pack .lw.val  -anchor e
   pack .lw.but -expand yes -fill x
-
   focus  .lw
   bind .lw <Escape> {.lw.but.cancel invoke}
   bind .lw <Return> {.lw.but.ok invoke}

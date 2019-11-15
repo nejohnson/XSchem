@@ -1225,8 +1225,8 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
   }
   if(argc==6) {
     select = atoi(argv[3]);
-    if( !strcmp(argv[2],"regex") )  search_inst(argv[4],argv[5],0,select, what);
-    else  search_inst(argv[4],argv[5],1,select, what);
+    if( !strcmp(argv[2],"regex") )  search(argv[4],argv[5],0,select, what);
+    else  search(argv[4],argv[5],1,select, what);
   }
  }
 

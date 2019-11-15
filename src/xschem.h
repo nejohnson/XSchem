@@ -599,6 +599,7 @@ extern struct instpinentry *instpintable[NBOXES][NBOXES];
 extern double mx_double_save, my_double_save; /*  20070322 */
 extern struct instentry *insttable[NBOXES][NBOXES];
 extern size_t get_tok_value_size;
+extern size_t get_tok_size;
 
 /*  functions */
 extern void print_version(void);
@@ -617,7 +618,7 @@ extern const char *get_file_path(char *f);
 extern int save(int confirm);
 extern struct hilight_hashentry *bus_hilight_lookup(const char *token, int value, int remove) ;
 extern int  name_strcmp(char *s, char *d) ;
-extern void search_inst(const char *tok, const char *val, int sub, int sel, int what);
+extern void search(const char *tok, const char *val, int sub, int sel, int what);
 extern int process_options(int argc, char **argv);
 extern void calc_drawing_bbox(Box *boundbox, int selected);
 extern void ps_draw(void);
@@ -903,6 +904,12 @@ extern const char *random_string(const char *prefix);
 extern const char *create_tmpdir(char *prefix);
 extern FILE *open_tmpfile(char *prefix, char **filename);
 extern void child_handler(int signum);
+extern char cairo_font_name[1024]; /*  should be monospaced */
+extern int cairo_longest_line;
+extern int cairo_lines;
+extern double cairo_font_scale; /*  default: 1.0, allows to adjust font size */
+extern double cairo_font_line_spacing; /*  allows to change line spacing: default: 1.0 */
+extern double cairo_vert_correct;
 #ifdef HAS_CAIRO /*  20171105 */
 #include <cairo.h>
 #include <cairo-xlib.h>
@@ -923,12 +930,6 @@ extern XRenderPictFormat *format;
 
 
 #endif /*  HAS_CAIRO */
-extern char cairo_font_name[1024]; /*  should be monospaced */
-extern int cairo_longest_line;
-extern int cairo_lines;
-extern double cairo_font_scale; /*  default: 1.0, allows to adjust font size */
-extern double cairo_font_line_spacing; /*  allows to change line spacing: default: 1.0 */
-extern double cairo_vert_correct;
 
 #endif
 

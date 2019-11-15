@@ -142,7 +142,8 @@ start_pin {
     
     coord += delta1
     pin[pos, n, "coord"] = round(coord)
-    dbg("pin[" pos ", " n ", coord]: " pin[pos, n, "coord"] " pinname: " pinname " bus: " bus " delta: " delta1 ":" delta2 " coord: " coord)
+    dbg("pin[" pos ", " n ", coord]: " pin[pos, n, "coord"] " pinname: " \
+        pinname " bus: " bus " delta: " delta1 ":" delta2 " coord: " coord)
     # dbg("delta1: " delta1 " delta2: " delta2)
     coord += delta2
     pin[pos, "maxcoord"] = coord
@@ -186,12 +187,11 @@ END{
   symbolx2 += symbolx1
   symboly1 -= round(symboly2/2)
   symboly2 += symboly1
-
   for(i = 0; i < 4; i++) {
     p = posseq[i]
     for(n = 0; n < pin[p,"n"]; n++) {
-
-
+      dir = pin[p, n, "dir"]
+      plinelay = (dir =="in") ? 4 : (dir == "inout") ? 3 : 1
       if(p == 0 ) { 
         x = symbolx1 - pinlinelength
         y = symboly1 + pin[p, n, "coord"] + firstpinyoffset
@@ -208,7 +208,6 @@ END{
         x = symbolx1 + pin[p, n, "coord"]
         y = symboly2 + pinlinelength
       }
-
       if(pin[p, n, "spacer"] != 1) {
         pinbox(p, n, x, y)
         neg = pin[p, n, "neg"]
@@ -219,7 +218,7 @@ END{
           sub(/_$/,"", pinname)
         }
         if(p == 0) {
-          line(x, y, x + (neg ? pinlinelength - 2 * negradius : pinlinelength), y, 4, "")
+          line(x, y, x + (neg ? pinlinelength - 2 * negradius : pinlinelength), y, plinelay, "")
           text(pinname, x + pinlinelength + pintextoffset, y - pintextcenteroffset, 0, 0, pintextsize, "")
           if(pin[p, n, "overbar"] == 1) {
             obx = x + pinlinelength + pintextoffset
@@ -229,9 +228,9 @@ END{
           }
           if(!hide_pinnumber)text(pin[p, n, "pinnumber"], x + pinlinelength - pinnumberoffset, \
                y - pinnumbercenteroffset, 0, 1, pinnumbertextsize, "")
-          if(neg) circle(x + pinlinelength - negradius, y, negradius, 4, "")
+          if(neg) circle(x + pinlinelength - negradius, y, negradius, plinelay, "")
         } else if(p == 1) {
-          line(x, y, x, y + (neg ? pinlinelength - 2 * negradius : pinlinelength) , 4, "")
+          line(x, y, x, y + (neg ? pinlinelength - 2 * negradius : pinlinelength) , plinelay, "")
           if(horizontal) {
             halflabwidth = length(pinname) * pincharspacing / 2
             text(pinname, x - halflabwidth, y + pinlinelength + pintextoffset, 0, 0, pintextsize, "")
@@ -252,9 +251,9 @@ END{
           }
           if(!hide_pinnumber)text(pin[p, n, "pinnumber"], x - pinnumbercenteroffset, \
                y + pinlinelength - pinnumberoffset, 3, 0, pinnumbertextsize, "")
-          if(neg) circle(x, y + pinlinelength - negradius, negradius, 4, "")
+          if(neg) circle(x, y + pinlinelength - negradius, negradius, plinelay, "")
         } else if(p == 2) {
-          line(x - (neg ? pinlinelength -2 * negradius :pinlinelength), y, x, y, 4, "")
+          line(x - (neg ? pinlinelength -2 * negradius :pinlinelength), y, x, y, plinelay, "")
           text(pinname, x - pinlinelength - pintextoffset, y - pintextcenteroffset, 0, 1, pintextsize, "")
           if(pin[p, n, "overbar"] == 1) {
             obx = x - pinlinelength - pintextoffset
@@ -264,9 +263,9 @@ END{
           }
           if(!hide_pinnumber)text(pin[p, n, "pinnumber"], x - pinlinelength + pinnumberoffset, \
                y - pinnumbercenteroffset, 0, 0, pinnumbertextsize, "")
-          if(neg) circle(x - pinlinelength + negradius, y, negradius, 4, "")
+          if(neg) circle(x - pinlinelength + negradius, y, negradius, plinelay, "")
         } else if(p == 3) {
-          line(x, y - (neg ? pinlinelength -2 * negradius :pinlinelength), x, y, 4, "")
+          line(x, y - (neg ? pinlinelength -2 * negradius :pinlinelength), x, y, plinelay, "")
           if(horizontal) {
             halflabwidth = length(pinname) * pincharspacing / 2
             text(pinname, x - halflabwidth, y - pinlinelength - pintextoffset, 2, 1, pintextsize, "")
@@ -287,9 +286,9 @@ END{
           }
           if(!hide_pinnumber)text(pin[p, n, "pinnumber"], x - pinnumbercenteroffset, \
                y - pinlinelength + pinnumberoffset, 3, 1, pinnumbertextsize, "")
-          if(neg) circle(x, y - pinlinelength + negradius, negradius, 4, "")
+          if(neg) circle(x, y - pinlinelength + negradius, negradius, plinelay, "")
         }
-        if(trig) trigger(x, y, 4, p)
+        if(trig) trigger(x, y, plinelay, p)
       }
     } # for(n)
   } # for(p)
@@ -301,7 +300,6 @@ END{
     laby = (symboly1 + symboly2) / 2 + ( l - label["n"] / 2 ) * labelspacing + labelcenteroffset
     text(label[l], labx, laby, 0, 0, labeltextsize, "")
   }
-   
 }  
 
 function dbg(s)

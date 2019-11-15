@@ -273,7 +273,7 @@ int bus_search(const char*s)
  return bus;
 }
 
-void search_inst(const char *tok, const char *val, int sub, int sel, int what)
+void search(const char *tok, const char *val, int sub, int sel, int what)
 {
  int save_draw;
  int i,c, col,tmp,bus=0;
@@ -285,13 +285,13 @@ void search_inst(const char *tok, const char *val, int sub, int sel, int what)
  regex_t re;
 
  if(!val) {
-   fprintf(errfp, "search_inst(): warning: null val key\n");
+   fprintf(errfp, "search(): warning: null val key\n");
    return;
  }
  save_draw = draw_window;
  draw_window=1;
  if(regcomp(&re, val , REG_EXTENDED)) return;
- if(debug_var>=1) fprintf(errfp, "search_inst():val=%s\n", val);
+ if(debug_var>=1) fprintf(errfp, "search():val=%s\n", val);
  if(sel==1) {
    drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
    drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
@@ -311,8 +311,8 @@ void search_inst(const char *tok, const char *val, int sub, int sel, int what)
         has_token = (inst_ptr[i].name != NULL) && inst_ptr[i].name[0];
         str = inst_ptr[i].name;
       } else if(!strncmp(tok,"cell::", 6)) {
-        has_token = (inst_ptr[i].ptr+instdef)->prop_ptr && strstr((inst_ptr[i].ptr+instdef)->prop_ptr, tok + 6) != NULL;
         my_strdup(142, &tmpname,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,tok+6,0)); /* flexible cell__ search 20140408 */
+        has_token = get_tok_size;
         if(tmpname) {
           str = tmpname;
         } else {
@@ -322,13 +322,13 @@ void search_inst(const char *tok, const char *val, int sub, int sel, int what)
         has_token = (inst_ptr[i].prop_ptr != NULL) && inst_ptr[i].prop_ptr[0];
         str = inst_ptr[i].prop_ptr;
       } else {
-        has_token =  inst_ptr[i].prop_ptr && strstr(inst_ptr[i].prop_ptr, tok) != NULL;
         str = get_tok_value(inst_ptr[i].prop_ptr, tok,0);
+        has_token = get_tok_size;
       }
-      if(debug_var>=1) fprintf(errfp, "search_inst(): inst=%d, tok=%s, val=%s \n", i,tok, str);
+      if(debug_var>=1) fprintf(errfp, "search(): inst=%d, tok=%s, val=%s \n", i,tok, str);
      
       if(bus && sub) {
-       if(debug_var>=1) fprintf(errfp, "search_inst(): doing substr search on bus sig:%s inst=%d tok=%s val=%s\n", str,i,tok,val);
+       if(debug_var>=1) fprintf(errfp, "search(): doing substr search on bus sig:%s inst=%d tok=%s val=%s\n", str,i,tok,val);
        str=expandlabel(str,&tmp);
       }
       if(str && has_token) {
@@ -346,7 +346,7 @@ void search_inst(const char *tok, const char *val, int sub, int sel, int what)
                 draw_symbol_outline(NOW,col%(cadlayers-7)+7, i,c,0,0,0.0,0.0);
             }
             else {
-              if(debug_var>=1) fprintf(errfp, "search_inst(): setting hilight flag on inst %d\n",i);
+              if(debug_var>=1) fprintf(errfp, "search(): setting hilight flag on inst %d\n",i);
               hilight_nets=1;
               inst_ptr[i].flags |= 4;
               if(what==NOW) for(c=0;c<cadlayers;c++)
@@ -366,14 +366,13 @@ void search_inst(const char *tok, const char *val, int sub, int sel, int what)
       
     }
     for(i=0;i<lastwire;i++) {
-      has_token = strstr(wire[i].prop_ptr, tok) != NULL;
       str = get_tok_value(wire[i].prop_ptr, tok,0);
-      if(has_token ) {
+      if(get_tok_size ) {
         if(   (!regexec(&re, str,0 , NULL, 0) && !sub )  ||       /* 20071120 regex instead of strcmp */
               ( !strcmp(str, val) &&  sub )
           ) {
             str = get_tok_value(wire[i].prop_ptr, "lab",0);
-            if(debug_var>=2) fprintf(errfp, "search_inst(): wire=%d, tok=%s, val=%s \n", i,tok, str);
+            if(debug_var>=2) fprintf(errfp, "search(): wire=%d, tok=%s, val=%s \n", i,tok, str);
             if(!sel && str[0]) { /* !sel 20190525 */
               bus_hilight_lookup(str, col, 0);
               if(what == NOW) {
@@ -402,7 +401,47 @@ void search_inst(const char *tok, const char *val, int sub, int sel, int what)
             }
         }
         else {
-          if(debug_var>=2) fprintf(errfp, "search_inst():  not found wire=%d, tok=%s, val=%s search=%s\n", i,tok, str,val);
+          if(debug_var>=2) fprintf(errfp, "search():  not found wire=%d, tok=%s, val=%s search=%s\n", i,tok, str,val);
+        }
+      }
+    }
+    if(sel) for(c = 0; c < cadlayers; c++) for(i=0;i<lastline[c];i++) {
+      str = get_tok_value(line[c][i].prop_ptr, tok,0);
+      if(get_tok_size) {
+        if( (!regexec(&re, str,0 , NULL, 0) && !sub ) ||
+            ( !strcmp(str, val) &&  sub )
+          ) {
+            if(sel==1) {
+              select_line(c, i,SELECTED, 1);
+              ui_state|=SELECTION;
+            }
+            if(sel==-1) {
+              select_line(c, i,0, 1);
+            }
+        }
+        else {
+          if(debug_var>=2) fprintf(errfp, "search(): not found line=%d col=%d, tok=%s, val=%s search=%s\n", 
+                              i, c, tok, str, val);
+        }
+      }
+    }
+    if(sel) for(c = 0; c < cadlayers; c++) for(i=0;i<lastrect[c];i++) {
+      str = get_tok_value(rect[c][i].prop_ptr, tok,0);
+      if(get_tok_size) {
+        if( (!regexec(&re, str,0 , NULL, 0) && !sub ) ||
+            ( !strcmp(str, val) &&  sub )
+          ) {
+            if(sel==1) {
+              select_box(c, i,SELECTED, 1);
+              ui_state|=SELECTION;
+            }
+            if(sel==-1) {
+              select_box(c, i,0, 1);
+            }
+        }
+        else {
+          if(debug_var>=2) fprintf(errfp, "search(): not found rect=%d col=%d, tok=%s, val=%s search=%s\n", 
+                              i, c, tok, str, val);
         }
       }
     }

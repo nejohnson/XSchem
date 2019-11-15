@@ -324,7 +324,7 @@ void merge_file(int selection_load, const char ext[])
         load_ascii_string(&aux_ptr, fd);
         if(selection_load) 
         {
-          sscanf( aux_ptr, "%lg %lg", &mousex_snap, &mousey_snap);
+          sscanf( aux_ptr, "%lf %lf", &mousex_snap, &mousey_snap);
         }
         break;
        case 'L':

@@ -341,7 +341,9 @@ char *get_tok_value(const char *s,const char *tok, int with_quotes)
   register int token_pos=0, value_pos=0;
   int quote=0;
   int escape=0;
+  int tok_size = 0;
  
+  get_tok_size = 0;
   if(!size) {
     size=CADCHUNKALLOC;
     sizetok=CADCHUNKALLOC;
@@ -378,6 +380,7 @@ char *get_tok_value(const char *s,const char *tok, int with_quotes)
       escape = (c=='\\' && !escape);
     } else if(state==XENDTOK || state==XSEPARATOR) {
         if(token_pos) {
+          tok_size = token_pos;
           token[token_pos]='\0';
           token_pos=0;
         }
@@ -385,7 +388,9 @@ char *get_tok_value(const char *s,const char *tok, int with_quotes)
     } else if(state==XEND) {
       result[value_pos]='\0';
       if( !strcmp(token,tok) ) {
+        get_tok_size = tok_size; /* report back also token size, useful to check if requested token exists */
         get_tok_value_size = value_pos; /* return also size so to avoid using strlen 20180926 */
+        
         return result;
       }
       value_pos=0;
@@ -393,6 +398,7 @@ char *get_tok_value(const char *s,const char *tok, int with_quotes)
     }
     if(c=='\0') {
       result[0]='\0';
+      get_tok_size = 0;
       get_tok_value_size = 0; /* return also size so to avoid using strlen 20180926 */
       return result;
     }
@@ -515,7 +521,7 @@ void new_prop_string(char **new_prop,const char *old_prop, int fast, int disable
  
  if(old_prop==NULL) 
  { 
-  if(debug_var>=1) fprintf(errfp, "new_prop_string():-0-  old=%s fast=%d\n", old_prop,fast);
+  if(debug_var>=1) fprintf(errfp, "new_prop_string():-0-  old=NULL fast=%d\n",fast);
   my_strdup(443, new_prop,NULL);
   return;
  }
@@ -1589,7 +1595,7 @@ void print_verilog_element(FILE *fd, int inst)
  int no_of_pins=0;
 
 
- int  tmp1;
+ int  tmp1 = 0;
  register int c, state=XBEGIN, space;
  static char *value=NULL,  *token=NULL;
  int sizetok=0, sizeval=0;

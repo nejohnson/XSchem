@@ -20,8 +20,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "xschem.h"
 #include <stdarg.h>
+#include "xschem.h"
 
 static int rot = 0, flip = 0;          
 

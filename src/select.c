@@ -272,7 +272,7 @@ void delete(void)
     j++; 
     if(wire[i].bus){ /* 20171201 */
       int ov, y1, y2;
-      ov = BUS_WIDTH> CADHALFDOTSIZE ? BUS_WIDTH : CADHALFDOTSIZE;
+      ov = bus_width> CADHALFDOTSIZE ? bus_width : CADHALFDOTSIZE;
       if(wire[i].y1 < wire[i].y2) { y1 = wire[i].y1-ov; y2 = wire[i].y2+ov; }
       else                        { y1 = wire[i].y1+ov; y2 = wire[i].y2-ov; }
       bbox(ADD, wire[i].x1-ov, y1 , wire[i].x2+ov , y2 );
@@ -577,7 +577,6 @@ void select_wire(int i,unsigned short select_mode, int fast)
      drawtempline(gc[SELLAYER], ADD, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
   }
   else {
-   /* if(get_tok_value(wire[i].prop_ptr,"bus",0)[0]) */
    if(wire[i].bus) /* 20171201 */
      drawtempline(gctiled, THICK, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
    else

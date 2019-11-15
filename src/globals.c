@@ -49,6 +49,7 @@ int do_print=0;
 int no_readline=0;
 Colormap colormap;
 int lw=0; /* line width */
+int bus_width = BUS_WIDTH; 
 double lw_double=0.0; /* line width */
 int fill=1; /* filled rectangles */
 int draw_pixmap=1; /* use pixmap for double buffer */

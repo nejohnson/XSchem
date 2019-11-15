@@ -454,6 +454,7 @@ void edit_wire_property(void)
   int i;
   int preserve;
   char *oldprop=NULL;
+  char *bus_ptr;
 
   if(wire[selectedgroup[0].n].prop_ptr!=NULL) {
     my_strdup(47, &oldprop, wire[selectedgroup[0].n].prop_ptr);
@@ -466,20 +467,47 @@ void edit_wire_property(void)
   if(strcmp(tclgetvar("rcode"),"") )
   {
     for(i=0; i<lastselected; i++) {
+      int oldbus=0;
+      int k = selectedgroup[i].n;
       if(selectedgroup[i].type != WIRE) continue; 
       if(!modified) push_undo(); /* 20150327 */
       prepared_hash_wires=0; /* 20181025 */
       prepared_netlist_structs=0;
       prepared_hilight_structs=0;
       set_modify(1); 
+      oldbus = wire[k].bus;
       if(preserve == 1) {
-        set_different_token(&wire[selectedgroup[i].n].prop_ptr, 
+        set_different_token(&wire[k].prop_ptr, 
                (char *) tclgetvar("retval"), oldprop, 0, 0);
       } else {
-        my_strdup(100, &wire[selectedgroup[i].n].prop_ptr,(char *) tclgetvar("retval"));
+        my_strdup(100, &wire[k].prop_ptr,(char *) tclgetvar("retval"));
       }
-      if(get_tok_value(wire[selectedgroup[i].n].prop_ptr,"bus",0)[0]) wire[selectedgroup[i].n].bus=1; /* 20171201 */
-      else wire[selectedgroup[i].n].bus=0;
+      bus_ptr = get_tok_value(wire[k].prop_ptr,"bus",0);
+      if(!strcmp(bus_ptr, "true")) {
+        int ov, y1, y2;
+        bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0);
+        ov = bus_width > CADHALFDOTSIZE ? bus_width : CADHALFDOTSIZE;
+        if(wire[k].y1 < wire[k].y2) { y1 = wire[k].y1-ov; y2 = wire[k].y2+ov; }
+        else                        { y1 = wire[k].y1+ov; y2 = wire[k].y2-ov; }
+        bbox(ADD, wire[k].x1-ov, y1 , wire[k].x2+ov , y2 );
+        wire[k].bus=1;
+        bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
+        draw();
+        bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
+      } else {
+        if(oldbus){ /* 20171201 */
+          int ov, y1, y2;
+          bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0);
+          ov = bus_width> CADHALFDOTSIZE ? bus_width : CADHALFDOTSIZE;
+          if(wire[k].y1 < wire[k].y2) { y1 = wire[k].y1-ov; y2 = wire[k].y2+ov; }
+          else                        { y1 = wire[k].y1+ov; y2 = wire[k].y2-ov; }
+          bbox(ADD, wire[k].x1-ov, y1 , wire[k].x2+ov , y2 );
+          wire[k].bus=0;
+          bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
+          draw();
+          bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
+        }
+      }
     }
   }
   my_free(&oldprop);

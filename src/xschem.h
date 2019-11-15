@@ -202,7 +202,7 @@
 #define FONTWHITESPACE 10
 
 #define S(a) (sizeof(a)/sizeof(char))
-#define BUS_WIDTH ( lw_double>5 ? (int)lw_double:5 )
+#define BUS_WIDTH 4
 #define POINTINSIDE(xa,ya,x1,y1,x2,y2)  \
  (xa>=x1 && xa<=x2 && ya>=y1 && ya<=y2 )
 
@@ -471,6 +471,7 @@ extern int current_type;
 extern char current_name[PATH_MAX];
 extern unsigned int color_index[];
 extern int lw; /*  line width */
+extern int bus_width; /*  line width */
 extern double lw_double; /*  line width */
 extern int change_lw; /*  allow change line width */
 extern int thin_text;

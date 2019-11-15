@@ -782,8 +782,7 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
   if(!only_probes && (x2-x1)< 0.3 && fabs(y2-y1)< 0.3) return; /* 20171206 */
   if( clip(&x1,&y1,&x2,&y2) )
   {
-   XSetLineAttributes (display, gc[c], BUS_WIDTH , LineSolid, CapRound , JoinRound);
-
+   XSetLineAttributes (display, gc[c], bus_width , LineSolid, CapRound , JoinRound);
    if(draw_window) XDrawLine(display, window, gc[c], x1, y1, x2, y2);
    if(draw_pixmap) XDrawLine(display, save_pixmap, gc[c], x1, y1, x2, y2);
    XSetLineAttributes (display, gc[c], lw, LineSolid, CapRound , JoinRound);
@@ -844,7 +843,7 @@ void drawtempline(GC gc, int what, double linex1,double liney1,double linex2,dou
   y2=Y_TO_SCREEN(liney2);
   if( clip(&x1,&y1,&x2,&y2) )
   {
-   XSetLineAttributes (display, gc, BUS_WIDTH, LineSolid, CapRound , JoinRound); /* 20150410 */
+   XSetLineAttributes (display, gc, bus_width, LineSolid, CapRound , JoinRound); /* 20150410 */
 
    XDrawLine(display, window, gc, x1, y1, x2, y2);
    if(gc==gctiled) 

@@ -17,8 +17,8 @@ END  { endfile(_filename_) }
 BEGIN{
 }
 
-/search_inst\(/ {
-  gsub(/search_inst\(/, "search(")
+/^N .*{.*bus=1.*}/{
+  sub(/bus=1/, "bus=true")
   found = 1
 }
 

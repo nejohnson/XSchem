@@ -225,7 +225,7 @@ void trim_wires(void)
            wire[lastwire].sel=0;
            wire[lastwire].prop_ptr=NULL;
            my_strdup(27, &wire[lastwire].prop_ptr, wire[i].prop_ptr);
-           if(get_tok_value(wire[lastwire].prop_ptr,"bus",0)[0]) /* 20171201 */
+           if(!strcmp(get_tok_value(wire[lastwire].prop_ptr,"bus",0), "true")) /* 20171201 */
              wire[lastwire].bus=1;
            else
              wire[lastwire].bus=0;
@@ -253,7 +253,7 @@ void trim_wires(void)
            wire[lastwire].sel=0;
            wire[lastwire].prop_ptr=NULL;
            my_strdup(29, &wire[lastwire].prop_ptr, wire[j].prop_ptr);
-           if(get_tok_value(wire[lastwire].prop_ptr,"bus",0)[0]) /* 20171201 */
+           if(!strcmp(get_tok_value(wire[lastwire].prop_ptr,"bus",0), "true")) /* 20171201 */
              wire[lastwire].bus=1;
            else
              wire[lastwire].bus=0;
@@ -334,7 +334,7 @@ void break_wires_at_pins(void)
               wire[lastwire].sel=SELECTED;
               wire[lastwire].prop_ptr=NULL;
               my_strdup(31, &wire[lastwire].prop_ptr, wire[i].prop_ptr);
-              if(get_tok_value(wire[lastwire].prop_ptr,"bus",0)[0]) /* 20171201 */
+              if(!strcmp(get_tok_value(wire[lastwire].prop_ptr,"bus",0), "true")) /* 20171201 */
                 wire[lastwire].bus=1;
               else
                 wire[lastwire].bus=0;
@@ -391,7 +391,7 @@ void break_wires_at_pins(void)
             wire[lastwire].sel=SELECTED;
             wire[lastwire].prop_ptr=NULL;
             my_strdup(33, &wire[lastwire].prop_ptr, wire[i].prop_ptr);
-            if(get_tok_value(wire[lastwire].prop_ptr,"bus",0)[0]) /* 20171201 */
+            if(!strcmp(get_tok_value(wire[lastwire].prop_ptr,"bus",0), "true")) /* 20171201 */
               wire[lastwire].bus=1;
             else
               wire[lastwire].bus=0;

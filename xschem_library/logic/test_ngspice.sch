@@ -85,6 +85,10 @@ N 800 -500 980 -500 {lab=Y_NOR}
 N 1040 -500 1090 -500 {lab=Y_NOR_A}
 N 460 -380 510 -380 {lab=A_A}
 N 460 -340 510 -340 {lab=B_A}
+N 480 -720 610 -720 {lab=A}
+N 480 -680 610 -680 {lab=B}
+N 710 -700 890 -700 {lab=Y_NAND4}
+N 950 -700 1000 -700 {lab=Y_NAND_A[4]}
 C {title.sym} 160 -30 0 0 {name=l2}
 C {verilog_timescale.sym} 50 -320 0 0 {name=s1 timestep="1ps" precision="1ps" }
 C {use.sym} 50 -420 0 0 {------------------------------------------------
@@ -116,10 +120,19 @@ C {lab_wire.sym} 830 -360 0 1 {name=l5 lab=Y_NAND}
 C {nd2.sym} 740 -360 0 0 {name=a3 delay="120 ps" del=120}
 C {dac_bridge.sym} 1010 -360 0 0 {name=a4 }
 C {lab_pin.sym} 1090 -360 2 0 {name=p1 lab=Y_NAND_A}
-C {/mnt/x/home/schippes/xschem-repo/trunk/xschem_library/devices/netlist_options.sym} 50 -480 0 0 {bus_replacement_char="xx"}
+C {/mnt/x/home/schippes/xschem-repo/trunk/xschem_library/devices/netlist_options.sym} 50 -480 0 0 {bus_replacement_char="[]"}
 C {lab_pin.sym} 670 -520 2 1 {name=p13 lab=A}
 C {lab_pin.sym} 670 -480 2 1 {name=p14 lab=~B,~Y_NAND}
 C {lab_wire.sym} 870 -500 0 1 {name=l15 lab=Y_NOR}
 C {dac_bridge.sym} 1010 -500 0 0 {name=a6 }
 C {lab_pin.sym} 1090 -500 2 0 {name=p16 lab=Y_NOR_A}
 C {nr2.sym} 740 -500 0 0 {name=a5 delay="200 ps" del=200}
+C {lab_wire.sym} 580 -720 0 1 {name=l1 lab=A}
+C {lab_wire.sym} 580 -680 0 1 {name=l6 lab=B}
+C {lab_wire.sym} 740 -700 0 1 {name=l7 lab=Y_NAND4}
+C {nd2.sym} 650 -700 0 0 {name=a7 delay="120 ps" del=120}
+C {dac_bridge.sym} 920 -700 0 0 {name=a8 }
+C {lab_pin.sym} 1000 -700 2 0 {name=p2 lab=Y_NAND_A[4]}
+C {assign.sym} 1280 -470 0 0 {name=v1 delay=1}
+C {lab_pin.sym} 1250 -470 2 1 {name=p3 lab=Y_NOR_A}
+C {lab_pin.sym} 1310 -470 2 0 {name=p4 lab=Y_NOR[3]}

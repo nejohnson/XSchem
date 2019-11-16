@@ -50,7 +50,10 @@ int get_instance(const char *s)
        }
      }
      if(debug_var>=1) fprintf(errfp, "get_instance(): found=%d, i=%d\n", found, i);
-     if(!found) i=atol(s);
+     if(!found) {
+       if(!isonlydigit(s)) return -1;
+       i=atol(s);
+     }
      if(i<0 || i>lastinst) {
        Tcl_AppendResult(interp, "Index out of range", NULL);
        return -1;
@@ -570,7 +573,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
            int slot;
            if( (ss = strchr(inst_ptr[inst].instname, ':')) ) {
              sscanf(ss + 1, "%d", &slot);
-             value = find_nth(value, ':', slot);
+             if(strstr(value, ":")) value = find_nth(value, ':', slot);
            }
            Tcl_AppendResult(interp, value, NULL);
          }

@@ -36,14 +36,20 @@ BEGIN{
 ##1       2     3        4    5           6
 ##        inst  net      pin  pinnumber   pinindex
 # conn    U1:2  INPUT_A  A    1:4:9:12    1
-/^begin_inst .* numslots/{ numslots=$4; next}
+/^begin_inst .* numslots/{ 
+  reparse()
+  numslots=$4; 
+  next
+}
 $1=="device"||$1=="footprint"{
+  reparse()
   arg1=$1; arg2=$2; $1=$2=""; $0=$0
   gsub(/^[ \t]*/,"")
   gsub(/[\\]* +/,"\\ ")
   $0=arg1 " " arg2 " " $0
 }
 /^footprint/{
+  reparse()
   fp=""
   nn=split($2, inst_arr, ":")
   inst_name=inst_arr[1]
@@ -55,6 +61,7 @@ $1=="device"||$1=="footprint"{
 }
 
 /^device/{
+  reparse()
   dev=""
   nn=split($2, inst_arr, ":")
   inst_name=inst_arr[1]
@@ -66,6 +73,7 @@ $1=="device"||$1=="footprint"{
 }
   
 /^conn/{
+  reparse()
   nn=split($2, inst_arr, ":")
   inst_name=inst_arr[1]
   slot = (nn==2) ? inst_arr[2]+0 : 1
@@ -120,4 +128,13 @@ $1=="device"||$1=="footprint"{
 
 { 
   print
+}
+
+# avoid considering escaped spaces as field separators
+function reparse(    i)
+{
+  gsub(/\\ /, SUBSEP)
+  for(i = 1; i <= NF; i++) {
+    gsub(SUBSEP, "\\ ", $i)
+  }
 }

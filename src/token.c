@@ -605,7 +605,7 @@ char *subst_token(const char *s, const char *tok, const char *new_val)
   } else if( state==XTOKEN && space) state=XENDTOK;
   else if( (state==XTOKEN || state==XENDTOK) && c=='=') state=XSEPARATOR;
   else if( state==XSEPARATOR && !space) state=XVALUE;
-  else if( state==XVALUE && space && !quote) state=XEND;
+  else if( state==XVALUE && space && !quote && !escape) state=XEND;
   if(result_pos >= size) {
    size += CADCHUNKALLOC;
    my_realloc(455, &result, size);
@@ -1461,7 +1461,7 @@ void print_tedax_element(FILE *fd, int inst)
     token[token_pos]='\0'; 
     token_pos=0;
  
-    value = get_tok_value(inst_ptr[inst].prop_ptr, token+1, 2);
+    value = get_tok_value(inst_ptr[inst].prop_ptr, token+1, 0);
     if(value[0] == '\0')
     value=get_tok_value(template, token+1, 0);
  
@@ -1508,7 +1508,8 @@ void print_tedax_element(FILE *fd, int inst)
      * 'property' the property defined for that pin (property=value) 
      * in case this property is found the value for it is printed.
      * if device is slotted (U1:m) and property value for pin
-     * is also slotted ('a,b,c,d') then print the m-th substring.
+     * is also slotted ('a:b:c:d') then print the m-th substring.
+     * if property value is not slotted print entire value regardless of device slot.
      * slot numbers start from 1
      */
     } else if(token[0]=='@' && token[1]=='#') {  /* 20180911 */
@@ -1531,7 +1532,7 @@ void print_tedax_element(FILE *fd, int inst)
             int slot;
             if( (ss=strchr(inst_ptr[inst].instname, ':')) ) {
               sscanf(ss+1, "%d", &slot);
-              value = find_nth(value, ':', slot);
+              if(strstr(value, ":")) value = find_nth(value, ':', slot);
             }
             fprintf(fd, "%s", value);
           }
@@ -2218,37 +2219,37 @@ char *translate(int inst, char* s)
     result_pos+=tmp;
    } else if(token[0]=='@' && token[1]=='#') {  /* 20180911 */
      int n;
-     char *subtok = my_malloc(532, sizetok * sizeof(char));
-     char *subtok4 = my_malloc(55, sizetok * sizeof(char));
-     char *subtok2 = my_malloc(43, sizetok * sizeof(char)+20);
-     char *subtok3=NULL, *pinname;
+     char *pin_attr = my_malloc(532, sizetok * sizeof(char));
+     char *pin_num_or_name = my_malloc(55, sizetok * sizeof(char));
+     char *inst_pin_num_redefine = my_malloc(43, sizetok * sizeof(char)+20);
+     char *inst_pin_name_redefine=NULL, *pinname;
 
-     subtok4[0]='\0';
-     subtok[0]='\0';
+     pin_num_or_name[0]='\0';
+     pin_attr[0]='\0';
      n=-1;
-     sscanf(token+2, "%[^:]:%[^:]", subtok4, subtok);
-     if(isonlydigit(subtok4)) {
-       n = atoi(subtok4);
+     sscanf(token+2, "%[^:]:%[^:]", pin_num_or_name, pin_attr);
+     if(isonlydigit(pin_num_or_name)) {
+       n = atoi(pin_num_or_name);
      }
-     else if(subtok4[0]) {
+     else if(pin_num_or_name[0]) {
        for(n = 0 ; n < (inst_ptr[inst].ptr+instdef)->rects[PINLAYER]; n++) {
-         if(!strcmp(get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr,"name",0), subtok4)) break;
+         if(!strcmp(get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr,"name",0), pin_num_or_name)) break;
        }
      }
-     if(n>=0  && subtok[0] && n < (inst_ptr[inst].ptr+instdef)->rects[PINLAYER]) {
+     if(n>=0  && pin_attr[0] && n < (inst_ptr[inst].ptr+instdef)->rects[PINLAYER]) {
        pinname = get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr,"name",0);
-       subtok3 = my_malloc(52, 100+sizetok+get_tok_value_size);
-       my_snprintf(subtok3, 100+sizetok+get_tok_value_size, "%s(%s)", subtok, pinname);
-       my_snprintf(subtok2, sizetok * sizeof(char)+20, "%s(%d)", subtok, n);
-       value = get_tok_value(inst_ptr[inst].prop_ptr,subtok3,0);
-       if(!value[0]) value = get_tok_value(inst_ptr[inst].prop_ptr,subtok2,0);
-       if(!value[0]) value = get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr,subtok,0);
+       inst_pin_name_redefine = my_malloc(52, 100+sizetok+get_tok_value_size);
+       my_snprintf(inst_pin_name_redefine, 100+sizetok+get_tok_value_size, "%s(%s)", pin_attr, pinname);
+       my_snprintf(inst_pin_num_redefine, sizetok * sizeof(char)+20, "%s(%d)", pin_attr, n);
+       value = get_tok_value(inst_ptr[inst].prop_ptr,inst_pin_name_redefine,0);
+       if(!value[0]) value = get_tok_value(inst_ptr[inst].prop_ptr,inst_pin_num_redefine,0);
+       if(!value[0]) value = get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr,pin_attr,0);
        if(value[0] != 0) {
          char *ss;
          int slot;
          if( (ss=strchr(inst_ptr[inst].instname, ':')) ) {
            sscanf(ss+1, "%d", &slot);
-           value = find_nth(value, ':', slot);
+           if(strstr(value,":")) value = find_nth(value, ':', slot);
          }
          tmp=strlen(value);
          if(result_pos + tmp>=size) {
@@ -2258,11 +2259,11 @@ char *translate(int inst, char* s)
          memcpy(result+result_pos, value, tmp+1); /* 20180923 */
          result_pos+=tmp;
        }
-       my_free(&subtok3);
+       my_free(&inst_pin_name_redefine);
      }
-     my_free(&subtok);
-     my_free(&subtok2);
-     my_free(&subtok4);
+     my_free(&pin_attr);
+     my_free(&inst_pin_num_redefine);
+     my_free(&pin_num_or_name);
    } else if(strcmp(token,"@sch_last_modified")==0) {
 
     my_strncpy(file_name, abs_sym_path(inst_ptr[inst].name, ""), S(file_name));

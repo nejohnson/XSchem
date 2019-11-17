@@ -1245,6 +1245,26 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
      Tcl_AppendResult(interp, schematic[currentsch+x], NULL);
    }
  }
+ else if(!strcmp(argv[1],"instance_bbox")) {
+   int i;
+   char s[200];
+   for(i=0;i<lastinst;i++) {
+     if(!strcmp(inst_ptr[i].instname, argv[2])) {
+       break;
+     }
+   }
+   if(i<lastinst) {
+   my_snprintf(s, S(s), "Instance: %g %g %g %g", inst_ptr[i].x1, inst_ptr[i].y1, inst_ptr[i].x2, inst_ptr[i].y2);
+   Tcl_AppendResult(interp, s, NULL);
+   my_snprintf(s, S(s), "\nSymbol: %g %g %g %g", 
+	(inst_ptr[i].ptr+instdef)->minx, 
+	(inst_ptr[i].ptr+instdef)->miny, 
+	(inst_ptr[i].ptr+instdef)->maxx, 
+	(inst_ptr[i].ptr+instdef)->maxy 
+              );
+   Tcl_AppendResult(interp, s, NULL);
+   }
+ }
 
  else if(!strcmp(argv[1],"instance_pos")) {
    int i;

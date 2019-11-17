@@ -31,7 +31,7 @@
 #define CAD_SPICE_NETLIST 1
 
 extern int netlist_type;
-extern int debug_var;
+int dbg_var = 0;
 extern FILE *errfp;
 extern void my_strdup(int id, char **dest, char *src);
 extern void my_free(void *ptr);
@@ -72,12 +72,12 @@ const char *expandlabel(const char *s, int *m)
  my_free(&dest_string.str);     /* 30102004  delete 'memory' of previous execution */
  dest_string.str=NULL;          /* 30102004 */
 
- if(debug_var >=3) fprintf(errfp, "expandlabel(): entering\n");
+ if(dbg_var >=3) fprintf(errfp, "expandlabel(): entering\n");
  buf=yy_scan_string(s);
  bracket=0;
  yyparse();  /* 20140108 */
  yy_delete_buffer(buf);
- if(debug_var >=3) fprintf(errfp, "expandlabel(): returning %s  from %s mult=%d\n",dest_string.str, s, dest_string.m);
+ if(dbg_var >=3) fprintf(errfp, "expandlabel(): returning %s  from %s mult=%d\n",dest_string.str, s, dest_string.m);
  if(dest_string.str)
     *m = dest_string.m;
  else
@@ -104,74 +104,90 @@ const char *expandlabel(const char *s, int *m)
 %x rest
 
 %%
-^(alias|ipin|opin)[+ \n]+[^+\n ]+/[\n +]+ { 
-                         yylval.ptr.str=NULL; /*19102004 */
-       my_strdup(298, &yylval.ptr.str, yytext); /* these things are freed after use in expandlabel.y */
-                         BEGIN(next_to_alias);
-                         return B_LINE;
+^(alias|ipin|iopin|opin)[+ \n]+[^+\n ]+/[\n +]+ { 
+                          yylval.ptr.str=NULL; /*19102004 */
+       			  /* these things are freed after use in expandlabel.y */
+			  my_strdup(298, &yylval.ptr.str, yytext);
+                          BEGIN(next_to_alias);
+			  if(dbg_var >=3) fprintf(errfp, "parselabel: alias, yytext = %s\n", yytext);
+                          return B_LINE;
                         }
 <next_to_alias>[\n +]+  {       /* get all white space and return a single separator */
-                         BEGIN(label);
-                         yylval.val=yytext[0];
-                         return B_CAR;
+                          BEGIN(label);
+			  if(dbg_var >=3) fprintf(errfp, "parselabel: next_to_alias, yytext = %s\n", yytext);
+                          yylval.val=yytext[0];
+                          return B_CAR;
                         }
 ^[^*]                   {
-                         if(debug_var>=3) fprintf(errfp, "yylex(): matched: ^[^*] |%s|\n",yytext);
-
-                         yyless(0);    /* push back to input */
-                         BEGIN(label); /* we know that a label follows. */
+                          if(dbg_var>=3) fprintf(errfp, "yylex(): matched: ^[^*] |%s|, push back\n",yytext);
+                          yyless(0);    /* push back to input */
+                          BEGIN(label); /* we know that a label follows. */
                                        /* so go and process it. */
                         }
 ^\*.*                   {              /* a comment, return as LINE token */
-       yylval.ptr.str=NULL; /*19102004 */
-       my_strdup(299, &yylval.ptr.str, yytext); /* these things are freed after use in expandlabel.y */
-                         return B_LINE;
+                          yylval.ptr.str=NULL; /*19102004 */
+                          if(dbg_var>=3) fprintf(errfp, "yylex(): B_LINE: %s\n",yytext);
+                          my_strdup(299, &yylval.ptr.str, yytext); /* these things are freed after use in expandlabel.y */
+                          return B_LINE;
                         }
 <label>{
 
 [ \n]+                  {       /* this ends the <label> start condition */
-                         if(debug_var>=3) fprintf(errfp, "yylex(): matched: |%s|\n",yytext);
-                         BEGIN(rest);
-                         yylval.val=yytext[0];
-                         return B_CAR;
+                          BEGIN(rest);
+                          yylval.val=yytext[0];
+                          if(dbg_var>=3) fprintf(errfp, "yylex(): B_CAR: %s\n",yytext);
+                          return B_CAR;
+                        }
+\.\.                    {
+                          if(dbg_var>=3) fprintf(errfp, "parselabel(): B_DOUBLEDOT: %s\n", yytext);
+                          return B_DOUBLEDOT;
                         }
 [0-9]+                  {
-                         sscanf(yytext, "%d",&yylval.val);
-                         if(bracket) return B_IDXNUM;
-                         else return B_NUM;
+                          sscanf(yytext, "%d",&yylval.val);
+                          if(bracket) {
+                            if(dbg_var>=3) fprintf(errfp, "parselabel(): B_IDXNUM: %s\n", yytext);
+                            return B_IDXNUM;
+                          }
+                          else {
+                            if(dbg_var>=3) fprintf(errfp, "parselabel(): B_NUM: %s\n", yytext);
+                            return B_NUM;
+                          }
                         }
-[.=_a-zA-Z][:.=_a-zA-Z0-9]*     {
-       yylval.ptr.str=NULL; /*19102004 */
-       my_strdup(300, &yylval.ptr.str, yytext); /* these things are freed after use in expandlabel.y */
-       if(debug_var>=3) fprintf(errfp, "parselabel(): B_NAME (%lu) \n", (unsigned long)yylval.ptr.str);
-                         return B_NAME;
+([=_a-zA-Z][:.=_a-zA-Z0-9]*)|([.=_a-zA-Z][:=_a-zA-Z0-9]*)     {
+                          yylval.ptr.str=NULL; /*19102004 */
+                          my_strdup(300, &yylval.ptr.str, yytext); /* these things are freed after use in expandlabel.y */
+                          if(dbg_var>=3) fprintf(errfp, "parselabel(): B_NAME: %s\n", yytext);
+                          return B_NAME;
                         }
 \[                      {
-                         bracket++;
-                         return yytext[0];
+                          bracket++;
+                          if(dbg_var>=3) fprintf(errfp, "parselabel(): open bracket: %s\n", yytext);
+                          return yytext[0];
                         }
 \]                      {
-                         bracket--;
-                         return yytext[0];
+                          bracket--;
+                          if(dbg_var>=3) fprintf(errfp, "parselabel(): close bracket: %s\n", yytext);
+                          return yytext[0];
                         }
 [^ ]                    {
-                         return yytext[0];
+                          if(dbg_var>=3) fprintf(errfp, "parselabel(): returning character: %s\n", yytext);
+                          return yytext[0];
                         }
 } /* end <label> */
 
 <rest>{                 /* treat rest of line as a single LINE token */
 (.|\n)*                 {
-                         if(debug_var>=3) fprintf(errfp, "yylex(): doing the rest\n");
-       yylval.ptr.str=NULL; /*19102004 */
-       my_strdup(301, &yylval.ptr.str, yytext); /* these things are freed after use in expandlabel.y */
-                         BEGIN(INITIAL);
-                         return B_LINE;
+                          yylval.ptr.str=NULL; /*19102004 */
+                          my_strdup(301, &yylval.ptr.str, yytext); /* these things are freed after use in expandlabel.y */
+                          if(dbg_var>=3) fprintf(errfp, "yylex(): <rest> B_LINE: %s\n",yytext);
+                          BEGIN(INITIAL);
+                          return B_LINE;
                         }
 
 } /* end rest */
 <*><<EOF>>              {
-                         BEGIN(INITIAL);
-                         return 0;
+                          BEGIN(INITIAL);
+                          return 0;
                         }
 %%
 

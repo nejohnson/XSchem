@@ -191,7 +191,7 @@ END{
     p = posseq[i]
     for(n = 0; n < pin[p,"n"]; n++) {
       dir = pin[p, n, "dir"]
-      plinelay = (dir =="in") ? 4 : (dir == "inout") ? 3 : 1
+      plinelay = (dir =="in") ? 4 : (dir == "inout") ? 3 : 2
       if(p == 0 ) { 
         x = symbolx1 - pinlinelength
         y = symboly1 + pin[p, n, "coord"] + firstpinyoffset

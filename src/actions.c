@@ -635,7 +635,7 @@ void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
   } else {
     indirect=0;
   }
-  printf("indirect=%d\n", indirect);
+  /* printf("indirect=%d\n", indirect); */
 
   rebuild_selected_array();
   k = lastselected;

@@ -17,8 +17,8 @@ END  { endfile(_filename_) }
 BEGIN{
 }
 
-/^N .*{.*bus=1.*}/{
-  sub(/bus=1/, "bus=true")
+/bus_connect_not_shown/{
+  sub(/bus_connect_not_shown/, "bus_connect")
   found = 1
 }
 

@@ -577,6 +577,7 @@ void hilight_net(void)
      break;
    }
   }
+  if(!incr_hilight) hilight_color++;
   if(enable_drill) {
     drill_hilight();
     /*traverse_schematic(); */

@@ -400,5 +400,24 @@ index_nobracket: B_IDXNUM B_DOUBLEDOT B_IDXNUM
                           if(i==$3) break;
                          }
                         }
+	| B_IDXNUM B_DOUBLEDOT B_IDXNUM B_DOUBLEDOT B_IDXNUM
+			{
+                         int i;
+                         int sign;
+
+                         sign = SIGN($3-$1);
+                         $$=my_malloc(130, INITIALIDXSIZE*sizeof(int));
+                         $$[0]=0;
+                         if(debug_var>=3) fprintf(errfp, "yyparse(): parsing first idx range\n");
+                         for(i=$1;;i+=sign*$5)
+                         {
+                          check_idx(&$$,++$$[0]);
+                          $$[$$[0]]=i;
+
+                          if(sign==1 && i>=$3) break;
+                          if(sign==-1 && i<=$3) break;
+                         }
+			}
+
 %%
 

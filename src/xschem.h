@@ -227,8 +227,8 @@
 
 #define RECTORDER(x1,y1,x2,y2) { \
   double xxtmp; \
-  if(x2 < x1) { xxtmp=x1;x1=x2;x2=xxtmp;} \
-  if(y2 < y1) { xxtmp=y1;y1=y2;y2=xxtmp;} \
+  if(x2 < x1) {xxtmp = x1; x1 = x2; x2 = xxtmp;} \
+  if(y2 < y1) {xxtmp = y1; y1 = y2; y2 = xxtmp;} \
 } 
 
 #define OUTSIDE(xa,ya,xb,yb,x1,y1,x2,y2) \

@@ -181,6 +181,27 @@ static void check_idx(int **ptr,int n)
  }
 }
 
+static char *my_strbus_nobracket(char *s, int *n)
+{
+ int i,l;
+ int tmplen;
+ char *res=NULL;
+ char *tmp=NULL;
+ my_realloc(126, &res, n[0]*(strlen(s)+20));
+ my_realloc(127, &tmp, strlen(s)+30);
+ l=0;
+ for(i=1;i<n[0];i++)
+ {
+  tmplen = sprintf(tmp, "%s%d,", s, n[i]);
+  /* strcpy(res+l,tmp); */
+  memcpy(res+l,tmp, tmplen+1); /* 20180923 */
+  l+=tmplen;
+ }
+ my_free(&tmp);
+ sprintf(res+l, "%s%d", s, n[i]);
+ return res;
+}
+
 %}
 
 
@@ -195,13 +216,16 @@ int  *idx;  /* for bus index & bus index ranges */
 %token <val> B_NUM
 %token <val> B_CAR
 %token <val> B_IDXNUM
+%token <val> B_DOUBLEDOT
 %token <str> B_NAME
 %token <str> B_LINE
 /* BISON Declarations: non terminal symbols*/
 %type <ptr> list
 %type <idx> index
+%type <idx> index_nobracket
 
 /* operator precedences (bottom = highest)  and associativity  */
+%left B_DOUBLEDOT
 %left B_CAR
 %left ','
 %left ':'
@@ -280,6 +304,17 @@ list:     B_NAME        {
                          $3=NULL; /*19102004 */
                          idxsize=INITIALIDXSIZE;
                         }
+        | B_NAME  '[' index_nobracket  ']' 
+                        {
+                         if(debug_var>=3) fprintf(errfp, "yyparse(): making nobracket bus: n=%d\n",$3[0]);
+                         $$.str=my_strbus_nobracket($1,$3); my_free(&$1);
+                         $1=NULL; /*19102004 */
+                         if(debug_var>=3) fprintf(errfp, "yyparse(): done making nobracket bus: n=%d\n",$3[0]);
+                         $$.m=$3[0];
+                         my_free(&$3); /*19102004 */
+                         $3=NULL; /*19102004 */
+                         idxsize=INITIALIDXSIZE;
+                        }
 ;
 index:    B_IDXNUM ':' B_IDXNUM ':' B_IDXNUM
                         {
@@ -352,5 +387,18 @@ index:    B_IDXNUM ':' B_IDXNUM ':' B_IDXNUM
                          $$[$$[0]]=$3;
                         }
 ;
+index_nobracket: B_IDXNUM B_DOUBLEDOT B_IDXNUM
+                        {
+                         int i;
+                         $$=my_malloc(85, INITIALIDXSIZE*sizeof(int));
+                         $$[0]=0;
+                         if(debug_var>=3) fprintf(errfp, "yyparse(): doubledot\n");
+                         for(i=$1;;i+=SIGN($3-$1))
+                         {
+                          check_idx(&$$,++$$[0]);
+                          $$[$$[0]]=i;
+                          if(i==$3) break;
+                         }
+                        }
 %%
 

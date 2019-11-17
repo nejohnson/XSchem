@@ -123,6 +123,9 @@ FILE *open_tmpfile(char *prefix, char **filename)
 
 void updatebbox(int count, Box *boundbox, Box *tmp)
 {
+ RECTORDER(tmp->x1, tmp->y1, tmp->x2, tmp->y2);
+ /* if(debug_var >=0) fprintf(errfp, "updatebbox(): count=%d, tmp = %g %g %g %g\n", 
+         count, tmp->x1, tmp->y1, tmp->x2, tmp->y2); */
  if(count==1)  *boundbox = *tmp;
  else
  {
@@ -1373,6 +1376,8 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
      count++;
      tmp.x1=ll[c][i].x1;tmp.y1=ll[c][i].y1;tmp.x2=ll[c][i].x2;tmp.y2=ll[c][i].y2;
      updatebbox(count,&boundbox,&tmp);
+     if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): line[%d][%d]: %g %g %g %g\n", 
+			c, i, tmp.x1,tmp.y1,tmp.x2,tmp.y2);
     }
     for(i=0;i<lasta[c];i++)
     {
@@ -1424,9 +1429,10 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
    instdef[lastinstdef].maxy = boundbox.y2;
    instdef[lastinstdef].name=NULL;
    my_strdup(352, &instdef[lastinstdef].name,name); 
+   /* if(debug_var>=0) fprintf(errfp, "load_symbol_definition(): symbol %d, returning, bbox= %g %g %g %g\n",
+            lastinstdef, boundbox.x1, boundbox.y1, boundbox.x2, boundbox.y2);*/
    lastinstdef++;
 
-   if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): returning\n");
    my_free(&lastl);
    my_free(&lastr);
    my_free(&lastp);

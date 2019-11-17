@@ -661,6 +661,7 @@ void draw_hilight_net(int on_window)
  Instdef *symptr; /* 20160414 */
  int use_hash;
  struct wireentry *wireptr;
+ int hilight_connected_inst;
 
  if(!hilight_nets) return;
  save_draw = draw_window; /* 20181009 */
@@ -729,7 +730,22 @@ void draw_hilight_net(int on_window)
    /* /20150409 */
 
   type = (inst_ptr[i].ptr+instdef)->type; /* 20150409 */
-  if( type &&
+
+  hilight_connected_inst = !strcmp(get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr, "highlight", 0), "true");
+  if(hilight_connected_inst) {
+    int rects, j;
+    if( (rects = (inst_ptr[i].ptr+instdef)->rects[PINLAYER]) > 0 ) {
+      for(j=0;j<rects;j++) {
+        if( inst_ptr[i].node && inst_ptr[i].node[j]) {
+          entry=bus_hilight_lookup(inst_ptr[i].node[j], 0, 2);
+          if(entry) {
+            inst_color[i]=7+entry->value%(cadlayers-7);
+            break;
+          }
+        }
+      }
+    }
+  } else if( type &&
       !(strcmp(type,"label") && strcmp(type,"ipin") &&
         strcmp(type,"iopin") && strcmp(type,"opin") )
     )

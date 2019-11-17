@@ -732,7 +732,11 @@ void draw_hilight_net(int on_window)
   type = (inst_ptr[i].ptr+instdef)->type; /* 20150409 */
 
   hilight_connected_inst = !strcmp(get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr, "highlight", 0), "true");
-  if(hilight_connected_inst) {
+  if( inst_ptr[i].flags & 4) {
+    if(debug_var>=1) fprintf(errfp, "draw_hilight_net(): instance %d flags &4 true\n", i);
+    inst_color[i]=PINLAYER;
+  }
+  else if(hilight_connected_inst) {
     int rects, j;
     if( (rects = (inst_ptr[i].ptr+instdef)->rects[PINLAYER]) > 0 ) {
       for(j=0;j<rects;j++) {
@@ -752,10 +756,6 @@ void draw_hilight_net(int on_window)
   {
    entry=bus_hilight_lookup( get_tok_value(inst_ptr[i].prop_ptr,"lab",0) , 0, 2 );
    if(entry) inst_color[i]=7+entry->value%(cadlayers-7);
-  }
-  else if( inst_ptr[i].flags & 4) {
-    if(debug_var>=1) fprintf(errfp, "draw_hilight_net(): instance %d flags &4 true\n", i);
-    inst_color[i]=PINLAYER;
   }
  }
 

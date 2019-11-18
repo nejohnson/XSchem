@@ -1593,8 +1593,6 @@ void descend_symbol(void)
   zoom_array[currentsch].y=yorigin;
   zoom_array[currentsch].zoom=zoom;
   ++currentsch;
-  unselect_all();
-  remove_symbols();
   if((inst_ptr[selectedgroup[0].n].ptr+instdef)->flags & EMBEDDED ||
     !strcmp(get_tok_value(inst_ptr[selectedgroup[0].n].prop_ptr,"embed", 0), "true")) {
     my_snprintf(name_embedded, S(name_embedded),
@@ -1604,10 +1602,14 @@ void descend_symbol(void)
     }
     save_embedded_symbol(inst_ptr[selectedgroup[0].n].ptr+instdef, fd, 0);
     fclose(fd);
+    unselect_all();
+    remove_symbols(); /* must follow save (if) embedded */
     /* load_symbol(name_embedded); */
     load_schematic(1, 1, name_embedded, 1);
   } else {
     /* load_symbol(abs_sym_path(name, "")); */
+    unselect_all();
+    remove_symbols(); /* must follow save (if) embedded */
     load_schematic(1, 1, abs_sym_path(name, ""), 1);
   }
   zoom_full(1, 0);

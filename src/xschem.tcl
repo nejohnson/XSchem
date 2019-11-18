@@ -1011,7 +1011,11 @@ proc tclcmd {} {
 proc select_layers {} {
    global dark_colorscheme colors enable_layer
    toplevel .sl -class dialog
-   if { $dark_colorscheme == 1 } { set txt_color black} else { set txt_color white}
+   if { $dark_colorscheme == 1 } {
+     set txt_color black
+   } else {
+     set txt_color white
+   }
    set j 0
    set f 0
    frame .sl.f0
@@ -1022,7 +1026,11 @@ proc select_layers {} {
    frame .sl.f0.f$f 
    pack .sl.f0.f$f -side left -fill y
    foreach i $colors {
-     
+     if { $dark_colorscheme == 1 } {
+       set ind_bg white
+     } else {
+       set ind_bg black
+     }
      ## 20121121
      if {  $j == [xschem get pinlayer] } {
        set laylab [format %2d $j]-PIN
@@ -1036,9 +1044,11 @@ proc select_layers {} {
      } elseif { $j == [xschem get backlayer] } { ;# 20161206
        set laylab [format %2d $j]-BG
        if { $dark_colorscheme == 1 } {
-         set layfg grey60
+         set layfg white
+         set ind_bg black
        } else {
          set layfg black
+         set ind_bg white
        }
      } elseif { $j == [xschem get gridlayer] } { ;# 20161206
        set laylab [format %2d $j]-GRID
@@ -1049,7 +1059,7 @@ proc select_layers {} {
      }
 
      checkbutton .sl.f0.f$f.cb$j -text $laylab  -variable enable_layer($j) -activeforeground $layfg \
-        -anchor w -foreground $layfg -background $i -activebackground $i \
+        -selectcolor $ind_bg -anchor w -foreground $layfg -background $i -activebackground $i \
         -command { 
             xschem enable_layers
          }
@@ -1971,20 +1981,26 @@ proc reconfigure_layers_menu {} {
    global colors dark_colorscheme
    set j 0
    foreach i $colors {
+     set ind_bg white
      if {  $j == [xschem get backlayer] } {
         if { $dark_colorscheme == 1 } { 
           set layfg white
+          set ind_bg black
         } else {
           set layfg black
+          set ind_bg white
         }
      } else {
         if { $dark_colorscheme == 1 } { 
           set layfg black
+          set ind_bg white
         } else {
           set layfg white
+          set ind_bg black
         }
      }
-     .menubar.layers.menu entryconfigure $j -activebackground $i -background $i -foreground $layfg -activeforeground $layfg
+     .menubar.layers.menu entryconfigure $j -activebackground $i \
+        -selectcolor $ind_bg -background $i -foreground $layfg -activeforeground $layfg
      incr j
    }
    .menubar.layers configure -background [lindex $colors [xschem get rectcolor]]

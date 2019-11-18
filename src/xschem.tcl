@@ -537,11 +537,12 @@ proc load_file_dialog {{msg {}}  {ext {}} {global_initdir {INITIALINSTDIR}}} {
   panedwindow  .myload.l -orient horizontal
 
   frame .myload.l.listbox1
-  listbox .myload.l.listbox1.list -width 50 -listvariable myload_files1 \
+  listbox .myload.l.listbox1.list -listvariable myload_files1 \
     -yscrollcommand ".myload.l.listbox1.yscroll set" -selectmode browse \
     -xscrollcommand ".myload.l.listbox1.xscroll set"
   scrollbar .myload.l.listbox1.yscroll -command ".myload.l.listbox1.list yview" 
   scrollbar .myload.l.listbox1.xscroll -command ".myload.l.listbox1.list xview" -orient horiz
+  .myload.l.listbox1.list xview moveto 1
   pack  .myload.l.listbox1.yscroll -side right -fill y
   pack  .myload.l.listbox1.xscroll -side bottom -fill x
   pack  .myload.l.listbox1.list -fill both -expand true
@@ -556,15 +557,15 @@ proc load_file_dialog {{msg {}}  {ext {}} {global_initdir {INITIALINSTDIR}}} {
   }
 
   frame .myload.l.listbox2
-  listbox .myload.l.listbox2.list -listvariable myload_files2 \
+  listbox .myload.l.listbox2.list  -listvariable myload_files2 \
     -yscrollcommand ".myload.l.listbox2.yscroll set" -selectmode browse
   scrollbar .myload.l.listbox2.yscroll -command ".myload.l.listbox2.list yview"
   pack  .myload.l.listbox2.yscroll -side right -fill y
   pack  .myload.l.listbox2.list -side right  -fill both -expand true
 
   # pack  .myload.l.listbox1 .myload.l.listbox2 -side left -fill both -expand true
-  .myload.l  add .myload.l.listbox1 -minsize 100
-  .myload.l  add .myload.l.listbox2 -minsize 100
+  .myload.l  add .myload.l.listbox1 -minsize 40
+  .myload.l  add .myload.l.listbox2 -minsize 40
  
   frame .myload.buttons
   button .myload.buttons.ok -text OK -command { set myload_retval [.myload.buttons.entry get]; destroy .myload} 

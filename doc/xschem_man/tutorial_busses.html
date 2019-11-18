@@ -44,12 +44,45 @@ p{padding: 15px  30px 10px;}
  </p>
  <img src="busses0.png">
  <br>
+
  <p>
-  In following picture there is a main 277 bit bus (the vertical thick wire) and a bus ripper symbol
-  (<kbd>devices/bus_connect.sym</kbd>) is used to take a slice of bits from the main bus.
+  Recently a new notation has been added for buses that expands without putting brackets:
+ </p>
+ <ul>
+ <li><kbd>AAA[3..0]</kbd>: describes the set <kbd>AAA3,AAA2,AAA1,AAA0</kbd>. The form <kbd>AAA[3..0]</kbd>
+    and <kbd>AAA3,AAA2,AAA1,AAA0</kbd> are exactly equivalent.</li>
+ <li><kbd>AAA[1..0],BBB[5..4]</kbd>: describes the bundle: <kbd>AAA1,AAA0,BBB5,BBB4</kbd>.</li>
+ <li><kbd>AAA[6..0..2]</kbd>: describes the bundle <kbd>AAA6,AAA4,AAA2,AAA0</kbd>.</li>
+ <li><kbd>2*AAA[1..0]</kbd>: describes the bundle <kbd>AAA1,AAA0,AAA1,AAA0</kbd>.</li>
+ <li><kbd>AAA[1..0]*2</kbd>: describes the bundle <kbd>AAA1,AAA1,AAA0,AAA0</kbd>.</li>
+ <li><kbd>2*(AAA[1..0],BBB)</kbd>: describes the bundle <kbd>AAA1,AAA0,BBB,AAA1,AAA0,BBB</kbd>.</li>
+ <li><kbd>(AAA[1..0],BBB)*2</kbd>: describes the bundle <kbd>AAA1,AAA1,AAA0,AAA0,BBB,BBB</kbd>.</li>
+ </ul>
+
+
+ <p>
+  In following picture there is a main 72 bit bus (the vertical thick wire) and bus ripper symbols
+  (<kbd>devices/bus_connect_nolab.sym</kbd>) are used to take slices of bits from the main bus. Wire labels are used to define bus slices.
+  To display thick wires for busses, select all wire segments, then press 'q' and add attribute <kbd>bus=true</kbd>.
  </p>
  <img src="busses1.png">
-
+ <p>
+  following picture shows an istantiation of 6 inverters:
+ </p>
+ <img src="busses2.png">
+ <p>
+  The generated spice netlist is the following:
+ </p>
+ <pre class="code">
+...
+xinv5 BB0 AA5 bf
+xinv4 BB1 AA4 bf
+xinv3 BB2 AA3 bf
+xinv2 BB3 AA2 bf
+xinv1 BB4 AA1 bf
+xinv0 BB5 AA0 bf
+...
+ </pre>
  <!-- end of slide -->
  <div class="filler"></div>
 </div>

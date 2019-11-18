@@ -38,6 +38,129 @@ If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
 
+2.9.5_RC1
+- added comments in xschemrc for new available options (tk_scaling and enable_layer() )
+ 
+- open file dialog: better panedwindow sizing
+
+- New menu entry View->symbol visible layers, can be used to turn off certain layers (example: pin red boxes)
+- tk_scaling tcl variable can be set in xschemrc to change the default scaling of fonts based on dpi setting,
+  use a value slightly lower or greater than 1.0
+
+- eeschema extension: allow DQ[31..0..X] to expand one out of X bits: DQ[7..0..2] --> DQ7,DQ5,DQ3,DQ1
+
+- fixes, highlight instances if 'highlight' attribute set to true in sym
+
+- symbols with global attribute 'highlight=true' will be highlighted when one of the attached nets is highlighted. Used for bus rippers.
+
+- FIX: long long standing bug in bbox calculation that could leave some garbage on screen
+- New eeschema-like bus notation DATA[0..3] expands to DATA0,DATA1,DATA2,DATA3, this differs from
+  xschem standard notation DATA[0:3] that expands to DATA[0],DATA[1],DATA[2],DATA[3]
+  Complex notations allowed like DATA[0..3],2*DATA[7..4],CS,CLK,RST,VCC*3 for funky bundles
+
+- better bus connector shape
+
+- better tedax netlist (handle escaped spaces in refdes)
+
+- Improved bus drawing (better zoom scaling)
+
+- rotate/flip multiple selected instances in place around anchor points. (Alt-R, Alt-F)
+- 'Search and select' function enabled for lines and rectangles in addition to instances/nets.
+
+- added installation of symgen.awk, Esc key reactivates screen redraw if for some reason no_draw was set to 0
+
+- added ngspice backannotation of operating point into schematic
+
+- fixed sample circuits, some symbols were screwed out...
+
+- add 'xschem getprop instance_pin <instname> <pin_name> <pin_attr>' to report back pin attributes.
+
+- symgen.awk: options --auto_pinnumber and --hide_pinnumber, various minor cosmetic fixes
+  updated symben tutorial accordingly
+
+- Tutorial page on xschem's symgen.awk
+
+- symgen.awk: processes djboxsym .symdef files (with some extensions) to produce xschem symbols
+
+- global=1 attribute in global pin symbols (vdd.sym, gnd.sym) changed to global=true.
+
+- better memory check in debug mode for discovering leakages/stale pointers,
+- fixed crashing bug if user deletes 'lab=' attribute from a label. If this happens get lab attribute from template string in symbol
+
+- test schematics for XSPICE (ngspice) tests
+
+- symbols saved. File updates (1.1 version)
+
+- Better token substitution: @token\blabla; backslash can be used to indicate 
+  end of token to be substituted if no separator can be used.
+  documentation updates (new attributes)
+
+- all functions to create pins from highlight nets, create schematic from symbol, attach labels to instance now work in 
+indirect library reference mode (devics/ipin.sym) and in direct reference mode (ipin.sym)
+
+- fix bug in search_inst() where wires were searched by substring matching instead of exact label matching.
+
+- implement 'select_connected_nets' in event reporting
+
+- new 'Alt-K' command to select all nets attached (or with same label) to selected ones.
+
+- more comands added to the event reporting mode (--events)
+
+- created new symbol netlist_options.sym in devices/
+  this will be used to set netlisting options.
+  currently supports attribute bus_replacement_char for changing
+  subscript characters ([], <>) for bussed signals.
+  example: place netlist_options.sym, set attribute: bus_replacement_char="xx" to avoid
+  bracketed signal indexes
+
+- logic and xspice primitive cleanups
+
+- added dac_bridge to XSPICE primitives (NGSPICE <-->XSPICE logic Interface)
+- nand gate (nd2.sym) works without schematic in all 3 circuit netlisting modes.
+
+- use 'bus_replacement_char' specified in xschemrc only for spice netlisting,
+  since VHDL and Verilog work just fine with standard xschem bus notation.
+- logic/test_ngspice.sch showing for the first time a digital gate (NAND)
+  simulated in NGSPICE using the digital XSPICE subsystem. This enables
+  the same circuit to be simulated in Verilog, VHDL and NGSPICE with no
+  modifications.
+
+- fix regression causing segfault introduced in netlist.c at rev 273. (selection when symbols with generic vhdl pins are present)
+
+- added behavioral ngspice source
+
+- added XSPICE primitives
+
+- start implementing ngspice digital primitives using the XSPICE subsystem
+
+- add xschemrc variable bus_replacement_char to change default bracket notation
+  for bussed spice signals: DATA[7] --> DATA<7>, by adding: 'set bus_replacement_char {<>} in xschemrc
+- changes in logic sample symbol library
+
+- added arbitrary width register to logic sample library, works in VHDL and Verilog.
+
+- better relative/absolute path heuristics, example schematics minor fixes
+
+- added ram model (vhdl and verilog) to logic library
+
+- fixes in vhdl post processor for initialized std_logic_vector types (put correct quotes)
+- additions in logic/ library
+
+- add logic library with some simple gates what work both in verilog and VHDL sims
+- Still incomplete but functional.
+
+- avoid netlisting vhdl 'time' parameters (generics in vhdl slang) when doing verilog netlists.
+
+- fix crashing bug when doing netlists ( unselect_all() done after remove_symbols() ) 
+
+- Added tutorial on bus notation
+
+- avoid reentrant invocaktion of 'Place symbol' via menu.
+
+- DOC- added tutorial on symbol library paths
+
+- improvements in load file selector, some fixes when resolving symlinked libs
+
 2.9.2
 - Misc small bug fix of 2.9.1
 

@@ -1985,22 +1985,18 @@ proc reconfigure_layers_menu {} {
      if {  $j == [xschem get backlayer] } {
         if { $dark_colorscheme == 1 } { 
           set layfg white
-          set ind_bg black
         } else {
           set layfg black
-          set ind_bg white
         }
      } else {
         if { $dark_colorscheme == 1 } { 
           set layfg black
-          set ind_bg white
         } else {
           set layfg white
-          set ind_bg black
         }
      }
      .menubar.layers.menu entryconfigure $j -activebackground $i \
-        -selectcolor $ind_bg -background $i -foreground $layfg -activeforeground $layfg
+        -background $i -foreground $layfg -activeforeground $layfg
      incr j
    }
    .menubar.layers configure -background [lindex $colors [xschem get rectcolor]]

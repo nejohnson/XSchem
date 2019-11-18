@@ -638,7 +638,7 @@ void draw_temp_symbol_outline(int what, GC gc, int n,int layer,int tmp_flip, int
    }
  }
  
- if(layer != PINLAYER || enable_layer[layer]) for(j=0;j< symptr->rects[layer];j++)
+ for(j=0;j< symptr->rects[layer];j++)
  {
   box = (symptr->boxptr[layer])[j];
   ROTATION(0.0,0.0,box.x1,box.y1,x1,y1);

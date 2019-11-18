@@ -1007,6 +1007,62 @@ proc tclcmd {} {
   pack .tclcmd.b.close -side left -expand yes -fill x
 }
 
+proc select_layers {} {
+   global dark_colorscheme colors enable_layer
+   toplevel .sl -class dialog
+   if { $dark_colorscheme == 1 } { set txt_color black} else { set txt_color white}
+   set j 0
+   set f 0
+   frame .sl.f0
+   frame .sl.f1
+   pack .sl.f0 .sl.f1 -side top -fill x
+   button .sl.f1.ok -text OK -command { destroy .sl}
+   pack .sl.f1.ok -side left -expand yes -fill x
+   frame .sl.f0.f$f 
+   pack .sl.f0.f$f -side left -fill y
+   foreach i $colors {
+     
+     ## 20121121
+     if {  $j == [xschem get pinlayer] } {
+       set laylab [format %2d $j]-PIN
+       set layfg $txt_color
+     } elseif { $j == [xschem get wirelayer] } {
+       set laylab [format %2d $j]-WIRE
+       set layfg $txt_color
+     } elseif { $j == [xschem get textlayer] } { ;# 20161206
+       set laylab [format %2d $j]-TEXT
+       set layfg $txt_color
+     } elseif { $j == [xschem get backlayer] } { ;# 20161206
+       set laylab [format %2d $j]-BG
+       if { $dark_colorscheme == 1 } {
+         set layfg grey60
+       } else {
+         set layfg black
+       }
+     } elseif { $j == [xschem get gridlayer] } { ;# 20161206
+       set laylab [format %2d $j]-GRID
+       set layfg $txt_color
+     } else {
+       set laylab "[format %2d $j]        "
+       set layfg $txt_color
+     }
+
+     checkbutton .sl.f0.f$f.cb$j -text $laylab  -variable enable_layer($j) -activeforeground $layfg \
+        -anchor w -foreground $layfg -background $i -activebackground $i \
+        -command { 
+            xschem enable_layers
+         }
+     pack .sl.f0.f$f.cb$j -side top -fill x
+     incr j
+     if { [expr $j%10] == 0 } {
+       incr f
+       frame .sl.f0.f$f
+       pack .sl.f0.f$f -side left  -fill y
+     }
+   }
+   tkwait window .sl
+}
+
 proc color_dim {} {
   toplevel .dim -class dialog
   wm title .dim {Dim colors}
@@ -2155,6 +2211,7 @@ if {!$rainbow_colors} {
 
 ## pad missing colors with black
 for {set i 0} { $i<$cadlayers } { incr i} {
+  set_ne enable_layer($i) 1
   foreach j { ps_colors light_colors dark_colors } {
     if { ![string compare [lindex [set $j] $i] {} ] } {
       if { ![string compare $j {ps_colors} ] } {
@@ -2242,7 +2299,7 @@ font configure Underline-Font -underline true -size 24
 #   #option add *Text*font "-*-courier-medium-r-normal-*-12-*-*-*-p-*-iso8859-1" startupFile
 #   option add *Label*font "-*-helvetica-medium-r-normal-*-12-*-*-*-p-*-iso8859-1" startupFile
 
-   tk scaling 1.0
+   if { [info exists tk_scaling] } {tk scaling $tk_scaling}
    infowindow {}
    #proc unknown  {comm args} { puts "unknown command-> \<$comm\> $args" }
    frame .menubar -relief raised -bd 2 
@@ -2459,7 +2516,7 @@ font configure Underline-Font -underline true -size 24
        set layfg $txt_color
      }
 
-   .menubar.layers.menu add command  -label $laylab  -activeforeground $layfg \
+     .menubar.layers.menu add command -label $laylab  -activeforeground $layfg \
         -foreground $layfg -background $i -activebackground $i \
         -command " 
            .menubar.layers configure -background [lindex $colors $j]
@@ -2503,6 +2560,9 @@ font configure Underline-Font -underline true -size 24
    .menubar.zoom.menu add command -label "Dim colors"  -accelerator {} -command {
            color_dim
            xschem color_dim
+        }
+   .menubar.zoom.menu add command -label "Symbol visible layers"  -accelerator {} -command {
+           select_layers
         }
    .menubar.zoom.menu add command -label "Change Current Layer color"  -accelerator {} -command {
            change_color

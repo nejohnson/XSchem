@@ -257,6 +257,7 @@ void xwin_exit(void)
  my_free(&line);
  my_free(&fill_type);
  my_free(&pixdata);
+ my_free(&enable_layer);
  my_free(&lastrect);
  my_free(&polygon); /* 20171115 */
  my_free(&arc); /* 20171115 */
@@ -613,6 +614,7 @@ void alloc_data()
      fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
    }
  }
+ enable_layer=my_calloc(87, cadlayers, sizeof(int));
 }
 
 
@@ -934,6 +936,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
  /* */
 
  alloc_data();
+ enable_layers();
 
  #ifndef IN_MEMORY_UNDO
  /* 20150327 create undo directory */

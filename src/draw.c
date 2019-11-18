@@ -449,6 +449,7 @@ void draw_symbol_outline(int what,int c, int n,int layer,int tmp_flip, int rot,
  #ifdef HAS_CAIRO
  char *textfont;
  #endif
+  if(layer != PINLAYER && !enable_layer[layer] ) return;
   if(!has_x) return;
   if(layer==0) {
    x1=X_TO_SCREEN(inst_ptr[n].x1+xoffset);  /* 20150729 added xoffset, yoffset */
@@ -519,7 +520,7 @@ void draw_symbol_outline(int what,int c, int n,int layer,int tmp_flip, int rot,
     drawarc(c,what, x0+x1, y0+y1, arc.r, angle, arc.b);
   }
 
-  for(j=0;j< symptr->rects[layer];j++)
+  if(layer != PINLAYER || enable_layer[layer]) for(j=0;j< symptr->rects[layer];j++)
   {
     box = (symptr->boxptr[layer])[j];
     ROTATION(0.0,0.0,box.x1,box.y1,x1,y1);
@@ -582,6 +583,7 @@ void draw_temp_symbol_outline(int what, GC gc, int n,int layer,int tmp_flip, int
  int customfont;
  #endif
 
+ if(layer != PINLAYER && !enable_layer[layer] ) return;
  if(!has_x) return;
  if(layer==0) { /* 20150424 */
    x1=X_TO_SCREEN(inst_ptr[n].x1+xoffset); /* 20150729 added xoffset, yoffset */
@@ -636,7 +638,7 @@ void draw_temp_symbol_outline(int what, GC gc, int n,int layer,int tmp_flip, int
    }
  }
  
- for(j=0;j< symptr->rects[layer];j++)
+ if(layer != PINLAYER || enable_layer[layer]) for(j=0;j< symptr->rects[layer];j++)
  {
   box = (symptr->boxptr[layer])[j];
   ROTATION(0.0,0.0,box.x1,box.y1,x1,y1);

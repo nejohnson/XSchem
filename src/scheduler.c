@@ -804,6 +804,9 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
     printf("max_rects[%d]=%d\n", i, max_rects[i]);
     printf("max_lines[%d]=%d\n", i, max_lines[i]);
   }
+  for(i=0;i<cadlayers;i++) {
+    printf("enable_layer[%d]=%d\n", i, enable_layer[i]);
+  }
   printf("currentsch=%d\n", currentsch);
   printf("schematic[%d]=%s\n", currentsch, schematic[currentsch]);
   for(i=0;i<currentsch;i++)
@@ -1188,6 +1191,12 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
   Tcl_ResetResult(interp);
  }
 
+ else if(!strcmp(argv[1],"enable_layers"))
+ {
+  Tcl_ResetResult(interp);
+  enable_layers(); 
+ }
+
  else if(!strcmp(argv[1],"select_connected_nets"))
  {
    select_connected_nets();
@@ -1232,10 +1241,6 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
     else  search(argv[4],argv[5],1,select, what);
   }
  }
-
- /*
-  * ********** xschem get subcommands
-  */
 
  /* 20171010 allows to retrieve name of n-th parent schematic */
  else if(argc == 4 && !strcmp(argv[1],"get") && !strcmp(argv[2],"schname") ) {
@@ -1298,6 +1303,10 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
    Tcl_AppendResult(interp, pins, NULL);
    my_free(&pins);
  }
+
+ /*
+  * ********** xschem get subcommands
+  */
 
  else if(argc == 4 && !strcmp(argv[1],"get") && !strcmp(argv[2],"expandlabel"))  {  /* 20121121 */
    int tmp, llen;

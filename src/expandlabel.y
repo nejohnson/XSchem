@@ -187,8 +187,8 @@ static char *my_strbus_nobracket(char *s, int *n)
  int tmplen;
  char *res=NULL;
  char *tmp=NULL;
- my_realloc(126, &res, n[0]*(strlen(s)+20));
- my_realloc(127, &tmp, strlen(s)+30);
+ my_realloc(107, &res, n[0]*(strlen(s)+20));
+ my_realloc(108, &tmp, strlen(s)+30);
  l=0;
  for(i=1;i<n[0];i++)
  {
@@ -406,7 +406,7 @@ index_nobracket: B_IDXNUM B_DOUBLEDOT B_IDXNUM
                          int sign;
 
                          sign = SIGN($3-$1);
-                         $$=my_malloc(130, INITIALIDXSIZE*sizeof(int));
+                         $$=my_malloc(109, INITIALIDXSIZE*sizeof(int));
                          $$[0]=0;
                          if(debug_var>=3) fprintf(errfp, "yyparse(): parsing first idx range\n");
                          for(i=$1;;i+=sign*$5)

@@ -76,6 +76,7 @@ int draw_single_layer=-1; /* 20151117 */
 
 unsigned short enable_stretch=0;
 int cadlayers=0;
+int *enable_layer;
 int need_rebuild_selected_array=1;
 Window window; /* window is the drawing area, topwindow is the root win */
 Window parent_of_topwindow;

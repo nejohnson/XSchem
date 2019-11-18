@@ -442,6 +442,7 @@ extern int semaphore;
 extern int a3page;
 extern int manhattan_lines;
 extern int cadlayers;
+extern int *enable_layer;
 extern  int hilight_color;
 extern int do_print;
 extern int prepared_netlist_structs;
@@ -543,7 +544,7 @@ extern int head_undo_ptr;
 extern int max_undo;
 extern int draw_dots;
 extern int draw_single_layer; /*  20151117 */
-
+extern void enable_layers(void);
 extern Window window;
 extern Window parent_of_topwindow;
 extern char *xschem_executable;

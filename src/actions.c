@@ -602,6 +602,16 @@ void clear_drawing(void)
  free_hash();
 }
 
+void enable_layers(void)
+{
+  int i;
+  char tmp[50];
+  for(i = 0; i< cadlayers; i++) {
+    my_snprintf(tmp, S(tmp), "enable_layer(%d)",i);
+    if(tclgetvar(tmp)[0] == '0') enable_layer[i] = 0;
+    else enable_layer[i] = 1;
+  }
+}
 void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
 {
   Instdef *symbol;

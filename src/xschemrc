@@ -94,6 +94,16 @@ set disable_unique_names 0
 ## to select symbols / schematics from
 set use_list_dirs 0
 
+## if set to 1 continue drawing lines / wires after click
+# set persistent_command 1
+
+
+## set widget scaling (mainly for font display) 
+# set tk_scaling 1.7
+
+## disable some symbol layers
+# set enable_layer(5) 0 ;# example to disable pin red boxes
+
 ###########################################################################
 # custom grid / snap value settings
 ###########################################################################

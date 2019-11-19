@@ -1,6 +1,5 @@
 
 # increments index of bussed label by $incr
-# works if only one net label/pin  is selected
 proc change_index {incr} {
 
   set sel [xschem selected_set]
@@ -9,7 +8,7 @@ proc change_index {incr} {
     regsub {.*\[} $mylabel {} myindex
     regsub {\].*} $myindex {} myindex
     regsub {\[.*} $mylabel {} mybasename
-    if { [regexp {^[1-9][0-9]*$} $myindex] } {
+    if { [regexp {^[0-9][0-9]*$} $myindex] } {
       set myindex [expr $myindex + $incr]
       set mylabel "$mybasename\[$myindex\]"
       xschem setprop instance $i lab $mylabel

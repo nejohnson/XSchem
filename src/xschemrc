@@ -32,11 +32,13 @@
 #
 # set XSCHEM_LIBRARY_PATH {}
 # append XSCHEM_LIBRARY_PATH :.
-# append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/xschem_library/devices
 # append XSCHEM_LIBRARY_PATH :~/.xschem/xschem_library
+# append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/xschem_library/devices
 # append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/logic
 # append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/examples
+# append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/ngspice
 # append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/pcb
+# append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/symgen
 
 
 ###########################################################################
@@ -51,7 +53,7 @@
 # To avoid absolute paths, use a path that is relative to one of the
 # XSCHEM_LIBRARY_PATH directories.
 #
-# set XSCHEM_START_WINDOW {0_examples_top}
+# set XSCHEM_START_WINDOW {0_examples_top.sch}
 
 
 ###########################################################################
@@ -59,7 +61,7 @@
 ###########################################################################
 # If unset xschem asks user to choose one when doing a netlist
 #
-# set netlist_dir $env(HOME)/xschem_library/simulations
+# set netlist_dir $env(HOME)/.xschem/simulations
 
 
 ###########################################################################

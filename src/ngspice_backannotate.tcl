@@ -38,11 +38,14 @@ proc read_ngspice_raw {arr fp} {
 proc get_voltage {arr n } {
   global voltage
   upvar $arr var
-  set n "v($n)"
-  if { abs($var([string tolower $n])) < 1e-3 } {
-    return [format %.4e $var([string tolower $n])]
+  set m "v($n)"
+  if { ! [info exists var([string tolower $m])] } {
+    set m $n
+  }
+  if { abs($var([string tolower $m])) < 1e-3 } {
+    return [format %.4e $var([string tolower $m])]
   } else {
-    return [format %.4g $var([string tolower $n])]
+    return [format %.4g $var([string tolower $m])]
   }
   # return DELETE
 }
@@ -50,9 +53,15 @@ proc get_voltage {arr n } {
 proc get_diff_voltage {arr p m } {
   global voltage
   upvar $arr var
-  set p "v($p)"
-  set m "v($m)"
-  return [format %.4e [expr $var([string tolower $p]) - $var([string tolower $m]) ] ]
+  set pp "v($p)"
+  set mm "v($m)"
+  if { ! [info exists var([string tolower $pp])] } {
+    set pp $p
+  }
+  if { ! [info exists var([string tolower $mm])] } {
+    set mm $m
+  }
+  return [format %.4e [expr $var([string tolower $pp]) - $var([string tolower $mm]) ] ]
   # return DELETE
 }
 

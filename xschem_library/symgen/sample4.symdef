@@ -1,0 +1,18 @@
+[labels]
+TEST SYMBOL
+STEFAN SCHIPPERS
+! type=subcircuit
+! format=@name @pinlist @model
+! template="name=X1"
+--auto_pinnumber
+--hide_pinnumber
+[left]
+  i      D
+  i      RST
+  i>!    CLK
+[right]
+  o      QB
+[top]
+  io     VCC
+[bottom]
+  io     VSS

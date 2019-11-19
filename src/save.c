@@ -876,10 +876,10 @@ void load_schematic(int symbol, int load_symbols, const char *filename, int rese
   if(filename && filename[0]) {
     if( !stat(filename, &buf) ) {
       my_strncpy(name, filename, S(name));
-    } else {
+    } /* else {
       if(symbol) my_strncpy(name, add_ext(filename, ".sym"), S(name));
       else       my_strncpy(name, add_ext(filename, ".sch"), S(name));
-    }
+    } */
     my_snprintf(msg, S(msg), "set current_dirname \"[file dirname {%s}]\"", name);
     tcleval(msg);
     my_strncpy(schematic[currentsch], name, S(schematic[currentsch]));

@@ -56,11 +56,12 @@ void merge_wire(FILE *fd)
 {
     int i;
     double x1,y1,x2,y2;
-    static char *ptr=NULL;
+    char *ptr=NULL;
     i=lastwire;
     fscanf(fd, "%lf %lf %lf %lf",&x1, &y1, &x2, &y2 );
     load_ascii_string( &ptr, fd);
     storeobject(-1, x1,y1,x2,y2,WIRE,0,SELECTED,ptr);
+    my_free(&ptr);
     select_wire(i, SELECTED, 1);
 }
 
@@ -203,6 +204,7 @@ void merge_inst(int k,FILE *fd)
     /* the final tmp argument is zero for the 1st call and used in */
     /* new_prop_string() for cleaning some internal caches. */
     my_strdup2(306, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); /* 20150409 */
+    my_free(&prop_ptr);
     hash_proplist(i, 0);
     lastinst++;
     set_modify(1);
@@ -275,7 +277,7 @@ void merge_file(int selection_load, const char ext[])
     char name[PATH_MAX];
     char name1[PATH_MAX]; /* overflow safe */
     char tmp[256]; /* 20161122 overflow safe */
-    static char *aux_ptr=NULL;
+    char *aux_ptr=NULL;
 
     if(selection_load==0)
     {
@@ -309,7 +311,7 @@ void merge_file(int selection_load, const char ext[])
       switch(name1[0])
       {
        case 'v':
-        load_ascii_string(&xschem_version_string, fd);
+        load_ascii_string(&aux_ptr, fd);
         break;
        case 'V':
         load_ascii_string(&aux_ptr, fd);
@@ -357,6 +359,7 @@ void merge_file(int selection_load, const char ext[])
         break;
       }
      }
+     my_free(&aux_ptr);
      match_merged_inst(old);
      fclose(fd);
      ui_state |= STARTMERGE;

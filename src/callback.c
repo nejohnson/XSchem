@@ -549,6 +549,7 @@ int callback(int event, int mx, int my, KeySym key,
      break;
     }
     if(ui_state & STARTMERGE) delete();
+    set_modify(0); /* aborted merge: no change, so reset modify flag set by delete() */
     ui_state = 0;
     unselect_all(); 
     draw();

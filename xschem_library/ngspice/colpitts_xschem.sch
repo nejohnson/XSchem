@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC1 file_version=1.1}
+v {xschem version=2.9.5_RC2 file_version=1.1}
 G {}
 V {}
 S {}

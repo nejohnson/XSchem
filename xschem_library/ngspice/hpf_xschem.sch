@@ -125,8 +125,8 @@ RL3 22 28 100K
 C {vsource.sym} 100 -490 0 0 {name=v2 value="ac 1"}
 C {gnd.sym} 100 -460 0 0 {name=l14 lab=0}
 C {lab_pin.sym} 100 -550 0 0 {name=l23 sig_type=std_logic lab=IN}
-C {capa.sym} 240 -550 1 1 {name=C1 m=1 value=\{C\} footprint=1206 device="ceramic capacitor"}
-C {res.sym} 340 -520 0 0 {name=R6 value=\{k*R\} footprint=1206 device=resistor m=1}
+C {capa.sym} 240 -550 1 1 {name=C1 m=1 value=C footprint=1206 device="ceramic capacitor"}
+C {res.sym} 340 -520 0 0 {name=R6 value='k*R' footprint=1206 device=resistor m=1}
 C {gnd.sym} 340 -490 0 0 {name=l2 lab=0}
 C {vsource.sym} 850 -570 0 0 {name=v6 value=12}
 C {vsource.sym} 850 -490 0 0 {name=v1 value=12}
@@ -142,8 +142,8 @@ C {netlist_at_end.sym} 280 -310 0 0 {name=DIRECTIVES value=".ac oct 100 0.1 1k
 .param C    = 1/(sqrt(k)*R*w0)
 "}
 C {opin.sym} 670 -510 0 0 {name=p9 lab=OUT}
-C {res.sym} 200 -630 0 0 {name=R7 value=\{R\} footprint=1206 device=resistor m=1}
-C {capa.sym} 160 -550 1 1 {name=C2 m=1 value=\{C\} footprint=1206 device="ceramic capacitor"}
+C {res.sym} 200 -630 0 0 {name=R7 value=R footprint=1206 device=resistor m=1}
+C {capa.sym} 160 -550 1 1 {name=C2 m=1 value=C footprint=1206 device="ceramic capacitor"}
 C {gnd.sym} 530 -450 0 0 {name=l1 lab=VEE}
 C {vdd.sym} 530 -570 0 0 {name=l5 lab=VCC}
 C {gnd.sym} 850 -460 0 0 {name=l3 lab=VEE}

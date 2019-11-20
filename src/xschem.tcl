@@ -517,7 +517,7 @@ proc myload_set_home {dir} {
 
 proc load_file_dialog {{msg {}}  {ext {}} {global_initdir {INITIALINSTDIR}}} {
   global myload_index1 myload_files2 myload_files1 myload_retval myload_dir1 pathlist
-  global myload_default_geometry
+  global myload_default_geometry myload_sash_pos
   upvar #0 $global_initdir initdir
   toplevel .myload -class dialog
   wm title .myload $msg
@@ -537,7 +537,7 @@ proc load_file_dialog {{msg {}}  {ext {}} {global_initdir {INITIALINSTDIR}}} {
   panedwindow  .myload.l -orient horizontal
 
   frame .myload.l.listbox1
-  listbox .myload.l.listbox1.list -listvariable myload_files1 \
+  listbox .myload.l.listbox1.list -listvariable myload_files1 -width 60 \
     -yscrollcommand ".myload.l.listbox1.yscroll set" -selectmode browse \
     -xscrollcommand ".myload.l.listbox1.xscroll set"
   scrollbar .myload.l.listbox1.yscroll -command ".myload.l.listbox1.list yview" 
@@ -557,17 +557,22 @@ proc load_file_dialog {{msg {}}  {ext {}} {global_initdir {INITIALINSTDIR}}} {
   }
 
   frame .myload.l.listbox2
-  listbox .myload.l.listbox2.list  -listvariable myload_files2 \
-    -yscrollcommand ".myload.l.listbox2.yscroll set" -selectmode browse
+  listbox .myload.l.listbox2.list  -listvariable myload_files2 -width 60 \
+    -yscrollcommand ".myload.l.listbox2.yscroll set" -selectmode browse \
+    -xscrollcommand ".myload.l.listbox2.xscroll set"
   scrollbar .myload.l.listbox2.yscroll -command ".myload.l.listbox2.list yview"
+  scrollbar .myload.l.listbox2.xscroll -command ".myload.l.listbox2.list xview" -orient horiz
   pack  .myload.l.listbox2.yscroll -side right -fill y
+  pack  .myload.l.listbox2.xscroll -side bottom -fill x
   pack  .myload.l.listbox2.list -side right  -fill both -expand true
 
   # pack  .myload.l.listbox1 .myload.l.listbox2 -side left -fill both -expand true
   .myload.l  add .myload.l.listbox1 -minsize 40
   .myload.l  add .myload.l.listbox2 -minsize 40
+  .myload.l paneconfigure .myload.l.listbox1 -stretch always
+  .myload.l paneconfigure .myload.l.listbox2 -stretch always
  
-  frame .myload.buttons
+  frame .myload.buttons 
   button .myload.buttons.ok -text OK -command { set myload_retval [.myload.buttons.entry get]; destroy .myload} 
   button .myload.buttons.cancel -text Cancel -command {set myload_retval {}; destroy .myload}
   button .myload.buttons.home -text Home -command {
@@ -594,7 +599,7 @@ proc load_file_dialog {{msg {}}  {ext {}} {global_initdir {INITIALINSTDIR}}} {
   pack .myload.buttons.ok .myload.buttons.up .myload.buttons.cancel \
        .myload.buttons.home .myload.buttons.label -side left
   pack .myload.buttons.entry -side left -fill x -expand true
-  pack .myload.l -side top -expand true -fill both
+  pack .myload.l -expand true -fill both
   pack .myload.buttons -side top -fill x
   myload_set_home $initdir
   bind .myload <Return> { 
@@ -612,14 +617,22 @@ proc load_file_dialog {{msg {}}  {ext {}} {global_initdir {INITIALINSTDIR}}} {
   bind .myload <Escape> { set myload_retval {}; destroy .myload}
 
 
+  update
+  if { [info exists myload_default_geometry]} {
+     wm geometry .myload "${myload_default_geometry}"
+  }
+  update
+  if { [ info exists myload_sash_pos] } {
+    eval .myload.l sash mark 0 [.myload.l sash coord 0]
+    eval .myload.l sash dragto 0 [subst $myload_sash_pos]
+  }
+
   bind .myload <Configure> {
+    set myload_sash_pos [.myload.l sash coord 0]
     set myload_default_geometry [wm geometry .myload]
     regsub {\+.*} $myload_default_geometry {} myload_default_geometry
   }
 
-
-  wm geometry .myload "${myload_default_geometry}"
-  update
   set myload_dir1 [abs_sym_path [.myload.l.listbox1.list get $myload_index1]]
   set myload_files2 [lsort [glob -directory $myload_dir1 -tails \{.*,*\}]]
   myload_set_colors
@@ -647,9 +660,7 @@ proc load_file_dialog {{msg {}}  {ext {}} {global_initdir {INITIALINSTDIR}}} {
       }
     }
   }
-
   tkwait window .myload
-
   if { $myload_retval ne {} } {
     set initdir "$myload_dir1"
     return "$myload_dir1/$myload_retval" ;# removed file normalize
@@ -2117,7 +2128,6 @@ set_ne to_png {gm convert}
 ## 20160325 remember edit_prop widget size
 set_ne edit_prop_default_geometry 80x12
 set_ne text_line_default_geometry 80x12
-set_ne myload_default_geometry 600x300
 set_ne terminal xterm
 
 # set_ne analog_viewer waveview

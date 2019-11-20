@@ -92,7 +92,7 @@ void global_vhdl_netlist(int global)  /* netlister driver */
  if(debug_var>=1) fprintf(errfp, "global_vhdl_netlist(): printing top level entity\n");
 
  /* 20071015 already done in print_generic() */
- /* fprintf(fd,">>> entity %s is\n", skip_dir( schematic[currentsch]) ); */
+ /* fprintf(fd," --- entity %s is\n", skip_dir( schematic[currentsch]) ); */
  /* 20071015 end */
 
  /* flush data structures (remove unused symbols) */

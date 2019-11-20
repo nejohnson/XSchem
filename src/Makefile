@@ -134,7 +134,7 @@ install: xschem
 	cp -ru ../xschem_library/ngspice $(prefix)/share/doc/xschem/
 	cp -ru ../xschem_library/pcb $(prefix)/share/doc/xschem/
 	cp -ru ../xschem_library/logic $(prefix)/share/doc/xschem/
-	mkdir $(prefix)/share/doc/xschem/symgen
+	mkdir -p $(prefix)/share/doc/xschem/symgen
 	cp -ru ../xschem_library/symgen/*.sym $(prefix)/share/doc/xschem/symgen
 	cp -ru ../xschem_library/symgen/*.symdef $(prefix)/share/doc/xschem/symgen
 

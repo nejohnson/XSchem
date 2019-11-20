@@ -2198,9 +2198,9 @@ char *translate(int inst, char* s)
    token_pos=0;
 
    value = get_tok_value(inst_ptr[inst].prop_ptr, token+1, 2); /* 20171205 use get_tok_value instead of hash_lookup */
-   if(!value[0]) value=get_tok_value((inst_ptr[inst].ptr+instdef)->templ, token+1, 2); /* 20190310 2 instead of 0 */
+   if(!get_tok_size) value=get_tok_value((inst_ptr[inst].ptr+instdef)->templ, token+1, 2); /* 20190310 2 instead of 0 */
 
-   if(value[0] != 0) {
+   if(get_tok_size) {
     tmp=get_tok_value_size;  /* strlen(value); */  /* 20180926 */
     if(result_pos + tmp>=size) {
      size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
@@ -2242,8 +2242,8 @@ char *translate(int inst, char* s)
        my_snprintf(inst_pin_name_redefine, 100+sizetok+get_tok_value_size, "%s(%s)", pin_attr, pinname);
        my_snprintf(inst_pin_num_redefine, sizetok * sizeof(char)+20, "%s(%d)", pin_attr, n);
        value = get_tok_value(inst_ptr[inst].prop_ptr,inst_pin_name_redefine,0);
-       if(!value[0]) value = get_tok_value(inst_ptr[inst].prop_ptr,inst_pin_num_redefine,0);
-       if(!value[0]) value = get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr,pin_attr,0);
+       if(!get_tok_size) value = get_tok_value(inst_ptr[inst].prop_ptr,inst_pin_num_redefine,0);
+       if(!get_tok_size) value = get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr,pin_attr,0);
        if(value[0] != 0) {
          char *ss;
          int slot;

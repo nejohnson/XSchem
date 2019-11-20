@@ -167,8 +167,11 @@ set terminal {xterm -geometry 100x35 -fn 9x15 -bg black -fg white -cr white -ms 
 ## In order to reduce memory usage and increase the performance, all instances
 ## of the terminal are sharing a single process. LXTerminal is part of LXDE
 
-# editor must not detach from launching shell (-f mandatory for gvim)
+## editor must not detach from launching shell (-f mandatory for gvim)
+# set editor { xterm -geometry 100x40 -e nano }
+# set editor { xterm -geometry 100x40 -e pico }
 set editor {gvim -f -geometry 90x28}
+
 
 ###########################################################################
 # alternatives: ngspice hspice, hspicerf, finesim

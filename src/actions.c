@@ -638,6 +638,7 @@ void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
   int first_call;
   struct stat buf;
   int indirect;
+  int use_label_prefix;
 
 
   if(!stat(abs_sym_path(symname_pin, ""), &buf)) {
@@ -651,8 +652,6 @@ void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
   k = lastselected;
   first_call=1; /*  20171214 for place_symbol--> new_prop_string */
   prepare_netlist_structs(1);
-  if(k) push_undo(); /*  20150327 */
-  bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0);
   for(j=0;j<k;j++) if(selectedgroup[j].type==ELEMENT) {
 
 
@@ -661,12 +660,14 @@ void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
     tclsetvar("custom_label_prefix",prop);
     /*  20171005 */
     if(!do_all_inst) {
+      if(debug_var>=1) fprintf(errfp,"attach_labels_to_inst(): invoking tcl attach_labels_to_inst\n");
       tcleval("attach_labels_to_inst");
       if(!strcmp(tclgetvar("rcode"),"") ) {
         bbox(END, 0., 0., 0., 0.);
         return;
       }
     }
+    use_label_prefix = atoi(tclgetvar("use_label_prefix"));
 
     rot_txt = tclgetvar("rotated_text");
     if(strcmp(rot_txt,"")) rotated_text=atoi(rot_txt); /*  20171208 */
@@ -741,7 +742,7 @@ void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
          my_strdup(9, &prop, "name=p1 lab=");
 
          /*  20171005 */
-         if(!strcmp(tclgetvar("use_label_prefix"),"1")) {
+         if(use_label_prefix) {
            my_strcat(10, &prop, (char *)tclgetvar("custom_label_prefix"));
          }
          /*  /20171005 */
@@ -756,15 +757,15 @@ void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
          }
          if(!strcmp(tclgetvar("use_lab_wire"),"0")) {
            if(indirect) 
-             place_symbol(-1,symname_pin, pinx0, piny0, rot1, dir, prop, 0, first_call);
+             place_symbol(-1,symname_pin, pinx0, piny0, rot1, dir, prop, 2, first_call);
            else
-             place_symbol(-1,symname_pin2, pinx0, piny0, rot1, dir, prop, 0, first_call);
+             place_symbol(-1,symname_pin2, pinx0, piny0, rot1, dir, prop, 2, first_call);
            first_call=0;
          } else {
            if(indirect) 
-             place_symbol(-1,symname_wire, pinx0, piny0, rot1, dir, prop, 0, first_call);
+             place_symbol(-1,symname_wire, pinx0, piny0, rot1, dir, prop, 2, first_call);
            else
-             place_symbol(-1,symname_wire2, pinx0, piny0, rot1, dir, prop, 0, first_call);
+             place_symbol(-1,symname_wire2, pinx0, piny0, rot1, dir, prop, 2, first_call);
            first_call=0;
          }
 
@@ -780,10 +781,9 @@ void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
 }
 
 
-/*  draw_sym==3 start bbox end bbox, draw placed symbols  */
-/*  draw_sym==1 end bbox, draw placed symbols  */
-/*  draw_sym==2 start  bbox */
-/*  draw_sym==0 dont draw */
+/*  draw_sym==4 select element after placing */
+/*  draw_sym==2 begin bbox if(first_call), add bbox */
+/*  draw_sym==1 begin bbox if(first_call), add bbox, end bbox, draw placed symbols  */
 /*  */
 /*  first_call: set to 1 on first invocation for a given set of symbols (same prefix) */
 /*  set to 0 on next calls, this speeds up searching for unique names in prop string */
@@ -805,15 +805,16 @@ void place_symbol(int pos, const char *symbol_name, double x, double y, int rot,
  }
  if(debug_var>=1) fprintf(errfp, "place_symbol(): load_file_dialog returns:  name=%s\n",name);
  my_strncpy(name, rel_sym_path(name), S(name));
- if(name[0]) push_undo(); /*  20150327 */
- else  return;
+ if(name[0]) {
+   if(first_call) push_undo(); /*  20150327 */
+ } else  return;
 
  i=match_symbol(name);
 
  if(i!=-1)
  {
   check_inst_storage();
-  if(pos==-1) n=lastinst;
+  if(pos==-1 || pos > lastinst) n=lastinst;
   else
   {
    for(j=lastinst;j>pos;j--)
@@ -859,11 +860,11 @@ void place_symbol(int pos, const char *symbol_name, double x, double y, int rot,
   if(cond) inst_ptr[n].flags|=2;
   else inst_ptr[n].flags &=~2;
 
-  if(draw_sym&2) bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0);
+  if(first_call && (draw_sym & 3) ) bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0);
 
   symbol_bbox(n, &inst_ptr[n].x1, &inst_ptr[n].y1,
                     &inst_ptr[n].x2, &inst_ptr[n].y2);
-  bbox(ADD, inst_ptr[n].x1, inst_ptr[n].y1, inst_ptr[n].x2, inst_ptr[n].y2);
+  if(draw_sym & 3) bbox(ADD, inst_ptr[n].x1, inst_ptr[n].y1, inst_ptr[n].x2, inst_ptr[n].y2);
   lastinst++;
   set_modify(1);
   prepared_hash_instances=0; /*  20171224 */
@@ -876,7 +877,7 @@ void place_symbol(int pos, const char *symbol_name, double x, double y, int rot,
   }
   /*   hilight new element 24122002 */
 
-  if(draw_sym) {
+  if(draw_sym & 4 ) {
     drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
     drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
     drawtemparc(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);

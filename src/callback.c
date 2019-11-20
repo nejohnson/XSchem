@@ -80,7 +80,7 @@ int callback(int event, int mx, int my, KeySym key,
  state &=~Mod2Mask; /* 20170511 filter out NumLock status */
  if(semaphore)
  {
-   if(debug_var>=1) 
+   if(debug_var>=2) 
      fprintf(errfp, "callback(): reentrant call of callback(), semaphore=%d\n", semaphore);
    if(event==Expose) {
      XCopyArea(display, save_pixmap, window, gctiled, mx,my,button,aux,mx,my);
@@ -850,7 +850,15 @@ int callback(int event, int mx, int my, KeySym key,
    {
     if(semaphore==2) break;
     last_command = 0;
-    place_symbol(-1,NULL,mousex_snap, mousey_snap, 0, 0, NULL,3, 1);
+
+    /* place_symbol(-1,NULL,mousex_snap, mousey_snap, 0, 0, NULL,3, 1);*/
+    place_symbol(-1,NULL,mousex_snap, mousey_snap, 0, 0, NULL, 4, 1);
+    mx_save = mx; my_save = my; /* 20070323 */
+    mx_double_save=mousex_snap;
+    my_double_save=mousey_snap;
+    move_objects(BEGIN,0,0,0);
+
+
     break;
    }
    if(key=='s' && state & Mod1Mask)                     /* reload */

@@ -539,25 +539,27 @@ void draw_symbol_outline(int what,int c, int n,int layer,int tmp_flip, int rot,
       ROTATION(0.0,0.0,text.x0,text.y0,x1,y1);
 
       textlayer = c;
-      #ifdef HAS_CAIRO
       textlayer = symptr->txtptr[j].layer;
       if(textlayer < 0 || textlayer >= cadlayers) textlayer = c;
-      textfont = symptr->txtptr[j].font;
-      if(textfont && textfont[0]) {
-        cairo_save(ctx);
-        cairo_save(save_ctx);
-        cairo_select_font_face (ctx, textfont, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-        cairo_select_font_face (save_ctx, textfont, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-      }
-      #endif
-      draw_string(textlayer, what, text.txt_ptr,
-        (text.rot + ( (flip && (text.rot & 1) ) ? rot+2 : rot) ) & 0x3,
-        flip^text.flip,
-        x0+x1, y0+y1, text.xscale, text.yscale);                    
-      #ifdef HAS_CAIRO
-      if(textfont && textfont[0]) {
-        cairo_restore(ctx);
-        cairo_restore(save_ctx);
+      if(enable_layer[textlayer]) {
+        #ifdef HAS_CAIRO
+        textfont = symptr->txtptr[j].font;
+        if(textfont && textfont[0]) {
+          cairo_save(ctx);
+          cairo_save(save_ctx);
+          cairo_select_font_face (ctx, textfont, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+          cairo_select_font_face (save_ctx, textfont, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+        }
+        #endif
+        draw_string(textlayer, what, text.txt_ptr,
+          (text.rot + ( (flip && (text.rot & 1) ) ? rot+2 : rot) ) & 0x3,
+          flip^text.flip,
+          x0+x1, y0+y1, text.xscale, text.yscale);                    
+        #ifdef HAS_CAIRO
+        if(textfont && textfont[0]) {
+          cairo_restore(ctx);
+          cairo_restore(save_ctx);
+        }
       }
       #endif
     }

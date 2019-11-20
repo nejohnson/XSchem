@@ -1877,6 +1877,10 @@ proc abs_sym_path {fname {ext {} } } {
   if { $ext ne {} } { 
     set fname [file rootname $fname]$ext
   }
+
+  # transform ./file_or_path to file_or_path
+  regsub {^ *\.\/} $fname {} fname
+
   set lib_cell [get_cell $fname]
 
   if {$fname eq {} } return {}
@@ -1884,7 +1888,7 @@ proc abs_sym_path {fname {ext {} } } {
   # fname is of type libname/cellname[.ext] but not ./cellname[.ext] or
   # ../cellname[.ext] and has a slash, so no cellname[.ext] 
   # no ./cell.sym
-  if {![string compare $fname $lib_cell ]  && ![regexp {^ *\.\/} $lib_cell]} {
+  if {![string compare $fname $lib_cell ]} {
     foreach path_elem $pathlist {
       if { ![string compare $path_elem .]  && [info exist current_dirname]} {
         set path_elem $current_dirname

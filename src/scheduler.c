@@ -68,7 +68,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
  int i;
  char name[1024]; /* overflow safe 20161122 */
  if(argc<2) return TCL_ERROR;
- if(debug_var>=1) {
+ if(debug_var>=2) {
    int i;
    fprintf(errfp, "xschem():");
    for(i=0; i<argc; i++) {
@@ -250,7 +250,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
  {
    semaphore++;
    if(semaphore < 2) {
-     place_symbol(-1,NULL,0.0, 0.0, 0, 0, NULL, 3, 1);
+     place_symbol(-1,NULL,0.0, 0.0, 0, 0, NULL, 7, 1);
      move_objects(BEGIN,0,0,0);
    }
    semaphore--;
@@ -1083,6 +1083,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
  else if(!strcmp(argv[1],"push_undo"))
  {
   push_undo();
+  Tcl_ResetResult(interp);
  }
 
  else if(!strcmp(argv[1],"check_unique_names")) {

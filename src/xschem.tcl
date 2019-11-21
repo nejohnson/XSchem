@@ -537,7 +537,7 @@ proc load_file_dialog {{msg {}}  {ext {}} {global_initdir {INITIALINSTDIR}}} {
   panedwindow  .myload.l -orient horizontal
 
   frame .myload.l.listbox1
-  listbox .myload.l.listbox1.list -listvariable myload_files1 -width 60 \
+  listbox .myload.l.listbox1.list -listvariable myload_files1 -width 60 -height 30\
     -yscrollcommand ".myload.l.listbox1.yscroll set" -selectmode browse \
     -xscrollcommand ".myload.l.listbox1.xscroll set"
   scrollbar .myload.l.listbox1.yscroll -command ".myload.l.listbox1.list yview" 
@@ -557,7 +557,7 @@ proc load_file_dialog {{msg {}}  {ext {}} {global_initdir {INITIALINSTDIR}}} {
   }
 
   frame .myload.l.listbox2
-  listbox .myload.l.listbox2.list  -listvariable myload_files2 -width 60 \
+  listbox .myload.l.listbox2.list  -listvariable myload_files2 -width 30 -height 30\
     -yscrollcommand ".myload.l.listbox2.yscroll set" -selectmode browse \
     -xscrollcommand ".myload.l.listbox2.xscroll set"
   scrollbar .myload.l.listbox2.yscroll -command ".myload.l.listbox2.list yview"

@@ -236,9 +236,11 @@ int callback(int event, int mx, int my, KeySym key,
   break;
   case KeyRelease:  /* 20161118 */
     if(key==' ') {  /* pan schematic */
-      if(ui_state & STARTPAN2) {  /* 20121123 */
+      /* 
+      if(ui_state & STARTPAN2) {
         ui_state &=~STARTPAN2;
       }
+      */
     }
   break;
   case KeyPress: /* 20161118 */
@@ -1324,8 +1326,13 @@ int callback(int event, int mx, int my, KeySym key,
      break;
    }
   break;
+
   case ButtonPress:                     /* end operation */
    if(debug_var>=1) fprintf(errfp, "callback(): ButtonPress  ui_state=%ld state=%d\n",ui_state,state);
+   if(ui_state & STARTPAN2) {  /* 20121123 */
+     ui_state &=~STARTPAN2;
+     break;
+   }
    if(button==Button5 && state == 0 ) view_unzoom(CADZOOMSTEP);
    else if(button == Button3 && semaphore <2) {
      if(!(ui_state & STARTPOLYGON) && !(state & Mod1Mask) ) {
@@ -1565,9 +1572,6 @@ int callback(int event, int mx, int my, KeySym key,
    break;
   case ButtonRelease:
    if(debug_var>=1) fprintf(errfp, "callback(): ButtonRelease  ui_state=%ld state=%d\n",ui_state,state);
-   if(ui_state & STARTPAN2) {  /* 20121123 */
-     ui_state &=~STARTPAN2;
-   }
    if(semaphore==2) break; /* 20160423 */
    if(ui_state & STARTSELECT) {
      if(state & ControlMask) {

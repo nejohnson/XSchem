@@ -235,13 +235,6 @@ int callback(int event, int mx, int my, KeySym key,
 
   break;
   case KeyRelease:  /* 20161118 */
-    if(key==' ') {  /* pan schematic */
-      /* 
-      if(ui_state & STARTPAN2) {
-        ui_state &=~STARTPAN2;
-      }
-      */
-    }
   break;
   case KeyPress: /* 20161118 */
    if(key==' ') {
@@ -1571,6 +1564,10 @@ int callback(int event, int mx, int my, KeySym key,
    } /* button==Button1 */
    break;
   case ButtonRelease:
+   if(ui_state & STARTPAN2) {
+     ui_state &=~STARTPAN2;
+     break;
+   }
    if(debug_var>=1) fprintf(errfp, "callback(): ButtonRelease  ui_state=%ld state=%d\n",ui_state,state);
    if(semaphore==2) break; /* 20160423 */
    if(ui_state & STARTSELECT) {

@@ -234,8 +234,13 @@ int main(int argc, char *argv[])
     }
     curr_dataset++;
   } else {
+    fprintf(stderr, "rawtovcd: failed to open file for writing\n");
     return EXIT_FAILURE;
   }
   if(fd && fd != stdin) fclose(fd);
-  return EXIT_SUCCESS;
+  if(variables) return EXIT_SUCCESS;
+  else {
+    fprintf(stderr, "rawtovcd: dataset not found in raw file\n");
+    return EXIT_FAILURE;
+  }
 }

@@ -1,4 +1,4 @@
-v {xschem version=2.8.4 file_version=1.1}
+v {xschem version=2.9.5_RC5 file_version=1.1}
 G {}
 V {}
 S {}
@@ -14,7 +14,7 @@ C {title.sym} 160 -30 0 0 {name=l1 author="Stefan Schippers"}
 C {launcher.sym} 320 -100 0 0 {name=h1
 descr="NGSPICE Manual" 
 url="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&cad=rja&uact=8&ved=2ahUKEwiVvafVvtzfAhVHExoKHaZLAIQQFjAAegQICRAC&url=http%3A%2F%2Fngspice.sourceforge.net%2Fdocs%2Fngspice-manual.pdf&usg=AOvVaw3n8fjRjAJRgWMjg1Y04Ht8"}
-C {code.sym} 640 -210 0 0 {name=STIMULI
+C {code_shown.sym} 640 -210 0 0 {name=STIMULI
 only_toplevel=true
 tclcommand="xschem edit_vi_prop"
 value="

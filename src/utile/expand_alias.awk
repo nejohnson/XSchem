@@ -106,8 +106,8 @@ function analyze_params_in_expressions(name, s,       ss, s_arr, i, o, o_arr, n)
   o = split(s, o_arr, /[^=\-\+\*\/]+/) # 20150810 added '='
   for(i=1; i<=n;i++) {
     invert=0 # 20140527
-    if(s_arr[i] ~ /\~/) { # 20140527
-      sub(/^\~/,"",s_arr[i])
+    if(s_arr[i] ~ /~/) { # 20140527
+      sub(/^~/,"",s_arr[i])
       invert=1
     }
     if(name SUBSEP "p" s_arr[i]  in alias) {

@@ -1,7 +1,7 @@
-v {xschem version=2.9.2 file_version=1.1}
+v {xschem version=2.9.5_RC5 file_version=1.1}
 G {type=gate
-verilog_format="assign #@del @@Y = ~( @@A & @@B );"
-vhdl_format = "@@Y <= @@A nand @@B after @del ps;"
+verilog_format="assign #@del @@Y = ~( @@A[max:0] & @@B[max:0] );"
+vhdl_format = "@@Y <= @@A[max:0] nand @@B[max:0] after @del ps;"
 format="@name [ @@A[max:0] @@B[max:0] ] @@Y nand"
 template="name=a1 del=120"}
 V {}

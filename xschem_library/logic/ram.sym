@@ -1,7 +1,6 @@
-v {xschem version=2.9.2 file_version=1.1}
+v {xschem version=2.9.5_RC5 file_version=1.1}
 G {type=subcircuit
 vhdl_stop=true
-verilog_netlist=true
 format="@name @pinlist @symname"
 template="name=x1 dim=5 width=8 hex=0 datafile=ram.list modulename=ram"
 generic_type="datafile=string modulename=string"

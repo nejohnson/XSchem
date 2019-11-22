@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC2 file_version=1.1}
+v {xschem version=2.9.5_RC5 file_version=1.1}
 G {}
 V {}
 S {}
@@ -28,7 +28,7 @@ N 510 -450 540 -450 {lab=#net1}
 N 510 -690 510 -630 {lab=D}
 N 690 -550 690 -500 {lab=C}
 C {title.sym} 160 -30 0 0 {name=l7 author="Stefan Schippers"}
-C {netlist_at_end.sym} 30 -290 0 0 {name=s1 value=".ac oct 1000 100 10G
+C {code_shown.sym} 30 -310 0 0 {name=CONTROL place=end value=".ac oct 1000 100 10G
 .control
    listing e
    run
@@ -42,7 +42,7 @@ C {netlist_at_end.sym} 30 -290 0 0 {name=s1 value=".ac oct 1000 100 10G
 .endc
 
 "}
-C {netlist_not_shown_at_end.sym} 840 -250 0 0 {name=MODELS value=".model Q2N2219A  NPN(Is=14.34f Xti=3 Eg=1.11 Vaf=74.03 Bf=255.9 Ne=1.307 Ise=14.34f Ikf=.2847 Xtb=1.5 Br=6.092 Nc=2 Isc=0 Ikr=0 Rc=1 Cjc=7.306p
+C {code.sym} 840 -250 0 0 {name=MODELS value=".model Q2N2219A  NPN(Is=14.34f Xti=3 Eg=1.11 Vaf=74.03 Bf=255.9 Ne=1.307 Ise=14.34f Ikf=.2847 Xtb=1.5 Br=6.092 Nc=2 Isc=0 Ikr=0 Rc=1 Cjc=7.306p
 + Mjc=.3416 Vjc=.75 Fc=.5 Cje=22.01p Mje=.377 Vje=.75 Tr=46.91n Tf=411.1p Itf=.6 Vtf=1.7 Xtf=3 Rb=10 Vceo=40 Icrating=800m mfg=Philips)
 "}
 C {ind.sym} 340 -690 1 0 {name=l1 value=10uH}

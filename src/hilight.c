@@ -276,7 +276,7 @@ int bus_search(const char*s)
 void search(const char *tok, const char *val, int sub, int sel, int what)
 {
  int save_draw;
- int i,c, col,tmp,bus=0;
+ int i,c, col = 7,tmp,bus=0;
  const char *str;
  char *type; 
  int has_token;

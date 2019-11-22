@@ -1,3 +1,27 @@
+/* File: rawtovcd.c
+ * 
+ * This file is part of XSCHEM,
+ * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
+ * simulation.
+ * Copyright (C) 1998-2019 Stefan Frederik Schippers
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+/* create a vcd file from a ngspice raw file */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -106,7 +130,7 @@ void read_binary_block()
   }
 }
 
-void write_header()
+void write_vcd_header()
 {
   char t[20];
   int v;
@@ -137,11 +161,11 @@ void write_header()
      
 }
 
-void dump_waves()
+void dump_vcd_waves()
 {
   int p, v;
-  /* dump waveforms */
   double *lastvalue;
+
   lastvalue = malloc(nvars * sizeof(double));
   for(p = 0; p < npoints; p++) {
     if(p == 0) {
@@ -171,6 +195,7 @@ void dump_waves()
 void free_storage()
 {
   int i;
+
   for(i = 0 ; i < nvars; i++) {
     free(names[i]);
     free(vcd_ids[i]);
@@ -187,7 +212,11 @@ int main(int argc, char *argv[])
 {
   int dataset, curr_dataset;
   int variables;
-  if(argc < 3) exit(EXIT_FAILURE);
+  if(argc < 3) {
+    fprintf(stderr, "usage: rawtovcd n rawfile > vcdfile\n"
+      "n is the dataset index starting from 0\n");
+    exit(EXIT_FAILURE);
+  }
   dataset = atoi(argv[1]);
   curr_dataset = 0;
   if(!strcmp(argv[2], "-")) fd = stdin;
@@ -197,8 +226,8 @@ int main(int argc, char *argv[])
     if(curr_dataset == dataset) {
       if(variables) {
         read_binary_block();
-        write_header();
-        dump_waves();
+        write_vcd_header();
+        dump_vcd_waves();
         free_storage();
       }
       break;

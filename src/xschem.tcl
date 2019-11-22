@@ -2038,6 +2038,7 @@ set pathlist {}
 if { [info exists XSCHEM_LIBRARY_PATH] } {
   set pathlist_orig [split $XSCHEM_LIBRARY_PATH :]
   foreach i $pathlist_orig {
+    regsub {^~} $i $env(HOME) i
     if { ![string compare $i .] } {
       lappend pathlist $i
     } elseif { [ file exists $i] } {

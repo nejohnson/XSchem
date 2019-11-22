@@ -69,16 +69,19 @@ endif
 
 ## to fix rendering problems due to bugs in the exceed turboX server
 ## add -DTURBOX_FIX
-MOREFLAGS= -g -std=c89 -pedantic 
+MOREFLAGS= -O2 -std=c89 -pedantic -Wall
 
-CFLAGS  = -Wall  $(MOREFLAGS)  -I/usr/include/tcl${TCLVER} $(CAIRO_INCLUDES) -I/home/sschippe/include \
+CFLAGS  =  $(MOREFLAGS)  -I/usr/include/tcl${TCLVER} $(CAIRO_INCLUDES) -I/home/sschippe/include \
            $(IN_MEMORY_UNDO) -DXSCHEM_SHAREDIR='"${sharedir}"'  -DUSER_CONF_DIR='"${userconfdir}"' \
            -DXSCHEM_LIBRARY_PATH='"${xschem_library_path}"' \
            -DHAS_POPEN=$(HAS_POPEN) -DHAS_PIPE=$(HAS_PIPE)
 
 LDFLAGS = -L/usr/X11R6/lib -L/home/sschippe/lib $(MOREFLAGS) -lX11 -lm -lXpm -ltcl${TCLVER} -ltk${TCLVER} \
            $(CAIRO_LIBS)
+all: xschem rawtovcd
 
+rawtovcd: rawtovcd.o
+	$(CC) -o $@   $^ -lm
 xschem: 	$(OBJ)
 	$(CC) -o $@   $^ $(LDFLAGS)
 
@@ -92,9 +95,12 @@ parselabel.o: expandlabel.h
 
 $(OBJ): xschem.h
 
+rawtovcd.o: rawtovcd.c
+	$(CC) -c -o $@  $^ $(MOREFLAGS)
+
 .PHONY: clean
 clean:
-	rm -rf xschem *.o expandlabel.[ch] parselabel.c netlist netlist.spice netlist.vhdl netlist.v *.da gmon.out
+	rm -rf xschem rawtovcd *.o expandlabel.[ch] parselabel.c 
 
 .PHONY: install
 install: xschem
@@ -106,6 +112,7 @@ install: xschem
 	mkdir -p $(user_library_dir)
 	mkdir -p $(user_library_dir)/simulations
 	cp xschem $(prefix)/bin
+	cp rawtovcd $(prefix)/bin
 	cp xschem $(prefix)/share/xschem
 	cp keys.help  $(prefix)/share/xschem
 	cp xschem.help  $(prefix)/share/xschem
@@ -141,6 +148,7 @@ install: xschem
 .PHONY: uninstall
 uninstall:
 	rm $(prefix)/bin/xschem
+	rm $(prefix)/bin/rawtovcd
 	rm -rf $(prefix)/share/xschem
 	rm -rf $(prefix)/share/doc/xschem
 

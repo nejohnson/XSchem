@@ -1,0 +1,212 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+
+FILE *fd;
+int nvars, npoints;
+double **values;
+char **names, **vcd_ids;
+double timescale=1e10; /* spice times will be multiplied by this number to get an integer */
+double rel_timestep_precision = 5e-3;
+double abs_timestep_precision = 1e-10;
+
+/* get a short unique ascii identifier to identify node */
+const char *get_vcd_id(int idx)
+{
+  static const char syms[] = 
+    "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ=+-_)(*&^%$#@!~`:;',\"<.>/?|";
+  static const int n = sizeof(syms)-1;
+  int q, r, pos;
+  static char res[32];
+
+  q = idx;
+  pos = 31;
+  res[pos] = '\0';
+  do {
+    pos--;
+    r = q % n;
+    q /= n;
+    res[pos] = syms[r];
+  } while(q && pos > 0);
+  return res + pos;
+}
+
+/* parse ascii raw header section: 
+ * returns: non zero if dataset and variables were read.
+ * Typical ascii header of raw file looks like: 
+ *
+ * Title: **.subckt poweramp
+ * Date: Thu Nov 21 18:36:25  2019
+ * Plotname: Transient Analysis
+ * Flags: real
+ * No. Variables: 158
+ * No. Points: 90267
+ * Variables:
+ *         0       time    time
+ *         1       v(net1) voltage
+ *         2       v(vss)  voltage
+ *         ...
+ *         ...
+ *         155     i(v.x1.vd)      current
+ *         156     i(v0)   current
+ *         157     i(v1)   current
+ * Binary:
+ */
+int read_ascii_header(int curr_dataset, int dataset)
+{
+  int variables = 0, i, done_points = 0;
+  char line[4096], varname[4096];
+  const char *id;
+
+  while(fgets(line, sizeof(line), fd) ) {
+    if(!strncmp(line, "Binary:", 7)) break; /* start of binary block */
+    if(curr_dataset == dataset) {
+      if(variables) {
+        sscanf(line, "%d %s", &i, varname); /* read index and name of saved waveform */
+        names[i] = malloc(strlen(varname) + 1);
+        strcpy(names[i], varname);
+        id = get_vcd_id(i);
+        vcd_ids[i] = malloc(strlen(id) + 1) ;
+        strcpy(vcd_ids[i], id);
+      }
+      if(!strncmp(line, "No. of Data Rows :", 18)) {
+        sscanf(line, "No. of Data Rows : %d", &npoints);
+        done_points = 1;
+      }
+      if(!strncmp(line, "No. Variables:", 14)) {
+        sscanf(line, "No. Variables: %d", &nvars);
+      }
+      if(!done_points && !strncmp(line, "No. Points:", 11)) {
+        sscanf(line, "No. Points: %d", &npoints);
+      }
+      if(!strncmp(line, "Variables:", 10)) {
+        variables = 1;
+        names = calloc(nvars, sizeof(char *));
+        vcd_ids = calloc(nvars, sizeof(char *));
+      }
+    }
+  }
+  return variables;
+}
+
+/* binary block is just a blob of npoints * nvars doubles */
+void read_binary_block()
+{
+  int p;
+
+  /* allocate storage for binary block */
+  values = calloc(npoints, sizeof(double *));
+  for(p = 0 ; p < npoints; p++) {
+    values[p] = calloc(nvars, sizeof(double));
+  }
+  /* read binary block */
+  for(p = 0; p < npoints; p++) {
+    fread(values[p], sizeof(double), nvars, fd);
+  }
+}
+
+void write_header()
+{
+  char t[20];
+  int v;
+  printf("$timescale\n");
+  strcpy(t, 
+      timescale == 1e12 ? "1ps"   :
+      timescale == 1e11 ? "10ps"  :
+      timescale == 1e10 ? "100ps" :
+      timescale == 1e9  ? "1ns"   :
+      timescale == 1e8  ? "10ns"  :
+      timescale == 1e7  ? "100ns" :
+      timescale == 1e6  ? "1us"   :
+      timescale == 1e5  ? "10us"  :
+      timescale == 1e4  ? "100us" :
+      timescale == 1e3  ? "1ms"   :
+      timescale == 1e2  ? "10ms"  :
+      timescale == 1e1  ? "100ms" :
+      timescale == 1    ? "1s"    :
+      timescale == 1e-1 ? "10s"   :
+      timescale == 1e-2 ? "100s"  :
+                          "1000s");
+  printf("   %s\n", t);
+  printf("$end\n");
+  for(v = 1; v < nvars; v++) {
+    printf("$var real 1 %s %s $end\n", vcd_ids[v], names[v]);
+  }
+  printf("$enddefinitions $end\n");
+     
+}
+
+void dump_waves()
+{
+  int p, v;
+  /* dump waveforms */
+  double *lastvalue;
+  lastvalue = malloc(nvars * sizeof(double));
+  for(p = 0; p < npoints; p++) {
+    if(p == 0) {
+      printf("#0\n");
+      printf("$dumpvars\n");
+      for(v = 1 ; v < nvars; v++) {
+        printf("r%.3g %s\n", values[p][v], vcd_ids[v]);
+        lastvalue[v] = values[p][v];
+      }
+      printf("$end\n");
+    } else {
+      printf("#%d\n", (int) (values[p][0] * timescale));
+      for(v = 1 ; v < nvars; v++) {
+        if(
+           (values[p][v] != 0.0 &&  fabs((values[p][v] - lastvalue[v]) / values[p][v]) > rel_timestep_precision) ||
+           (values[p][v] == 0.0 && fabs(values[p][v] - lastvalue[v]) > abs_timestep_precision) 
+          ) {
+          printf("r%.3g %s\n", values[p][v], vcd_ids[v]);
+          lastvalue[v] = values[p][v];
+        }
+      }
+    }
+  }
+  free(lastvalue);
+}
+
+void free_storage()
+{
+  int i;
+  for(i = 0 ; i < nvars; i++) {
+    free(names[i]);
+    free(vcd_ids[i]);
+  }
+  for(i = 0 ; i < npoints; i++) {
+    free(values[i]);
+  }
+  free(values);
+  free(names);
+  free(vcd_ids);
+}
+
+int main(int argc, char *argv[])
+{
+  int dataset, curr_dataset;
+  int variables;
+  if(argc < 3) exit(EXIT_FAILURE);
+  dataset = atoi(argv[1]);
+  curr_dataset = 0;
+  if(!strcmp(argv[2], "-")) fd = stdin;
+  else fd = fopen(argv[2], "r");
+  if(fd) while(1) {
+    variables = read_ascii_header(curr_dataset, dataset);
+    if(curr_dataset == dataset) {
+      if(variables) {
+        read_binary_block();
+        write_header();
+        dump_waves();
+        free_storage();
+      }
+      break;
+    }
+    curr_dataset++;
+  } else {
+    return EXIT_FAILURE;
+  }
+  if(fd && fd != stdin) fclose(fd);
+  return EXIT_SUCCESS;
+}

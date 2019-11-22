@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC2 file_version=1.1}
+v {xschem version=2.9.5_RC5 file_version=1.1}
 G {process
 begin
 A<='0';
@@ -90,8 +90,8 @@ N 480 -680 610 -680 {lab=B}
 N 710 -700 890 -700 {lab=Y_NAND4}
 N 950 -700 1000 -700 {lab=Y_NAND_A[4]}
 C {title.sym} 160 -30 0 0 {name=l2}
-C {verilog_timescale.sym} 50 -320 0 0 {name=s1 timestep="1ps" precision="1ps" }
-C {use.sym} 50 -420 0 0 {------------------------------------------------
+C {verilog_timescale.sym} 30 -340 0 0 {name=s1 timestep="1ps" precision="1ps" }
+C {use.sym} 30 -440 0 0 {------------------------------------------------
 library ieee;
         use ieee.std_logic_1164.all;
         use ieee.numeric_std.all;}
@@ -99,15 +99,17 @@ C {lab_pin.sym} 460 -380 2 1 {name=p47 lab=A_A verilog_type=reg}
 C {lab_pin.sym} 460 -340 2 1 {name=p48 lab=B_A verilog_type=reg}
 C {adc_bridge.sym} 540 -380 0 0 {name=a1 delay=1}
 C {adc_bridge.sym} 540 -340 0 0 {name=a2 delay=1}
-C {code.sym} 380 -210 0 0 {name=STIMULI
+C {code_shown.sym} 30 -260 0 0 {name=STIMULI
 place=end
 vhdl_ignore=true
 verilog_ignore=true
 only_toplevel=true
 tclcommand="xschem edit_vi_prop"
 value="
-
-.include stimuli.cir
+* to generate following file copy ..share/doc/xschem/logic/stimuli.test_ngspice
+* to the simulation directory and run simulation -> Utile Stimuli Editor (GUI), 
+* and press 'Translate'
+.include stimuli_test_ngspice.cir
 
 .control
 tran 100n 26u
@@ -120,7 +122,7 @@ C {lab_wire.sym} 830 -360 0 1 {name=l5 lab=Y_NAND}
 C {nd2.sym} 740 -360 0 0 {name=a3 delay="120 ps" del=120}
 C {dac_bridge.sym} 1010 -360 0 0 {name=a4 }
 C {lab_pin.sym} 1090 -360 2 0 {name=p1 lab=Y_NAND_A}
-C {/mnt/x/home/schippes/xschem-repo/trunk/xschem_library/devices/netlist_options.sym} 50 -480 0 0 {bus_replacement_char="[]"}
+C {netlist_options.sym} 30 -510 0 0 {bus_replacement_char="[]"}
 C {lab_pin.sym} 670 -520 2 1 {name=p13 lab=A}
 C {lab_pin.sym} 670 -480 2 1 {name=p14 lab=~B,~Y_NAND}
 C {lab_wire.sym} 870 -500 0 1 {name=l15 lab=Y_NOR}

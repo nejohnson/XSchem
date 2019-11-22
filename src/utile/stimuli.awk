@@ -315,9 +315,9 @@ BEGIN{
      
  if($2 in buswidth)
  {
-  if($3 ~ /^\~/)  # inversion flag on bus assignment
+  if($3 ~ /^~/)  # inversion flag on bus assignment
   {
-   sub(/^\~/,"",$3)
+   sub(/^~/,"",$3)
    invert=1
   }
   else invert=0
@@ -384,11 +384,11 @@ BEGIN{
  else  ## not a bus
  {
 
-  if($3 ~ /^\~1/)  # inversion flag on signal assignment 20140623
+  if($3 ~ /^~1/)  # inversion flag on signal assignment 20140623
   {
     $3=0
   }
-  if($3 ~ /^\~0/)  # inversion flag on signal assignment 20140623
+  if($3 ~ /^~0/)  # inversion flag on signal assignment 20140623
   {
     $3=1
   }
@@ -446,16 +446,17 @@ function end_file(){
   print "**************************************\n" > file
   for(i in signalname)
   {
+    use_z = ( (format !~ /_simple/) && signalz[i] ) 
     ix=i
     gsub(/\./,"_",ix)
-    if(format ~/_simple/) 
+    if(!use_z) 
       printf simplesignalname[i]>file
     else
       printf signalname[i]>file
     for(j=1;j<=signal[i,"n"];j++)
       printf "%.9g%c  %s ",signal[i,"time",j],unit,signal[i,"value",j] >file
     printf "\n">file
-    if(format !~ /_simple/)
+    if(use_z)
     {
      if(variant!="hspice")
        # 20100224 quotes instead of parenthesis used for value=....
@@ -469,7 +470,7 @@ function end_file(){
      printf "\n">file
     }
   }
-  if( (format !~ /_simple/) || create_eldo_bus )
+  if(use_z || create_eldo_bus )
    for(i in buswidth)
    {
      if( variant != "hspice")  {
@@ -587,9 +588,9 @@ function write_pwl_pair( name, value,res, vhi, vlo,slope,   timex, namex,vv,vv1,
    halfvoltageloc = halfvoltage
  }
 
-
+  if(res != ron) signalz[name] = 1
   if(value ~ /^[10]$/) {v= ( value==1 ? vhi : vlo )  ; pwlres=res}
-  else if(value ~ /^[zZ]$/) {v=halfvoltageloc; pwlres=roff}
+  else if(value ~ /^[zZ]$/) {signalz[name] = 1; v=halfvoltageloc; pwlres=roff}
   else {v = value; pwlres=res}
   namex=name
   gsub(/\./,"_",namex)

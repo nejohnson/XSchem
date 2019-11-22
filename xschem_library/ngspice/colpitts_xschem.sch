@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC2 file_version=1.1}
+v {xschem version=2.9.5_RC5 file_version=1.1}
 G {}
 V {}
 S {}
@@ -36,12 +36,11 @@ C {capa.sym} 420 -240 0 1 {name=C1 m=1 value=\{cr\} footprint=1206 device="ceram
 C {gnd.sym} 420 -130 0 0 {name=l6 lab=0}
 C {title.sym} 160 -30 0 0 {name=l7 author="Stefan Schippers"}
 C {lab_pin.sym} 620 -440 0 1 {name=l8 sig_type=std_logic lab=VCC}
-C {netlist_at_end.sym} 50 -210 0 0 {name=s1 value=".params l0=20u cr=89p 
+C {code_shown.sym} 50 -210 0 0 {name=CONTROL place=end value=".params l0=20u cr=89p 
 .options method=gear reltol=1m
 .tran 5ns 20us 10us 10ns
-*.tran 5ns 200us
 "}
-C {netlist_not_shown_at_end.sym} 740 -200 0 0 {name=MODELS value=".MODEL Q2N5179  NPN (IS=1.55467e-17 BF=296.182 NF=0.850014 VAF=10
+C {code.sym} 740 -200 0 0 {name=MODELS value=".MODEL Q2N5179  NPN (IS=1.55467e-17 BF=296.182 NF=0.850014 VAF=10
 +IKF=0.00544635 ISE=2.01913e-14 NE=1.54276 BR=19.550
 +NR=0.825166 VAR=73.1109 IKR=0.0544635 ISC=1e-160
 +NC=2.9688 RB=21.0221 IRB=0.478136 RBM=0.1384250

@@ -1,4 +1,4 @@
-v {xschem version=2.8.4 file_version=1.1}
+v {xschem version=2.9.5_RC5 file_version=1.1}
 G {}
 V {}
 S {}
@@ -29,7 +29,7 @@ C {lab_wire.sym} 660 -360 0 0 {name=l9 lab=G}
 C {res.sym} 770 -190 0 0 {name=Rload m=1 value=100 footprint=1206 device=resistor
 tedax_ignore=true}
 C {gnd.sym} 770 -130 0 0 {name=l10 lab=VSS}
-C {code.sym} 950 -430 0 0 {name=STIMULI
+C {code_shown.sym} 950 -430 0 0 {name=STIMULI
 tedax_ignore=true
 only_toplevel=true
 tclcommand="xschem edit_vi_prop"

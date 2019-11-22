@@ -1,4 +1,4 @@
-v {xschem version=2.8.2_RC1 file_version=1.0}
+v {xschem version=2.9.5_RC5 file_version=1.1}
 G {}
 V {}
 S {}
@@ -76,52 +76,52 @@ N 620 -450 620 -410 {lab=A[4]}
 N 620 -370 620 -330 {lab=A[3]}
 N 620 -290 620 -250 {lab=A[2]}
 N 620 -210 620 -170 {lab=A[1]}
-C {title} 160 -30 0 0 {name=l3 author="Stefan Schippers"}
-C {verilog_timescale} 30 -110 0 0 {name=s1 timestep="1ps" precision="1ps" }
-C {xnor} 660 -470 0 0 {name=x2 risedel=1 falldel=1}
-C {xnor} 660 -550 0 0 {name=x3 risedel=1 falldel=1}
-C {xnor} 660 -630 0 0 {name=x14 risedel=1 falldel=1}
-C {lab_pin} 570 -690 0 0 {name=p9 lab=A[7] }
-C {lab_pin} 570 -610 0 0 {name=p1 lab=A[6] }
-C {lab_pin} 570 -530 0 0 {name=p2 lab=A[5] }
-C {lab_pin} 570 -450 0 0 {name=p3 lab=A[4] }
-C {lab_pin} 830 -710 0 1 {name=p4 lab=B[7]}
-C {lab_pin} 830 -630 0 1 {name=p0 lab=B[6]}
-C {lab_pin} 830 -550 0 1 {name=p5 lab=B[5]}
-C {lab_pin} 830 -470 0 1 {name=p6 lab=B[4]}
-C {assign} 660 -690 0 0 {name=v1 delay=1}
-C {xnor} 660 -230 0 0 {name=x1 risedel=1 falldel=1}
-C {xnor} 660 -310 0 0 {name=x4 risedel=1 falldel=1}
-C {xnor} 660 -390 0 0 {name=x5 risedel=1 falldel=1}
-C {lab_pin} 570 -370 0 0 {name=p7 lab=A[3] }
-C {lab_pin} 570 -290 0 0 {name=p8 lab=A[2] }
-C {lab_pin} 570 -210 0 0 {name=p10 lab=A[1]}
-C {lab_pin} 830 -390 0 1 {name=p11 lab=B[3]}
-C {lab_pin} 830 -310 0 1 {name=p12 lab=B[2]}
-C {lab_pin} 830 -230 0 1 {name=p13 lab=B[1]}
-C {xnor} 660 -150 0 0 {name=x6 risedel=1 falldel=1}
-C {lab_pin} 570 -130 0 0 {name=p14 lab=A[0]}
-C {lab_pin} 830 -150 0 1 {name=p15 lab=B[0]}
-C {opin} 150 -220 0 0 { name=p16 lab=B[7:0] }
-C {lab_pin} 90 -200 0 0 { name=l17 lab=A[7:0]  verilog_type=reg}
-C {xnor} 1060 -470 0 0 {name=x7 risedel=1 falldel=1}
-C {xnor} 1060 -550 0 0 {name=x8 risedel=1 falldel=1}
-C {xnor} 1060 -630 0 0 {name=x9 risedel=1 falldel=1}
-C {assign} 1060 -690 0 0 {name=v0 delay=1}
-C {xnor} 1060 -230 0 0 {name=x10 risedel=1 falldel=1}
-C {xnor} 1060 -310 0 0 {name=x11 risedel=1 falldel=1}
-C {xnor} 1060 -390 0 0 {name=x12 risedel=1 falldel=1}
-C {xnor} 1060 -150 0 0 {name=x13 risedel=1 falldel=1}
-C {lab_pin} 1230 -710 0 1 {name=p18 lab=C[7]}
-C {lab_pin} 1230 -630 0 1 {name=p19 lab=C[6]}
-C {lab_pin} 1230 -550 0 1 {name=p20 lab=C[5]}
-C {lab_pin} 1230 -470 0 1 {name=p21 lab=C[4]}
-C {lab_pin} 1230 -390 0 1 {name=p22 lab=C[3]}
-C {lab_pin} 1230 -310 0 1 {name=p23 lab=C[2]}
-C {lab_pin} 1230 -230 0 1 {name=p24 lab=C[1]}
-C {lab_pin} 1230 -150 0 1 {name=p25 lab=C[0]}
-C {opin} 150 -190 0 0 { name=p26 lab=C[7:0] }
-C {code} 330 -250 0 0 {name=TESTBENCH only_toplevel=false value="initial begin
+C {title.sym} 160 -30 0 0 {name=l3 author="Stefan Schippers"}
+C {verilog_timescale.sym} 30 -110 0 0 {name=s1 timestep="1ps" precision="1ps" }
+C {xnor.sym} 660 -470 0 0 {name=x2 risedel=1 falldel=1}
+C {xnor.sym} 660 -550 0 0 {name=x3 risedel=1 falldel=1}
+C {xnor.sym} 660 -630 0 0 {name=x14 risedel=1 falldel=1}
+C {lab_pin.sym} 570 -690 0 0 {name=p9 lab=A[7] }
+C {lab_pin.sym} 570 -610 0 0 {name=p1 lab=A[6] }
+C {lab_pin.sym} 570 -530 0 0 {name=p2 lab=A[5] }
+C {lab_pin.sym} 570 -450 0 0 {name=p3 lab=A[4] }
+C {lab_pin.sym} 830 -710 0 1 {name=p4 lab=B[7]}
+C {lab_pin.sym} 830 -630 0 1 {name=p0 lab=B[6]}
+C {lab_pin.sym} 830 -550 0 1 {name=p5 lab=B[5]}
+C {lab_pin.sym} 830 -470 0 1 {name=p6 lab=B[4]}
+C {assign.sym} 660 -690 0 0 {name=v1 delay=1}
+C {xnor.sym} 660 -230 0 0 {name=x1 risedel=1 falldel=1}
+C {xnor.sym} 660 -310 0 0 {name=x4 risedel=1 falldel=1}
+C {xnor.sym} 660 -390 0 0 {name=x5 risedel=1 falldel=1}
+C {lab_pin.sym} 570 -370 0 0 {name=p7 lab=A[3] }
+C {lab_pin.sym} 570 -290 0 0 {name=p8 lab=A[2] }
+C {lab_pin.sym} 570 -210 0 0 {name=p10 lab=A[1]}
+C {lab_pin.sym} 830 -390 0 1 {name=p11 lab=B[3]}
+C {lab_pin.sym} 830 -310 0 1 {name=p12 lab=B[2]}
+C {lab_pin.sym} 830 -230 0 1 {name=p13 lab=B[1]}
+C {xnor.sym} 660 -150 0 0 {name=x6 risedel=1 falldel=1}
+C {lab_pin.sym} 570 -130 0 0 {name=p14 lab=A[0]}
+C {lab_pin.sym} 830 -150 0 1 {name=p15 lab=B[0]}
+C {opin.sym} 150 -220 0 0 { name=p16 lab=B[7:0] }
+C {lab_pin.sym} 90 -200 0 0 { name=l17 lab=A[7:0]  verilog_type=reg}
+C {xnor.sym} 1060 -470 0 0 {name=x7 risedel=1 falldel=1}
+C {xnor.sym} 1060 -550 0 0 {name=x8 risedel=1 falldel=1}
+C {xnor.sym} 1060 -630 0 0 {name=x9 risedel=1 falldel=1}
+C {assign.sym} 1060 -690 0 0 {name=v0 delay=1}
+C {xnor.sym} 1060 -230 0 0 {name=x10 risedel=1 falldel=1}
+C {xnor.sym} 1060 -310 0 0 {name=x11 risedel=1 falldel=1}
+C {xnor.sym} 1060 -390 0 0 {name=x12 risedel=1 falldel=1}
+C {xnor.sym} 1060 -150 0 0 {name=x13 risedel=1 falldel=1}
+C {lab_pin.sym} 1230 -710 0 1 {name=p18 lab=C[7]}
+C {lab_pin.sym} 1230 -630 0 1 {name=p19 lab=C[6]}
+C {lab_pin.sym} 1230 -550 0 1 {name=p20 lab=C[5]}
+C {lab_pin.sym} 1230 -470 0 1 {name=p21 lab=C[4]}
+C {lab_pin.sym} 1230 -390 0 1 {name=p22 lab=C[3]}
+C {lab_pin.sym} 1230 -310 0 1 {name=p23 lab=C[2]}
+C {lab_pin.sym} 1230 -230 0 1 {name=p24 lab=C[1]}
+C {lab_pin.sym} 1230 -150 0 1 {name=p25 lab=C[0]}
+C {opin.sym} 150 -190 0 0 { name=p26 lab=C[7:0] }
+C {code.sym} 330 -250 0 0 {name=TESTBENCH only_toplevel=false value="initial begin
   $dumpfile(\\"dumpfile.vcd\\");
   $dumpvars;
   A=0;

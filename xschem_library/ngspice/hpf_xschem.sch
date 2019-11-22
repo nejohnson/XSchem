@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC2 file_version=1.1}
+v {xschem version=2.9.5_RC5 file_version=1.1}
 G {}
 V {}
 S {}
@@ -18,8 +18,7 @@ N 410 -470 430 -470 {lab=OUT}
 N 850 -540 850 -520 {lab=0}
 N 800 -530 850 -530 {lab=0}
 N 100 -550 130 -550 {lab=IN}
-C {title.sym} 160 -30 0 0 {name=l7 author="Stefan Schippers"}
-C {netlist_at_end.sym} 20 -320 0 0 {name=CONTROL value=".control
+C {code_shown.sym} 20 -320 0 0 {name=CONTROL vhdl_ignore=true place=end value=".control
   listing e
   run
   write hpf.raw
@@ -29,7 +28,27 @@ C {netlist_at_end.sym} 20 -320 0 0 {name=CONTROL value=".control
   gnuplot hpf response xlog
 .endc
 "}
-C {netlist_not_shown_at_end.sym} 840 -250 0 0 {name=MODELS value="*//////////////////////////////////////////////////////////
+C {code_shown.sym} 280 -310 0 0 {name=DIRECTIVES vhdl_ignore=true place=end value=".ac oct 100 0.1 1k 
+.param pi   = 3.1415926
+.param Q    = 1
+.param freq = 20 
+.param w0   = 2.0*pi*freq
+.param k    = 4*Q**2
+.param R    = 10k
+.param C    = 1/(sqrt(k)*R*w0)
+"}
+C {title.sym} 160 -30 0 0 {name=l7 author="Stefan Schippers"}
+C {vsource.sym} 100 -490 0 0 {name=v2 value="ac 1"}
+C {gnd.sym} 100 -460 0 0 {name=l14 lab=0}
+C {capa.sym} 240 -550 1 1 {name=C1 m=1 value=C footprint=1206 device="ceramic capacitor"}
+C {lab_wire.sym} 400 -550 0 0 {name=l8 sig_type=std_logic lab=PLUS}
+C {res.sym} 340 -520 0 0 {name=R6 value='k*R' footprint=1206 device=resistor m=1}
+C {gnd.sym} 340 -490 0 0 {name=l2 lab=0}
+C {vsource.sym} 850 -570 0 0 {name=v6 value=12}
+C {vsource.sym} 850 -490 0 0 {name=v1 value=12}
+C {lm741.sym} 530 -510 0 0 {name=X1 model=LM741 device=LM741 footprint="SO(8)"
+}
+C {code.sym} 760 -290 0 0 {name=MODELS vhdl_ignore=true value="*//////////////////////////////////////////////////////////
 *LM741 OPERATIONAL AMPLIFIER MACRO-MODEL
 *//////////////////////////////////////////////////////////
 *
@@ -122,26 +141,7 @@ RL3 22 28 100K
 *
 .ENDS
 "}
-C {vsource.sym} 100 -490 0 0 {name=v2 value="ac 1"}
-C {gnd.sym} 100 -460 0 0 {name=l14 lab=0}
 C {lab_pin.sym} 100 -550 0 0 {name=l23 sig_type=std_logic lab=IN}
-C {capa.sym} 240 -550 1 1 {name=C1 m=1 value=C footprint=1206 device="ceramic capacitor"}
-C {res.sym} 340 -520 0 0 {name=R6 value='k*R' footprint=1206 device=resistor m=1}
-C {gnd.sym} 340 -490 0 0 {name=l2 lab=0}
-C {vsource.sym} 850 -570 0 0 {name=v6 value=12}
-C {vsource.sym} 850 -490 0 0 {name=v1 value=12}
-C {lm741.sym} 530 -510 0 0 {name=X1 model=LM741 device=LM741 footprint="SO(8)"
-}
-C {netlist_at_end.sym} 280 -310 0 0 {name=DIRECTIVES value=".ac oct 100 0.1 1k 
-.param pi   = 3.1415926
-.param Q    = 1
-.param freq = 20 
-.param w0   = 2.0*pi*freq
-.param k    = 4*Q**2
-.param R    = 10k
-.param C    = 1/(sqrt(k)*R*w0)
-"}
-C {opin.sym} 670 -510 0 0 {name=p9 lab=OUT}
 C {res.sym} 200 -630 0 0 {name=R7 value=R footprint=1206 device=resistor m=1}
 C {capa.sym} 160 -550 1 1 {name=C2 m=1 value=C footprint=1206 device="ceramic capacitor"}
 C {gnd.sym} 530 -450 0 0 {name=l1 lab=VEE}
@@ -149,4 +149,4 @@ C {vdd.sym} 530 -570 0 0 {name=l5 lab=VCC}
 C {gnd.sym} 850 -460 0 0 {name=l3 lab=VEE}
 C {vdd.sym} 850 -600 0 0 {name=l4 lab=VCC}
 C {gnd.sym} 800 -530 0 0 {name=l6 lab=0}
-C {lab_wire.sym} 400 -550 0 0 {name=l8 sig_type=std_logic lab=PLUS}
+C {opin.sym} 670 -510 0 0 {name=p9 lab=OUT}

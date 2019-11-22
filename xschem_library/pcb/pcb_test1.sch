@@ -1,4 +1,4 @@
-v {xschem version=2.9.2 file_version=1.1}
+v {xschem version=2.9.5_RC5 file_version=1.1}
 G {}
 V {}
 S {}
@@ -43,7 +43,7 @@ C {lab_pin.sym} 490 -190 0 0 {name=p20 lab=VCC12}
 C {lab_pin.sym} 940 -190 0 1 {name=p22 lab=VCC5}
 C {lab_pin.sym} 590 -110 0 0 {name=p23 lab=ANALOG_GND}
 C {capa.sym} 890 -160 0 0 {name=C4 m=1 value=10u device="tantalium capacitor"}
-C {res.sym} 520 -190 1 0 {name=R0 m=1 value=4.7 device="carbon resistor"}
+C {res.sym} 520 -190 1 0 {name=R0 m=1 value=4.7 device="carbonresistor"}
 C {lab_wire.sym} 700 -460 0 0 {name=l3 lab=A}
 C {lab_wire.sym} 700 -420 0 0 {name=l0 lab=B}
 C {lab_wire.sym} 650 -190 0 0 {name=l1 lab=VCCFILT}

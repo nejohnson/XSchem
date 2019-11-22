@@ -20,18 +20,19 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-/* create a vcd file from a ngspice raw file */
+/* create a vcd file from a ngspice raw file containing a transient time simulation*/
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-
+#define BUFSIZE 4095
+int debug = 1;
 FILE *fd;
-int nvars, npoints;
-double **values;
-char **names, **vcd_ids;
-double timescale=1e10; /* spice times will be multiplied by this number to get an integer */
+int nvars = 0 , npoints = 0;
+double **values = NULL;
+char **names = NULL, **vcd_ids = NULL;
+double timescale=1e11; /* spice times will be multiplied by this number to get an integer */
 double rel_timestep_precision = 5e-3;
 double abs_timestep_precision = 1e-10;
 
@@ -39,7 +40,8 @@ double abs_timestep_precision = 1e-10;
 const char *get_vcd_id(int idx)
 {
   static const char syms[] = 
-    "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ=+-_)(*&^%$#@!~`:;',\"<.>/?|";
+    "0123456789abcdefghijklmnopqrstuvwxyz"
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ=+-_)(*&^%$#@!~`:;',\"<.>/?|";
   static const int n = sizeof(syms)-1;
   int q, r, pos;
   static char res[32];
@@ -54,6 +56,23 @@ const char *get_vcd_id(int idx)
     res[pos] = syms[r];
   } while(q && pos > 0);
   return res + pos;
+}
+
+/* binary block is just a blob of npoints * nvars doubles */
+void read_binary_block()
+{
+  int p;
+
+  /* allocate storage for binary block */
+  values = calloc(npoints, sizeof(double *));
+  for(p = 0 ; p < npoints; p++) {
+    values[p] = calloc(nvars, sizeof(double));
+  }
+  /* read binary block */
+  for(p = 0; p < npoints; p++) {
+    fread(values[p], sizeof(double), nvars, fd);
+  }
+  if(debug) fprintf(stderr, "done reading binary block\n");
 }
 
 /* parse ascii raw header section: 
@@ -77,15 +96,18 @@ const char *get_vcd_id(int idx)
  *         157     i(v1)   current
  * Binary:
  */
-int read_ascii_header(int curr_dataset, int dataset)
+int read_dataset(void)
 {
   int variables = 0, i, done_points = 0;
-  char line[4096], varname[4096];
+  char line[BUFSIZE + 1], varname[BUFSIZE + 1];
   const char *id;
-
-  while(fgets(line, sizeof(line), fd) ) {
+  char *ptr;
+  int transient = 0;
+  npoints = 0; 
+  nvars = 0;
+  while(ptr = fgets(line, sizeof(line), fd) ) {
     if(!strncmp(line, "Binary:", 7)) break; /* start of binary block */
-    if(curr_dataset == dataset) {
+    if(transient) {
       if(variables) {
         sscanf(line, "%d %s", &i, varname); /* read index and name of saved waveform */
         names[i] = malloc(strlen(varname) + 1);
@@ -94,40 +116,38 @@ int read_ascii_header(int curr_dataset, int dataset)
         vcd_ids[i] = malloc(strlen(id) + 1) ;
         strcpy(vcd_ids[i], id);
       }
-      if(!strncmp(line, "No. of Data Rows :", 18)) {
-        sscanf(line, "No. of Data Rows : %d", &npoints);
-        done_points = 1;
-      }
-      if(!strncmp(line, "No. Variables:", 14)) {
-        sscanf(line, "No. Variables: %d", &nvars);
-      }
-      if(!done_points && !strncmp(line, "No. Points:", 11)) {
-        sscanf(line, "No. Points: %d", &npoints);
-      }
       if(!strncmp(line, "Variables:", 10)) {
         variables = 1;
         names = calloc(nvars, sizeof(char *));
         vcd_ids = calloc(nvars, sizeof(char *));
       }
     }
+    if(!strncmp(line, "No. of Data Rows :", 18)) {
+      sscanf(line, "No. of Data Rows : %d", &npoints);
+      done_points = 1;
+    }
+    if(!strncmp(line, "No. Variables:", 14)) {
+      sscanf(line, "No. Variables: %d", &nvars);
+    }
+    if(!strncmp(line, "Plotname: Transient Analysis", 28)) {
+      transient = 1;
+    }
+    if(!done_points && !strncmp(line, "No. Points:", 11)) {
+      sscanf(line, "No. Points: %d", &npoints);
+    }
+  }
+  if(!ptr) {
+    if(debug) fprintf(stderr, "EOF found\n");
+    variables = -1; /* EOF */
+  }
+  if(debug) fprintf(stderr, "npoints=%d, nvars=%d\n", npoints, nvars);
+  if(variables == 1) {
+    read_binary_block();
+  } else if(variables == 0) {
+    if(debug) fprintf(stderr, "seeking past binary block\n");
+    fseek(fd, nvars * npoints * sizeof(double), SEEK_CUR); /* skip binary block */
   }
   return variables;
-}
-
-/* binary block is just a blob of npoints * nvars doubles */
-void read_binary_block()
-{
-  int p;
-
-  /* allocate storage for binary block */
-  values = calloc(npoints, sizeof(double *));
-  for(p = 0 ; p < npoints; p++) {
-    values[p] = calloc(nvars, sizeof(double));
-  }
-  /* read binary block */
-  for(p = 0; p < npoints; p++) {
-    fread(values[p], sizeof(double), nvars, fd);
-  }
 }
 
 void write_vcd_header()
@@ -158,33 +178,32 @@ void write_vcd_header()
     printf("$var real 1 %s %s $end\n", vcd_ids[v], names[v]);
   }
   printf("$enddefinitions $end\n");
-     
 }
 
 void dump_vcd_waves()
 {
   int p, v;
-  double *lastvalue;
+  double *lastvalue, val;
 
   lastvalue = malloc(nvars * sizeof(double));
   for(p = 0; p < npoints; p++) {
     if(p == 0) {
       printf("#0\n");
       printf("$dumpvars\n");
-      for(v = 1 ; v < nvars; v++) {
-        printf("r%.3g %s\n", values[p][v], vcd_ids[v]);
-        lastvalue[v] = values[p][v];
+      for(v = 1 ; val = values[p][v], v < nvars; v++) {
+        printf("r%.3g %s\n", val, vcd_ids[v]);
+        lastvalue[v] = val;
       }
       printf("$end\n");
     } else {
       printf("#%d\n", (int) (values[p][0] * timescale));
-      for(v = 1 ; v < nvars; v++) {
+      for(v = 1 ; val = values[p][v], v < nvars; v++) {
         if(
-           (values[p][v] != 0.0 &&  fabs((values[p][v] - lastvalue[v]) / values[p][v]) > rel_timestep_precision) ||
-           (values[p][v] == 0.0 && fabs(values[p][v] - lastvalue[v]) > abs_timestep_precision) 
+           (val != 0.0 &&  fabs((val - lastvalue[v]) / val) > rel_timestep_precision) ||
+           (val == 0.0 && fabs(val - lastvalue[v]) > abs_timestep_precision) 
           ) {
-          printf("r%.3g %s\n", values[p][v], vcd_ids[v]);
-          lastvalue[v] = values[p][v];
+          printf("r%.3g %s\n", val, vcd_ids[v]);
+          lastvalue[v] = val;
         }
       }
     }
@@ -210,37 +229,27 @@ void free_storage()
 
 int main(int argc, char *argv[])
 {
-  int dataset, curr_dataset;
-  int variables;
-  if(argc < 3) {
-    fprintf(stderr, "usage: rawtovcd n rawfile > vcdfile\n"
-      "n is the dataset index starting from 0\n");
+  int res;
+  if(argc != 2) {
+    fprintf(stderr, "usage: rawtovcd rawfile > vcdfile\n");
     exit(EXIT_FAILURE);
   }
-  dataset = atoi(argv[1]);
-  curr_dataset = 0;
-  if(!strcmp(argv[2], "-")) fd = stdin;
-  else fd = fopen(argv[2], "r");
-  if(fd) while(1) {
-    variables = read_ascii_header(curr_dataset, dataset);
-    if(curr_dataset == dataset) {
-      if(variables) {
-        read_binary_block();
-        write_vcd_header();
-        dump_vcd_waves();
-        free_storage();
-      }
+  if(!strcmp(argv[1], "-")) fd = stdin;
+  else fd = fopen(argv[1], "r");
+  if(fd) for(;;) {
+    if((res = read_dataset()) == 1) {
+      write_vcd_header();
+      dump_vcd_waves();
+      free_storage();
       break;
+    } else if(res == -1) {  /* EOF */
+      fprintf(stderr, "rawtovcd: dataset not found in raw file\n");
+      return EXIT_FAILURE;
     }
-    curr_dataset++;
   } else {
-    fprintf(stderr, "rawtovcd: failed to open file for writing\n");
+    fprintf(stderr, "rawtovcd: failed to open file for reading\n");
     return EXIT_FAILURE;
   }
   if(fd && fd != stdin) fclose(fd);
-  if(variables) return EXIT_SUCCESS;
-  else {
-    fprintf(stderr, "rawtovcd: dataset not found in raw file\n");
-    return EXIT_FAILURE;
-  }
+  return EXIT_SUCCESS;
 }

@@ -936,7 +936,6 @@ int Tcl_AppInit(Tcl_Interp *inter)
  /* */
 
  alloc_data();
- enable_layers();
 
  #ifndef IN_MEMORY_UNDO
  /* 20150327 create undo directory */
@@ -1157,6 +1156,9 @@ int Tcl_AppInit(Tcl_Interp *inter)
  } else {
    my_strdup(50, &netlist_dir, tclgetvar("netlist_dir"));
  }
+
+ enable_layers();
+
  if(filename) {
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): filename %s given, removing symbols\n", filename);
     remove_symbols();

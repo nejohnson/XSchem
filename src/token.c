@@ -1318,6 +1318,7 @@ void print_spice_element(FILE *fd, int inst)
      tclcmd = my_malloc(488, s);
      Tcl_ResetResult(interp);
      my_snprintf(tclcmd, s, "tclpropeval {%s} {%s} {%s}", token, name, inst_ptr[inst].name);
+     if(debug_var>=1) fprintf(errfp, "tclpropeval {%s} {%s} {%s}", token, name, inst_ptr[inst].name);
      tcleval(tclcmd);
      fprintf(fd, "%s", Tcl_GetStringResult(interp));
      my_free(&tclcmd);

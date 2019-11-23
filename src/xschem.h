@@ -41,7 +41,7 @@
 /*  approximate PI definition */
 #define XSCH_PI 3.14159265358979323846264338327950288419716939937
 
-/* #include "../config.h" */
+#include "../config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -461,6 +461,7 @@ extern char home_dir[PATH_MAX]; /* home dir obtained via getpwuid */
 extern char pwd_dir[PATH_MAX]; /* obtained via getcwd() */
 extern int load_initfile;
 extern char rcfile[PATH_MAX];
+extern char *tcl_command;
 extern char plotfile[PATH_MAX];
 extern int persistent_command;
 extern int disable_unique_names;
@@ -529,7 +530,6 @@ extern int *max_arcs; /*  20181012 */
 extern int *max_lines;
 extern int previous_instance[];
 extern int split_files;
-extern int hspice_netlist;
 extern char *netlist_dir;
 extern char bus_replacement_char[];
 extern void set_modify(int mod);

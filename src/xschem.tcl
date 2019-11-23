@@ -251,7 +251,7 @@ proc simulate {filename} {
  global iverilog_opts ;# 20161118
  global computerfarm ;# 20151007
 
- if { [select_dir 0] ne "" } {
+ if { [select_netlist_dir 0] ne "" } {
 
    if { $netlist_type=="verilog" } {
      # 20150916 added modelsim
@@ -366,7 +366,7 @@ proc waves {schname} {
  global gtkwave_path analog_viewer waveview_path
 
  set tmpname [file rootname "$schname"]
- if { [select_dir 0] ne "" } {
+ if { [select_netlist_dir 0] ne "" } {
    if { $netlist_type=="verilog" } {
      task "$gtkwave_path dumpfile.vcd \"$tmpname.sav\" 2>/dev/null" $netlist_dir bg
 
@@ -397,7 +397,7 @@ proc edit_netlist {schname } {
  set tmpname [file rootname "$schname"]
 
  if { [regexp vim $editor] } { set ftype "-c \":set filetype=$netlist_type\"" } else { set ftype {} }
- if { [select_dir 0] ne "" } {
+ if { [select_netlist_dir 0] ne "" } {
    # puts "edit_netlist: \"$editor $ftype  ${schname}.v\" $netlist_dir bg"
    if { $netlist_type=="verilog" } {
      task "$editor $ftype  \"${tmpname}.v\"" $netlist_dir bg
@@ -870,7 +870,7 @@ proc make_symbol {name} {
  return {}
 }
 
-proc select_dir { force {dir {} }} {
+proc select_netlist_dir { force {dir {} }} {
    global netlist_dir env
 
    if { ( $force == 0 )  && ( $netlist_dir ne {} ) } { return $netlist_dir } 
@@ -2311,7 +2311,7 @@ xschem set disable_unique_names $disable_unique_names
 ### build Tk widgets
 ###
 if { [string length   [lindex [array get env DISPLAY] 1] ] > 0 
-     && ![info exist no_x]} {
+     && ![info exists no_x]} {
 
 # for hyperlink in about dialog
 eval  font create Underline-Font [ font actual TkDefaultFont ]
@@ -2653,7 +2653,7 @@ font configure Underline-Font -underline true -size 24
 
    .menubar.simulation.menu add command -label "Set netlist Dir" \
      -command {
-           select_dir 1
+           select_netlist_dir 1
      }
    if { [info exists waveview_path] } {
      .menubar.simulation.menu add command -label {WaveView} -command {waveview [file tail [xschem get schname]]}
@@ -2667,7 +2667,7 @@ font configure Underline-Font -underline true -size 24
    }
    .menubar.simulation.menu add command -label {Shell [simulation path]} \
       -command {
-         if { [select_dir 0] ne "" } {
+         if { [select_netlist_dir 0] ne "" } {
            get_shell $netlist_dir
          }
        }

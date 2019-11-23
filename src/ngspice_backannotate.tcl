@@ -166,4 +166,4 @@ proc annotate {} {
   }
 }
 
-bind .drw <Alt-a> {annotate}
+if { ![info exists no_x] } {bind .drw <Alt-a> {annotate} }

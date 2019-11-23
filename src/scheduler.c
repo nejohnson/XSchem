@@ -1384,12 +1384,6 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
     my_snprintf(res, S(res), "%g %g %g %g", boundbox.x1, boundbox.y1, boundbox.x2, boundbox.y2);
     Tcl_AppendResult(interp, res, NULL);
   }
-  else if(!strcmp(argv[2],"hspice_netlist"))  {
-     if( hspice_netlist != 0 )
-        Tcl_AppendResult(interp, "1",NULL);
-     else
-        Tcl_AppendResult(interp, "0",NULL);
-  }
   else if(!strcmp(argv[2],"enable_stretch"))  {
      if( enable_stretch != 0 )
         Tcl_AppendResult(interp, "1",NULL);
@@ -1652,11 +1646,6 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
   }
   else if(!strcmp(argv[2],"split_files"))  {
         split_files=atoi(argv[3]);
-  }
-  else if(!strcmp(argv[2],"hspice_netlist"))  {
-        hspice_netlist=atoi(argv[3]);
-        my_snprintf(name, S(name), "%d", hspice_netlist);
-        tclsetvar("hspice_netlist",name);
   }
   else if(!strcmp(argv[2],"enable_stretch"))  {
         enable_stretch=atoi(argv[3]);

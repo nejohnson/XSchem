@@ -76,7 +76,9 @@ void read_binary_block()
 }
 
 /* parse ascii raw header section: 
- * returns: non zero if dataset and variables were read.
+ * returns: 1 if dataset and variables were read.
+ *          0 if transient sim dataset not found
+ *         -1 on EOF
  * Typical ascii header of raw file looks like: 
  *
  * Title: **.subckt poweramp

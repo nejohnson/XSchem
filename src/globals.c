@@ -41,6 +41,7 @@ char pwd_dir[PATH_MAX];  /* obtained via getcwd() */
 int load_initfile=1;
 char plotfile[PATH_MAX] = {'\0'};
 char rcfile[PATH_MAX] = {'\0'};
+char *tcl_command = NULL;
 int persistent_command=0; /* remember last command 20181022 */
 int disable_unique_names=0; /* if set allow instances with duplicate names */
 int quit=0;  /* set from process_options (ex netlist from cmdline and quit) */
@@ -237,7 +238,6 @@ int hilight_color=0;
 Zoom zoom_array[CADMAXHIER];
 int pending_fullzoom=0;
 int split_files=0; /* split netlist files 20081202 */
-int hspice_netlist=0; /* hspice veriants 20081209 */
 char *netlist_dir=NULL; /* 20081210 */
 int horizontal_move=0; /* 20171023 */
 int vertical_move=0; /* 20171023 */

@@ -1194,6 +1194,7 @@ proc property_search {} {
 # attributes.
 #
 proc tclpropeval {s instname symname} {
+  # puts "$s $instname $symname"
   regsub {^@tcleval\(} $s {} s
   regsub {\)$} $s {} s
   return [eval $s]

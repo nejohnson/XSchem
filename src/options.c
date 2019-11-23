@@ -74,7 +74,7 @@ void check_opt(char *opt, char *optval, int type)
         if(debug_var>=1) fprintf(errfp, "process_options(): will print png\n");
         do_print=2;
 
-    } else if( (type == LONG && !strcmp("tcl_command", opt)) ) {
+    } else if( (type == LONG && !strcmp("tcl", opt)) ) {
         if(debug_var>=1) fprintf(errfp, "process_options(): passing tcl command to interpreter: %s\n", optval);
         my_strdup(110, &tcl_command, optval);
 
@@ -159,7 +159,7 @@ int process_options(int argc, char *argv[])
             if(!strcmp("debug", opt)) {
               optval = argv[++i];
             }
-            else if(!strcmp("tcl_command", opt)) {
+            else if(!strcmp("tcl", opt)) {
               optval = argv[++i];
             }
             else if(!strcmp("log", opt)) {

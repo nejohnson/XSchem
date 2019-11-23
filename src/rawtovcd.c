@@ -107,7 +107,7 @@ int read_dataset(void)
   int transient = 0;
   npoints = 0; 
   nvars = 0;
-  while(ptr = fgets(line, sizeof(line), fd) ) {
+  while((ptr = fgets(line, sizeof(line), fd)) ) {
     if(!strncmp(line, "Binary:", 7)) break; /* start of binary block */
     if(transient) {
       if(variables) {

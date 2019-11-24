@@ -124,7 +124,7 @@ FILE *open_tmpfile(char *prefix, char **filename)
 void updatebbox(int count, Box *boundbox, Box *tmp)
 {
  RECTORDER(tmp->x1, tmp->y1, tmp->x2, tmp->y2);
- /* if(debug_var >=0) fprintf(errfp, "updatebbox(): count=%d, tmp = %g %g %g %g\n", 
+ /* if(debug_var >=1) fprintf(errfp, "updatebbox(): count=%d, tmp = %g %g %g %g\n", 
          count, tmp->x1, tmp->y1, tmp->x2, tmp->y2); */
  if(count==1)  *boundbox = *tmp;
  else
@@ -1429,7 +1429,7 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
    instdef[lastinstdef].maxy = boundbox.y2;
    instdef[lastinstdef].name=NULL;
    my_strdup(352, &instdef[lastinstdef].name,name); 
-   /* if(debug_var>=0) fprintf(errfp, "load_symbol_definition(): symbol %d, returning, bbox= %g %g %g %g\n",
+   /* if(debug_var>=1) fprintf(errfp, "load_symbol_definition(): symbol %d, returning, bbox= %g %g %g %g\n",
             lastinstdef, boundbox.x1, boundbox.y1, boundbox.x2, boundbox.y2);*/
    lastinstdef++;
 

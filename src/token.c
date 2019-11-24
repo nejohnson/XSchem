@@ -330,7 +330,6 @@ int set_different_token(char **s,char *new, char *old, int object, int n)
 /* 0: eat non escaped quotes (") */
 /* 1: return unescaped quotes as part of the token value if they are present */
 /* 2: eat backslashes */
-/* 3: 1+2 : never used, non sense */
 char *get_tok_value(const char *s,const char *tok, int with_quotes)
 {
   static char *result=NULL;
@@ -374,6 +373,7 @@ char *get_tok_value(const char *s,const char *tok, int with_quotes)
       if(c=='"') {
         if(!escape) quote=!quote;
         if((with_quotes & 1) || escape)  result[value_pos++]=c;
+        
       }
       else if( !((c=='\\') && (with_quotes & 2)) ) result[value_pos++]=c; /* 20150411 fixed logical expression */
       else if( (c=='\\') && escape ) result[value_pos++]=c; /* 20170414 add escaped backslashes */
@@ -1218,7 +1218,7 @@ void print_spice_element(FILE *fd, int inst)
  /* my_strdup(485, &name,get_tok_value(inst_ptr[inst].prop_ptr,"name",0)); */
 
  my_strdup(486, &format,
-     get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"format",0));
+     get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"format",2));
  if((name==NULL) || (format==NULL) ) return; /* do no netlist unwanted insts(no format) */
  no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
  s=format;
@@ -1228,10 +1228,10 @@ void print_spice_element(FILE *fd, int inst)
  while(1)
  {
   c=*s++; 
-  if(c=='"' && escape) { 
+  if(c=='"' && !escape) { 
     quote=!quote; /* 20171029 */
+    c = *s++;
   }
-  if(c=='"' && !escape ) c=*s++;
   if(c=='\n' && escape ) c=*s++; /* 20171030 eat escaped newlines */
   /* 20150317 use SPACE2() instead of SPACE() */
   space=SPACE2(c);
@@ -1239,7 +1239,10 @@ void print_spice_element(FILE *fd, int inst)
   if( state==XBEGIN && c=='@' && !escape) state=XTOKEN;
 
   /* 20171029 added !escape, !quote */          /* <<<<< */
-  else if( state==XTOKEN && (space || c == '@' || c == '\\')  && token_pos > 1 && !escape && !quote) state=XSEPARATOR;
+  else if( state==XTOKEN && (space || c == '@' || c == '\\')  && token_pos > 1 && !escape && !quote) {
+    if(debug_var >= 1 ) fprintf(errfp, "print_spice_element: c=%c, space=%d, escape=%d, quote=%d\n", c, space, escape, quote);
+    state=XSEPARATOR;
+  }
 
   if(token_pos>=sizetok)
   {
@@ -1254,7 +1257,7 @@ void print_spice_element(FILE *fd, int inst)
   {
    token[token_pos]='\0'; 
    token_pos=0;
-
+   if(debug_var >=1) fprintf(errfp, "print_spice_element(): token: |%s|\n", token);
    value = get_tok_value(inst_ptr[inst].prop_ptr, token+1, 2);
    if(value[0] == '\0')
    value=get_tok_value(template, token+1, 0);
@@ -1310,7 +1313,7 @@ void print_spice_element(FILE *fd, int inst)
          fprintf(fd, "@%d %s ", mult, str_ptr);
        }
    }
-   else if(!strcmp(token,"@tcleval")) { /* 20171029 */
+   else if(!strncmp(token,"@tcleval", 8)) { /* 20171029 */
      /* char tclcmd[strlen(token)+100]; */
      size_t s;
      char *tclcmd=NULL;
@@ -1379,7 +1382,7 @@ void print_tedax_element(FILE *fd, int inst)
  /* my_strdup(496, &name,get_tok_value(inst_ptr[inst].prop_ptr,"name",0)); */
 
  my_strdup(497, &format,
-     get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"tedax_format",0));
+     get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"tedax_format",2));
  if(name==NULL) return; 
  if(!format || !format[0]) return; /* do no netlist unwanted insts(no format) */
  no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
@@ -1435,10 +1438,10 @@ void print_tedax_element(FILE *fd, int inst)
   while(1)
   {
    c=*s++; 
-   if(c=='"' && escape) { 
+   if(c=='"' && !escape) { 
      quote=!quote; /* 20171029 */
+     c = *s++;
    }
-   if(c=='"' && !escape ) c=*s++;
    if(c=='\n' && escape ) c=*s++; /* 20171030 eat escaped newlines */
    /* 20150317 use SPACE2() instead of SPACE() */
    space=SPACE2(c);
@@ -1800,7 +1803,7 @@ void print_vhdl_primitive(FILE *fd, int inst) /* netlist  primitives, 20071217 *
  /* my_strdup(515, &name,get_tok_value(inst_ptr[inst].prop_ptr,"name",0)); */
 
  my_strdup(516, &format,
-     get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"vhdl_format",0)); /* 20071217 */
+     get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"vhdl_format",2)); /* 20071217 */
  if((name==NULL) || (format==NULL) ) return; /*do no netlist unwanted insts(no format) */
  no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
  s=format;
@@ -1813,10 +1816,10 @@ void print_vhdl_primitive(FILE *fd, int inst) /* netlist  primitives, 20071217 *
  while(1)
  {
   c=*s++; 
-  if(c=='"' && escape) {
+  if(c=='"' && !escape) {
     quote=!quote; /* 20171029 */
+    c = *s++;
   }
-  if(c=='"' && !escape ) c=*s++;
   if(c=='\n' && escape ) c=*s++; /* 20171030 eat escaped newlines */
   space=SPACE(c);
                                /* 20171029 */
@@ -1962,7 +1965,7 @@ void print_verilog_primitive(FILE *fd, int inst) /* netlist switch level primiti
  /* my_strdup(521, &name,get_tok_value(inst_ptr[inst].prop_ptr,"name",0)); */
 
  my_strdup(522, &format,
-     get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"verilog_format",0));
+     get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"verilog_format",2));
  if((name==NULL) || (format==NULL) ) return; /*do no netlist unwanted insts(no format) */
  no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
  s=format;
@@ -1975,10 +1978,10 @@ void print_verilog_primitive(FILE *fd, int inst) /* netlist switch level primiti
  while(1)
  {
   c=*s++; 
-  if(c=='"' && escape) {
+  if(c=='"' && !escape) {
     quote=!quote; /* 20171029 */
+    c = *s++;
   }
-  if(c=='"' && !escape ) c=*s++;
   if(c=='\n' && escape ) c=*s++; /* 20171030 eat escaped newlines */
   space=SPACE(c);                
                                  /*20171029 */

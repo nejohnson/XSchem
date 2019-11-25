@@ -1386,7 +1386,6 @@ void print_tedax_element(FILE *fd, int inst)
  register int c, state=XBEGIN, space;
  static char *template=NULL,*format=NULL,*s, *value=NULL, *name=NULL, *token=NULL;
  static char *extra=NULL, *extra_pinnumber=NULL;
- static char *pinnumber=NULL;
  static char *numslots=NULL;
  int pin_number; /* 20180911 */
  char *extra_token, *extra_ptr, *extra_token_val;
@@ -2255,8 +2254,6 @@ char *translate(int inst, char* s)
      int n;
      char *pin_attr = my_malloc(532, sizetok * sizeof(char));
      char *pin_num_or_name = my_malloc(55, sizetok * sizeof(char));
-     char *inst_pin_num_redefine = my_malloc(43, sizetok * sizeof(char)+20);
-     char *inst_pin_name_redefine=NULL, *pinname;
 
      pin_num_or_name[0]='\0';
      pin_attr[0]='\0';

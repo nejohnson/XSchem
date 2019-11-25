@@ -598,7 +598,10 @@ void select_element(int i,unsigned short select_mode, int fast)
   }
   if( !fast )
   {
-   prepare_netlist_structs(0); /* 20190526 */
+
+   /* 20190526 */ /*Why this? 20191125 commented. slow down on big schematics */
+   /* prepare_netlist_structs(0); */
+
    my_snprintf(str, S(str), "selected element %d: %s properties: %s", i, inst_ptr[i].name,s);
    statusmsg(str,2);
    my_snprintf(str, S(str), "symbol .name=%s", inst_ptr[i].name==NULL?"(null)":inst_ptr[i].name);

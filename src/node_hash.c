@@ -58,7 +58,7 @@ void print_vhdl_signals(FILE *fd)
     found = 1;
     if(ptr->token[0]=='#')
     {
-     mult=get_unnamed_node(3, 0,  strtol((ptr->token)+4, NULL,10) );
+     mult=get_unnamed_node(3, 0,  atoi((ptr->token)+4) );
     }
     else 
     {
@@ -127,7 +127,7 @@ void print_verilog_signals(FILE *fd)
     found = 1;
     if(ptr->token[0]=='#')
     {
-     mult=get_unnamed_node(3, 0,  strtol((ptr->token)+4, NULL,10) );
+     mult=get_unnamed_node(3, 0,  atoi((ptr->token)+4) );
     }
     else 
     {

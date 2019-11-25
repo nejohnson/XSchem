@@ -1731,7 +1731,11 @@ proc alert_ {txtlabel {position +200+300}} {
 }
 
 
-proc infowindow {infotxt} {
+proc infowindow {} {
+ global infowindow_text
+
+ set infotxt $infowindow_text
+ if { $infowindow_text ne {}} {append infotxt \n}
  set z {.infotext}
 
   if ![string compare $infotxt ""] { 
@@ -2329,7 +2333,8 @@ font configure Underline-Font -underline true -size 24
 #   option add *Label*font "-*-helvetica-medium-r-normal-*-12-*-*-*-p-*-iso8859-1" startupFile
 
    if { [info exists tk_scaling] } {tk scaling $tk_scaling}
-   infowindow {}
+   set infowindow_text {}
+   infowindow
    #proc unknown  {comm args} { puts "unknown command-> \<$comm\> $args" }
    frame .menubar -relief raised -bd 2 
    

@@ -501,6 +501,38 @@ const char *find_bracket(const char *s)
  return s;
 }
 
+char *get_pin_attr_from_inst(int inst, int pin, const char *attr)
+{ 
+   int attr_size;
+   char *pinname = NULL, *pname = NULL, *pinnumber = NULL;
+   char *pnumber = NULL;
+   char *str;
+
+
+   if(debug_var >= 1) fprintf(errfp, "get_pin_attr_from_inst: inst=%d pin=%d attr=%s\n", inst, pin, attr);
+   pinnumber = NULL;
+   str = get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][pin].prop_ptr,"name",0);
+   if(str[0]) {
+     attr_size = strlen(attr);
+     my_strdup(498, &pinname, str);
+     pname =my_malloc(49, get_tok_value_size + attr_size + 30);
+     my_snprintf(pname, get_tok_value_size + attr_size + 30, "%s(%s)", attr, pinname);
+     my_free(&pinname);
+     str = get_tok_value(inst_ptr[inst].prop_ptr, pname, 0);
+     my_free(&pname);
+     if(get_tok_size) my_strdup2(51, &pinnumber, str);
+     else {
+       pnumber = my_malloc(52, attr_size + 100);
+       my_snprintf(pnumber, attr_size + 100, "%s(%d)", attr, pin);
+       str = get_tok_value(inst_ptr[inst].prop_ptr, pnumber, 0);
+       if(debug_var >= 1) fprintf(errfp, "get_pin_attr_from_inst: pnumber=%s\n", pnumber);
+       my_free(&pnumber);
+       if(get_tok_size) my_strdup2(40, &pinnumber, str);
+     }
+   }
+   return pinnumber;
+}
+
 void new_prop_string(char **new_prop,const char *old_prop, int fast, int disable_unique_names)
 {
 /* given a old_prop property string, return a new */
@@ -1353,7 +1385,7 @@ void print_tedax_element(FILE *fd, int inst)
  const char *str_ptr=NULL; 
  register int c, state=XBEGIN, space;
  static char *template=NULL,*format=NULL,*s, *value=NULL, *name=NULL, *token=NULL;
- static char *pinname=NULL, *extra=NULL, *extra_pinnumber=NULL;
+ static char *extra=NULL, *extra_pinnumber=NULL;
  static char *pinnumber=NULL;
  static char *numslots=NULL;
  int pin_number; /* 20180911 */
@@ -1389,26 +1421,24 @@ void print_tedax_element(FILE *fd, int inst)
 
  fprintf(fd, "begin_inst %s numslots %s\n", name, numslots);
  for(i=0;i<no_of_pins; i++) {
-   char pnumber[100], *pname=NULL,*pnumber_ptr;
-   my_snprintf(pnumber, S(pnumber), "pinnumber(%d)", i);
-   my_strdup2(498, &pinname, get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"name",0));
-   pname =my_malloc(49, get_tok_value_size+30);
-   my_snprintf(pname, get_tok_value_size+30, "pinnumber(%s)", pinname);
-   if(!pinname) my_strdup(499, &pinnumber, "--UNDEF--");
-   else {
-     pnumber_ptr = get_tok_value(inst_ptr[inst].prop_ptr, pname, 0);
-     if(pnumber_ptr[0]) my_strdup(51, &pinnumber, pnumber_ptr);
-     else my_strdup(40, &pinnumber, get_tok_value(inst_ptr[inst].prop_ptr, pnumber, 0));
-     if(!pinnumber) my_strdup(500, &pinnumber, get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"pinnumber",0));
+   char *pinnumber;
+   pinnumber = get_pin_attr_from_inst(inst, i, "pinnumber");
+   if(!pinnumber) {
+     my_strdup2(500, &pinnumber, get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"pinnumber",0));
    }
-   if(!pinnumber) my_strdup(501, &pinnumber, "--UNDEF--");
+   if(!get_tok_size) my_strdup(501, &pinnumber, "--UNDEF--");
    tmp = pin_node(inst,i, &mult, 0);
    if(tmp && strcmp(tmp, "<UNCONNECTED_PIN>")) {
-     fprintf(fd, "conn %s %s %s %s %d\n", name, tmp, pinname, pinnumber, i+1);
+     fprintf(fd, "conn %s %s %s %s %d\n",
+           name,
+           tmp,
+           get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"name",0),
+           pinnumber,
+           i+1);
    }
-   my_free(&pname);
+   my_free(&pinnumber);
  }
-
+ 
  if(extra){ 
    /* fprintf(errfp, "extra_pinnumber: |%s|\n", extra_pinnumber); */
    /* fprintf(errfp, "extra: |%s|\n", extra); */
@@ -1742,7 +1772,7 @@ const char *pin_node(int i, int j, int *mult, int hash_prefix_unnamed_net)
   if((inst_ptr[i].node[j])[0] == '#') /* unnamed net */
   {
    /* get unnamed node multiplicity ( minimum mult found in circuit) */
-   *mult = get_unnamed_node(3, 0, strtol((inst_ptr[i].node[j])+4, NULL,10) );
+   *mult = get_unnamed_node(3, 0, atoi((inst_ptr[i].node[j])+4) );
     if(debug_var>=2) fprintf(errfp, "pin_node(): node = %s  n=%d mult=%d\n",
      inst_ptr[i].node[j], atoi(inst_ptr[i].node[j]), *mult);
    if(hash_prefix_unnamed_net) {
@@ -2241,13 +2271,13 @@ char *translate(int inst, char* s)
        }
      }
      if(n>=0  && pin_attr[0] && n < (inst_ptr[inst].ptr+instdef)->rects[PINLAYER]) {
-       pinname = get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr,"name",0);
-       inst_pin_name_redefine = my_malloc(52, 100+sizetok+get_tok_value_size);
-       my_snprintf(inst_pin_name_redefine, 100+sizetok+get_tok_value_size, "%s(%s)", pin_attr, pinname);
-       my_snprintf(inst_pin_num_redefine, sizetok * sizeof(char)+20, "%s(%d)", pin_attr, n);
-       value = get_tok_value(inst_ptr[inst].prop_ptr,inst_pin_name_redefine,0);
-       if(!get_tok_size) value = get_tok_value(inst_ptr[inst].prop_ptr,inst_pin_num_redefine,0);
-       if(!get_tok_size) value = get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr,pin_attr,0);
+       char *pinnumber;
+       pinnumber = get_pin_attr_from_inst(inst, n, pin_attr);
+       if(!pinnumber) {
+         my_strdup2(499, &pinnumber, get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr, pin_attr, 0));
+       }
+       if(!get_tok_size) my_strdup(379, &pinnumber, "--UNDEF--");
+       value = pinnumber;
        if(value[0] != 0) {
          char *ss;
          int slot;
@@ -2263,10 +2293,9 @@ char *translate(int inst, char* s)
          memcpy(result+result_pos, value, tmp+1); /* 20180923 */
          result_pos+=tmp;
        }
-       my_free(&inst_pin_name_redefine);
+       my_free(&pinnumber);
      }
      my_free(&pin_attr);
-     my_free(&inst_pin_num_redefine);
      my_free(&pin_num_or_name);
    } else if(strcmp(token,"@sch_last_modified")==0) {
 

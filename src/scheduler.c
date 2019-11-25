@@ -25,7 +25,6 @@
 void statusmsg(char str[],int n)
 {
  static char s[2048];
- static char ss[2048];
 
  if(!has_x) return;
  tclsetvar("infowindow_text", str);

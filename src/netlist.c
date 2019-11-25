@@ -909,7 +909,7 @@ void prepare_netlist_structs(int for_hilight_only)
          expandlabel(get_tok_value(
            (inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][j].prop_ptr,"name",0),&pin_mult );
 
-         get_unnamed_node(2, pin_mult * inst_mult, strtol((inst_ptr[i].node[j])+4, NULL,10) );
+         get_unnamed_node(2, pin_mult * inst_mult, atoi((inst_ptr[i].node[j])+4) );
         }
        } /* end if(!touches) */
        touches=1;
@@ -955,7 +955,7 @@ void prepare_netlist_structs(int for_hilight_only)
              /* expandlabel(get_tok_value( */
              /*   inst_ptr[i].prop_ptr,"name",0), &inst_mult); */
             get_unnamed_node(2, pin_mult * inst_mult, 
-                             strtol((inst_ptr[i].node[j])+4, NULL,10) );
+                             atoi((inst_ptr[i].node[j])+4) );
            }
          }
          touches=1;

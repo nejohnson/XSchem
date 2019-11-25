@@ -25,17 +25,18 @@
 void statusmsg(char str[],int n)
 {
  static char s[2048];
+ static char ss[2048];
 
  if(!has_x) return;
+ tclsetvar("infowindow_text", str);
  if(n==2)
  {
-  my_snprintf(s, S(s), "infowindow {%s%s", str, !strcmp(str, "") ? "}" : "\n}");
   if(debug_var>=3) fprintf(errfp, "statusmsg(): %s\n", s);
-  tcleval(s);
+  tcleval("infowindow");
  }
  else
  {
-  my_snprintf(s, S(s), ".statusbar.1 configure -text {%s}", str);
+  my_snprintf(s, S(s), ".statusbar.1 configure -text $infowindow_text", str);
   tcleval(s);  
  }
 }
@@ -643,7 +644,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
      }
    } /* /20171029 */
    if(p>=no_of_pins) {
-     Tcl_AppendResult(interp, "Not found", NULL);
+     Tcl_AppendResult(interp, "Pin not found", NULL);
      return TCL_ERROR;
    } 
    Tcl_AppendResult(interp, str_ptr, NULL);

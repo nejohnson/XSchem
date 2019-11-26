@@ -154,6 +154,13 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
    windowid();
  }
 
+ else if(!strcmp(argv[1],"preview_window"))
+ {
+   if(argc == 3) preview_window(argv[2], "{}","{}");
+   else if(argc == 5) preview_window(argv[2], argv[3], argv[4]);
+   Tcl_ResetResult(interp);
+ }
+
  else if(!strcmp(argv[1],"paste"))
  {
     merge_file(2,".sch");
@@ -359,6 +366,11 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
   }
  }
 
+ else if(!strcmp(argv[1],"set_modify"))
+ {
+   set_modify(1);
+ }
+
  else if(!strcmp(argv[1],"reload"))
  {
    unselect_all(); /* 20180929 */
@@ -366,7 +378,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
    load_schematic(0, 1, schematic[currentsch], 1);
    zoom_full(1, 0);
  }
-
+ 
  else if(!strcmp(argv[1],"debug"))
  {
   if(argc==3)  {

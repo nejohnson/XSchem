@@ -1,4 +1,4 @@
-v {xschem version=2.8.1 file_version=1.0}
+v {xschem version=2.9.5_RC5 file_version=1.1}
 G {}
 V {}
 S {}
@@ -29,9 +29,9 @@ N 520 -460 760 -460 {lab=A}
 N 580 -420 760 -420 {lab=B}
 N 580 -420 580 -350 {lab=B}
 N 520 -350 580 -350 {lab=B}
-C {title} 160 -30 0 0 {name=l2 author="Stefan" embed=true}
+C {title.sym} 160 -30 0 0 {name=l2 author="Stefan" embed=true}
 [
-v {xschem version=2.8.1 file_version=1.0}
+v {xschem version=2.9.5_RC5 file_version=1.1}
 G {type=logo
 template="name=l1 author=\\"Stefan Schippers\\""
 verilog_ignore=true
@@ -49,9 +49,9 @@ T {@time_last_modified} 1020 -20 0 1 0.4 0.3 {}
 T {SCHEM} 5 -25 0 0 1 1 {}
 P 5 13 5 -30 -25 0 5 30 -15 30 -35 10 -55 30 -75 30 -45 0 -75 -30 -55 -30 -35 -10 -15 -30 5 -30 {fill=true}
 ]
-C {74ls00} 420 -350 0 0 {name=U1:2  risedel=100 falldel=200 embed=true}
+C {74ls00.sym} 420 -350 0 0 {name=U1:2  risedel=100 falldel=200 embed=true}
 [
-v {xschem version=2.8.1 file_version=1.0}
+v {xschem version=2.9.5_RC5 file_version=1.1}
 G {type=nand
 verilog_format="nand #(@risedel , @falldel ) @name ( @#2 , @#0 , @#1 );"
 tedax_format="footprint @name @footprint
@@ -79,11 +79,11 @@ T {@#0:pinnumber} -22.5 -22.5 0 0 0.12 0.12 {}
 T {@#1:pinnumber} -22.5 17.5 0 0 0.12 0.12 {}
 T {@#2:pinnumber} 32.5 -2.5 0 1 0.12 0.12 {}
 ]
-C {74ls00} 870 -440 0 0 {name=U1:1  risedel=100 falldel=200}
-C {lab_pin} 970 -440 0 1 {name=p0 lab=OUTPUT_Y}
-C {capa} 590 -160 0 0 {name=C0 m=1 value=100u device="electrolitic capacitor" embed=true}
+C {74ls00.sym} 870 -440 0 0 {name=U1:1  risedel=100 falldel=200}
+C {lab_pin.sym} 970 -440 0 1 {name=p0 lab=OUTPUT_Y}
+C {capa.sym} 590 -160 0 0 {name=C0 m=1 value=100u device="electrolitic capacitor" embed=true}
 [
-v {xschem version=2.8.1 file_version=1.0}
+v {xschem version=2.9.5_RC5 file_version=1.1}
 G {type=capacitor
 format="@name @pinlist @value m=@m"
 tedax_format="footprint @name @footprint 
@@ -108,11 +108,11 @@ T {m=@m} 15 10 0 0 0.25 0.2 {}
 T {@#0:pinnumber} -2.5 -25 0 1 0.12 0.12 {}
 T {@#1:pinnumber} -2.5 20 0 1 0.12 0.12 {}
 ]
-C {74ls00} 420 -460 0 0 {name=U1:4 risedel=100 falldel=200 power=VCC5
+C {74ls00.sym} 420 -460 0 0 {name=U1:4 risedel=100 falldel=200 power=VCC5
 url="http://www.engrcs.com/components/74LS00.pdf"}
-C {7805} 730 -190 0 0 {name=U0 url="https://www.sparkfun.com/datasheets/Components/LM7805.pdf" embed=true}
+C {7805.sym} 730 -190 0 0 {name=U0 url="https://www.sparkfun.com/datasheets/Components/LM7805.pdf" embed=true}
 [
-v {xschem version=2.8.1 file_version=1.0}
+v {xschem version=2.9.5_RC5 file_version=1.1}
 G {type=regulator
 format="x@name @pinlist r@symname"
 verilog_format="assign @#2 = @#0 ;"
@@ -138,13 +138,13 @@ T {@#0:pinnumber} -47.5 -2.5 0 0 0.12 0.12 {}
 T {@#1:pinnumber} -2.5 12.5 0 0 0.12 0.12 {}
 T {@#2:pinnumber} 47.5 -2.5 0 1 0.12 0.12 {}
 ]
-C {lab_pin} 490 -190 0 0 {name=p20 lab=VCC12}
-C {lab_pin} 940 -190 0 1 {name=p22 lab=VCC5}
-C {lab_pin} 590 -110 0 0 {name=p23 lab=ANALOG_GND}
-C {capa} 890 -160 0 0 {name=C4 m=1 value=10u device="tantalium capacitor"}
-C {res} 520 -190 1 0 {name=R0 m=1 value=4.7 device="carbon resistor" embed=true}
+C {lab_pin.sym} 490 -190 0 0 {name=p20 lab=VCC12}
+C {lab_pin.sym} 940 -190 0 1 {name=p22 lab=VCC5}
+C {lab_pin.sym} 590 -110 0 0 {name=p23 lab=ANALOG_GND}
+C {capa.sym} 890 -160 0 0 {name=C4 m=1 value=10u device="tantalium capacitor"}
+C {res.sym} 520 -190 1 0 {name=R0 m=1 value=4.7 device="carbon resistor" embed=true}
 [
-v {xschem version=2.8.1 file_version=1.0}
+v {xschem version=2.9.5_RC5 file_version=1.1}
 G {type=resistor
 format="@name @pinlist @value m=@m"
 verilog_format="tran @name ( @#0 , @#1 ) ;"
@@ -176,11 +176,11 @@ T {m=@m} 15 11.25 0 0 0.2 0.2 {}
 T {@#0:pinnumber} -5 -25 0 1 0.12 0.12 {}
 T {@#1:pinnumber} -5 20 0 1 0.12 0.12 {}
 ]
-C {lab_wire} 700 -460 0 0 {name=l3 lab=A}
-C {lab_wire} 700 -420 0 0 {name=l0 lab=B}
-C {lab_wire} 650 -190 0 0 {name=l1 lab=VCCFILT embed=true}
+C {lab_wire.sym} 700 -460 0 0 {name=l3 lab=A}
+C {lab_wire.sym} 700 -420 0 0 {name=l0 lab=B}
+C {lab_wire.sym} 650 -190 0 0 {name=l1 lab=VCCFILT embed=true}
 [
-v {xschem version=2.8.1 file_version=1.0}
+v {xschem version=2.9.5_RC5 file_version=1.1}
 G {type=label
 format="*.alias @lab"
 template="name=l1 sig_type=std_logic lab=xxx"}
@@ -190,16 +190,16 @@ E {}
 B 5 -1.25 -1.25 1.25 1.25 {name=p dir=in}
 T {@lab} -3.75 -18.75 0 1 0.33 0.27 {}
 ]
-C {lab_pin} 310 -370 0 0 {name=lONN1 lab=INPUT_A verilog_type=reg}
-C {lab_pin} 310 -330 0 0 {name=lONN2 lab=INPUT_B verilog_type=reg}
-C {lab_pin} 40 -330 0 1 { name=lONN3 lab=OUTPUT_Y }
-C {lab_pin} 310 -480 0 0 {name=lONN6 lab=INPUT_E verilog_type=reg}
-C {lab_pin} 310 -440 0 0 {name=lONN8 lab=INPUT_F verilog_type=reg}
-C {lab_pin} 40 -310 0 1 { name=lONN9 lab=VCC12 }
-C {lab_pin} 40 -290 0 1 { name=lONN14 lab=ANALOG_GND  verilog_type=reg}
-C {lab_pin} 40 -270 0 1 { name=lONN15 lab=GND  verilog_type=reg embed=true}
+C {lab_pin.sym} 310 -370 0 0 {name=lONN1 lab=INPUT_A verilog_type=reg}
+C {lab_pin.sym} 310 -330 0 0 {name=lONN2 lab=INPUT_B verilog_type=reg}
+C {lab_pin.sym} 40 -330 0 1 { name=lONN3 lab=OUTPUT_Y }
+C {lab_pin.sym} 310 -480 0 0 {name=lONN6 lab=INPUT_E verilog_type=reg}
+C {lab_pin.sym} 310 -440 0 0 {name=lONN8 lab=INPUT_F verilog_type=reg}
+C {lab_pin.sym} 40 -310 0 1 { name=lONN9 lab=VCC12 }
+C {lab_pin.sym} 40 -290 0 1 { name=lONN14 lab=ANALOG_GND  verilog_type=reg}
+C {lab_pin.sym} 40 -270 0 1 { name=lONN15 lab=GND  verilog_type=reg embed=true}
 [
-v {xschem version=2.8.1 file_version=1.0}
+v {xschem version=2.9.5_RC5 file_version=1.1}
 G {type=label
 format="*.alias @lab"
 template="name=l1 sig_type=std_logic lab=xxx"}
@@ -209,7 +209,7 @@ E {}
 B 5 -1.25 -1.25 1.25 1.25 {name=p dir=in}
 T {@lab} -7.5 -7.5 0 1 0.36 0.33 {}
 ]
-C {code} 1030 -280 0 0 {name=TESTBENCH_CODE only_toplevel=false value="initial begin
+C {code.sym} 1030 -280 0 0 {name=TESTBENCH_CODE only_toplevel=false value="initial begin
   $dumpfile(\\"dumpfile.vcd\\");
   $dumpvars;
   INPUT_E=0;
@@ -235,7 +235,7 @@ assign VCC12=1;
 
 " embed=true}
 [
-v {xschem version=2.8.1 file_version=1.0}
+v {xschem version=2.9.5_RC5 file_version=1.1}
 G {type=netlist_commands
 template="name=s1 only_toplevel=false value=blabla"
 tedax_ignore=true
@@ -264,9 +264,9 @@ L 5 10 0 10 100 {}
 L 5 10 0 100 0 {}
 T {@name} 15 -25 0 0 0.3 0.3 {}
 ]
-C {verilog_timescale} 1050 -100 0 0 {name=s1 timestep="1ns" precision="1ns"  embed=true}
+C {verilog_timescale.sym} 1050 -100 0 0 {name=s1 timestep="1ns" precision="1ns"  embed=true}
 [
-v {xschem version=2.8.1 file_version=1.0}
+v {xschem version=2.9.5_RC5 file_version=1.1}
 G {type=timescale
 spice_ignore=true
 template="name=s1 timestep=\\"100ps\\" precision=\\"100ps\\" "
@@ -279,9 +279,9 @@ L 4 0 -10 0 10 {}
 T {TIMESCALE} 5 -25 0 0 0.3 0.3 {}
 T {`timescale @timestep/@precision} 15 -5 0 0 0.3 0.3 {}
 ]
-C {conn_8x1} 20 -390 0 0 {name=C1 footprint=connector(8,1) embed=true}
+C {conn_8x1.sym} 20 -390 0 0 {name=C1 footprint=connector(8,1) embed=true}
 [
-v {xschem version=2.8.1 file_version=1.0}
+v {xschem version=2.9.5_RC5 file_version=1.1}
 G {type=connector
 verilog_ignore=true
 format="*connector(8,1) @pinlist"
@@ -318,7 +318,7 @@ T {@#6:pinnumber} 6.25 98.75 0 1 0.1 0.1 {}
 T {@#7:pinnumber} 6.25 118.75 0 1 0.1 0.1 {}
 P 4 5 10 130 -10 130 -10 -30 10 -30 10 130 {}
 ]
-C {lab_pin} 40 -370 0 1 {name=l4 lab=INPUT_A verilog_type=reg}
-C {lab_pin} 40 -350 0 1 {name=l5 lab=INPUT_B verilog_type=reg}
-C {lab_pin} 40 -410 0 1 {name=l6 lab=INPUT_E verilog_type=reg}
-C {lab_pin} 40 -390 0 1 {name=l7 lab=INPUT_F verilog_type=reg}
+C {lab_pin.sym} 40 -370 0 1 {name=l4 lab=INPUT_A verilog_type=reg}
+C {lab_pin.sym} 40 -350 0 1 {name=l5 lab=INPUT_B verilog_type=reg}
+C {lab_pin.sym} 40 -410 0 1 {name=l6 lab=INPUT_E verilog_type=reg}
+C {lab_pin.sym} 40 -390 0 1 {name=l7 lab=INPUT_F verilog_type=reg}

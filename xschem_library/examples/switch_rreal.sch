@@ -1,4 +1,4 @@
-v {xschem version=2.8.2_RC1 file_version=1.0}
+v {xschem version=2.9.5_RC5 file_version=1.1}
 G {
 
 -- process
@@ -83,15 +83,15 @@ end process;
 V {}
 S {}
 E {}
-C {use} 0 -310 0 0 {    library ieee,work;
+C {use.sym} 0 -310 0 0 {    library ieee,work;
     use ieee.std_logic_1164.all;
     use work.rrreal.all;
     use std.textio.all;
 }
-C {ipin} 80 -120 0 0 {name=p3 lab=ENAB}
-C {iopin} 170 -40 0 0 {name=p1 lab=B sig_type=rreal}
-C {iopin} 40 -40 0 1 {name=p2 lab=A sig_type=rreal}
-C {arch_declarations} 20 -190 0 0 {
+C {ipin.sym} 80 -120 0 0 {name=p3 lab=ENAB}
+C {iopin.sym} 170 -40 0 0 {name=p1 lab=B sig_type=rreal}
+C {iopin.sym} 40 -40 0 1 {name=p2 lab=A sig_type=rreal}
+C {arch_declarations.sym} 20 -190 0 0 {
 
 signal SCHEDULE : integer ;
 

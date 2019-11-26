@@ -444,6 +444,20 @@ proc save_file_dialog { msg ext global_initdir {initialfile {}} {overwrt 1} } {
   return $r ;# removed file normalize
 }
 
+proc is_xschem_file {f} {
+  set fd [open $f r]
+  if { [gets $fd line] >=0 } {
+    if {[regexp "^v\[ \t\]+\{xschem\[ \t\]+version\[ \t\]*=.*\[ \t\]+file_version\[ \t\]*=" $line]} {
+      set ret 1
+    } else {
+      set ret 0
+    }
+  } else {
+   set ret 0
+  }
+  close $fd
+  return $ret
+}
 
 proc list_dirs {pathlist } {
   global list_dirs_selected_dir INITIALINSTDIR
@@ -489,12 +503,12 @@ proc list_dirs {pathlist } {
 proc myload_set_colors {} {
   global myload_index1 myload_files2
   update
-  set dir1 [abs_sym_path [.myload.l.listbox1.list get $myload_index1]]
-  for {set i 0} { $i< [.myload.l.listbox2.list index end] } { incr i} {
+  set dir1 [abs_sym_path [.myload.l.paneleft.list get $myload_index1]]
+  for {set i 0} { $i< [.myload.l.paneright.list index end] } { incr i} {
     if {[ file isdirectory "$dir1/[lindex $myload_files2 $i]"]} {
-      .myload.l.listbox2.list itemconfigure $i -foreground blue
+      .myload.l.paneright.list itemconfigure $i -foreground blue
     } else {
-      .myload.l.listbox2.list itemconfigure $i -foreground black
+      .myload.l.paneright.list itemconfigure $i -foreground black
     }
   }
 }
@@ -505,19 +519,18 @@ proc myload_set_home {dir} {
   if { $i>=0 } {
     set myload_files1 $pathlist
     set myload_index1 $i
-    .myload.l.listbox1.list selection set $myload_index1
+    .myload.l.paneleft.list selection set $myload_index1
 
   } else {
     set myload_files1 $dir
     set myload_index1 0
-    .myload.l.listbox1.list selection set 0
+    .myload.l.paneleft.list selection set 0
   }
-
 }
 
 proc load_file_dialog {{msg {}}  {ext {}} {global_initdir {INITIALINSTDIR}}} {
   global myload_index1 myload_files2 myload_files1 myload_retval myload_dir1 pathlist
-  global myload_default_geometry myload_sash_pos
+  global myload_default_geometry myload_sash_pos myload_yview
   upvar #0 $global_initdir initdir
   toplevel .myload -class dialog
   wm title .myload $msg
@@ -536,57 +549,63 @@ proc load_file_dialog {{msg {}}  {ext {}} {global_initdir {INITIALINSTDIR}}} {
   
   panedwindow  .myload.l -orient horizontal
 
-  frame .myload.l.listbox1
-  listbox .myload.l.listbox1.list -listvariable myload_files1 -width 60 -height 30\
-    -yscrollcommand ".myload.l.listbox1.yscroll set" -selectmode browse \
-    -xscrollcommand ".myload.l.listbox1.xscroll set"
-  scrollbar .myload.l.listbox1.yscroll -command ".myload.l.listbox1.list yview" 
-  scrollbar .myload.l.listbox1.xscroll -command ".myload.l.listbox1.list xview" -orient horiz
-  .myload.l.listbox1.list xview moveto 1
-  pack  .myload.l.listbox1.yscroll -side right -fill y
-  pack  .myload.l.listbox1.xscroll -side bottom -fill x
-  pack  .myload.l.listbox1.list -fill both -expand true
-  bind .myload.l.listbox1.list <<ListboxSelect>> { 
-    set sel [.myload.l.listbox1.list curselection]
+  frame .myload.l.paneleft
+  listbox .myload.l.paneleft.list -listvariable myload_files1 -width 60 -height 12\
+    -yscrollcommand ".myload.l.paneleft.yscroll set" -selectmode browse \
+    -xscrollcommand ".myload.l.paneleft.xscroll set"
+  scrollbar .myload.l.paneleft.yscroll -command ".myload.l.paneleft.list yview" 
+  scrollbar .myload.l.paneleft.xscroll -command ".myload.l.paneleft.list xview" -orient horiz
+  .myload.l.paneleft.list xview moveto 1
+  pack  .myload.l.paneleft.yscroll -side right -fill y
+  pack  .myload.l.paneleft.xscroll -side bottom -fill x
+  pack  .myload.l.paneleft.list -fill both -expand true
+  bind .myload.l.paneleft.list <<ListboxSelect>> { 
+    # bind .myload.l.paneright.pre <Expose> {}
+    # .myload.l.paneright.pre configure -background white
+    set sel [.myload.l.paneleft.list curselection]
     if { $sel ne {} } {
-      set myload_dir1 [abs_sym_path [.myload.l.listbox1.list get $sel]]
+      set myload_dir1 [abs_sym_path [.myload.l.paneleft.list get $sel]]
       set myload_index1 $sel
       set myload_files2 [lsort [glob -directory $myload_dir1 -tails \{.*,*\}]]
       myload_set_colors
     }
   }
 
-  frame .myload.l.listbox2
-  listbox .myload.l.listbox2.list  -listvariable myload_files2 -width 30 -height 30\
-    -yscrollcommand ".myload.l.listbox2.yscroll set" -selectmode browse \
-    -xscrollcommand ".myload.l.listbox2.xscroll set"
-  scrollbar .myload.l.listbox2.yscroll -command ".myload.l.listbox2.list yview"
-  scrollbar .myload.l.listbox2.xscroll -command ".myload.l.listbox2.list xview" -orient horiz
-  pack  .myload.l.listbox2.yscroll -side right -fill y
-  pack  .myload.l.listbox2.xscroll -side bottom -fill x
-  pack  .myload.l.listbox2.list -side right  -fill both -expand true
+  frame .myload.l.paneright
+  frame .myload.l.paneright.pre -background white -width 200 -height 200
+  listbox .myload.l.paneright.list  -listvariable myload_files2 -width 30 -height 12\
+    -yscrollcommand ".myload.l.paneright.yscroll set" -selectmode browse \
+    -xscrollcommand ".myload.l.paneright.xscroll set"
+  scrollbar .myload.l.paneright.yscroll -command ".myload.l.paneright.list yview"
+  scrollbar .myload.l.paneright.xscroll -command ".myload.l.paneright.list xview" -orient horiz
+  pack .myload.l.paneright.pre -side bottom -anchor s -fill x 
+  pack  .myload.l.paneright.yscroll -side right -fill y
+  pack  .myload.l.paneright.xscroll -side bottom -fill x
+  pack  .myload.l.paneright.list -side bottom  -fill both -expand true
 
-  # pack  .myload.l.listbox1 .myload.l.listbox2 -side left -fill both -expand true
-  .myload.l  add .myload.l.listbox1 -minsize 40
-  .myload.l  add .myload.l.listbox2 -minsize 40
-  .myload.l paneconfigure .myload.l.listbox1 -stretch always
-  .myload.l paneconfigure .myload.l.listbox2 -stretch always
- 
+  .myload.l  add .myload.l.paneleft -minsize 40
+  .myload.l  add .myload.l.paneright -minsize 40
+  # .myload.l paneconfigure .myload.l.paneleft -stretch always
+  # .myload.l paneconfigure .myload.l.paneright -stretch always
   frame .myload.buttons 
   button .myload.buttons.ok -text OK -command { set myload_retval [.myload.buttons.entry get]; destroy .myload} 
   button .myload.buttons.cancel -text Cancel -command {set myload_retval {}; destroy .myload}
   button .myload.buttons.home -text Home -command {
+    bind .myload.l.paneright.pre <Expose> {}
+    .myload.l.paneright.pre configure -background white
     set myload_files1 $pathlist
     set myload_index1 0
-    set myload_dir1 [abs_sym_path [.myload.l.listbox1.list get $myload_index1]]
+    set myload_dir1 [abs_sym_path [.myload.l.paneleft.list get $myload_index1]]
     set myload_files2 [lsort [glob -directory $myload_dir1 -tails \{.*,*\}]]
     myload_set_colors
     .myload.buttons.entry delete 0 end
-    .myload.l.listbox1.list selection set $myload_index1
+    .myload.l.paneleft.list selection set $myload_index1
   }
   label .myload.buttons.label  -text {File:}
   entry .myload.buttons.entry
   button .myload.buttons.up -text UP -command {
+    bind .myload.l.paneright.pre <Expose> {}
+    .myload.l.paneright.pre configure -background white
     set d [file dirname $myload_dir1]
     if { [file isdirectory $d]} {
       myload_set_home $d
@@ -608,7 +627,7 @@ proc load_file_dialog {{msg {}}  {ext {}} {global_initdir {INITIALINSTDIR}}} {
       destroy .myload
     }
   }
-  bind .myload.l.listbox2.list <Double-Button-1> {
+  bind .myload.l.paneright.list <Double-Button-1> {
     set myload_retval [.myload.buttons.entry get]
     if {$myload_retval ne {} } {
       destroy .myload
@@ -626,21 +645,28 @@ proc load_file_dialog {{msg {}}  {ext {}} {global_initdir {INITIALINSTDIR}}} {
     eval .myload.l sash mark 0 [.myload.l sash coord 0]
     eval .myload.l sash dragto 0 [subst $myload_sash_pos]
   }
+  if { [ info exists myload_yview]} {
+    eval .myload.l.paneright.yscroll set [subst $myload_yview]
+  }
 
   bind .myload <Configure> {
     set myload_sash_pos [.myload.l sash coord 0]
     set myload_default_geometry [wm geometry .myload]
     regsub {\+.*} $myload_default_geometry {} myload_default_geometry
   }
+  bind .myload.l.paneright.yscroll <Motion> {
+    set myload_yview [.myload.l.paneright.list yview]
+  }
 
-  set myload_dir1 [abs_sym_path [.myload.l.listbox1.list get $myload_index1]]
+  xschem preview_window create .myload.l.paneright.pre {}
+  set myload_dir1 [abs_sym_path [.myload.l.paneleft.list get $myload_index1]]
   set myload_files2 [lsort [glob -directory $myload_dir1 -tails \{.*,*\}]]
   myload_set_colors
-  bind .myload.l.listbox2.list <<ListboxSelect>> {
-    set sel [.myload.l.listbox2.list curselection]
+  bind .myload.l.paneright.list <<ListboxSelect>> {
+    set sel [.myload.l.paneright.list curselection]
     if { $sel ne {} } {
-      set myload_dir1 [abs_sym_path [.myload.l.listbox1.list get $myload_index1]]
-      set dir2 [.myload.l.listbox2.list get $sel]
+      set myload_dir1 [abs_sym_path [.myload.l.paneleft.list get $myload_index1]]
+      set dir2 [.myload.l.paneright.list get $sel]
       if {$dir2 eq {..}} {
         set d [file dirname $myload_dir1]
       } elseif { $dir2 eq {.} } {
@@ -649,6 +675,8 @@ proc load_file_dialog {{msg {}}  {ext {}} {global_initdir {INITIALINSTDIR}}} {
         set d "$myload_dir1/$dir2" ;# removed file normalize
       }
       if { [file isdirectory $d]} {
+        bind .myload.l.paneright.pre <Expose> {}
+        .myload.l.paneright.pre configure -background white
         myload_set_home $d
         set myload_files2 [lsort [glob -directory $d -tails \{.*,*\}]]
         myload_set_colors
@@ -657,12 +685,23 @@ proc load_file_dialog {{msg {}}  {ext {}} {global_initdir {INITIALINSTDIR}}} {
       } else {
         .myload.buttons.entry delete 0 end
         .myload.buttons.entry insert 0 $dir2
+         if { [is_xschem_file $myload_dir1/$dir2] } {
+           .myload.l.paneright.pre configure -background {}
+	   update
+           xschem preview_window draw .myload.l.paneright.pre "$myload_dir1/$dir2"
+           bind .myload.l.paneright.pre <Expose> {xschem preview_window draw .myload.l.paneright.pre "$myload_dir1/$dir2"}
+         } else {
+           bind .myload.l.paneright.pre <Expose> {}
+           .myload.l.paneright.pre configure -background white
+         }
+         # puts "xschem preview_window draw .myload.l.paneright.pre \"$myload_dir1/$dir2\""
       }
     }
   }
   tkwait window .myload
+  xschem preview_window destroy {} {} 
+  set initdir "$myload_dir1"
   if { $myload_retval ne {} } {
-    set initdir "$myload_dir1"
     return "$myload_dir1/$myload_retval" ;# removed file normalize
   } else {
     return {}
@@ -1895,7 +1934,11 @@ proc abs_sym_path {fname {ext {} } } {
   }
 
   # transform ./file_or_path to file_or_path
-  regsub {^ *\.\/} $fname {} fname
+  if { [regexp {^\.\./} $fname ] } {
+    set fname [file normalize $fname]
+  } elseif {[regexp {^\./} $fname ] } {
+    regsub {^\./} $fname {} fname
+  }
 
   set lib_cell [get_cell $fname]
 

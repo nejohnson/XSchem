@@ -1,11 +1,13 @@
+v {xschem version=2.9.5_RC5 file_version=1.1}
 G {type=architecture
-template=" nothing here, use global schematic properties "} 
-V {} 
-S {} 
-L 4 0 -10 355 -10 {} 
-T {ARCHITECTURE} 5 -25 0 0 0.3 0.3 {} 
+template=" nothing here, use global schematic properties "}
+V {}
+S {}
+E {}
+L 4 0 -10 355 -10 {}
+T {ARCHITECTURE} 5 -25 0 0 0.3 0.3 {}
 T {@schprop
 ----
 @schverilogprop
 ----
-@schvhdlprop} 45 5 0 0 0.3 0.3 {} 
+@schvhdlprop} 45 5 0 0 0.3 0.3 {}

@@ -36,7 +36,7 @@ char *read_line(FILE *fp)
       break;
     }
   }
-  return a;
+  return a ? a : "<NULL>";
 }
 
 /* */
@@ -627,6 +627,7 @@ void read_xschem_file(FILE *fd) /* 20180912 */
   char name_embedded[PATH_MAX];
   char c[1];
   int inst_cnt;
+  int version_found = 0;
 
   if(debug_var>=3) fprintf(errfp, "read_xschem_file(): start\n");
   inst_cnt = endfile = 0;
@@ -639,6 +640,7 @@ void read_xschem_file(FILE *fd) /* 20180912 */
      case 'v':
       load_ascii_string(&xschem_version_string, fd);
       my_snprintf(file_version, S(file_version), "%s", get_tok_value(xschem_version_string, "file_version", 0));
+      version_found = 1;
       if(debug_var >= 1) fprintf(errfp, "read_xschem_file(): file_version=%s\n", file_version);
       break;
      case 'E':
@@ -707,6 +709,7 @@ void read_xschem_file(FILE *fd) /* 20180912 */
       fprintf(errfp, "read_xschem_file(): skipping: %s", read_line(fd)); /* read rest of line and discard */
       break;
     }
+    if(check_version && !version_found) return;
     if(!file_version[0]) {
       my_snprintf(file_version, S(file_version), "1.0");
       if(debug_var >= 1) fprintf(errfp, "read_xschem_file(): no file_version, assuming file_version=%s\n", file_version);
@@ -863,7 +866,6 @@ void link_symbols_to_instances(void) /* 20150326 separated from load_schematic()
 void load_schematic(int symbol, int load_symbols, const char *filename, int reset_undo) /* 20150327 added reset_undo */
 {
   FILE *fd;
-  struct stat buf;
   char name[PATH_MAX];
   static char msg[PATH_MAX+100];
 
@@ -874,14 +876,7 @@ void load_schematic(int symbol, int load_symbols, const char *filename, int rese
   prepared_hash_wires=0; /* 20171224 */
   if(reset_undo) clear_undo();
   if(filename && filename[0]) {
-    if( !stat(filename, &buf) ) {
-      my_strncpy(name, filename, S(name));
-    } /* else {
-      if(symbol) my_strncpy(name, add_ext(filename, ".sym"), S(name));
-      else       my_strncpy(name, add_ext(filename, ".sch"), S(name));
-    } */
-    my_snprintf(msg, S(msg), "set current_dirname \"[file dirname {%s}]\"", name);
-    tcleval(msg);
+    my_strncpy(name, filename, S(name));
     my_strncpy(schematic[currentsch], name, S(schematic[currentsch]));
     my_strncpy(current_name, rel_sym_path(name), S(current_name)); /* 20190519 */
     if(debug_var>=1) fprintf(errfp, "load_schematic(): opening file for loading:%s, filename=%s\n", name, filename);
@@ -893,12 +888,14 @@ void load_schematic(int symbol, int load_symbols, const char *filename, int rese
       fflush(stdout);
     }
     if( (fd=fopen(name,"r"))== NULL) {
-      fprintf(errfp, "load_schematic(): unable to open %s file: %s, filename=%s\n", 
-          file_version, name, filename ? filename : "(null)");
+      fprintf(errfp, "load_schematic(): unable to open file: %s, filename=%s\n", 
+          name, filename ? filename : "<NULL>");
       my_snprintf(msg, S(msg), "alert_ {Unable to open file: %s}", filename ? filename: "(null)");
       tcleval(msg);
       clear_drawing();
     } else {
+      my_snprintf(msg, S(msg), "set current_dirname \"[file dirname {%s}]\"", name);
+      tcleval(msg);
       clear_drawing();
       if(debug_var>=1) fprintf(errfp, "load_schematic(): reading file: %s\n", name);
       read_xschem_file(fd);

@@ -24,10 +24,10 @@
 #include <pwd.h> /* getpwuid */
 
 static int init_done=0; /* 20150409 to avoid double call by Xwindows close and TclExitHandler */
-
+static Window save_window;
 static XSetWindowAttributes winattr;
 static int screen_number;
-static Tk_Window  tkwindow, mainwindow;
+static Tk_Window  tkwindow, mainwindow, tkpre_window;
 static XWMHints *hints_ptr;
 static Window topwindow;
 static XColor xcolor_exact,xcolor;
@@ -158,7 +158,7 @@ void windowid()
   Window framewin, rootwindow;
   Window *framewin_child_ptr;
   unsigned int framweindow_nchildren;
-
+ 
     mainwindow=Tk_MainWindow(interp);
     display = Tk_Display(mainwindow);
     tcleval( "winfo id .");
@@ -171,12 +171,9 @@ void windowid()
     if(debug_var>=1) fprintf(errfp,"framewin child 0=%x\n", (unsigned int) framewin_child_ptr[0]);
 
     /* here I create the icon pixmap,to be used when iconified,  */
-    /* I will use it when I know how to use it as icon :-( */
-    /* removed icon, ts created by tcl  31102004 */
     if(!cad_icon_pixmap) {
       i=XpmCreatePixmapFromData(display,framewin, cad_icon,&cad_icon_pixmap, NULL, NULL);
       if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): creating icon pixmap returned: %d\n",i);
-      /*this does not work (sending icon pixmap hint) */
       hints_ptr = XAllocWMHints();
       hints_ptr->icon_pixmap = cad_icon_pixmap ;
       hints_ptr->flags = IconPixmapHint ;
@@ -703,6 +700,58 @@ int source_tcl_file(char *s)
     return TCL_ERROR;
   }
   return TCL_OK;
+}
+
+void preview_window(const char *what, const char *tk_win_path, const char *filename)
+{
+  if(!strcmp(what, "create")) {
+    tkpre_window = Tk_NameToWindow(interp, tk_win_path, mainwindow);
+    Tk_MakeWindowExist(tkpre_window);
+    pre_window = Tk_WindowId(tkpre_window);
+  }
+  else if(!strcmp(what, "draw")) {
+    double xor, yor, z;
+    int save_mod;
+ 
+    /* save context */
+    xor = xorigin;
+    yor = yorigin;
+    z = zoom;
+    save_window = window;
+    save_mod = modified;
+    push_undo();
+    currentsch++;
+    unselect_all();
+    remove_symbols();
+
+    /* preview */
+    check_version = 1; /* refuse to load and preview anything if not an xschem file */
+    load_schematic(0, 1,filename, 0);
+    window = pre_window;
+    resetwin();
+    zoom_full(1, 0); /* draw */
+    check_version = 0;
+   
+    /* restore context */
+    unselect_all();
+    remove_symbols();
+    my_strncpy(schematic[currentsch] , "", S(schematic[currentsch]));
+    currentsch--;
+    pop_undo(0);
+    modified = save_mod;
+    set_modify(modified);
+    window = save_window;
+    xorigin = xor;
+    yorigin = yor;
+    zoom = z;
+    mooz = 1/z;
+    resetwin();
+    change_linewidth(-1.);
+    
+  }
+  else if(!strcmp(what, "destroy")) {
+    Tk_DestroyWindow(tkpre_window);
+  }
 }
 
 int Tcl_AppInit(Tcl_Interp *inter)

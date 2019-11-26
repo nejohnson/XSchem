@@ -1,4 +1,4 @@
-v {xschem version=2.8.2_RC1 file_version=1.0}
+v {xschem version=2.9.5_RC5 file_version=1.1}
 G {
 
 process
@@ -33,8 +33,8 @@ end process;
 V {}
 S {}
 E {}
-C {iopin} 50 -80 0 0 {name=p1 lab=USC sig_type=rreal}
-C {use} -120 -340 0 0 {library ieee;
+C {iopin.sym} 50 -80 0 0 {name=p1 lab=USC sig_type=rreal}
+C {use.sym} -120 -340 0 0 {library ieee;
 use std.TEXTIO.all;
 use ieee.std_logic_1164.all;
 use work.rrreal.all;

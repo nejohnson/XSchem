@@ -122,10 +122,10 @@ C {ipin.sym} 530 -100 0 0 {name=p3 lab=VNN}
 C {ipin.sym} 530 -140 0 0 {name=p4 lab=VSS}
 C {opin.sym} 600 -130 0 0 {name=p5 lab=OUT}
 C {nmos3.sym} 1090 -440 0 0 {name=xm2 model=irf540 m=1
-url="http://www.ece.usu.edu/ece_store/spec/IRF540.pdf"}
+url="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&ved=2ahUKEwj1-O_2q4TmAhUJIMUKHSSsBLgQFjAAegQIARAC&url=https%3A%2F%2Fwww.vishay.com%2Fdocs%2F91021%2F91021.pdf&usg=AOvVaw3Z06pHM9MkoyThqmuu--5L"}
 C {res.sym} 1030 -410 0 1 {name=R7 m=1 value=190}
 C {nmos3.sym} 1090 -760 0 0 {name=xm1 model=irf540 m=1
-url="http://www.ece.usu.edu/ece_store/spec/IRF540.pdf"}
+url="https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&ved=2ahUKEwj1-O_2q4TmAhUJIMUKHSSsBLgQFjAAegQIARAC&url=https%3A%2F%2Fwww.vishay.com%2Fdocs%2F91021%2F91021.pdf&usg=AOvVaw3Z06pHM9MkoyThqmuu--5L"}
 C {res.sym} 1030 -730 0 1 {name=R0 m=1 value=190}
 C {lab_pin.sym} 1390 -590 0 1 {name=p14 lab=OUT}
 C {lab_pin.sym} 1110 -280 0 0 {name=p18 lab=VNN}

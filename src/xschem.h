@@ -23,7 +23,7 @@
 #ifndef CADGLOBALS
 #define CADGLOBALS
 
-#define XSCHEM_VERSION "2.9.5_RC5"
+#define XSCHEM_VERSION "2.9.5_RC6"
 #define XSCHEM_FILE_VERSION "1.1"
 
 #if HAS_PIPE == 1
@@ -41,7 +41,7 @@
 /*  approximate PI definition */
 #define XSCH_PI 3.14159265358979323846264338327950288419716939937
 
-#include "../config.h"
+/* #include "../config.h" */
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -544,8 +544,10 @@ extern int head_undo_ptr;
 extern int max_undo;
 extern int draw_dots;
 extern int draw_single_layer; /*  20151117 */
+extern int check_version; 
 extern void enable_layers(void);
 extern Window window;
+extern Window pre_window;
 extern Window parent_of_topwindow;
 extern char *xschem_executable;
 extern Pixmap cad_icon_pixmap, *pixmap,save_pixmap;
@@ -891,6 +893,7 @@ extern void print_hilight_net(int show);
 extern void change_layer();
 extern void launcher(); /*  20161102 */
 extern void windowid();
+extern void preview_window(const char *what, const char *tk_win_path, const char *filename);
 extern int window_state (Display *disp, Window win, char *arg);
 extern void toggle_fullscreen();
 extern void toggle_only_probes(); /*  20110112 */

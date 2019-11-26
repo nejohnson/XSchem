@@ -74,12 +74,14 @@ int head_undo_ptr=0;
 int max_undo=MAX_UNDO;
 int draw_dots=1; /*20150331 */
 int draw_single_layer=-1; /* 20151117 */
+int check_version = 0; /* if set ensures 'v' version header line is present before loading file */
 
 unsigned short enable_stretch=0;
 int cadlayers=0;
 int *enable_layer;
 int need_rebuild_selected_array=1;
 Window window; /* window is the drawing area, topwindow is the root win */
+Window pre_window; /* preview when opening files */
 Window parent_of_topwindow;
 int depth;
 int *fill_type; /*20171117 for every layer: 0: no fill, 1, solid fill, 2: stipple fill */

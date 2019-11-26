@@ -848,10 +848,10 @@ int callback(int event, int mx, int my, KeySym key,
     last_command = 0;
 
     /* place_symbol(-1,NULL,mousex_snap, mousey_snap, 0, 0, NULL,3, 1);*/
-    place_symbol(-1,NULL,mousex_snap, mousey_snap, 0, 0, NULL, 4, 1);
     mx_save = mx; my_save = my; /* 20070323 */
     mx_double_save=mousex_snap;
     my_double_save=mousey_snap;
+    place_symbol(-1,NULL,mousex_snap, mousey_snap, 0, 0, NULL, 4, 1);
     move_objects(BEGIN,0,0,0);
 
 

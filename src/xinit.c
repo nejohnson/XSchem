@@ -747,7 +747,7 @@ void preview_window(const char *what, const char *tk_win_path, const char *filen
     mooz = 1/z;
     resetwin();
     change_linewidth(-1.);
-    
+    draw();
   }
   else if(!strcmp(what, "destroy")) {
     Tk_DestroyWindow(tkpre_window);

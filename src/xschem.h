@@ -138,20 +138,20 @@
 #define STARTMOVE 64        /*  used for move/copy  operations */
 #define STARTCOPY 128       /*  used for move/copy  operations */
 #define STARTZOOM 256       /*  used for move/copy  operations */
-#define STARTMERGE 512       /*  used fpr merge schematic/symbol */
-#define MENUSTARTWIRE 1024   /*  start wire invoked from menu */
-#define MENUSTARTLINE 2048   /*  start line invoked from menu */
-#define MENUSTARTRECT 4096   /*  start rect invoked from menu */
-#define MENUSTARTZOOM 8192   /*  start zoom box invoked from menu */
-#define STARTPAN2     16384  /*  new pan method with mouse button3 20121123 */
-#define MENUSTARTTEXT 32768  /*  20161201 click to place text if action starts from menu */
+#define STARTMERGE 512      /*  used fpr merge schematic/symbol */
+#define MENUSTARTWIRE 1024  /*  start wire invoked from menu */
+#define MENUSTARTLINE 2048  /*  start line invoked from menu */
+#define MENUSTARTRECT 4096  /*  start rect invoked from menu */
+#define MENUSTARTZOOM 8192  /*  start zoom box invoked from menu */
+#define STARTPAN2     16384 /*  new pan method with mouse button3 20121123 */
+#define MENUSTARTTEXT 32768 /*  20161201 click to place text if action starts from menu */
 #define MENUSTARTSNAPWIRE 65536   /*  start wire invoked from menu, snap to pin variant 20171022 */
-#define STARTPOLYGON 131072   /*  20171115 */
+#define STARTPOLYGON 131072 /*  20171115 */
 #define MENUSTARTPOLYGON 262144   /*  20171117 */
 #define STARTARC 524288
 #define MENUSTARTARC 1048576
 #define MENUSTARTCIRCLE 2097152
-
+#define PLACE_SYMBOL 4194304 /* used in move_objects after place_symbol to avoid storing intermediate undo state */
 #define SELECTED 1          /*  used in the .sel field for selected objs. */
 #define SELECTED1 2         /*  first point selected... */
 #define SELECTED2 4         /*  second point selected... */
@@ -757,7 +757,7 @@ extern void remove_symbol(void);
 extern void clear_drawing(void);
 extern int load_symbol_definition(const char name[], FILE *embed_fd);
 extern void descend_symbol(void);
-extern void place_symbol(int pos, const char *symbol_name, double x, double y, int rot, int flip, 
+extern int place_symbol(int pos, const char *symbol_name, double x, double y, int rot, int flip, 
                          const char *inst_props, int draw_sym, int first_call);
 extern void attach_labels_to_inst(void);
 extern int match_symbol(char name[]);

@@ -141,8 +141,8 @@ int callback(int event, int mx, int my, KeySym key,
     break;
 
   case MotionNotify:
-    if(ui_state & STARTPAN2)   pan2(RUBBER, mx, my); /* 20121123 -  20160425 moved up */
     if(semaphore==2) break;
+    if(ui_state & STARTPAN2)   pan2(RUBBER, mx, my); /* 20121123 -  20160425 moved up */
     if(ui_state) {
       #ifdef TURBOX_FIX
       /* fix Exceed TurboX bugs when drawing with pixmap tiled fill pattern */
@@ -159,7 +159,7 @@ int callback(int event, int mx, int my, KeySym key,
     }
     if(ui_state & STARTPAN)    pan(RUBBER);
     if(ui_state & STARTZOOM)   zoom_box(RUBBER);
-    if(ui_state & STARTSELECT) {
+    if(ui_state & STARTSELECT && !(ui_state & PLACE_SYMBOL) && !(ui_state & STARTPAN2)) {
       if( (state & Button1Mask)  && (state & Mod1Mask)) { /* 20171026 added unselect by area  */
           select_rect(RUBBER,0);
       } else if(state & Button1Mask) {
@@ -198,8 +198,8 @@ int callback(int event, int mx, int my, KeySym key,
       new_polygon(RUBBER); /* 20171115 */
     }
 
-    if(!(ui_state & STARTPOLYGON) && (state&Button1Mask) && !(ui_state & STARTWIRE) &&
-         !(state & Mod1Mask) && !(state & ShiftMask))  /* start of a mouse area selection */
+    if(!(ui_state & STARTPOLYGON) && (state&Button1Mask) && !(ui_state & STARTWIRE) && !(ui_state & STARTPAN2) &&
+         !(state & Mod1Mask) && !(state & ShiftMask) && !(ui_state & PLACE_SYMBOL))  /* start of a mouse area selection */
     {
       static int onetime=0;
       if(mx != mx_save || my != my_save) {
@@ -217,12 +217,14 @@ int callback(int event, int mx, int my, KeySym key,
       }
     }
  
-    if((state & Button1Mask)  && (state & Mod1Mask) && !(state & ShiftMask)) { /* 20150927 unselect area */
+    if((state & Button1Mask)  && (state & Mod1Mask) && !(state & ShiftMask) &&
+       !(ui_state & STARTPAN2) && !(ui_state & PLACE_SYMBOL)) { /* 20150927 unselect area */
       if( !(ui_state & STARTSELECT)) {
         select_rect(BEGIN,0);
       }
     }
-    else if((state&Button1Mask) && (state & ShiftMask)) {
+    else if((state&Button1Mask) && (state & ShiftMask) && !(ui_state & PLACE_SYMBOL) &&
+             !(ui_state & STARTPAN2) ) {
       if(mx != mx_save || my != my_save) {
         if( !(ui_state & STARTSELECT)) {
           select_rect(BEGIN,1);
@@ -849,12 +851,14 @@ int callback(int event, int mx, int my, KeySym key,
 
     /* place_symbol(-1,NULL,mousex_snap, mousey_snap, 0, 0, NULL,3, 1);*/
     mx_save = mx; my_save = my; /* 20070323 */
-    mx_double_save=mousex_snap;
-    my_double_save=mousey_snap;
-    place_symbol(-1,NULL,mousex_snap, mousey_snap, 0, 0, NULL, 4, 1);
-    move_objects(BEGIN,0,0,0);
-
-
+    mx_double_save = mousex_snap;
+    my_double_save = mousey_snap;
+    if(place_symbol(-1,NULL,mousex_snap, mousey_snap, 0, 0, NULL, 4, 1) ) {
+      mousey_snap = my_double_save;
+      mousex_snap = mx_double_save;
+      move_objects(BEGIN,0,0,0);
+      ui_state |= PLACE_SYMBOL;
+    }
     break;
    }
    if(key=='s' && state & Mod1Mask)                     /* reload */
@@ -1324,6 +1328,10 @@ int callback(int event, int mx, int my, KeySym key,
    if(debug_var>=1) fprintf(errfp, "callback(): ButtonPress  ui_state=%ld state=%d\n",ui_state,state);
    if(ui_state & STARTPAN2) {  /* 20121123 */
      ui_state &=~STARTPAN2;
+     mx_save = mx; my_save = my;
+     mx_double_save=mousex_snap; /* 20070322 */
+     my_double_save=mousey_snap; /* 20070322 */
+
      break;
    }
    if(button==Button5 && state == 0 ) view_unzoom(CADZOOMSTEP);
@@ -1566,6 +1574,10 @@ int callback(int event, int mx, int my, KeySym key,
   case ButtonRelease:
    if(ui_state & STARTPAN2) {
      ui_state &=~STARTPAN2;
+     mx_save = mx; my_save = my;
+     mx_double_save=mousex_snap; /* 20070322 */
+     my_double_save=mousey_snap; /* 20070322 */
+
      break;
    }
    if(debug_var>=1) fprintf(errfp, "callback(): ButtonRelease  ui_state=%ld state=%d\n",ui_state,state);

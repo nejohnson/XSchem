@@ -261,7 +261,7 @@ size_t my_strcat(int id, char **str, const char *append_str)
 size_t my_strncat(int id, char **str, size_t n, const char *append_str)
 {
  size_t s, a;
- if(debug_var>=3) fprintf(stderr,"my_strncat(%d,): str=%s  append_str=%s\n", id, *str, append_str);
+ if(debug_var>=3) fprintf(errfp,"my_strncat(%d,): str=%s  append_str=%s\n", id, *str, append_str);
  a = strlen(append_str)+1;
  if(a>n+1) a=n+1;
  if( *str != NULL)
@@ -271,7 +271,7 @@ size_t my_strncat(int id, char **str, size_t n, const char *append_str)
   my_realloc(id, str, s + a );
   memcpy(*str+s, append_str, a); /* 20180923 */
   *(*str+s+a) = '\0';
-  if(debug_var>=3) fprintf(stderr,"my_strncat(%d,): reallocated string %s\n", id, *str);
+  if(debug_var>=3) fprintf(errfp,"my_strncat(%d,): reallocated string %s\n", id, *str);
   return s + a -1;
  }
  else
@@ -280,7 +280,7 @@ size_t my_strncat(int id, char **str, size_t n, const char *append_str)
   *str = my_malloc(id,  a );
   memcpy(*str, append_str, a); /* 20180923 */
   *(*str+a) = '\0';
-  if(debug_var>=3) fprintf(stderr,"my_strncat(%d,): allocated string %s\n", id, *str);
+  if(debug_var>=3) fprintf(errfp,"my_strncat(%d,): allocated string %s\n", id, *str);
   return a -1;
  }
 }

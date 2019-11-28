@@ -787,7 +787,8 @@ void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
 /*  */
 /*  first_call: set to 1 on first invocation for a given set of symbols (same prefix) */
 /*  set to 0 on next calls, this speeds up searching for unique names in prop string */
-void place_symbol(int pos, const char *symbol_name, double x, double y, int rot, int flip, 
+/*  returns 1 if symbol successfully placed, 0 otherwise */
+int place_symbol(int pos, const char *symbol_name, double x, double y, int rot, int flip, 
                    const char *inst_props, int draw_sym, int first_call)
 /*  if symbol_name is a valid string load specified cell and */
 /*  use the given params, otherwise query user */
@@ -796,7 +797,7 @@ void place_symbol(int pos, const char *symbol_name, double x, double y, int rot,
  static char name[PATH_MAX];
  char *type;
  int cond;
- if(current_type==SYMBOL) return; /*  20161210 dont allow components placed inside symbols */
+ if(current_type==SYMBOL) return 0; /*  20161210 dont allow components placed inside symbols */
  if(symbol_name==NULL) {
    tcleval("load_file_dialog {Choose symbol} .sym INITIALINSTDIR");
    my_strncpy(name, Tcl_GetStringResult(interp), S(name));
@@ -806,9 +807,8 @@ void place_symbol(int pos, const char *symbol_name, double x, double y, int rot,
  if(debug_var>=1) fprintf(errfp, "place_symbol(): load_file_dialog returns:  name=%s\n",name);
  my_strncpy(name, rel_sym_path(name), S(name));
  if(name[0]) {
-   if(first_call) push_undo(); /*  20150327 */
- } else  return;
-
+   if(first_call) push_undo();
+ } else  return 0;
  i=match_symbol(name);
 
  if(i!=-1)
@@ -882,12 +882,16 @@ void place_symbol(int pos, const char *symbol_name, double x, double y, int rot,
     drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
     drawtemparc(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
     select_element(n, SELECTED,0);
+    ui_state |= SELECTION;
     drawtemparc(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0, 0.0);
     drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
     drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
+    need_rebuild_selected_array = 1; /* 20191127 */
+    rebuild_selected_array();
   }
 
  }
+ return 1;
 }
 
 void symbol_in_new_window(void)

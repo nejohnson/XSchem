@@ -528,7 +528,7 @@ proc myload_set_home {dir} {
   }
 }
 
-proc load_file_dialog {{msg {}}  {ext {}} {global_initdir {INITIALINSTDIR}}} {
+proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
   global myload_index1 myload_files2 myload_files1 myload_retval myload_dir1 pathlist
   global myload_default_geometry myload_sash_pos myload_yview
   upvar #0 $global_initdir initdir
@@ -550,7 +550,7 @@ proc load_file_dialog {{msg {}}  {ext {}} {global_initdir {INITIALINSTDIR}}} {
   panedwindow  .myload.l -orient horizontal
 
   frame .myload.l.paneleft
-  listbox .myload.l.paneleft.list -listvariable myload_files1 -width 60 -height 12\
+  listbox .myload.l.paneleft.list -listvariable myload_files1 -width 20 -height 18\
     -yscrollcommand ".myload.l.paneleft.yscroll set" -selectmode browse \
     -xscrollcommand ".myload.l.paneleft.xscroll set"
   scrollbar .myload.l.paneleft.yscroll -command ".myload.l.paneleft.list yview" 
@@ -572,7 +572,7 @@ proc load_file_dialog {{msg {}}  {ext {}} {global_initdir {INITIALINSTDIR}}} {
 
   frame .myload.l.paneright
   frame .myload.l.paneright.pre -background white -width 200 -height 200
-  listbox .myload.l.paneright.list  -listvariable myload_files2 -width 30 -height 12\
+  listbox .myload.l.paneright.list  -listvariable myload_files2 -width 20 -height 18\
     -yscrollcommand ".myload.l.paneright.yscroll set" -selectmode browse \
     -xscrollcommand ".myload.l.paneright.xscroll set"
   scrollbar .myload.l.paneright.yscroll -command ".myload.l.paneright.list yview"
@@ -2640,6 +2640,7 @@ font configure Underline-Font -underline true -size 24
         }
    .menubar.zoom.menu add command -label "Symbol visible layers"  -accelerator {} -command {
            select_layers
+           xschem redraw
         }
    .menubar.zoom.menu add command -label "Change Current Layer color"  -accelerator {} -command {
            change_color

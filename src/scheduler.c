@@ -258,11 +258,25 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
 
  else if(!strcmp(argv[1],"place_symbol"))
  {
+   int ret;
    semaphore++;
-   if(semaphore < 2) {
-     place_symbol(-1,NULL,0.0, 0.0, 0, 0, NULL, 7, 1);
-     move_objects(BEGIN,0,0,0);
+   mx_double_save = mousex_snap;
+   my_double_save = mousey_snap;
+   if(argc == 4) {
+     ret = place_symbol(-1,argv[2],mousex_snap, mousey_snap, 0, 0, argv[3], 4, 1);
+   } else if(argc == 3) {
+     ret = place_symbol(-1,argv[2],mousex_snap, mousey_snap, 0, 0, NULL, 4, 1);
+   } else {
+     ret = place_symbol(-1,NULL,mousex_snap, mousey_snap, 0, 0, NULL, 4, 1);
    }
+
+   if(ret) {
+     mousey_snap = my_double_save;
+     mousex_snap = mx_double_save;
+     move_objects(BEGIN,0,0,0);
+     ui_state |= PLACE_SYMBOL;
+   }
+
    semaphore--;
  }
 

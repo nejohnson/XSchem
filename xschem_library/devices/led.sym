@@ -3,7 +3,7 @@ G {type=diode
 format="@spiceprefix@name @pinlist @model"
 tedax_format="footprint @name @footprint
 device @name @device"
-template="name=x1 model=XXX device=XXX"}
+template="name=X1 model=XXX device=XXX"}
 V {}
 S {}
 E {}

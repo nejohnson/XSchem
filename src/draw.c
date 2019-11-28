@@ -585,7 +585,7 @@ void draw_temp_symbol_outline(int what, GC gc, int n,int layer,int tmp_flip, int
  int customfont;
  #endif
 
- if(layer != PINLAYER && !enable_layer[layer] ) return;
+ /* if(layer != PINLAYER && !enable_layer[layer] ) return; */
  if(!has_x) return;
  if(layer==0) { /* 20150424 */
    x1=X_TO_SCREEN(inst_ptr[n].x1+xoffset); /* 20150729 added xoffset, yoffset */

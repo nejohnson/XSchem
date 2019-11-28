@@ -1,7 +1,7 @@
 v {xschem version=2.9.5_RC5 file_version=1.1}
 G {type=tline
 format="@name @pinlist TD=@TD Z0=@Z0"
-template="name=t1 TD=4n Z0=50"}
+template="name=T1 TD=4n Z0=50"}
 V {}
 S {}
 E {}

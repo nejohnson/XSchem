@@ -5,7 +5,12 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device"
 verilog_ignore=true
-template="name=C1 m=1 value=1p footprint=1206 device=\\"ceramic capacitor\\""}
+template="name=C1
+m=1
+value=1p
+footprint=1206
+device=\\"ceramic capacitor\\""
+}
 V {}
 S {}
 E {}

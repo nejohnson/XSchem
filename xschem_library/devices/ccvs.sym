@@ -1,7 +1,7 @@
 v {xschem version=2.9.5_RC5 file_version=1.1}
 G {type=vcvs
 format="@name @pinlist @vnam @value"
-template="name=h1 vnam=v1 value=1"}
+template="name=H1 vnam=v1 value=1"}
 V {}
 S {}
 E {}

@@ -809,7 +809,6 @@ void move_objects(int what, int merge, double dx, double dy)
  char  *textfont;
  #endif
 
-
  if(what & BEGIN)
  {
   rotatelocal=0; /*20171208 */
@@ -829,7 +828,8 @@ void move_objects(int what, int merge, double dx, double dy)
  {
   draw_selection(gctiled,0);
   rot=flip=deltax=deltay=0;
-  ui_state&=~STARTMOVE;
+  ui_state &= ~STARTMOVE;
+  ui_state &= ~PLACE_SYMBOL;
  }
  if(what & RUBBER)                              /* abort operation */
  {
@@ -863,8 +863,12 @@ void move_objects(int what, int merge, double dx, double dy)
   prepared_netlist_structs=0;
   prepared_hilight_structs=0;
 
-  if(! ( ui_state & STARTMERGE) ) push_undo(); /* 20150327 push_undo */
-
+  
+  if( !(ui_state & (STARTMERGE | PLACE_SYMBOL)) ) {
+    if(debug_var>=1) fprintf(errfp, "move_objects(): push undo state\n");
+    push_undo(); /* 20150327 push_undo */
+  }
+  ui_state &= ~PLACE_SYMBOL;
   if(dx!=0.0 || dy!=0.0) {
     deltax = dx;
     deltay = dy;

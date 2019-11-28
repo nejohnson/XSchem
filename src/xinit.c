@@ -1092,7 +1092,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
     /* 
     if (!XMatchVisualInfo(
         display, XDefaultScreen(display), 24, TrueColor, &vinfo)
-    ) return fprintf(stderr, "no 32 bit visual\n");
+    ) return fprintf(errfp, "no 32 bit visual\n");
     visual = vinfo.visual;
     */
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done step b of xinit()\n");

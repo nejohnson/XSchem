@@ -598,42 +598,39 @@ void select_element(int i,unsigned short select_mode, int fast)
   }
   if( !fast )
   {
-
-   /* 20190526 */ /*Why this? 20191125 commented. slow down on big schematics */
-   /* prepare_netlist_structs(0); */
-
-   my_snprintf(str, S(str), "selected element %d: %s properties: %s", i, inst_ptr[i].name,s);
-   statusmsg(str,2);
-   my_snprintf(str, S(str), "symbol .name=%s", inst_ptr[i].name==NULL?"(null)":inst_ptr[i].name);
-   statusmsg(str,2);
-   for(j=0;j< (inst_ptr[i].ptr+instdef)->rects[PINLAYER] ;j++) 
-   {
-    if(debug_var>=1) fprintf(errfp, "i=%d, inst_prop[i].node=%p\n", i, (void *)inst_ptr[i].node);
-    /*                                         --------20170323 check prop_ptr---------------------------- */
-    if(inst_ptr[i].node && inst_ptr[i].node[j] && (inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][j].prop_ptr)
-    {
-     my_snprintf(str, S(str), "pin:%s -> %s", 
-       get_tok_value(
-          (inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][j].prop_ptr,"name",0) ,
-       inst_ptr[i].node[j]);
-     statusmsg(str,2);
+    my_snprintf(str, S(str), "selected element %d: %s properties: %s", i, inst_ptr[i].name,s);
+    statusmsg(str,2);
+    my_snprintf(str, S(str), "symbol .name=%s", inst_ptr[i].name==NULL?"(null)":inst_ptr[i].name);
+    statusmsg(str,2);
+    /* 20190526 */ /*Why this? 20191125 only on small schematics. slow down on big schematics */
+    if(lastinst < 30000) {
+      prepare_netlist_structs(0);
+      for(j=0;j< (inst_ptr[i].ptr+instdef)->rects[PINLAYER] ;j++) 
+      {
+        if(inst_ptr[i].node && (inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][j].prop_ptr)
+        {
+          my_snprintf(str, S(str), "pin:%s -> %s", 
+            get_tok_value(
+               (inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][j].prop_ptr,"name",0) ,
+            inst_ptr[i].node[j] ? inst_ptr[i].node[j] : "<UNCONNECTED_PIN>");
+          statusmsg(str,2);
+        }
+      }
     }
-   }
-   my_snprintf(str, S(str), "n=%4d x = %.16g  y = %.16g  w = %.16g h = %.16g",i, inst_ptr[i].xx1, inst_ptr[i].yy1,
-      inst_ptr[i].xx2-inst_ptr[i].xx1, inst_ptr[i].yy2-inst_ptr[i].yy1
-   );
-   statusmsg(str,1);
-
+    my_snprintf(str, S(str), "n=%4d x = %.16g  y = %.16g  w = %.16g h = %.16g",i, inst_ptr[i].xx1, inst_ptr[i].yy1,
+       inst_ptr[i].xx2-inst_ptr[i].xx1, inst_ptr[i].yy2-inst_ptr[i].yy1
+    );
+    statusmsg(str,1);
   }
   inst_ptr[i].sel = select_mode;
   if(select_mode) {
-   for(c=0;c<cadlayers;c++) {
-    draw_temp_symbol_outline(ADD, gc[SELLAYER], i,c,0,0,0.0,0.0);
-   }
+    for(c=0;c<cadlayers;c++) {
+      draw_temp_symbol_outline(ADD, gc[SELLAYER], i,c,0,0,0.0,0.0);
+    }
   } else {
-   for(c=0;c<cadlayers;c++) {
-    draw_temp_symbol_outline(NOW, gctiled, i,c,0,0,0.0,0.0);
-   }
+    for(c=0;c<cadlayers;c++) {
+      draw_temp_symbol_outline(NOW, gctiled, i,c,0,0,0.0,0.0);
+    }
   }
   need_rebuild_selected_array=1;
 }

@@ -555,7 +555,6 @@ proc load_file_dialog {{msg {}}  {ext {}} {global_initdir {INITIALINSTDIR}}} {
     -xscrollcommand ".myload.l.paneleft.xscroll set"
   scrollbar .myload.l.paneleft.yscroll -command ".myload.l.paneleft.list yview" 
   scrollbar .myload.l.paneleft.xscroll -command ".myload.l.paneleft.list xview" -orient horiz
-  .myload.l.paneleft.list xview moveto 1
   pack  .myload.l.paneleft.yscroll -side right -fill y
   pack  .myload.l.paneleft.xscroll -side bottom -fill x
   pack  .myload.l.paneleft.list -fill both -expand true
@@ -635,8 +634,6 @@ proc load_file_dialog {{msg {}}  {ext {}} {global_initdir {INITIALINSTDIR}}} {
   }
   bind .myload <Escape> { set myload_retval {}; destroy .myload}
 
-
-  update
   if { [info exists myload_default_geometry]} {
      wm geometry .myload "${myload_default_geometry}"
   }
@@ -645,15 +642,18 @@ proc load_file_dialog {{msg {}}  {ext {}} {global_initdir {INITIALINSTDIR}}} {
     eval .myload.l sash mark 0 [.myload.l sash coord 0]
     eval .myload.l sash dragto 0 [subst $myload_sash_pos]
   }
+  update
   if { [ info exists myload_yview]} {
     eval .myload.l.paneright.yscroll set [subst $myload_yview]
   }
-
+  .myload.l.paneleft.list xview moveto 1
   bind .myload <Configure> {
     set myload_sash_pos [.myload.l sash coord 0]
     set myload_default_geometry [wm geometry .myload]
-    regsub {\+.*} $myload_default_geometry {} myload_default_geometry
+    .myload.l.paneleft.list xview moveto 1
+    # regsub {\+.*} $myload_default_geometry {} myload_default_geometry
   }
+
   bind .myload.l.paneright.yscroll <Motion> {
     set myload_yview [.myload.l.paneright.list yview]
   }
@@ -1442,7 +1442,7 @@ proc change_color {} {
 }
 
 proc edit_prop {txtlabel} {
-   global edit_prop_default_geometry
+   global edit_prop_default_geometry infowindow_text
    global prev_symbol retval symbol rcode rbutton1 rbutton2 copy_cell tcl_debug editprop_semaphore
    global user_wants_copy_cell editprop_sympath
    set user_wants_copy_cell 0

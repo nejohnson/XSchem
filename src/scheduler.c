@@ -30,12 +30,15 @@ void statusmsg(char str[],int n)
  tclsetvar("infowindow_text", str);
  if(n==2)
  {
-  if(debug_var>=3) fprintf(errfp, "statusmsg(): %s\n", s);
+  if(debug_var>=3) fprintf(errfp, "statusmsg(): n = 2, s = %s\n", s);
   tcleval("infowindow");
  }
  else
  {
   my_snprintf(s, S(s), ".statusbar.1 configure -text $infowindow_text", str);
+  if(debug_var>=3) fprintf(errfp, "statusmsg(): n = %d, %s\n", n, s);
+  if(debug_var>=3) fprintf(errfp, "           --> $infowindow_text = %s\n", tclgetvar("infowindow_text"));
+
   tcleval(s);  
  }
 }

@@ -83,7 +83,7 @@ proc get_diff_voltage {arr p m } {
   if { ! [info exists var([string tolower $mm])] } {
     set mm $m
   }
-  return [format %.4e [expr $var([string tolower $pp]) - $var([string tolower $mm]) ] ]
+  return [format %.4g [expr $var([string tolower $pp]) - $var([string tolower $mm]) ] ]
   # return DELETE
 }
 

@@ -159,13 +159,13 @@ footprint=CRYSTAL 300
 device=CRYSTAL}
 C {capa.sym} 1050 -1380 3 1 {name=C5
 m=1
-value=1p
-footprint=1206
+value=30p
+footprint=sm1206
 device="ceramic capacitor"}
 C {capa.sym} 870 -1380 1 0 {name=C4
 m=1
-value=1p
-footprint=1206
+value=30p
+footprint=sm1206
 device="ceramic capacitor"}
 C {gnd.sym} 1080 -1380 0 0 {name=l3 lab=GND}
 C {gnd.sym} 840 -1380 0 1 {name=l4 lab=GND}

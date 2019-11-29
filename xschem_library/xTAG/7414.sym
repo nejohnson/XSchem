@@ -6,7 +6,7 @@ tedax_format="footprint @name @footprint
 device @name @symname"
 template="name=U1
 device=7414
-footprint=\\"dip(14)\\"
+footprint=SO14"
 risedel=100
 falldel=200
 numslots=6 

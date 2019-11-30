@@ -2013,6 +2013,7 @@ void place_text(int draw_text, double mx, double my)
   #endif
 
   tclsetvar("props","");
+  tclsetvar("txt","");
 
   if(tclgetvar("hsize")==NULL)
    tclsetvar("hsize","0.4");

@@ -1920,7 +1920,6 @@ int text_bbox(char *str, double xscale, double yscale,
   double ww, hh;
 
   if(!has_x) return 0;
-  if(!str) return 0;
   size = (xscale+yscale)*26.*cairo_font_scale;
 
   /*  if(size*mooz>800.) { */
@@ -1934,7 +1933,7 @@ int text_bbox(char *str, double xscale, double yscale,
   cairo_longest_line=0;
   cairo_lines=1;
   str_ptr = str;
-  while( str[c] ) {
+  while( str && str[c] ) {
     if(str[c] == '\n') {
       str[c]='\0';
       hh++;
@@ -1954,7 +1953,7 @@ int text_bbox(char *str, double xscale, double yscale,
     }
     c++;
   }
-  if(str_ptr[0]!='\0') {
+  if(str_ptr && str_ptr[0]!='\0') {
     cairo_text_extents(ctx, str_ptr, &ext);
     if(ext.x_advance > ww) ww= ext.x_advance;
   }

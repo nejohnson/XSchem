@@ -1,6 +1,10 @@
 v {xschem version=2.9.5_RC6 file_version=1.1}
 G {type=regulator
 format="@spiceprefix@name @pinlist @symname"
+
+tedax_format="footprint @name @footprint
+device @name @symname"
+
 template="name=U1 device=MAX882 footprint=SO8"}
 V {}
 S {}
@@ -19,7 +23,7 @@ B 5 -202.5 37.5 -197.5 42.5 {name=LBI dir=in pinnumber=8}
 B 5 197.5 -42.5 202.5 -37.5 {name=LBO dir=out pinnumber=1}
 B 5 197.5 37.5 202.5 42.5 {name=OUT dir=out pinnumber=4}
 B 5 -122.5 137.5 -117.5 142.5 {name=SET dir=inout pinnumber=2}
-B 5 77.5 137.5 82.5 142.5 {name=GND1 dir=inout pinnumber=3}
+B 5 77.5 137.5 82.5 142.5 {name=GND dir=inout pinnumber=3}
 B 5 117.5 137.5 122.5 142.5 {name=GND dir=inout pinnumber=6}
 P 4 5 -160 -100 160 -100 160 100 -160 100 -160 -100 {}
 T {STBY_} -149 -49.6 0 0 0.4 0.4 {}

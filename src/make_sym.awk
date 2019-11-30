@@ -67,6 +67,7 @@ function beginfile(f)
  text_voffset=20
  lab_voffset=4
  ip=op=n_pin=0
+ print "v {xschem version=2.9.5_RC6 file_version=1.1}" > sym
  if(template=="") {
   printf "%s", "G {type=subcircuit\nformat=\"@name @pinlist @symname\"\n"  >sym
   printf "%s\n", "template=\"name=x1\""  >sym
@@ -78,9 +79,69 @@ function beginfile(f)
  
 
 }
- 
 
+
+/^C \{.*generic_pin(\.sym)?\}/{
+  get_end_line()
+  process_line()
+  type_pin[n_pin]=generic_type
+  dir_pin[n_pin]="generic"
+  y_pin[n_pin] = $4+0 # y coordinate of pin 20140519
+  index_pin[n_pin] = n_pin # one level indirection for sorting pins 20140519
+  value_pin[n_pin]=value
+  label_pin[n_pin] = pin_label
+  n_pin++
+  ip++
+}
+
+/^C \{.*ipin(\.sym)?\}/{
+  get_end_line()
+  process_line()
+  type_pin[n_pin]=sig_type
+  verilog_pin[n_pin]=verilog_type
+  dir_pin[n_pin]="ipin"
+  y_pin[n_pin] = $4+0 # y coordinate of pin 20140519
+  index_pin[n_pin] = n_pin # one level indirection 20140519
+  value_pin[n_pin]=value
+  label_pin[n_pin] = pin_label
+  n_pin++
+  ip++
+}
+
+$0 ~ /^C \{.*opin(\.sym)?\}/ && $0 !~ /^C \{.*iopin(\.sym)?\}/ {
+  get_end_line()
+  process_line()
+  type_pin[n_pin]=sig_type
+  verilog_pin[n_pin]=verilog_type
+  dir_pin[n_pin]="opin"
+  y_pin[n_pin] = $4+0 # y coordinate of pin 20140519
+  index_pin[n_pin] = n_pin # one level indirection 20140519
+  value_pin[n_pin]=value
+  label_pin[n_pin] = pin_label
+  n_pin++
+  op++
+}
+
+/^C \{.*iopin(\.sym)?\}/{
+  print "iopin"
+  get_end_line()
+  process_line()
+  type_pin[n_pin]=sig_type
+  verilog_pin[n_pin]=verilog_type
+  dir_pin[n_pin]="iopin"
+  y_pin[n_pin] = $4+0 # y coordinate of pin 20140519
+  index_pin[n_pin] = n_pin # one level indirection 20140519
+  value_pin[n_pin]=value
+  label_pin[n_pin] = pin_label
+  n_pin++
+  op++
+}
+
+
+
+function process_line()
 {
+ print "process_line"
  sig_type=""  #20070726    # "std_logic"
  verilog_type= ""  # 20070726   "wire" #09112003
  pin_label=""
@@ -124,7 +185,7 @@ function beginfile(f)
   if(value ~ /value="/) 
   {
    sub(/^.*value="/,"",value)
-   value= "\"" substr(value,1, match(value, /[^\\]\"/)  ) "\""
+   value= "\"" substr(value,1, match(value, /[^\\]"/)  ) "\""
   }
   else
   {
@@ -132,78 +193,21 @@ function beginfile(f)
    sub(/[ }].*$/,"",value)
   }
  }
-# print "lab=" lab " sig_type=" sig_type " type=" type " value=" value
+ # print "process_line: returning:" $0
+ # print "process_line: pin_label=" pin_label " verilog_type=" verilog_type
 }
 
-
-
-
-#   {
-#    sig_type=""
-#    for(i=7;i<=NF;i++)
-#    {
-#     if($i ~ /lab=/)
-#     {
-#      pin_label=$i
-#      sub("lab=","",pin_label)
-#      sub("}","",pin_label)
-#     }
-#     if($i ~ /sig_type=/)
-#     {
-#      sig_type=$i
-#      sub("sig_type=","",sig_type)
-#      sub("}","",sig_type)
-#     }
-#    }
-#    if(sig_type=="") sig_type="std_logic"
-#    #print $0 "--> " sig_type
-#   }
-
-/^C \{.*generic_pin(\.sym)?\}/{
-  type_pin[n_pin]=generic_type
-  dir_pin[n_pin]="generic"
-  y_pin[n_pin] = $4+0 # y coordinate of pin 20140519
-  index_pin[n_pin] = n_pin # one level indirection for sorting pins 20140519
-  value_pin[n_pin]=value
-  label_pin[n_pin] = pin_label
-  n_pin++
-  ip++
-}
-
-/^C \{.*ipin(\.sym)?\}/{
-  type_pin[n_pin]=sig_type
-  verilog_pin[n_pin]=verilog_type
-  dir_pin[n_pin]="ipin"
-  y_pin[n_pin] = $4+0 # y coordinate of pin 20140519
-  index_pin[n_pin] = n_pin # one level indirection 20140519
-  value_pin[n_pin]=value
-  label_pin[n_pin] = pin_label
-  n_pin++
-  ip++
-}
-
-$0 ~ /^C \{.*opin(\.sym)?\}/ && $0 !~ /^C \{.*iopin(\.sym)?\}/ {
-  type_pin[n_pin]=sig_type
-  verilog_pin[n_pin]=verilog_type
-  dir_pin[n_pin]="opin"
-  y_pin[n_pin] = $4+0 # y coordinate of pin 20140519
-  index_pin[n_pin] = n_pin # one level indirection 20140519
-  value_pin[n_pin]=value
-  label_pin[n_pin] = pin_label
-  n_pin++
-  op++
-}
-
-/^C \{.*iopin(\.sym)?\}/{
-  type_pin[n_pin]=sig_type
-  verilog_pin[n_pin]=verilog_type
-  dir_pin[n_pin]="iopin"
-  y_pin[n_pin] = $4+0 # y coordinate of pin 20140519
-  index_pin[n_pin] = n_pin # one level indirection 20140519
-  value_pin[n_pin]=value
-  label_pin[n_pin] = pin_label
-  n_pin++
-  op++
+## join lines like this:
+## C {ipin.sym} ........ {lab=xxx
+## verilog_type=reg}
+function get_end_line()
+{
+  print "get_end_line"
+  while($0 !~ /\}[ \t]*$/) {
+    a=$0
+    getline
+    $0 = a " " $0
+  }
 }
 
 function endfile(f) {

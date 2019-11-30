@@ -18,6 +18,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 (C) 2001 Stefan Petersen (spe@stacken.kth.se)
 } 20 -310 0 0 0.3 0.3 {}
+T {Place one near each VCC pin for U1} 1670 -1210 0 0 0.4 0.4 {}
 N 840 -1300 840 -1270 {lab=V3_3}
 N 800 -1300 840 -1300 {lab=V3_3}
 N 720 -1300 720 -1270 {lab=V3_3}
@@ -272,7 +273,7 @@ m=1}
 C {gnd.sym} 1770 -1130 0 0 {name=l18 lab=GND}
 C {vdd.sym} 1490 -1240 0 0 {name=l19 lab=V3_3}
 C {vdd.sym} 1590 -1240 0 0 {name=l20 lab=V3_3}
-C {conn_10x2.sym} 1590 -690 3 0 {name=CONN1 footprint=connector(8,1)}
+C {conn_10x2.sym} 1590 -690 3 0 {name=CONN1 footprint="connector 10 2"}
 C {vdd.sym} 1730 -750 0 0 {name=l21 lab=V3_3}
 C {gnd.sym} 1790 -730 0 0 {name=l22 lab=GND}
 C {ipin.sym} 1790 -530 0 1 {name=p4 lab=tdo_ttl}

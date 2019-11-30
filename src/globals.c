@@ -79,6 +79,7 @@ int check_version = 0; /* if set ensures 'v' version header line is present befo
 unsigned short enable_stretch=0;
 int cadlayers=0;
 int *enable_layer;
+int n_active_layers=0;
 int need_rebuild_selected_array=1;
 Window window; /* window is the drawing area, topwindow is the root win */
 Window pre_window; /* preview when opening files */

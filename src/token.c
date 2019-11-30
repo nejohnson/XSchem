@@ -2171,6 +2171,7 @@ char *find_nth(char *str, char sep, int n)
 
 /* substitute given tokens in a string with their corresponding values */
 /* ex.: name=@name w=@w l=@l ---> name=m112 w=3e-6 l=0.8e-6 */
+/* if s==NULL return emty string */
 char *translate(int inst, char* s)
 {
  static char *result=NULL;
@@ -2190,11 +2191,12 @@ char *translate(int inst, char* s)
  size=CADCHUNKALLOC;
  if(result==NULL) result=my_malloc(526, size);
  else my_realloc(527, &result,size);
+ result[0]='\0';
 
-  if(debug_var>=2) fprintf(errfp, "translate(): substituting props in <%s>, instance <%s>\n",
+ if(debug_var>=2) fprintf(errfp, "translate(): substituting props in <%s>, instance <%s>\n",
         s?s:"NULL",inst_ptr[inst].instname?inst_ptr[inst].instname:"NULL");
 
- while(1)
+ while(s)
  {
   c=*s++; 
   
@@ -2411,6 +2413,7 @@ char *translate(int inst, char* s)
    return result;
   }
  }
+ return result;
 }
 
 

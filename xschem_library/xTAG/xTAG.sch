@@ -25,13 +25,13 @@ N 430 -460 670 -460 {lab=tck_ttl}
 N 430 -480 670 -480 {lab=tms_ttl}
 N 430 -500 670 -500 {lab=tdo_ttl}
 N 430 -520 670 -520 {lab=tdi_ttl}
-N 780 -750 1020 -750 {lab=reset_}
-N 1020 -750 1020 -520 {lab=reset_}
+N 780 -750 1020 -750 {lab=pon_reset_}
+N 1020 -750 1020 -520 {lab=pon_reset_}
 N 970 -480 1080 -480 {lab=usb_iop}
 N 970 -440 1080 -440 {lab=usb_iom}
 N 1230 -780 1230 -580 {lab=usb_power}
 N 780 -780 1230 -780 {lab=usb_power}
-N 970 -520 1020 -520 {lab=reset_}
+N 970 -520 1020 -520 {lab=pon_reset_}
 C {xTAG-psu.sym} 630 -780 0 0 {name=x4}
 C {xTAG-jtagio.sym} 280 -480 0 0 {name=x2}
 C {lab_pin.sym} 280 -780 0 0 {name=l4 sig_type=std_logic lab=jtag_power}
@@ -45,5 +45,5 @@ C {xTAG-consio.sym} 1230 -480 0 0 {name=x3}
 C {title.sym} 160 -30 0 0 {name=l1 author="Stefan Schippers"}
 C {lab_wire.sym} 1060 -480 0 0 {name=p2 lab=usb_iop}
 C {lab_wire.sym} 1060 -440 0 0 {name=p3 lab=usb_iom}
-C {lab_pin.sym} 1020 -750 0 1 {name=l2 lab=reset_}
+C {lab_pin.sym} 1020 -750 0 1 {name=l2 lab=pon_reset_}
 C {lab_pin.sym} 1230 -780 0 1 {name=p5 lab=usb_power}

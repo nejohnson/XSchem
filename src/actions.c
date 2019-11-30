@@ -606,10 +606,14 @@ void enable_layers(void)
 {
   int i;
   char tmp[50];
+  n_active_layers = 0;
   for(i = 0; i< cadlayers; i++) {
     my_snprintf(tmp, S(tmp), "enable_layer(%d)",i);
     if(tclgetvar(tmp)[0] == '0') enable_layer[i] = 0;
-    else enable_layer[i] = 1;
+    else {
+      enable_layer[i] = 1;
+      if(i>=7) n_active_layers++;
+    }
   }
 }
 void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */

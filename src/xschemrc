@@ -36,6 +36,7 @@
 # append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/xschem_library/devices
 # append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/logic
 # append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/examples
+# append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/binto7seg
 # append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/xTAG
 # append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/ngspice
 # append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/pcb

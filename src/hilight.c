@@ -273,9 +273,23 @@ int bus_search(const char*s)
  return bus;
 }
 
+int get_color(int value) 
+{
+  int x, y, i;
+
+  x = 7+value%(n_active_layers);
+  for(y = i = 7; i< cadlayers; i++) {
+    if(!enable_layer[i]) continue;
+    if(y == x) break;
+    y++;
+  } 
+  return i >= cadlayers ? cadlayers - 1 : i;
+}
+
+
 void search(const char *tok, const char *val, int sub, int sel, int what)
 {
- int save_draw;
+ int save_draw, hilight_layer;
  int i,c, col = 7,tmp,bus=0;
  const char *str;
  char *type; 
@@ -301,6 +315,7 @@ void search(const char *tok, const char *val, int sub, int sel, int what)
    
     if(!sel) { /* 20190525 */
       col=hilight_color;
+      hilight_layer = get_color(col);
       if(incr_hilight) hilight_color++;
     }
     has_token = 0;
@@ -343,14 +358,14 @@ void search(const char *tok, const char *val, int sub, int sel, int what)
               ) {
               if(!bus_hilight_lookup(str, col,0)) hilight_nets = 1;
               if(what==NOW) for(c=0;c<cadlayers;c++)
-                draw_symbol_outline(NOW,col%(cadlayers-7)+7, i,c,0,0,0.0,0.0);
+                draw_symbol_outline(NOW, hilight_layer, i,c,0,0,0.0,0.0);
             }
             else {
               if(debug_var>=1) fprintf(errfp, "search(): setting hilight flag on inst %d\n",i);
               hilight_nets=1;
               inst_ptr[i].flags |= 4;
               if(what==NOW) for(c=0;c<cadlayers;c++)
-                draw_symbol_outline(NOW,col%(cadlayers-7)+7, i,c,0,0,0.0,0.0);  /* 20150804 */
+                draw_symbol_outline(NOW, hilight_layer, i,c,0,0,0.0,0.0);  /* 20150804 */
             }
           }
           if(sel==1) {
@@ -377,17 +392,17 @@ void search(const char *tok, const char *val, int sub, int sel, int what)
               bus_hilight_lookup(str, col, 0);
               if(what == NOW) {
                 if(wire[i].bus) /* 20171201 */
-                  drawline(7+col%(cadlayers-7), THICK,
+                  drawline(hilight_layer, THICK,
                      wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
                 else
-                  drawline(7+col%(cadlayers-7), NOW,
+                  drawline(hilight_layer, NOW,
                      wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
                 if(CADHALFDOTSIZE*mooz>=0.7) {
                   if( wire[i].end1 >1 ) {
-                    filledarc(7+col%(cadlayers-7), NOW, wire[i].x1, wire[i].y1, CADHALFDOTSIZE, 0, 360);
+                    filledarc(hilight_layer, NOW, wire[i].x1, wire[i].y1, CADHALFDOTSIZE, 0, 360);
                   }
                   if( wire[i].end2 >1 ) {
-                    filledarc(7+col%(cadlayers-7), NOW, wire[i].x2, wire[i].y2, CADHALFDOTSIZE, 0, 360);
+                    filledarc(hilight_layer, NOW, wire[i].x2, wire[i].y2, CADHALFDOTSIZE, 0, 360);
                   }
                 }
               }
@@ -681,17 +696,17 @@ void draw_hilight_net(int on_window)
     if(str[0]) {
       if( (entry = bus_hilight_lookup(str, 0,2)) ) {
         if(wire[i].bus) /* 20171201 */
-          drawline(7+entry->value%(cadlayers-7), THICK,
+          drawline(get_color(entry->value), THICK,
              wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
         else
-          drawline(7+entry->value%(cadlayers-7), NOW,
+          drawline(get_color(entry->value), NOW,
              wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
         if(CADHALFDOTSIZE*mooz>=0.7) {
           if( wire[i].end1 >1 ) { /* 20150331 draw_dots */
-            filledarc(7+entry->value%(cadlayers-7), NOW, wire[i].x1, wire[i].y1, CADHALFDOTSIZE, 0, 360);
+            filledarc(get_color(entry->value), NOW, wire[i].x1, wire[i].y1, CADHALFDOTSIZE, 0, 360);
           }
           if( wire[i].end2 >1 ) { /* 20150331 draw_dots */
-            filledarc(7+entry->value%(cadlayers-7), NOW, wire[i].x2, wire[i].y2, CADHALFDOTSIZE, 0, 360);
+            filledarc(get_color(entry->value), NOW, wire[i].x2, wire[i].y2, CADHALFDOTSIZE, 0, 360);
           }
         }
       }
@@ -702,17 +717,17 @@ void draw_hilight_net(int on_window)
     if(str[0]) {
       if( (entry = bus_hilight_lookup(str, 0,2)) ) {
         if(wire[i].bus) /* 20171201 */
-          drawline(7+entry->value%(cadlayers-7), THICK,
+          drawline(get_color(entry->value), THICK,
              wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
         else
-          drawline(7+entry->value%(cadlayers-7), NOW,
+          drawline(get_color(entry->value), NOW,
              wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
         if(CADHALFDOTSIZE*mooz>=0.7) {
           if( wire[i].end1 >1 ) { /* 20150331 draw_dots */
-            filledarc(7+entry->value%(cadlayers-7), NOW, wire[i].x1, wire[i].y1, CADHALFDOTSIZE, 0, 360);
+            filledarc(get_color(entry->value), NOW, wire[i].x1, wire[i].y1, CADHALFDOTSIZE, 0, 360);
           }
           if( wire[i].end2 >1 ) { /* 20150331 draw_dots */
-            filledarc(7+entry->value%(cadlayers-7), NOW, wire[i].x2, wire[i].y2, CADHALFDOTSIZE, 0, 360);
+            filledarc(get_color(entry->value), NOW, wire[i].x2, wire[i].y2, CADHALFDOTSIZE, 0, 360);
           }
         }
       }
@@ -744,7 +759,7 @@ void draw_hilight_net(int on_window)
         if( inst_ptr[i].node && inst_ptr[i].node[j]) {
           entry=bus_hilight_lookup(inst_ptr[i].node[j], 0, 2);
           if(entry) {
-            inst_color[i]=7+entry->value%(cadlayers-7);
+            inst_color[i]=get_color(entry->value);
             break;
           }
         }
@@ -756,7 +771,7 @@ void draw_hilight_net(int on_window)
     )
   {
    entry=bus_hilight_lookup( get_tok_value(inst_ptr[i].prop_ptr,"lab",0) , 0, 2 );
-   if(entry) inst_color[i]=7+entry->value%(cadlayers-7);
+   if(entry) inst_color[i]=get_color(entry->value);
   }
  }
 
@@ -863,7 +878,7 @@ void undraw_hilight_net(int on_window) /* 20160413 */
     )
   {
    entry=bus_hilight_lookup( get_tok_value(inst_ptr[i].prop_ptr,"lab",0) , 0, 2 );
-   if(entry) inst_color[i]=7+entry->value%(cadlayers-7);
+   if(entry) inst_color[i]=get_color(entry->value);
   }
   else if( inst_ptr[i].flags & 4) {
     inst_color[i]=PINLAYER;

@@ -137,6 +137,7 @@ install: xschem
 	cp -r ../doc/* $(prefix)/share/doc/xschem/
 	cp ./utile/* $(prefix)/share/xschem/utile
 	cp -ru ../xschem_library/devices/* $(system_library_dir)
+	cp -ru ../xschem_library/binto7seg $(prefix)/share/doc/xschem/
 	cp -ru ../xschem_library/examples $(prefix)/share/doc/xschem/
 	cp -ru ../xschem_library/xTAG $(prefix)/share/doc/xschem/
 	cp -ru ../xschem_library/ngspice $(prefix)/share/doc/xschem/

@@ -644,7 +644,7 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
   }
   update
   if { [ info exists myload_yview]} {
-    eval .myload.l.paneright.yscroll set [subst $myload_yview]
+   .myload.l.paneright.list yview moveto  [lindex $myload_yview 0]
   }
   .myload.l.paneleft.list xview moveto 1
   bind .myload <Configure> {
@@ -662,7 +662,12 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
   set myload_dir1 [abs_sym_path [.myload.l.paneleft.list get $myload_index1]]
   set myload_files2 [lsort [glob -directory $myload_dir1 -tails \{.*,*\}]]
   myload_set_colors
+
+  bind .myload.l.paneright.list <ButtonPress> { 
+    set myload_yview [.myload.l.paneright.list yview]
+  }
   bind .myload.l.paneright.list <<ListboxSelect>> {
+    set myload_yview [.myload.l.paneright.list yview] 
     set sel [.myload.l.paneright.list curselection]
     if { $sel ne {} } {
       set myload_dir1 [abs_sym_path [.myload.l.paneleft.list get $myload_index1]]

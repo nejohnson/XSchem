@@ -1,10 +1,14 @@
-v {xschem version=2.9.5_RC5 file_version=1.1}
+v {xschem version=2.9.5_RC6 file_version=1.1}
 G {type=inductor
 format="@name @pinlist @value m=@m"
 tedax_format="footprint @name @footprint 
 value @name @value
 device @name @device"
-template="name=L1 m=1 value=1n footprint=1206 device=\\"inductor\\""}
+template="name=L1
+m=1
+value=1n
+footprint=1206
+device=inductor"}
 V {}
 S {}
 E {}

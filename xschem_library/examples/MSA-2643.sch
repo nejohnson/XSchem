@@ -6,6 +6,9 @@ E {}
 P 11 5 290 -100 290 -670 1000 -670 1000 -100 290 -100 {}
 T {Components inside green box are in package} 340 -700 0 0 0.4 0.4 {}
 T {MSA-2643} 300 -660 0 0 0.8 0.8 {layer=5}
+T {Agilent MSA-2643
+Cascadable Silicon Bipolar
+Gain Block MMIC Amplifier} 390 -940 0 0 0.9 0.9 {}
 N 500 -430 560 -430 {lab=B1}
 N 500 -430 500 -390 {lab=B1}
 N 460 -390 500 -390 {lab=B1}

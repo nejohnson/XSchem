@@ -442,6 +442,7 @@ extern int semaphore;
 extern int a3page;
 extern int manhattan_lines;
 extern int cadlayers;
+extern int *active_layer;
 extern int *enable_layer;
 extern int n_active_layers;
 extern int hilight_color;

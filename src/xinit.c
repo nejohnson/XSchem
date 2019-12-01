@@ -253,6 +253,7 @@ void xwin_exit(void)
  my_free(&rect);
  my_free(&line);
  my_free(&fill_type);
+ my_free(&active_layer);
  my_free(&pixdata);
  my_free(&enable_layer);
  my_free(&lastrect);
@@ -600,6 +601,11 @@ void alloc_data()
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
+ active_layer=my_calloc(563, cadlayers, sizeof(int));
+ if(active_layer==NULL){
+   fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
+ }
+
  pixdata=my_calloc(641, cadlayers, sizeof(char*));
  if(pixdata==NULL){
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
@@ -711,7 +717,7 @@ void preview_window(const char *what, const char *tk_win_path, const char *filen
   }
   else if(!strcmp(what, "draw")) {
     double xor, yor, z;
-    int save_mod;
+    int save_mod, save_ev;
  
     /* save context */
     xor = xorigin;
@@ -719,8 +725,11 @@ void preview_window(const char *what, const char *tk_win_path, const char *filen
     z = zoom;
     save_window = window;
     save_mod = modified;
+    save_ev = event_reporting;
+    event_reporting = 0;
     push_undo();
     currentsch++;
+    
     unselect_all();
     remove_symbols();
 
@@ -748,6 +757,7 @@ void preview_window(const char *what, const char *tk_win_path, const char *filen
     resetwin();
     change_linewidth(-1.);
     draw();
+    event_reporting = save_ev;
   }
   else if(!strcmp(what, "destroy")) {
     Tk_DestroyWindow(tkpre_window);

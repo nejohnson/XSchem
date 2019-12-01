@@ -275,21 +275,16 @@ int bus_search(const char*s)
 
 int get_color(int value) 
 {
-  int x, y, i;
+  int x;
 
-  x = 7+value%(n_active_layers);
-  for(y = i = 7; i< cadlayers; i++) {
-    if(!enable_layer[i]) continue;
-    if(y == x) break;
-    y++;
-  } 
-  return i >= cadlayers ? cadlayers - 1 : i;
+  x = value%(n_active_layers);
+  return active_layer[x];
 }
 
 
 void search(const char *tok, const char *val, int sub, int sel, int what)
 {
- int save_draw, hilight_layer;
+ int save_draw, hilight_layer = 7;
  int i,c, col = 7,tmp,bus=0;
  const char *str;
  char *type; 

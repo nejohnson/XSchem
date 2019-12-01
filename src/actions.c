@@ -612,7 +612,10 @@ void enable_layers(void)
     if(tclgetvar(tmp)[0] == '0') enable_layer[i] = 0;
     else {
       enable_layer[i] = 1;
-      if(i>=7) n_active_layers++;
+      if(i>=7) {
+        active_layer[n_active_layers] = i;
+        n_active_layers++;
+      }
     }
   }
 }

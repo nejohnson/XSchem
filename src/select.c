@@ -590,6 +590,7 @@ void select_element(int i,unsigned short select_mode, int fast)
   int c, j;
   char str[1024];       /* overflow safe */
   char s[256];          /* overflow safe */
+  if(!strcmp(get_tok_value(inst_ptr[i].prop_ptr, "lock", 0), "true") && select_mode == SELECTED) return;
   my_strncpy(s,inst_ptr[i].prop_ptr!=NULL?inst_ptr[i].prop_ptr:"<NULL>",S(s));
   if(event_reporting) { 
     char n[PATH_MAX];

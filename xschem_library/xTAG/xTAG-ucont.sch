@@ -243,7 +243,7 @@ footprint=sm0805
 device=resistor
 m=1}
 C {ipin.sym} 280 -1120 0 0 {name=p3 lab=reset_}
-C {capa.sym} 510 -1220 0 0 {name=C2
+C {capa-2.sym} 510 -1220 0 0 {name=C2
 m=1
 value=2.2u
 footprint=sm1206

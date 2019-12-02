@@ -4,7 +4,8 @@ format="@name @pinlist @value m=@m"
 verilog_format="tran @name (@@P\\\\, @@M\\\\);"
 tedax_format="footprint @name @footprint
 value @name @value
-device @name @device"
+device @name @device
+@comptag"
 template="name=R1
 value=1k
 footprint=1206

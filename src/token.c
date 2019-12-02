@@ -1494,8 +1494,7 @@ void print_tedax_element(FILE *fd, int inst)
     token_pos=0;
  
     value = get_tok_value(inst_ptr[inst].prop_ptr, token+1, 0);
-    if(value[0] == '\0')
-    value=get_tok_value(template, token+1, 0);
+    if(!get_tok_size) value=get_tok_value(template, token+1, 0);
  
     if(value[0]!='\0')
     {

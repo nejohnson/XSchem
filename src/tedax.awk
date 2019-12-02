@@ -36,6 +36,12 @@ BEGIN{
 ##1       2     3        4    5           6
 ##        inst  net      pin  pinnumber   pinindex
 # conn    U1:2  INPUT_A  A    1:4:9:12    1
+
+/^begin netlist/{ 
+  print
+  next
+}
+
 /^begin_inst .* numslots/{ 
   reparse()
   numslots=$4; 
@@ -45,30 +51,42 @@ $1=="device"||$1=="footprint"{
   reparse()
   arg1=$1; arg2=$2; $1=$2=""; $0=$0
   gsub(/^[ \t]*/,"")
-  gsub(/[\\]* +/,"\\ ")
+  gsub(/[\\]? +/,"\\ ")
   $0=arg1 " " arg2 " " $0
+  current_name=arg2
 }
 /^footprint/{
-  reparse()
-  fp=""
-  nn=split($2, inst_arr, ":")
-  inst_name=inst_arr[1]
-  for(i=3; i<=NF;i++) {
-    fp = ((i==3) ? $i : fp " " $i)
+  if(NF>=3) {
+    reparse()
+    fp=""
+    nn=split($2, inst_arr, ":")
+    inst_name=inst_arr[1]
+    for(i=3; i<=NF;i++) {
+      fp = ((i==3) ? $i : fp " " $i)
+    }
+    footprint[inst_name] = fp
   }
-  footprint[inst_name] = fp
+  next
+}
+
+#skip if empty value field
+/^value/{ 
+  if(NF <= 2) next
+  print
   next
 }
 
 /^device/{
-  reparse()
-  dev=""
-  nn=split($2, inst_arr, ":")
-  inst_name=inst_arr[1]
-  for(i=3; i<=NF;i++) {
-    dev = ((i==3) ? $i : dev " " $i)
+  if(NF>=3) {
+    reparse()
+    dev=""
+    nn=split($2, inst_arr, ":")
+    inst_name=inst_arr[1]
+    for(i=3; i<=NF;i++) {
+      dev = ((i==3) ? $i : dev " " $i)
+    }
+    device[inst_name] = dev
   }
-  device[inst_name] = dev
   next
 }
   
@@ -102,6 +120,12 @@ $1=="device"||$1=="footprint"{
   }
   next
 }
+
+/^tEDAx v1/{
+  print
+  next
+}
+
 /^end_inst/{
   next
 }
@@ -126,8 +150,9 @@ $1=="device"||$1=="footprint"{
   next
 }
 
-{ 
-  print
+NF>=2{
+  print "comptag", current_name, $0
+  next
 }
 
 # avoid considering escaped spaces as field separators

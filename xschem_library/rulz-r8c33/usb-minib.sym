@@ -1,0 +1,57 @@
+v {xschem version=2.9.5_RC6 file_version=1.1}
+G {type=npn
+format="* @name @pinlist  @model"
+tedax_format="footprint @name @footprint
+value @name @value
+device @name @device
+@comptag"
+template="name=C1
+model=usb-minib
+device="UX60SC-MB-5ST(80)"
+footprint=hirose-UX60SC
+"
+}
+V {}
+S {}
+E {}
+L 4 -60 -80 -60 80 {}
+L 4 -60 -80 60 -80 {}
+L 4 60 -80 60 80 {}
+L 4 -60 80 -10 80 {}
+L 4 -5 -50 -5 50 {}
+L 4 -15 -50 -5 -50 {}
+L 4 -25 -35 -15 -50 {}
+L 4 -40 -35 -40 35 {}
+L 4 -25 35 -15 50 {}
+L 4 -15 50 -5 50 {}
+L 4 -40 35 -25 35 {}
+L 4 -40 -35 -25 -35 {}
+L 4 -50 -80 -50 80 {}
+L 4 10 80 60 80 {}
+L 4 0 90 0 120 {}
+L 4 60 -60 80 -60 {}
+L 4 60 -30 80 -30 {}
+L 4 60 0 80 0 {}
+L 4 60 30 80 30 {}
+L 4 60 60 80 60 {}
+B 5 77.5 -62.5 82.5 -57.5 {name=V5V dir=inout pinnumber=1}
+B 5 77.5 -32.5 82.5 -27.5 {name=DM dir=inout pinnumber=2}
+B 5 77.5 -2.5 82.5 2.5 {name=DP dir=inout pinnumber=3}
+B 5 77.5 27.5 82.5 32.5 {name=ID dir=inout pinnumber=4}
+B 5 77.5 57.5 82.5 62.5 {name=G dir=inout pinnumber=5}
+B 5 -2.5 117.5 2.5 122.5 {name=G dir=inout pinnumber=G}
+A 4 0 80 10 180 360 {}
+T {@model} -40 -75 0 0 0.2 0.2 {}
+T {@name} 20 -95 0 0 0.2 0.2 {}
+T {V5V} 55 -65 0 1 0.2 0.2 {}
+T {DM} 55 -35 0 1 0.2 0.2 {}
+T {DP} 55 -5 0 1 0.2 0.2 {}
+T {ID} 55 25 0 1 0.2 0.2 {}
+T {GND} 55 55 0 1 0.2 0.2 {}
+T {G} 5 55 0 1 0.2 0.2 {}
+T {@#0:pinnumber} 63.75 -76.25 0 0 0.2 0.2 {layer=13}
+T {@#1:pinnumber} 63.75 -46.25 0 0 0.2 0.2 {layer=13}
+T {@#2:pinnumber} 63.75 -16.25 0 0 0.2 0.2 {layer=13}
+T {@#3:pinnumber} 63.75 13.75 0 0 0.2 0.2 {layer=13}
+T {@#4:pinnumber} 63.75 43.75 0 0 0.2 0.2 {layer=13}
+T {@#5:pinnumber} 3.75 93.75 0 0 0.2 0.2 {layer=13}

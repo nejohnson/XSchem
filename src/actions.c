@@ -702,7 +702,7 @@ void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
     rect=symbol->boxptr[PINLAYER];
     
     for(i=0;i<npin;i++) {
-       my_strdup(8, &labname,get_tok_value(rect[i].prop_ptr,"name",0));
+       my_strdup(8, &labname,get_tok_value(rect[i].prop_ptr,"name",1));
        if(debug_var>=1) fprintf(errfp,"200711 2 --> labname=%s\n", labname);
        
        pinx0 = (rect[i].x1+rect[i].x2)/2;

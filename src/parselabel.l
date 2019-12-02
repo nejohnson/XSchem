@@ -153,7 +153,7 @@ const char *expandlabel(const char *s, int *m)
                             return B_NUM;
                           }
                         }
-([=_a-zA-Z][:.=_a-zA-Z0-9]*)|([.=_a-zA-Z][:=_a-zA-Z0-9]*)     {
+([=_a-zA-Z][\\/:.=_a-zA-Z0-9]*)|([.=_a-zA-Z][\\/:=_a-zA-Z0-9]*)     {
                           yylval.ptr.str=NULL; /*19102004 */
                           my_strdup(300, &yylval.ptr.str, yytext); /* these things are freed after use in expandlabel.y */
                           if(dbg_var>=3) fprintf(errfp, "parselabel(): B_NAME: %s\n", yytext);

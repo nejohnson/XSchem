@@ -22,7 +22,7 @@
 
 #include "xschem.h"
 #define SPACE(c) ( c=='\n' || c==' ' || c=='\t' || \
-                   c=='\0' || c==';' || c=='/' )
+                   c=='\0' || c==';' )
 
 /* 20150317 */
 #define SPACE2(c) ( SPACE(c) || c=='\'' || c== '"')
@@ -390,7 +390,6 @@ char *get_tok_value(const char *s,const char *tok, int with_quotes)
       if( !strcmp(token,tok) ) {
         get_tok_size = tok_size; /* report back also token size, useful to check if requested token exists */
         get_tok_value_size = value_pos; /* return also size so to avoid using strlen 20180926 */
-        
         return result;
       }
       value_pos=0;
@@ -1786,13 +1785,13 @@ const char *pin_node(int i, int j, int *mult, int hash_prefix_unnamed_net)
       my_snprintf(str_node, S(str_node), "%s", (inst_ptr[i].node[j])+1 );
    }
    expandlabel(get_tok_value(
-           (inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][j].prop_ptr,"name",0), mult);
+           (inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][j].prop_ptr,"name",1), mult);
    return expandlabel(str_node, &tmp);
   }
   else
   {
    expandlabel(get_tok_value(
-           (inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][j].prop_ptr,"name",0), mult);
+           (inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][j].prop_ptr,"name",1), mult);
    return expandlabel(inst_ptr[i].node[j], &tmp);
   }
  }

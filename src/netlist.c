@@ -694,11 +694,11 @@ void prepare_netlist_structs(int for_hilight_only)
      my_strdup(261, &class,get_tok_value(inst_ptr[i].prop_ptr,"class",0));
    }
 
-   my_strdup(262, &inst_ptr[i].node[0], get_tok_value(inst_ptr[i].prop_ptr,"lab",0));
+   my_strdup(262, &inst_ptr[i].node[0], get_tok_value(inst_ptr[i].prop_ptr,"lab",1));
    if(!(inst_ptr[i].node[0]) ) {
      char *template=NULL;
      my_strdup(64, &template, get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"template",0));
-     my_strdup(65, &inst_ptr[i].node[0], get_tok_value(template, "lab",0));
+     my_strdup(65, &inst_ptr[i].node[0], get_tok_value(template, "lab",1));
      if(debug_var>=1) fprintf(errfp, "no lab attr on instance, pick from symbol: %s\n", inst_ptr[i].node[0]);
      my_free(&template);
    }

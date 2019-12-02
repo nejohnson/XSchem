@@ -1,12 +1,12 @@
-v {xschem version=2.9.5_RC5 file_version=1.1}
+v {xschem version=2.9.5_RC6 file_version=1.1}
 G {type=timescale
 spice_ignore=true
 template="name=s1 timestep=\\"100ps\\" precision=\\"100ps\\" "
-format="`timescale @timestep/@precision"}
+format="`timescale @timestep\\/@precision"}
 V {}
 S {}
 E {}
 L 4 0 -10 70 -10 {}
 L 4 0 -10 0 10 {}
 T {TIMESCALE} 5 -25 0 0 0.3 0.3 {}
-T {`timescale @timestep/@precision} 15 -5 0 0 0.3 0.3 {}
+T {`timescale @timestep\\/@precision} 15 -5 0 0 0.3 0.3 {}

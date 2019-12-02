@@ -230,7 +230,7 @@ int callback(int event, int mx, int my, KeySym key,
           select_rect(BEGIN,1);
         }
         if(abs(mx-mx_save) > 8 || abs(my-my_save) > 8 ) {  /* 20121130 set some reasonable threshold before unselecting */
-          select_object(X_TO_XSCHEM(mx_save), Y_TO_XSCHEM(my_save), 0); /* 20121130 remove near object if dragging */
+          select_object(X_TO_XSCHEM(mx_save), Y_TO_XSCHEM(my_save), 0, 0); /* 20121130 remove near object if dragging */
         }
       }
     }
@@ -1005,7 +1005,7 @@ int callback(int event, int mx, int my, KeySym key,
      unselect_all();
 
      for(init_inst_iterator(x1, y1, x2, y2); ( iptr = inst_iterator_next() );) {
-       select_element(iptr->n,SELECTED,1);
+       select_element(iptr->n, SELECTED, 1, 0);
      }
     
      for(init_wire_iterator(x1, y1, x2, y2); ( wptr = wire_iterator_next() );) {
@@ -1339,7 +1339,7 @@ int callback(int event, int mx, int my, KeySym key,
      if(!(ui_state & STARTPOLYGON) && !(state & Mod1Mask) ) {
        last_command = 0;
        unselect_all();
-       select_object(mousex,mousey,SELECTED);
+       select_object(mousex,mousey,SELECTED, 1);
        if(state & ShiftMask) {
          edit_property(1);
        } else {
@@ -1375,7 +1375,7 @@ int callback(int event, int mx, int my, KeySym key,
        rebuild_selected_array();
        if(lastselected==0) ui_state &=~SELECTION;
      }
-     select_object(mousex, mousey, 0);
+     select_object(mousex, mousey, 0, 0);
    }
    else if(button==Button2 && (state == 0)) {
      pan2(BEGIN, mx, my);
@@ -1550,7 +1550,7 @@ int callback(int event, int mx, int my, KeySym key,
        if( !(state & ShiftMask) && !(state & Mod1Mask) ) {
          unselect_all();
        }
-       sel = select_object(mousex,mousey,SELECTED);
+       sel = select_object(mousex, mousey, SELECTED, 0);
  
        if(sel && state == ControlMask) { /* 20170416 */
          launcher();
@@ -1611,7 +1611,7 @@ int callback(int event, int mx, int my, KeySym key,
 /*
  * else if(button==Button3) {
  *   if(state==0 || state == ShiftMask) {
- *      select_object(mousex,mousey,SELECTED);
+ *      select_object(mousex,mousey,SELECTED, 0);
  *      rebuild_selected_array();
  *      if(lastselected ==1 &&  selectedgroup[0].type==ELEMENT) {
  *        if(state==0) descend_schematic();

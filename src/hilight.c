@@ -364,12 +364,12 @@ void search(const char *tok, const char *val, int sub, int sel, int what)
             }
           }
           if(sel==1) {
-            select_element(i, SELECTED, 1);
+            select_element(i, SELECTED, 1, 0);
             ui_state|=SELECTION;
           }
           
           if(sel==-1) { /* 20171211 unselect */
-            select_element(i, 0, 1);
+            select_element(i, 0, 1, 0);
          }
         }
       }

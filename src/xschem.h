@@ -667,7 +667,8 @@ extern int text_bbox_nocairo(char * str,double xscale, double yscale,
             double *rx2, double *ry2);
 #endif
 
-extern unsigned short select_object(double mx,double my, unsigned short sel_mode); /*  return type 20160503 */
+extern unsigned short select_object(double mx,double my, unsigned short sel_mode, 
+                                    int override_lock); /*  return type 20160503 */
 extern void unselect_all(void);
 extern void select_inside(double x1,double y1, double x2, double y2, int sel);
 extern void xwin_exit(void);
@@ -853,7 +854,7 @@ extern const char *expandlabel(const char *s, int *m);
 extern void merge_inst(int k, FILE *fd);
 extern void merge_file(int selection_load, const char ext[]);
 extern void select_wire(int i, unsigned short select_mode, int fast);
-extern void select_element(int i, unsigned short select_mode, int fast);
+extern void select_element(int i, unsigned short select_mode, int fast, int override_lock);
 extern void select_text(int i, unsigned short select_mode, int fast);
 extern void select_box(int c, int i, unsigned short select_mode, int fast);
 extern void select_arc(int c, int i, unsigned short select_mode, int fast);

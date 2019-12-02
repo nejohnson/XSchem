@@ -585,12 +585,14 @@ void select_wire(int i,unsigned short select_mode, int fast)
   need_rebuild_selected_array=1;
 }
 
-void select_element(int i,unsigned short select_mode, int fast)
+void select_element(int i,unsigned short select_mode, int fast, int override_lock)
 {
   int c, j;
   char str[1024];       /* overflow safe */
   char s[256];          /* overflow safe */
-  if(!strcmp(get_tok_value(inst_ptr[i].prop_ptr, "lock", 0), "true") && select_mode == SELECTED) return;
+
+  if(!strcmp(get_tok_value(inst_ptr[i].prop_ptr, "lock", 0), "true") && 
+      select_mode == SELECTED && !override_lock) return;
   my_strncpy(s,inst_ptr[i].prop_ptr!=NULL?inst_ptr[i].prop_ptr:"<NULL>",S(s));
   if(event_reporting) { 
     char n[PATH_MAX];
@@ -819,7 +821,7 @@ void select_line(int c, int i, unsigned short select_mode, int fast )
 }
 
 /* 20160503 return type field */
-unsigned short select_object(double mousex,double mousey, unsigned short select_mode)
+unsigned short select_object(double mousex,double mousey, unsigned short select_mode, int override_lock)
 {
    Selected sel;
    sel = find_closest_obj(mousex,mousey);
@@ -849,7 +851,7 @@ unsigned short select_object(double mousex,double mousey, unsigned short select_
      select_arc(sel.col,sel.n, select_mode,0);
      break;
     case ELEMENT:
-     select_element(sel.n,select_mode,0);
+     select_element(sel.n,select_mode,0, override_lock);
      break;
     default:
      break;
@@ -918,7 +920,7 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) /* 201509
   if(RECTINSIDE(inst_ptr[i].xx1, inst_ptr[i].yy1, inst_ptr[i].xx2, inst_ptr[i].yy2, x1,y1,x2,y2))
   {
    ui_state |= SELECTION; /* set ui_state to SELECTION also if unselecting by area ???? */
-   sel ? select_element(i,SELECTED,1): select_element(i,0,1);
+   sel ? select_element(i,SELECTED,1, 0): select_element(i,0,1, 0);
   }
  }
  for(c=0;c<cadlayers;c++)
@@ -1055,7 +1057,7 @@ void select_all(void)
  }                       
  for(i=0;i<lastinst;i++)
  {
-   select_element(i,SELECTED,1);
+   select_element(i,SELECTED,1, 0);
  }
  for(c=0;c<cadlayers;c++)
  {

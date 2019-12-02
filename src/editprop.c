@@ -890,7 +890,7 @@ void update_symbol(const char *result, int x)
   /* in this latter case the last pointed element remains selected. */
   if( !strcmp(tclgetvar("editprop_semaphore"), "2")) {
     unselect_all();
-    select_object(mousex,mousey,SELECTED);
+    select_object(mousex,mousey,SELECTED, 0);
   }
   rebuild_selected_array();
 }

@@ -3,7 +3,8 @@ G {type=inductor
 format="@name @pinlist @value m=@m"
 tedax_format="footprint @name @footprint 
 value @name @value
-device @name @device"
+device @name @device
+@comptag"
 template="name=L1
 m=1
 value=1n

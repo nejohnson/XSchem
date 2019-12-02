@@ -140,6 +140,7 @@ install: xschem
 	cp -ru ../xschem_library/binto7seg $(prefix)/share/doc/xschem/
 	cp -ru ../xschem_library/examples $(prefix)/share/doc/xschem/
 	cp -ru ../xschem_library/xTAG $(prefix)/share/doc/xschem/
+	cp -ru ../xschem_library/rulz-r8c33 $(prefix)/share/doc/xschem/
 	cp -ru ../xschem_library/ngspice $(prefix)/share/doc/xschem/
 	cp -ru ../xschem_library/pcb $(prefix)/share/doc/xschem/
 	cp -ru ../xschem_library/logic $(prefix)/share/doc/xschem/

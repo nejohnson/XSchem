@@ -251,7 +251,7 @@ void match_merged_inst(int old)
     for(i=old;i<lastinst;i++)
     {
      if(inst_ptr[i].ptr<0) continue;
-     select_element(i,SELECTED,1);
+     select_element(i,SELECTED,1, 0);
      symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1,
                        &inst_ptr[i].x2, &inst_ptr[i].y2);
      /* type=get_tok_value(instdef[inst_ptr[i].ptr].prop_ptr,"type",0); */

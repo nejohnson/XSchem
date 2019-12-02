@@ -702,12 +702,12 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
      /* 20171006 find by instance name */
      for(i=0;i<lastinst;i++) {
        if(!strcmp(inst_ptr[i].instname, argv[3])) {
-         select_element(i, SELECTED,0);
+         select_element(i, SELECTED, 0, 0);
          found=1;
          break;
        }
      }
-     if(!found && n<lastinst) select_element(n, SELECTED,0);
+     if(!found && n<lastinst) select_element(n, SELECTED, 0, 0);
    }
    else if(!strcmp(argv[2],"wire") && argc==4) {
      int n=atol(argv[3]);

@@ -888,7 +888,7 @@ int place_symbol(int pos, const char *symbol_name, double x, double y, int rot, 
     drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
     drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
     drawtemparc(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
-    select_element(n, SELECTED,0);
+    select_element(n, SELECTED,0, 0);
     ui_state |= SELECTION;
     drawtemparc(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0, 0.0);
     drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);

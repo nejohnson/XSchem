@@ -31,9 +31,9 @@ X1 MAY BE INSTALLED EITHER ORIENTATION
 
 ALL CAPACITORS, RESISTORS, AND L1 ARE NONPOLAR
 AND MAY BE INSTALLED EITHER ORIENTATION} 1475 -545 0 0 0.5 0.5 {}
-T {PCB MATERIAL FR4 OR EQUIV 0.031 OR 0.062 INCH
-COPPER ANY FROM 0.5 to 2.0 OZ
-SOLDERMASK BOTH SIDES DIFFERENT
+T {PCB MATERIAL FR4 OR EQUIV 0.031 OR
+0.062 INCH COPPER ANY FROM 0.5 to
+2.0 OZ SOLDERMASK BOTH SIDES DIFFERENT
 SILKSCREEN BOTH SIDES DIFFERENT
 SOLDERMASK AND SILKSCREEN ANY COLOR 
 AS LONG AS THEY CONTRAST
@@ -72,6 +72,10 @@ T {R8C/33c DevCon Lab Board} 830 -2375 0 0 1 1 {}
 T {Copyright (C) 2010 DJ Delorie (dj delorie com)
 Distributed under the terms of the GNU General Public License,
 either verion 2 or (at your choice) any later version.} 2340 -340 0 0 0.7 0.7 {layer=8}
+T {ctrl-left-click
+for datasheet} 930 -1580 0 0 0.4 0.4 {layer=8}
+T {ctrl-left-click
+for datasheet} 2470 -1610 0 0 0.4 0.4 {layer=8}
 N 290 -1470 640 -1470 {lab=USBDM}
 N 420 -1430 640 -1430 {lab=USBDP}
 N 420 -1440 420 -1430 {lab=USBDP}
@@ -270,11 +274,13 @@ footprint=JUMPER2
 device=JUMPER}
 C {r8c-33c.sym} 2310 -1260 0 0 {name=U2 device=r8c-33c
 footprint=TQFP32_7
+url="https://www.renesas.com/en-eu/doc/products/mpumcu/doc/r8c/r01ds0008ej_r8c33c.pdf"
 comptag="manufacturer_part_number R8C/33C
 manifacturer Renesas
 vendor_part_number R5F21336CNFP
 vendor Renesas"}
-C {ft232rl.sym} 860 -1210 0 0 {name=U1 
+C {ft232rl.sym} 860 -1210 0 0 {name=U1
+url="https://www.ftdichip.com/Support/Documents/DataSheets/ICs/DS_FT232R.pdf"
 device="USB to Serial converter"
 footprint=SSOP28
 comptag="manufacturer_part_number FT232RL\\ R
@@ -593,3 +599,7 @@ footprint=res3-e15mm 300
 device=CRYSTAL_module comptag="manufacturer_part_number AWSCR-18.43CV-T
 manifacturer Abracon"}
 C {gnd.sym} 1860 -890 0 0 {name=l54 lab=GND}
+C {launcher.sym} 1580 -2350 0 0 {name=h1
+descr="Ctrl-click to go to Delorie's 
+project page for info" 
+url="http://www.delorie.com/electronics/rulz"}

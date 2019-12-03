@@ -38,6 +38,7 @@ BEGIN{
   pinboxhalfsize = 2.5
   pinlinelength = 40
   pintextsize = 0.4
+  overbaroffset = 6 * pintextsize
   pintextcenteroffset = 24 * pintextsize
   pintextheight = 56.6 * pintextsize
   pincharspacing = 35 * pintextsize
@@ -246,7 +247,7 @@ END{
           text(pinname, x + pinlinelength + pintextoffset, y - pintextcenteroffset, 0, 0, pintextsize, "")
           if(pin[p, n, "overbar"] == 1) {
             obx = x + pinlinelength + pintextoffset
-            oby = y - pintextcenteroffset
+            oby = y - pintextcenteroffset - overbaroffset
             obl = (length(pin[p, n, "pinname"]) - 2 ) * pincharspacing
             line(obx, oby, obx + obl, oby, 3, "")
           }
@@ -260,14 +261,14 @@ END{
             text(pinname, x - halflabwidth, y + pinlinelength + pintextoffset, 0, 0, pintextsize, "")
             if(pin[p, n, "overbar"] == 1) {
               obx = x - halflabwidth
-              oby = y + pinlinelength + pintextoffset
+              oby = y + pinlinelength + pintextoffset - overbaroffset
               obl = (length(pin[p, n, "pinname"]) - 2 ) * pincharspacing
               line(obx, oby, obx + obl, oby, 3, "")
             }
           } else {
             text(pinname, x + pintextcenteroffset, y + pinlinelength + pintextoffset, 1, 0, pintextsize, "")
             if(pin[p, n, "overbar"] == 1) {
-              obx = x + pintextcenteroffset - pintextheight
+              obx = x + pintextcenteroffset - pintextheight - overbaroffset
               oby = y + pinlinelength + pintextoffset
               obl = (length(pin[p, n, "pinname"]) - 2 ) * pincharspacing
               line(obx, oby + obl, obx, oby, 3, "")
@@ -281,7 +282,7 @@ END{
           text(pinname, x - pinlinelength - pintextoffset, y - pintextcenteroffset, 0, 1, pintextsize, "")
           if(pin[p, n, "overbar"] == 1) {
             obx = x - pinlinelength - pintextoffset
-            oby = y - pintextcenteroffset
+            oby = y - pintextcenteroffset - overbaroffset
             obl = (length(pin[p, n, "pinname"]) - 2) * pincharspacing
             line(obx - obl, oby, obx, oby, 3, "")
           }
@@ -295,14 +296,14 @@ END{
             text(pinname, x - halflabwidth, y - pinlinelength - pintextoffset, 2, 1, pintextsize, "")
             if(pin[p, n, "overbar"] == 1) {
               obx = x - halflabwidth
-              oby = y - pinlinelength - pintextoffset - pintextheight
+              oby = y - pinlinelength - pintextoffset - pintextheight - overbaroffset
               obl = (length(pin[p, n, "pinname"]) - 2 ) * pincharspacing
               line(obx, oby, obx + obl, oby, 3, "")
             }
           } else {
             text(pinname, x + pintextcenteroffset, y - pinlinelength - pintextoffset, 1, 1, pintextsize, "")
             if(pin[p, n, "overbar"] == 1) {
-              obx = x + pintextcenteroffset - pintextheight
+              obx = x + pintextcenteroffset - pintextheight - overbaroffset
               oby = y - pinlinelength - pintextoffset
               obl = (length(pin[p, n, "pinname"]) - 2 ) * pincharspacing
               line(obx, oby, obx, oby - obl, 3, "")

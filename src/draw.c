@@ -539,8 +539,10 @@ void draw_symbol_outline(int what,int c, int n,int layer,int tmp_flip, int rot,
       ROTATION(0.0,0.0,text.x0,text.y0,x1,y1);
 
       textlayer = c;
+      #ifdef HAS_CAIRO
       textlayer = symptr->txtptr[j].layer;
       if(textlayer < 0 || textlayer >= cadlayers) textlayer = c;
+      #endif
       if(enable_layer[textlayer]) {
         #ifdef HAS_CAIRO
         textfont = symptr->txtptr[j].font;
@@ -560,8 +562,8 @@ void draw_symbol_outline(int what,int c, int n,int layer,int tmp_flip, int rot,
           cairo_restore(ctx);
           cairo_restore(save_ctx);
         }
+        #endif
       }
-      #endif
     }
   }
 }

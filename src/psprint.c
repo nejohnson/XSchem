@@ -87,7 +87,7 @@ static void ps_xfillrectange(int layer, double x1, double y1, double x2,
 
 /* Convex Nonconvex Complex */
 #define Polygontype Nonconvex
-static void ps_drawpolygon(int c, int what, double *x, double *y, int points)
+static void ps_drawpolygon(int c, int what, double *x, double *y, int points, int poly_fill)
 {
   double x1,y1,x2,y2;
   double xx, yy;
@@ -109,7 +109,7 @@ static void ps_drawpolygon(int c, int what, double *x, double *y, int points)
   }
   fprintf(fd, "closepath gsave stroke\n");
   fprintf(fd, "grestore\n");
-  if( (c==4 || c==PINLAYER || c==WIRELAYER) && fill) {
+  if(fill && fill_type[c] && poly_fill) {
     fprintf(fd, " fill\n");
   }
 }
@@ -304,7 +304,7 @@ static void ps_draw_symbol_outline(int n,int layer,int tmp_flip, int rot,
          x[k]+= x0;
          y[k] += y0;
        }
-       ps_drawpolygon(layer, NOW, x, y, polygon.points);
+       ps_drawpolygon(layer, NOW, x, y, polygon.points, polygon.fill);
        my_free(&x); my_free(&y);
      }
  
@@ -490,7 +490,7 @@ void ps_draw(void)
     ps_drawarc(c, 0, arc[c][i].x, arc[c][i].y, arc[c][i].r, arc[c][i].a, arc[c][i].b);
   }
   for(i=0;i<lastpolygon[c];i++) {
-    ps_drawpolygon(c, NOW, polygon[c][i].x, polygon[c][i].y, polygon[c][i].points);
+    ps_drawpolygon(c, NOW, polygon[c][i].x, polygon[c][i].y, polygon[c][i].points, polygon[c][i].fill);
   }
 
 

@@ -248,6 +248,8 @@ N 2680 -760 2750 -760 {lab=GND}
 N 2680 -730 2750 -730 {lab=GND}
 N 2750 -790 2750 -760 {lab=GND}
 N 2750 -760 2750 -730 {lab=GND}
+N 190 -1290 190 -1270 {lab=#net22}
+N 230 -1290 230 -1270 {lab=#net23}
 C {title-2.sym} 0 0 0 0 {name=l1 
 author="Stefan Schippers"
 page=1
@@ -291,7 +293,7 @@ vendor digikey"
 }
 C {gnd.sym} 290 -1350 0 0 {name=l2 lab=GND}
 C {noconn.sym} 290 -1380 1 0 {name=l3}
-C {noconn.sym} 210 -1290 3 0 {name=l4}
+C {noconn.sym} 190 -1270 3 0 {name=l4}
 C {vdd.sym} 160 -1660 0 0 {name=l5 lab=+5V}
 C {led.sym} 160 -1630 0 0 {name=LED8 
 model=LED 
@@ -341,7 +343,7 @@ vendor digikey"}
 C {pmos.sym} 700 -1830 1 1 {name=Q1 
 model=DMP2035U 
 device=DMP2035U
-footprint SOT-523
+footprint=SOT-523
 comptag="manufacturer_part_number RZE002P02TL
 manifacturer Rohm
 vendor_part_number RZE002P02TLCT-ND
@@ -604,3 +606,4 @@ C {launcher.sym} 1670 -2320 0 0 {name=h1
 descr="Ctrl-click to go to Delorie's 
 project page for info" 
 url="http://www.delorie.com/electronics/rulz"}
+C {noconn.sym} 230 -1270 1 1 {name=l55}

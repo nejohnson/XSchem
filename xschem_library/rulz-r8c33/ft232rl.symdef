@@ -8,11 +8,15 @@
 @device
 @symname
 @name
-! type=subcircuit
+! type=ic
 ! format="@spiceprefix@name @pinlist @symname"
-! tedax_format="footprint @name @footprint
-! device @name @device"
-! template="name=U1 device=FT232RL footprint=SSOP28"
+! tedax_format="footprint @name @footprint 
+! value @name @value
+! device @name @device
+! @comptag"
+! template="name=U1
+! device=FT232RL
+! footprint=SSOP28"
 [left]
 16 USBDM
 15 USBDP

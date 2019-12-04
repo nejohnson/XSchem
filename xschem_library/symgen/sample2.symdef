@@ -5,13 +5,18 @@
 # direction is mandatory: i=input, o=output, b=bidirectional (inout)
 
 [labels] 
-FAKE IC TO TEST XSCHEM SYMGEN
-STEFAN FREDERIK SCHIPPERS
+@device
 @symname
 @name
-! type=subcircuit
-! format="@name @pinlist @symname"
-! template="name=x1"
+! type=ic
+! format="@spiceprefix@name @pinlist @symname"
+! tedax_format="footprint @name @footprint 
+! value @name @value
+! device @name @device
+! @comptag"
+! template="name=U1 
+! device=r8c-33c 
+! footprint=TQFP32_7"
 --vmode
 [left]
 24   i!   CHIP_SELECT

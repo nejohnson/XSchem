@@ -62,8 +62,8 @@ BEGIN{
 }
 
 /^--/{
-  if(/^--auto_pinnumber/) { enable_autopinnumber = 1 }
-  if(/^--hide_pinnumber/) { hide_pinnumber = 1 }
+  if(/^--auto[-_]pinnumber/) { enable_autopinnumber = 1 }
+  if(/^--hide[-_]pinnumber/) { hide_pinnumber = 1 }
   if(/^--vmode/) { horizontal = 0 } # force horizontal top/bottom labels
   next
 }
@@ -212,6 +212,7 @@ END{
   symbolx2 += symbolx1
   symboly1 -= round(symboly2/2)
   symboly2 += symboly1
+  pinseq = 0;
   for(i = 0; i < 4; i++) {
     p = posseq[i]
     for(n = 0; n < pin[p,"n"]; n++) {
@@ -251,8 +252,8 @@ END{
             obl = (length(pin[p, n, "pinname"]) - 2 ) * pincharspacing
             line(obx, oby, obx + obl, oby, 3, "")
           }
-          if(!hide_pinnumber)text(pin[p, n, "pinnumber"], x + pinlinelength - pinnumberoffset, \
-               y - pinnumbercenteroffset, 0, 1, pinnumbertextsize, "")
+          if(!hide_pinnumber)text(pinnumber_id(pinseq), x + pinlinelength - pinnumberoffset, \
+               y - pinnumbercenteroffset, 0, 1, pinnumbertextsize, "layer=13")
           if(neg) circle(x + pinlinelength - negradius, y, negradius, plinelay, "")
         } else if(p == 1) {
           line(x, y, x, y + (neg ? pinlinelength - 2 * negradius : pinlinelength) , plinelay, "")
@@ -274,8 +275,8 @@ END{
               line(obx, oby + obl, obx, oby, 3, "")
             }
           }
-          if(!hide_pinnumber)text(pin[p, n, "pinnumber"], x - pinnumbercenteroffset, \
-               y + pinlinelength - pinnumberoffset, 3, 0, pinnumbertextsize, "")
+          if(!hide_pinnumber)text(pinnumber_id(pinseq), x - pinnumbercenteroffset, \
+               y + pinlinelength - pinnumberoffset, 3, 0, pinnumbertextsize, "layer=13")
           if(neg) circle(x, y + pinlinelength - negradius, negradius, plinelay, "")
         } else if(p == 2) {
           line(x - (neg ? pinlinelength -2 * negradius :pinlinelength), y, x, y, plinelay, "")
@@ -286,8 +287,8 @@ END{
             obl = (length(pin[p, n, "pinname"]) - 2) * pincharspacing
             line(obx - obl, oby, obx, oby, 3, "")
           }
-          if(!hide_pinnumber)text(pin[p, n, "pinnumber"], x - pinlinelength + pinnumberoffset, \
-               y - pinnumbercenteroffset, 0, 0, pinnumbertextsize, "")
+          if(!hide_pinnumber)text(pinnumber_id(pinseq), x - pinlinelength + pinnumberoffset, \
+               y - pinnumbercenteroffset, 0, 0, pinnumbertextsize, "layer=13")
           if(neg) circle(x - pinlinelength + negradius, y, negradius, plinelay, "")
         } else if(p == 3) {
           line(x, y - (neg ? pinlinelength -2 * negradius :pinlinelength), x, y, plinelay, "")
@@ -309,11 +310,12 @@ END{
               line(obx, oby, obx, oby - obl, 3, "")
             }
           }
-          if(!hide_pinnumber)text(pin[p, n, "pinnumber"], x - pinnumbercenteroffset, \
-               y - pinlinelength + pinnumberoffset, 3, 1, pinnumbertextsize, "")
+          if(!hide_pinnumber)text(pinnumber_id(pinseq), x - pinnumbercenteroffset, \
+               y - pinlinelength + pinnumberoffset, 3, 1, pinnumbertextsize, "layer=13")
           if(neg) circle(x, y - pinlinelength + negradius, negradius, plinelay, "")
         }
         if(trig) trigger(x, y, plinelay, p)
+        pinseq++
       }
     } # for(n)
   } # for(p)
@@ -355,6 +357,12 @@ function trigger(x, y, layer, pos)
     line(x - triggerysize, y - pinlinelength, x, y - pinlinelength - triggerxsize, layer, "")
     line(x , y - pinlinelength - triggerxsize, x + triggerysize, y - pinlinelength, layer, "")
   }
+}
+
+
+function pinnumber_id(pinseq) 
+{
+  return("@#" pinseq ":pinnumber")
 }
 
 function circle(x, y, r, layer, props)

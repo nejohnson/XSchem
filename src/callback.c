@@ -1063,7 +1063,7 @@ int callback(int event, int mx, int my, KeySym key,
     }
     break;
    }
-   if(key=='F' && state==(ShiftMask|Mod1Mask))          /* Fullscreen */
+   if(key=='\\' && state==0)          /* Fullscreen */
    {
     if(debug_var>=1) fprintf(errfp, "callback(): toggle fullscreen\n");
     toggle_fullscreen();

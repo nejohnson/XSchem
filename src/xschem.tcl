@@ -20,6 +20,10 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+
+### for tclreadline: disable customcompleters
+proc completer { text start end line } { return {}}
+
 ###
 ### set var with $val if var Not existing
 ###

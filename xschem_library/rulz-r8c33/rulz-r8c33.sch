@@ -3,19 +3,19 @@ G {}
 V {}
 S {}
 E {}
-L 4 120 -390 120 -380 {}
-L 4 120 -150 120 -140 {}
-L 4 690 -390 690 -380 {}
-L 4 690 -150 690 -140 {}
-B 7 115 -380 125 -370 {}
-B 7 115 -140 125 -130 {}
-B 7 685 -380 695 -370 {}
-B 7 685 -140 695 -130 {}
-P 4 5 120 -410 110 -400 120 -390 130 -400 120 -410 {}
-P 4 5 120 -170 110 -160 120 -150 130 -160 120 -170 {}
-P 4 5 690 -410 680 -400 690 -390 700 -400 690 -410 {}
-P 4 5 690 -170 680 -160 690 -150 700 -160 690 -170 {}
-P 4 5 70 -430 70 -120 740 -120 740 -430 70 -430 {}
+L 4 120 -370 120 -360 {}
+L 4 120 -180 120 -170 {}
+L 4 580 -370 580 -360 {}
+L 4 580 -180 580 -170 {}
+B 7 115 -360 125 -350 {}
+B 7 115 -170 125 -160 {}
+B 7 575 -360 585 -350 {}
+B 7 575 -170 585 -160 {}
+P 4 5 120 -390 110 -380 120 -370 130 -380 120 -390 {}
+P 4 5 120 -200 110 -190 120 -180 130 -190 120 -200 {}
+P 4 5 580 -390 570 -380 580 -370 590 -380 580 -390 {}
+P 4 5 580 -200 570 -190 580 -180 590 -190 580 -200 {}
+P 4 5 70 -410 70 -150 630 -150 630 -410 70 -410 {}
 T {MANUFACTURING NOTES
 REFERENCE: CONN1 IS IN THE LOWER LEFT
 
@@ -30,7 +30,7 @@ U2 PIN 1 IS UPPER LEFT
 X1 MAY BE INSTALLED EITHER ORIENTATION
 
 ALL CAPACITORS, RESISTORS, AND L1 ARE NONPOLAR
-AND MAY BE INSTALLED EITHER ORIENTATION} 1475 -515 0 0 0.5 0.5 {}
+AND MAY BE INSTALLED EITHER ORIENTATION} 1335 -505 0 0 0.5 0.5 {}
 T {PCB MATERIAL FR4 OR EQUIV 0.031 OR
 0.062 INCH COPPER ANY FROM 0.5 to
 2.0 OZ SOLDERMASK BOTH SIDES DIFFERENT
@@ -39,36 +39,38 @@ SOLDERMASK AND SILKSCREEN ANY COLOR
 AS LONG AS THEY CONTRAST
 DRILL TOLERANCE +- 0.002 INCH
 
-PCB FINAL SIZE IS 1.0 INCH BY 2.0 INCH} 795 -515 0 0 0.5 0.5 {}
-T {FIDUCIAL LOCATIONS ARE IN MILS (0.001 INCH) RELATIVE
-TO THE LOWER LEFT (CONN1 LOCATION) OF THE PCB
+PCB FINAL SIZE IS 1.0 INCH BY 2.0 INCH} 715 -485 0 0 0.5 0.5 {}
+T {FIDUCIAL LOCATIONS ARE IN MILS
+(0.001 INCH) RELATIVE TO THE LOWER
+LEFT (CONN1 LOCATION) OF THE PCB
 
-FIDUCIALS ARE EXPOSED 0.025 INCH SQUARE COPPER
-WITH CENTERPOINTS NOTED AS BELOW} 40 -610 0 0 0.5 0.5 {}
+FIDUCIALS ARE EXPOSED 0.025 INCH
+SQUARE COPPER WITH CENTERPOINTS
+NOTED AS BELOW} 70 -670 0 0 0.5 0.5 {}
 T {X = 1890
-Y = 840} 550 -400 0 0 0.5 0.5 {}
+Y = 840} 440 -380 0 0 0.5 0.5 {}
 T {X = 1950
-Y = 50} 550 -190 0 0 0.5 0.5 {}
+Y = 50} 440 -220 0 0 0.5 0.5 {}
 T {X = 60
-Y = 910} 140 -410 0 0 0.5 0.5 {}
+Y = 910} 140 -390 0 0 0.5 0.5 {}
 T {X = 50
-Y = 50} 140 -200 0 0 0.5 0.5 {}
-T {(CONN1)} 90 -100 0 0 0.5 0.5 {}
-T {TP1} 105 -425 0 0 0.3 0.3 {layer=8}
-T {TP2} 105 -185 0 0 0.3 0.3 {layer=8}
-T {TP4} 675 -185 0 0 0.3 0.3 {layer=8}
-T {TP3} 675 -425 0 0 0.3 0.3 {layer=8}
+Y = 50} 140 -230 0 0 0.5 0.5 {}
+T {(CONN1)} 70 -140 0 0 0.5 0.5 {}
+T {TP1} 105 -405 0 0 0.3 0.3 {layer=8}
+T {TP2} 105 -215 0 0 0.3 0.3 {layer=8}
+T {TP4} 565 -215 0 0 0.3 0.3 {layer=8}
+T {TP3} 565 -405 0 0 0.3 0.3 {layer=8}
 T {ALL RESISTORS ARE 5% OR BETTER
 ALL CAPACITORS ARE 10V X5R OR BETTER
 SUBSTITUTIONS TO SIMILAR OR HIGHER
 SPEC PARTS IS ALLOWED.
-DNP MEANS DO NOT POPULATE} 795 -215 0 0 0.5 0.5 {}
+DNP MEANS DO NOT POPULATE} 715 -185 0 0 0.5 0.5 {}
 T {1 x 2 in R8C/33C Lab/Breadboard helper. P0 and P3 drive the breadboard, 
 giving GPIO, ADC, DAC, SPI, I2C, and UART on the breadboard. 
 P1 is used for serial mode 2 programming and UART communications via USB
 (with HW flow control), as well as driving four discrete LEDs. 
 P2's PWM outputs drive an RGB LED. } 385 -2185 0 0 0.7 0.7 {}
-T {R8C/33c DevCon Lab Board} 700 -2345 0 0 1 1 {}
+T {R8C/33c DevCon Lab Board} 690 -2325 0 0 1 1 {}
 T {Copyright (C) 2010 DJ Delorie (dj delorie com)
 Distributed under the terms of the GNU General
 Public License, either verion 2 or (at your choice)
@@ -251,11 +253,11 @@ N 2750 -760 2750 -730 {lab=GND}
 N 190 -1290 190 -1270 {lab=#net22}
 N 230 -1290 230 -1270 {lab=#net23}
 C {title-2.sym} 0 0 0 0 {name=l1 
-author="Stefan Schippers"
+author="Stefan Frederik Schippers"
 page=1
 pages=1
 title="R8C/R33C RULZ LAB BOARD"
-lock=true}
+lock=truex}
 C {usb-minib.sym} 210 -1410 0 0 {name=CONN1
 model=usb-minib
 device=UX60SC-MB-5ST(80)
@@ -478,9 +480,9 @@ C {noconn.sym} 640 -1360 3 0 {name=l33}
 C {noconn.sym} 1080 -1120 1 1 {name=l34}
 C {noconn.sym} 1080 -1080 1 1 {name=l37}
 C {noconn.sym} 1080 -1040 1 1 {name=l38}
-C {gnd.sym} 720 -780 0 0 {name=l39 lab=GND}
-C {gnd.sym} 780 -780 0 0 {name=l40 lab=GND}
-C {gnd.sym} 840 -780 0 0 {name=l41 lab=GND}
+C {gnd.sym} 720 -820 0 0 {name=l39 lab=GND}
+C {gnd.sym} 780 -820 0 0 {name=l40 lab=GND}
+C {gnd.sym} 840 -820 0 0 {name=l41 lab=GND}
 C {lab_wire.sym} 570 -1850 0 0 {name=l42 lab=USB_5V}
 C {res.sym} 2910 -1370 3 1 {name=R7
 value=1k
@@ -602,7 +604,7 @@ footprint=res3-e15mm 300
 device=CRYSTAL_module comptag="manufacturer_part_number AWSCR-18.43CV-T
 manifacturer Abracon"}
 C {gnd.sym} 1860 -860 0 0 {name=l54 lab=GND}
-C {launcher.sym} 1670 -2320 0 0 {name=h1
+C {launcher.sym} 1670 -2300 0 0 {name=h1
 descr="Ctrl-click to go to Delorie's 
 project page for info" 
 url="http://www.delorie.com/electronics/rulz"}

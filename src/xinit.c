@@ -1292,7 +1292,8 @@ int Tcl_AppInit(Tcl_Interp *inter)
  /* */
 
  if(!no_readline) {
-   tcleval( "if {![catch {package require tclreadline}]} { ::tclreadline::Loop }" ) ;
+   tcleval( "if {![catch {package require tclreadline}]} "
+      "{::tclreadline::readline customcompleter  completer; ::tclreadline::Loop }" ) ;
  }
 
  if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): returning TCL_OK\n");

@@ -730,7 +730,7 @@ void load_ascii_string(char **ptr, FILE *fd)
   c=fgetc(fd);
   if(c==EOF) {
     fprintf(errfp, "EOF reached, malformed {...} string input, missing close brace\n");
-    my_strdup(327, ptr, NULL);
+    my_free(ptr);
     my_free(&str);
     return;
   }
@@ -740,7 +740,7 @@ void load_ascii_string(char **ptr, FILE *fd)
      c=fgetc(fd);
      if(c==EOF) {
        fprintf(errfp, "EOF reached, malformed {...} string input, missing close brace\n");
-       my_strdup(328, ptr, NULL);
+       my_free(ptr);
        my_free(&str);
        return;
      }
@@ -828,10 +828,10 @@ void link_symbols_to_instances(void) /* 20150326 separated from load_schematic()
     {
       if(debug_var>=2) fprintf(errfp, "link_symbols_to_instances(): missing symbol, skipping...\n");
       hash_proplist(i, 1); /* 06052001 remove props from hash table  */
-      my_strdup(330, &inst_ptr[i].prop_ptr, NULL);  /* 06052001 remove properties */
+      my_free(&inst_ptr[i].prop_ptr);  /* 06052001 remove properties */
       delete_inst_node(i);
-      my_strdup(331, &inst_ptr[i].name, NULL);      /* 06052001 remove symname */
-      my_strdup(332, &inst_ptr[i].instname, NULL);  /* 20150409 */
+      my_free(&inst_ptr[i].name);      /* 06052001 remove symname */
+      my_free(&inst_ptr[i].instname);  /* 20150409 */
       missing++;
       continue;
     }

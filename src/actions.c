@@ -521,7 +521,7 @@ void remove_symbol(void)
    }
   }
   if(instdef[j].txtptr) my_free(&instdef[j].txtptr);
-  my_strdup(2, &instdef[j].name, NULL);
+  my_free(&instdef[j].name);
 
   lastinstdef--;
 }
@@ -554,8 +554,8 @@ void clear_drawing(void)
  my_free(&schverilogprop); /* 09112003 */
  for(i=0;i<lastwire;i++)
  {
-  my_strdup(3, &wire[i].prop_ptr, NULL);
-  my_strdup(4, &wire[i].node, NULL);
+  my_free(&wire[i].prop_ptr);
+  my_free(&wire[i].node);
  } 
  lastwire = 0;
  for(i=0;i<lastinst;i++)
@@ -626,13 +626,13 @@ void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
   double x0,y0, pinx0, piny0; 
   int flip, rot, rot1 ; /*  20101129  */
   Box *rect;
-  static char *labname=NULL;
-  static char *prop=NULL; /*  20161122 overflow safe */
+  char *labname=NULL;
+  char *prop=NULL; /*  20161122 overflow safe */
   char symname_pin[] = "devices/lab_pin.sym";
   char symname_wire[] = "devices/lab_wire.sym"; /*  20171005 */
   char symname_pin2[] = "lab_pin.sym";
   char symname_wire2[] = "lab_wire.sym"; /*  20171005 */
-  static char *type=NULL;
+  char *type=NULL;
   int dir;
   int k,ii, skip;
   int do_all_inst=0; /*  20171206 */
@@ -671,6 +671,7 @@ void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
       tcleval("attach_labels_to_inst");
       if(!strcmp(tclgetvar("rcode"),"") ) {
         bbox(END, 0., 0., 0., 0.);
+        my_free(&prop);
         return;
       }
     }
@@ -781,6 +782,8 @@ void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
        if(debug_var>=1) fprintf(errfp, "%d   %.16g %.16g %s\n", i, pinx0, piny0,labname);
     }
   }
+  my_free(&prop);
+  my_free(&labname);
   /*  draw things  */
   bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
   draw();

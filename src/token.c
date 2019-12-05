@@ -252,9 +252,11 @@ int set_different_token(char **s,char *new, char *old, int object, int n)
  int quote=0;
  int escape=0;
  int mod;
+ char *my_new;
 
  mod=0;
- if(debug_var>=1) fprintf(errfp, "set_different_token(): *s=%s, new=%s, old=%s\n",*s, new, old);
+ my_new = new;
+ if(debug_var>=1) fprintf(errfp, "set_different_token(): *s=%s, new=%s, old=%s n=%d\n",*s, new, old, n);
  if(new==NULL) return 0;
  sizetok=CADCHUNKALLOC;
  if(token==NULL) token=my_malloc(427, sizetok);
@@ -262,14 +264,15 @@ int set_different_token(char **s,char *new, char *old, int object, int n)
  sizeval=CADCHUNKALLOC;
  if(value==NULL) value=my_malloc(429, sizeval);
  else my_realloc(430, &value,sizeval);
+ /* parse new string and add / change attributes that are missing / different from old */
  while(1) {
-  c=*new++; 
+  c=*my_new++; 
   space=SPACE(c) ;
   if( (state==XBEGIN || state==XENDTOK) && !space && c != '=') state=XTOKEN;
   else if( state==XTOKEN && space) state=XENDTOK;
   else if( (state==XTOKEN || state==XENDTOK) && c=='=') state=XSEPARATOR;
   else if( state==XSEPARATOR && !space) state=XVALUE;
-  else if( state==XVALUE && space && !quote) state=XEND;
+  else if( state==XVALUE && space && !quote && !escape) state=XEND;
   if(value_pos>=sizeval) {
    sizeval+=CADCHUNKALLOC;
    my_realloc(431, &value,sizeval);
@@ -281,11 +284,9 @@ int set_different_token(char **s,char *new, char *old, int object, int n)
   if(state==XTOKEN) token[token_pos++]=c;
   else if(state==XVALUE) {
    if(c=='"' && !escape) quote=!quote;
-   /*else value[value_pos++]=c; */
    value[value_pos++]=c;
    if(c=='\\') {
      escape=1;
-     /*c=*new++; */
    } else escape=0;
   }
   else if(state==XENDTOK || state==XSEPARATOR) {
@@ -297,21 +298,76 @@ int set_different_token(char **s,char *new, char *old, int object, int n)
    value[value_pos]='\0';
    value_pos=0;
    if(strcmp(value, get_tok_value(old,token,1))) {
-
     if(event_reporting && object == ELEMENT) {
       char n1[PATH_MAX];
       char n2[PATH_MAX];
       char n3[PATH_MAX];
-      printf("xschem setprop instance %s %s %s\n", 
+      printf("xschem setprop %s %s %s\n", 
            escape_chars(n1, inst_ptr[n].instname, PATH_MAX), 
            escape_chars(n2, token, PATH_MAX), 
            escape_chars(n3, value, PATH_MAX)
       );
       fflush(stdout);
     }
-
     mod=1;
     my_strdup(433, s, subst_token(*s, token, value) );
+   }
+   state=XBEGIN;
+  }
+  if(c=='\0') break;
+ }
+
+
+
+ state = XBEGIN;
+ escape = quote = token_pos = value_pos = 0;
+ /* parse old string and remove attributes that are not present in new */
+ while(1) {
+  c=*old++;
+  space=SPACE(c) ;
+  if( (state==XBEGIN || state==XENDTOK) && !space && c != '=') state=XTOKEN;
+  else if( state==XTOKEN && space) state=XENDTOK;
+  else if( (state==XTOKEN || state==XENDTOK) && c=='=') state=XSEPARATOR;
+  else if( state==XSEPARATOR && !space) state=XVALUE;
+  else if( state==XVALUE && space && !quote && !escape) state=XEND;
+  if(value_pos>=sizeval) {
+   sizeval+=CADCHUNKALLOC;
+   my_realloc(415, &value,sizeval);
+  }
+  if(token_pos>=sizetok) {
+   sizetok+=CADCHUNKALLOC;
+   my_realloc(416, &token,sizetok);
+  }
+  if(state==XTOKEN) token[token_pos++]=c;
+  else if(state==XVALUE) {
+   if(c=='"' && !escape) quote=!quote;
+   value[value_pos++]=c;
+   if(c=='\\') {
+     escape=1;
+   } else escape=0;
+  }
+  else if(state==XENDTOK || state==XSEPARATOR) {
+   if(token_pos) {
+     token[token_pos]='\0';
+     token_pos=0;
+   }
+  } else if(state==XEND) {
+   value[value_pos]='\0';
+   value_pos=0;
+   get_tok_value(new,token,1);
+   if(get_tok_size == 0 ) {
+
+    if(event_reporting && object == ELEMENT) {
+      char n1[PATH_MAX];
+      char n2[PATH_MAX];
+      printf("xschem setprop %s %s\n",
+           escape_chars(n1, inst_ptr[n].instname, PATH_MAX),
+           escape_chars(n2, token, PATH_MAX)
+      );
+      fflush(stdout);
+    }
+    mod=1;
+    my_strdup(443, s, subst_token(*s, token, NULL) );
    }
    state=XBEGIN;
   }
@@ -553,14 +609,13 @@ void new_prop_string(char **new_prop,const char *old_prop, int fast, int disable
  if(old_prop==NULL) 
  { 
   if(debug_var>=1) fprintf(errfp, "new_prop_string():-0-  old=NULL fast=%d\n",fast);
-  my_strdup(443, new_prop,NULL);
+  my_free(new_prop);
   return;
  }
  if(debug_var>=1) fprintf(errfp, "new_prop_string(): new=%s   old=%s\n",*new_prop, old_prop);
  old_name_len = my_strdup(444, &old_name,get_tok_value(old_prop,"name",0) ); /* added old_name_len 20180926 */
  if(old_name==NULL) 
  { 
-  /*my_strdup(445, new_prop,NULL); */
   my_strdup(446, new_prop,old_prop);  /* 03102001 changed to copy old props if no name */
   return;
  }
@@ -608,16 +663,9 @@ char *subst_token(const char *s, const char *tok, const char *new_val)
  int quote=0;
  int done_subst=0;
  int escape=0;
+ int cmptok = 1;
 
  if(debug_var>=1) fprintf(errfp, "subst_token(%s, %s, %s)\n", s, tok, new_val);
- if(new_val && !strcmp(new_val, "DELETE")) {
-    if(!strcmp(tok,"name")) {
-      fprintf(errfp,"subst_token(): Can not DELETE name attribute\n");
-      my_strdup(450, &result, s);
-      return result;
-    }
-    new_val = NULL;
- }
  sizetok=CADCHUNKALLOC;
  if(token==NULL) token=my_malloc(451, sizetok);
  else my_realloc(452, &token,sizetok);
@@ -630,7 +678,7 @@ char *subst_token(const char *s, const char *tok, const char *new_val)
   space=SPACE(c);
   if( (state==XBEGIN || state==XENDTOK) && !space && c != '=') {
     result_save_pos = result_pos-1;
-    if(result_pos < 0) result_pos = 0;
+    if(result_save_pos < 0) result_save_pos = 0;
     token_pos=0 ;
     state=XTOKEN; 
   } else if( state==XTOKEN && space) state=XENDTOK;
@@ -651,7 +699,7 @@ char *subst_token(const char *s, const char *tok, const char *new_val)
        result[result_pos++] = c;
   } else if(state==XSEPARATOR) {
        token[token_pos] = '\0'; 
-       if(!strcmp(token,tok) && !new_val) {
+       if(!(cmptok = strcmp(token,tok)) && !new_val) {
          result_pos = result_save_pos;
          if(debug_var>=3) fprintf(errfp, "subst_token(): result_pos=%d\n", result_pos);
        } else {
@@ -661,7 +709,7 @@ char *subst_token(const char *s, const char *tok, const char *new_val)
     if(c == '"' && !escape) quote=!quote;
     if(c == '\\') escape = 1;
     else escape = 0;
-    if(!strcmp(token,tok))
+    if(!cmptok)
     {
      if(!done_subst)
      {
@@ -688,10 +736,10 @@ char *subst_token(const char *s, const char *tok, const char *new_val)
      token[token_pos]='\0';
      result[result_pos++] = c;
   } else if(state == XEND) {
-       result[result_pos++] = c;
+       if(c=='\0' || !(result_save_pos == 0 && !cmptok && !new_val) ) result[result_pos++] = c;
        state = XBEGIN;
   } else if(state == XBEGIN) {
-       result[result_pos++] = c;
+       if(c=='\0' || !(result_save_pos == 0 && !cmptok && !new_val) ) result[result_pos++] = c;
   }
   if(c == '\0')  break;
  } /* end while */
@@ -798,7 +846,7 @@ void print_vhdl_element(FILE *fd, int inst) /* 20071217 */
      (inst_ptr[inst].ptr+instdef)->templ); /* 2015049 */
 
  my_strdup(462, &name,inst_ptr[inst].instname); /* 20161210 */
- /* my_strdup(463, &name,get_tok_value(inst_ptr[inst].prop_ptr,"name",0)); */
+ if(!name) my_strdup(58, &name, get_tok_value(template, "name", 0));
 
  if(name==NULL) return;
  no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
@@ -1247,6 +1295,7 @@ void print_spice_element(FILE *fd, int inst)
 
  my_strdup(484, &name,inst_ptr[inst].instname); /* 20161210 */
  /* my_strdup(485, &name,get_tok_value(inst_ptr[inst].prop_ptr,"name",0)); */
+ if(!name) my_strdup(43, &name, get_tok_value(template, "name", 0));
 
  my_strdup(486, &format,
      get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"format",2));
@@ -1269,7 +1318,7 @@ void print_spice_element(FILE *fd, int inst)
                               /* 20151028 */
   if( state==XBEGIN && c=='@' && !escape) state=XTOKEN;
 
-  /* 20171029 added !escape, !quote */          /* <<<<< */
+  /* 20171029 added !escape, !quote */
   else if( state==XTOKEN && (space || c == '@' || c == '\\')  && token_pos > 1 && !escape && !quote) {
     if(debug_var >= 1 ) fprintf(errfp, "print_spice_element: c=%c, space=%d, escape=%d, quote=%d\n", c, space, escape, quote);
     state=XSEPARATOR;
@@ -1410,6 +1459,7 @@ void print_tedax_element(FILE *fd, int inst)
 
  my_strdup(495, &name,inst_ptr[inst].instname); /* 20161210 */
  /* my_strdup(496, &name,get_tok_value(inst_ptr[inst].prop_ptr,"name",0)); */
+ if(!name) my_strdup(2, &name, get_tok_value(template, "name", 0));
 
  my_strdup(497, &format,
      get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"tedax_format",2));
@@ -1647,8 +1697,7 @@ void print_verilog_element(FILE *fd, int inst)
      (inst_ptr[inst].ptr+instdef)->templ); /* 20150409 */
 
  my_strdup(507, &name,inst_ptr[inst].instname); /* 20161210 */
- /* my_strdup(508, &name,get_tok_value(inst_ptr[inst].prop_ptr,"name",0)); */
-
+ if(!name) my_strdup(3, &name, get_tok_value(template, "name", 0));
  if(name==NULL) return;
  no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
 
@@ -1827,7 +1876,7 @@ void print_vhdl_primitive(FILE *fd, int inst) /* netlist  primitives, 20071217 *
      /* get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"template",2)); */
      (inst_ptr[inst].ptr+instdef)->templ); /* 20150409 20171103 */
  my_strdup(514, &name, inst_ptr[inst].instname); /* 20161210 */
- /* my_strdup(515, &name,get_tok_value(inst_ptr[inst].prop_ptr,"name",0)); */
+ if(!name) my_strdup(111, &name, get_tok_value(template, "name", 0));
 
  my_strdup(516, &format,
      get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"vhdl_format",2)); /* 20071217 */
@@ -1989,7 +2038,7 @@ void print_verilog_primitive(FILE *fd, int inst) /* netlist switch level primiti
      (inst_ptr[inst].ptr+instdef)->templ); /* 20150409 */
 
  my_strdup(520, &name,inst_ptr[inst].instname); /*20161210 */
- /* my_strdup(521, &name,get_tok_value(inst_ptr[inst].prop_ptr,"name",0)); */
+ if(!name) my_strdup(4, &name, get_tok_value(template, "name", 0));
 
  my_strdup(522, &format,
      get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"verilog_format",2));

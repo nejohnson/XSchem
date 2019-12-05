@@ -318,7 +318,7 @@ void hash_wire(int what, int n)
 
   /* 20190606 */
   /* wire[n].node=NULL; */ 
-  my_strdup(58, &wire[n].node, NULL);
+  my_free(&wire[n].node);
 
   wire[n].end1 = wire[n].end2=-1;
   x1=wire[n].x1;
@@ -1028,7 +1028,7 @@ void delete_netlist_structs(void)
   }
   for(i=0;i<lastwire;i++)
   {
-    my_strdup(276, &wire[i].node, NULL);
+    my_free(&wire[i].node);
   } 
   /* erase inst and wire topological hash tables */
   del_inst_pin_table();

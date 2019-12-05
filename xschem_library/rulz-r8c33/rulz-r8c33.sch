@@ -30,7 +30,7 @@ U2 PIN 1 IS UPPER LEFT
 X1 MAY BE INSTALLED EITHER ORIENTATION
 
 ALL CAPACITORS, RESISTORS, AND L1 ARE NONPOLAR
-AND MAY BE INSTALLED EITHER ORIENTATION} 1335 -505 0 0 0.5 0.5 {}
+AND MAY BE INSTALLED EITHER ORIENTATION} 1345 -485 0 0 0.5 0.5 {}
 T {PCB MATERIAL FR4 OR EQUIV 0.031 OR
 0.062 INCH COPPER ANY FROM 0.5 to
 2.0 OZ SOLDERMASK BOTH SIDES DIFFERENT
@@ -257,7 +257,7 @@ author="Stefan Frederik Schippers"
 page=1
 pages=1
 title="R8C/R33C RULZ LAB BOARD"
-lock=truex}
+lock=true}
 C {usb-minib.sym} 210 -1410 0 0 {name=CONN1
 model=usb-minib
 device=UX60SC-MB-5ST(80)
@@ -291,8 +291,7 @@ footprint=SSOP28
 comptag="manufacturer_part_number FT232RL\\ R
 manifacturer FTDI
 vendor_part_number 768-1007-1-ND
-vendor digikey"
-}
+vendor digikey"}
 C {gnd.sym} 290 -1350 0 0 {name=l2 lab=GND}
 C {noconn.sym} 290 -1380 1 0 {name=l3}
 C {noconn.sym} 190 -1270 3 0 {name=l4}

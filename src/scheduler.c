@@ -416,43 +416,51 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
  } else if(!strcmp(argv[1], "setprop")) {
    int inst, fast=0;
 
-   if(argc == 7) {
-     if(!strcmp(argv[6], "fast")) {
+   if(argc >= 6) {
+     if(!strcmp(argv[5], "fast")) {
        fast = 1;
-       argc = 6;
+       argc = 5;
      }
    }
-   if(argc!=6) {
-     Tcl_AppendResult(interp, "xschem setprop needs 4 additional arguments", NULL);
+   else if(argc >= 5) {
+     if(!strcmp(argv[4], "fast")) {
+       fast = 1;
+       argc = 4;
+     }
+   }
+
+   if(argc < 4) {
+     Tcl_AppendResult(interp, "xschem setprop needs 2 or 3 additional arguments", NULL);
      return TCL_ERROR;
    }
-   if(!strcmp(argv[2],"instance")) {
-     if( (inst = get_instance(argv[3])) < 0 ) {
-       Tcl_AppendResult(interp, "xschem setprop: instance not found", NULL);
-       return TCL_ERROR;
-     } else {
-       bbox(BEGIN,0.0,0.0,0.0,0.0);
-       symbol_bbox(inst, &inst_ptr[inst].x1, &inst_ptr[inst].y1, &inst_ptr[inst].x2, &inst_ptr[inst].y2);
-       bbox(ADD, inst_ptr[inst].x1, inst_ptr[inst].y1, inst_ptr[inst].x2, inst_ptr[inst].y2);
-       push_undo();
-       set_modify(1);
-       if(!fast) {
-         prepared_hash_instances=0;
-         prepared_netlist_structs=0;
-         prepared_hilight_structs=0;
-       }
-       hash_proplist(inst, 1); /* remove old props from hash table */
-       new_prop_string(&inst_ptr[inst].prop_ptr, subst_token(inst_ptr[inst].prop_ptr, argv[4], argv[5]),0, disable_unique_names); 
-       my_strdup2(367, &inst_ptr[inst].instname, get_tok_value(inst_ptr[inst].prop_ptr, "name",0));
-       hash_proplist(inst, 0); /* put new props in hash table */
-       /* new symbol bbox after prop changes (may change due to text length) */
-       symbol_bbox(inst, &inst_ptr[inst].x1, &inst_ptr[inst].y1, &inst_ptr[inst].x2, &inst_ptr[inst].y2);
-       bbox(ADD, inst_ptr[inst].x1, inst_ptr[inst].y1, inst_ptr[inst].x2, inst_ptr[inst].y2);
-       /* redraw symbol with new props */
-       bbox(SET,0.0,0.0,0.0,0.0);
-       draw();
-       bbox(END,0.0,0.0,0.0,0.0);
+   if( (inst = get_instance(argv[2])) < 0 ) {
+     Tcl_AppendResult(interp, "xschem setprop: instance not found", NULL);
+     return TCL_ERROR;
+   } else {
+     bbox(BEGIN,0.0,0.0,0.0,0.0);
+     symbol_bbox(inst, &inst_ptr[inst].x1, &inst_ptr[inst].y1, &inst_ptr[inst].x2, &inst_ptr[inst].y2);
+     bbox(ADD, inst_ptr[inst].x1, inst_ptr[inst].y1, inst_ptr[inst].x2, inst_ptr[inst].y2);
+     push_undo();
+     set_modify(1);
+     if(!fast) {
+       prepared_hash_instances=0;
+       prepared_netlist_structs=0;
+       prepared_hilight_structs=0;
      }
+     hash_proplist(inst, 1); /* remove old props from hash table */
+     if(argc >= 5) 
+       new_prop_string(&inst_ptr[inst].prop_ptr, subst_token(inst_ptr[inst].prop_ptr, argv[3], argv[4]),0, disable_unique_names); 
+     else /* assume argc == 4 */
+       new_prop_string(&inst_ptr[inst].prop_ptr, subst_token(inst_ptr[inst].prop_ptr, argv[3], NULL),0, disable_unique_names); 
+     my_strdup2(367, &inst_ptr[inst].instname, get_tok_value(inst_ptr[inst].prop_ptr, "name",0));
+     hash_proplist(inst, 0); /* put new props in hash table */
+     /* new symbol bbox after prop changes (may change due to text length) */
+     symbol_bbox(inst, &inst_ptr[inst].x1, &inst_ptr[inst].y1, &inst_ptr[inst].x2, &inst_ptr[inst].y2);
+     bbox(ADD, inst_ptr[inst].x1, inst_ptr[inst].y1, inst_ptr[inst].x2, inst_ptr[inst].y2);
+     /* redraw symbol with new props */
+     bbox(SET,0.0,0.0,0.0,0.0);
+     draw();
+     bbox(END,0.0,0.0,0.0,0.0);
    }
    Tcl_ResetResult(interp);
 

@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC5 file_version=1.1}
+v {xschem version=2.9.5_RC6 file_version=1.1}
 G {}
 V {}
 S {}
@@ -38,7 +38,7 @@ C {title.sym} 160 -30 0 0 {name=l7 author="Stefan Schippers"}
 C {lab_pin.sym} 620 -440 0 1 {name=l8 sig_type=std_logic lab=VCC}
 C {code_shown.sym} 50 -210 0 0 {name=CONTROL place=end value=".params l0=20u cr=89p 
 .options method=gear reltol=1m
-.tran 5ns 20us 10us 10ns
+.tran 1ns 20us 10us 1ns
 "}
 C {code.sym} 740 -200 0 0 {name=MODELS value=".MODEL Q2N5179  NPN (IS=1.55467e-17 BF=296.182 NF=0.850014 VAF=10
 +IKF=0.00544635 ISE=2.01913e-14 NE=1.54276 BR=19.550

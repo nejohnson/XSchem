@@ -230,8 +230,9 @@ void match_merged_inst(int old)
      {
       if(debug_var>=1) fprintf(errfp, "merge_inst(): missing symbol, skipping...\n");
       hash_proplist(i, 1); /* 06052001 remove props from hash table */
-      my_strdup(307, &inst_ptr[i].prop_ptr, NULL);  /* 06052001 remove properties */
-      my_strdup(308, &inst_ptr[i].name, NULL);      /* 06052001 remove symname   */
+      my_free(&inst_ptr[i].prop_ptr);  /* 06052001 remove properties */
+      my_free(&inst_ptr[i].name);      /* 06052001 remove symname   */
+      my_free(&inst_ptr[i].instname);
       missing++;
       continue;
      }
@@ -241,10 +242,11 @@ void match_merged_inst(int old)
 
       inst_ptr[i-missing] = inst_ptr[i];
       inst_ptr[i].prop_ptr=NULL;
-      delete_inst_node(i);
+      /* delete_inst_node(i); */  /* probably not needed */
       inst_ptr[i].ptr=-1;  /*04112003 was 0 */
       inst_ptr[i].flags=0;
       inst_ptr[i].name=NULL;
+      inst_ptr[i].instname=NULL;
      }
     }
     lastinst -= missing;

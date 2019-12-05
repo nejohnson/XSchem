@@ -303,8 +303,8 @@ void storeobject(int pos, double x1,double y1,double x2,double y2,
 void freenet_nocheck(int i)
 {
  int j;
-  my_strdup(415, &wire[i].prop_ptr, NULL);
-  my_strdup(416, &wire[i].node, NULL);
+  my_free(&wire[i].prop_ptr);
+  my_free(&wire[i].node);
   for(j=i+1;j<lastwire;j++)
   {
     wire[j-1] = wire[j];

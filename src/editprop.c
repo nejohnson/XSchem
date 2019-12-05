@@ -871,6 +871,7 @@ void update_symbol(const char *result, int x)
    if(event_reporting) {
      char *ss=NULL;
      set_different_token(&ss, new_prop, old_prop, ELEMENT, i);
+     my_free(&ss);
    }
    my_strdup2(90, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name",0)); /* 20150409 */
 
@@ -922,7 +923,7 @@ void fill_symbol_editprop_form(int x)
    }
    else
    {
-     set_inst_prop(i);
+     /* set_inst_prop(i); */  /* getting prop_ptr from template should be done only on 1st placement */
      if(inst_ptr[i].prop_ptr!=NULL) {
       if(netlist_commands && x==1) {
       /* 20070318 */

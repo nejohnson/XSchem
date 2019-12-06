@@ -398,10 +398,10 @@ void edit_rect_property(void)
   preserve = atoi(tclgetvar("preserve_unchanged_attrs"));
   if(strcmp(tclgetvar("rcode"),"") )
   {
+    push_undo();
+    set_modify(1);
     for(i=0; i<lastselected; i++) {
       if(selectedgroup[i].type != RECT) continue;
-      if(!modified) push_undo();
-      set_modify(1);
 
       if(preserve == 1) {
         set_different_token(&rect[selectedgroup[i].col][selectedgroup[i].n].prop_ptr, 
@@ -431,10 +431,10 @@ void edit_line_property(void)
   preserve = atoi(tclgetvar("preserve_unchanged_attrs"));
   if(strcmp(tclgetvar("rcode"),"") )
   {
+    push_undo();
+    set_modify(1);
     for(i=0; i<lastselected; i++) {
       if(selectedgroup[i].type != LINE) continue;
-      if(!modified) push_undo();
-      set_modify(1);
 
       if(preserve == 1) {
         set_different_token(&line[selectedgroup[i].col][selectedgroup[i].n].prop_ptr, 
@@ -466,15 +466,15 @@ void edit_wire_property(void)
   preserve = atoi(tclgetvar("preserve_unchanged_attrs"));
   if(strcmp(tclgetvar("rcode"),"") )
   {
+    push_undo(); /* 20150327 */
+    set_modify(1); 
     for(i=0; i<lastselected; i++) {
       int oldbus=0;
       int k = selectedgroup[i].n;
       if(selectedgroup[i].type != WIRE) continue; 
-      if(!modified) push_undo(); /* 20150327 */
       prepared_hash_wires=0; /* 20181025 */
       prepared_netlist_structs=0;
       prepared_hilight_structs=0;
-      set_modify(1); 
       oldbus = wire[k].bus;
       if(preserve == 1) {
         set_different_token(&wire[k].prop_ptr, 
@@ -512,6 +512,64 @@ void edit_wire_property(void)
   }
   my_free(&oldprop);
 }
+
+
+void edit_polygon_property(void)
+{
+  int old_fill; /* 20180914 */
+  int k;
+  double x1=0., y1=0., x2=0., y2=0.;
+  int c, i, ii;
+  char *oldprop = NULL;
+  int preserve;
+
+  if(debug_var>=1) fprintf(errfp, "edit_property(): input property:\n");
+  if(polygon[selectedgroup[0].col][selectedgroup[0].n].prop_ptr!=NULL) {
+    my_strdup(112, &oldprop, polygon[selectedgroup[0].col][selectedgroup[0].n].prop_ptr);
+    tclsetvar("retval", oldprop);
+  } else { /* 20161208 */
+    tclsetvar("retval","");
+  }
+  tcleval("text_line {Input property:} 0 normal");
+  preserve = atoi(tclgetvar("preserve_unchanged_attrs"));
+  if(strcmp(tclgetvar("rcode"),"") )
+  {
+
+   set_modify(1); push_undo(); /* 20150327 */
+   for(ii=0; ii<lastselected; ii++) {
+     if(selectedgroup[ii].type != POLYGON) continue;
+   
+     i = selectedgroup[ii].n;
+     c = selectedgroup[ii].col;
+
+     if(preserve == 1) {
+        set_different_token(&polygon[c][i].prop_ptr, (char *) tclgetvar("retval"), oldprop, 0, 0);
+
+     } else {
+        my_strdup(113, &polygon[c][i].prop_ptr, (char *) tclgetvar("retval"));
+     }
+     old_fill = polygon[c][i].fill;
+     if( !strcmp(get_tok_value(polygon[c][i].prop_ptr,"fill",0),"true") )
+       polygon[c][i].fill =1;
+     else 
+       polygon[c][i].fill =0;
+     if(old_fill != polygon[c][i].fill) {
+       bbox(BEGIN,0.0,0.0,0.0,0.0);
+       for(k=0; k<polygon[c][i].points; k++) {
+         if(k==0 || polygon[c][i].x[k] < x1) x1 = polygon[c][i].x[k];
+         if(k==0 || polygon[c][i].y[k] < y1) y1 = polygon[c][i].y[k];
+         if(k==0 || polygon[c][i].x[k] > x2) x2 = polygon[c][i].x[k];
+         if(k==0 || polygon[c][i].y[k] > y2) y2 = polygon[c][i].y[k];
+       }
+       bbox(ADD, x1, y1, x2, y2);
+       bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
+       draw();
+       bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
+     }
+   }
+  }
+}
+
 
 /* x=0 use text widget   x=1 use vim editor */
 void edit_text_property(int x)
@@ -1116,47 +1174,8 @@ void edit_property(int x)
    edit_wire_property();
    break;
   case POLYGON: /* 20171115 */
-   if(debug_var>=1) fprintf(errfp, "edit_property(): input property:\n");
-   if(polygon[selectedgroup[0].col][selectedgroup[0].n].prop_ptr!=NULL) {
-     tclsetvar("retval",polygon[selectedgroup[0].col][selectedgroup[0].n].prop_ptr);
-   } else { /* 20161208 */
-     tclsetvar("retval","");
-   }
-   tcleval("text_line {Input property:} 0");
-   if(strcmp(tclgetvar("rcode"),"") )
-   {
-    int old_fill; /* 20180914 */
-    int k;
-    double x1=0., y1=0., x2=0., y2=0.;
-    int c, i;
-
-    c = selectedgroup[0].col;
-    i = selectedgroup[0].n;
-    set_modify(1); push_undo(); /* 20150327 */
-    my_strdup(101, &polygon[c][i].prop_ptr,
-        (char *) tclgetvar("retval"));
-    /* 20180914 */
-    old_fill = polygon[c][i].fill;
-    if( !strcmp(get_tok_value(polygon[c][i].prop_ptr,"fill",0),"true") )
-      polygon[c][i].fill =1;
-    else 
-      polygon[c][i].fill =0;
-    if(old_fill != polygon[c][i].fill) {
-      bbox(BEGIN,0.0,0.0,0.0,0.0);
-      for(k=0; k<polygon[c][i].points; k++) {
-        if(k==0 || polygon[c][i].x[k] < x1) x1 = polygon[c][i].x[k];
-        if(k==0 || polygon[c][i].y[k] < y1) y1 = polygon[c][i].y[k];
-        if(k==0 || polygon[c][i].x[k] > x2) x2 = polygon[c][i].x[k];
-        if(k==0 || polygon[c][i].y[k] > y2) y2 = polygon[c][i].y[k];
-      }
-      bbox(ADD, x1, y1, x2, y2);
-      bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
-      draw();
-      bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
-    }
-   }
+   edit_polygon_property();
    break;
-
   case LINE:
    edit_line_property();
    break;

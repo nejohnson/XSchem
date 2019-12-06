@@ -1128,7 +1128,6 @@ int Tcl_AppInit(Tcl_Interp *inter)
     {
       XWindowAttributes wattr;
       XGetWindowAttributes(display, window, &wattr);
-
       #if HAS_XRENDER==1
       #if HAS_XCB==1
       sfc = cairo_xcb_surface_create_with_xrender_format(xcbconn, screen_xcb, window, &format_rgb, 1 , 1);
@@ -1152,6 +1151,16 @@ int Tcl_AppInit(Tcl_Interp *inter)
       }
       ctx = cairo_create(sfc);
       save_ctx = cairo_create(save_sfc);
+
+      #if 0
+      {
+        cairo_font_options_t *cfo;
+        cfo = cairo_font_options_create ();
+        cairo_font_options_set_antialias(cfo, CAIRO_ANTIALIAS_DEFAULT); /* CAIRO_ANTIALIAS_NONE */
+        cairo_set_font_options (ctx, cfo);
+        cairo_set_font_options (save_ctx, cfo);
+      }
+      #endif
 
       /* load font from tcl 20171112 */
       tcleval("xschem set cairo_font_name $cairo_font_name");

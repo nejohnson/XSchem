@@ -73,7 +73,7 @@ P2's PWM outputs drive an RGB LED. } 385 -2185 0 0 0.7 0.7 {}
 T {R8C/33c DevCon Lab Board} 690 -2325 0 0 1 1 {}
 T {Copyright (C) 2010 DJ Delorie (dj delorie com)
 Distributed under the terms of the GNU General
-Public License, either verion 2 or (at your choice)
+Public License, either version 2 or (at your choice)
 any later version.} 2240 -370 0 0 0.7 0.7 {layer=8}
 T {ctrl-left-click
 for datasheet} 930 -1550 0 0 0.4 0.4 {layer=8}

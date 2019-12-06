@@ -395,7 +395,7 @@ void edit_rect_property(void)
   }
 
   tcleval("text_line {Input property:} 0 normal");
-  preserve = atoi(tclgetvar("rbutton2"));
+  preserve = atoi(tclgetvar("preserve_unchanged_attrs"));
   if(strcmp(tclgetvar("rcode"),"") )
   {
     for(i=0; i<lastselected; i++) {
@@ -428,7 +428,7 @@ void edit_line_property(void)
     tclsetvar("retval","");
   }
   tcleval("text_line {Input property:} 0 normal");
-  preserve = atoi(tclgetvar("rbutton2"));
+  preserve = atoi(tclgetvar("preserve_unchanged_attrs"));
   if(strcmp(tclgetvar("rcode"),"") )
   {
     for(i=0; i<lastselected; i++) {
@@ -463,7 +463,7 @@ void edit_wire_property(void)
     tclsetvar("retval","");
   }
   tcleval("text_line {Input property:} 0 normal");
-  preserve = atoi(tclgetvar("rbutton2"));
+  preserve = atoi(tclgetvar("preserve_unchanged_attrs"));
   if(strcmp(tclgetvar("rcode"),"") )
   {
     for(i=0; i<lastselected; i++) {
@@ -743,8 +743,8 @@ void update_symbol(const char *result, int x)
 
   my_strncpy(symbol, (char *) tclgetvar("symbol") , S(symbol));
   if(debug_var>=1) fprintf(errfp, "update_symbol(): symbol=%s\n", symbol);
-  no_change_props=atoi(tclgetvar("rbutton1") );
-  only_different=atoi(tclgetvar("rbutton2") );
+  no_change_props=atoi(tclgetvar("no_change_attrs") );
+  only_different=atoi(tclgetvar("preserve_unchanged_attrs") );
   copy_cell=atoi(tclgetvar("user_wants_copy_cell") ); /* 20150911 */
 
 

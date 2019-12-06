@@ -1350,15 +1350,13 @@ proc ask_save { {ask {save file?}} } {
 
 
 proc edit_vi_prop {txtlabel} {
- global XSCHEM_TMP_DIR retval symbol prev_symbol rcode rbutton1 rbutton2 tcl_debug netlist_type editor
+ global XSCHEM_TMP_DIR retval symbol prev_symbol rcode tcl_debug netlist_type editor
 
  # 20150914
  global user_wants_copy_cell
  set user_wants_copy_cell 0
 
  set rcode {}
-# set rbutton1 0  ## 20090518 commented...
-# set rbutton2 0
  set filename .xschem_edit_file.[pid]
  if ![string compare $netlist_type "vhdl"] { set suffix vhd } else { set suffix v }
  set filename $filename.$suffix
@@ -1383,14 +1381,12 @@ proc edit_vi_prop {txtlabel} {
 }
 
 proc edit_vi_netlist_prop {txtlabel} {
- global XSCHEM_TMP_DIR retval rcode rbutton1 rbutton2 tcl_debug netlist_type editor
+ global XSCHEM_TMP_DIR retval rcode tcl_debug netlist_type editor
 
  # 20150914
  global user_wants_copy_cell
  set user_wants_copy_cell 0
 
- # set rbutton1 0 ;# commented 20121206
- # set rbutton2 0 ;# commented 20121206
  set filename .xschem_edit_file.[pid]
  if ![string compare $netlist_type "vhdl"] { set suffix vhd } else { set suffix v }
  set filename $filename.$suffix
@@ -1452,7 +1448,7 @@ proc change_color {} {
 
 proc edit_prop {txtlabel} {
    global edit_prop_default_geometry infowindow_text
-   global prev_symbol retval symbol rcode rbutton1 rbutton2 copy_cell tcl_debug editprop_semaphore
+   global prev_symbol retval symbol rcode no_change_attrs preserve_unchanged_attrs copy_cell tcl_debug editprop_semaphore
    global user_wants_copy_cell editprop_sympath
    set user_wants_copy_cell 0
    set rcode {}
@@ -1556,8 +1552,8 @@ proc edit_prop {txtlabel} {
    button .ent2.f1.b4 -text "Del" -command {
      .ent2.e1 delete 1.0 end
    }
-   checkbutton .ent2.f2.r1 -text "no change properties" -variable rbutton1 -state normal
-   checkbutton .ent2.f2.r2 -text "preserve unchanged props" -variable rbutton2 -state normal
+   checkbutton .ent2.f2.r1 -text "no change properties" -variable no_change_attrs -state normal
+   checkbutton .ent2.f2.r2 -text "preserve unchanged props" -variable preserve_unchanged_attrs -state normal
    checkbutton .ent2.f2.r3 -text "copy cell" -variable copy_cell -state normal
 
    pack .ent2.f1.l2 .ent2.f1.e2 .ent2.f1.b1 .ent2.f1.b2 .ent2.f1.b3 .ent2.f1.b4 .ent2.f1.b5 -side left -expand 1
@@ -1646,7 +1642,7 @@ proc write_data {data f} {
 }
 
 proc text_line {txtlabel clear {preserve_disabled disabled} } {
-   global text_line_default_geometry rbutton2
+   global text_line_default_geometry preserve_unchanged_attrs
    global retval rcode tcl_debug
    if $clear==1 then {set retval ""}
    if $tcl_debug<=-1 then {puts " text_line{}: clear=$clear"}
@@ -1714,7 +1710,7 @@ proc text_line {txtlabel clear {preserve_disabled disabled} } {
    {
      .ent2.e1 delete 1.0 end
    }
-   checkbutton .ent2.f0.l2 -text "preserve unchanged props" -variable rbutton2 -state $preserve_disabled
+   checkbutton .ent2.f0.l2 -text "preserve unchanged props" -variable preserve_unchanged_attrs -state $preserve_disabled
    pack .ent2.f0 -fill x
    pack .ent2.f0.l2 -side left
    pack .ent2.f0.l1 -side left -expand yes
@@ -2099,7 +2095,7 @@ if { [info exists XSCHEM_LIBRARY_PATH] } {
     if { ![string compare $i .] } {
       lappend pathlist $i
     } elseif { [ file exists $i] } {
-      lappend pathlist ${i} ;# removed file normalize
+      lappend pathlist [file normalize ${i}]
     }
   }
 }
@@ -2313,8 +2309,8 @@ set_ne colors $dark_colors
 
 
 # 20111005 added missing initialization of globals...
-set rbutton1 0
-set rbutton2 0
+set_ne no_change_attrs 0
+set_ne preserve_unchanged_attrs 1
 set search_select 0
 
 # 20111106 these vars are overwritten by caller with mktemp file names

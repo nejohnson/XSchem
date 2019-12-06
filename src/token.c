@@ -322,7 +322,7 @@ int set_different_token(char **s,char *new, char *old, int object, int n)
  state = XBEGIN;
  escape = quote = token_pos = value_pos = 0;
  /* parse old string and remove attributes that are not present in new */
- while(1) {
+ while(old) {
   c=*old++;
   space=SPACE(c) ;
   if( (state==XBEGIN || state==XENDTOK) && !space && c != '=') state=XTOKEN;

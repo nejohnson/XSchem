@@ -290,7 +290,7 @@ void toggle_fullscreen()
     char fullscr[]="add,fullscreen";
     char normal[]="remove,fullscreen";
     static int menu_removed = 0;
-    fullscreen = (fullscreen+1)%3;
+    fullscreen = (fullscreen+1)%2;
     if(fullscreen==1) tclsetvar("fullscreen","1");
     else if(fullscreen==2) tclsetvar("fullscreen","2");
     else tclsetvar("fullscreen","0");
@@ -307,7 +307,10 @@ void toggle_fullscreen()
     }
      
 
-    if(fullscreen !=0) {
+    if(fullscreen == 1) {
+      window_state(display , parent_of_topwindow,fullscr);
+    } else if(fullscreen == 2) {
+      window_state(display , parent_of_topwindow,normal);
       window_state(display , parent_of_topwindow,fullscr);
     } else {
       window_state(display , parent_of_topwindow,normal);

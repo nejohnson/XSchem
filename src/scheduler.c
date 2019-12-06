@@ -746,6 +746,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
  } else if(!strcmp(argv[1],"wire")) {   
    double x1,y1,x2,y2;
    int pos, save;
+   const char *prop;
    if(argc>=6) {
      x1=atof(argv[2]);
      y1=atof(argv[3]);
@@ -753,8 +754,11 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
      y2=atof(argv[5]);
      ORDER(x1,y1,x2,y2);
      pos=-1;
-     if(argc==7) pos=atol(argv[6]);
-     storeobject(pos, x1,y1,x2,y2,WIRE,0,0,NULL);
+     if(argc >= 7) pos=atol(argv[6]);
+     if(argc == 8) prop = argv[7]; 
+     else prop = NULL;
+     push_undo();
+     storeobject(pos, x1,y1,x2,y2,WIRE,0,0,prop);
      save = draw_window; draw_window = 1;
      drawline(WIRELAYER,NOW, x1,y1,x2,y2);
      draw_window = save;

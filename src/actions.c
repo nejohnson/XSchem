@@ -1524,7 +1524,11 @@ void new_wire(int what, double mx_snap, double my_snap)
          storeobject(-1, xx1,yy1,xx2,yy2,WIRE,0,0,NULL);
          drawline(WIRELAYER,NOW, xx1,yy1,xx2,yy2);
        }
-       
+       if(event_reporting) {
+         printf("xschem wire %g %g %g %g %d\n", xx1, yy1, xx2, yy2, -1);
+         fflush(stdout);
+       }
+ 
      }
      if(! (what &END)) {
        x1=mx_snap;

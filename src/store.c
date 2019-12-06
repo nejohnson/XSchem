@@ -216,7 +216,7 @@ void store_polygon(int pos, double *x, double *y, int points, unsigned int rectc
 
 void storeobject(int pos, double x1,double y1,double x2,double y2,
                  unsigned short type, unsigned int rectcolor,
-                 unsigned short sel, char *prop_ptr)
+                 unsigned short sel, const char *prop_ptr)
 {
  int n, j;
     if(type == LINE)

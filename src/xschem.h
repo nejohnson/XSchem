@@ -41,7 +41,7 @@
 /*  approximate PI definition */
 #define XSCH_PI 3.14159265358979323846264338327950288419716939937
 
-/* #include "../config.h" */
+#include "../config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -736,7 +736,7 @@ extern void check_touch(int i, int j,
 
 extern void storeobject(int pos, double x1,double y1,double x2,double y2,
                         unsigned short type,unsigned int rectcolor,
-                        unsigned short sel, char *prop_ptr);
+                        unsigned short sel, const char *prop_ptr);
 extern void store_polygon(int pos, double *x, double *y, int points,  /*  20171115 */
            unsigned int rectcolor, unsigned short sel, char *prop_ptr);
 extern void store_arc(int pos, double x, double y, double r, double a, double b,

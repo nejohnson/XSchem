@@ -873,6 +873,11 @@ void move_objects(int what, int merge, double dx, double dy)
     deltax = dx;
     deltay = dy;
   }
+
+  if(event_reporting) {
+    printf("xschem move_objects %g %g\n", deltax, deltay);
+    fflush(stdout);
+  }
   for(k=0;k<cadlayers;k++)
   {
    drawarc(k, BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);

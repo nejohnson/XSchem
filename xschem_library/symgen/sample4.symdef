@@ -2,17 +2,15 @@
 TEST SYMBOL
 STEFAN SCHIPPERS
 ! type=subcircuit
-! format=@name @pinlist @model
+! format="@name @pinlist @model"
 ! template="name=X1"
---auto_pinnumber
---hide_pinnumber
 [left]
-  i      D
-  i      RST
-  i>!    CLK
+  1 i      D
+  2 i      RST
+  3 i>!    CLK
 [right]
-  o      QB
+  4 o      QB
 [top]
-  io     VCC
+  5 io     VCC
 [bottom]
-  io     VSS
+  6 io     VSS

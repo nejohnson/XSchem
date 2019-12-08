@@ -119,7 +119,6 @@ install: xschem
 	cp xschem.tcl  $(prefix)/share/xschem
 	cp -r systemlib $(prefix)/share/xschem
 	cp break.awk $(prefix)/share/xschem
-	cp symgen.awk $(prefix)/share/xschem
 	cp convert_to_verilog2001.awk $(prefix)/share/xschem
 	cp flatten.awk $(prefix)/share/xschem
 	cp make_sym.awk $(prefix)/share/xschem
@@ -133,6 +132,7 @@ install: xschem
 	cp vhdl.awk $(prefix)/share/xschem
 	cp hspice_backannotate.tcl $(prefix)/share/xschem
 	cp ngspice_backannotate.tcl $(prefix)/share/xschem
+	cp gschemtoxschem.awk $(prefix)/share/xschem
 	cp change_index.tcl $(prefix)/share/xschem
 	cp -r ../doc/* $(prefix)/share/doc/xschem/
 	cp ./utile/* $(prefix)/share/xschem/utile

@@ -119,7 +119,7 @@ start_labels == 1 {
 ## typical pin line is as follows
 ## 26   i!>   CLK
 start_pin {
-  if(NF > 0 && enable_autopinnumber) $0 = autopinnumber++ " " $0
+  if(NF > 0 && enable_autopinnumber) $0 = ++autopinnumber " " $0
   n =  pin[pos, "n"]
   if(NF == 0) {
     if(bus == 1) coord += delta1

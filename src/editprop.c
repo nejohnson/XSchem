@@ -1023,7 +1023,7 @@ void change_elem_order(void)
     {
      my_snprintf(tmp_txt, S(tmp_txt), "%d",selectedgroup[0].n);
      tclsetvar("retval",tmp_txt);
-     tcleval("text_line {Input number} 0");
+     tcleval("text_line {Object Sequence number} 0");
      if(strcmp(tclgetvar("rcode"),"") )
      {
       push_undo(); /* 20150327 */

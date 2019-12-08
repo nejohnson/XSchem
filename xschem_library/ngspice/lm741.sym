@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC5 file_version=1.1}
+v {xschem version=2.9.5_RC6 file_version=1.1}
 G {type=opamp
 format="@spiceprefix@name @pinlist @model"
 tedax_format="footprint @name @footprint
@@ -26,8 +26,8 @@ T {@name} 20 -42 0 0 0.3 0.3 {}
 T {@#2:pinnumber} 85 -14 0 0 0.2 0.2 {layer=13}
 T {@#0:pinnumber} -85 -54 0 1 0.2 0.2 {layer=13}
 T {@#1:pinnumber} -85 26 0 1 0.2 0.2 {layer=13}
-T {OUT} 61.5625 -4.9375 0 1 0.2 0.2 {}
-T {PLUS} -75 -44 0 0 0.2 0.2 {}
-T {MINUS} -75 36 0 0 0.2 0.2 {}
+T {@#4:name} 61.5625 -4.9375 0 1 0.2 0.2 {}
+T {@#0:name} -75 -44 0 0 0.2 0.2 {}
+T {@#1:name} -75 36 0 0 0.2 0.2 {}
 T {@#4:pinnumber} 5 46 0 0 0.2 0.2 {layer=13}
 T {@#3:pinnumber} 5 -56.5 0 0 0.2 0.2 {layer=13}

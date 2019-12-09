@@ -1144,6 +1144,7 @@ void change_linewidth(double w)
     if(change_lw)  {
       lw_double=mooz * 0.150 * cadsnap;
       bus_width = BUS_WIDTH * mooz * 0.150 * cadsnap;
+      cadhalfdotsize = CADHALFDOTSIZE * 0.1 * cadsnap;
       changed=1;
     }
   /* explicitly set line width */

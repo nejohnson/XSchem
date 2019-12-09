@@ -272,13 +272,13 @@ void delete(void)
     j++; 
     if(wire[i].bus){ /* 20171201 */
       int ov, y1, y2;
-      ov = bus_width> CADHALFDOTSIZE ? bus_width : CADHALFDOTSIZE;
+      ov = bus_width> cadhalfdotsize ? bus_width : CADHALFDOTSIZE;
       if(wire[i].y1 < wire[i].y2) { y1 = wire[i].y1-ov; y2 = wire[i].y2+ov; }
       else                        { y1 = wire[i].y1+ov; y2 = wire[i].y2-ov; }
       bbox(ADD, wire[i].x1-ov, y1 , wire[i].x2+ov , y2 );
     } else {
       int ov, y1, y2;
-      ov = CADHALFDOTSIZE;
+      ov = cadhalfdotsize;
       if(wire[i].y1 < wire[i].y2) { y1 = wire[i].y1-ov; y2 = wire[i].y2+ov; }
       else                        { y1 = wire[i].y1+ov; y2 = wire[i].y2-ov; }
       bbox(ADD, wire[i].x1-ov, y1 , wire[i].x2+ov , y2 );

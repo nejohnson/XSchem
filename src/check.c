@@ -89,7 +89,7 @@ void update_conn_cues(int draw_cues, int dr_win)
 
   if(!lastwire) return;
   if(!draw_dots) return;
-  if(CADHALFDOTSIZE*mooz<0.7) return;
+  if(cadhalfdotsize*mooz<0.7) return;
 
   x1 = X_TO_XSCHEM(areax1);
   y1 = Y_TO_XSCHEM(areay1);
@@ -138,10 +138,10 @@ void update_conn_cues(int draw_cues, int dr_win)
     for(init_wire_iterator(x1, y1, x2, y2); ( wireptr = wire_iterator_next() ) ;) {
       i = wireptr->n;
       if( wire[i].end1 >1 ) { /* 20150331 draw_dots */
-        filledarc(WIRELAYER, ADD, wire[i].x1, wire[i].y1, CADHALFDOTSIZE, 0, 360);
+        filledarc(WIRELAYER, ADD, wire[i].x1, wire[i].y1, cadhalfdotsize, 0, 360);
       }
       if( wire[i].end2 >1 ) { /* 20150331 draw_dots */
-        filledarc(WIRELAYER, ADD, wire[i].x2, wire[i].y2, CADHALFDOTSIZE, 0, 360);
+        filledarc(WIRELAYER, ADD, wire[i].x2, wire[i].y2, cadhalfdotsize, 0, 360);
       }
     }
     filledarc(WIRELAYER, END, 0.0, 0.0, 0.0, 0.0, 0.0);

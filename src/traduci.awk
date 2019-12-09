@@ -17,8 +17,8 @@ END  { endfile(_filename_) }
 BEGIN{
 }
 
-/bus_connect_not_shown/{
-  sub(/bus_connect_not_shown/, "bus_connect")
+/CADHALFDOTSIZE/{
+  sub(/CADHALFDOTSIZE/, "cadhalfdotsize")
   found = 1
 }
 

@@ -486,7 +486,7 @@ void edit_wire_property(void)
       if(!strcmp(bus_ptr, "true")) {
         int ov, y1, y2;
         bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0);
-        ov = bus_width > CADHALFDOTSIZE ? bus_width : CADHALFDOTSIZE;
+        ov = bus_width > cadhalfdotsize ? bus_width : CADHALFDOTSIZE;
         if(wire[k].y1 < wire[k].y2) { y1 = wire[k].y1-ov; y2 = wire[k].y2+ov; }
         else                        { y1 = wire[k].y1+ov; y2 = wire[k].y2-ov; }
         bbox(ADD, wire[k].x1-ov, y1 , wire[k].x2+ov , y2 );
@@ -498,7 +498,7 @@ void edit_wire_property(void)
         if(oldbus){ /* 20171201 */
           int ov, y1, y2;
           bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0);
-          ov = bus_width> CADHALFDOTSIZE ? bus_width : CADHALFDOTSIZE;
+          ov = bus_width> cadhalfdotsize ? bus_width : CADHALFDOTSIZE;
           if(wire[k].y1 < wire[k].y2) { y1 = wire[k].y1-ov; y2 = wire[k].y2+ov; }
           else                        { y1 = wire[k].y1+ov; y2 = wire[k].y2-ov; }
           bbox(ADD, wire[k].x1-ov, y1 , wire[k].x2+ov , y2 );

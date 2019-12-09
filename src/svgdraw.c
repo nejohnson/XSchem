@@ -526,10 +526,10 @@ void svg_draw(void)
      for(init_wire_iterator(x1, y1, x2, y2); ( wireptr = wire_iterator_next() ) ;) {
        i = wireptr->n;
        if( wire[i].end1 >1 ) { /* 20150331 draw_dots */
-         svg_drawcircle(WIRELAYER, 1, wire[i].x1, wire[i].y1, CADHALFDOTSIZE, 0, 360);
+         svg_drawcircle(WIRELAYER, 1, wire[i].x1, wire[i].y1, cadhalfdotsize, 0, 360);
        }
        if( wire[i].end2 >1 ) { /* 20150331 draw_dots */
-         svg_drawcircle(WIRELAYER, 1, wire[i].x2, wire[i].y2, CADHALFDOTSIZE, 0, 360);
+         svg_drawcircle(WIRELAYER, 1, wire[i].x2, wire[i].y2, cadhalfdotsize, 0, 360);
        }
      }
    }

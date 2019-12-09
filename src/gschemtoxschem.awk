@@ -1,7 +1,7 @@
 #!/usr/bin/awk -f
 
 BEGIN{
-  halfpinsize=20
+  halfpinsize=2.5
   ret = 1
 }
 
@@ -9,10 +9,10 @@ BEGIN{
   while(ret > 0 ) {
 
     if($0 ~ /^L/){
-      x1 = $2
-      y1 = $3
-      x2 = $4
-      y2 = $5
+      x1 = $2 / 10
+      y1 = $3 / 10
+      x2 = $4 / 10
+      y2 = $5 / 10
       lines = lines  "L 4 " order(x1, y1, x2, y2) " {}\n"
     }
     
@@ -27,9 +27,9 @@ BEGIN{
     # 0-------------3--------------6
     # num_lines starts at 1
     else if($0 ~ /^T/){
-      xt = $2
-      yt = $3
-      size = $5 / 4
+      xt = $2 / 10
+      yt = $3 / 10
+      size = $5 / 30
       visibility = $6
       show = $7
       angle = $8
@@ -64,10 +64,10 @@ BEGIN{
     } 
        
     else if($0 ~ /^B/){
-      x1 = $2
-      y1 = $3
-      x2 = x1 + $4
-      y2 = y1 + $5
+      x1 = $2 / 10
+      y1 = $3 / 10
+      x2 = x1 + $4 / 10
+      y2 = y1 + $5 / 10
       boxes = boxes "L 4 " x1 " " (-y1) " " x2 " " (-y1) " {}\n"
       boxes = boxes "L 4 " x2 " " (-y2) " " x2 " " (-y1) " {}\n"
       boxes = boxes "L 4 " x1 " " (-y2) " " x2 " " (-y2) " {}\n"
@@ -75,12 +75,12 @@ BEGIN{
     }
     
     else if($0 ~ /^V/){ #circle
-      circles = circles "A 4 " $2 " " -$3 " " $4 " " 0 " " 360 " {}\n"
+      circles = circles "A 4 " $2/10 " " -$3/10 " " $4/10 " " 0 " " 360 " {}\n"
     }
     
     # A 1000 1000 100 90 180 3 0 0 0 -1 -1
     else if($0 ~ /^A/){ #arc
-      arcs = arcs "A 4 " $2 " " -$3 " " $4 " " $5 " " $6 " {}\n"
+      arcs = arcs "A 4 " $2/10 " " -$3/10 " " $4/10 " " $5 " " $6 " {}\n"
     }
     
     # H 3 0 0 0 -1 -1 1 -1 -1 -1 -1 -1 5 <--n_lines
@@ -95,8 +95,8 @@ BEGIN{
           polyx[i] = polyx[0]
           polyy[i] = polyy[0]
         } else {
-          polyx[i] = $2
-          polyy[i] = -$3
+          polyx[i] = $2/10
+          polyy[i] = -$3/10
         }
         polys = polys polyx[i] " " polyy[i] " " 
       }
@@ -105,10 +105,10 @@ BEGIN{
     
     # N 39000 50400 39000 51000 4
     else if($0 ~/^N/) {
-      nx1 = $2
-      ny1 = -$3
-      nx2 = $4
-      ny2 = -$5
+      nx1 = $2/10
+      ny1 = -$3/10
+      nx2 = $4/10
+      ny2 = -$5/10
       propstring = ""
       ret = getline
       if($0 == "{") {
@@ -133,8 +133,8 @@ BEGIN{
     #C 36700 54700    1         90     0   resistor-1.sym
     #component
     else if($0 ~ /^C/){  
-      cx = $2
-      cy=-$3
+      cx = $2/10
+      cy=-$3/10
       crot = $5/90
       if(crot == 1) crot = 3
       cflip = $6
@@ -162,6 +162,7 @@ BEGIN{
       
     # P 900 100 750 100 1 0 0
     else if($0 ~ /^P/){
+      $2/=10; $3/=10; $4/=10; $5/=10
       pin_idx++
       pin_line[pin_idx] =  "L 3 " order($2, $3, $4, $5) " {}"
       if($8 == 0) {
@@ -178,10 +179,10 @@ BEGIN{
         while($0 !="}") {
           getline
           if($1 == "T") {
-            xt = $2
-            yt = $3
+            xt = $2/10
+            yt = $3/10
             color = $4
-            size = $5/4
+            size = $5/30
             visible = $6
             show = $7
             angle = $8

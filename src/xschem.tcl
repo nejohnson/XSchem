@@ -2785,10 +2785,10 @@ font configure Underline-Font -underline true -size 24
    label .statusbar.1   -text "STATUS BAR 1"  
    label .statusbar.2   -text "SNAP:"
    entry .statusbar.3 -textvariable snap -relief sunken -bg white \
-          -width 10 -state disabled -disabledforeground black 
+          -width 10 -foreground black 
    label .statusbar.4   -text "GRID:"
    entry .statusbar.5 -textvariable grid -relief sunken -bg white \
-          -width 10 -state disabled -disabledforeground black 
+          -width 10 -foreground black 
    label .statusbar.6   -text "NETLIST MODE:"
    entry .statusbar.7 -textvariable netlist_type -relief sunken -bg white \
           -width 10 -state disabled -disabledforeground black 
@@ -2802,6 +2802,8 @@ font configure Underline-Font -underline true -size 24
    pack .drw -anchor n -side top -fill both -expand true
    pack .menubar -anchor n -side top -fill x  -before .drw
    pack .statusbar -after .drw -anchor sw  -fill x 
+   bind .statusbar.5 <Leave> { xschem set cadgrid $grid; focus .drw}
+   bind .statusbar.3 <Leave> { xschem set cadsnap $snap; focus .drw}
 ###
 ### Tk event handling
 ###
@@ -2817,7 +2819,7 @@ font configure Underline-Font -underline true -size 24
    bind .drw <KeyPress> {xschem callback %T %x %y %N 0 0 %s}
    bind .drw <KeyRelease> {xschem callback %T %x %y %N 0 0 %s} ;# 20161118
    bind .drw <Motion> {xschem callback %T %x %y 0 0 0 %s}
-   bind .drw  <Enter> { xschem callback %T %x %y 0 0 0 0 }
+   bind .drw  <Enter> {xschem callback %T %x %y 0 0 0 0 }
    bind .drw <Leave> {}
    bind .drw <Unmap> {
     wm withdraw .infotext

@@ -109,9 +109,9 @@ void set_snap(double newsnap) /*  20161212 set new snap factor and just notify n
     cadsnap = newsnap ? newsnap : default_snap;
     sprintf(str, "%.16g", cadsnap);
     if(cadsnap == default_snap) {
-      tcleval(".statusbar.3 configure -disabledbackground PaleGreen");
+      tcleval(".statusbar.3 configure -background PaleGreen");
     } else {
-      tcleval(".statusbar.3 configure -disabledbackground OrangeRed");
+      tcleval(".statusbar.3 configure -background OrangeRed");
     }
     tclsetvar("snap", str);
 }
@@ -129,9 +129,9 @@ void set_grid(double newgrid)
     sprintf(str, "%.16g", cadgrid);
     if(debug_var>=1) fprintf(errfp, "set_grid(): default_grid = %.16g, cadgrid=%.16g\n", default_grid, cadgrid);
     if(cadgrid == default_grid) {
-      tcleval(".statusbar.5 configure -disabledbackground PaleGreen");
+      tcleval(".statusbar.5 configure -background PaleGreen");
     } else {
-      tcleval(".statusbar.5 configure -disabledbackground OrangeRed");
+      tcleval(".statusbar.5 configure -background OrangeRed");
     }
     tclsetvar("grid", str);
 }
@@ -1142,8 +1142,8 @@ void change_linewidth(double w)
   /* choose line width automatically based on zoom */
   if(w<0.) {
     if(change_lw)  {
-      lw_double=mooz * 1.5;
-      bus_width = BUS_WIDTH * mooz * 1.5;
+      lw_double=mooz * 0.150 * cadsnap;
+      bus_width = BUS_WIDTH * mooz * 0.150 * cadsnap;
       changed=1;
     }
   /* explicitly set line width */

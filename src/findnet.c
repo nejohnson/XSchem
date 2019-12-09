@@ -30,8 +30,8 @@ void find_closest_net(double mx,double my)
 /* if there are nets and distance < CADWIREMINDIST */
 {
  double tmp;
- static double threshold = CADWIREMINDIST * CADWIREMINDIST;
  int i,w=-1;
+ double threshold = CADWIREMINDIST * CADWIREMINDIST * cadgrid * cadgrid / 400;
 
  for(i=0;i<lastwire;i++)
  {
@@ -51,9 +51,9 @@ void find_closest_polygon(double mx,double my)
 /* if there are lines and distance < CADWIREMINDIST */
 {
  double tmp;
- static double threshold = CADWIREMINDIST * CADWIREMINDIST;
  int i, c, j, l=-1;
  double x1, y1, x2, y2;
+ double threshold = CADWIREMINDIST * CADWIREMINDIST * cadgrid * cadgrid / 400;
  for(c=0;c<cadlayers;c++)
  {
   for(i=0;i<lastpolygon[c];i++)
@@ -85,8 +85,8 @@ void find_closest_line(double mx,double my)
 /* if there are lines and distance < CADWIREMINDIST */
 {
  double tmp;
- static double threshold = CADWIREMINDIST * CADWIREMINDIST;
  int i,c,l=-1;
+ double threshold = CADWIREMINDIST * CADWIREMINDIST * cadgrid * cadgrid / 400;
  for(c=0;c<cadlayers;c++)
  {
   for(i=0;i<lastline[c];i++)
@@ -170,7 +170,7 @@ void find_closest_net_or_symbol_pin(double mx,double my, double *x, double *y)
 
 void find_closest_arc(double mx,double my)
 {
- static double threshold = 0.2;
+ double thres = 0.2*cadgrid*cadgrid/400;
  double dist, angle, angle1, angle2;
  int i,c,r=-1;
  int match;
@@ -209,7 +209,7 @@ void find_closest_arc(double mx,double my)
     }
   } /* end for i */
  } /* end for c */
- if( r!=-1 && distance <= threshold* pow(arc[sel.col][r].r,2))
+ if( r!=-1 && distance <= thres* pow(arc[sel.col][r].r,2))
  {
   sel.n = r; sel.type = ARC;
  }
@@ -268,8 +268,8 @@ void find_closest_text(double mx,double my)
 {
  int rot,flip;
  double xx1,xx2,yy1,yy2;
- static double threshold = CADWIREMINDIST * CADWIREMINDIST;
  int i,r=-1;
+ double threshold = CADWIREMINDIST * CADWIREMINDIST * cadgrid * cadgrid / 400;
  #ifdef HAS_CAIRO
  int customfont;
  #endif

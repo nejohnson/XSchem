@@ -40,18 +40,18 @@ BEGIN{
       for(i = 1; i<= nlines; i++) {
         getline
         if($0 ~/=/) {
-          sub(/^device/, "type") 
           sub(/^refdes/, "name")
-          if ($0 ~/type/) {
+          template_attrs = template_attrs escape_chars($0) "\n"
+          sub(/^device/, "type") 
+          if ($0 ~/^type=/) {
             global_attrs = global_attrs $0 "\n"
-          } else {
-            template_attrs = template_attrs escape_chars($0) "\n"
-            if(show == 1) {
-              sub(/=.*/,"",$0)
-              $0 = "@" $0
-            }
-            if(show == 2) sub(/=.*/,"",$0)
           }
+          if(show == 1) {
+            sub(/=.*/,"",$0)
+            $0 = "@" $0
+          }
+          if(show == 2) sub(/=.*/,"",$0)
+          # print ">>> " $0 ":  template_attrs = " template_attrs > "/dev/stderr"
         }
         if(length($0) > len) len = length($0)
         if(text != "") text = text "\n"
@@ -216,6 +216,8 @@ BEGIN{
               if(attr == "pinseq") {
                 pin_index[value] = pin_idx
               }
+              gsub(/ /, "\\\\ ", value)
+              gsub(/\\_/, "_", value)
               pin_attr[pin_idx, nattr] = attr
               pin_value[pin_idx, nattr] = value
             }
@@ -248,9 +250,14 @@ function escape_chars(s)
 
 function print_header()
 {
+  tedax_attrs = "tedax_format=\"footprint @name @footprint" \
+     "value @name @value\n" \
+     "device @name @device\n" \
+     "@comptag\"\n"
   print "v {xschem version=2.9.5_RC6 file_version=1.1}"
   if(global_attrs !~ /type=/) { global_attrs = "type=symbol " global_attrs }
-  print "G {" global_attrs " " template_attrs "}"
+  print "G {" global_attrs template_attrs tedax_attrs"}"
+
   print "V {}"
   print "S {}"
   print "E {}"
@@ -298,7 +305,7 @@ function correct_align()
 }
 
 END{
-  template_attrs = "template=\"" template_attrs "\""
+  template_attrs = "template=\"" template_attrs "\"\n"
   print_header()
   print texts
   print boxes

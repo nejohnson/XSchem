@@ -406,12 +406,12 @@ char *get_tok_value(const char *s,const char *tok, int with_quotes)
     my_realloc(435, &token,sizetok);
   }
   if(s==NULL){result[0]='\0'; return result;}
-    if(debug_var>=3) fprintf(errfp, "get_tok_value(): looking for <%s> in <%s>\n",tok,s);
+    if(debug_var>=2) fprintf(errfp, "get_tok_value(): looking for <%s> in <%s>\n",tok,s);
   while(1) {
     c=*s++;
     space=SPACE(c) ;
     if( (state==XBEGIN || state==XENDTOK) && !space && c != '=') state=XTOKEN;
-    else if( state==XTOKEN && space) state=XENDTOK;
+    else if( state==XTOKEN && space && !quote && !escape) state=XENDTOK;
     else if( (state==XTOKEN || state==XENDTOK) && c=='=') state=XSEPARATOR;
     else if( state==XSEPARATOR && !space) state=XVALUE;
     else if( state==XVALUE && space && !quote && !escape ) state=XEND;
@@ -424,20 +424,26 @@ char *get_tok_value(const char *s,const char *tok, int with_quotes)
       sizetok+=CADCHUNKALLOC;
       my_realloc(437, &token,sizetok);
     }
-    if(state==XTOKEN) token[token_pos++]=c;
-    else if(state==XVALUE) {
+    if(c=='"') {
+      if(!escape) quote=!quote;
+    }
+    if(state==XTOKEN) {
       if(c=='"') {
-        if(!escape) quote=!quote;
-        if((with_quotes & 1) || escape)  result[value_pos++]=c;
-        
+        if((with_quotes & 1) || escape)  token[token_pos++]=c;
       }
-      else if( !((c=='\\') && (with_quotes & 2)) ) result[value_pos++]=c; /* 20150411 fixed logical expression */
-      else if( (c=='\\') && escape ) result[value_pos++]=c; /* 20170414 add escaped backslashes */
-      escape = (c=='\\' && !escape);
+      else if( !(c == '\\' && (with_quotes & 2)) ) token[token_pos++]=c;
+      else if(escape && c == '\\') token[token_pos++]=c;
+    } else if(state==XVALUE) {
+      if(c=='"') {
+        if((with_quotes & 1) || escape)  result[value_pos++]=c;
+      }
+      else if( !((c == '\\') && (with_quotes & 2)) ) result[value_pos++]=c; /* skip unescaped backslashes */
+      else if( (c == '\\') && escape ) result[value_pos++]=c; /* 20170414 add escaped backslashes */
     } else if(state==XENDTOK || state==XSEPARATOR) {
         if(token_pos) {
           tok_size = token_pos;
           token[token_pos]='\0';
+          if(debug_var >= 2) fprintf(errfp, "get_tok_value(): token=%s\n", token);
           token_pos=0;
         }
 
@@ -451,6 +457,7 @@ char *get_tok_value(const char *s,const char *tok, int with_quotes)
       value_pos=0;
       state=XBEGIN;
     }
+    escape = (c=='\\' && !escape);
     if(c=='\0') {
       result[0]='\0';
       get_tok_size = 0;
@@ -585,7 +592,7 @@ char *get_pin_attr_from_inst(int inst, int pin, const char *attr)
        if(get_tok_size) my_strdup2(40, &pinnumber, str);
      }
    }
-   return pinnumber;
+   return pinnumber; /* caller is responsible for freeing up storage for pinnumber */
 }
 
 void new_prop_string(char **new_prop,const char *old_prop, int fast, int disable_unique_names)
@@ -2259,7 +2266,12 @@ char *translate(int inst, char* s)
 
   space=SPACE3(c); /* 20150418 use SPACE3 */
   if( state==XBEGIN && c=='@' && !escape  ) state=XTOKEN; /* 20161210 escape */
-  else if( state==XTOKEN && (space || c == '@' || escape) && token_pos > 1 ) state=XSEPARATOR;
+  else if( state==XTOKEN && ( 
+                              (space && !escape)  || 
+                               c =='@' ||
+                              (!space && escape)
+                            ) 
+                         && token_pos > 1 ) state=XSEPARATOR;
 
   if(result_pos>=size)
   {
@@ -2277,6 +2289,7 @@ char *translate(int inst, char* s)
   else if(state==XSEPARATOR) 
   {
    token[token_pos]='\0'; 
+   if(debug_var >= 2) fprintf(errfp, "translate(): token=%s\n", token);
    token_pos=0;
 
    value = get_tok_value(inst_ptr[inst].prop_ptr, token+1, 2); /* 20171205 use get_tok_value instead of hash_lookup */
@@ -2320,7 +2333,7 @@ char *translate(int inst, char* s)
        char *pinnumber;
        pinnumber = get_pin_attr_from_inst(inst, n, pin_attr);
        if(!pinnumber) {
-         my_strdup2(499, &pinnumber, get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr, pin_attr, 0));
+         my_strdup2(499, &pinnumber, get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][n].prop_ptr, pin_attr, 2));
        }
        if(!get_tok_size) my_strdup(379, &pinnumber, "--UNDEF--");
        value = pinnumber;

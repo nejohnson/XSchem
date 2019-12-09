@@ -45,6 +45,7 @@ BEGIN{
 /^begin_inst .* numslots/{ 
   reparse()
   numslots=$4; 
+  if(numslots ==0) numslots = 1
   next
 }
 $1=="device"||$1=="footprint"{
@@ -90,6 +91,7 @@ $1=="device"||$1=="footprint"{
   next
 }
   
+# conn U1 Tx2In Tx2\ In 10 10
 /^conn/{
   reparse()
   nn=split($2, inst_arr, ":")
@@ -107,15 +109,15 @@ $1=="device"||$1=="footprint"{
     curr_pin = (nn>1) ? pinlist_arr[i]: pinlist_arr[1]
     if(!(inst_name, curr_pin) in arr || arr[inst_name, curr_pin]=="" || arr[inst_name, curr_pin] ~/^--UNCONN--/) {
       if(curr_pin == pin_number) {
-        arr[inst_name, curr_pin]=net_name " " pin_index " " pin_name " " i " " slotted
+        arr[inst_name, curr_pin]=net_name SUBSEP pin_index SUBSEP pin_name SUBSEP i SUBSEP slotted
       } else {
-        arr[inst_name, curr_pin]="--UNCONN--" " " pin_index " " pin_name " " i " " slotted
+        arr[inst_name, curr_pin]="--UNCONN--" SUBSEP pin_index SUBSEP pin_name SUBSEP i SUBSEP slotted
       }
     # hidden connections (VCC, VSS on slotted devices, usually) specified on instance have higher
     # precedence w.r.t. default specified in symbol.
     } else if($0 ~ /# instance_based/ && curr_pin==pin_number) {
       # overwrite with instance specified net name.
-      arr[inst_name, curr_pin]=net_name " " pin_index " " pin_name " " i " " slotted
+      arr[inst_name, curr_pin]=net_name SUBSEP pin_index SUBSEP pin_name SUBSEP i SUBSEP slotted
     }
   }
   next
@@ -134,8 +136,9 @@ $1=="device"||$1=="footprint"{
   for(i in arr) { 
     if(arr[i]) {
       split(i, i_arr, SUBSEP)
-      split(arr[i], n_arr, " ")
+      split(arr[i], n_arr, SUBSEP)
       slotted = n_arr[5]+0
+      # print "slotted=" slotted ">> " $0 > "/dev/stderr"
       if(n_arr[1] !~/--UNCONN--/) print "conn", n_arr[1], i_arr[1], i_arr[2]
       if(slotted) {
         print "pinslot", i_arr[1], i_arr[2], n_arr[4]

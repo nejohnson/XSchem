@@ -392,12 +392,12 @@ void search(const char *tok, const char *val, int sub, int sel, int what)
                 else
                   drawline(hilight_layer, NOW,
                      wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
-                if(CADHALFDOTSIZE*mooz>=0.7) {
+                if(cadhalfdotsize*mooz>=0.7) {
                   if( wire[i].end1 >1 ) {
-                    filledarc(hilight_layer, NOW, wire[i].x1, wire[i].y1, CADHALFDOTSIZE, 0, 360);
+                    filledarc(hilight_layer, NOW, wire[i].x1, wire[i].y1, cadhalfdotsize, 0, 360);
                   }
                   if( wire[i].end2 >1 ) {
-                    filledarc(hilight_layer, NOW, wire[i].x2, wire[i].y2, CADHALFDOTSIZE, 0, 360);
+                    filledarc(hilight_layer, NOW, wire[i].x2, wire[i].y2, cadhalfdotsize, 0, 360);
                   }
                 }
               }
@@ -696,12 +696,12 @@ void draw_hilight_net(int on_window)
         else
           drawline(get_color(entry->value), NOW,
              wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
-        if(CADHALFDOTSIZE*mooz>=0.7) {
+        if(cadhalfdotsize*mooz>=0.7) {
           if( wire[i].end1 >1 ) { /* 20150331 draw_dots */
-            filledarc(get_color(entry->value), NOW, wire[i].x1, wire[i].y1, CADHALFDOTSIZE, 0, 360);
+            filledarc(get_color(entry->value), NOW, wire[i].x1, wire[i].y1, cadhalfdotsize, 0, 360);
           }
           if( wire[i].end2 >1 ) { /* 20150331 draw_dots */
-            filledarc(get_color(entry->value), NOW, wire[i].x2, wire[i].y2, CADHALFDOTSIZE, 0, 360);
+            filledarc(get_color(entry->value), NOW, wire[i].x2, wire[i].y2, cadhalfdotsize, 0, 360);
           }
         }
       }
@@ -717,12 +717,12 @@ void draw_hilight_net(int on_window)
         else
           drawline(get_color(entry->value), NOW,
              wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
-        if(CADHALFDOTSIZE*mooz>=0.7) {
+        if(cadhalfdotsize*mooz>=0.7) {
           if( wire[i].end1 >1 ) { /* 20150331 draw_dots */
-            filledarc(get_color(entry->value), NOW, wire[i].x1, wire[i].y1, CADHALFDOTSIZE, 0, 360);
+            filledarc(get_color(entry->value), NOW, wire[i].x1, wire[i].y1, cadhalfdotsize, 0, 360);
           }
           if( wire[i].end2 >1 ) { /* 20150331 draw_dots */
-            filledarc(get_color(entry->value), NOW, wire[i].x2, wire[i].y2, CADHALFDOTSIZE, 0, 360);
+            filledarc(get_color(entry->value), NOW, wire[i].x2, wire[i].y2, cadhalfdotsize, 0, 360);
           }
         }
       }
@@ -842,12 +842,12 @@ void undraw_hilight_net(int on_window) /* 20160413 */
        else
          drawline(WIRELAYER, NOW, 
             wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
-        if(CADHALFDOTSIZE*mooz>=0.7) {
+        if(cadhalfdotsize*mooz>=0.7) {
           if( wire[i].end1 >1 ) { /* 20150331 draw_dots */
-            filledarc(WIRELAYER, NOW, wire[i].x1, wire[i].y1, CADHALFDOTSIZE, 0, 360);
+            filledarc(WIRELAYER, NOW, wire[i].x1, wire[i].y1, cadhalfdotsize, 0, 360);
           }
           if( wire[i].end2 >1 ) { /* 20150331 draw_dots */
-            filledarc(WIRELAYER, NOW, wire[i].x2, wire[i].y2, CADHALFDOTSIZE, 0, 360);
+            filledarc(WIRELAYER, NOW, wire[i].x2, wire[i].y2, cadhalfdotsize, 0, 360);
           }
         }
      }

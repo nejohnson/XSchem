@@ -484,6 +484,7 @@ extern int auto_hilight;
 extern int fill; /*  fill rectangles */
 extern int draw_grid;
 extern double cadgrid;
+extern double cadhalfdotsize;
 extern int draw_pixmap; /*  pixmap used as 2nd buffer */
 extern int draw_window; /* 20181009 */
 extern int need_rebuild_selected_array;

@@ -869,7 +869,7 @@ void load_schematic(int symbol, int load_symbols, const char *filename, int rese
   char name[PATH_MAX];
   static char msg[PATH_MAX+100];
 
-  current_type=SCHEMATIC;
+  current_type=SCHEMATIC; /* correct type is set later by read_xschem_file() */
   prepared_hilight_structs=0; /* 20171212 */
   prepared_netlist_structs=0; /* 20171212 */
   prepared_hash_instances=0; /* 20171224 */

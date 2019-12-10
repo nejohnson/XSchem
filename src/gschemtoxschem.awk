@@ -5,6 +5,13 @@ BEGIN{
   ret = 1
 }
 
+FNR==1{
+  if(FILENAME ~/\.sym$/) is_symbol = 1
+  sch = FILENAME
+  sub(/\.[^.]+$/, ".sch", sch)
+  if(file_exists(sch)) has_schematic = 1
+}
+
 {
   while(ret > 0 ) {
 
@@ -42,10 +49,13 @@ BEGIN{
         if($0 ~/=/) {
           sub(/^refdes/, "name")
           template_attrs = template_attrs escape_chars($0) "\n"
-          sub(/^device/, "type") 
+          save = $0
+          sub(/^device=/, "type=") 
           if ($0 ~/^type=/) {
-            global_attrs = global_attrs $0 "\n"
+            if(is_symbol && has_schematic) global_attrs = "type=subcircuit\n" global_attrs
+            else global_attrs = global_attrs $0 "\n"
           }
+          $0 = save
           if(show == 1) {
             sub(/=.*/,"",$0)
             $0 = "@" $0
@@ -137,6 +147,7 @@ BEGIN{
       cy=-$3/10
       crot = $5/90
       if(crot == 1) crot = 3
+      else if(crot == 3) crot = 1
       cflip = $6
       symbol = $NF
       propstring = ""
@@ -255,12 +266,25 @@ function print_header()
      "device @name @device\n" \
      "@comptag\"\n"
   print "v {xschem version=2.9.5_RC6 file_version=1.1}"
-  if(global_attrs !~ /type=/) { global_attrs = "type=symbol " global_attrs }
-  print "G {" global_attrs template_attrs tedax_attrs"}"
+
+  if(FILENAME ~/\.sym$/) {
+    if(global_attrs !~ /type=/) { global_attrs = "type=symbol " global_attrs }
+    print "G {" global_attrs template_attrs tedax_attrs"}"
+  } else {
+    print "G {}"
+  }
 
   print "V {}"
   print "S {}"
   print "E {}"
+}
+
+function file_exists(f,     r, c)
+{
+  r = getline c < f
+  close(f)
+  if(r==-1) return 0
+  else return 1
 }
 
 function order(x1, y1, x2, y2,       tmp) 
@@ -289,19 +313,62 @@ function alert(s)
   print s > "/dev/stderr"
 }
 
-function correct_align()
+# 2-------------5--------------8
+# |                            |
+# 1      T    E(4) X    T      7
+# |                            |
+# 0-------------3--------------6
+#
+# assumes xt, yt, angle, align, len are set globally
+# corrects angle, xt, yt, sets flip
+function correct_align(          hcorrect, vcorrect)
 {
-  flip =0
-  if(align == 6 || align == 7 || align == 8) flip = 1 
-  if(align == 0 || align == 3 || align == 6) {
-    yt += size*50
-  }
-  if(align == 1 || align == 4 || align == 7) {
-    yt += size*25
-  }
-  if(align == 3 || align == 4 || align == 5) {
-    xt -= size*17*len
-  }
+  hcorrect = 17
+  vcorrect = 25
+  if     (angle ==   0 && align == 0 ) { angle = 180; flip = 1}
+  else if(angle ==  90 && align == 0 ) { angle =  90; flip = 1}
+  else if(angle == 180 && align == 0 ) { angle =   0; flip = 1}
+  else if(angle == 270 && align == 0 ) { angle = 270; flip = 1}
+
+  if     (angle ==   0 && align == 3 ) { angle = 180; flip = 1; xt-=size*hcorrect*len}
+  else if(angle ==  90 && align == 3 ) { angle =  90; flip = 1; yt-=size*hcorrect*len}
+  else if(angle == 180 && align == 3 ) { angle =   0; flip = 1; xt+=size*hcorrect*len}
+  else if(angle == 270 && align == 3 ) { angle = 270; flip = 1; yt+=size*hcorrect*len}
+
+  else if(angle ==   0 && align == 6 ) { angle = 180; flip = 0}
+  else if(angle ==  90 && align == 6 ) { angle =  90; flip = 0}
+  else if(angle == 180 && align == 6 ) { angle =   0; flip = 0}
+  else if(angle == 270 && align == 6 ) { angle = 270; flip = 0}
+
+  else if(angle ==   0 && align == 8 ) { angle =   0; flip = 1}
+  else if(angle ==  90 && align == 8 ) { angle = 270; flip = 1}
+  else if(angle == 180 && align == 8 ) { angle = 180; flip = 1}
+  else if(angle == 270 && align == 8 ) { angle =  90; flip = 1}
+
+  else if(angle ==   0 && align == 7 ) { angle =   0; flip = 1; yt+=size*vcorrect}
+  else if(angle ==  90 && align == 7 ) { angle = 270; flip = 1; xt-=size*vcorrect}
+  else if(angle == 180 && align == 7 ) { angle = 180; flip = 1; yt-=size*vcorrect}
+  else if(angle == 270 && align == 7 ) { angle =  90; flip = 1; xt+=size*vcorrect}
+
+  else if(angle ==   0 && align == 4 ) { angle =   0; flip = 1; yt+=size*vcorrect; xt+=size*hcorrect*len}
+  else if(angle ==  90 && align == 4 ) { angle = 270; flip = 1; xt-=size*vcorrect; yt+=size*hcorrect*len}
+  else if(angle == 180 && align == 4 ) { angle = 180; flip = 1; yt-=size*vcorrect; xt-=size*hcorrect*len}
+  else if(angle == 270 && align == 4 ) { angle =  90; flip = 1; xt+=size*vcorrect; yt-=size*hcorrect*len}
+
+  else if(angle ==   0 && align == 2 ) { angle =   0; flip = 0}
+  else if(angle ==  90 && align == 2 ) { angle = 270; flip = 0}
+  else if(angle == 180 && align == 2 ) { angle = 180; flip = 0}
+  else if(angle == 270 && align == 2 ) { angle =  90; flip = 0}
+
+  else if(angle ==   0 && align == 1 ) { angle =   0; flip = 0; yt+=size*vcorrect}
+  else if(angle ==  90 && align == 1 ) { angle = 270; flip = 0; xt-=size*vcorrect}
+  else if(angle == 180 && align == 1 ) { angle = 180; flip = 0; yt-=size*vcorrect}
+  else if(angle == 270 && align == 1 ) { angle =  90; flip = 0; xt+=size*vcorrect}
+
+  else if(angle ==   0 && align == 5 ) { angle =   0; flip = 0; xt-=size*hcorrect*len}
+  else if(angle ==  90 && align == 5 ) { angle = 270; flip = 0; yt-=size*hcorrect*len}
+  else if(angle == 180 && align == 5 ) { angle = 180; flip = 0; xt+=size*hcorrect*len}
+  else if(angle == 270 && align == 5 ) { angle =  90; flip = 0; yt+=size*hcorrect*len}
 }
 
 END{

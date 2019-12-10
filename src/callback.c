@@ -93,8 +93,8 @@ int callback(int event, int mx, int my, KeySym key,
  mousey=Y_TO_XSCHEM(my); 
  mousex_snap=ROUND(mousex / cadsnap) * cadsnap;
  mousey_snap=ROUND(mousey / cadsnap) * cadsnap;
- my_snprintf(str, S(str), "mouse = %.16g %.16g - %s  selected: %d", 
-   mousex_snap, mousey_snap, current_name, lastselected );
+ my_snprintf(str, S(str), "mouse = %.16g %.16g - selected: %d", 
+   mousex_snap, mousey_snap, lastselected );
  statusmsg(str,1);
  switch(event)
  {
@@ -150,8 +150,8 @@ int callback(int event, int mx, int my, KeySym key,
       XSetClipRectangles(display, gctiled, 0,0, xrect, 1, Unsorted);
       #endif
       if(ui_state & SELECTION) rebuild_selected_array(); /* 20171129 */
-      my_snprintf(str, S(str), "mouse = %.16g %.16g - %s  selected: %d w=%.16g h=%.16g", 
-        mousex_snap, mousey_snap, current_name, 
+      my_snprintf(str, S(str), "mouse = %.16g %.16g - selected: %d w=%.16g h=%.16g", 
+        mousex_snap, mousey_snap, 
         lastselected ,
         mousex_snap-mx_double_save, mousey_snap-my_double_save /* 20070322 */
       );

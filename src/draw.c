@@ -449,6 +449,7 @@ void draw_symbol_outline(int what,int c, int n,int layer,int tmp_flip, int rot,
  #ifdef HAS_CAIRO
  char *textfont;
  #endif
+  if(inst_ptr[n].ptr == -1) return;
   if( (layer != PINLAYER && !enable_layer[layer]) ) return;
   if(!has_x) return;
   if(layer==0) {
@@ -587,6 +588,7 @@ void draw_temp_symbol_outline(int what, GC gc, int n,int layer,int tmp_flip, int
  int customfont;
  #endif
 
+ if(inst_ptr[n].ptr == -1) return;
  /* if(layer != PINLAYER && !enable_layer[layer] ) return; */
  if(!has_x) return;
  if(layer==0) { /* 20150424 */
@@ -1473,6 +1475,7 @@ void draw(void)
             /* --------------------------------- /20171224 */
           } else {
             for(i=0;i<lastinst;i++) {
+              if(inst_ptr[i].ptr == -1) continue;
               symptr = (inst_ptr[i].ptr+instdef);
               if( c==0 || /*20150408 draw_symbol_outline call is needed on layer 0 to avoid redundant work (outside check) */
                   symptr->lines[c] ||  /* 20150408 */

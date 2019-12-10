@@ -257,7 +257,7 @@ author="Stefan Frederik Schippers"
 page=1
 pages=1
 title="R8C/R33C RULZ LAB BOARD"
-lock=true}
+lock=true rev=1.1}
 C {usb-minib.sym} 210 -1410 0 0 {name=CONN1
 model=usb-minib
 device=UX60SC-MB-5ST(80)

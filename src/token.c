@@ -2241,6 +2241,7 @@ char *translate(int inst, char* s)
  char file_name[PATH_MAX];
  static char *value; /* 20100401 */
  int escape=0; /* 20161210 */
+ char date[200];
  
  size=CADCHUNKALLOC;
  if(result==NULL) result=my_malloc(526, size);
@@ -2358,37 +2359,39 @@ char *translate(int inst, char* s)
      my_free(&pin_num_or_name);
    } else if(strcmp(token,"@sch_last_modified")==0) {
 
-    my_strncpy(file_name, abs_sym_path(inst_ptr[inst].name, ""), S(file_name));
-    stat(file_name , &time_buf);
-    tm=localtime(&(time_buf.st_mtime) );
-    tmp=strlen( asctime(tm));
-    if(result_pos + tmp>=size) {
-     size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
-     my_realloc(534, &result,size);
-    }
-    memcpy(result+result_pos,asctime(tm), tmp+1); /* 20180923 */
-    result_pos+=tmp;
+    my_strncpy(file_name, abs_sym_path(inst_ptr[inst].name, ".sch"), S(file_name));
+    if(!stat(file_name , &time_buf)) {
+      tm=localtime(&(time_buf.st_mtime) );
+      tmp=strftime(date, sizeof(date), "%Y-%m-%d  %H:%M:%S", tm);
+      if(result_pos + tmp>=size) {
+       size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
+       my_realloc(534, &result,size);
+      }
+      memcpy(result+result_pos, date, tmp+1); /* 20180923 */
+      result_pos+=tmp;
+    } 
    } else if(strcmp(token,"@sym_last_modified")==0) {
     my_strncpy(file_name, abs_sym_path(inst_ptr[inst].name, ""), S(file_name));
-    stat(file_name , &time_buf);
-    tm=localtime(&(time_buf.st_mtime) );
-    tmp=strlen( asctime(tm));
-    if(result_pos + tmp>=size) {
-     size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
-     my_realloc(535, &result,size);
+    if(!stat(file_name , &time_buf)) {
+      tm=localtime(&(time_buf.st_mtime) );
+      tmp=strftime(date, sizeof(date), "%Y-%m-%d  %H:%M:%S", tm);
+      if(result_pos + tmp>=size) {
+       size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
+       my_realloc(535, &result,size);
+      }
+      memcpy(result+result_pos, date, tmp+1); /* 20180923 */
+      result_pos+=tmp;
     }
-    memcpy(result+result_pos,asctime(tm), tmp+1); /* 20180923 */
-    result_pos+=tmp;
    } else if(strcmp(token,"@time_last_modified")==0) {
     my_strncpy(file_name, abs_sym_path(schematic[currentsch], ""), S(file_name));
     if(!stat(file_name , &time_buf)) {  /* 20161211 */
       tm=localtime(&(time_buf.st_mtime) );
-      tmp=strlen( asctime(tm));
+      tmp=strftime(date, sizeof(date), "%Y-%m-%d  %H:%M:%S", tm);
       if(result_pos + tmp>=size) {
        size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
        my_realloc(536, &result,size);
       }
-      memcpy(result+result_pos,asctime(tm), tmp+1); /* 20180923 */
+      memcpy(result+result_pos, date, tmp+1); /* 20180923 */
       result_pos+=tmp;
     }
    } else if(strcmp(token,"@schname")==0) {

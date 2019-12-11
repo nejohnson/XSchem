@@ -248,7 +248,6 @@ void delete(void)
    bbox(ADD, inst_ptr[i].x1, inst_ptr[i].y1, inst_ptr[i].x2, inst_ptr[i].y2);
    if(inst_ptr[i].prop_ptr != NULL) 
    {
-    hash_proplist(i, 1); /* remove props from hash table */
     my_free(&inst_ptr[i].prop_ptr);
    }
    delete_inst_node(i);

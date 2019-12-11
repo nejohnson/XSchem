@@ -683,10 +683,10 @@ void prepare_netlist_structs(int for_hilight_only)
 
    /* obtain ipin/opin/label signal type (default: std_logic) */
    if(for_hilight_only) {
-     my_strdup(254, &sig_type,"");
-     my_strdup(255, &verilog_type,"");
-     my_strdup(256, &value,"");
-     my_strdup(257, &class,"");
+     my_free(&sig_type);
+     my_free(&verilog_type);
+     my_free(&value);
+     my_free(&class);
    } else {
      my_strdup(258, &sig_type,get_tok_value(inst_ptr[i].prop_ptr,"sig_type",0));
      my_strdup(259, &verilog_type,get_tok_value(inst_ptr[i].prop_ptr,"verilog_type",0)); /*09112003 */
@@ -731,7 +731,7 @@ void prepare_netlist_structs(int for_hilight_only)
    y0=inst_ptr[i].y0+ry1;
    get_square(x0, y0, &sqx, &sqy);
    wptr=wiretable[sqx][sqy];
-   while(wptr)
+   if(inst_ptr[i].node[0]) while(wptr)
    {
     if( touch(wire[wptr->n].x1, wire[wptr->n].y1,
               wire[wptr->n].x2, wire[wptr->n].y2, x0,y0) )

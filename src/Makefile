@@ -71,12 +71,12 @@ endif
 ## add -DTURBOX_FIX
 MOREFLAGS= -O2 -std=c89 -pedantic -Wall
 
-CFLAGS  =  $(MOREFLAGS)  -I/usr/include/tcl${TCLVER} $(CAIRO_INCLUDES) -I/home/sschippe/include \
+CFLAGS  =  $(MOREFLAGS)  -I/usr/include/tcl${TCLVER} $(CAIRO_INCLUDES) \
            $(IN_MEMORY_UNDO) -DXSCHEM_SHAREDIR='"${sharedir}"'  -DUSER_CONF_DIR='"${userconfdir}"' \
            -DXSCHEM_LIBRARY_PATH='"${xschem_library_path}"' \
            -DHAS_POPEN=$(HAS_POPEN) -DHAS_PIPE=$(HAS_PIPE)
 
-LDFLAGS = -L/usr/X11R6/lib -L/home/sschippe/lib $(MOREFLAGS) -lX11 -lm -lXpm -ltcl${TCLVER} -ltk${TCLVER} \
+LDFLAGS = -L/usr/X11R6/lib $(MOREFLAGS) -lX11 -lm -lXpm -ltcl${TCLVER} -ltk${TCLVER} \
            $(CAIRO_LIBS)
 all: xschem rawtovcd
 
@@ -147,6 +147,10 @@ install: xschem
 	mkdir -p $(prefix)/share/doc/xschem/symgen
 	cp -ru ../xschem_library/symgen/*.sym $(prefix)/share/doc/xschem/symgen
 	cp -ru ../xschem_library/symgen/*.symdef $(prefix)/share/doc/xschem/symgen
+	mkdir -p $(prefix)/share/doc/xschem/gschem_import/sym
+	cp -u ../xschem_library/gschem_import/*.sym $(prefix)/share/doc/xschem/gschem_import
+	cp -u ../xschem_library/gschem_import/*.sch $(prefix)/share/doc/xschem/gschem_import
+	cp -u ../xschem_library/gschem_import/sym/*.sym $(prefix)/share/doc/xschem/gschem_import/sym
 
 .PHONY: uninstall
 uninstall:

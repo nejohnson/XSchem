@@ -85,12 +85,12 @@ FNR==1{
     }
     
     else if($0 ~ /^V/){ #circle
-      circles = circles "A 4 " $2/10 " " -$3/10 " " $4/10 " " 0 " " 360 " {}\n"
+      circles = circles "A 4 " ($2/10) " " (-$3/10) " " ($4/10) " " 0 " " 360 " {}\n"
     }
     
     # A 1000 1000 100 90 180 3 0 0 0 -1 -1
     else if($0 ~ /^A/){ #arc
-      arcs = arcs "A 4 " $2/10 " " -$3/10 " " $4/10 " " $5 " " $6 " {}\n"
+      arcs = arcs "A 4 " ($2/10) " " (-$3/10) " " ($4/10) " " ($5) " " ($6) " {}\n"
     }
     
     # H 3 0 0 0 -1 -1 1 -1 -1 -1 -1 -1 5 <--n_lines
@@ -261,7 +261,8 @@ function escape_chars(s)
 
 function print_header()
 {
-  tedax_attrs = "tedax_format=\"footprint @name @footprint" \
+  spice_attrs="format=\"@name @pinlist @value\"\n"
+  tedax_attrs = "tedax_format=\"footprint @name @footprint\n" \
      "value @name @value\n" \
      "device @name @device\n" \
      "@comptag\"\n"
@@ -269,7 +270,7 @@ function print_header()
 
   if(FILENAME ~/\.sym$/) {
     if(global_attrs !~ /type=/) { global_attrs = "type=symbol " global_attrs }
-    print "G {" global_attrs template_attrs tedax_attrs"}"
+    print "G {" global_attrs template_attrs tedax_attrs spice_attrs"}"
   } else {
     print "G {}"
   }
@@ -383,9 +384,7 @@ END{
   print components
   print wires
   # i is the pinseq
-  for(i = 1; i <= pin_idx; i++) {
-    if(!(i in pin_index)) alert("pinseq " i " not found...")
-    idx = pin_index[i]
+  for(idx = 1; idx <= pin_idx; idx++) {
     print pin_line[idx]
     nattr = pin_nattr[idx]
     attr_string=""
@@ -401,7 +400,7 @@ END{
       show = pin_show[idx, j]
       angle = pin_angle[idx, j]
       align = pin_align[idx, j]
-      attr = "@#" (i-1) ":" pin_attr[idx, j]
+      attr = "@#" (idx-1) ":" pin_attr[idx, j]
       len = length(pin_value[idx, j])
       correct_align()
       if( visible ) {

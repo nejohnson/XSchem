@@ -876,7 +876,6 @@ void update_symbol(const char *result, int x)
 
    bbox(ADD, inst_ptr[i].x1, inst_ptr[i].y1, inst_ptr[i].x2, inst_ptr[i].y2);
 
-   hash_proplist(i, 1); /* remove old props from hash table */
    /* update property string from tcl dialog */
    if(!no_change_props)
    {
@@ -933,7 +932,6 @@ void update_symbol(const char *result, int x)
    }
    my_strdup2(90, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name",0)); /* 20150409 */
 
-   hash_proplist(i, 0); /* put new props in hash table */
    /* new symbol bbox after prop changes (may change due to text length) */
    symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1, &inst_ptr[i].x2, &inst_ptr[i].y2);
  

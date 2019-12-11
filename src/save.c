@@ -481,7 +481,6 @@ static void load_inst(int k, FILE *fd)
       load_ascii_string(&prop_ptr,fd);
       my_strdup(319, &inst_ptr[i].prop_ptr, prop_ptr);
       my_strdup2(320, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); /* 20150409 */
-      hash_proplist(i, 0);
       if(debug_var>=2) fprintf(errfp, "load_inst(): n=%d name=%s prop=%s\n",
             i, inst_ptr[i].name? inst_ptr[i].name:"<NULL>", inst_ptr[i].prop_ptr? inst_ptr[i].prop_ptr:"<NULL>");
       lastinst++;
@@ -827,7 +826,6 @@ void link_symbols_to_instances(void) /* 20150326 separated from load_schematic()
     if(symbol == -1) 
     {
       if(debug_var>=2) fprintf(errfp, "link_symbols_to_instances(): missing symbol, skipping...\n");
-      hash_proplist(i, 1); /* 06052001 remove props from hash table  */
       my_free(&inst_ptr[i].prop_ptr);  /* 06052001 remove properties */
       delete_inst_node(i);
       my_free(&inst_ptr[i].name);      /* 06052001 remove symname */

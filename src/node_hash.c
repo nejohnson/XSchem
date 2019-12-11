@@ -182,7 +182,7 @@ struct node_hashentry *bus_hash_lookup(char *token, char *dir,int remove,int por
  char *string=NULL;
  struct node_hashentry *ptr1=NULL, *ptr2=NULL;
 
- if(token==NULL) return NULL;
+ if(token==NULL || token[0] == 0) return NULL;
  if( token[0] == '#')
  {
    my_strdup(279, &string, token);
@@ -235,6 +235,7 @@ struct node_hashentry *node_hash_lookup(char *token, char *dir,int remove,int po
  int s ;
  struct drivers d;
 
+ if(token==NULL || token[0]==0 ) return NULL;
  if(debug_var>=3) fprintf(errfp, "node_hash_lookup(): called with: %s dir=%s remove=%d port=%d\n",
         token, dir, remove, port);
  d.in=d.out=d.inout=0;
@@ -242,7 +243,6 @@ struct node_hashentry *node_hash_lookup(char *token, char *dir,int remove,int po
  else if(!strcmp(dir,"out") ) d.out=1;
  else if(!strcmp(dir,"inout") ) d.inout=1;
  d.port=port;
- if(token==NULL || token[0]==0 ) return NULL;
  hashcode=hash(token); 
  index=hashcode % HASHSIZE; 
  entry=table[index];

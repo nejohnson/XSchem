@@ -200,7 +200,7 @@ void merge_inst(int k,FILE *fd)
     ptr[i].instname=NULL; /* 20150411 */
     ptr[i].node=NULL;
     load_ascii_string(&prop_ptr,fd);
-    new_prop_string(&inst_ptr[i].prop_ptr, prop_ptr, k, disable_unique_names);
+    new_prop_string(i, prop_ptr, k, disable_unique_names);
     /* the final tmp argument is zero for the 1st call and used in */
     /* new_prop_string() for cleaning some internal caches. */
     my_strdup2(306, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); /* 20150409 */

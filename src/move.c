@@ -758,7 +758,7 @@ void copy_objects(int what)
        inst_ptr[lastinst].rot = (inst_ptr[lastinst].rot + 
           ( (flip && (inst_ptr[lastinst].rot & 1) ) ? rot+2 : rot) ) & 0x3;
        inst_ptr[lastinst].flip = (flip? !inst_ptr[n].flip:inst_ptr[n].flip);
-       new_prop_string(&inst_ptr[lastinst].prop_ptr, inst_ptr[n].prop_ptr,newpropcnt++, disable_unique_names);
+       new_prop_string(lastinst, inst_ptr[n].prop_ptr,newpropcnt++, disable_unique_names);
        /* the final newpropcnt argument is zero for the 1st call and used in  */
        /* new_prop_string() for cleaning some internal caches. */
        my_strdup2(235, &inst_ptr[lastinst].instname, get_tok_value(inst_ptr[lastinst].prop_ptr, "name", 0)); /* 20150409 */

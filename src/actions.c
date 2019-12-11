@@ -857,7 +857,7 @@ int place_symbol(int pos, const char *symbol_name, double x, double y, int rot, 
   inst_ptr[n].prop_ptr=NULL;
   if(debug_var>=1) fprintf(errfp, "place_symbol() :all inst_ptr members set\n");  /*  03-02-2000 */
   if(inst_props) {
-    new_prop_string(&inst_ptr[n].prop_ptr, inst_props,!first_call, disable_unique_names); /*  20171214 first_call */
+    new_prop_string(n, inst_props,!first_call, disable_unique_names); /*  20171214 first_call */
   }
   else {
     set_inst_prop(n);

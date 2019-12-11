@@ -168,14 +168,6 @@ void free_hash(void) /* remove the whole hash table  */
  max_collisions=0;
 }
 
-/* insert **only** name in hash table */
-void hash_proplist(int i, int remove) /* 20171205 */
-{
-  char *name=inst_ptr[i].instname;
-  
-  if(name && name[0]) hash_lookup(name, "", remove, strlen(name));
-}
-
 void check_unique_names(int rename)
 {
   int i;
@@ -201,7 +193,7 @@ void check_unique_names(int rename)
       my_strdup(511, &tmp, inst_ptr[i].prop_ptr);
       new_prop_string(&inst_ptr[i].prop_ptr, tmp, newpropcnt++, !rename);
       my_strdup2(512, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); /* 20150409 */
-      hash_proplist(i, 0);
+      hash_lookup(inst_ptr[i].instname, "", 0, strlen(inst_ptr[i].instname));
       if(rename == 1) bbox(ADD, inst_ptr[i].x1, inst_ptr[i].y1, inst_ptr[i].x2, inst_ptr[i].y2);
     }
   }
@@ -611,7 +603,13 @@ void new_prop_string(char **new_prop,const char *old_prop, int fast, int disable
  int old_name_len; /* 20180926 */
  int new_name_len;
 
- if(!fast) {for(q=1;q<=255;q++) last[q]=1;}
+ if(!fast) { /* on 1st invocation of new_prop_string */
+   for(q=1;q<=255;q++) last[q]=1;
+   free_hash();
+   for(q=0;q<lastinst;q++) { /* insert instnames in hash */
+     hash_lookup(inst_ptr[q].instname, "", 0, strlen(inst_ptr[q].instname));
+   }
+ }
  
  if(old_prop==NULL) 
  { 
@@ -2293,7 +2291,7 @@ char *translate(int inst, char* s)
    if(debug_var >= 2) fprintf(errfp, "translate(): token=%s\n", token);
    token_pos=0;
 
-   value = get_tok_value(inst_ptr[inst].prop_ptr, token+1, 2); /* 20171205 use get_tok_value instead of hash_lookup */
+   value = get_tok_value(inst_ptr[inst].prop_ptr, token+1, 2);
    if(!get_tok_size) value=get_tok_value((inst_ptr[inst].ptr+instdef)->templ, token+1, 2); /* 20190310 2 instead of 0 */
 
    if(get_tok_size) {

@@ -805,7 +805,6 @@ extern const char *tclgetvar(const char *s);
 extern void tclsetvar(const char *s, const char *value);
 extern void statusmsg(char str[],int n);
 extern void place_text(int draw_text, double mx, double my);
-extern void hash_proplist(int i, int remove);
 extern void init_inst_iterator(double x1, double y1, double x2, double y2);
 extern struct instentry *inst_iterator_next();
 extern void init_wire_iterator(double x1, double y1, double x2, double y2);

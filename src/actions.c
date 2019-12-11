@@ -865,7 +865,6 @@ int place_symbol(int pos, const char *symbol_name, double x, double y, int rot, 
   if(debug_var>=1) fprintf(errfp, "place_symbol(): done set_inst_prop()\n");  /*  03-02-2000 */
 
   my_strdup2(13, &inst_ptr[n].instname, get_tok_value(inst_ptr[n].prop_ptr,"name",0) ); /*  20150409 */
-  hash_proplist(n, 0);
 
   type = instdef[inst_ptr[n].ptr].type; /* 20150409 */
   cond= !type || (strcmp(type,"label") && strcmp(type,"ipin") &&

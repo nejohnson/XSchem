@@ -1,0 +1,65 @@
+v {xschem version=2.9.5_RC6 file_version=1.1}
+G {type=MC10E104
+template="device=MC10E104
+slot=1
+numslots=4
+slotdef=1:4,5,7,8
+slotdef=2:2,3,9,10
+slotdef=3:27,28,12,13
+slotdef=4:25,26,14,15
+name=U?
+symversion=0.1
+documentation=http://www.onsemi.com/pub/Collateral/MC10E104-D.PDF
+"
+tedax_format="footprint @name @footprint
+value @name @value
+device @name @device
+@comptag"
+format="@name @pinlist @value"
+}
+V {}
+S {}
+E {}
+T {MC10E104} 30 0 2 1 0.266667 0.266667 {}
+T {@name} 30 -90 2 1 0.333333 0.333333 {}
+
+
+L 4 30 -80 30 -20 {}
+L 4 30 -80 70 -80 {}
+L 4 30 -20 70 -20 {}
+
+A 4 95 -30 4.9 0 360 {}
+
+A 4 70 -50 30 270 180 {}
+
+
+
+
+L 3 100 -30 120 -30 {}
+B 5 117.5 -32.5 122.5 -27.5 {pinnumber=8
+pinseq=4
+name=8
+dir=inout
+}
+T {@#0:pinnumber} 108.5 -35 2 1 0.266667 0.266667 {}
+L 3 90 -70 120 -70 {}
+B 5 117.5 -72.5 122.5 -67.5 {pinnumber=7
+pinseq=3
+name=7
+dir=inout
+}
+T {@#1:pinnumber} 98.5 -75 2 1 0.266667 0.266667 {}
+L 3 0 -30 30 -30 {}
+B 5 -2.5 -32.5 2.5 -27.5 {pinnumber=5
+pinseq=2
+name=5
+dir=inout
+}
+T {@#2:pinnumber} 10 -35 2 1 0.266667 0.266667 {}
+L 3 0 -70 30 -70 {}
+B 5 -2.5 -72.5 2.5 -67.5 {pinnumber=4
+pinseq=1
+name=4
+dir=inout
+}
+T {@#3:pinnumber} 10 -75 2 1 0.266667 0.266667 {}

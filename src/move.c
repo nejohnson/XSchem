@@ -762,7 +762,6 @@ void copy_objects(int what)
        /* the final newpropcnt argument is zero for the 1st call and used in  */
        /* new_prop_string() for cleaning some internal caches. */
        my_strdup2(235, &inst_ptr[lastinst].instname, get_tok_value(inst_ptr[lastinst].prop_ptr, "name", 0)); /* 20150409 */
-       hash_proplist(lastinst, 0);
        n=selectedgroup[i].n=lastinst;
        symbol_bbox(lastinst, &inst_ptr[lastinst].x1, &inst_ptr[lastinst].y1,
                          &inst_ptr[lastinst].x2, &inst_ptr[lastinst].y2);

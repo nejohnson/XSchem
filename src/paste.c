@@ -205,7 +205,6 @@ void merge_inst(int k,FILE *fd)
     /* new_prop_string() for cleaning some internal caches. */
     my_strdup2(306, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); /* 20150409 */
     my_free(&prop_ptr);
-    hash_proplist(i, 0);
     lastinst++;
     set_modify(1);
     prepared_hash_instances=0;
@@ -229,7 +228,6 @@ void match_merged_inst(int old)
      if(symbol == -1)
      {
       if(debug_var>=1) fprintf(errfp, "merge_inst(): missing symbol, skipping...\n");
-      hash_proplist(i, 1); /* 06052001 remove props from hash table */
       my_free(&inst_ptr[i].prop_ptr);  /* 06052001 remove properties */
       my_free(&inst_ptr[i].name);      /* 06052001 remove symname   */
       my_free(&inst_ptr[i].instname);

@@ -447,13 +447,11 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
        prepared_netlist_structs=0;
        prepared_hilight_structs=0;
      }
-     hash_proplist(inst, 1); /* remove old props from hash table */
      if(argc >= 5) 
        new_prop_string(&inst_ptr[inst].prop_ptr, subst_token(inst_ptr[inst].prop_ptr, argv[3], argv[4]),0, disable_unique_names); 
      else /* assume argc == 4 */
        new_prop_string(&inst_ptr[inst].prop_ptr, subst_token(inst_ptr[inst].prop_ptr, argv[3], NULL),0, disable_unique_names); 
      my_strdup2(367, &inst_ptr[inst].instname, get_tok_value(inst_ptr[inst].prop_ptr, "name",0));
-     hash_proplist(inst, 0); /* put new props in hash table */
      /* new symbol bbox after prop changes (may change due to text length) */
      symbol_bbox(inst, &inst_ptr[inst].x1, &inst_ptr[inst].y1, &inst_ptr[inst].x2, &inst_ptr[inst].y2);
      bbox(ADD, inst_ptr[inst].x1, inst_ptr[inst].y1, inst_ptr[inst].x2, inst_ptr[inst].y2);
@@ -510,7 +508,6 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
        my_strdup(369, &inst_ptr[inst].name,symbol);
        inst_ptr[inst].ptr=sym_number;
        bbox(ADD, inst_ptr[inst].x1, inst_ptr[inst].y1, inst_ptr[inst].x2, inst_ptr[inst].y2);
-       hash_proplist(inst, 1); /* remove old props from hash table */
   
        my_strdup(370, &name, inst_ptr[inst].instname);
        if(name && name[0] )  /* 30102003 */
@@ -528,7 +525,6 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
          if(cond) inst_ptr[inst].flags|=2;
          else inst_ptr[inst].flags &=~2;
        }
-       hash_proplist(inst, 0); /* put new props in hash table */
        /* new symbol bbox after prop changes (may change due to text length) */
        symbol_bbox(inst, &inst_ptr[inst].x1, &inst_ptr[inst].y1, &inst_ptr[inst].x2, &inst_ptr[inst].y2);
        bbox(ADD, inst_ptr[inst].x1, inst_ptr[inst].y1, inst_ptr[inst].x2, inst_ptr[inst].y2);

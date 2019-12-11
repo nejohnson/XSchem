@@ -154,7 +154,7 @@ void free_hash(void) /* remove the whole hash table  */
 {
  int i;
   
- if(debug_var>=3) fprintf(errfp, "free_hash(): removing hash table\n");
+ if(debug_var>=1) fprintf(errfp, "free_hash(): removing hash table\n");
  n_elements=0;
  for(i=0;i<HASHSIZE;i++)
  {
@@ -191,7 +191,7 @@ void check_unique_names(int rename)
       inst_ptr[i].flags |=4;
       hilight_nets=1;
       my_strdup(511, &tmp, inst_ptr[i].prop_ptr);
-      new_prop_string(&inst_ptr[i].prop_ptr, tmp, newpropcnt++, !rename);
+      new_prop_string(i, tmp, newpropcnt++, !rename);
       my_strdup2(512, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); /* 20150409 */
       hash_lookup(inst_ptr[i].instname, "", 0, strlen(inst_ptr[i].instname));
       if(rename == 1) bbox(ADD, inst_ptr[i].x1, inst_ptr[i].y1, inst_ptr[i].x2, inst_ptr[i].y2);
@@ -587,10 +587,11 @@ char *get_pin_attr_from_inst(int inst, int pin, const char *attr)
    return pinnumber; /* caller is responsible for freeing up storage for pinnumber */
 }
 
-void new_prop_string(char **new_prop,const char *old_prop, int fast, int disable_unique_names)
+/* void new_prop_string(char **new_prop,const char *old_prop, int fast, int disable_unique_names) */
+void new_prop_string(int i, const char *old_prop, int fast, int disable_unique_names)
 {
 /* given a old_prop property string, return a new */
-/* property string in new_prop such that the element name is */
+/* property string in inst_ptr[i].prop_ptr such that the element name is */
 /* unique in current design (that is, element name is changed */
 /* if necessary) */
 /* if old_prop=NULL return NULL */
@@ -603,39 +604,37 @@ void new_prop_string(char **new_prop,const char *old_prop, int fast, int disable
  int old_name_len; /* 20180926 */
  int new_name_len;
 
+
  if(!fast) { /* on 1st invocation of new_prop_string */
    for(q=1;q<=255;q++) last[q]=1;
    free_hash();
    for(q=0;q<lastinst;q++) { /* insert instnames in hash */
+     if(q == i) continue; /* do not hash the instance we are assigning to */
      hash_lookup(inst_ptr[q].instname, "", 0, strlen(inst_ptr[q].instname));
    }
  }
  
  if(old_prop==NULL) 
  { 
-  if(debug_var>=1) fprintf(errfp, "new_prop_string():-0-  old=NULL fast=%d\n",fast);
-  my_free(new_prop);
+  my_free(&inst_ptr[i].prop_ptr);
   return;
  }
- if(debug_var>=1) fprintf(errfp, "new_prop_string(): new=%s   old=%s\n",*new_prop, old_prop);
  old_name_len = my_strdup(444, &old_name,get_tok_value(old_prop,"name",0) ); /* added old_name_len 20180926 */
  if(old_name==NULL) 
  { 
-  my_strdup(446, new_prop,old_prop);  /* 03102001 changed to copy old props if no name */
+  my_strdup(446, &inst_ptr[i].prop_ptr, old_prop);  /* 03102001 changed to copy old props if no name */
   return;
  }
  prefix=old_name[0];
  /* don't change old_prop if name does not conflict. */
  if(disable_unique_names || hash_lookup(old_name, NULL, 0, old_name_len) == NULL)
  {
-  my_strdup(447, new_prop, old_prop);
-  if(debug_var>=1) fprintf(errfp, "new_prop_string():-1-  new=%s old=%s fast=%d\n",*new_prop, old_prop,fast);
+  my_strdup(447, &inst_ptr[i].prop_ptr, old_prop);
   return;
  }
  tmp=find_bracket(old_name);
  my_realloc(448, &new_name, old_name_len + 40); /* strlen(old_name)+40); */ /* 20180926 */
  qq=fast ?  last[(int)prefix] : 1; 
- if(debug_var>=1) fprintf(errfp, "new_prop_string(): -2- new=%s old=%s fast=%d\n",*new_prop, old_prop,fast);
  for(q=qq;;q++)
  {
   new_name_len = my_snprintf(new_name, old_name_len + 40, "%c%d%s", prefix,q, tmp); /* added new_name_len 20180926 */
@@ -647,8 +646,7 @@ void new_prop_string(char **new_prop,const char *old_prop, int fast, int disable
  } 
  tmp2 = subst_token(old_prop, "name", new_name); 
  if(strcmp(tmp2, old_prop) ) {
-   if(debug_var>=1) fprintf(errfp, "new_prop_string(): tmp2=%s, old_prop=%s\n", tmp2, old_prop);
-   my_strdup(449, new_prop, tmp2);
+   my_strdup(449, &inst_ptr[i].prop_ptr, tmp2);
  }
 }
 

@@ -41,7 +41,7 @@
 /*  approximate PI definition */
 #define XSCH_PI 3.14159265358979323846264338327950288419716939937
 
-/* #include "../config.h" */
+#include "../config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -834,7 +834,7 @@ extern void *my_calloc(int id, size_t nmemb, size_t size);
 extern void my_free(void *ptr);
 extern size_t my_strcat(int id, char **, const char *);
 extern char *subst_token(const char *s, const char *tok, const char *new_val);
-extern void new_prop_string(char **new_prop,const char *old_prop,int fast, int disable_unique_names);
+extern void new_prop_string(int i, const char *old_prop,int fast, int disable_unique_names);
 extern void symbol_bbox(int i, double *x1,double *y1, double *x2, double *y2);
 extern char *escape_chars(char *dest, const char *source, int size);
 

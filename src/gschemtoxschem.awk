@@ -159,7 +159,7 @@ FNR==1{
              # do nothing for now
           } else {
             if($0 ~/refdes=/) sub(/refdes=/, "name=")
-            sub(/ /, "\\\\ ", $0)
+            gsub(/ /, "\\\\ ", $0)
             propstring = propstring $0 "\n"
           }
           getline

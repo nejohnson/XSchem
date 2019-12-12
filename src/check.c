@@ -86,20 +86,19 @@ void update_conn_cues(int draw_cues, int dr_win)
   double x0, y0;
   double x1, y1, x2, y2;
   struct wireentry *wireptr;
-
+  
   if(!lastwire) return;
   if(!draw_dots) return;
   if(cadhalfdotsize*mooz<0.7) return;
-
   x1 = X_TO_XSCHEM(areax1);
   y1 = Y_TO_XSCHEM(areay1);
   x2 = X_TO_XSCHEM(areax2);
   y2 = Y_TO_XSCHEM(areay2);
-
   hash_wires();
   for(init_wire_iterator(x1, y1, x2, y2); ( wireptr = wire_iterator_next() ) ;) {
     k=wireptr->n;
-    /* wire[k].end1 = wire[k].end2 = 0; */
+    /* optimization when editing small areas (detailed zoom)  of a huge schematic */
+    if(LINE_OUTSIDE(wire[k].x1, wire[k].y1, wire[k].x2, wire[k].y2, x1, y1, x2, y2)) continue;
     for(l = 0;l < 2;l++) {
       if(l==0 ) {
         if(wire[k].end1 !=-1) continue; /* 20181103 */
@@ -137,6 +136,8 @@ void update_conn_cues(int draw_cues, int dr_win)
     filledarc(WIRELAYER, BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
     for(init_wire_iterator(x1, y1, x2, y2); ( wireptr = wire_iterator_next() ) ;) {
       i = wireptr->n;
+      /* optimization when editing small areas (detailed zoom)  of a huge schematic */
+      if(LINE_OUTSIDE(wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2, x1, y1, x2, y2)) continue;
       if( wire[i].end1 >1 ) { /* 20150331 draw_dots */
         filledarc(WIRELAYER, ADD, wire[i].x1, wire[i].y1, cadhalfdotsize, 0, 360);
       }

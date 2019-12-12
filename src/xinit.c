@@ -710,6 +710,7 @@ int source_tcl_file(char *s)
 
 void preview_window(const char *what, const char *tk_win_path, const char *filename)
 {
+  char *saveptr = NULL;
   if(!strcmp(what, "create")) {
     tkpre_window = Tk_NameToWindow(interp, tk_win_path, mainwindow);
     Tk_MakeWindowExist(tkpre_window);
@@ -727,6 +728,7 @@ void preview_window(const char *what, const char *tk_win_path, const char *filen
     save_mod = modified;
     save_ev = event_reporting;
     event_reporting = 0;
+    my_strdup(111, &saveptr, tclgetvar("current_dirname"));
     push_undo();
     currentsch++;
     
@@ -742,6 +744,8 @@ void preview_window(const char *what, const char *tk_win_path, const char *filen
     check_version = 0;
    
     /* restore context */
+    tclsetvar("current_dirname", saveptr);
+    my_free(&saveptr);
     unselect_all();
     remove_symbols();
     my_strncpy(schematic[currentsch] , "", S(schematic[currentsch]));

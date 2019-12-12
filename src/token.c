@@ -407,7 +407,6 @@ char *get_tok_value(const char *s,const char *tok, int with_quotes)
     else if( (state==XTOKEN || state==XENDTOK) && c=='=') state=XSEPARATOR;
     else if( state==XSEPARATOR && !space) state=XVALUE;
     else if( state==XVALUE && space && !quote && !escape ) state=XEND;
-
     if(value_pos>=size) {
       size+=CADCHUNKALLOC;
       my_realloc(436, &result,size);
@@ -438,7 +437,6 @@ char *get_tok_value(const char *s,const char *tok, int with_quotes)
           if(debug_var >= 2) fprintf(errfp, "get_tok_value(): token=%s\n", token);
           token_pos=0;
         }
-
     } else if(state==XEND) {
       result[value_pos]='\0';
       if( !strcmp(token,tok) ) {

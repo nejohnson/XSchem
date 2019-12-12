@@ -44,7 +44,9 @@
 
 set XSCHEM_LIBRARY_PATH {}
 append XSCHEM_LIBRARY_PATH :.
+# append XSCHEM_LIBRARY_PATH :/home/schippes/xschem-repo/trunk/xschem_library/gschem_import
 append XSCHEM_LIBRARY_PATH :./sym
+append XSCHEM_LIBRARY_PATH :$env(HOME)/xschem-repo/trunk/xschem_library/devices
 
 
 

@@ -2309,7 +2309,7 @@ set_ne colors $dark_colors
 
 # 20111005 added missing initialization of globals...
 set_ne no_change_attrs 0
-set_ne preserve_unchanged_attrs 1
+set_ne preserve_unchanged_attrs 0
 set search_select 0
 
 # 20111106 these vars are overwritten by caller with mktemp file names

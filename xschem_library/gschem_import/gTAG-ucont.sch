@@ -103,7 +103,7 @@ device=RESISTOR
 }
 C {resistor-2.sym} 4740 -4580 3 0 {name=R5
 value=0
-comment=do\\ not mount
+comment=do\\ not\\ mount
 footprint=sm0805
 device=RESISTOR
 }
@@ -169,7 +169,7 @@ device=RESISTOR
 }
 C {resistor-2.sym} 4510 -4350 3 0 {name=R9
 value=0
-comment=do\\ not mount
+comment=do\\ not\\ mount
 footprint=sm0805
 device=RESISTOR
 }
@@ -214,7 +214,7 @@ C {in-1.sym} 4690 -5290 0 0 {name=reset#
 device=INPUT
 }
 C {header20-1.sym} 6320 -4590 3 0 {name=CONN1
-footprint=CONNECTOR\\ 10 2
+footprint=CONNECTOR\\ 10\\ 2
 device=HEADER20
 }
 

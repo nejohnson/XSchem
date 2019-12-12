@@ -376,7 +376,7 @@ void set_inst_prop(int i)
   my_strdup2(70, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name",0)); /* 20150409 */
   if(inst_ptr[i].instname[0]) {
     my_strdup(101, &tmp, inst_ptr[i].prop_ptr);
-    new_prop_string(i, tmp, 0, disable_unique_names); /*<<<<<*/
+    new_prop_string(i, tmp, 0, disable_unique_names);
     my_free(&tmp);
   }
 }
@@ -872,8 +872,6 @@ void update_symbol(const char *result, int x)
     inst_ptr[i].ptr=sym_number;
    }
 
-   /* <<<<<*/
-
    bbox(ADD, inst_ptr[i].x1, inst_ptr[i].y1, inst_ptr[i].x2, inst_ptr[i].y2);
 
    /* update property string from tcl dialog */
@@ -932,7 +930,6 @@ void update_symbol(const char *result, int x)
    }
    my_strdup2(90, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name",0)); /* 20150409 */
   
-   /* <<<<< */
 
    /* new symbol bbox after prop changes (may change due to text length) */
    symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1, &inst_ptr[i].x2, &inst_ptr[i].y2);

@@ -54,7 +54,7 @@ device=VOLTAGE_SOURCE
 footprint=none
 }
 C {vac-1.sym} 2720 -5230 0 0 {name=Vin
-value=dc\\ 0 ac 1
+value=dc\\ 0\\ ac\\ 1
 device=vac
 footprint=none
 }

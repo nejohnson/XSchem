@@ -4,17 +4,20 @@ template="device=DS2480B
 name=U?
 footprint=SMD8
 numslots=0
-description=Dallas\\\\ Semiconductor\\\\ 1-Wire\\\\ Serial\\\\ Line\\\\ Driver\\\\ w/Load\\\\ Sensor\\\\ (Travis\\\\ Sawyer)
-net=GND:1
-net=Vdd:4
-net=Vpp:5
+description=\\"Dallas Semiconductor 1-Wire Serial Line Driver w/Load Sensor (Travis Sawyer)\\"
 documentation=http://pdfserv.maxim-ic.com/en/ds/DS2480B.pdf
+GND=GND
+Vdd=Vdd
+Vpp=Vpp
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @GND @Vdd @Vpp"
+
+extra="GND Vdd Vpp"
+extra_pinnumber="1 4 5"
 }
 V {}
 S {}

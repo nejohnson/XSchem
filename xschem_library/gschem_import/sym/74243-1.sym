@@ -3,17 +3,20 @@ G {type=74243
 template="device=74243
 name=U?
 footprint=DIP14
-description=quad\\\\ transceiver\\\\ (tristate)
+description=\\"quad transceiver (tristate)\\"
 numslots=0
-net=Vcc:14
-net=GND:7
 documentation=http://www.semiconductors.philips.com/acrobat/datasheets/74HC_HCT243_CNV_2.pdf
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="14 7"
 }
 V {}
 S {}

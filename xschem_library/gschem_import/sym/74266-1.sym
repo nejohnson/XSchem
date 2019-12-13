@@ -7,18 +7,21 @@ slotdef=1:1,2,3
 slotdef=2:5,6,4
 slotdef=3:8,9,10
 slotdef=4:12,13,11
-net=Vcc:14
-net=GND:7
 name=U?
 footprint=DIP14
-description=4\\\\ XOR\\\\ gates\\\\ with\\\\ open\\\\ collector\\\\ output
+description=\\"4 XOR gates with open collector output\\"
 documentation=http://www-s.ti.com/sc/ds/sn74hc266.pdf
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="14 7"
 }
 V {}
 S {}

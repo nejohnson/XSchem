@@ -4,14 +4,17 @@ template="device=MC100ELT21
 name=U?
 pins=8
 documentation=http://www.onsemi.com/pub/Collateral/MC10ELT21-D.PDF
-net=GND:5
-net=Vcc:8
+GND=GND
+Vcc=Vcc
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @GND @Vcc"
+
+extra="GND Vcc"
+extra_pinnumber="5 8"
 }
 V {}
 S {}
@@ -38,13 +41,6 @@ name=2
 dir=inout
 }
 T {@#0:pinnumber} 10 -75 2 1 0.266667 0.266667 {}
-L 3 80 -50 110 -50 {}
-B 5 107.5 -52.5 112.5 -47.5 {pinnumber=7
-pinseq=3
-name=7
-dir=inout
-}
-T {@#1:pinnumber} 91.5 -55 2 1 0.266667 0.266667 {}
 L 3 0 -30 20 -30 {}
 B 5 -2.5 -32.5 2.5 -27.5 {pinnumber=3
 pinseq=2
@@ -52,3 +48,10 @@ name=3
 dir=inout
 }
 T {@#2:pinnumber} 11.5 -35 2 1 0.266667 0.266667 {}
+L 3 80 -50 110 -50 {}
+B 5 107.5 -52.5 112.5 -47.5 {pinnumber=7
+pinseq=3
+name=7
+dir=inout
+}
+T {@#1:pinnumber} 91.5 -55 2 1 0.266667 0.266667 {}

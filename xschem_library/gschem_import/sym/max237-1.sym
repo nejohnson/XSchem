@@ -3,7 +3,7 @@ G {type=MAX237
 template="device=MAX237
 name=U?
 footprint=DIP24
-description=multichannel\\\\ RS-232\\\\ driver/receiver
+description=\\"multichannel RS-232 driver/receiver\\"
 numslots=0
 documentation=http://pdfserv.maxim-ic.com/en/ds/MAX220-MAX249.pdf
 "
@@ -11,7 +11,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}

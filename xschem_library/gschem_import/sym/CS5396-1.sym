@@ -3,7 +3,7 @@ G {type=CS5396-KS
 template="device=CS5396-KS
 name=U?
 footprint=SO28
-description=120dB,\\\\ 96kHz\\\\ Audio\\\\ A/D\\\\ Converter
+description=\\"120dB, 96kHz Audio A/D Converter\\"
 numslots=0
 symversion=0.1
 documentation=http://www.cirrus.com/en/pubs/proBulletin/5396pi_3.pdf
@@ -12,7 +12,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}

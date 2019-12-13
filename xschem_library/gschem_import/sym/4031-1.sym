@@ -3,18 +3,21 @@ G {type=4031
 template="name=U?
 device=4031
 footprint=DIP16
-net=VSS:8
-net=VDD:16
-description=64-stage\\\\ static\\\\ shift\\\\ register
+description=\\"64-stage static shift register\\"
 numslots=0
-comment=Pin\\\\ 5\\\\ may\\\\ not\\\\ be\\\\ connected\\\\ on\\\\ all\\\\ devices
+comment=\\"Pin 5 may not be connected on all devices\\"
 documentation=http://www.semiconductors.philips.com/acrobat/datasheets/HEF4031B_CNV_3.pdf
+VSS=VSS
+VDD=VDD
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @VSS @VDD"
+
+extra="VSS VDD"
+extra_pinnumber="8 16"
 }
 V {}
 S {}

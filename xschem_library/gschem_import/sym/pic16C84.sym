@@ -3,7 +3,7 @@ G {type=PIC16C84
 template="device=PIC16C84
 name=U?
 footprint=DIP18
-description=8-bit\\\\ Flash/EEPROM\\\\ microcontroller
+description=\\"8-bit Flash/EEPROM microcontroller\\"
 numslots=0
 documentation=http://www.microchip.com/download/lit/pline/picmicro/families/16f8x/30445c.pdf
 "
@@ -11,7 +11,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}

@@ -3,15 +3,16 @@ G {type=CONNECTOR_33
 template="name=CONN?
 device=CONNECTOR_33
 footprint=SIP33N
-author=Leon\\\\ Kos
-description=generic\\\\ connector
+author=\\"Leon Kos\\"
+description=\\"generic connector\\"
 numslots=0
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}

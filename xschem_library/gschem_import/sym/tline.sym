@@ -2,13 +2,14 @@ v {xschem version=2.9.5_RC6 file_version=1.1}
 G {type=T-Line
 template="device=T-Line
 name=T?
-value=TD=?pS\\\\ Z0=?
+value=?
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}
@@ -33,16 +34,16 @@ pinseq=1
 name=left
 dir=inout
 }
-L 3 200 -40 220 -40 {}
-B 5 217.5 -42.5 222.5 -37.5 {pinnumber=right
-pinseq=3
-name=right
-dir=inout
-}
 L 3 40 -20 40 0 {}
 B 5 37.5 -2.5 42.5 2.5 {pinnumber=left-ref
 pinseq=2
 name=left-ref
+dir=inout
+}
+L 3 200 -40 220 -40 {}
+B 5 217.5 -42.5 222.5 -37.5 {pinnumber=right
+pinseq=3
+name=right
 dir=inout
 }
 L 3 180 -20 180 0 {}

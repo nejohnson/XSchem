@@ -3,17 +3,20 @@ G {type=4514
 template="name=U?
 device=4514
 footprint=DIP24
-net=VSS:12
-net=VDD:24
-description=4-bit\\\\ demultiplexer
+description=\\"4-bit demultiplexer\\"
 numslots=0
 documentation=http://www.semiconductors.philips.com/acrobat/datasheets/HEF4514B_CNV_3.pdf
+VSS=VSS
+VDD=VDD
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @VSS @VDD"
+
+extra="VSS VDD"
+extra_pinnumber="12 24"
 }
 V {}
 S {}

@@ -1,18 +1,21 @@
 v {xschem version=2.9.5_RC6 file_version=1.1}
 G {type=MC100ELT23
 template="device=MC100ELT23
-footprint=SMD\\\\ 8
+footprint=\\"SMD 8\\"
 name=U?
 pins=8
-net=GND:5
-net=Vcc:8
 documentation=http://www.onsemi.com/pub/Collateral/MC100ELT23-D.PDF
+GND=GND
+Vcc=Vcc
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @GND @Vcc"
+
+extra="GND Vcc"
+extra_pinnumber="5 8"
 }
 V {}
 S {}
@@ -73,11 +76,5 @@ dir=inout
 }
 T {@#4:pinnumber} 10 -45 2 1 0.266667 0.266667 {}
 T {@#4:name} 36 -40 2 1 0.266667 0.266667 {}
-L 3 0 -70 30 -70 {}
-B 5 -2.5 -72.5 2.5 -67.5 {pinnumber=4
-pinseq=7
-name=D1
-dir=inout
-}
-T {@#5:pinnumber} 10 -75 2 1 0.266667 0.266667 {}
-T {@#5:name} 36 -70 2 1 0.266667 0.266667 {}
+
+ {}

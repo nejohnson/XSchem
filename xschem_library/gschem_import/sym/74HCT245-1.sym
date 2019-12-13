@@ -3,17 +3,20 @@ G {type=74HCT245
 template="name=U?
 device=74HCT245
 footprint=DIP20
-description=8\\\\ bit\\\\ bus\\\\ transceiver
-net=Vcc:20
-net=GND:10
+description=\\"8 bit bus transceiver\\"
 numslots=0
 documentation=http://www-s.ti.com/sc/ds/sn74hct245.pdf
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="20 10"
 }
 V {}
 S {}
@@ -105,70 +108,8 @@ dir=inout
 }
 T {@#8:pinnumber} 20 -85 2 0 0.266667 0.266667 {}
 T {@#8:name} 35 -80 2 1 0.266667 0.266667 {}
-L 3 0 -50 20 -50 {}
-B 5 -2.5 -52.5 2.5 -47.5 {pinnumber=19
-pinseq=19
-name=_ENABLE_
-dir=in
-}
-T {@#9:pinnumber} 20 -55 2 0 0.266667 0.266667 {}
-T {@#9:name} 35 -50 2 1 0.266667 0.266667 {}
-L 3 170 -290 200 -290 {}
-B 5 197.5 -292.5 202.5 -287.5 {pinnumber=18
-pinseq=18
-name=B1
-dir=inout
-}
-T {@#10:pinnumber} 180 -295 2 1 0.266667 0.266667 {}
-T {@#10:name} 165 -290 2 0 0.266667 0.266667 {}
-L 3 170 -260 200 -260 {}
-B 5 197.5 -262.5 202.5 -257.5 {pinnumber=17
-pinseq=17
-name=B2
-dir=inout
-}
-T {@#11:pinnumber} 180 -265 2 1 0.266667 0.266667 {}
-T {@#11:name} 165 -260 2 0 0.266667 0.266667 {}
-L 3 170 -230 200 -230 {}
-B 5 197.5 -232.5 202.5 -227.5 {pinnumber=16
-pinseq=16
-name=B3
-dir=inout
-}
-T {@#12:pinnumber} 180 -235 2 1 0.266667 0.266667 {}
-T {@#12:name} 165 -230 2 0 0.266667 0.266667 {}
-L 3 170 -200 200 -200 {}
-B 5 197.5 -202.5 202.5 -197.5 {pinnumber=15
-pinseq=15
-name=B4
-dir=inout
-}
-T {@#13:pinnumber} 180 -205 2 1 0.266667 0.266667 {}
-T {@#13:name} 165 -200 2 0 0.266667 0.266667 {}
-L 3 170 -170 200 -170 {}
-B 5 197.5 -172.5 202.5 -167.5 {pinnumber=14
-pinseq=14
-name=B5
-dir=inout
-}
-T {@#14:pinnumber} 180 -175 2 1 0.266667 0.266667 {}
-T {@#14:name} 165 -170 2 0 0.266667 0.266667 {}
-L 3 170 -140 200 -140 {}
-B 5 197.5 -142.5 202.5 -137.5 {pinnumber=13
-pinseq=13
-name=B6
-dir=inout
-}
-T {@#15:pinnumber} 180 -145 2 1 0.266667 0.266667 {}
-T {@#15:name} 165 -140 2 0 0.266667 0.266667 {}
-L 3 170 -110 200 -110 {}
-B 5 197.5 -112.5 202.5 -107.5 {pinnumber=12
-pinseq=12
-name=B7
-dir=inout
-}
-T {@#16:pinnumber} 180 -115 2 1 0.266667 0.266667 {}
-T {@#16:name} 165 -110 2 0 0.266667 0.266667 {}
+
+ {}
 L 3 170 -80 200 -80 {}
 B 5 197.5 -82.5 202.5 -77.5 {pinnumber=11
 pinseq=11
@@ -177,3 +118,59 @@ dir=inout
 }
 T {@#17:pinnumber} 180 -85 2 1 0.266667 0.266667 {}
 T {@#17:name} 165 -80 2 0 0.266667 0.266667 {}
+L 3 170 -110 200 -110 {}
+B 5 197.5 -112.5 202.5 -107.5 {pinnumber=12
+pinseq=12
+name=B7
+dir=inout
+}
+T {@#16:pinnumber} 180 -115 2 1 0.266667 0.266667 {}
+T {@#16:name} 165 -110 2 0 0.266667 0.266667 {}
+L 3 170 -140 200 -140 {}
+B 5 197.5 -142.5 202.5 -137.5 {pinnumber=13
+pinseq=13
+name=B6
+dir=inout
+}
+T {@#15:pinnumber} 180 -145 2 1 0.266667 0.266667 {}
+T {@#15:name} 165 -140 2 0 0.266667 0.266667 {}
+L 3 170 -170 200 -170 {}
+B 5 197.5 -172.5 202.5 -167.5 {pinnumber=14
+pinseq=14
+name=B5
+dir=inout
+}
+T {@#14:pinnumber} 180 -175 2 1 0.266667 0.266667 {}
+T {@#14:name} 165 -170 2 0 0.266667 0.266667 {}
+L 3 170 -200 200 -200 {}
+B 5 197.5 -202.5 202.5 -197.5 {pinnumber=15
+pinseq=15
+name=B4
+dir=inout
+}
+T {@#13:pinnumber} 180 -205 2 1 0.266667 0.266667 {}
+T {@#13:name} 165 -200 2 0 0.266667 0.266667 {}
+L 3 170 -230 200 -230 {}
+B 5 197.5 -232.5 202.5 -227.5 {pinnumber=16
+pinseq=16
+name=B3
+dir=inout
+}
+T {@#12:pinnumber} 180 -235 2 1 0.266667 0.266667 {}
+T {@#12:name} 165 -230 2 0 0.266667 0.266667 {}
+L 3 170 -260 200 -260 {}
+B 5 197.5 -262.5 202.5 -257.5 {pinnumber=17
+pinseq=17
+name=B2
+dir=inout
+}
+T {@#11:pinnumber} 180 -265 2 1 0.266667 0.266667 {}
+T {@#11:name} 165 -260 2 0 0.266667 0.266667 {}
+L 3 170 -290 200 -290 {}
+B 5 197.5 -292.5 202.5 -287.5 {pinnumber=18
+pinseq=18
+name=B1
+dir=inout
+}
+T {@#10:pinnumber} 180 -295 2 1 0.266667 0.266667 {}
+T {@#10:name} 165 -290 2 0 0.266667 0.266667 {}

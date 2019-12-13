@@ -9,15 +9,18 @@ slotdef=3:8,9,10
 slotdef=4:12,13,11
 name=U?
 footprint=DIP14
-description=4\\\\ NOR-gates\\\\ with\\\\ 2\\\\ inputs
-net=VDD:14
-net=VSS:7
+description=\\"4 NOR-gates with 2 inputs\\"
+VDD=VDD
+VSS=VSS
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @VDD @VSS"
+
+extra="VDD VSS"
+extra_pinnumber="14 7"
 }
 V {}
 S {}

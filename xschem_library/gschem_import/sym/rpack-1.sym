@@ -9,7 +9,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}
@@ -113,23 +114,11 @@ pinseq=1
 dir=inout
 name=R1
 }
-L 3 70 -80 100 -80 {}
-B 5 97.5 -82.5 102.5 -77.5 {pinnumber=16
-pinseq=16
-dir=inout
-name=R1A
-}
 L 3 0 -70 30 -70 {}
 B 5 -2.5 -72.5 2.5 -67.5 {pinnumber=2
 pinseq=2
 dir=inout
 name=R2
-}
-L 3 70 -70 100 -70 {}
-B 5 97.5 -72.5 102.5 -67.5 {pinnumber=15
-pinseq=15
-dir=inout
-name=R2A
 }
 L 3 0 -60 30 -60 {}
 B 5 -2.5 -62.5 2.5 -57.5 {pinnumber=3
@@ -137,23 +126,11 @@ pinseq=3
 dir=inout
 name=R3
 }
-L 3 70 -60 100 -60 {}
-B 5 97.5 -62.5 102.5 -57.5 {pinnumber=14
-pinseq=14
-dir=inout
-name=R3A
-}
 L 3 0 -50 30 -50 {}
 B 5 -2.5 -52.5 2.5 -47.5 {pinnumber=4
 pinseq=4
 dir=inout
 name=R4
-}
-L 3 70 -50 100 -50 {}
-B 5 97.5 -52.5 102.5 -47.5 {pinnumber=13
-pinseq=13
-dir=inout
-name=R4A
 }
 L 3 0 -40 30 -40 {}
 B 5 -2.5 -42.5 2.5 -37.5 {pinnumber=5
@@ -161,35 +138,17 @@ pinseq=5
 dir=inout
 name=R5
 }
-L 3 70 -40 100 -40 {}
-B 5 97.5 -42.5 102.5 -37.5 {pinnumber=12
-pinseq=12
-dir=inout
-name=R5A
-}
 L 3 0 -30 30 -30 {}
 B 5 -2.5 -32.5 2.5 -27.5 {pinnumber=6
 pinseq=6
 dir=inout
 name=R6
 }
-L 3 70 -30 100 -30 {}
-B 5 97.5 -32.5 102.5 -27.5 {pinnumber=11
-pinseq=11
-dir=inout
-name=R6A
-}
 L 3 0 -20 30 -20 {}
 B 5 -2.5 -22.5 2.5 -17.5 {pinnumber=7
 pinseq=7
 dir=inout
 name=R7
-}
-L 3 70 -20 100 -20 {}
-B 5 97.5 -22.5 102.5 -17.5 {pinnumber=10
-pinseq=10
-dir=inout
-name=R7A
 }
 L 3 0 -10 30 -10 {}
 B 5 -2.5 -12.5 2.5 -7.5 {pinnumber=8
@@ -202,4 +161,46 @@ B 5 97.5 -12.5 102.5 -7.5 {pinnumber=9
 pinseq=9
 dir=inout
 name=R8A
+}
+L 3 70 -20 100 -20 {}
+B 5 97.5 -22.5 102.5 -17.5 {pinnumber=10
+pinseq=10
+dir=inout
+name=R7A
+}
+L 3 70 -30 100 -30 {}
+B 5 97.5 -32.5 102.5 -27.5 {pinnumber=11
+pinseq=11
+dir=inout
+name=R6A
+}
+L 3 70 -40 100 -40 {}
+B 5 97.5 -42.5 102.5 -37.5 {pinnumber=12
+pinseq=12
+dir=inout
+name=R5A
+}
+L 3 70 -50 100 -50 {}
+B 5 97.5 -52.5 102.5 -47.5 {pinnumber=13
+pinseq=13
+dir=inout
+name=R4A
+}
+L 3 70 -60 100 -60 {}
+B 5 97.5 -62.5 102.5 -57.5 {pinnumber=14
+pinseq=14
+dir=inout
+name=R3A
+}
+L 3 70 -70 100 -70 {}
+B 5 97.5 -72.5 102.5 -67.5 {pinnumber=15
+pinseq=15
+dir=inout
+name=R2A
+}
+L 3 70 -80 100 -80 {}
+B 5 97.5 -82.5 102.5 -77.5 {pinnumber=16
+pinseq=16
+dir=inout
+name=R1A
 }

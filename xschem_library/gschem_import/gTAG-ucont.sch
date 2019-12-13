@@ -56,9 +56,11 @@ footprint=sm0805
 device=RESISTOR
 }
 C {in-1.sym} 4550 -4930 0 0 {name=usb_io+
+lab=usb_io+
 device=INPUT
 }
 C {in-1.sym} 4550 -5010 0 0 {name=usb_io-
+lab=usb_io-
 device=INPUT
 }
 C {resistor-2.sym} 4670 -5090 0 0 {name=R2
@@ -135,18 +137,23 @@ C {cy7c64603-52nc.sym} 5030 -4110 0 0 {name=U1
 footprint=cy7c64603
 }
 C {in-1.sym} 6400 -4410 0 1 {name=tdo_ttl
+lab=tdo_ttl
 device=INPUT
 }
 C {out-1.sym} 6340 -4570 0 0 {name=tdi_ttl
+lab=tdi_ttl
 device=OUTPUT
 }
 C {out-1.sym} 6340 -4530 0 0 {name=tms_ttl
+lab=tms_ttl
 device=OUTPUT
 }
 C {out-1.sym} 6340 -4490 0 0 {name=tck_ttl
+lab=tck_ttl
 device=OUTPUT
 }
 C {out-1.sym} 6340 -4450 0 0 {name=trst_ttl
+lab=trst_ttl
 device=OUTPUT
 }
 C {3.3V-plus-1.sym} 5940 -5310 0 0 {}
@@ -211,6 +218,7 @@ footprint=JUMPER2
 device=JUMPER
 }
 C {in-1.sym} 4690 -5290 0 0 {name=reset#
+lab=reset#
 device=INPUT
 }
 C {header20-1.sym} 6320 -4590 3 0 {name=CONN1

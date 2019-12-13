@@ -3,7 +3,7 @@ G {type=2N5911
 template="device=2N5911
 name=Q?
 footprint=TO78
-description=matched\\\\ n-channel\\\\ jfet\\\\ pairs
+description=\\"matched n-channel jfet pairs\\"
 numslots=2
 documentation=http://wwww.ges.cz/sheet/2/2n5911.pdf
 slot=1
@@ -14,7 +14,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}
@@ -34,13 +35,6 @@ L 4 35 -35 40 -40 {}
 
 
 
-L 3 60 -80 60 -50 {}
-B 5 57.5 -82.5 62.5 -77.5 {pinnumber=2
-pinseq=2
-name=D
-dir=inout
-}
-T {@#0:pinnumber} 65 -60 2 1 0.266667 0.266667 {}
 L 3 60 -30 60 0 {}
 B 5 57.5 -2.5 62.5 2.5 {pinnumber=1
 pinseq=1
@@ -48,6 +42,13 @@ name=S
 dir=inout
 }
 T {@#1:pinnumber} 65 -10 2 1 0.266667 0.266667 {}
+L 3 60 -80 60 -50 {}
+B 5 57.5 -82.5 62.5 -77.5 {pinnumber=2
+pinseq=2
+name=D
+dir=inout
+}
+T {@#0:pinnumber} 65 -60 2 1 0.266667 0.266667 {}
 L 3 0 -40 30 -40 {}
 B 5 -2.5 -42.5 2.5 -37.5 {pinnumber=3
 pinseq=3

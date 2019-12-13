@@ -12,17 +12,20 @@ slotdef=6:13,12
 name=U?
 pins=14
 class=IC
-net=GND:7
-net=Vcc:14
 footprint=DIP14
-description=6\\\\ NOT\\\\ gates
+description=\\"6 NOT gates\\"
 documentation=http://www-s.ti.com/sc/ds/sn74hc04.pdf
+GND=GND
+Vcc=Vcc
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @GND @Vcc"
+
+extra="GND Vcc"
+extra_pinnumber="7 14"
 }
 V {}
 S {}

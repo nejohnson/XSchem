@@ -3,17 +3,20 @@ G {type=74139
 template="device=74139
 name=U?
 footprint=DIP16
-description=2\\\\ 2-to-4\\\\ decoder/demultiplexer
+description=\\"2 2-to-4 decoder/demultiplexer\\"
 numslots=0
-net=Vcc:16
-net=GND:8
 documentation=http://www-s.ti.com/sc/ds/sn74hc139.pdf
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="16 8"
 }
 V {}
 S {}
@@ -98,54 +101,8 @@ dir=out
 }
 T {@#6:pinnumber} 180 -155 2 1 0.266667 0.266667 {}
 T {@#6:name} 165 -150 2 0 0.266667 0.266667 {}
-L 3 0 -110 20 -110 {}
-B 5 -2.5 -112.5 2.5 -107.5 {pinnumber=15
-pinseq=15
-name=G2
-dir=in
-}
-T {@#7:pinnumber} 20 -115 2 0 0.266667 0.266667 {}
-T {@#7:name} 35 -110 2 1 0.266667 0.266667 {}
-L 3 0 -80 30 -80 {}
-B 5 -2.5 -82.5 2.5 -77.5 {pinnumber=14
-pinseq=14
-name=A2
-dir=in
-}
-T {@#8:pinnumber} 20 -85 2 0 0.266667 0.266667 {}
-T {@#8:name} 35 -80 2 1 0.266667 0.266667 {}
-L 3 0 -50 30 -50 {}
-B 5 -2.5 -52.5 2.5 -47.5 {pinnumber=13
-pinseq=13
-name=B2
-dir=in
-}
-T {@#9:pinnumber} 20 -55 2 0 0.266667 0.266667 {}
-T {@#9:name} 35 -50 2 1 0.266667 0.266667 {}
-L 3 180 -110 200 -110 {}
-B 5 197.5 -112.5 202.5 -107.5 {pinnumber=12
-pinseq=12
-name=2Y0
-dir=out
-}
-T {@#10:pinnumber} 180 -115 2 1 0.266667 0.266667 {}
-T {@#10:name} 165 -110 2 0 0.266667 0.266667 {}
-L 3 180 -80 200 -80 {}
-B 5 197.5 -82.5 202.5 -77.5 {pinnumber=11
-pinseq=11
-name=2Y1
-dir=out
-}
-T {@#11:pinnumber} 180 -85 2 1 0.266667 0.266667 {}
-T {@#11:name} 165 -80 2 0 0.266667 0.266667 {}
-L 3 180 -50 200 -50 {}
-B 5 197.5 -52.5 202.5 -47.5 {pinnumber=10
-pinseq=10
-name=2Y2
-dir=out
-}
-T {@#12:pinnumber} 180 -55 2 1 0.266667 0.266667 {}
-T {@#12:name} 165 -50 2 0 0.266667 0.266667 {}
+
+ {}
 L 3 180 -20 200 -20 {}
 B 5 197.5 -22.5 202.5 -17.5 {pinnumber=9
 pinseq=9
@@ -154,3 +111,43 @@ dir=out
 }
 T {@#13:pinnumber} 180 -25 2 1 0.266667 0.266667 {}
 T {@#13:name} 165 -20 2 0 0.266667 0.266667 {}
+L 3 180 -50 200 -50 {}
+B 5 197.5 -52.5 202.5 -47.5 {pinnumber=10
+pinseq=10
+name=2Y2
+dir=out
+}
+T {@#12:pinnumber} 180 -55 2 1 0.266667 0.266667 {}
+T {@#12:name} 165 -50 2 0 0.266667 0.266667 {}
+L 3 180 -80 200 -80 {}
+B 5 197.5 -82.5 202.5 -77.5 {pinnumber=11
+pinseq=11
+name=2Y1
+dir=out
+}
+T {@#11:pinnumber} 180 -85 2 1 0.266667 0.266667 {}
+T {@#11:name} 165 -80 2 0 0.266667 0.266667 {}
+L 3 180 -110 200 -110 {}
+B 5 197.5 -112.5 202.5 -107.5 {pinnumber=12
+pinseq=12
+name=2Y0
+dir=out
+}
+T {@#10:pinnumber} 180 -115 2 1 0.266667 0.266667 {}
+T {@#10:name} 165 -110 2 0 0.266667 0.266667 {}
+L 3 0 -50 30 -50 {}
+B 5 -2.5 -52.5 2.5 -47.5 {pinnumber=13
+pinseq=13
+name=B2
+dir=in
+}
+T {@#9:pinnumber} 20 -55 2 0 0.266667 0.266667 {}
+T {@#9:name} 35 -50 2 1 0.266667 0.266667 {}
+L 3 0 -80 30 -80 {}
+B 5 -2.5 -82.5 2.5 -77.5 {pinnumber=14
+pinseq=14
+name=A2
+dir=in
+}
+T {@#8:pinnumber} 20 -85 2 0 0.266667 0.266667 {}
+T {@#8:name} 35 -80 2 1 0.266667 0.266667 {}

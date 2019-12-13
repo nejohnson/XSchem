@@ -7,7 +7,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}
@@ -39,6 +40,15 @@ L 4 30 -400 30 0 {}
 
 
 
+L 3 230 -380 260 -380 {}
+B 5 257.5 -382.5 262.5 -377.5 {pinnumber=1
+pinseq=1
+name=1
+dir=inout
+}
+T {@#8:pinnumber} 241 -386 2 1 0.266667 0.266667 {}
+
+ {}
 L 3 0 -380 30 -380 {}
 B 5 -2.5 -382.5 2.5 -377.5 {pinnumber=3
 pinseq=3
@@ -60,6 +70,8 @@ name=5
 dir=inout
 }
 T {@#2:pinnumber} 11 -306 2 1 0.266667 0.266667 {}
+
+ {}
 L 3 0 -260 30 -260 {}
 B 5 -2.5 -262.5 2.5 -257.5 {pinnumber=7
 pinseq=7
@@ -74,6 +86,8 @@ name=8
 dir=inout
 }
 T {@#4:pinnumber} 11 -226 2 1 0.266667 0.266667 {}
+
+ {}
 L 3 0 -180 30 -180 {}
 B 5 -2.5 -182.5 2.5 -177.5 {pinnumber=10
 pinseq=10
@@ -81,27 +95,8 @@ name=10
 dir=inout
 }
 T {@#5:pinnumber} 11 -186 2 1 0.266667 0.266667 {}
-L 3 0 -140 30 -140 {}
-B 5 -2.5 -142.5 2.5 -137.5 {pinnumber=13
-pinseq=13
-name=13
-dir=inout
-}
-T {@#6:pinnumber} 11 -146 2 1 0.266667 0.266667 {}
-L 3 0 -100 30 -100 {}
-B 5 -2.5 -102.5 2.5 -97.5 {pinnumber=17
-pinseq=17
-name=17
-dir=inout
-}
-T {@#7:pinnumber} 11 -106 2 1 0.266667 0.266667 {}
-L 3 230 -380 260 -380 {}
-B 5 257.5 -382.5 262.5 -377.5 {pinnumber=1
-pinseq=1
-name=1
-dir=inout
-}
-T {@#8:pinnumber} 241 -386 2 1 0.266667 0.266667 {}
+
+ {}
 L 3 230 -340 260 -340 {}
 B 5 257.5 -342.5 262.5 -337.5 {pinnumber=12
 pinseq=12
@@ -109,24 +104,10 @@ name=12
 dir=inout
 }
 T {@#9:pinnumber} 241 -346 2 1 0.266667 0.266667 {}
-L 3 230 -300 260 -300 {}
-B 5 257.5 -302.5 262.5 -297.5 {pinnumber=14
-pinseq=14
-name=14
+L 3 0 -140 30 -140 {}
+B 5 -2.5 -142.5 2.5 -137.5 {pinnumber=13
+pinseq=13
+name=13
 dir=inout
 }
-T {@#10:pinnumber} 241 -306 2 1 0.266667 0.266667 {}
-L 3 230 -260 260 -260 {}
-B 5 257.5 -262.5 262.5 -257.5 {pinnumber=19
-pinseq=19
-name=19
-dir=inout
-}
-T {@#11:pinnumber} 241 -266 2 1 0.266667 0.266667 {}
-L 3 0 -60 30 -60 {}
-B 5 -2.5 -62.5 2.5 -57.5 {pinnumber=20
-pinseq=20
-name=20
-dir=inout
-}
-T {@#12:pinnumber} 11 -66 2 1 0.266667 0.266667 {}
+T {@#6:pinnumber} 11 -146 2 1 0.266667 0.266667 {}

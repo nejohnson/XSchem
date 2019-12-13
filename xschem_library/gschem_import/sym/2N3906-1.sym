@@ -2,7 +2,7 @@ v {xschem version=2.9.5_RC6 file_version=1.1}
 G {type=2N3906
 template="device=2N3906
 name=Q?
-description=2N3906\\\\ PNP\\\\ transistor
+description=\\"2N3906 PNP transistor\\"
 documentation=http://www.fairchildsemi.com/pf/2N/2N3906.html
 numslots=0
 footprint=TO92
@@ -11,7 +11,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}
@@ -41,13 +42,6 @@ dir=inout
 name=C
 }
 T {@#0:pinnumber} 52.7 -85.6 2 1 0.2 0.2 {}
-L 3 60 -20 60 0 {}
-B 5 57.5 -2.5 62.5 2.5 {pinnumber=3
-pinseq=3
-dir=inout
-name=E
-}
-T {@#1:pinnumber} 50 -5 2 1 0.2 0.2 {}
 L 3 0 -50 18.4 -50 {}
 B 5 -2.5 -52.5 2.5 -47.5 {pinnumber=2
 pinseq=2
@@ -55,3 +49,10 @@ dir=inout
 name=B
 }
 T {@#2:pinnumber} 10 -55 2 1 0.2 0.2 {}
+L 3 60 -20 60 0 {}
+B 5 57.5 -2.5 62.5 2.5 {pinnumber=3
+pinseq=3
+dir=inout
+name=E
+}
+T {@#1:pinnumber} 50 -5 2 1 0.2 0.2 {}

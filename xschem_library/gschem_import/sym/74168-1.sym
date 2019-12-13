@@ -3,17 +3,20 @@ G {type=74168
 template="device=74168
 footprint=DIP16
 name=U?
-description=synchronous\\\\ programmable\\\\ decimal\\\\ up/down\\\\ counter
+description=\\"synchronous programmable decimal up/down counter\\"
 numslots=0
-net=Vcc:16
-net=GND:8
 symversion=1.0
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="16 8"
 }
 V {}
 S {}
@@ -133,14 +136,6 @@ dir=in
 }
 T {@#11:pinnumber} 20 -105 2 0 0.266667 0.266667 {}
 T {@#11:name} 35 -100 2 1 0.266667 0.266667 {}
-L 3 0 -20 30 -20 {}
-B 5 -2.5 -22.5 2.5 -17.5 {pinnumber=2
-pinseq=14
-name=CP
-dir=inout
-}
-T {@#12:pinnumber} 20 -25 2 0 0.266667 0.266667 {}
-T {@#12:name} 37.5 -20 2 1 0.266667 0.266667 {}
 L 3 0 -60 30 -60 {}
 B 5 -2.5 -62.5 2.5 -57.5 {pinnumber=9
 pinseq=13
@@ -149,3 +144,11 @@ dir=in
 }
 T {@#13:pinnumber} 20 -65 2 0 0.266667 0.266667 {}
 T {@#13:name} 35 -60 2 1 0.266667 0.266667 {}
+L 3 0 -20 30 -20 {}
+B 5 -2.5 -22.5 2.5 -17.5 {pinnumber=2
+pinseq=14
+name=CP
+dir=inout
+}
+T {@#12:pinnumber} 20 -25 2 0 0.266667 0.266667 {}
+T {@#12:name} 37.5 -20 2 1 0.266667 0.266667 {}

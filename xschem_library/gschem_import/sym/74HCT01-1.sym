@@ -9,15 +9,18 @@ slotdef=1:1,2,3
 slotdef=2:4,5,6
 slotdef=3:10,8,9
 slotdef=4:13,11,12
-net=GND:7
-net=Vcc:14
-description=4\\\\ NAND\\\\ gates\\\\ with\\\\ 2\\\\ inputs\\\\ and\\\\ open\\\\ collector\\\\ output
+description=\\"4 NAND gates with 2 inputs and open collector output\\"
+GND=GND
+Vcc=Vcc
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @GND @Vcc"
+
+extra="GND Vcc"
+extra_pinnumber="7 14"
 }
 V {}
 S {}

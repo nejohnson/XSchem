@@ -20,18 +20,23 @@ T {Place near the VCC pin for U20} 5720 -5520 2 1 0.5 0.5 {}
 
 C {title-A2.sym} 4020 -4290 0 0 {}
 C {in-1.sym} 4540 -5360 0 0 {name=tdo_ttl
+lab=tdo_ttl
 device=INPUT
 }
 C {in-1.sym} 4540 -5180 0 0 {name=tms_ttl
+lab=tms_ttl
 device=INPUT
 }
 C {in-1.sym} 4540 -5010 0 0 {name=tck_ttl
+lab=tck_ttl
 device=INPUT
 }
 C {in-1.sym} 4540 -4840 0 0 {name=trst_ttl
+lab=trst_ttl
 device=INPUT
 }
 C {in-1.sym} 4540 -5600 0 0 {name=jtag_power
+lab=jtag_power
 device=INPUT
 }
 C {7414-1.sym} 5420 -5480 0 1 {name=U20
@@ -66,6 +71,7 @@ net=GND:7
 device=7414
 }
 C {out-1.sym} 4600 -5520 0 1 {name=tdi_ttl
+lab=tdi_ttl
 device=OUTPUT
 }
 C {connector8-1.sym} 5860 -5050 0 1 {name=CONN4

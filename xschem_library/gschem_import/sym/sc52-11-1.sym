@@ -4,14 +4,15 @@ template="name=D?
 device=sc52-11
 footprint=none
 numslots=0
-description=7-segment-display\\\\ with\\\\ common\\\\ cathode
+description=\\"7-segment-display with common cathode\\"
 documentation=http://www.kingbright-led.com/data/spec/SC52-11EWA.pdf
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}
@@ -128,14 +129,6 @@ dir=inout
 }
 T {@#5:pinnumber} 20 -215 2 0 0.266667 0.266667 {}
 T {@#5:name} 35 -210 2 1 0.266667 0.266667 {}
-L 3 0 -50 30 -50 {}
-B 5 -2.5 -52.5 2.5 -47.5 {pinnumber=5
-pinseq=10
-name=dp
-dir=inout
-}
-T {@#6:pinnumber} 20 -55 2 0 0.266667 0.266667 {}
-T {@#6:name} 35 -50 2 1 0.266667 0.266667 {}
 L 3 0 -170 30 -170 {}
 B 5 -2.5 -172.5 2.5 -167.5 {pinnumber=1
 pinseq=7
@@ -160,3 +153,11 @@ dir=inout
 }
 T {@#9:pinnumber} 20 -95 2 0 0.266667 0.266667 {}
 T {@#9:name} 35 -90 2 1 0.266667 0.266667 {}
+L 3 0 -50 30 -50 {}
+B 5 -2.5 -52.5 2.5 -47.5 {pinnumber=5
+pinseq=10
+name=dp
+dir=inout
+}
+T {@#6:pinnumber} 20 -55 2 0 0.266667 0.266667 {}
+T {@#6:name} 35 -50 2 1 0.266667 0.266667 {}

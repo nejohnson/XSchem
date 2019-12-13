@@ -3,16 +3,19 @@ G {type=4034
 template="name=U?
 device=4034
 footprint=DIP24
-net=VSS:12
-net=VDD:24
-description=8-stage\\\\ static\\\\ parallel/serial\\\\ bus\\\\ transceiver
+description=\\"8-stage static parallel/serial bus transceiver\\"
 numslots=0
+VSS=VSS
+VDD=VDD
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @VSS @VDD"
+
+extra="VSS VDD"
+extra_pinnumber="12 24"
 }
 V {}
 S {}

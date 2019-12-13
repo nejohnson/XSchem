@@ -3,17 +3,20 @@ G {type=74173
 template="device=74173
 footprint=DIP16
 name=U?
-description=4\\\\ bit\\\\ D-register\\\\ with\\\\ tristate\\\\ outputs
+description=\\"4 bit D-register with tristate outputs\\"
 numslots=0
-net=Vcc:16
-net=GND:8
 documentation=http://www.semiconductors.philips.com/acrobat/datasheets/74HC_HCT173_CNV_2.pdf
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="16 8"
 }
 V {}
 S {}

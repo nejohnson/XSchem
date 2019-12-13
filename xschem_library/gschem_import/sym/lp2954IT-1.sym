@@ -3,17 +3,20 @@ G {type=LP2954IT
 template="device=LP2954IT
 name=U?
 pins=3
-net=GND:2
 numslots=0
 footprint=TO220
-description=5V\\\\ Micropower\\\\ Low-Dropout\\\\ Voltage\\\\ Regulator
+description=\\"5V Micropower Low-Dropout Voltage Regulator\\"
 documentation=http://www.national.com/ds/LP/LP2954.pdf
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @GND"
+
+extra="GND"
+extra_pinnumber="2"
 }
 V {}
 S {}

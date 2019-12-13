@@ -4,15 +4,16 @@ template="name=V?
 device=vsin
 footprint=none
 numslots=0
-description=sinusoidal\\\\ signal\\\\ source
-value=sin\\\\ 0\\\\ 1\\\\ 1meg
-comment=syntax:\\\\ sin\\\\ vo\\\\ va\\\\ freq\\\\ td\\\\ theta
+description=\\"sinusoidal signal source\\"
+value=\\"sin 0 1 1meg\\"
+comment=\\"syntax: sin vo va freq td theta\\"
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}

@@ -3,17 +3,20 @@ G {type=40374
 template="name=U?
 device=40374
 footprint=DIP20
-net=VSS:20
-net=VDD:10
-description=octal\\\\ D-type\\\\ flip-flops
+description=\\"octal D-type flip-flops\\"
 numslots=0
 documentation=http://www.semiconductors.philips.com/acrobat/datasheets/HEF40374B_CNV_3.pdf
+VSS=VSS
+VDD=VDD
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @VSS @VDD"
+
+extra="VSS VDD"
+extra_pinnumber="20 10"
 }
 V {}
 S {}

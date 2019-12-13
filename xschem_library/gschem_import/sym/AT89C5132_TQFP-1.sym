@@ -1,25 +1,28 @@
 v {xschem version=2.9.5_RC6 file_version=1.1}
 G {type=AT89C5132_TQFP
-template="net=Vdd:11,23,41,51,71
-author=Jim\\\\ Duchek\\\\ <jrduchek@blueridge.net>
-description=8-bit\\\\ 8051\\\\ compatible\\\\ microcontroller\\\\ w/USB\\\\ (Atmel)
-net=Vss:15,24,42,52,72
-net=PVss:14
-net=PVdd:12
-net=AVss:34
-net=AVdd:33
+template="author=\\"Jim Duchek <jrduchek@blueridge.net>\\"
+description=\\"8-bit 8051 compatible microcontroller w/USB (Atmel)\\"
 footprint=TQFP80
 device=AT89C5132_TQFP
 numslots=0
 name=U?
-net=UVss:20
-net=UVdd:19
+Vdd=Vdd
+Vss=Vss
+PVss=PVss
+PVdd=PVdd
+AVss=AVss
+AVdd=AVdd
+UVss=UVss
+UVdd=UVdd
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vdd @Vss @PVss @PVdd @AVss @AVdd @UVss @UVdd"
+
+extra="Vdd Vss PVss PVdd AVss AVdd UVss UVdd"
+extra_pinnumber="11,23,41,51,71 15,24,42,52,72 14 12 34 33 20 19"
 }
 V {}
 S {}
@@ -165,14 +168,6 @@ pinseq=16
 }
 T {@#15:pinnumber} 430 -1240 2 1 0.266667 0.266667 {}
 T {@#15:name} 410 -1230 2 0 0.266667 0.266667 {}
-L 3 10 -870 40 -870 {}
-B 5 7.5 -872.5 12.5 -867.5 {pinnumber=32
-dir=inout
-name=P3.7/~RD
-pinseq=24
-}
-T {@#16:pinnumber} 20 -880 2 1 0.266667 0.266667 {}
-T {@#16:name} 50 -870 2 1 0.266667 0.266667 {}
 L 3 10 -1150 40 -1150 {}
 B 5 7.5 -1152.5 12.5 -1147.5 {pinnumber=25
 dir=inout
@@ -229,6 +224,14 @@ pinseq=23
 }
 T {@#23:pinnumber} 20 -920 2 1 0.266667 0.266667 {}
 T {@#23:name} 50 -910 2 1 0.266667 0.266667 {}
+L 3 10 -870 40 -870 {}
+B 5 7.5 -872.5 12.5 -867.5 {pinnumber=32
+dir=inout
+name=P3.7/~RD
+pinseq=24
+}
+T {@#16:pinnumber} 20 -880 2 1 0.266667 0.266667 {}
+T {@#16:name} 50 -870 2 1 0.266667 0.266667 {}
 L 3 420 -1150 450 -1150 {}
 B 5 447.5 -1152.5 452.5 -1147.5 {pinnumber=64
 name=P2.0/A8
@@ -413,14 +416,6 @@ dir=in
 }
 T {@#46:name} 50 -510 2 1 0.266667 0.266667 {}
 T {@#46:pinnumber} 20 -520 2 1 0.266667 0.266667 {}
-L 3 10 -390 40 -390 {}
-B 5 7.5 -392.5 12.5 -387.5 {pinseq=49
-name=DCLK
-pinnumber=44
-dir=out
-}
-T {@#47:name} 50 -390 2 1 0.266667 0.266667 {}
-T {@#47:pinnumber} 20 -400 2 1 0.266667 0.266667 {}
 L 3 10 -430 40 -430 {}
 B 5 7.5 -432.5 12.5 -427.5 {pinseq=48
 name=DOUT
@@ -429,6 +424,14 @@ dir=out
 }
 T {@#48:name} 50 -430 2 1 0.266667 0.266667 {}
 T {@#48:pinnumber} 20 -440 2 1 0.266667 0.266667 {}
+L 3 10 -390 40 -390 {}
+B 5 7.5 -392.5 12.5 -387.5 {pinseq=49
+name=DCLK
+pinnumber=44
+dir=out
+}
+T {@#47:name} 50 -390 2 1 0.266667 0.266667 {}
+T {@#47:pinnumber} 20 -400 2 1 0.266667 0.266667 {}
 L 3 10 -350 40 -350 {}
 B 5 7.5 -352.5 12.5 -347.5 {pinseq=50
 name=DSEL
@@ -461,54 +464,6 @@ dir=inout
 }
 T {@#52:name} 410 -390 2 0 0.266667 0.266667 {}
 T {@#52:pinnumber} 430 -400 2 1 0.266667 0.266667 {}
-L 3 420 -230 450 -230 {}
-B 5 447.5 -232.5 452.5 -227.5 {pinnumber=37
-dir=in
-name=AIN0
-pinseq=60
-}
-T {@#53:pinnumber} 430 -240 2 1 0.266667 0.266667 {}
-T {@#53:name} 410 -230 2 0 0.266667 0.266667 {}
-L 3 420 -190 450 -190 {}
-B 5 447.5 -192.5 452.5 -187.5 {pinnumber=38
-dir=in
-name=AIN1
-pinseq=61
-}
-T {@#54:pinnumber} 430 -200 2 1 0.266667 0.266667 {}
-T {@#54:name} 410 -190 2 0 0.266667 0.266667 {}
-L 3 420 -310 450 -310 {}
-B 5 447.5 -312.5 452.5 -307.5 {pinnumber=35
-dir=in
-name=AREFP
-pinseq=58
-}
-T {@#55:pinnumber} 430 -320 2 1 0.266667 0.266667 {}
-T {@#55:name} 410 -310 2 0 0.266667 0.266667 {}
-L 3 420 -270 450 -270 {}
-B 5 447.5 -272.5 452.5 -267.5 {pinnumber=36
-dir=in
-name=AREFN
-pinseq=59
-}
-T {@#56:pinnumber} 430 -280 2 1 0.266667 0.266667 {}
-T {@#56:name} 410 -270 2 0 0.266667 0.266667 {}
-L 3 420 -30 450 -30 {}
-B 5 447.5 -32.5 452.5 -27.5 {pinnumber=50
-dir=out
-name=MCLK
-pinseq=64
-}
-T {@#57:pinnumber} 430 -40 2 1 0.266667 0.266667 {}
-T {@#57:name} 410 -30 2 0 0.266667 0.266667 {}
-L 3 420 -110 450 -110 {}
-B 5 447.5 -112.5 452.5 -107.5 {pinnumber=48
-dir=inout
-name=MCMD
-pinseq=62
-}
-T {@#58:pinnumber} 430 -120 2 1 0.266667 0.266667 {}
-T {@#58:name} 410 -110 2 0 0.266667 0.266667 {}
 L 3 10 -230 40 -230 {}
 B 5 7.5 -232.5 12.5 -227.5 {pinnumber=1
 dir=out
@@ -541,6 +496,46 @@ pinseq=57
 }
 T {@#62:pinnumber} 20 -80 2 1 0.266667 0.266667 {}
 T {@#62:name} 50 -70 2 1 0.266667 0.266667 {}
+L 3 420 -310 450 -310 {}
+B 5 447.5 -312.5 452.5 -307.5 {pinnumber=35
+dir=in
+name=AREFP
+pinseq=58
+}
+T {@#55:pinnumber} 430 -320 2 1 0.266667 0.266667 {}
+T {@#55:name} 410 -310 2 0 0.266667 0.266667 {}
+L 3 420 -270 450 -270 {}
+B 5 447.5 -272.5 452.5 -267.5 {pinnumber=36
+dir=in
+name=AREFN
+pinseq=59
+}
+T {@#56:pinnumber} 430 -280 2 1 0.266667 0.266667 {}
+T {@#56:name} 410 -270 2 0 0.266667 0.266667 {}
+L 3 420 -230 450 -230 {}
+B 5 447.5 -232.5 452.5 -227.5 {pinnumber=37
+dir=in
+name=AIN0
+pinseq=60
+}
+T {@#53:pinnumber} 430 -240 2 1 0.266667 0.266667 {}
+T {@#53:name} 410 -230 2 0 0.266667 0.266667 {}
+L 3 420 -190 450 -190 {}
+B 5 447.5 -192.5 452.5 -187.5 {pinnumber=38
+dir=in
+name=AIN1
+pinseq=61
+}
+T {@#54:pinnumber} 430 -200 2 1 0.266667 0.266667 {}
+T {@#54:name} 410 -190 2 0 0.266667 0.266667 {}
+L 3 420 -110 450 -110 {}
+B 5 447.5 -112.5 452.5 -107.5 {pinnumber=48
+dir=inout
+name=MCMD
+pinseq=62
+}
+T {@#58:pinnumber} 430 -120 2 1 0.266667 0.266667 {}
+T {@#58:name} 410 -110 2 0 0.266667 0.266667 {}
 L 3 420 -70 450 -70 {}
 B 5 447.5 -72.5 452.5 -67.5 {name=MDAT
 dir=inout
@@ -549,3 +544,11 @@ pinseq=63
 }
 T {@#63:name} 410 -70 2 0 0.266667 0.266667 {}
 T {@#63:pinnumber} 430 -80 2 1 0.266667 0.266667 {}
+L 3 420 -30 450 -30 {}
+B 5 447.5 -32.5 452.5 -27.5 {pinnumber=50
+dir=out
+name=MCLK
+pinseq=64
+}
+T {@#57:pinnumber} 430 -40 2 1 0.266667 0.266667 {}
+T {@#57:name} 410 -30 2 0 0.266667 0.266667 {}

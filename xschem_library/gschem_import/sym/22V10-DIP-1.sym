@@ -3,16 +3,19 @@ G {type=22V10
 template="device=22V10
 name=U?
 footprint=DIP24
-description=Programmable\\\\ Logic\\\\ Device
+description=\\"Programmable Logic Device\\"
 numslots=0
-net=Vcc:24
-net=GND:12
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="24 12"
 }
 V {}
 S {}
@@ -31,6 +34,10 @@ L 4 30 -390 30 0 {}
 
 
 
+
+ {}
+
+ {}
 L 3 0 -360 30 -360 {}
 B 5 -2.5 -362.5 2.5 -357.5 {pinnumber=1
 pinseq=3
@@ -191,19 +198,3 @@ name=IOQ7
 }
 T {@#19:pinnumber} 180 -155 2 1 0.266667 0.266667 {}
 T {@#19:name} 127.8 -145 2 1 0.266667 0.266667 {}
-L 3 170 -120 200 -120 {}
-B 5 197.5 -122.5 202.5 -117.5 {pinnumber=15
-pinseq=23
-dir=inout
-name=IOQ8
-}
-T {@#20:pinnumber} 180 -125 2 1 0.266667 0.266667 {}
-T {@#20:name} 127 -115 2 1 0.266667 0.266667 {}
-L 3 170 -90 200 -90 {}
-B 5 197.5 -92.5 202.5 -87.5 {pinnumber=14
-pinseq=24
-dir=inout
-name=IOQ9
-}
-T {@#21:pinnumber} 180 -95 2 1 0.266667 0.266667 {}
-T {@#21:name} 125.4 -85 2 1 0.266667 0.266667 {}

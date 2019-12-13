@@ -5,13 +5,14 @@ name=M?
 model-name=pmos4
 w=10u
 l=1u
-description=low\\\\ voltage\\\\ PMOS
+description=\\"low voltage PMOS\\"
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}
@@ -35,18 +36,6 @@ L 4 50 -55 60 -50 {}
 
 
 
-L 3 60 -100 60 -70 {}
-B 5 57.5 -102.5 62.5 -97.5 {pinnumber=S
-pinseq=3
-name=S
-dir=inout
-}
-L 3 60 -50 70 -50 {}
-B 5 67.5 -52.5 72.5 -47.5 {pinnumber=B
-pinseq=4
-name=B
-dir=inout
-}
 L 3 60 -30 60 0 {}
 B 5 57.5 -2.5 62.5 2.5 {pinnumber=D
 pinseq=1
@@ -57,5 +46,17 @@ L 3 0 -50 30 -50 {}
 B 5 -2.5 -52.5 2.5 -47.5 {pinnumber=G
 pinseq=2
 name=G
+dir=inout
+}
+L 3 60 -100 60 -70 {}
+B 5 57.5 -102.5 62.5 -97.5 {pinnumber=S
+pinseq=3
+name=S
+dir=inout
+}
+L 3 60 -50 70 -50 {}
+B 5 67.5 -52.5 72.5 -47.5 {pinnumber=B
+pinseq=4
+name=B
 dir=inout
 }

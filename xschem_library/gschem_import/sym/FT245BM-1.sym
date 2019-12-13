@@ -3,7 +3,7 @@ G {type=FT245BM
 template="name=U?
 device=FT245BM
 footprint=TQFP32
-description=USB\\\\ FIFO\\\\ (USB\\\\ -\\\\ Parallel)
+description=\\"USB FIFO (USB - Parallel)\\"
 numslots=0
 documentation=http://www.ftdichip.com/Documents/ds245b11.pdf
 "
@@ -11,7 +11,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}
@@ -142,6 +143,22 @@ dir=inout
 }
 T {@#13:pinnumber} 20 -105 2 0 0.266667 0.266667 {}
 T {@#13:name} 35 -100 2 1 0.266667 0.266667 {}
+L 3 0 -60 30 -60 {}
+B 5 -2.5 -62.5 2.5 -57.5 {pinnumber=15
+pinseq=15
+name=WR
+dir=inout
+}
+T {@#26:pinnumber} 20 -65 2 0 0.266667 0.266667 {}
+T {@#26:name} 35 -60 2 1 0.266667 0.266667 {}
+L 3 0 -20 30 -20 {}
+B 5 -2.5 -22.5 2.5 -17.5 {pinnumber=16
+pinseq=16
+name=RD#
+dir=inout
+}
+T {@#27:pinnumber} 20 -25 2 0 0.266667 0.266667 {}
+T {@#27:name} 35 -20 2 1 0.266667 0.266667 {}
 L 3 280 -20 310 -20 {}
 B 5 307.5 -22.5 312.5 -17.5 {pinnumber=17
 pinseq=17
@@ -238,22 +255,6 @@ dir=out
 }
 T {@#25:pinnumber} 290 -465 2 1 0.266667 0.266667 {}
 T {@#25:name} 275 -460 2 0 0.266667 0.266667 {}
-L 3 0 -60 30 -60 {}
-B 5 -2.5 -62.5 2.5 -57.5 {pinnumber=15
-pinseq=15
-name=WR
-dir=inout
-}
-T {@#26:pinnumber} 20 -65 2 0 0.266667 0.266667 {}
-T {@#26:name} 35 -60 2 1 0.266667 0.266667 {}
-L 3 0 -20 30 -20 {}
-B 5 -2.5 -22.5 2.5 -17.5 {pinnumber=16
-pinseq=16
-name=RD#
-dir=inout
-}
-T {@#27:pinnumber} 20 -25 2 0 0.266667 0.266667 {}
-T {@#27:name} 35 -20 2 1 0.266667 0.266667 {}
 L 3 280 -500 310 -500 {}
 B 5 307.5 -502.5 312.5 -497.5 {pinnumber=29
 pinseq=29

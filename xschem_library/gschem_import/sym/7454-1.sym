@@ -3,17 +3,20 @@ G {type=7454
 template="device=7454
 footprint=DIP14
 name=U?
-description=combined\\\\ AND/NOR\\\\ gates
-net=Vcc:14
-net=GND:7
-comment=Attention:\\\\ one\\\\ some\\\\ devices\\\\ pins\\\\ 11\\\\ and\\\\ 12\\\\ are\\\\ not\\\\ connected
+description=\\"combined AND/NOR gates\\"
+comment=\\"Attention: one some devices pins 11 and 12 are not connected\\"
 numslots=0
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="14 7"
 }
 V {}
 S {}

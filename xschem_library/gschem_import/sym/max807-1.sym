@@ -3,7 +3,7 @@ G {type=MAX807
 template="device=MAX807
 name=U?
 footprint=DIP16
-description=uP\\\\ supervisory\\\\ circuit\\\\ with\\\\ 1.5%\\\\ reset\\\\ accuracy
+description=\\"uP supervisory circuit with 1.5% reset accuracy\\"
 numslots=0
 documentation=http://pdfserv.maxim-ic.com/en/ds/MAX807L-MAX807N.pdf
 "
@@ -11,7 +11,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}

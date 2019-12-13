@@ -3,18 +3,21 @@ G {type=AT90S8535
 template="name=U?
 device=AT90S8535
 footprint=DIP40
-net=Vcc:10
-net=GND:11
-net=AVcc:30
-net=AGND:31
-comment=dont_use\\\\ this\\\\ symbol:\\\\ nonstandard\\\\ symwidth
+comment=\\"dont_use this symbol: nonstandard symwidth\\"
 numslots=0
+Vcc=Vcc
+GND=GND
+AVcc=AVcc
+AGND=AGND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND @AVcc @AGND"
+
+extra="Vcc GND AVcc AGND"
+extra_pinnumber="10 11 30 31"
 }
 V {}
 S {}

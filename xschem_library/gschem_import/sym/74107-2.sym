@@ -6,17 +6,20 @@ numslots=2
 slotdef=1:1,3,4,2,13,12
 slotdef=2:8,5,11,6,10,9
 name=U?
-description=2\\\\ JK-flip-flops\\\\ with\\\\ clear\\\\ (pulstriggered)
-net=Vcc:14
-net=GND:7
+description=\\"2 JK-flip-flops with clear (pulstriggered)\\"
 slot=1
 documentation=http://www.semiconductors.philips.com/acrobat/datasheets/74HC_HCT107_CNV_2.pdf
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="14 7"
 }
 V {}
 S {}

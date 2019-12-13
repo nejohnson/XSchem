@@ -3,18 +3,21 @@ G {type=MAX3120
 template="device=MAX3120
 name=U?
 footprint=uMAX8
-description=IrDA\\\\ infrared\\\\ transceiver
+description=\\"IrDA infrared transceiver\\"
 numslots=0
-net=GND:3,6
-net=Vcc:2
 documentation=http://pdfserv.maxim-ic.com/en/ds/MAX3120.pdf
 symversion=1.0
+GND=GND
+Vcc=Vcc
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @GND @Vcc"
+
+extra="GND Vcc"
+extra_pinnumber="3,6 2"
 }
 V {}
 S {}
@@ -42,6 +45,10 @@ dir=in
 }
 T {@#0:pinnumber} 20 -105 2 0 0.266667 0.266667 {}
 T {@#0:name} 35 -100 2 1 0.266667 0.266667 {}
+
+ {}
+
+ {}
 L 3 0 -60 30 -60 {}
 B 5 -2.5 -62.5 2.5 -57.5 {pinnumber=4
 pinseq=4
@@ -50,22 +57,6 @@ dir=in
 }
 T {@#1:pinnumber} 20 -65 2 0 0.266667 0.266667 {}
 T {@#1:name} 35 -60 2 1 0.266667 0.266667 {}
-L 3 230 -60 260 -60 {}
-B 5 257.5 -62.5 262.5 -57.5 {pinnumber=7
-pinseq=7
-name=LEDC
-dir=out
-}
-T {@#2:pinnumber} 240 -65 2 1 0.266667 0.266667 {}
-T {@#2:name} 225 -60 2 0 0.266667 0.266667 {}
-L 3 230 -20 260 -20 {}
-B 5 257.5 -22.5 262.5 -17.5 {pinnumber=8
-pinseq=8
-name=RXD
-dir=out
-}
-T {@#3:pinnumber} 240 -25 2 1 0.266667 0.266667 {}
-T {@#3:name} 225 -20 2 0 0.266667 0.266667 {}
 L 3 0 -20 20 -20 {}
 B 5 -2.5 -22.5 2.5 -17.5 {pinnumber=5
 pinseq=5

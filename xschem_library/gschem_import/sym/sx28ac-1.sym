@@ -3,17 +3,20 @@ G {type=SX28AC
 template="device=SX28AC
 name=U?
 footprint=DIP28
-description=8-bit\\\\ configurable\\\\ communication\\\\ controller
+description=\\"8-bit configurable communication controller\\"
 numslots=0
-net=Vcc:2
-net=GND:4
 documentation=http://www.scenix.com/pdfs/products/sx/processor/SX-DDS-SX2028AC-16.pdf
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="2 4"
 }
 V {}
 S {}
@@ -41,6 +44,14 @@ dir=in
 }
 T {@#0:pinnumber} 20 -415 2 0 0.266667 0.266667 {}
 T {@#0:name} 35 -410 2 1 0.266667 0.266667 {}
+
+ {}
+
+ {}
+
+ {}
+
+ {}
 L 3 0 -260 30 -260 {}
 B 5 -2.5 -262.5 2.5 -257.5 {pinnumber=6
 pinseq=6
@@ -105,118 +116,6 @@ dir=inout
 }
 T {@#8:pinnumber} 20 -55 2 0 0.266667 0.266667 {}
 T {@#8:name} 35 -50 2 1 0.266667 0.266667 {}
-L 3 230 -260 260 -260 {}
-B 5 257.5 -262.5 262.5 -257.5 {pinnumber=23
-pinseq=23
-name=RC5
-dir=inout
-}
-T {@#9:pinnumber} 240 -265 2 1 0.266667 0.266667 {}
-T {@#9:name} 225 -260 2 0 0.266667 0.266667 {}
-L 3 230 -200 260 -200 {}
-B 5 257.5 -202.5 262.5 -197.5 {pinnumber=21
-pinseq=21
-name=RC3
-dir=inout
-}
-T {@#10:pinnumber} 240 -205 2 1 0.266667 0.266667 {}
-T {@#10:name} 225 -200 2 0 0.266667 0.266667 {}
-L 3 230 -140 260 -140 {}
-B 5 257.5 -142.5 262.5 -137.5 {pinnumber=19
-pinseq=19
-name=RC1
-dir=inout
-}
-T {@#11:pinnumber} 240 -145 2 1 0.266667 0.266667 {}
-T {@#11:name} 225 -140 2 0 0.266667 0.266667 {}
-L 3 230 -110 260 -110 {}
-B 5 257.5 -112.5 262.5 -107.5 {pinnumber=18
-pinseq=18
-name=RC0
-dir=inout
-}
-T {@#12:pinnumber} 240 -115 2 1 0.266667 0.266667 {}
-T {@#12:name} 225 -110 2 0 0.266667 0.266667 {}
-L 3 230 -80 260 -80 {}
-B 5 257.5 -82.5 262.5 -77.5 {pinnumber=17
-pinseq=17
-name=RB7
-dir=inout
-}
-T {@#13:pinnumber} 240 -85 2 1 0.266667 0.266667 {}
-T {@#13:name} 225 -80 2 0 0.266667 0.266667 {}
-L 3 230 -50 260 -50 {}
-B 5 257.5 -52.5 262.5 -47.5 {pinnumber=16
-pinseq=16
-name=RB6
-dir=inout
-}
-T {@#14:pinnumber} 240 -55 2 1 0.266667 0.266667 {}
-T {@#14:name} 225 -50 2 0 0.266667 0.266667 {}
-L 3 230 -20 260 -20 {}
-B 5 257.5 -22.5 262.5 -17.5 {pinnumber=15
-pinseq=15
-name=RB5
-dir=inout
-}
-T {@#15:pinnumber} 240 -25 2 1 0.266667 0.266667 {}
-T {@#15:name} 225 -20 2 0 0.266667 0.266667 {}
-L 3 230 -170 260 -170 {}
-B 5 257.5 -172.5 262.5 -167.5 {pinnumber=20
-pinseq=20
-name=RC2
-dir=inout
-}
-T {@#16:pinnumber} 240 -175 2 1 0.266667 0.266667 {}
-T {@#16:name} 225 -170 2 0 0.266667 0.266667 {}
-L 3 230 -230 260 -230 {}
-B 5 257.5 -232.5 262.5 -227.5 {pinnumber=22
-pinseq=22
-name=RC4
-dir=inout
-}
-T {@#17:pinnumber} 240 -235 2 1 0.266667 0.266667 {}
-T {@#17:name} 225 -230 2 0 0.266667 0.266667 {}
-L 3 230 -290 260 -290 {}
-B 5 257.5 -292.5 262.5 -287.5 {pinnumber=24
-pinseq=24
-name=RC6
-dir=inout
-}
-T {@#18:pinnumber} 240 -295 2 1 0.266667 0.266667 {}
-T {@#18:name} 225 -290 2 0 0.266667 0.266667 {}
-L 3 230 -320 260 -320 {}
-B 5 257.5 -322.5 262.5 -317.5 {pinnumber=25
-pinseq=25
-name=RC7
-dir=inout
-}
-T {@#19:pinnumber} 240 -325 2 1 0.266667 0.266667 {}
-T {@#19:name} 225 -320 2 0 0.266667 0.266667 {}
-L 3 230 -350 260 -350 {}
-B 5 257.5 -352.5 262.5 -347.5 {pinnumber=26
-pinseq=26
-name=OSC2
-dir=out
-}
-T {@#20:pinnumber} 240 -355 2 1 0.266667 0.266667 {}
-T {@#20:name} 225 -350 2 0 0.266667 0.266667 {}
-L 3 230 -380 260 -380 {}
-B 5 257.5 -382.5 262.5 -377.5 {pinnumber=27
-pinseq=27
-name=OSC1
-dir=in
-}
-T {@#21:pinnumber} 240 -385 2 1 0.266667 0.266667 {}
-T {@#21:name} 225 -380 2 0 0.266667 0.266667 {}
-L 3 240 -410 260 -410 {}
-B 5 257.5 -412.5 262.5 -407.5 {pinnumber=28
-pinseq=28
-name=_MCLR_
-dir=in
-}
-T {@#22:pinnumber} 240 -415 2 1 0.266667 0.266667 {}
-T {@#22:name} 225 -410 2 0 0.266667 0.266667 {}
 L 3 0 -20 30 -20 {}
 B 5 -2.5 -22.5 2.5 -17.5 {pinnumber=14
 pinseq=14
@@ -225,3 +124,83 @@ dir=inout
 }
 T {@#23:pinnumber} 20 -25 2 0 0.266667 0.266667 {}
 T {@#23:name} 35 -20 2 1 0.266667 0.266667 {}
+L 3 230 -20 260 -20 {}
+B 5 257.5 -22.5 262.5 -17.5 {pinnumber=15
+pinseq=15
+name=RB5
+dir=inout
+}
+T {@#15:pinnumber} 240 -25 2 1 0.266667 0.266667 {}
+T {@#15:name} 225 -20 2 0 0.266667 0.266667 {}
+L 3 230 -50 260 -50 {}
+B 5 257.5 -52.5 262.5 -47.5 {pinnumber=16
+pinseq=16
+name=RB6
+dir=inout
+}
+T {@#14:pinnumber} 240 -55 2 1 0.266667 0.266667 {}
+T {@#14:name} 225 -50 2 0 0.266667 0.266667 {}
+L 3 230 -80 260 -80 {}
+B 5 257.5 -82.5 262.5 -77.5 {pinnumber=17
+pinseq=17
+name=RB7
+dir=inout
+}
+T {@#13:pinnumber} 240 -85 2 1 0.266667 0.266667 {}
+T {@#13:name} 225 -80 2 0 0.266667 0.266667 {}
+L 3 230 -110 260 -110 {}
+B 5 257.5 -112.5 262.5 -107.5 {pinnumber=18
+pinseq=18
+name=RC0
+dir=inout
+}
+T {@#12:pinnumber} 240 -115 2 1 0.266667 0.266667 {}
+T {@#12:name} 225 -110 2 0 0.266667 0.266667 {}
+L 3 230 -140 260 -140 {}
+B 5 257.5 -142.5 262.5 -137.5 {pinnumber=19
+pinseq=19
+name=RC1
+dir=inout
+}
+T {@#11:pinnumber} 240 -145 2 1 0.266667 0.266667 {}
+T {@#11:name} 225 -140 2 0 0.266667 0.266667 {}
+L 3 230 -170 260 -170 {}
+B 5 257.5 -172.5 262.5 -167.5 {pinnumber=20
+pinseq=20
+name=RC2
+dir=inout
+}
+T {@#16:pinnumber} 240 -175 2 1 0.266667 0.266667 {}
+T {@#16:name} 225 -170 2 0 0.266667 0.266667 {}
+L 3 230 -200 260 -200 {}
+B 5 257.5 -202.5 262.5 -197.5 {pinnumber=21
+pinseq=21
+name=RC3
+dir=inout
+}
+T {@#10:pinnumber} 240 -205 2 1 0.266667 0.266667 {}
+T {@#10:name} 225 -200 2 0 0.266667 0.266667 {}
+L 3 230 -230 260 -230 {}
+B 5 257.5 -232.5 262.5 -227.5 {pinnumber=22
+pinseq=22
+name=RC4
+dir=inout
+}
+T {@#17:pinnumber} 240 -235 2 1 0.266667 0.266667 {}
+T {@#17:name} 225 -230 2 0 0.266667 0.266667 {}
+L 3 230 -260 260 -260 {}
+B 5 257.5 -262.5 262.5 -257.5 {pinnumber=23
+pinseq=23
+name=RC5
+dir=inout
+}
+T {@#9:pinnumber} 240 -265 2 1 0.266667 0.266667 {}
+T {@#9:name} 225 -260 2 0 0.266667 0.266667 {}
+L 3 230 -290 260 -290 {}
+B 5 257.5 -292.5 262.5 -287.5 {pinnumber=24
+pinseq=24
+name=RC6
+dir=inout
+}
+T {@#18:pinnumber} 240 -295 2 1 0.266667 0.266667 {}
+T {@#18:name} 225 -290 2 0 0.266667 0.266667 {}

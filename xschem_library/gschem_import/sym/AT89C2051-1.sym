@@ -3,16 +3,19 @@ G {type=AT89C2051
 template="name=U?
 device=AT89C2051
 footprint=DIP20
-net=GND:10
-net=Vcc:20
 numslots=0
-description=8-bit\\\\ 8051-compatible\\\\ micro\\\\ controller\\\\ (Atmel)
+description=\\"8-bit 8051-compatible micro controller (Atmel)\\"
+GND=GND
+Vcc=Vcc
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @GND @Vcc"
+
+extra="GND Vcc"
+extra_pinnumber="10 20"
 }
 V {}
 S {}
@@ -31,6 +34,30 @@ L 4 30 -390 30 -30 {}
 
 
 
+L 3 70 -30 70 0 {}
+B 5 67.5 -2.5 72.5 2.5 {pinnumber=1
+pinseq=1
+name=RST/VPP
+dir=in
+}
+T {@#15:pinnumber} 75 -10 2 1 0.266667 0.266667 {}
+T {@#15:name} 38.2667 -35 2 1 0.266667 0.266667 {}
+L 3 130 -30 130 0 {}
+B 5 127.5 -2.5 132.5 2.5 {pinnumber=5
+pinseq=2
+name=XTAL1
+dir=in
+}
+T {@#16:pinnumber} 135 -10 2 1 0.266667 0.266667 {}
+T {@#16:name} 107.333 -35 2 1 0.266667 0.266667 {}
+L 3 210 -30 210 0 {}
+B 5 207.5 -2.5 212.5 2.5 {pinnumber=4
+pinseq=3
+name=XTAL2
+dir=out
+}
+T {@#17:pinnumber} 215 -10 2 1 0.266667 0.266667 {}
+T {@#17:name} 187.333 -35 2 1 0.266667 0.266667 {}
 L 3 250 -350 280 -350 {}
 B 5 277.5 -352.5 282.5 -347.5 {pinnumber=12
 pinseq=4
@@ -151,27 +178,3 @@ dir=inout
 }
 T {@#14:pinnumber} 20 -75 2 0 0.266667 0.266667 {}
 T {@#14:name} 35 -70 2 1 0.266667 0.266667 {}
-L 3 70 -30 70 0 {}
-B 5 67.5 -2.5 72.5 2.5 {pinnumber=1
-pinseq=1
-name=RST/VPP
-dir=in
-}
-T {@#15:pinnumber} 75 -10 2 1 0.266667 0.266667 {}
-T {@#15:name} 38.2667 -35 2 1 0.266667 0.266667 {}
-L 3 130 -30 130 0 {}
-B 5 127.5 -2.5 132.5 2.5 {pinnumber=5
-pinseq=2
-name=XTAL1
-dir=in
-}
-T {@#16:pinnumber} 135 -10 2 1 0.266667 0.266667 {}
-T {@#16:name} 107.333 -35 2 1 0.266667 0.266667 {}
-L 3 210 -30 210 0 {}
-B 5 207.5 -2.5 212.5 2.5 {pinnumber=4
-pinseq=3
-name=XTAL2
-dir=out
-}
-T {@#17:pinnumber} 215 -10 2 1 0.266667 0.266667 {}
-T {@#17:name} 187.333 -35 2 1 0.266667 0.266667 {}

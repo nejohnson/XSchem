@@ -7,15 +7,18 @@ slotdef=1:1,2,4,5,6
 slotdef=2:9,10,12,13,8
 name=U?
 footprint=DIP14
-description=2\\\\ NAND\\\\ gates\\\\ with\\\\ 4\\\\ inputs\\\\ and\\\\ open\\\\ collector\\\\ output
-net=Vcc:14
-net=GND:7
+description=\\"2 NAND gates with 4 inputs and open collector output\\"
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="14 7"
 }
 V {}
 S {}
@@ -39,20 +42,6 @@ A 4 70 -60 30 270 180 {}
 
 
 
-L 3 110 -60 130 -60 {}
-B 5 127.5 -62.5 132.5 -57.5 {pinnumber=6
-pinseq=5
-name=Y
-dir=inout
-}
-T {@#0:pinnumber} 110 -65 2 1 0.266667 0.266667 {}
-L 3 0 -10 30 -10 {}
-B 5 -2.5 -12.5 2.5 -7.5 {pinnumber=5
-pinseq=4
-name=D
-dir=in
-}
-T {@#1:pinnumber} 20 -15 2 0 0.266667 0.266667 {}
 L 3 0 -110 30 -110 {}
 B 5 -2.5 -112.5 2.5 -107.5 {pinnumber=1
 pinseq=1
@@ -74,3 +63,17 @@ name=C
 dir=in
 }
 T {@#4:pinnumber} 20 -45 2 0 0.266667 0.266667 {}
+L 3 0 -10 30 -10 {}
+B 5 -2.5 -12.5 2.5 -7.5 {pinnumber=5
+pinseq=4
+name=D
+dir=in
+}
+T {@#1:pinnumber} 20 -15 2 0 0.266667 0.266667 {}
+L 3 110 -60 130 -60 {}
+B 5 127.5 -62.5 132.5 -57.5 {pinnumber=6
+pinseq=5
+name=Y
+dir=inout
+}
+T {@#0:pinnumber} 110 -65 2 1 0.266667 0.266667 {}

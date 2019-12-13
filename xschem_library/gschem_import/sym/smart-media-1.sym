@@ -5,14 +5,15 @@ name=CONN?
 footprint=DIP22
 numslots=0
 symversion=1.1
-description=smart\\\\ media\\\\ connector
+description=\\"smart media connector\\"
 documentation=http://www.iodata.com/catalogs/sm_1.pdf
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}

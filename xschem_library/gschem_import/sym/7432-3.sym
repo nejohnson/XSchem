@@ -8,7 +8,7 @@ slotdef=3:9,10,8
 slotdef=4:12,13,11
 name=U?
 footprint=DIP14
-description=4\\\\ OR\\\\ gates\\\\ with\\\\ 2\\\\ inputs
+description=\\"4 OR gates with 2 inputs\\"
 documentation=http://www-s.ti.com/sc/ds/sn74hc32.pdf
 device=7432
 "
@@ -16,7 +16,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}

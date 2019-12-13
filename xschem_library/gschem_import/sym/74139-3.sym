@@ -6,17 +6,20 @@ numslots=2
 slotdef=1:2,4,3,5,6,1,7
 slotdef=2:14,12,13,11,10,15,9
 name=U?
-description=2\\\\ 2-to-4\\\\ decoder/demultiplexer
-net=Vcc:16
-net=GND:8
+description=\\"2 2-to-4 decoder/demultiplexer\\"
 slot=1
 documentation=http://www-s.ti.com/sc/ds/sn74hc139.pdf
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="16 8"
 }
 V {}
 S {}

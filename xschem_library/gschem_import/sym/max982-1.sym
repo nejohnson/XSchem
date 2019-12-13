@@ -3,7 +3,7 @@ G {type=MAX982
 template="name=U?
 device=MAX982
 footprint=DIP8
-description=ultra-low-power,\\\\ open-drain,\\\\ single/dual-supply\\\\ comparator
+description=\\"ultra-low-power, open-drain, single/dual-supply comparator\\"
 numslots=0
 documentation=http://pdfserv.maxim-ic.com/en/ds/MAX971-MAX984.pdf
 "
@@ -11,7 +11,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}
@@ -69,14 +70,6 @@ L 4 210 -100 210 -40 {}
 
 
 
-L 3 300 -200 320 -200 {}
-B 5 317.5 -202.5 322.5 -197.5 {pinnumber=8
-pinseq=8
-name=OUTB
-dir=out
-}
-T {@#0:pinnumber} 305 -205 2 1 0.266667 0.266667 {}
-T {@#0:name} 295 -205 2 0 0.266667 0.266667 {}
 L 3 0 -200 20 -200 {}
 B 5 -2.5 -202.5 2.5 -197.5 {pinnumber=1
 pinseq=1
@@ -85,14 +78,6 @@ dir=out
 }
 T {@#1:pinnumber} 15 -205 2 0 0.266667 0.266667 {}
 T {@#1:name} 25 -205 2 1 0.266667 0.266667 {}
-L 3 160 -270 160 -250 {}
-B 5 157.5 -272.5 162.5 -267.5 {name=V+
-pinnumber=7
-pinseq=7
-dir=inout
-}
-T {@#2:name} 150.933 -245 0 0 0.266667 0.266667 {}
-T {@#2:pinnumber} 165 -255 2 1 0.266667 0.266667 {}
 L 3 160 -20 160 0 {}
 B 5 157.5 -2.5 162.5 2.5 {name=V-
 pinnumber=2
@@ -133,3 +118,19 @@ dir=out
 }
 T {@#7:pinnumber} 305 -45 2 1 0.266667 0.266667 {}
 T {@#7:name} 295 -45 2 0 0.266667 0.266667 {}
+L 3 160 -270 160 -250 {}
+B 5 157.5 -272.5 162.5 -267.5 {name=V+
+pinnumber=7
+pinseq=7
+dir=inout
+}
+T {@#2:name} 150.933 -245 0 0 0.266667 0.266667 {}
+T {@#2:pinnumber} 165 -255 2 1 0.266667 0.266667 {}
+L 3 300 -200 320 -200 {}
+B 5 317.5 -202.5 322.5 -197.5 {pinnumber=8
+pinseq=8
+name=OUTB
+dir=out
+}
+T {@#0:pinnumber} 305 -205 2 1 0.266667 0.266667 {}
+T {@#0:name} 295 -205 2 0 0.266667 0.266667 {}

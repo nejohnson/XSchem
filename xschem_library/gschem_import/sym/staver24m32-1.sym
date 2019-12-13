@@ -3,16 +3,17 @@ G {type=StAVeR24M32
 template="name=U?
 device=StAVeR24M32
 footprint=DIP24
-author=m.\\\\ dickens\\\\ <marvindickens@bellsouth.net>
+author=\\"m. dickens <marvindickens@bellsouth.net>\\"
 documentation=http://www.lawicel.com/
-description=microcontroller\\\\ module\\\\ based\\\\ on\\\\ Atmel\\\\ ATMega32
+description=\\"microcontroller module based on Atmel ATMega32\\"
 numslots=0
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}

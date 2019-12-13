@@ -4,15 +4,16 @@ template="name=V?
 device=vexp
 footprint=none
 numslots=0
-description=exponential\\\\ signal\\\\ source
-value=vexp\\\\ 0\\\\ 1\\\\ 
-comment=syntax:\\\\ exp\\\\ v1\\\\ v2\\\\ td1\\\\ tau1\\\\ td2\\\\ tau2
+description=\\"exponential signal source\\"
+value=\\"vexp 0 1 \\"
+comment=\\"syntax: exp v1 v2 td1 tau1 td2 tau2\\"
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}

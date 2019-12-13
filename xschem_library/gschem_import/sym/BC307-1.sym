@@ -3,14 +3,15 @@ G {type=BC307
 template="device=BC307
 name=Q?
 footprint=TO92
-description=PNP\\\\ transistor
+description=\\"PNP transistor\\"
 numslots=0
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}

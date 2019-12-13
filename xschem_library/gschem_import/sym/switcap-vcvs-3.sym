@@ -3,13 +3,16 @@ G {type=SWITCAP-vcvs
 template="device=SWITCAP-vcvs
 name=E?
 gain=1
-net=GND:2
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @GND"
+
+extra="GND"
+extra_pinnumber="2"
 }
 V {}
 S {}
@@ -36,15 +39,11 @@ pinseq=1
 name=OP
 dir=out
 }
+
+ {}
 L 3 0 -70 20 -70 {}
 B 5 -2.5 -72.5 2.5 -67.5 {pinnumber=3
 pinseq=3
 name=IP
-dir=in
-}
-L 3 0 -30 20 -30 {}
-B 5 -2.5 -32.5 2.5 -27.5 {pinnumber=4
-pinseq=4
-name=IM
 dir=in
 }

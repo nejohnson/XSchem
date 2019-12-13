@@ -3,16 +3,19 @@ G {type=7483
 template="device=7483
 footprint=DIP16
 name=U?
-description=4-bit\\\\ binary\\\\ full\\\\ adder\\\\ with\\\\ carry
-net=Vcc:5
-net=GND:12
+description=\\"4-bit binary full adder with carry\\"
 numslots=0
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="5 12"
 }
 V {}
 S {}

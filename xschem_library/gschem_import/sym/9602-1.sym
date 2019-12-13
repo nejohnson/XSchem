@@ -3,16 +3,19 @@ G {type=9602
 template="name=U?
 device=9602
 footprint=DIP16
-description=2\\\\ retriggerable,\\\\ resetable\\\\ monoflops
+description=\\"2 retriggerable, resetable monoflops\\"
 numslots=0
-net=Vcc:16
-net=GND:8
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="16 8"
 }
 V {}
 S {}
@@ -93,54 +96,8 @@ dir=out
 }
 T {@#6:pinnumber} 20 -35 2 0 0.266667 0.266667 {}
 T {@#6:name} 35 -30 2 1 0.266667 0.266667 {}
-L 3 170 -210 200 -210 {}
-B 5 197.5 -212.5 202.5 -207.5 {pinnumber=15
-pinseq=15
-name=CEXT2
-dir=inout
-}
-T {@#7:pinnumber} 180 -215 2 1 0.266667 0.266667 {}
-T {@#7:name} 165 -210 2 0 0.266667 0.266667 {}
-L 3 170 -180 200 -180 {}
-B 5 197.5 -182.5 202.5 -177.5 {pinnumber=14
-pinseq=14
-name=RCEXT2
-dir=inout
-}
-T {@#8:pinnumber} 180 -185 2 1 0.266667 0.266667 {}
-T {@#8:name} 165 -180 2 0 0.266667 0.266667 {}
-L 3 180 -150 200 -150 {}
-B 5 197.5 -152.5 202.5 -147.5 {pinnumber=13
-pinseq=13
-name=_CLR2_
-dir=in
-}
-T {@#9:pinnumber} 180 -155 2 1 0.266667 0.266667 {}
-T {@#9:name} 165 -150 2 0 0.266667 0.266667 {}
-L 3 170 -120 200 -120 {}
-B 5 197.5 -122.5 202.5 -117.5 {pinnumber=12
-pinseq=12
-name=TRIG2
-dir=in
-}
-T {@#10:pinnumber} 180 -125 2 1 0.266667 0.266667 {}
-T {@#10:name} 165 -120 2 0 0.266667 0.266667 {}
-L 3 180 -90 200 -90 {}
-B 5 197.5 -92.5 202.5 -87.5 {pinnumber=11
-pinseq=11
-name=_TRIG2_
-dir=in
-}
-T {@#11:pinnumber} 180 -95 2 1 0.266667 0.266667 {}
-T {@#11:name} 165 -90 2 0 0.266667 0.266667 {}
-L 3 170 -60 200 -60 {}
-B 5 197.5 -62.5 202.5 -57.5 {pinnumber=10
-pinseq=10
-name=Q2
-dir=out
-}
-T {@#12:pinnumber} 180 -65 2 1 0.266667 0.266667 {}
-T {@#12:name} 165 -60 2 0 0.266667 0.266667 {}
+
+ {}
 L 3 180 -30 200 -30 {}
 B 5 197.5 -32.5 202.5 -27.5 {pinnumber=9
 pinseq=9
@@ -149,3 +106,43 @@ dir=out
 }
 T {@#13:pinnumber} 180 -35 2 1 0.266667 0.266667 {}
 T {@#13:name} 165 -30 2 0 0.266667 0.266667 {}
+L 3 170 -60 200 -60 {}
+B 5 197.5 -62.5 202.5 -57.5 {pinnumber=10
+pinseq=10
+name=Q2
+dir=out
+}
+T {@#12:pinnumber} 180 -65 2 1 0.266667 0.266667 {}
+T {@#12:name} 165 -60 2 0 0.266667 0.266667 {}
+L 3 180 -90 200 -90 {}
+B 5 197.5 -92.5 202.5 -87.5 {pinnumber=11
+pinseq=11
+name=_TRIG2_
+dir=in
+}
+T {@#11:pinnumber} 180 -95 2 1 0.266667 0.266667 {}
+T {@#11:name} 165 -90 2 0 0.266667 0.266667 {}
+L 3 170 -120 200 -120 {}
+B 5 197.5 -122.5 202.5 -117.5 {pinnumber=12
+pinseq=12
+name=TRIG2
+dir=in
+}
+T {@#10:pinnumber} 180 -125 2 1 0.266667 0.266667 {}
+T {@#10:name} 165 -120 2 0 0.266667 0.266667 {}
+L 3 180 -150 200 -150 {}
+B 5 197.5 -152.5 202.5 -147.5 {pinnumber=13
+pinseq=13
+name=_CLR2_
+dir=in
+}
+T {@#9:pinnumber} 180 -155 2 1 0.266667 0.266667 {}
+T {@#9:name} 165 -150 2 0 0.266667 0.266667 {}
+L 3 170 -180 200 -180 {}
+B 5 197.5 -182.5 202.5 -177.5 {pinnumber=14
+pinseq=14
+name=RCEXT2
+dir=inout
+}
+T {@#8:pinnumber} 180 -185 2 1 0.266667 0.266667 {}
+T {@#8:name} 165 -180 2 0 0.266667 0.266667 {}

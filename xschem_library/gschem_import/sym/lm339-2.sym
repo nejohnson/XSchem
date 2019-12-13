@@ -8,14 +8,17 @@ slotdef=4:11,10,13
 numslots=4
 slot=1
 name=U?
-net=GND:12
-net=V+:3
+GND=GND
+V+=V+
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @GND @V+"
+
+extra="GND V+"
+extra_pinnumber="12 3"
 }
 V {}
 S {}

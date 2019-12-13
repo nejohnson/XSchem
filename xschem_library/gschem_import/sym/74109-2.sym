@@ -6,17 +6,20 @@ numslots=2
 slotdef=1:2,6,3,7,5,1,4
 slotdef=2:14,10,13,9,11,15,12
 name=U?
-description=2\\\\ JK-flip-flops\\\\ with\\\\ preset\\\\ and\\\\ clear
-net=Vcc:16
-net=GND:8
+description=\\"2 JK-flip-flops with preset and clear\\"
 slot=1
 documentation=http://www-s.ti.com/sc/ds/sn74hc109.pdf
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="16 8"
 }
 V {}
 S {}

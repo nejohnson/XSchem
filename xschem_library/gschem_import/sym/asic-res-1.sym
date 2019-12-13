@@ -5,13 +5,14 @@ name=R?
 l=10u
 w=3u
 model-name=rpolyh
-description=high\\\\ resistive\\\\ poly0\\\\ resistor
+description=\\"high resistive poly0 resistor\\"
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}
@@ -32,15 +33,15 @@ L 4 25 -60 25 -40 {}
 
 
 
-L 3 85 -50 110 -50 {}
-B 5 107.5 -52.5 112.5 -47.5 {pinnumber=2
-pinseq=2
-name=2
-dir=inout
-}
 L 3 0 -50 25 -50 {}
 B 5 -2.5 -52.5 2.5 -47.5 {pinnumber=1
 pinseq=1
 name=1
+dir=inout
+}
+L 3 85 -50 110 -50 {}
+B 5 107.5 -52.5 112.5 -47.5 {pinnumber=2
+pinseq=2
+name=2
 dir=inout
 }

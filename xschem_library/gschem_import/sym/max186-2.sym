@@ -3,7 +3,7 @@ G {type=MAX189
 template="device=MAX189
 name=U?
 footprint=DIP20
-description=low-power,\\\\ 8-channel,\\\\ serial\\\\ 12-bit\\\\ ADC
+description=\\"low-power, 8-channel, serial 12-bit ADC\\"
 numslots=0
 documentation=http://pdfserv.maxim-ic.com/en/ds/MAX186-MAX188.pdf
 "
@@ -11,7 +11,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}

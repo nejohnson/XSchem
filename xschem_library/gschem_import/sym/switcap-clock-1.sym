@@ -5,13 +5,16 @@ device=SWITCAP-clock
 PSTART=0
 PSTOP=3/8
 name=CLK?
-net=GND:1
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @GND"
+
+extra="GND"
+extra_pinnumber="1"
 }
 V {}
 S {}

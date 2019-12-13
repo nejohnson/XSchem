@@ -10,13 +10,14 @@ slot=1
 name=U?
 symversion=1.0
 documentation=http://www.onsemi.com/pub/Collateral/LM339-D.PDF
-description=single\\\\ supply\\\\ quad\\\\ comparators
+description=\\"single supply quad comparators\\"
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}
@@ -51,13 +52,6 @@ name=4
 dir=inout
 }
 T {@#1:pinnumber} 5 -22.5 2 1 0.266667 0.266667 {}
-L 3 80 -40 100 -40 {}
-B 5 97.5 -42.5 102.5 -37.5 {pinnumber=2
-pinseq=5
-name=2
-dir=inout
-}
-T {@#2:pinnumber} 87.5 -42.5 2 1 0.266667 0.266667 {}
 L 3 50 -80 50 -60 {}
 B 5 47.5 -82.5 52.5 -77.5 {pinnumber=3
 pinseq=3
@@ -72,3 +66,10 @@ name=12
 dir=inout
 }
 T {@#4:pinnumber} 52.5 -5 2 1 0.266667 0.266667 {}
+L 3 80 -40 100 -40 {}
+B 5 97.5 -42.5 102.5 -37.5 {pinnumber=2
+pinseq=5
+name=2
+dir=inout
+}
+T {@#2:pinnumber} 87.5 -42.5 2 1 0.266667 0.266667 {}

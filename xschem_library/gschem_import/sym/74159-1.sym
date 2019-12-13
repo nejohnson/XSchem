@@ -3,17 +3,20 @@ G {type=74159
 template="device=74159
 footprint=DIP24N
 name=U?
-description=4-bit\\\\ binary\\\\ decoder/demultiplexer\\\\ with\\\\ open\\\\ collector\\\\ outputs
+description=\\"4-bit binary decoder/demultiplexer with open collector outputs\\"
 numslots=0
-net=Vcc:24
-net=GND:12
 symversion=1.0
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="24 12"
 }
 V {}
 S {}

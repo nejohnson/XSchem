@@ -3,15 +3,18 @@ G {type=4513
 template="name=U?
 device=4513
 footprint=none
-net=VSS:9
-net=VDD:18
 numslots=0
+VSS=VSS
+VDD=VDD
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @VSS @VDD"
+
+extra="VSS VDD"
+extra_pinnumber="9 18"
 }
 V {}
 S {}

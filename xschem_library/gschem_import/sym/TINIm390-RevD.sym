@@ -3,16 +3,19 @@ G {type=TINIm390-RevD
 template="device=TINIm390-RevD
 name=U?
 footprint=SIMM72
-description=Tini\\\\ Verification\\\\ Module\\\\ m390\\\\ RevD
+description=\\"Tini Verification Module m390 RevD\\"
 numslots=0
-net=GND:3,4,5,6,7
-net=Vcc:67,68,69,70
+GND=GND
+Vcc=Vcc
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @GND @Vcc"
+
+extra="GND Vcc"
+extra_pinnumber="3,4,5,6,7 67,68,69,70"
 }
 V {}
 S {}
@@ -58,6 +61,16 @@ name=IOS0
 }
 T {@#1:pinnumber} 22 -715 2 1 0.266667 0.266667 {}
 T {@#1:name} 45 -716.667 0 0 0.266667 0.266667 {}
+
+ {}
+
+ {}
+
+ {}
+
+ {}
+
+ {}
 L 3 10 -1160 40 -1160 {}
 B 5 7.5 -1162.5 12.5 -1157.5 {pinnumber=8
 pinseq=8
@@ -506,43 +519,3 @@ name=ETH3
 }
 T {@#57:pinnumber} 14 -445 2 1 0.266667 0.266667 {}
 T {@#57:name} 45 -446.667 0 0 0.266667 0.266667 {}
-L 3 10 -410 40 -410 {}
-B 5 7.5 -412.5 12.5 -407.5 {pinnumber=64
-pinseq=64
-dir=in
-name=ETH6
-}
-T {@#58:pinnumber} 14 -415 2 1 0.266667 0.266667 {}
-T {@#58:name} 45 -416.667 0 0 0.266667 0.266667 {}
-L 3 10 -470 40 -470 {}
-B 5 7.5 -472.5 12.5 -467.5 {pinnumber=65
-pinseq=65
-dir=out
-name=ETH2
-}
-T {@#59:pinnumber} 14 -475 2 1 0.266667 0.266667 {}
-T {@#59:name} 45 -476.667 0 0 0.266667 0.266667 {}
-L 3 10 -500 40 -500 {}
-B 5 7.5 -502.5 12.5 -497.5 {pinnumber=66
-pinseq=66
-dir=out
-name=ETH1
-}
-T {@#60:pinnumber} 14 -505 2 1 0.266667 0.266667 {}
-T {@#60:name} 45 -506.667 0 0 0.266667 0.266667 {}
-L 3 10 -560 40 -560 {}
-B 5 7.5 -562.5 12.5 -557.5 {pinnumber=71
-pinseq=71
-dir=out
-name=EESK
-}
-T {@#61:pinnumber} 14 -565 2 1 0.266667 0.266667 {}
-T {@#61:name} 45 -566.667 0 0 0.266667 0.266667 {}
-L 3 10 -590 40 -590 {}
-B 5 7.5 -592.5 12.5 -587.5 {pinnumber=72
-pinseq=72
-dir=out
-name=EED0
-}
-T {@#62:pinnumber} 14 -595 2 1 0.266667 0.266667 {}
-T {@#62:name} 45 -596.667 0 0 0.266667 0.266667 {}

@@ -7,16 +7,19 @@ slotdef=1:2,16,3,1,15,13,14
 slotdef=2:6,10,7,11,9,4,8
 slot=1
 name=U?
-description=2\\\\ 2-bit\\\\ D-latches
-net=Vcc:5
-net=GND:12
+description=\\"2 2-bit D-latches\\"
 documentation=http://www.semiconductors.philips.com/acrobat/datasheets/74HC_HCT75_CNV_2.pdf
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="5 12"
 }
 V {}
 S {}

@@ -3,20 +3,23 @@ G {type=40240
 template="name=U?
 device=40240
 footprint=DIP20
-net=VSS:10
-net=VDD:20
 slot=1
 numslots=2
 slotdef=1:1,8,6,4,2,12,14,16,18
 slotdef=2:19,17,15,13,11,3,5,7,9
-description=2\\\\ quad\\\\ inverting\\\\ bus\\\\ driver
+description=\\"2 quad inverting bus driver\\"
 documentation=http://www.semiconductors.philips.com/acrobat/datasheets/HEF40240B_CNV_3.pdf
+VSS=VSS
+VDD=VDD
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @VSS @VDD"
+
+extra="VSS VDD"
+extra_pinnumber="10 20"
 }
 V {}
 S {}

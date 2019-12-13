@@ -3,7 +3,7 @@ G {type=OPAMP
 template="device=OPAMP
 name=U?
 footprint=DIP8
-description=single\\\\ opamp\\\\ with\\\\ trimmable\\\\ offset
+description=\\"single opamp with trimmable offset\\"
 numslots=0
 symversion=1.0
 comment=NC-PINS:8
@@ -12,7 +12,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}
@@ -50,13 +51,6 @@ name=IN-
 dir=in
 }
 T {@#1:pinnumber} 15 -55 2 0 0.266667 0.266667 {}
-L 3 100 -70 120 -70 {}
-B 5 117.5 -72.5 122.5 -67.5 {pinnumber=6
-pinseq=5
-name=OUT
-dir=out
-}
-T {@#2:pinnumber} 105 -75 2 1 0.266667 0.266667 {}
 L 3 50 -140 50 -120 {}
 B 5 47.5 -142.5 52.5 -137.5 {pinnumber=7
 pinseq=3
@@ -73,6 +67,13 @@ dir=inout
 }
 T {@#4:pinnumber} 55 -5 2 1 0.266667 0.266667 {}
 T {@#4:name} 40.9333 -25 2 1 0.266667 0.266667 {}
+L 3 100 -70 120 -70 {}
+B 5 117.5 -72.5 122.5 -67.5 {pinnumber=6
+pinseq=5
+name=OUT
+dir=out
+}
+T {@#2:pinnumber} 105 -75 2 1 0.266667 0.266667 {}
 L 3 0 -110 20 -110 {}
 B 5 -2.5 -112.5 2.5 -107.5 {pinnumber=1
 pinseq=6

@@ -2,16 +2,17 @@ v {xschem version=2.9.5_RC6 file_version=1.1}
 G {type=6821
 template="name=U?
 device=6821
-author=Terry\\\\ J\\\\ Porter\\\\ <techmanATd2.net.au>
+author=\\"Terry J Porter <techmanATd2.net.au>\\"
 footprint=DIP40
-description=PIA\\\\ peripheral\\\\ interface\\\\ line
+description=\\"PIA peripheral interface line\\"
 numslots=0
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}
@@ -34,6 +35,14 @@ A 4 35 -330 5 0 360 {}
 
 
 
+L 3 70 -40 70 -10 {}
+B 5 67.5 -12.5 72.5 -7.5 {pinnumber=1
+pinseq=1
+dir=inout
+name=VSS
+}
+T {@#21:pinnumber} 75 -20 2 1 0.266667 0.266667 {}
+T {@#21:name} 56.4 -45 2 1 0.266667 0.266667 {}
 L 3 190 -630 220 -630 {}
 B 5 217.5 -632.5 222.5 -627.5 {pinnumber=2
 pinseq=2
@@ -178,22 +187,6 @@ name=CB2
 }
 T {@#17:pinnumber} 200 -65 2 1 0.266667 0.266667 {}
 T {@#17:name} 185 -60 2 0 0.266667 0.266667 {}
-L 3 190 -690 220 -690 {}
-B 5 217.5 -692.5 222.5 -687.5 {pinnumber=39
-pinseq=39
-dir=inout
-name=CA2
-}
-T {@#18:pinnumber} 200 -695 2 1 0.266667 0.266667 {}
-T {@#18:name} 185 -690 2 0 0.266667 0.266667 {}
-L 3 190 -720 220 -720 {}
-B 5 217.5 -722.5 222.5 -717.5 {pinnumber=40
-pinseq=40
-dir=in
-name=CA1
-}
-T {@#19:pinnumber} 200 -725 2 1 0.266667 0.266667 {}
-T {@#19:name} 185 -720 2 0 0.266667 0.266667 {}
 L 3 160 -790 160 -760 {}
 B 5 157.5 -792.5 162.5 -787.5 {pinnumber=20
 pinseq=20
@@ -202,30 +195,22 @@ name=VCC
 }
 T {@#20:pinnumber} 165 -770 2 1 0.266667 0.266667 {}
 T {@#20:name} 146.4 -755 0 0 0.266667 0.266667 {}
-L 3 70 -40 70 -10 {}
-B 5 67.5 -12.5 72.5 -7.5 {pinnumber=1
-pinseq=1
-dir=inout
-name=VSS
+L 3 10 -360 40 -360 {}
+B 5 7.5 -362.5 12.5 -357.5 {pinnumber=21
+pinseq=21
+dir=in
+name=R/_W_
 }
-T {@#21:pinnumber} 75 -20 2 1 0.266667 0.266667 {}
-T {@#21:name} 56.4 -45 2 1 0.266667 0.266667 {}
-L 3 10 -120 30 -120 {}
-B 5 7.5 -122.5 12.5 -117.5 {pinnumber=37
-pinseq=37
-dir=out
-name=_IRQB_
+T {@#28:pinnumber} 30 -365 2 0 0.266667 0.266667 {}
+T {@#28:name} 45 -360 2 1 0.266667 0.266667 {}
+L 3 10 -270 40 -270 {}
+B 5 7.5 -272.5 12.5 -267.5 {pinnumber=22
+pinseq=22
+dir=in
+name=CS0
 }
-T {@#22:pinnumber} 30 -125 2 0 0.266667 0.266667 {}
-T {@#22:name} 45 -120 2 1 0.266667 0.266667 {}
-L 3 10 -150 30 -150 {}
-B 5 7.5 -152.5 12.5 -147.5 {pinnumber=38
-pinseq=38
-dir=out
-name=_IRQA_
-}
-T {@#23:pinnumber} 30 -155 2 0 0.266667 0.266667 {}
-T {@#23:name} 45 -150 2 1 0.266667 0.266667 {}
+T {@#26:pinnumber} 30 -275 2 0 0.266667 0.266667 {}
+T {@#26:name} 45 -270 2 1 0.266667 0.266667 {}
 L 3 10 -210 30 -210 {}
 B 5 7.5 -212.5 12.5 -207.5 {pinnumber=23
 pinseq=23
@@ -242,30 +227,6 @@ name=CS1
 }
 T {@#25:pinnumber} 30 -245 2 0 0.266667 0.266667 {}
 T {@#25:name} 45 -240 2 1 0.266667 0.266667 {}
-L 3 10 -270 40 -270 {}
-B 5 7.5 -272.5 12.5 -267.5 {pinnumber=22
-pinseq=22
-dir=in
-name=CS0
-}
-T {@#26:pinnumber} 30 -275 2 0 0.266667 0.266667 {}
-T {@#26:name} 45 -270 2 1 0.266667 0.266667 {}
-L 3 10 -330 30 -330 {}
-B 5 7.5 -332.5 12.5 -327.5 {pinnumber=34
-pinseq=34
-dir=in
-name=_RESET_
-}
-T {@#27:pinnumber} 30 -335 2 0 0.266667 0.266667 {}
-T {@#27:name} 45 -330 2 1 0.266667 0.266667 {}
-L 3 10 -360 40 -360 {}
-B 5 7.5 -362.5 12.5 -357.5 {pinnumber=21
-pinseq=21
-dir=in
-name=R/_W_
-}
-T {@#28:pinnumber} 30 -365 2 0 0.266667 0.266667 {}
-T {@#28:name} 45 -360 2 1 0.266667 0.266667 {}
 L 3 10 -390 40 -390 {}
 B 5 7.5 -392.5 12.5 -387.5 {pinnumber=25
 pinseq=25
@@ -274,22 +235,6 @@ name=E
 }
 T {@#29:pinnumber} 30 -395 2 0 0.266667 0.266667 {}
 T {@#29:name} 45 -390 2 1 0.266667 0.266667 {}
-L 3 10 -420 40 -420 {}
-B 5 7.5 -422.5 12.5 -417.5 {pinnumber=35
-pinseq=35
-dir=in
-name=RS1
-}
-T {@#30:pinnumber} 30 -425 2 0 0.266667 0.266667 {}
-T {@#30:name} 45 -420 2 1 0.266667 0.266667 {}
-L 3 10 -450 40 -450 {}
-B 5 7.5 -452.5 12.5 -447.5 {pinnumber=36
-pinseq=36
-dir=in
-name=RS0
-}
-T {@#31:pinnumber} 30 -455 2 0 0.266667 0.266667 {}
-T {@#31:name} 45 -450 2 1 0.266667 0.266667 {}
 L 3 10 -510 40 -510 {}
 B 5 7.5 -512.5 12.5 -507.5 {pinnumber=26
 pinseq=26
@@ -354,3 +299,59 @@ name=D0
 }
 T {@#39:pinnumber} 30 -725 2 0 0.266667 0.266667 {}
 T {@#39:name} 45 -720 2 1 0.266667 0.266667 {}
+L 3 10 -330 30 -330 {}
+B 5 7.5 -332.5 12.5 -327.5 {pinnumber=34
+pinseq=34
+dir=in
+name=_RESET_
+}
+T {@#27:pinnumber} 30 -335 2 0 0.266667 0.266667 {}
+T {@#27:name} 45 -330 2 1 0.266667 0.266667 {}
+L 3 10 -420 40 -420 {}
+B 5 7.5 -422.5 12.5 -417.5 {pinnumber=35
+pinseq=35
+dir=in
+name=RS1
+}
+T {@#30:pinnumber} 30 -425 2 0 0.266667 0.266667 {}
+T {@#30:name} 45 -420 2 1 0.266667 0.266667 {}
+L 3 10 -450 40 -450 {}
+B 5 7.5 -452.5 12.5 -447.5 {pinnumber=36
+pinseq=36
+dir=in
+name=RS0
+}
+T {@#31:pinnumber} 30 -455 2 0 0.266667 0.266667 {}
+T {@#31:name} 45 -450 2 1 0.266667 0.266667 {}
+L 3 10 -120 30 -120 {}
+B 5 7.5 -122.5 12.5 -117.5 {pinnumber=37
+pinseq=37
+dir=out
+name=_IRQB_
+}
+T {@#22:pinnumber} 30 -125 2 0 0.266667 0.266667 {}
+T {@#22:name} 45 -120 2 1 0.266667 0.266667 {}
+L 3 10 -150 30 -150 {}
+B 5 7.5 -152.5 12.5 -147.5 {pinnumber=38
+pinseq=38
+dir=out
+name=_IRQA_
+}
+T {@#23:pinnumber} 30 -155 2 0 0.266667 0.266667 {}
+T {@#23:name} 45 -150 2 1 0.266667 0.266667 {}
+L 3 190 -690 220 -690 {}
+B 5 217.5 -692.5 222.5 -687.5 {pinnumber=39
+pinseq=39
+dir=inout
+name=CA2
+}
+T {@#18:pinnumber} 200 -695 2 1 0.266667 0.266667 {}
+T {@#18:name} 185 -690 2 0 0.266667 0.266667 {}
+L 3 190 -720 220 -720 {}
+B 5 217.5 -722.5 222.5 -717.5 {pinnumber=40
+pinseq=40
+dir=in
+name=CA1
+}
+T {@#19:pinnumber} 200 -725 2 1 0.266667 0.266667 {}
+T {@#19:name} 185 -720 2 0 0.266667 0.266667 {}

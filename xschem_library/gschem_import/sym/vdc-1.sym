@@ -4,14 +4,15 @@ template="name=V?
 device=VOLTAGE_SOURCE
 footprint=none
 numslots=0
-description=dc\\\\ power\\\\ source
-value=DC\\\\ 1V
+description=\\"dc power source\\"
+value=\\"DC 1V\\"
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}

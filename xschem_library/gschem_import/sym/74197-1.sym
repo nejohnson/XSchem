@@ -3,16 +3,19 @@ G {type=74197
 template="device=74197
 footprint=DIP14
 name=U?
-description=programmable\\\\ 4-bit\\\\ binary\\\\ counter
+description=\\"programmable 4-bit binary counter\\"
 numslots=0
-net=Vcc:14
-net=GND:7
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="14 7"
 }
 V {}
 S {}

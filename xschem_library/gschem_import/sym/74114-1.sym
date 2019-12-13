@@ -3,16 +3,19 @@ G {type=74114
 template="device=74114
 footprint=DIP14
 name=U?
-description=2\\\\ JK-flipflops\\\\ with\\\\ preset\\\\ and\\\\ common\\\\ clock,\\\\ clear
-net=Vcc:14
-net=GND:7
+description=\\"2 JK-flipflops with preset and common clock, clear\\"
 numslots=0
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="14 7"
 }
 V {}
 S {}

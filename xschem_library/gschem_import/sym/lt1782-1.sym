@@ -1,19 +1,22 @@
 v {xschem version=2.9.5_RC6 file_version=1.1}
 G {type=LT1782
 template="name=U?
-net=Vcc:5
-net=GND:2
 footprint=SOT23
 device=LT1782
-description=rail-to-rail\\\\ input\\\\ and\\\\ output\\\\ opamp
+description=\\"rail-to-rail input and output opamp\\"
 numslots=0
 documentation=http://www.linear.com.cn/pdf/1782fa.pdf
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="5 2"
 }
 V {}
 S {}
@@ -41,6 +44,8 @@ dir=out
 name=OUT
 }
 T {@#0:pinnumber} 80 -45 2 1 0.266667 0.266667 {}
+
+ {}
 L 3 0 -60 20 -60 {}
 B 5 -2.5 -62.5 2.5 -57.5 {pinnumber=3
 pinseq=3
@@ -48,10 +53,3 @@ dir=in
 name=IN+
 }
 T {@#1:pinnumber} 20 -65 2 0 0.266667 0.266667 {}
-L 3 0 -20 20 -20 {}
-B 5 -2.5 -22.5 2.5 -17.5 {pinnumber=4
-pinseq=4
-dir=in
-name=IN-
-}
-T {@#2:pinnumber} 20 -25 2 0 0.266667 0.266667 {}

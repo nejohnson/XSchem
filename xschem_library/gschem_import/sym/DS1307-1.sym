@@ -3,16 +3,17 @@ G {type=ds1307
 template="name=U?
 device=ds1307
 footprint=DIP8
-author=m.\\\\ dickens\\\\ <marvindickens@bellsouth.net>
+author=\\"m. dickens <marvindickens@bellsouth.net>\\"
 documentation=http://www.maxim.com
-description=real\\\\ time\\\\ clock,\\\\ 64x8,\\\\ serial,\\\\ i2c
+description=\\"real time clock, 64x8, serial, i2c\\"
 numslots=0
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}

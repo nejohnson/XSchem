@@ -2,14 +2,15 @@ v {xschem version=2.9.5_RC6 file_version=1.1}
 G {type=HEADER8
 template="device=HEADER8
 numslots=0
-description=Header\\\\ 8\\\\ pins
+description=\\"Header 8 pins\\"
 name=J?
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}

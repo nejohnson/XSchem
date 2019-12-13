@@ -9,7 +9,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}
@@ -73,13 +74,6 @@ L 4 70 -49.8 74 -53.9 {}
 
 
 
-L 3 0 -140 30 -140 {}
-B 5 -2.5 -142.5 2.5 -137.5 {pinseq=2
-pinnumber=2
-dir=in
-name=LED-A
-}
-T {@#0:pinnumber} 10 -145 2 1 0.266667 0.266667 {}
 L 3 0 -100 30 -100 {}
 B 5 -2.5 -102.5 2.5 -97.5 {pinseq=1
 pinnumber=1
@@ -87,6 +81,13 @@ dir=out
 name=LED-K
 }
 T {@#1:pinnumber} 10 -105 2 1 0.266667 0.266667 {}
+L 3 0 -140 30 -140 {}
+B 5 -2.5 -142.5 2.5 -137.5 {pinseq=2
+pinnumber=2
+dir=in
+name=LED-A
+}
+T {@#0:pinnumber} 10 -145 2 1 0.266667 0.266667 {}
 L 3 0 -60 30 -60 {}
 B 5 -2.5 -62.5 2.5 -57.5 {pinseq=3
 pinnumber=3
@@ -101,13 +102,6 @@ dir=in
 name=PD1-A
 }
 T {@#3:pinnumber} 10 -25 2 1 0.266667 0.266667 {}
-L 3 150 -100 180 -100 {}
-B 5 177.5 -102.5 182.5 -97.5 {pinseq=6
-pinnumber=6
-dir=out
-name=PD2-K
-}
-T {@#4:pinnumber} 160 -105 2 1 0.266667 0.266667 {}
 L 3 150 -50 180 -50 {}
 B 5 177.5 -52.5 182.5 -47.5 {pinseq=5
 pinnumber=5
@@ -115,3 +109,10 @@ dir=in
 name=PD2-A
 }
 T {@#5:pinnumber} 160 -55 2 1 0.266667 0.266667 {}
+L 3 150 -100 180 -100 {}
+B 5 177.5 -102.5 182.5 -97.5 {pinseq=6
+pinnumber=6
+dir=out
+name=PD2-K
+}
+T {@#4:pinnumber} 160 -105 2 1 0.266667 0.266667 {}

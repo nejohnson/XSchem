@@ -3,16 +3,19 @@ G {type=4095
 template="name=U?
 device=4095
 footprint=DIP14
-net=VSS:7
-net=VDD:14
-description=gate\\\\ JK\\\\ master\\\\ slave\\\\ flip-flop
+description=\\"gate JK master slave flip-flop\\"
 numslots=0
+VSS=VSS
+VDD=VDD
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @VSS @VDD"
+
+extra="VSS VDD"
+extra_pinnumber="7 14"
 }
 V {}
 S {}

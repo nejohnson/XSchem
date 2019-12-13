@@ -1,7 +1,7 @@
 v {xschem version=2.9.5_RC6 file_version=1.1}
 G {type=LT1162
 template="device=LT1162
-description=Full-bridge\\\\ N-channel\\\\ Power\\\\ MOSFET\\\\ Driver
+description=\\"Full-bridge N-channel Power MOSFET Driver\\"
 documentation=http://www.linear.com/pdf/11602fa.pdf
 name=U?
 footprint=DIP24N
@@ -14,7 +14,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}

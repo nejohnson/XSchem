@@ -2,7 +2,7 @@ v {xschem version=2.9.5_RC6 file_version=1.1}
 G {type=OPAMP
 template="device=OPAMP
 name=U?
-description=operational\\\\ amplifier
+description=\\"operational amplifier\\"
 numslots=0
 symversion=0.1
 "
@@ -10,7 +10,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}
@@ -44,13 +45,6 @@ name=in-
 dir=in
 }
 T {@#1:pinnumber} 15 -25 2 0 0.266667 0.266667 {}
-L 3 80 -40 100 -40 {}
-B 5 97.5 -42.5 102.5 -37.5 {pinnumber=5
-pinseq=5
-name=out
-dir=out
-}
-T {@#2:pinnumber} 80 -45 2 1 0.266667 0.266667 {}
 L 3 50 -80 50 -60 {}
 B 5 47.5 -82.5 52.5 -77.5 {pinnumber=3
 pinseq=3
@@ -65,3 +59,10 @@ name=V-
 dir=inout
 }
 T {@#4:pinnumber} 55 -10 2 1 0.266667 0.266667 {}
+L 3 80 -40 100 -40 {}
+B 5 97.5 -42.5 102.5 -37.5 {pinnumber=5
+pinseq=5
+name=out
+dir=out
+}
+T {@#2:pinnumber} 80 -45 2 1 0.266667 0.266667 {}

@@ -4,16 +4,19 @@ template="name=U?
 device=MAX1114
 footprint=CERQUAD44
 numslots=0
-description=8-bit,\\\\ 150Msps\\\\ Flash\\\\ ADC
-net=AGND:2,8,9,14,16,18,20,25,26,33
-net=DGND:1,34
-net=VEE:3,7,12,22,27,32
+description=\\"8-bit, 150Msps Flash ADC\\"
+AGND=AGND
+DGND=DGND
+VEE=VEE
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @AGND @DGND @VEE"
+
+extra="AGND DGND VEE"
+extra_pinnumber="2,8,9,14,16,18,20,25,26,33 1,34 3,7,12,22,27,32"
 }
 V {}
 S {}
@@ -37,6 +40,14 @@ A 4 25 -390 5 0 360 {}
 
 
 
+L 3 0 -350 30 -350 {}
+B 5 -2.5 -352.5 2.5 -347.5 {pinnumber=31
+pinseq=1
+name=LINV
+dir=in
+}
+T {@#13:pinnumber} 20 -355 2 0 0.266667 0.266667 {}
+T {@#13:name} 35 -350 2 1 0.266667 0.266667 {}
 L 3 230 -510 260 -510 {}
 B 5 257.5 -512.5 262.5 -507.5 {pinnumber=36
 pinseq=2
@@ -101,6 +112,14 @@ dir=out
 }
 T {@#7:pinnumber} 240 -235 2 1 0.266667 0.266667 {}
 T {@#7:name} 225 -230 2 0 0.266667 0.266667 {}
+L 3 0 -310 30 -310 {}
+B 5 -2.5 -312.5 2.5 -307.5 {pinnumber=4
+pinseq=10
+name=MINV
+dir=in
+}
+T {@#14:pinnumber} 20 -315 2 0 0.266667 0.266667 {}
+T {@#14:name} 35 -310 2 1 0.266667 0.266667 {}
 L 3 230 -190 260 -190 {}
 B 5 257.5 -192.5 262.5 -187.5 {pinnumber=44
 pinseq=11
@@ -109,22 +128,6 @@ dir=out
 }
 T {@#8:pinnumber} 240 -195 2 1 0.266667 0.266667 {}
 T {@#8:name} 225 -190 2 0 0.266667 0.266667 {}
-L 3 230 -150 260 -150 {}
-B 5 257.5 -152.5 262.5 -147.5 {pinnumber=35
-pinseq=24
-name=DREADY
-dir=out
-}
-T {@#9:pinnumber} 240 -155 2 1 0.266667 0.266667 {}
-T {@#9:name} 225 -150 2 0 0.266667 0.266667 {}
-L 3 230 -110 260 -110 {}
-B 5 257.5 -112.5 262.5 -107.5 {pinnumber=29
-pinseq=23
-name=DRINV
-dir=out
-}
-T {@#10:pinnumber} 240 -115 2 1 0.266667 0.266667 {}
-T {@#10:name} 225 -110 2 0 0.266667 0.266667 {}
 L 3 0 -390 20 -390 {}
 B 5 -2.5 -392.5 2.5 -387.5 {pinnumber=5
 pinseq=12
@@ -141,22 +144,22 @@ dir=in
 }
 T {@#12:pinnumber} 20 -435 2 0 0.266667 0.266667 {}
 T {@#12:name} 42.5 -430 2 1 0.266667 0.266667 {}
-L 3 0 -350 30 -350 {}
-B 5 -2.5 -352.5 2.5 -347.5 {pinnumber=31
-pinseq=1
-name=LINV
-dir=in
+L 3 0 -70 30 -70 {}
+B 5 -2.5 -72.5 2.5 -67.5 {pinnumber=10
+pinseq=14
+name=VRBS
+dir=inout
 }
-T {@#13:pinnumber} 20 -355 2 0 0.266667 0.266667 {}
-T {@#13:name} 35 -350 2 1 0.266667 0.266667 {}
-L 3 0 -310 30 -310 {}
-B 5 -2.5 -312.5 2.5 -307.5 {pinnumber=4
-pinseq=10
-name=MINV
-dir=in
+T {@#21:pinnumber} 20 -75 2 0 0.266667 0.266667 {}
+T {@#21:name} 35 -70 2 1 0.266667 0.266667 {}
+L 3 0 -30 30 -30 {}
+B 5 -2.5 -32.5 2.5 -27.5 {pinnumber=11
+pinseq=15
+name=VRBF
+dir=inout
 }
-T {@#14:pinnumber} 20 -315 2 0 0.266667 0.266667 {}
-T {@#14:name} 35 -310 2 1 0.266667 0.266667 {}
+T {@#20:pinnumber} 20 -35 2 0 0.266667 0.266667 {}
+T {@#20:name} 35 -30 2 1 0.266667 0.266667 {}
 L 3 0 -510 30 -510 {}
 B 5 -2.5 -512.5 2.5 -507.5 {pinnumber=15
 pinseq=16
@@ -197,22 +200,6 @@ dir=inout
 }
 T {@#19:pinnumber} 20 -195 2 0 0.266667 0.266667 {}
 T {@#19:name} 35 -190 2 1 0.266667 0.266667 {}
-L 3 0 -30 30 -30 {}
-B 5 -2.5 -32.5 2.5 -27.5 {pinnumber=11
-pinseq=15
-name=VRBF
-dir=inout
-}
-T {@#20:pinnumber} 20 -35 2 0 0.266667 0.266667 {}
-T {@#20:name} 35 -30 2 1 0.266667 0.266667 {}
-L 3 0 -70 30 -70 {}
-B 5 -2.5 -72.5 2.5 -67.5 {pinnumber=10
-pinseq=14
-name=VRBS
-dir=inout
-}
-T {@#21:pinnumber} 20 -75 2 0 0.266667 0.266667 {}
-T {@#21:name} 35 -70 2 1 0.266667 0.266667 {}
 L 3 0 -150 30 -150 {}
 B 5 -2.5 -152.5 2.5 -147.5 {pinnumber=23
 pinseq=21
@@ -229,3 +216,19 @@ dir=inout
 }
 T {@#23:pinnumber} 20 -115 2 0 0.266667 0.266667 {}
 T {@#23:name} 35 -110 2 1 0.266667 0.266667 {}
+L 3 230 -110 260 -110 {}
+B 5 257.5 -112.5 262.5 -107.5 {pinnumber=29
+pinseq=23
+name=DRINV
+dir=out
+}
+T {@#10:pinnumber} 240 -115 2 1 0.266667 0.266667 {}
+T {@#10:name} 225 -110 2 0 0.266667 0.266667 {}
+L 3 230 -150 260 -150 {}
+B 5 257.5 -152.5 262.5 -147.5 {pinnumber=35
+pinseq=24
+name=DREADY
+dir=out
+}
+T {@#9:pinnumber} 240 -155 2 1 0.266667 0.266667 {}
+T {@#9:name} 225 -150 2 0 0.266667 0.266667 {}

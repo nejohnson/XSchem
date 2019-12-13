@@ -3,17 +3,20 @@ G {type=6A259DIP
 template="name=U?
 device=6A259DIP
 footprint=DIP20
-description=Peripheral\\\\ /\\\\ Power\\\\ Logic\\\\ 8-Bit\\\\ Addressable\\\\ Latch
+description=\\"Peripheral / Power Logic 8-Bit Addressable Latch\\"
 numslots=0
-net=Vcc:17
-net=GND:4
 documentation=http://focus.ti.com/docs/prod/folders/print/tpic6a259.html
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="17 4"
 }
 V {}
 S {}
@@ -34,70 +37,6 @@ A 4 25 -100 5.2 0 360 {}
 
 
 
-L 3 170 -380 200 -380 {}
-B 5 197.5 -382.5 202.5 -377.5 {pinnumber=19
-pinseq=19
-name=Q0
-dir=out
-}
-T {@#0:pinnumber} 180 -385 2 1 0.266667 0.266667 {}
-T {@#0:name} 165 -380 2 0 0.266667 0.266667 {}
-L 3 0 -140 20 -140 {}
-B 5 -2.5 -142.5 2.5 -137.5 {pinnumber=8
-pinseq=8
-name=ENABLE
-dir=in
-}
-T {@#1:pinnumber} 20 -145 2 0 0.266667 0.266667 {}
-T {@#1:name} 35 -140 2 1 0.266667 0.266667 {}
-L 3 0 -380 30 -380 {}
-B 5 -2.5 -382.5 2.5 -377.5 {pinnumber=18
-pinseq=18
-name=S0
-dir=in
-}
-T {@#2:pinnumber} 20 -385 2 0 0.266667 0.266667 {}
-T {@#2:name} 35 -380 2 1 0.266667 0.266667 {}
-L 3 0 -350 30 -350 {}
-B 5 -2.5 -352.5 2.5 -347.5 {pinnumber=3
-pinseq=3
-name=S1
-dir=in
-}
-T {@#3:pinnumber} 20 -355 2 0 0.266667 0.266667 {}
-T {@#3:name} 35 -350 2 1 0.266667 0.266667 {}
-L 3 0 -100 20 -100 {}
-B 5 -2.5 -102.5 2.5 -97.5 {pinnumber=14
-pinseq=14
-name=CLEAR
-dir=in
-}
-T {@#4:pinnumber} 20 -105 2 0 0.266667 0.266667 {}
-T {@#4:name} 35 -100 2 1 0.266667 0.266667 {}
-L 3 0 -220 30 -220 {}
-B 5 -2.5 -222.5 2.5 -217.5 {pinnumber=13
-pinseq=13
-name=D
-dir=in
-}
-T {@#5:pinnumber} 20 -225 2 0 0.266667 0.266667 {}
-T {@#5:name} 35 -220 2 1 0.266667 0.266667 {}
-L 3 0 -320 30 -320 {}
-B 5 -2.5 -322.5 2.5 -317.5 {pinnumber=7
-pinseq=7
-name=S2
-dir=in
-}
-T {@#6:pinnumber} 20 -325 2 0 0.266667 0.266667 {}
-T {@#6:name} 35 -320 2 1 0.266667 0.266667 {}
-L 3 170 -350 200 -350 {}
-B 5 197.5 -352.5 202.5 -347.5 {pinnumber=20
-pinseq=20
-name=Q1
-dir=out
-}
-T {@#7:pinnumber} 180 -355 2 1 0.266667 0.266667 {}
-T {@#7:name} 165 -350 2 0 0.266667 0.266667 {}
 L 3 170 -320 200 -320 {}
 B 5 197.5 -322.5 202.5 -317.5 {pinnumber=1
 pinseq=1
@@ -114,6 +53,48 @@ dir=out
 }
 T {@#9:pinnumber} 180 -295 2 1 0.266667 0.266667 {}
 T {@#9:name} 165 -290 2 0 0.266667 0.266667 {}
+L 3 0 -350 30 -350 {}
+B 5 -2.5 -352.5 2.5 -347.5 {pinnumber=3
+pinseq=3
+name=S1
+dir=in
+}
+T {@#3:pinnumber} 20 -355 2 0 0.266667 0.266667 {}
+T {@#3:name} 35 -350 2 1 0.266667 0.266667 {}
+
+ {}
+L 3 170 -110 200 -110 {}
+B 5 197.5 -112.5 202.5 -107.5 {pinnumber=5
+pinseq=5
+name=Power\\ GND
+dir=in
+}
+T {@#14:pinnumber} 180 -115 2 1 0.266667 0.266667 {}
+T {@#14:name} 165 -110 2 0 0.266667 0.266667 {}
+L 3 170 -80 200 -80 {}
+B 5 197.5 -82.5 202.5 -77.5 {pinnumber=6
+pinseq=6
+name=Power\\ GND
+dir=in
+}
+T {@#15:pinnumber} 180 -85 2 1 0.266667 0.266667 {}
+T {@#15:name} 165 -80 2 0 0.266667 0.266667 {}
+L 3 0 -320 30 -320 {}
+B 5 -2.5 -322.5 2.5 -317.5 {pinnumber=7
+pinseq=7
+name=S2
+dir=in
+}
+T {@#6:pinnumber} 20 -325 2 0 0.266667 0.266667 {}
+T {@#6:name} 35 -320 2 1 0.266667 0.266667 {}
+L 3 0 -140 20 -140 {}
+B 5 -2.5 -142.5 2.5 -137.5 {pinnumber=8
+pinseq=8
+name=ENABLE
+dir=in
+}
+T {@#1:pinnumber} 20 -145 2 0 0.266667 0.266667 {}
+T {@#1:name} 35 -140 2 1 0.266667 0.266667 {}
 L 3 170 -260 200 -260 {}
 B 5 197.5 -262.5 202.5 -257.5 {pinnumber=9
 pinseq=9
@@ -146,22 +127,22 @@ dir=out
 }
 T {@#13:pinnumber} 180 -175 2 1 0.266667 0.266667 {}
 T {@#13:name} 165 -170 2 0 0.266667 0.266667 {}
-L 3 170 -110 200 -110 {}
-B 5 197.5 -112.5 202.5 -107.5 {pinnumber=5
-pinseq=5
-name=Power\\ GND
+L 3 0 -220 30 -220 {}
+B 5 -2.5 -222.5 2.5 -217.5 {pinnumber=13
+pinseq=13
+name=D
 dir=in
 }
-T {@#14:pinnumber} 180 -115 2 1 0.266667 0.266667 {}
-T {@#14:name} 165 -110 2 0 0.266667 0.266667 {}
-L 3 170 -80 200 -80 {}
-B 5 197.5 -82.5 202.5 -77.5 {pinnumber=6
-pinseq=6
-name=Power\\ GND
+T {@#5:pinnumber} 20 -225 2 0 0.266667 0.266667 {}
+T {@#5:name} 35 -220 2 1 0.266667 0.266667 {}
+L 3 0 -100 20 -100 {}
+B 5 -2.5 -102.5 2.5 -97.5 {pinnumber=14
+pinseq=14
+name=CLEAR
 dir=in
 }
-T {@#15:pinnumber} 180 -85 2 1 0.266667 0.266667 {}
-T {@#15:name} 165 -80 2 0 0.266667 0.266667 {}
+T {@#4:pinnumber} 20 -105 2 0 0.266667 0.266667 {}
+T {@#4:name} 35 -100 2 1 0.266667 0.266667 {}
 L 3 170 -50 200 -50 {}
 B 5 197.5 -52.5 202.5 -47.5 {pinnumber=15
 pinseq=15
@@ -178,3 +159,13 @@ dir=in
 }
 T {@#17:pinnumber} 180 -25 2 1 0.266667 0.266667 {}
 T {@#17:name} 165 -20 2 0 0.266667 0.266667 {}
+
+ {}
+L 3 0 -380 30 -380 {}
+B 5 -2.5 -382.5 2.5 -377.5 {pinnumber=18
+pinseq=18
+name=S0
+dir=in
+}
+T {@#2:pinnumber} 20 -385 2 0 0.266667 0.266667 {}
+T {@#2:name} 35 -380 2 1 0.266667 0.266667 {}

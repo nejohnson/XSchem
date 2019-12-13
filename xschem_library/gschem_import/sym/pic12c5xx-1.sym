@@ -4,17 +4,20 @@ template="name=U?
 device=PIC12C5xx
 footprint=DIP8
 numslots=0
-net=Vdd:1
-net=Vss:8
-description=8-bit\\\\ CMOS\\\\ microcontroller
+description=\\"8-bit CMOS microcontroller\\"
 documentation=http://www.microchip.com/download/lit/pline/picmicro/families/12c5xx/40139e.pdf
 symversion=0.1
+Vdd=Vdd
+Vss=Vss
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vdd @Vss"
+
+extra="Vdd Vss"
+extra_pinnumber="1 8"
 }
 V {}
 S {}
@@ -57,6 +60,8 @@ dir=in
 }
 T {@#2:pinnumber} 20 -25 2 0 0.266667 0.266667 {}
 T {@#2:name} 35 -20 2 1 0.266667 0.266667 {}
+
+ {}
 L 3 260 -20 290 -20 {}
 B 5 287.5 -22.5 292.5 -17.5 {pinnumber=5
 pinseq=5
@@ -73,11 +78,3 @@ dir=inout
 }
 T {@#4:pinnumber} 270 -55 2 1 0.266667 0.266667 {}
 T {@#4:name} 255 -50 2 0 0.266667 0.266667 {}
-L 3 260 -80 290 -80 {}
-B 5 287.5 -82.5 292.5 -77.5 {pinnumber=7
-pinseq=7
-name=GP0
-dir=inout
-}
-T {@#5:pinnumber} 270 -85 2 1 0.266667 0.266667 {}
-T {@#5:name} 255 -80 2 0 0.266667 0.266667 {}

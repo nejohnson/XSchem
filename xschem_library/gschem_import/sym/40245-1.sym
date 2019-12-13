@@ -3,17 +3,20 @@ G {type=40245
 template="name=U?
 device=40245
 footprint=DIP20
-net=VSS:10
-net=VDD:20
-description=8-bit\\\\ transceiver
+description=\\"8-bit transceiver\\"
 numslots=0
 documentation=http://www.semiconductors.philips.com/acrobat/datasheets/HEF40245B_CNV_3.pdf
+VSS=VSS
+VDD=VDD
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @VSS @VDD"
+
+extra="VSS VDD"
+extra_pinnumber="10 20"
 }
 V {}
 S {}

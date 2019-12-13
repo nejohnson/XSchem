@@ -3,14 +3,15 @@ G {type=OPAMP
 template="device=OPAMP
 name=U?
 symversion=0.1
-description=operational\\\\ amplifier
+description=\\"operational amplifier\\"
 numslots=0
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}
@@ -46,13 +47,6 @@ name=in-
 dir=in
 }
 T {@#1:pinnumber} 15 -25 2 0 0.266667 0.266667 {}
-L 3 90 -50 110 -50 {}
-B 5 107.5 -52.5 112.5 -47.5 {pinnumber=5
-pinseq=5
-name=out
-dir=out
-}
-T {@#2:pinnumber} 95 -55 2 1 0.266667 0.266667 {}
 L 3 50 -100 50 -80 {}
 B 5 47.5 -102.5 52.5 -97.5 {pinnumber=3
 pinseq=3
@@ -67,3 +61,10 @@ name=V-
 dir=inout
 }
 T {@#4:pinnumber} 55 -10 2 1 0.266667 0.266667 {}
+L 3 90 -50 110 -50 {}
+B 5 107.5 -52.5 112.5 -47.5 {pinnumber=5
+pinseq=5
+name=out
+dir=out
+}
+T {@#2:pinnumber} 95 -55 2 1 0.266667 0.266667 {}

@@ -3,16 +3,19 @@ G {type=4021
 template="name=U?
 device=4021
 footprint=DIP16
-net=VSS:8
-net=VDD:16
-description=8-bit\\\\ shift\\\\ register\\\\ with\\\\ parallel\\\\ load
+description=\\"8-bit shift register with parallel load\\"
 numslots=0
+VSS=VSS
+VDD=VDD
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @VSS @VDD"
+
+extra="VSS VDD"
+extra_pinnumber="8 16"
 }
 V {}
 S {}

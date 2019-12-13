@@ -3,16 +3,19 @@ G {type=74141
 template="device=74141
 footprint=DIP16
 name=U?
-description=BCD\\\\ to\\\\ decimaldecoder\\\\ with\\\\ open\\\\ collector\\\\ output
+description=\\"BCD to decimaldecoder with open collector output\\"
 numslots=0
-net=Vcc:5
-net=GND:12
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="5 12"
 }
 V {}
 S {}

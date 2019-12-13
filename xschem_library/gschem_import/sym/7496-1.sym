@@ -3,16 +3,19 @@ G {type=7496
 template="device=7496
 footprint=DIP16
 name=U?
-description=5-bit\\\\ shift\\\\ register\\\\ with\\\\ parallel\\\\ load
-net=Vcc:5
-net=GND:12
+description=\\"5-bit shift register with parallel load\\"
 numslots=0
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="5 12"
 }
 V {}
 S {}

@@ -2,17 +2,18 @@ v {xschem version=2.9.5_RC6 file_version=1.1}
 G {type=a3967lsb
 template="name=U?
 device=a3967lsb
-footprint=SO24\\\\ .050
-author=m.\\\\ dickens\\\\ <marvindickens@bellsouth.net>
+footprint=\\"SO24 .050\\"
+author=\\"m. dickens <marvindickens@bellsouth.net>\\"
 documentation=http://www.allegro.com
-description=microstepping\\\\ driver\\\\ with\\\\ translator
+description=\\"microstepping driver with translator\\"
 numslots=0
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}

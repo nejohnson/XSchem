@@ -4,14 +4,17 @@ template="device=MC100ELT24
 name=U?
 pins=8
 documentation=http://www.onsemi.com/pub/Collateral/MC10ELT24-D.PDF
-net=GND:5
-net=Vcc:8
+GND=GND
+Vcc=Vcc
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @GND @Vcc"
+
+extra="GND Vcc"
+extra_pinnumber="5 8"
 }
 V {}
 S {}

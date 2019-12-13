@@ -4,17 +4,20 @@ template="name=U?
 device=PIC12F675
 footprint=DIP8
 numslots=0
-description=8-bit\\\\ FLASH\\\\ microcontroller
+description=\\"8-bit FLASH microcontroller\\"
 documentation=http://ww1.microchip.com/downloads/en/DeviceDoc/41190E.pdf
-net=GND:8
-net=Vcc:1
 symversion=1.0
+GND=GND
+Vcc=Vcc
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @GND @Vcc"
+
+extra="GND Vcc"
+extra_pinnumber="8 1"
 }
 V {}
 S {}
@@ -57,6 +60,8 @@ dir=in
 }
 T {@#2:pinnumber} 20 -25 2 0 0.266667 0.266667 {}
 T {@#2:name} 35 -20 2 1 0.266667 0.266667 {}
+
+ {}
 L 3 500 -20 530 -20 {}
 B 5 527.5 -22.5 532.5 -17.5 {pinnumber=5
 pinseq=5
@@ -73,11 +78,3 @@ dir=inout
 }
 T {@#4:pinnumber} 510 -55 2 1 0.266667 0.266667 {}
 T {@#4:name} 495 -50 2 0 0.266667 0.266667 {}
-L 3 500 -80 530 -80 {}
-B 5 527.5 -82.5 532.5 -77.5 {pinnumber=7
-pinseq=7
-name=GP0/AN0/CIN+/ICSPDAT
-dir=inout
-}
-T {@#5:pinnumber} 510 -85 2 1 0.266667 0.266667 {}
-T {@#5:name} 495 -80 2 0 0.266667 0.266667 {}

@@ -3,17 +3,20 @@ G {type=74154
 template="device=74154
 footprint=DIP24
 name=U?
-description=4-bit\\\\ binary\\\\ decoder/demultiplexer
+description=\\"4-bit binary decoder/demultiplexer\\"
 numslots=0
-net=Vcc:24
-net=GND:12
 documentation=http://www.semiconductors.philips.com/acrobat/datasheets/74HC_HCT154_CNV_2.pdf
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="24 12"
 }
 V {}
 S {}

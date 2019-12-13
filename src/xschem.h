@@ -652,6 +652,7 @@ extern int text_bbox(char * str,double xscale, double yscale,
             int rot, int flip, double x1,double y1, double *rx1, double *ry1,
             double *rx2, double *ry2);
 
+
 extern void hash_inst(int what, int n);
 extern void hash_inst_pin(int what, int i, int j);
 extern void del_inst_table(void);
@@ -835,6 +836,8 @@ extern void my_free(void *ptr);
 extern size_t my_strcat(int id, char **, const char *);
 extern char *subst_token(const char *s, const char *tok, const char *new_val);
 extern void new_prop_string(int i, const char *old_prop,int fast, int disable_unique_names);
+extern void hash_name(char *token, int remove);
+extern void hash_all_names(int n);
 extern void symbol_bbox(int i, double *x1,double *y1, double *x2, double *y2);
 extern char *escape_chars(char *dest, const char *source, int size);
 

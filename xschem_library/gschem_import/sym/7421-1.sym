@@ -3,8 +3,6 @@ G {type=7421
 template="device=7421
 slot=1
 numslots=2
-slotdef=1:1,2,4,5,6
-slotdef=2:9,10,12,13,8
 name=U?
 footprint=DIP14
 description=\\"2 AND gates with 4 inputs\\"
@@ -43,37 +41,42 @@ A 4 70 -60 30 270 180 {}
 
 
 L 3 0 -110 30 -110 {}
-B 5 -2.5 -112.5 2.5 -107.5 {pinnumber=1
+B 5 -2.5 -112.5 2.5 -107.5 {
 pinseq=1
 name=A
 dir=in
+pinnumber=1:9
 }
 T {@#2:pinnumber} 20 -115 2 0 0.266667 0.266667 {}
 L 3 0 -80 30 -80 {}
-B 5 -2.5 -82.5 2.5 -77.5 {pinnumber=2
+B 5 -2.5 -82.5 2.5 -77.5 {
 pinseq=2
 name=B
 dir=in
+pinnumber=2:10
 }
 T {@#3:pinnumber} 20 -85 2 0 0.266667 0.266667 {}
 L 3 0 -40 30 -40 {}
-B 5 -2.5 -42.5 2.5 -37.5 {pinnumber=4
+B 5 -2.5 -42.5 2.5 -37.5 {
 pinseq=3
 name=C
 dir=in
+pinnumber=5:13
 }
 T {@#4:pinnumber} 20 -45 2 0 0.266667 0.266667 {}
 L 3 0 -10 30 -10 {}
-B 5 -2.5 -12.5 2.5 -7.5 {pinnumber=5
+B 5 -2.5 -12.5 2.5 -7.5 {
 pinseq=4
 name=D
 dir=in
+pinnumber=6:8
 }
 T {@#1:pinnumber} 20 -15 2 0 0.266667 0.266667 {}
 L 3 100 -60 130 -60 {}
-B 5 127.5 -62.5 132.5 -57.5 {pinnumber=6
+B 5 127.5 -62.5 132.5 -57.5 {
 pinseq=5
 name=Y
 dir=out
+pinnumber=
 }
 T {@#0:pinnumber} 110 -65 2 1 0.266667 0.266667 {}

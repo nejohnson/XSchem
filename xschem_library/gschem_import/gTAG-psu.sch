@@ -62,7 +62,8 @@ footprint=sm1206
 device=CAPACITOR
 symversion=0.1
 }
-C {copyleft.sym} 4860 -4220 0 0 {device=none
+C {copyleft.sym} 4860 -4220 0 0 {name=C30
+device=none
 }
 C {resistor-2.sym} 6010 -5030 3 0 {name=R33
 value=39k

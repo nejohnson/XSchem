@@ -856,11 +856,12 @@ int place_symbol(int pos, const char *symbol_name, double x, double y, int rot, 
   inst_ptr[n].node=NULL;
   inst_ptr[n].prop_ptr=NULL;
   if(debug_var>=1) fprintf(errfp, "place_symbol() :all inst_ptr members set\n");  /*  03-02-2000 */
+  if(first_call) hash_all_names(n);
   if(inst_props) {
     new_prop_string(n, inst_props,!first_call, disable_unique_names); /*  20171214 first_call */
   }
   else {
-    set_inst_prop(n);
+    set_inst_prop(n); /* also calls new_prop_string() */
   }
   if(debug_var>=1) fprintf(errfp, "place_symbol(): done set_inst_prop()\n");  /*  03-02-2000 */
 

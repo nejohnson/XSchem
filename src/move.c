@@ -758,6 +758,7 @@ void copy_objects(int what)
        inst_ptr[lastinst].rot = (inst_ptr[lastinst].rot + 
           ( (flip && (inst_ptr[lastinst].rot & 1) ) ? rot+2 : rot) ) & 0x3;
        inst_ptr[lastinst].flip = (flip? !inst_ptr[n].flip:inst_ptr[n].flip);
+       if(!newpropcnt) hash_all_names(lastinst);
        new_prop_string(lastinst, inst_ptr[n].prop_ptr,newpropcnt++, disable_unique_names);
        /* the final newpropcnt argument is zero for the 1st call and used in  */
        /* new_prop_string() for cleaning some internal caches. */

@@ -14,6 +14,8 @@ FNR==1{
   net_assign = 0
   pinseq=0
   template_attrs=""
+  delete slotdef
+  numslots=""
 }
 
 {
@@ -52,6 +54,22 @@ FNR==1{
         getline
         if($0 ~/=/) {
           sub(/^refdes=/, "name=")
+          if($0 ~/slotdef=/) {
+            tmp = $0
+            sub(/slotdef=/,"", tmp)
+            slotnum=tmp
+            sub(/:.*/,"", slotnum)
+            sub(/.*:/,"", tmp)
+            slotdef[slotnum] = tmp
+            # print "slotnum=" slotnum " slotdef=" slotdef[slotnum] > "/dev/stderr"
+            continue
+          }
+          if($0 ~/numslots=/) {
+            numslots = $0
+            sub(/numslots=/,"", numslots)
+            template_attrs = template_attrs $0 "\n"
+            continue
+          }
           if($0 ~/net=/) {
             tmp = $0
             sub(/net=/,"", tmp)
@@ -169,6 +187,7 @@ FNR==1{
       cx = $2/10
       cy=-$3/10
       crot = $5/90
+      slot=""
       if(crot == 1) crot = 3
       else if(crot == 3) crot = 1
       cflip = $6
@@ -181,21 +200,42 @@ FNR==1{
           if($0 ~/^T /) {
              # do nothing for now
           } else {
-            if($0 ~/refdes=/) sub(/refdes=/, "name=")
+            if($0 ~/net=/) {
+              netname = pinnumber = $0
+              sub(/net=.*:/,"",pinnumber)
+              sub(/net=/,"", netname)
+              sub(/:.*/,"", netname)
+              $0 = "net:" pinnumber "=" netname
+            }
+            if($0 ~ /slot=/) {
+              slot = $0
+              sub(/slot=/,"", slot)
+              getline
+              continue
+            }
+            if($0 ~/refdes=/){
+              sub(/refdes=/, "name=")
+              instname = $0
 
-            if(symbol ~/(in|out|io)-1\.sym/) {
-              if($0 ~/name=/) {
+              if(symbol ~/(in|out|io)-1\.sym/) {
                 tmp = $0
                 sub(/name=/, "lab=", tmp)
-                $0 = $0 "\n" tmp
+                $0 = tmp
+              } else {
+                getline
+                continue
               }
+              
             }
-
-
             gsub(/ /, "\\\\ ", $0)
             propstring = propstring $0 "\n"
           }
           getline
+        }
+        if(slot) {
+          propstring = instname ":" slot "\n" propstring
+        } else {
+          propstring = instname "\n" propstring
         }
       } else {
         components = components  "C {" symbol "} " cx " " cy " " crot " " cflip " {" propstring "}\n"
@@ -487,6 +527,30 @@ END{
     for(j = 1; j <= nattr; j++) {
       attr_string = attr_string pin_attr[idx,j] "=" pin_value[idx,j] "\n"
     }
+
+
+    if(numslots > 1 ) {
+      pinnumber = attr_string
+      sub(/.*pinnumber=/,"", pinnumber)
+      sub(/[\n ].*/,"", pinnumber)
+      #print "pinnumber=" pinnumber > "/dev/stderr"
+      sub(/pinnumber=[^ \n]+/,"", attr_string)
+      #print "---\n" attr_string "\n---\n" > "/dev/stderr"
+      slotted_pinnumber = ""
+      for(j = 1; j<= numslots; j++) {
+        #print "slotdef[" j "]=" slotdef[j] > "/dev/stderr"
+        split(slotdef[j], slotdef_arr, ",")
+        if(slotted_pinnumber !="") slotted_pinnumber = slotted_pinnumber ":"
+        slotted_pinnumber = slotted_pinnumber slotdef_arr[pinnumber]
+      }
+      #print "slotted_pinnumber=" slotted_pinnumber > "/dev/stderr"
+      attr_string = attr_string "pinnumber=" slotted_pinnumber "\n"
+    }
+   
+
+
+
+
     print pin_box[idx] " {" attr_string "}"
     for(j = 1; j <= nattr; j++) {
       xt = pin_x[idx,j]

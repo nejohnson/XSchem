@@ -39,35 +39,30 @@ C {in-1.sym} 4540 -5600 0 0 {name=jtag_power
 lab=jtag_power
 device=INPUT
 }
-C {7414-1.sym} 5420 -5480 0 1 {name=U20
-slot=1
-net=jtag_power:14
-net=GND:7
+C {7414-1.sym} 5420 -5480 0 1 {name=U20:1
+net:14=jtag_power
+net:7=GND
 footprint=SO14
 device=7414
 }
-C {7414-1.sym} 5300 -5320 0 0 {name=U20
-slot=2
-net=jtag_power:14
-net=GND:7
+C {7414-1.sym} 5300 -5320 0 0 {name=U20:2
+net:14=jtag_power
+net:7=GND
 device=7414
 }
-C {7414-1.sym} 5300 -5140 0 0 {name=U20
-slot=3
-net=jtag_power:14
-net=GND:7
+C {7414-1.sym} 5300 -5140 0 0 {name=U20:3
+net:14=jtag_power
+net:7=GND
 device=7414
 }
-C {7414-1.sym} 5300 -4970 0 0 {name=U20
-slot=4
-net=jtag_power:14
-net=GND:7
+C {7414-1.sym} 5300 -4970 0 0 {name=U20:4
+net:14=jtag_power
+net:7=GND
 device=7414
 }
-C {7414-1.sym} 5300 -4800 0 0 {name=U20
-slot=5
-net=jtag_power:14
-net=GND:7
+C {7414-1.sym} 5300 -4800 0 0 {name=U20:5
+net:14=jtag_power
+net:7=GND
 device=7414
 }
 C {out-1.sym} 4600 -5520 0 1 {name=tdi_ttl
@@ -79,7 +74,8 @@ footprint=conn_jtag
 device=CONNECTOR_8
 }
 C {gnd-1.sym} 5610 -5020 0 0 {}
-C {copyleft.sym} 4050 -4310 0 0 {device=none
+C {copyleft.sym} 4050 -4310 0 0 {name=CONN4
+device=none
 }
 C {capacitor-1.sym} 5920 -5630 3 0 {name=C20
 value=100n
@@ -88,7 +84,8 @@ device=CAPACITOR
 symversion=0.1
 }
 C {gnd-1.sym} 5890 -5560 0 0 {}
-C {5V-plus-1.sym} 5880 -5760 0 0 {net=jtag_power:1
+C {5V-plus-1.sym} 5880 -5760 0 0 {name=C20
+net:1=jtag_power
 }
 C {resistor-2.sym} 4750 -5670 3 0 {name=R20
 value=10k
@@ -110,13 +107,17 @@ value=10k
 footprint=sm0805
 device=RESISTOR
 }
-C {5V-plus-1.sym} 4720 -5780 0 0 {net=jtag_power:1
+C {5V-plus-1.sym} 4720 -5780 0 0 {name=R23
+net:1=jtag_power
 }
-C {5V-plus-1.sym} 4850 -5780 0 0 {net=jtag_power:1
+C {5V-plus-1.sym} 4850 -5780 0 0 {name=R23
+net:1=jtag_power
 }
-C {5V-plus-1.sym} 4980 -5780 0 0 {net=jtag_power:1
+C {5V-plus-1.sym} 4980 -5780 0 0 {name=R23
+net:1=jtag_power
 }
-C {5V-plus-1.sym} 5120 -5780 0 0 {net=jtag_power:1
+C {5V-plus-1.sym} 5120 -5780 0 0 {name=R23
+net:1=jtag_power
 }
 
 N 5420 -5190 5690 -5190 {}

@@ -2,8 +2,6 @@ v {xschem version=2.9.5_RC6 file_version=1.1}
 G {type=TL072
 template="device=TL072
 numslots=2
-slotdef=1:1,2,3,4,8
-slotdef=2:7,6,5,4,8
 slot=1
 footprint=DIP8
 name=U?
@@ -35,37 +33,42 @@ L 4 25 -20 35 -20 {}
 
 
 L 3 80 -40 100 -40 {}
-B 5 97.5 -42.5 102.5 -37.5 {pinnumber=1
+B 5 97.5 -42.5 102.5 -37.5 {
 pinseq=1
 name=1
 dir=inout
+pinnumber=1:7
 }
 T {@#2:pinnumber} 87.5 -42.5 2 1 0.266667 0.266667 {}
 L 3 0 -20 20 -20 {}
-B 5 -2.5 -22.5 2.5 -17.5 {pinnumber=2
+B 5 -2.5 -22.5 2.5 -17.5 {
 pinseq=2
 name=2
 dir=inout
+pinnumber=2:6
 }
 T {@#1:pinnumber} 5 -22.5 2 1 0.266667 0.266667 {}
 L 3 0 -60 20 -60 {}
-B 5 -2.5 -62.5 2.5 -57.5 {pinnumber=3
+B 5 -2.5 -62.5 2.5 -57.5 {
 pinseq=3
 name=3
 dir=inout
+pinnumber=3:5
 }
 T {@#0:pinnumber} 5 -62.5 2 1 0.266667 0.266667 {}
 L 3 50 -20 50 0 {}
-B 5 47.5 -2.5 52.5 2.5 {pinnumber=4
+B 5 47.5 -2.5 52.5 2.5 {
 pinseq=4
 name=4
 dir=inout
+pinnumber=4:4
 }
 T {@#3:pinnumber} 52.5 -5 2 1 0.266667 0.266667 {}
 L 3 50 -80 50 -60 {}
-B 5 47.5 -82.5 52.5 -77.5 {pinnumber=8
+B 5 47.5 -82.5 52.5 -77.5 {
 pinseq=5
 name=8
 dir=inout
+pinnumber=
 }
 T {@#4:pinnumber} 52.5 -65 2 1 0.266667 0.266667 {}

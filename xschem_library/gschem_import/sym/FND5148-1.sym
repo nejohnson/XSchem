@@ -11,8 +11,6 @@ fname=$Source$
 footprint=\\"DIL 18 600\\"
 slot=1
 numslots=2
-slotdef=1:7,9,6,8,10,12,11,13,5
-slotdef=2:2,3,1,16,14,17,15,18,4
 name=U?
 "
 tedax_format="footprint @name @footprint
@@ -75,74 +73,83 @@ A 4 230 -40 10.2 0 360 {}
 
 
 L 3 0 -340 30 -340 {}
-B 5 -2.5 -342.5 2.5 -337.5 {pinnumber=7
+B 5 -2.5 -342.5 2.5 -337.5 {
 pinseq=1
 name=L1
 dir=inout
+pinnumber=11:15
 }
 T {@#0:pinnumber} 20 -345 2 0 0.266667 0.266667 {}
 T {@#0:name} 35 -340 2 1 0.266667 0.266667 {}
 L 3 0 -300 30 -300 {}
-B 5 -2.5 -302.5 2.5 -297.5 {pinnumber=9
+B 5 -2.5 -302.5 2.5 -297.5 {
 pinseq=2
 name=L2
 dir=inout
+pinnumber=5:4
 }
 T {@#1:pinnumber} 20 -305 2 0 0.266667 0.266667 {}
 T {@#1:name} 35 -300 2 1 0.266667 0.266667 {}
 L 3 0 -260 30 -260 {}
-B 5 -2.5 -262.5 2.5 -257.5 {pinnumber=6
+B 5 -2.5 -262.5 2.5 -257.5 {
 pinseq=3
 name=L3
 dir=inout
+pinnumber=12:17
 }
 T {@#2:pinnumber} 20 -265 2 0 0.266667 0.266667 {}
 T {@#2:name} 35 -260 2 1 0.266667 0.266667 {}
 L 3 0 -220 30 -220 {}
-B 5 -2.5 -222.5 2.5 -217.5 {pinnumber=8
+B 5 -2.5 -222.5 2.5 -217.5 {
 pinseq=4
 name=L4
 dir=inout
+pinnumber=13:18
 }
 T {@#3:pinnumber} 20 -225 2 0 0.266667 0.266667 {}
 T {@#3:name} 35 -220 2 1 0.266667 0.266667 {}
 L 3 0 -180 30 -180 {}
-B 5 -2.5 -182.5 2.5 -177.5 {pinnumber=10
+B 5 -2.5 -182.5 2.5 -177.5 {
 pinseq=5
 name=L5
 dir=inout
+pinnumber=
 }
 T {@#4:pinnumber} 20 -185 2 0 0.266667 0.266667 {}
 T {@#4:name} 35 -180 2 1 0.266667 0.266667 {}
 L 3 0 -140 30 -140 {}
-B 5 -2.5 -142.5 2.5 -137.5 {pinnumber=12
+B 5 -2.5 -142.5 2.5 -137.5 {
 pinseq=6
 name=L6
 dir=inout
+pinnumber=
 }
 T {@#5:pinnumber} 20 -145 2 0 0.266667 0.266667 {}
 T {@#5:name} 35 -140 2 1 0.266667 0.266667 {}
 L 3 0 -100 30 -100 {}
-B 5 -2.5 -102.5 2.5 -97.5 {pinnumber=11
+B 5 -2.5 -102.5 2.5 -97.5 {
 pinseq=7
 name=L7
 dir=inout
+pinnumber=
 }
 T {@#6:pinnumber} 20 -105 2 0 0.266667 0.266667 {}
 T {@#6:name} 35 -100 2 1 0.266667 0.266667 {}
 L 3 0 -60 30 -60 {}
-B 5 -2.5 -62.5 2.5 -57.5 {pinnumber=13
+B 5 -2.5 -62.5 2.5 -57.5 {
 pinseq=8
 name=L8
 dir=inout
+pinnumber=
 }
 T {@#7:pinnumber} 20 -65 2 0 0.266667 0.266667 {}
 T {@#7:name} 35 -60 2 1 0.266667 0.266667 {}
 L 3 0 -20 30 -20 {}
-B 5 -2.5 -22.5 2.5 -17.5 {pinnumber=5
+B 5 -2.5 -22.5 2.5 -17.5 {
 pinseq=9
 name=Com
 dir=inout
+pinnumber=10:14
 }
 T {@#8:pinnumber} 20 -25 2 0 0.266667 0.266667 {}
 T {@#8:name} 35 -20 2 1 0.266667 0.266667 {}

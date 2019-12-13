@@ -4,10 +4,6 @@ template="device=SMDA05
 name=U?
 slot=1
 numslots=4
-slotdef=1:1,8
-slotdef=2:2,7
-slotdef=3:3,6
-slotdef=4:4,5
 footprint=SO8
 symversion=0.1
 documentation=http://www.semtech.com/pdf/tvs_sg.pdf
@@ -42,16 +38,18 @@ L 4 27.5 -40 27.5 0 {}
 
 
 L 3 0 -20 20 -20 {}
-B 5 -2.5 -22.5 2.5 -17.5 {pinnumber=1
+B 5 -2.5 -22.5 2.5 -17.5 {
 pinseq=1
 name=1
 dir=inout
+pinnumber=1:2:3:4
 }
 T {@#0:pinnumber} 20 -25 2 0 0.266667 0.266667 {}
 L 3 70 -20 90 -20 {}
-B 5 87.5 -22.5 92.5 -17.5 {pinnumber=8
+B 5 87.5 -22.5 92.5 -17.5 {
 pinseq=2
 name=8
 dir=inout
+pinnumber=
 }
 T {@#1:pinnumber} 80 -25 2 0 0.266667 0.266667 {}

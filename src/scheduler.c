@@ -447,10 +447,13 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
        prepared_netlist_structs=0;
        prepared_hilight_structs=0;
      }
-     if(argc >= 5) 
+     hash_all_names(inst);
+     if(argc >= 5) {
        new_prop_string(inst, subst_token(inst_ptr[inst].prop_ptr, argv[3], argv[4]),0, disable_unique_names); 
-     else /* assume argc == 4 */
+   
+     } else {/* assume argc == 4 */
        new_prop_string(inst, subst_token(inst_ptr[inst].prop_ptr, argv[3], NULL),0, disable_unique_names); 
+     }
      my_strdup2(367, &inst_ptr[inst].instname, get_tok_value(inst_ptr[inst].prop_ptr, "name",0));
      /* new symbol bbox after prop changes (may change due to text length) */
      symbol_bbox(inst, &inst_ptr[inst].x1, &inst_ptr[inst].y1, &inst_ptr[inst].x2, &inst_ptr[inst].y2);
@@ -516,6 +519,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
          if(prefix) name[0]=prefix; /* change prefix if changing symbol type; */
   
          my_strdup(371, &ptr,subst_token(inst_ptr[inst].prop_ptr, "name", name) );
+         hash_all_names(inst);
          new_prop_string(inst, ptr,0, disable_unique_names); /* set new prop_ptr */
          my_strdup2(372, &inst_ptr[inst].instname, get_tok_value(inst_ptr[inst].prop_ptr, "name",0)); /* 20150409 */
   

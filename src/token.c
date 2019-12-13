@@ -70,7 +70,6 @@ int name_strcmp(char *s, char *d) /* compare strings up to '\0' or'[' */
  }
 }
 
-
 /* 20180926 added token_size */
 static struct hashentry *hash_lookup(char *token, char *value,int remove, size_t token_size)
 /*    token        value      remove    ... what ... */
@@ -131,6 +130,22 @@ static struct hashentry *hash_lookup(char *token, char *value,int remove, size_t
 static  int collisions, max_collisions=0, n_elements=0;
 
 
+void hash_name(char *token, int remove)
+{
+  if(remove) hash_lookup(token, NULL, 1, strlen(token));
+  else       hash_lookup(token, "", 0, strlen(token));
+}
+
+void hash_all_names(int n)
+{
+  int i;
+  free_hash();
+  for(i=0; i<lastinst; i++) {
+    if(i == n) continue;
+    hash_lookup(inst_ptr[i].instname, "", 0, strlen(inst_ptr[i].instname));
+  }
+}
+
 
 static struct hashentry *free_hash_entry(struct hashentry *entry)
 {
@@ -170,24 +185,26 @@ void free_hash(void) /* remove the whole hash table  */
 
 void check_unique_names(int rename)
 {
-  int i;
+  int i, first = 1;
   char *tmp = NULL;
   int newpropcnt = 0;
   /* int save_draw; */
 
-  if(rename == 1) {
-    /* save_draw = draw_window;*/
-    /* draw_window=1; */
-    bbox(BEGIN,0.0,0.0,0.0,0.0);
-    set_modify(1); push_undo();
-    prepared_hash_instances=0;
-    prepared_netlist_structs=0;
-    prepared_hilight_structs=0;
-  }
   free_hash();
+  first = 1;
   for(i=0;i<lastinst;i++) {
-    if(inst_ptr[i].instname[0] && hash_lookup(inst_ptr[i].instname, "", 0, strlen(inst_ptr[i].instname))) {
-      if(rename == 1) bbox(ADD, inst_ptr[i].x1, inst_ptr[i].y1, inst_ptr[i].x2, inst_ptr[i].y2);
+    if(inst_ptr[i].instname && inst_ptr[i].instname[0] && hash_lookup(inst_ptr[i].instname, "", 0, strlen(inst_ptr[i].instname))) {
+      if(rename == 1) {
+        if(first) {
+          bbox(BEGIN,0.0,0.0,0.0,0.0);
+          set_modify(1); push_undo();
+          prepared_hash_instances=0;
+          prepared_netlist_structs=0;
+          prepared_hilight_structs=0;
+          first = 0;
+        }
+        bbox(ADD, inst_ptr[i].x1, inst_ptr[i].y1, inst_ptr[i].x2, inst_ptr[i].y2);
+      }
       inst_ptr[i].flags |=4;
       hilight_nets=1;
       my_strdup(511, &tmp, inst_ptr[i].prop_ptr);
@@ -195,14 +212,14 @@ void check_unique_names(int rename)
       my_strdup2(512, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); /* 20150409 */
       hash_lookup(inst_ptr[i].instname, "", 0, strlen(inst_ptr[i].instname));
       if(rename == 1) bbox(ADD, inst_ptr[i].x1, inst_ptr[i].y1, inst_ptr[i].x2, inst_ptr[i].y2);
+      if(rename == 1) {
+        bbox(SET,0.0,0.0,0.0,0.0);
+        draw();
+        bbox(END,0.0,0.0,0.0,0.0);
+      }
+      my_free(&tmp);
     }
   }
-  if(rename == 1) {
-    bbox(SET,0.0,0.0,0.0,0.0);
-    draw();
-    bbox(END,0.0,0.0,0.0,0.0);
-  }
-  my_free(&tmp);
   draw_hilight_net(1);
   /* draw_window = save_draw; */
 }
@@ -602,14 +619,11 @@ void new_prop_string(int i, const char *old_prop, int fast, int disable_unique_n
  int old_name_len; /* 20180926 */
  int new_name_len;
 
+ if(debug_var>=1) fprintf(errfp, "new_prop_string(): i=%d, old_prop=%s, fast=%d\n", i, old_prop, fast);
+
 
  if(!fast) { /* on 1st invocation of new_prop_string */
    for(q=1;q<=255;q++) last[q]=1;
-   free_hash();
-   for(q=0;q<lastinst;q++) { /* insert instnames in hash */
-     if(q == i) continue; /* do not hash the instance we are assigning to */
-     hash_lookup(inst_ptr[q].instname, "", 0, strlen(inst_ptr[q].instname));
-   }
  }
  
  if(old_prop==NULL) 
@@ -627,6 +641,7 @@ void new_prop_string(int i, const char *old_prop, int fast, int disable_unique_n
  /* don't change old_prop if name does not conflict. */
  if(disable_unique_names || hash_lookup(old_name, NULL, 0, old_name_len) == NULL)
  {
+  hash_lookup(old_name,"", 0, old_name_len);
   my_strdup(447, &inst_ptr[i].prop_ptr, old_prop);
   return;
  }
@@ -646,6 +661,7 @@ void new_prop_string(int i, const char *old_prop, int fast, int disable_unique_n
  if(strcmp(tmp2, old_prop) ) {
    my_strdup(449, &inst_ptr[i].prop_ptr, tmp2);
  }
+ hash_lookup(new_name, "", 0, new_name_len); /* reinsert in hash */
 }
 
 char *subst_token(const char *s, const char *tok, const char *new_val)
@@ -1489,6 +1505,7 @@ void print_tedax_element(FILE *fd, int inst)
  }
  
  if(extra){ 
+   char netstring[40];
    /* fprintf(errfp, "extra_pinnumber: |%s|\n", extra_pinnumber); */
    /* fprintf(errfp, "extra: |%s|\n", extra); */
    for(extra_ptr = extra, extra_pinnumber_ptr = extra_pinnumber; ; extra_ptr=NULL, extra_pinnumber_ptr=NULL) {
@@ -1498,7 +1515,12 @@ void print_tedax_element(FILE *fd, int inst)
      /* fprintf(errfp, "extra_pinnumber_token: |%s|\n", extra_pinnumber_token); */
      /* fprintf(errfp, "extra_token: |%s|\n", extra_token); */
      instance_based=0;
+
+     /* alternate instance based extra net naming: net:<pinumber>=netname */
+     my_snprintf(netstring, S(netstring), "net:%s", extra_pinnumber_token);
+     if(debug_var>=1) fprintf(errfp, "print_tedax_element(): netstring=%s\n", netstring);
      extra_token_val=get_tok_value(inst_ptr[inst].prop_ptr, extra_token, 0);
+     if(!extra_token_val[0]) extra_token_val=get_tok_value(inst_ptr[inst].prop_ptr, netstring, 0);
      if(!extra_token_val[0]) extra_token_val=get_tok_value(template, extra_token, 0);
      else instance_based=1;
      if(!extra_token_val[0]) extra_token_val="--UNDEF--";

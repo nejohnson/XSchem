@@ -851,25 +851,25 @@ void update_symbol(const char *result, int x)
 
    if(sym_number>=0) /* changing symbol ! */
    {
-    delete_inst_node(i); /* 20180208 fix crashing bug: delete node info if changing symbol */
-                         /* if number of pins is different we must delete these data *before* */
-                         /* changing ysmbol, otherwise i might end up deleting non allocated data. */
-    my_strdup(82, &inst_ptr[i].name, rel_sym_path(symbol));
-
-
-   if(event_reporting) {
-     char n1[PATH_MAX];
-     char n2[PATH_MAX];
-     printf("xschem replace_symbol instance %s %s\n",
-         escape_chars(n1, inst_ptr[i].instname, PATH_MAX),
-         escape_chars(n2, symbol, PATH_MAX)
-     );
-     fflush(stdout);
-   }
-
-
-
-    inst_ptr[i].ptr=sym_number;
+     delete_inst_node(i); /* 20180208 fix crashing bug: delete node info if changing symbol */
+                          /* if number of pins is different we must delete these data *before* */
+                          /* changing ysmbol, otherwise i might end up deleting non allocated data. */
+     my_strdup(82, &inst_ptr[i].name, rel_sym_path(symbol));
+ 
+ 
+     if(event_reporting) {
+       char n1[PATH_MAX];
+       char n2[PATH_MAX];
+       printf("xschem replace_symbol instance %s %s\n",
+           escape_chars(n1, inst_ptr[i].instname, PATH_MAX),
+           escape_chars(n2, symbol, PATH_MAX)
+       );
+       fflush(stdout);
+     }
+ 
+ 
+ 
+     inst_ptr[i].ptr=sym_number;
    }
 
    bbox(ADD, inst_ptr[i].x1, inst_ptr[i].y1, inst_ptr[i].x2, inst_ptr[i].y2);
@@ -914,7 +914,10 @@ void update_symbol(const char *result, int x)
     if(debug_var>=1) fprintf(errfp, "update_symbol(): name=%s, inst_ptr[i].prop_ptr=%s\n", name, inst_ptr[i].prop_ptr);
     my_strdup(89, &ptr,subst_token(inst_ptr[i].prop_ptr, "name", name) );
                    /* set name of current inst */
-    new_prop_string(i, ptr, k, disable_unique_names); /* set new prop_ptr */
+    if(sym_number >=0) {
+      if(!k) hash_all_names(i);
+      new_prop_string(i, ptr, k, disable_unique_names); /* set new prop_ptr */
+    }
  
     type=instdef[inst_ptr[i].ptr].type; /* 20150409 */
     cond= !type || (strcmp(type,"label") && strcmp(type,"ipin") &&

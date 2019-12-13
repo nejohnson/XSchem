@@ -4,10 +4,6 @@ template="device=QUAD_OPAMP
 name=U?
 slot=1
 numslots=4
-slotdef=1:3,2,4,11,1
-slotdef=2:5,6,4,11,7
-slotdef=3:10,9,4,11,8
-slotdef=4:12,13,4,11,14
 footprint=SO14
 footprint2=DIP14
 symversion=1.0
@@ -39,37 +35,42 @@ L 4 25 -60 35 -60 {}
 
 
 L 3 0 -20 20 -20 {}
-B 5 -2.5 -22.5 2.5 -17.5 {pinnumber=3
+B 5 -2.5 -22.5 2.5 -17.5 {
 pinseq=1
 dir=in
 name=IN+
+pinnumber=4:4:4:4
 }
 T {@#0:pinnumber} 0 -20 2 1 0.333333 0.333333 {}
 L 3 0 -60 20 -60 {}
-B 5 -2.5 -62.5 2.5 -57.5 {pinnumber=2
+B 5 -2.5 -62.5 2.5 -57.5 {
 pinseq=2
 dir=in
 name=IN-
+pinnumber=2:6:9:13
 }
 T {@#1:pinnumber} 0 -60 2 1 0.333333 0.333333 {}
 L 3 50 -80 50 -60 {}
-B 5 47.5 -82.5 52.5 -77.5 {pinnumber=4
+B 5 47.5 -82.5 52.5 -77.5 {
 pinseq=3
 name=V+
 dir=inout
+pinnumber=11:11:11:11
 }
 T {@#3:pinnumber} 60 -60 2 1 0.333333 0.333333 {}
 L 3 50 -20 50 0 {}
-B 5 47.5 -2.5 52.5 2.5 {pinnumber=11
+B 5 47.5 -2.5 52.5 2.5 {
 pinseq=4
 name=V-
 dir=inout
+pinnumber=
 }
 T {@#4:pinnumber} 60 -10 2 1 0.333333 0.333333 {}
 L 3 80 -40 100 -40 {}
-B 5 97.5 -42.5 102.5 -37.5 {pinnumber=1
+B 5 97.5 -42.5 102.5 -37.5 {
 pinseq=5
 dir=out
 name=OUT
+pinnumber=3:5:10:12
 }
 T {@#2:pinnumber} 80 -40 2 1 0.333333 0.333333 {}

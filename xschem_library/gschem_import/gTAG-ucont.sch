@@ -19,8 +19,8 @@ T {Place one near each VCC pin for U1} 6240 -5160 2 1 0.5 0.5 {}
 C {title-A2.sym} 4370 -3850 0 0 {}
 C {24Cxx-1.sym} 4600 -4260 0 0 {name=U2
 footprint=SO8
-net=+3.3V:8
-net=GND:4
+net:8=+3.3V
+net:4=GND
 device=24Cxx
 }
 C {crystal-1.sym} 5500 -5320 0 0 {name=X1
@@ -211,7 +211,8 @@ symversion=0.1
 }
 C {3.3V-plus-1.sym} 6280 -5400 0 0 {}
 C {gnd-1.sym} 6290 -5200 0 0 {}
-C {copyleft.sym} 4400 -3870 0 0 {device=none
+C {copyleft.sym} 4400 -3870 0 0 {name=C9
+device=none
 }
 C {jumper-1.sym} 4840 -4260 3 0 {name=J1
 footprint=JUMPER2

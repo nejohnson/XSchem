@@ -8,7 +8,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}
@@ -42,15 +43,15 @@ pinseq=1
 dir=inout
 name=ANODE1
 }
-L 3 40 -20 50 -20 {}
-B 5 47.5 -22.5 52.5 -17.5 {pinnumber=3
-pinseq=3
-dir=inout
-name=CATHODE
-}
 L 3 0 -10 10 -10 {}
 B 5 -2.5 -12.5 2.5 -7.5 {pinnumber=2
 pinseq=2
 dir=inout
 name=ANODE2
+}
+L 3 40 -20 50 -20 {}
+B 5 47.5 -22.5 52.5 -17.5 {pinnumber=3
+pinseq=3
+dir=inout
+name=CATHODE
 }

@@ -1,7 +1,7 @@
 v {xschem version=2.9.5_RC6 file_version=1.1}
 G {type=MC34063
 template="name=U?
-description=Step-Up/-Down/Inverting\\\\ Switching\\\\ Regulator
+description=\\"Step-Up/-Down/Inverting Switching Regulator\\"
 footprint=DIP8
 device=MC34063
 numslots=0
@@ -12,7 +12,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}
@@ -63,30 +64,6 @@ pinseq=4
 }
 T {@#3:pinnumber} 20 -25 2 0 0.266667 0.266667 {}
 T {@#3:name} 35 -20 2 1 0.266667 0.266667 {}
-L 3 180 -110 210 -110 {}
-B 5 207.5 -112.5 212.5 -107.5 {pinnumber=8
-name=COLL_D
-dir=inout
-pinseq=8
-}
-T {@#4:pinnumber} 190 -115 2 1 0.266667 0.266667 {}
-T {@#4:name} 175 -110 2 0 0.266667 0.266667 {}
-L 3 180 -80 210 -80 {}
-B 5 207.5 -82.5 212.5 -77.5 {pinnumber=7
-name=IPK
-dir=inout
-pinseq=7
-}
-T {@#5:pinnumber} 190 -85 2 1 0.266667 0.266667 {}
-T {@#5:name} 175 -80 2 0 0.266667 0.266667 {}
-L 3 180 -50 210 -50 {}
-B 5 207.5 -52.5 212.5 -47.5 {pinnumber=6
-name=VCC
-dir=inout
-pinseq=6
-}
-T {@#6:pinnumber} 190 -55 2 1 0.266667 0.266667 {}
-T {@#6:name} 175 -50 2 0 0.266667 0.266667 {}
 L 3 180 -20 210 -20 {}
 B 5 207.5 -22.5 212.5 -17.5 {pinnumber=5
 name=COMP
@@ -95,3 +72,27 @@ pinseq=5
 }
 T {@#7:pinnumber} 190 -25 2 1 0.266667 0.266667 {}
 T {@#7:name} 175 -20 2 0 0.266667 0.266667 {}
+L 3 180 -50 210 -50 {}
+B 5 207.5 -52.5 212.5 -47.5 {pinnumber=6
+name=VCC
+dir=inout
+pinseq=6
+}
+T {@#6:pinnumber} 190 -55 2 1 0.266667 0.266667 {}
+T {@#6:name} 175 -50 2 0 0.266667 0.266667 {}
+L 3 180 -80 210 -80 {}
+B 5 207.5 -82.5 212.5 -77.5 {pinnumber=7
+name=IPK
+dir=inout
+pinseq=7
+}
+T {@#5:pinnumber} 190 -85 2 1 0.266667 0.266667 {}
+T {@#5:name} 175 -80 2 0 0.266667 0.266667 {}
+L 3 180 -110 210 -110 {}
+B 5 207.5 -112.5 212.5 -107.5 {pinnumber=8
+name=COLL_D
+dir=inout
+pinseq=8
+}
+T {@#4:pinnumber} 190 -115 2 1 0.266667 0.266667 {}
+T {@#4:name} 175 -110 2 0 0.266667 0.266667 {}

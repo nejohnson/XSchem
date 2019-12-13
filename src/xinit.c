@@ -728,8 +728,12 @@ void preview_window(const char *what, const char *tk_win_path, const char *filen
     save_mod = modified;
     save_ev = event_reporting;
     event_reporting = 0;
-    my_strdup(111, &saveptr, tclgetvar("current_dirname"));
+    my_strdup(117, &saveptr, tclgetvar("current_dirname"));
     push_undo();
+    my_strdup(114, &sch_prefix[currentsch+1], sch_prefix[currentsch]);
+    my_strcat(115, &sch_prefix[currentsch+1], "___preview___");
+    my_strcat(116, &sch_prefix[currentsch+1], ".");
+
     currentsch++;
     
     unselect_all();

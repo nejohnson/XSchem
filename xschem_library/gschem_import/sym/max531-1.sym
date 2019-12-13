@@ -3,7 +3,7 @@ G {type=MAX531
 template="device=MAX531
 name=U?
 footprint=DIP14
-description=low-power,\\\\ voltage-output,\\\\ serial\\\\ 12-bit\\\\ DAC
+description=\\"low-power, voltage-output, serial 12-bit DAC\\"
 numslots=0
 documentation=http://pdfserv.maxim-ic.com/en/ds/MAX531-MAX539.pdf
 "
@@ -11,7 +11,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}

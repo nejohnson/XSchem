@@ -8,7 +8,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}
@@ -29,13 +30,6 @@ L 4 30 -10 170 -80 {}
 
 
 
-L 3 0 -110 30 -110 {}
-B 5 -2.5 -112.5 2.5 -107.5 {pinnumber=14
-pinseq=14
-name=14
-dir=inout
-}
-T {@#0:pinnumber} 15 -112.5 2 1 0.266667 0.266667 {}
 L 3 0 -50 30 -50 {}
 B 5 -2.5 -52.5 2.5 -47.5 {pinnumber=1
 pinseq=1
@@ -43,13 +37,8 @@ name=1
 dir=inout
 }
 T {@#1:pinnumber} 15 -52.5 2 1 0.266667 0.266667 {}
-L 3 50 -170 50 -140 {}
-B 5 47.5 -172.5 52.5 -167.5 {pinnumber=12
-pinseq=12
-name=12
-dir=inout
-}
-T {@#2:pinnumber} 55 -147.5 2 1 0.266667 0.266667 {}
+
+ {}
 L 3 50 -20 50 10 {}
 B 5 47.5 7.5 52.5 12.5 {pinnumber=3
 pinseq=3
@@ -57,41 +46,8 @@ name=3
 dir=inout
 }
 T {@#3:pinnumber} 52.5 -5 2 1 0.266667 0.266667 {}
-L 3 70 -160 70 -130 {}
-B 5 67.5 -162.5 72.5 -157.5 {pinnumber=11
-pinseq=11
-name=11
-dir=inout
-}
-T {@#4:pinnumber} 75 -137.5 2 1 0.266667 0.266667 {}
-L 3 130 -100 160 -100 {}
-B 5 157.5 -102.5 162.5 -97.5 {pinnumber=8
-pinseq=8
-name=8
-dir=inout
-}
-T {@#5:pinnumber} 135 -107.5 2 1 0.266667 0.266667 {}
-L 3 130 -60 160 -60 {}
-B 5 157.5 -62.5 162.5 -57.5 {pinnumber=7
-pinseq=7
-name=7
-dir=inout
-}
-T {@#6:pinnumber} 135 -47.5 2 1 0.266667 0.266667 {}
-L 3 70 -30 70 0 {}
-B 5 67.5 -2.5 72.5 2.5 {pinnumber=4
-pinseq=12
-name=4
-dir=inout
-}
-T {@#7:pinnumber} 72.5 -15 2 1 0.266667 0.266667 {}
-L 3 110 -140 110 -110 {}
-B 5 107.5 -142.5 112.5 -137.5 {pinnumber=10
-pinseq=10
-name=10
-dir=inout
-}
-T {@#8:pinnumber} 115 -117.5 2 1 0.266667 0.266667 {}
+
+ {}
 L 3 110 -50 110 -20 {}
 B 5 107.5 -22.5 112.5 -17.5 {pinnumber=5
 pinseq=5
@@ -99,3 +55,28 @@ name=5
 dir=inout
 }
 T {@#9:pinnumber} 112.5 -35 2 1 0.266667 0.266667 {}
+
+ {}
+L 3 130 -60 160 -60 {}
+B 5 157.5 -62.5 162.5 -57.5 {pinnumber=7
+pinseq=7
+name=7
+dir=inout
+}
+T {@#6:pinnumber} 135 -47.5 2 1 0.266667 0.266667 {}
+L 3 130 -100 160 -100 {}
+B 5 157.5 -102.5 162.5 -97.5 {pinnumber=8
+pinseq=8
+name=8
+dir=inout
+}
+T {@#5:pinnumber} 135 -107.5 2 1 0.266667 0.266667 {}
+
+ {}
+L 3 110 -140 110 -110 {}
+B 5 107.5 -142.5 112.5 -137.5 {pinnumber=10
+pinseq=10
+name=10
+dir=inout
+}
+T {@#8:pinnumber} 115 -117.5 2 1 0.266667 0.266667 {}

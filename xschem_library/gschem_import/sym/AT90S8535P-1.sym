@@ -2,17 +2,20 @@ v {xschem version=2.9.5_RC6 file_version=1.1}
 G {type=AT90S8535P
 template="device=AT90S8535P
 name=U?
-net=GND:11
-net=Vcc:10
 footprint=DIP40
-description=8-bit\\\\ RISC\\\\ micro\\\\ controller\\\\ (Atmel)
+description=\\"8-bit RISC micro controller (Atmel)\\"
 numslots=0
+GND=GND
+Vcc=Vcc
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @GND @Vcc"
+
+extra="GND Vcc"
+extra_pinnumber="11 10"
 }
 V {}
 S {}
@@ -160,22 +163,6 @@ dir=inout
 }
 T {@#15:pinnumber} 20 -155 2 0 0.266667 0.266667 {}
 T {@#15:name} 35 -150 2 1 0.266667 0.266667 {}
-L 3 0 -30 30 -30 {}
-B 5 -2.5 -32.5 2.5 -27.5 {pinnumber=13
-pinseq=19
-name=XTAL1
-dir=in
-}
-T {@#16:pinnumber} 20 -35 2 0 0.266667 0.266667 {}
-T {@#16:name} 35 -30 2 1 0.266667 0.266667 {}
-L 3 0 -60 30 -60 {}
-B 5 -2.5 -62.5 2.5 -57.5 {pinnumber=12
-pinseq=18
-name=XTAL2
-dir=out
-}
-T {@#17:pinnumber} 20 -65 2 0 0.266667 0.266667 {}
-T {@#17:name} 35 -60 2 1 0.266667 0.266667 {}
 L 3 0 -90 20 -90 {}
 B 5 -2.5 -92.5 2.5 -87.5 {pinnumber=9
 pinseq=17
@@ -184,6 +171,22 @@ dir=in
 }
 T {@#18:pinnumber} 20 -95 2 0 0.266667 0.266667 {}
 T {@#18:name} 35 -90 2 1 0.266667 0.266667 {}
+L 3 0 -60 30 -60 {}
+B 5 -2.5 -62.5 2.5 -57.5 {pinnumber=12
+pinseq=18
+name=XTAL2
+dir=out
+}
+T {@#17:pinnumber} 20 -65 2 0 0.266667 0.266667 {}
+T {@#17:name} 35 -60 2 1 0.266667 0.266667 {}
+L 3 0 -30 30 -30 {}
+B 5 -2.5 -32.5 2.5 -27.5 {pinnumber=13
+pinseq=19
+name=XTAL1
+dir=in
+}
+T {@#16:pinnumber} 20 -35 2 0 0.266667 0.266667 {}
+T {@#16:name} 35 -30 2 1 0.266667 0.266667 {}
 L 3 180 -600 210 -600 {}
 B 5 207.5 -602.5 212.5 -597.5 {pinnumber=40
 pinseq=20
@@ -248,62 +251,6 @@ dir=inout
 }
 T {@#26:pinnumber} 190 -395 2 1 0.266667 0.266667 {}
 T {@#26:name} 175 -390 2 0 0.266667 0.266667 {}
-L 3 180 -360 210 -360 {}
-B 5 207.5 -362.5 212.5 -357.5 {pinnumber=22
-pinseq=35
-name=PC0
-dir=inout
-}
-T {@#27:pinnumber} 190 -365 2 1 0.266667 0.266667 {}
-T {@#27:name} 175 -360 2 0 0.266667 0.266667 {}
-L 3 180 -330 210 -330 {}
-B 5 207.5 -332.5 212.5 -327.5 {pinnumber=23
-pinseq=34
-name=PC1
-dir=inout
-}
-T {@#28:pinnumber} 190 -335 2 1 0.266667 0.266667 {}
-T {@#28:name} 175 -330 2 0 0.266667 0.266667 {}
-L 3 180 -300 210 -300 {}
-B 5 207.5 -302.5 212.5 -297.5 {pinnumber=24
-pinseq=33
-name=PC2
-dir=inout
-}
-T {@#29:pinnumber} 190 -305 2 1 0.266667 0.266667 {}
-T {@#29:name} 175 -300 2 0 0.266667 0.266667 {}
-L 3 180 -270 210 -270 {}
-B 5 207.5 -272.5 212.5 -267.5 {pinnumber=25
-pinseq=32
-name=PC3
-dir=inout
-}
-T {@#30:pinnumber} 190 -275 2 1 0.266667 0.266667 {}
-T {@#30:name} 175 -270 2 0 0.266667 0.266667 {}
-L 3 180 -240 210 -240 {}
-B 5 207.5 -242.5 212.5 -237.5 {pinnumber=26
-pinseq=31
-name=PC4
-dir=inout
-}
-T {@#31:pinnumber} 190 -245 2 1 0.266667 0.266667 {}
-T {@#31:name} 175 -240 2 0 0.266667 0.266667 {}
-L 3 180 -210 210 -210 {}
-B 5 207.5 -212.5 212.5 -207.5 {pinnumber=27
-pinseq=30
-name=PC5
-dir=inout
-}
-T {@#32:pinnumber} 190 -215 2 1 0.266667 0.266667 {}
-T {@#32:name} 175 -210 2 0 0.266667 0.266667 {}
-L 3 180 -180 210 -180 {}
-B 5 207.5 -182.5 212.5 -177.5 {pinnumber=28
-pinseq=29
-name=PC6
-dir=inout
-}
-T {@#33:pinnumber} 190 -185 2 1 0.266667 0.266667 {}
-T {@#33:name} 175 -180 2 0 0.266667 0.266667 {}
 L 3 180 -150 210 -150 {}
 B 5 207.5 -152.5 212.5 -147.5 {pinnumber=29
 pinseq=28
@@ -312,6 +259,62 @@ dir=inout
 }
 T {@#34:pinnumber} 190 -155 2 1 0.266667 0.266667 {}
 T {@#34:name} 175 -150 2 0 0.266667 0.266667 {}
+L 3 180 -180 210 -180 {}
+B 5 207.5 -182.5 212.5 -177.5 {pinnumber=28
+pinseq=29
+name=PC6
+dir=inout
+}
+T {@#33:pinnumber} 190 -185 2 1 0.266667 0.266667 {}
+T {@#33:name} 175 -180 2 0 0.266667 0.266667 {}
+L 3 180 -210 210 -210 {}
+B 5 207.5 -212.5 212.5 -207.5 {pinnumber=27
+pinseq=30
+name=PC5
+dir=inout
+}
+T {@#32:pinnumber} 190 -215 2 1 0.266667 0.266667 {}
+T {@#32:name} 175 -210 2 0 0.266667 0.266667 {}
+L 3 180 -240 210 -240 {}
+B 5 207.5 -242.5 212.5 -237.5 {pinnumber=26
+pinseq=31
+name=PC4
+dir=inout
+}
+T {@#31:pinnumber} 190 -245 2 1 0.266667 0.266667 {}
+T {@#31:name} 175 -240 2 0 0.266667 0.266667 {}
+L 3 180 -270 210 -270 {}
+B 5 207.5 -272.5 212.5 -267.5 {pinnumber=25
+pinseq=32
+name=PC3
+dir=inout
+}
+T {@#30:pinnumber} 190 -275 2 1 0.266667 0.266667 {}
+T {@#30:name} 175 -270 2 0 0.266667 0.266667 {}
+L 3 180 -300 210 -300 {}
+B 5 207.5 -302.5 212.5 -297.5 {pinnumber=24
+pinseq=33
+name=PC2
+dir=inout
+}
+T {@#29:pinnumber} 190 -305 2 1 0.266667 0.266667 {}
+T {@#29:name} 175 -300 2 0 0.266667 0.266667 {}
+L 3 180 -330 210 -330 {}
+B 5 207.5 -332.5 212.5 -327.5 {pinnumber=23
+pinseq=34
+name=PC1
+dir=inout
+}
+T {@#28:pinnumber} 190 -335 2 1 0.266667 0.266667 {}
+T {@#28:name} 175 -330 2 0 0.266667 0.266667 {}
+L 3 180 -360 210 -360 {}
+B 5 207.5 -362.5 212.5 -357.5 {pinnumber=22
+pinseq=35
+name=PC0
+dir=inout
+}
+T {@#27:pinnumber} 190 -365 2 1 0.266667 0.266667 {}
+T {@#27:name} 175 -360 2 0 0.266667 0.266667 {}
 L 3 180 -90 210 -90 {}
 B 5 207.5 -92.5 212.5 -87.5 {pinnumber=32
 pinseq=36

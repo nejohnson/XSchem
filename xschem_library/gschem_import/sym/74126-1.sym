@@ -8,16 +8,19 @@ slotdef=2:5,6,4
 slotdef=3:9,8,10
 slotdef=4:12,11,13
 name=U?
-description=4\\\\ busline\\\\ drivers
-net=Vcc:14
-net=GND:7
+description=\\"4 busline drivers\\"
 documentation=http://www-s.ti.com/sc/ds/sn74hc126.pdf
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="14 7"
 }
 V {}
 S {}

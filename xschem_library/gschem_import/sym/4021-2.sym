@@ -4,16 +4,19 @@ template="name=U?
 device=4021
 footprint=DIP16
 class=IC
-net=GND:8
-net=VCC:16
-description=8-bit\\\\ shift\\\\ register\\\\ with\\\\ parallel\\\\ load
+description=\\"8-bit shift register with parallel load\\"
 numslots=0
+GND=GND
+VCC=VCC
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @GND @VCC"
+
+extra="GND VCC"
+extra_pinnumber="8 16"
 }
 V {}
 S {}

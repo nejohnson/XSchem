@@ -3,17 +3,20 @@ G {type=62256
 template="device=62256
 name=U?
 footprint=DIP28
-description=32K-word\\\\ x\\\\ 8-bit\\\\ high\\\\ speed\\\\ cmos\\\\ static\\\\ ram
+description=\\"32K-word x 8-bit high speed cmos static ram\\"
 numslots=0
-author=Werner\\\\ Hoch\\\\ <werner.hoATgmx.de>
-net=Vcc:28
-net=GND:14
+author=\\"Werner Hoch <werner.hoATgmx.de>\\"
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="28 14"
 }
 V {}
 S {}
@@ -139,102 +142,8 @@ dir=inout
 }
 T {@#12:pinnumber} 240 -485 2 1 0.266667 0.266667 {}
 T {@#12:name} 225 -480 2 0 0.266667 0.266667 {}
-L 3 0 -80 20 -80 {}
-B 5 -2.5 -82.5 2.5 -77.5 {pinnumber=27
-pinseq=27
-name=_WE_
-dir=in
-}
-T {@#13:pinnumber} 20 -85 2 0 0.266667 0.266667 {}
-T {@#13:name} 35 -80 2 1 0.266667 0.266667 {}
-L 3 0 -150 30 -150 {}
-B 5 -2.5 -152.5 2.5 -147.5 {pinnumber=26
-pinseq=26
-name=A13
-dir=in
-}
-T {@#14:pinnumber} 20 -155 2 0 0.266667 0.266667 {}
-T {@#14:name} 35 -150 2 1 0.266667 0.266667 {}
-L 3 0 -300 30 -300 {}
-B 5 -2.5 -302.5 2.5 -297.5 {pinnumber=25
-pinseq=25
-name=A8
-dir=in
-}
-T {@#15:pinnumber} 20 -305 2 0 0.266667 0.266667 {}
-T {@#15:name} 35 -300 2 1 0.266667 0.266667 {}
-L 3 0 -270 30 -270 {}
-B 5 -2.5 -272.5 2.5 -267.5 {pinnumber=24
-pinseq=24
-name=A9
-dir=in
-}
-T {@#16:pinnumber} 20 -275 2 0 0.266667 0.266667 {}
-T {@#16:name} 35 -270 2 1 0.266667 0.266667 {}
-L 3 0 -210 30 -210 {}
-B 5 -2.5 -212.5 2.5 -207.5 {pinnumber=23
-pinseq=23
-name=A11
-dir=in
-}
-T {@#17:pinnumber} 20 -215 2 0 0.266667 0.266667 {}
-T {@#17:name} 35 -210 2 1 0.266667 0.266667 {}
-L 3 0 -50 20 -50 {}
-B 5 -2.5 -52.5 2.5 -47.5 {pinnumber=22
-pinseq=22
-name=_OE_
-dir=in
-}
-T {@#18:pinnumber} 20 -55 2 0 0.266667 0.266667 {}
-T {@#18:name} 35 -50 2 1 0.266667 0.266667 {}
-L 3 0 -240 30 -240 {}
-B 5 -2.5 -242.5 2.5 -237.5 {pinnumber=21
-pinseq=21
-name=A10
-dir=in
-}
-T {@#19:pinnumber} 20 -245 2 0 0.266667 0.266667 {}
-T {@#19:name} 35 -240 2 1 0.266667 0.266667 {}
-L 3 0 -20 20 -20 {}
-B 5 -2.5 -22.5 2.5 -17.5 {pinnumber=20
-pinseq=20
-name=_CS_
-dir=in
-}
-T {@#20:pinnumber} 20 -25 2 0 0.266667 0.266667 {}
-T {@#20:name} 35 -20 2 1 0.266667 0.266667 {}
-L 3 230 -330 260 -330 {}
-B 5 257.5 -332.5 262.5 -327.5 {pinnumber=19
-pinseq=19
-name=D7
-dir=inout
-}
-T {@#21:pinnumber} 240 -335 2 1 0.266667 0.266667 {}
-T {@#21:name} 225 -330 2 0 0.266667 0.266667 {}
-L 3 230 -360 260 -360 {}
-B 5 257.5 -362.5 262.5 -357.5 {pinnumber=18
-pinseq=18
-name=D6
-dir=inout
-}
-T {@#22:pinnumber} 240 -365 2 1 0.266667 0.266667 {}
-T {@#22:name} 225 -360 2 0 0.266667 0.266667 {}
-L 3 230 -390 260 -390 {}
-B 5 257.5 -392.5 262.5 -387.5 {pinnumber=17
-pinseq=17
-name=D5
-dir=inout
-}
-T {@#23:pinnumber} 240 -395 2 1 0.266667 0.266667 {}
-T {@#23:name} 225 -390 2 0 0.266667 0.266667 {}
-L 3 230 -420 260 -420 {}
-B 5 257.5 -422.5 262.5 -417.5 {pinnumber=16
-pinseq=16
-name=D4
-dir=inout
-}
-T {@#24:pinnumber} 240 -425 2 1 0.266667 0.266667 {}
-T {@#24:name} 225 -420 2 0 0.266667 0.266667 {}
+
+ {}
 L 3 230 -450 260 -450 {}
 B 5 257.5 -452.5 262.5 -447.5 {pinnumber=15
 pinseq=15
@@ -243,3 +152,91 @@ dir=inout
 }
 T {@#25:pinnumber} 240 -455 2 1 0.266667 0.266667 {}
 T {@#25:name} 225 -450 2 0 0.266667 0.266667 {}
+L 3 230 -420 260 -420 {}
+B 5 257.5 -422.5 262.5 -417.5 {pinnumber=16
+pinseq=16
+name=D4
+dir=inout
+}
+T {@#24:pinnumber} 240 -425 2 1 0.266667 0.266667 {}
+T {@#24:name} 225 -420 2 0 0.266667 0.266667 {}
+L 3 230 -390 260 -390 {}
+B 5 257.5 -392.5 262.5 -387.5 {pinnumber=17
+pinseq=17
+name=D5
+dir=inout
+}
+T {@#23:pinnumber} 240 -395 2 1 0.266667 0.266667 {}
+T {@#23:name} 225 -390 2 0 0.266667 0.266667 {}
+L 3 230 -360 260 -360 {}
+B 5 257.5 -362.5 262.5 -357.5 {pinnumber=18
+pinseq=18
+name=D6
+dir=inout
+}
+T {@#22:pinnumber} 240 -365 2 1 0.266667 0.266667 {}
+T {@#22:name} 225 -360 2 0 0.266667 0.266667 {}
+L 3 230 -330 260 -330 {}
+B 5 257.5 -332.5 262.5 -327.5 {pinnumber=19
+pinseq=19
+name=D7
+dir=inout
+}
+T {@#21:pinnumber} 240 -335 2 1 0.266667 0.266667 {}
+T {@#21:name} 225 -330 2 0 0.266667 0.266667 {}
+L 3 0 -20 20 -20 {}
+B 5 -2.5 -22.5 2.5 -17.5 {pinnumber=20
+pinseq=20
+name=_CS_
+dir=in
+}
+T {@#20:pinnumber} 20 -25 2 0 0.266667 0.266667 {}
+T {@#20:name} 35 -20 2 1 0.266667 0.266667 {}
+L 3 0 -240 30 -240 {}
+B 5 -2.5 -242.5 2.5 -237.5 {pinnumber=21
+pinseq=21
+name=A10
+dir=in
+}
+T {@#19:pinnumber} 20 -245 2 0 0.266667 0.266667 {}
+T {@#19:name} 35 -240 2 1 0.266667 0.266667 {}
+L 3 0 -50 20 -50 {}
+B 5 -2.5 -52.5 2.5 -47.5 {pinnumber=22
+pinseq=22
+name=_OE_
+dir=in
+}
+T {@#18:pinnumber} 20 -55 2 0 0.266667 0.266667 {}
+T {@#18:name} 35 -50 2 1 0.266667 0.266667 {}
+L 3 0 -210 30 -210 {}
+B 5 -2.5 -212.5 2.5 -207.5 {pinnumber=23
+pinseq=23
+name=A11
+dir=in
+}
+T {@#17:pinnumber} 20 -215 2 0 0.266667 0.266667 {}
+T {@#17:name} 35 -210 2 1 0.266667 0.266667 {}
+L 3 0 -270 30 -270 {}
+B 5 -2.5 -272.5 2.5 -267.5 {pinnumber=24
+pinseq=24
+name=A9
+dir=in
+}
+T {@#16:pinnumber} 20 -275 2 0 0.266667 0.266667 {}
+T {@#16:name} 35 -270 2 1 0.266667 0.266667 {}
+L 3 0 -300 30 -300 {}
+B 5 -2.5 -302.5 2.5 -297.5 {pinnumber=25
+pinseq=25
+name=A8
+dir=in
+}
+T {@#15:pinnumber} 20 -305 2 0 0.266667 0.266667 {}
+T {@#15:name} 35 -300 2 1 0.266667 0.266667 {}
+L 3 0 -150 30 -150 {}
+B 5 -2.5 -152.5 2.5 -147.5 {pinnumber=26
+pinseq=26
+name=A13
+dir=in
+}
+T {@#14:pinnumber} 20 -155 2 0 0.266667 0.266667 {}
+T {@#14:name} 35 -150 2 1 0.266667 0.266667 {}

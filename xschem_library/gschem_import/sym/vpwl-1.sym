@@ -4,15 +4,16 @@ template="name=V?
 device=vpwl
 footprint=none
 numslots=0
-description=piece-wise\\\\ linear\\\\ signal\\\\ source
-value=pwl\\\\ 100n\\\\ 0\\\\ 200n\\\\ 1
-comment=syntax:\\\\ pwl\\\\ t1\\\\ v1\\\\ t2\\\\ v2\\\\ ...
+description=\\"piece-wise linear signal source\\"
+value=\\"pwl 100n 0 200n 1\\"
+comment=\\"syntax: pwl t1 v1 t2 v2 ...\\"
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}

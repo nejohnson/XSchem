@@ -3,17 +3,20 @@ G {type=max3226
 template="name=U?
 device=max3226
 footprint=DIP16
-net=+5V:15
-net=GND:14
-description=1uA\\\\ supply\\\\ current,\\\\ 1Mbps,\\\\ 3V\\\\ to\\\\ 5.5V,\\\\ RS-232\\\\ transceiver\\\\ with\\\\ autoshutdown
+description=\\"1uA supply current, 1Mbps, 3V to 5.5V, RS-232 transceiver with autoshutdown\\"
 numslots=0
 documentation=http://pdfserv.maxim-ic.com/en/ds/MAX3224-MAX3245.pdf
++5V=+5V
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @+5V @GND"
+
+extra="+5V GND"
+extra_pinnumber="15 14"
 }
 V {}
 S {}
@@ -74,6 +77,14 @@ name=T1in
 }
 T {@#4:pinnumber} 20 -115 2 0 0.266667 0.266667 {}
 T {@#4:name} 35 -110 2 1 0.266667 0.266667 {}
+L 3 0 -80 30 -80 {}
+B 5 -2.5 -82.5 2.5 -77.5 {pinnumber=9
+pinseq=6
+dir=out
+name=R1out
+}
+T {@#13:pinnumber} 20 -85 2 0 0.266667 0.266667 {}
+T {@#13:name} 35 -80 2 1 0.266667 0.266667 {}
 L 3 0 -50 30 -50 {}
 B 5 -2.5 -52.5 2.5 -47.5 {pinnumber=1
 pinseq=7
@@ -90,46 +101,6 @@ name=FrcOn
 }
 T {@#6:pinnumber} 20 -25 2 0 0.266667 0.266667 {}
 T {@#6:name} 35 -20 2 1 0.266667 0.266667 {}
-L 3 170 -230 200 -230 {}
-B 5 197.5 -232.5 202.5 -227.5 {pinnumber=3
-pinseq=14
-dir=inout
-name=V+
-}
-T {@#7:pinnumber} 180 -235 2 1 0.266667 0.266667 {}
-T {@#7:name} 165 -230 2 0 0.266667 0.266667 {}
-L 3 170 -170 200 -170 {}
-B 5 197.5 -172.5 202.5 -167.5 {pinnumber=7
-pinseq=13
-dir=inout
-name=V-
-}
-T {@#8:pinnumber} 180 -175 2 1 0.266667 0.266667 {}
-T {@#8:name} 165 -170 2 0 0.266667 0.266667 {}
-L 3 170 -110 200 -110 {}
-B 5 197.5 -112.5 202.5 -107.5 {pinnumber=13
-pinseq=12
-dir=out
-name=T1out
-}
-T {@#9:pinnumber} 180 -115 2 1 0.266667 0.266667 {}
-T {@#9:name} 165 -110 2 0 0.266667 0.266667 {}
-L 3 170 -80 200 -80 {}
-B 5 197.5 -82.5 202.5 -77.5 {pinnumber=8
-pinseq=11
-dir=in
-name=R1in
-}
-T {@#10:pinnumber} 180 -85 2 1 0.266667 0.266667 {}
-T {@#10:name} 165 -80 2 0 0.266667 0.266667 {}
-L 3 180 -50 200 -50 {}
-B 5 197.5 -52.5 202.5 -47.5 {pinnumber=10
-pinseq=10
-dir=out
-name=_Invalid_
-}
-T {@#11:pinnumber} 180 -55 2 1 0.266667 0.266667 {}
-T {@#11:name} 165 -50 2 0 0.266667 0.266667 {}
 L 3 180 -20 200 -20 {}
 B 5 197.5 -22.5 202.5 -17.5 {pinnumber=16
 pinseq=9
@@ -138,11 +109,43 @@ name=_FrcOff_
 }
 T {@#12:pinnumber} 180 -25 2 1 0.266667 0.266667 {}
 T {@#12:name} 165 -20 2 0 0.266667 0.266667 {}
-L 3 0 -80 30 -80 {}
-B 5 -2.5 -82.5 2.5 -77.5 {pinnumber=9
-pinseq=6
+L 3 180 -50 200 -50 {}
+B 5 197.5 -52.5 202.5 -47.5 {pinnumber=10
+pinseq=10
 dir=out
-name=R1out
+name=_Invalid_
 }
-T {@#13:pinnumber} 20 -85 2 0 0.266667 0.266667 {}
-T {@#13:name} 35 -80 2 1 0.266667 0.266667 {}
+T {@#11:pinnumber} 180 -55 2 1 0.266667 0.266667 {}
+T {@#11:name} 165 -50 2 0 0.266667 0.266667 {}
+L 3 170 -80 200 -80 {}
+B 5 197.5 -82.5 202.5 -77.5 {pinnumber=8
+pinseq=11
+dir=in
+name=R1in
+}
+T {@#10:pinnumber} 180 -85 2 1 0.266667 0.266667 {}
+T {@#10:name} 165 -80 2 0 0.266667 0.266667 {}
+L 3 170 -110 200 -110 {}
+B 5 197.5 -112.5 202.5 -107.5 {pinnumber=13
+pinseq=12
+dir=out
+name=T1out
+}
+T {@#9:pinnumber} 180 -115 2 1 0.266667 0.266667 {}
+T {@#9:name} 165 -110 2 0 0.266667 0.266667 {}
+L 3 170 -170 200 -170 {}
+B 5 197.5 -172.5 202.5 -167.5 {pinnumber=7
+pinseq=13
+dir=inout
+name=V-
+}
+T {@#8:pinnumber} 180 -175 2 1 0.266667 0.266667 {}
+T {@#8:name} 165 -170 2 0 0.266667 0.266667 {}
+L 3 170 -230 200 -230 {}
+B 5 197.5 -232.5 202.5 -227.5 {pinnumber=3
+pinseq=14
+dir=inout
+name=V+
+}
+T {@#7:pinnumber} 180 -235 2 1 0.266667 0.266667 {}
+T {@#7:name} 165 -230 2 0 0.266667 0.266667 {}

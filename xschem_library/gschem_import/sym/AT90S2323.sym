@@ -3,17 +3,20 @@ G {type=AT90S2323
 template="name=U?
 device=AT90S2323
 footprint=DIP8
-net=GND:4
-net=Vcc:8
-description=8-bit\\\\ RISC\\\\ micro\\\\ controller\\\\ (Atmel)
+description=\\"8-bit RISC micro controller (Atmel)\\"
 numslots=0
-author=Werner\\\\ Hoch\\\\ <werner.hoATgmx.de>
+author=\\"Werner Hoch <werner.hoATgmx.de>\\"
+GND=GND
+Vcc=Vcc
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @GND @Vcc"
+
+extra="GND Vcc"
+extra_pinnumber="4 8"
 }
 V {}
 S {}

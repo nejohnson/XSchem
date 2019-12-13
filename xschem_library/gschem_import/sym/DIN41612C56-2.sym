@@ -2,14 +2,15 @@ v {xschem version=2.9.5_RC6 file_version=1.1}
 G {type=DIN41612C56
 template="device=DIN41612C56
 numslots=0
-description=DIN\\\\ 41612C-56
+description=\\"DIN 41612C-56\\"
 name=CONN?
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}

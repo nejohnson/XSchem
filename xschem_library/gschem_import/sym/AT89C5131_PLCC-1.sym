@@ -3,21 +3,24 @@ G {type=AT89C5131_PLCC
 template="name=U?
 device=AT89C5131_PLCC
 footprint=PLCC52
-net=GND:41
-net=Vcc:16
 numslots=0
 documentation=http://www.atmel.com/dyn/resources/prod_documents/doc4136.pdf
-description=USB\\\\ C51-based\\\\ microcontroller\\\\ with\\\\ 32kB\\\\ \\\\ flash
-net=AVcc:17
-net=AGND:19
-net=VREF:24
+description=\\"USB C51-based microcontroller with 32kB  flash\\"
 symversion=1.0
+GND=GND
+Vcc=Vcc
+AVcc=AVcc
+AGND=AGND
+VREF=VREF
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @GND @Vcc @AVcc @AGND @VREF"
+
+extra="GND Vcc AVcc AGND VREF"
+extra_pinnumber="41 16 17 19 24"
 }
 V {}
 S {}

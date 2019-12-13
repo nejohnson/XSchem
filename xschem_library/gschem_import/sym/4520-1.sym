@@ -3,20 +3,23 @@ G {type=4520
 template="name=U?
 device=4520
 footprint=DIP16
-net=VSS:8
-net=VDD:16
 slot=1
 numslots=2
 slotdef=1:7,2,1,6,5,4,3
 slotdef=2:9,14,15,10,11,12,13
-description=2\\\\ binary\\\\ counter
+description=\\"2 binary counter\\"
 documentation=http://www.semiconductors.philips.com/acrobat/datasheets/HEF4520B_CNV_3.pdf
+VSS=VSS
+VDD=VDD
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @VSS @VDD"
+
+extra="VSS VDD"
+extra_pinnumber="8 16"
 }
 V {}
 S {}

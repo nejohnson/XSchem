@@ -2,7 +2,7 @@ v {xschem version=2.9.5_RC6 file_version=1.1}
 G {type=BRIDGE
 template="name=U?
 device=BRIDGE
-description=bridge\\\\ rectifier
+description=\\"bridge rectifier\\"
 numslots=0
 symversion=0.1
 "
@@ -10,7 +10,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}
@@ -49,13 +50,6 @@ name=~
 dir=inout
 }
 T {@#1:pinnumber} 15 -25 2 0 0.266667 0.266667 {}
-L 3 100 -70 120 -70 {}
-B 5 117.5 -72.5 122.5 -67.5 {pinnumber=4
-pinseq=4
-name=-
-dir=inout
-}
-T {@#2:pinnumber} 105 -75 2 1 0.266667 0.266667 {}
 L 3 100 -20 120 -20 {}
 B 5 117.5 -22.5 122.5 -17.5 {pinnumber=3
 pinseq=3
@@ -63,3 +57,10 @@ name=+
 dir=inout
 }
 T {@#3:pinnumber} 105 -25 2 1 0.266667 0.266667 {}
+L 3 100 -70 120 -70 {}
+B 5 117.5 -72.5 122.5 -67.5 {pinnumber=4
+pinseq=4
+name=-
+dir=inout
+}
+T {@#2:pinnumber} 105 -75 2 1 0.266667 0.266667 {}

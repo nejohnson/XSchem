@@ -3,17 +3,20 @@ G {type=7495
 template="device=7495
 footprint=DIP14
 name=U?
-description=4-bit\\\\ shift\\\\ register,\\\\ parallel\\\\ load,\\\\ right\\\\ and\\\\ left\\\\ shift
-net=Vcc:14
-net=GND:7
+description=\\"4-bit shift register, parallel load, right and left shift\\"
 numslots=0
 symversion=1.0
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="14 7"
 }
 V {}
 S {}

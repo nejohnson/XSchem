@@ -3,16 +3,19 @@ G {type=7457
 template="device=7457
 footprint=DIP8
 name=U?
-description=2\\\\ frequency\\\\ dividers,\\\\ div6\\\\ and\\\\ div10
-net=Vcc:2
-net=GND:4
+description=\\"2 frequency dividers, div6 and div10\\"
 numslots=0
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="2 4"
 }
 V {}
 S {}

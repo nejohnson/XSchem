@@ -3,17 +3,20 @@ G {type=2732
 template="device=2732
 name=U?
 footprint=DIP24
-description=32K\\\\ (4Kx8)\\\\ CMOS\\\\ EPROM
+description=\\"32K (4Kx8) CMOS EPROM\\"
 numslots=0
-author=Jens-Peter\\\\ Kaps\\\\ <kapsATwpi.de>
-net=Vcc:24
-net=GND:12
+author=\\"Jens-Peter Kaps <kapsATwpi.de>\\"
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="24 12"
 }
 V {}
 S {}
@@ -34,6 +37,10 @@ A 4 25 -20 5 0 360 {}
 
 
 
+
+ {}
+
+ {}
 L 3 0 -210 30 -210 {}
 B 5 -2.5 -212.5 2.5 -207.5 {pinnumber=1
 pinseq=3
@@ -122,86 +129,8 @@ dir=inout
 }
 T {@#10:pinnumber} 240 -365 2 1 0.266667 0.266667 {}
 T {@#10:name} 225 -360 2 0 0.266667 0.266667 {}
-L 3 0 -180 30 -180 {}
-B 5 -2.5 -182.5 2.5 -177.5 {pinnumber=23
-pinseq=25
-name=A8
-dir=in
-}
-T {@#11:pinnumber} 20 -185 2 0 0.266667 0.266667 {}
-T {@#11:name} 35 -180 2 1 0.266667 0.266667 {}
-L 3 0 -150 30 -150 {}
-B 5 -2.5 -152.5 2.5 -147.5 {pinnumber=22
-pinseq=24
-name=A9
-dir=in
-}
-T {@#12:pinnumber} 20 -155 2 0 0.266667 0.266667 {}
-T {@#12:name} 35 -150 2 1 0.266667 0.266667 {}
-L 3 0 -90 30 -90 {}
-B 5 -2.5 -92.5 2.5 -87.5 {pinnumber=21
-pinseq=23
-name=A11
-dir=in
-}
-T {@#13:pinnumber} 20 -95 2 0 0.266667 0.266667 {}
-T {@#13:name} 35 -90 2 1 0.266667 0.266667 {}
-L 3 0 -50 20 -50 {}
-B 5 -2.5 -52.5 2.5 -47.5 {pinnumber=20
-pinseq=22
-name=_G_/VPP
-dir=in
-}
-T {@#14:pinnumber} 20 -55 2 0 0.266667 0.266667 {}
-T {@#14:name} 35 -50 2 1 0.266667 0.266667 {}
-L 3 0 -120 30 -120 {}
-B 5 -2.5 -122.5 2.5 -117.5 {pinnumber=19
-pinseq=21
-name=A10
-dir=in
-}
-T {@#15:pinnumber} 20 -125 2 0 0.266667 0.266667 {}
-T {@#15:name} 35 -120 2 1 0.266667 0.266667 {}
-L 3 0 -20 20 -20 {}
-B 5 -2.5 -22.5 2.5 -17.5 {pinnumber=18
-pinseq=20
-name=_E_
-dir=in
-}
-T {@#16:pinnumber} 20 -25 2 0 0.266667 0.266667 {}
-T {@#16:name} 35 -20 2 1 0.266667 0.266667 {}
-L 3 230 -210 260 -210 {}
-B 5 257.5 -212.5 262.5 -207.5 {pinnumber=17
-pinseq=19
-name=O7
-dir=inout
-}
-T {@#17:pinnumber} 240 -215 2 1 0.266667 0.266667 {}
-T {@#17:name} 225 -210 2 0 0.266667 0.266667 {}
-L 3 230 -240 260 -240 {}
-B 5 257.5 -242.5 262.5 -237.5 {pinnumber=16
-pinseq=18
-name=O6
-dir=inout
-}
-T {@#18:pinnumber} 240 -245 2 1 0.266667 0.266667 {}
-T {@#18:name} 225 -240 2 0 0.266667 0.266667 {}
-L 3 230 -270 260 -270 {}
-B 5 257.5 -272.5 262.5 -267.5 {pinnumber=15
-pinseq=17
-name=O5
-dir=inout
-}
-T {@#19:pinnumber} 240 -275 2 1 0.266667 0.266667 {}
-T {@#19:name} 225 -270 2 0 0.266667 0.266667 {}
-L 3 230 -300 260 -300 {}
-B 5 257.5 -302.5 262.5 -297.5 {pinnumber=14
-pinseq=16
-name=O4
-dir=inout
-}
-T {@#20:pinnumber} 240 -305 2 1 0.266667 0.266667 {}
-T {@#20:name} 225 -300 2 0 0.266667 0.266667 {}
+
+ {}
 L 3 230 -330 260 -330 {}
 B 5 257.5 -332.5 262.5 -327.5 {pinnumber=13
 pinseq=15
@@ -210,3 +139,59 @@ dir=inout
 }
 T {@#21:pinnumber} 240 -335 2 1 0.266667 0.266667 {}
 T {@#21:name} 225 -330 2 0 0.266667 0.266667 {}
+L 3 230 -300 260 -300 {}
+B 5 257.5 -302.5 262.5 -297.5 {pinnumber=14
+pinseq=16
+name=O4
+dir=inout
+}
+T {@#20:pinnumber} 240 -305 2 1 0.266667 0.266667 {}
+T {@#20:name} 225 -300 2 0 0.266667 0.266667 {}
+L 3 230 -270 260 -270 {}
+B 5 257.5 -272.5 262.5 -267.5 {pinnumber=15
+pinseq=17
+name=O5
+dir=inout
+}
+T {@#19:pinnumber} 240 -275 2 1 0.266667 0.266667 {}
+T {@#19:name} 225 -270 2 0 0.266667 0.266667 {}
+L 3 230 -240 260 -240 {}
+B 5 257.5 -242.5 262.5 -237.5 {pinnumber=16
+pinseq=18
+name=O6
+dir=inout
+}
+T {@#18:pinnumber} 240 -245 2 1 0.266667 0.266667 {}
+T {@#18:name} 225 -240 2 0 0.266667 0.266667 {}
+L 3 230 -210 260 -210 {}
+B 5 257.5 -212.5 262.5 -207.5 {pinnumber=17
+pinseq=19
+name=O7
+dir=inout
+}
+T {@#17:pinnumber} 240 -215 2 1 0.266667 0.266667 {}
+T {@#17:name} 225 -210 2 0 0.266667 0.266667 {}
+L 3 0 -20 20 -20 {}
+B 5 -2.5 -22.5 2.5 -17.5 {pinnumber=18
+pinseq=20
+name=_E_
+dir=in
+}
+T {@#16:pinnumber} 20 -25 2 0 0.266667 0.266667 {}
+T {@#16:name} 35 -20 2 1 0.266667 0.266667 {}
+L 3 0 -120 30 -120 {}
+B 5 -2.5 -122.5 2.5 -117.5 {pinnumber=19
+pinseq=21
+name=A10
+dir=in
+}
+T {@#15:pinnumber} 20 -125 2 0 0.266667 0.266667 {}
+T {@#15:name} 35 -120 2 1 0.266667 0.266667 {}
+L 3 0 -50 20 -50 {}
+B 5 -2.5 -52.5 2.5 -47.5 {pinnumber=20
+pinseq=22
+name=_G_/VPP
+dir=in
+}
+T {@#14:pinnumber} 20 -55 2 0 0.266667 0.266667 {}
+T {@#14:name} 35 -50 2 1 0.266667 0.266667 {}

@@ -10,7 +10,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}
@@ -560,28 +561,10 @@ A 4 40 -420 1 0 360 {}
 
 
 
-L 3 0 0 20 0 {}
-B 5 -2.5 -2.5 2.5 2.5 {pinnumber=6
-pinseq=6
-name=row7
-dir=in
-}
-L 3 0 -70 20 -70 {}
-B 5 -2.5 -72.5 2.5 -67.5 {pinnumber=5
-pinseq=5
-name=row6
-dir=in
-}
-L 3 0 -140 20 -140 {}
-B 5 -2.5 -142.5 2.5 -137.5 {pinnumber=4
-pinseq=4
-name=row5
-dir=in
-}
-L 3 0 -210 20 -210 {}
-B 5 -2.5 -212.5 2.5 -207.5 {pinnumber=9
-pinseq=9
-name=row4
+L 3 60 -500 60 -480 {}
+B 5 57.5 -502.5 62.5 -497.5 {pinnumber=1
+pinseq=1
+name=col1
 dir=in
 }
 L 3 0 -280 20 -280 {}
@@ -590,34 +573,28 @@ pinseq=2
 name=row3
 dir=in
 }
-L 3 0 -350 20 -350 {}
-B 5 -2.5 -352.5 2.5 -347.5 {pinnumber=11
-pinseq=11
-name=row2
-dir=in
-}
-L 3 0 -420 20 -420 {}
-B 5 -2.5 -422.5 2.5 -417.5 {pinnumber=12
-pinseq=12
-name=row1
-dir=in
-}
-L 3 60 -500 60 -480 {}
-B 5 57.5 -502.5 62.5 -497.5 {pinnumber=1
-pinseq=1
-name=col1
-dir=in
-}
 L 3 110 -500 110 -480 {}
 B 5 107.5 -502.5 112.5 -497.5 {pinnumber=3
 pinseq=3
 name=col2
 dir=in
 }
-L 3 160 -500 160 -480 {}
-B 5 157.5 -502.5 162.5 -497.5 {pinnumber=10
-pinseq=10
-name=col3
+L 3 0 -140 20 -140 {}
+B 5 -2.5 -142.5 2.5 -137.5 {pinnumber=4
+pinseq=4
+name=row5
+dir=in
+}
+L 3 0 -70 20 -70 {}
+B 5 -2.5 -72.5 2.5 -67.5 {pinnumber=5
+pinseq=5
+name=row6
+dir=in
+}
+L 3 0 0 20 0 {}
+B 5 -2.5 -2.5 2.5 2.5 {pinnumber=6
+pinseq=6
+name=row7
 dir=in
 }
 L 3 210 -500 210 -480 {}
@@ -630,5 +607,29 @@ L 3 260 -500 260 -480 {}
 B 5 257.5 -502.5 262.5 -497.5 {pinnumber=8
 pinseq=8
 name=col5
+dir=in
+}
+L 3 0 -210 20 -210 {}
+B 5 -2.5 -212.5 2.5 -207.5 {pinnumber=9
+pinseq=9
+name=row4
+dir=in
+}
+L 3 160 -500 160 -480 {}
+B 5 157.5 -502.5 162.5 -497.5 {pinnumber=10
+pinseq=10
+name=col3
+dir=in
+}
+L 3 0 -350 20 -350 {}
+B 5 -2.5 -352.5 2.5 -347.5 {pinnumber=11
+pinseq=11
+name=row2
+dir=in
+}
+L 3 0 -420 20 -420 {}
+B 5 -2.5 -422.5 2.5 -417.5 {pinnumber=12
+pinseq=12
+name=row1
 dir=in
 }

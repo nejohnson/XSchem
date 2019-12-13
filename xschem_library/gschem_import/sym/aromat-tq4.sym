@@ -9,7 +9,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}
@@ -89,48 +90,6 @@ A 4 34 -10 2 207 63 {}
 
 
 
-L 3 0 -80 25 -80 {}
-B 5 -2.5 -82.5 2.5 -77.5 {pinnumber=4
-pinseq=4
-name=COMMON1
-dir=inout
-}
-T {@#0:pinnumber} 19 -82 2 1 0.2 0.2 {}
-L 3 50 -90 80 -90 {}
-B 5 77.5 -92.5 82.5 -87.5 {pinnumber=3
-pinseq=3
-name=NC1
-dir=inout
-}
-T {@#1:pinnumber} 55 -92 2 1 0.2 0.2 {}
-L 3 50 -70 80 -70 {}
-B 5 77.5 -72.5 82.5 -67.5 {pinnumber=5
-pinseq=5
-name=NO1
-dir=inout
-}
-T {@#2:pinnumber} 55 -72 2 1 0.2 0.2 {}
-L 3 0 -40 25 -40 {}
-B 5 -2.5 -42.5 2.5 -37.5 {pinnumber=7
-pinseq=7
-name=COMMON2
-dir=inout
-}
-T {@#3:pinnumber} 17.8 -42 2 1 0.2 0.2 {}
-L 3 50 -50 80 -50 {}
-B 5 77.5 -52.5 82.5 -47.5 {pinnumber=6
-pinseq=6
-name=NC2
-dir=inout
-}
-T {@#4:pinnumber} 55 -52 2 1 0.2 0.2 {}
-L 3 50 -30 80 -30 {}
-B 5 77.5 -32.5 82.5 -27.5 {pinnumber=8
-pinseq=8
-name=NO2
-dir=inout
-}
-T {@#5:pinnumber} 55 -32 2 1 0.2 0.2 {}
 L 3 0 -20 30 -20 {}
 B 5 -2.5 -22.5 2.5 -17.5 {pinnumber=1
 pinseq=1
@@ -138,27 +97,58 @@ name=COIL1
 dir=inout
 }
 T {@#6:pinnumber} 20.2 -22 2 1 0.2 0.2 {}
-L 3 0 -10 30 -10 {}
-B 5 -2.5 -12.5 2.5 -7.5 {pinnumber=20
-pinseq=20
-name=COIL2
-dir=inout
-}
-T {@#7:pinnumber} 18.4 -12 2 1 0.2 0.2 {}
-L 3 0 -160 25 -160 {}
-B 5 -2.5 -162.5 2.5 -157.5 {pinnumber=14
-pinseq=14
-name=COMMON1
-dir=inout
-}
-T {@#8:pinnumber} 19 -162 2 1 0.2 0.2 {}
-L 3 50 -170 80 -170 {}
-B 5 77.5 -172.5 82.5 -167.5 {pinnumber=15
-pinseq=15
+
+ {}
+L 3 50 -90 80 -90 {}
+B 5 77.5 -92.5 82.5 -87.5 {pinnumber=3
+pinseq=3
 name=NC1
 dir=inout
 }
-T {@#9:pinnumber} 55 -172 2 1 0.2 0.2 {}
+T {@#1:pinnumber} 55 -92 2 1 0.2 0.2 {}
+L 3 0 -80 25 -80 {}
+B 5 -2.5 -82.5 2.5 -77.5 {pinnumber=4
+pinseq=4
+name=COMMON1
+dir=inout
+}
+T {@#0:pinnumber} 19 -82 2 1 0.2 0.2 {}
+L 3 50 -70 80 -70 {}
+B 5 77.5 -72.5 82.5 -67.5 {pinnumber=5
+pinseq=5
+name=NO1
+dir=inout
+}
+T {@#2:pinnumber} 55 -72 2 1 0.2 0.2 {}
+L 3 50 -50 80 -50 {}
+B 5 77.5 -52.5 82.5 -47.5 {pinnumber=6
+pinseq=6
+name=NC2
+dir=inout
+}
+T {@#4:pinnumber} 55 -52 2 1 0.2 0.2 {}
+L 3 0 -40 25 -40 {}
+B 5 -2.5 -42.5 2.5 -37.5 {pinnumber=7
+pinseq=7
+name=COMMON2
+dir=inout
+}
+T {@#3:pinnumber} 17.8 -42 2 1 0.2 0.2 {}
+L 3 50 -30 80 -30 {}
+B 5 77.5 -32.5 82.5 -27.5 {pinnumber=8
+pinseq=8
+name=NO2
+dir=inout
+}
+T {@#5:pinnumber} 55 -32 2 1 0.2 0.2 {}
+
+ {}
+
+ {}
+
+ {}
+
+ {}
 L 3 50 -150 80 -150 {}
 B 5 77.5 -152.5 82.5 -147.5 {pinnumber=13
 pinseq=13
@@ -166,24 +156,10 @@ name=NO1
 dir=inout
 }
 T {@#10:pinnumber} 55 -152 2 1 0.2 0.2 {}
-L 3 0 -120 25 -120 {}
-B 5 -2.5 -122.5 2.5 -117.5 {pinnumber=17
-pinseq=17
-name=COMMON2
+L 3 0 -160 25 -160 {}
+B 5 -2.5 -162.5 2.5 -157.5 {pinnumber=14
+pinseq=14
+name=COMMON1
 dir=inout
 }
-T {@#11:pinnumber} 17.8 -122 2 1 0.2 0.2 {}
-L 3 50 -130 80 -130 {}
-B 5 77.5 -132.5 82.5 -127.5 {pinnumber=18
-pinseq=18
-name=NC2
-dir=inout
-}
-T {@#12:pinnumber} 55 -132 2 1 0.2 0.2 {}
-L 3 50 -110 80 -110 {}
-B 5 77.5 -112.5 82.5 -107.5 {pinnumber=16
-pinseq=16
-name=NO2
-dir=inout
-}
-T {@#13:pinnumber} 55 -112 2 1 0.2 0.2 {}
+T {@#8:pinnumber} 19 -162 2 1 0.2 0.2 {}

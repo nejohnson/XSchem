@@ -3,18 +3,21 @@ G {type=MAX038
 template="device=MAX038
 name=U?
 footprint=DIP20
-description=high\\\\ frequency\\\\ waveform\\\\ generator
+description=\\"high frequency waveform generator\\"
 numslots=0
-net=DV+:16
-net=DGND:15
-net=GND:2,6,9,11,18
 documentation=http://pdfserv.maxim-ic.com/en/ds/MAX038.pdf
+DV+=DV+
+DGND=DGND
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @DV+ @DGND @GND"
+
+extra="DV+ DGND GND"
+extra_pinnumber="16 15 2,6,9,11,18"
 }
 V {}
 S {}
@@ -33,6 +36,16 @@ L 4 30 -400 30 0 {}
 
 
 
+L 3 230 -380 260 -380 {}
+B 5 257.5 -382.5 262.5 -377.5 {pinnumber=1
+pinseq=1
+name=REF
+dir=out
+}
+T {@#8:pinnumber} 240 -385 2 1 0.266667 0.266667 {}
+T {@#8:name} 225 -380 2 0 0.266667 0.266667 {}
+
+ {}
 L 3 0 -380 30 -380 {}
 B 5 -2.5 -382.5 2.5 -377.5 {pinnumber=3
 pinseq=3
@@ -57,6 +70,8 @@ dir=inout
 }
 T {@#2:pinnumber} 20 -305 2 0 0.266667 0.266667 {}
 T {@#2:name} 35 -300 2 1 0.266667 0.266667 {}
+
+ {}
 L 3 0 -260 30 -260 {}
 B 5 -2.5 -262.5 2.5 -257.5 {pinnumber=7
 pinseq=7
@@ -73,6 +88,8 @@ dir=in
 }
 T {@#4:pinnumber} 20 -225 2 0 0.266667 0.266667 {}
 T {@#4:name} 35 -220 2 1 0.266667 0.266667 {}
+
+ {}
 L 3 0 -180 30 -180 {}
 B 5 -2.5 -182.5 2.5 -177.5 {pinnumber=10
 pinseq=10
@@ -81,30 +98,8 @@ dir=inout
 }
 T {@#5:pinnumber} 20 -185 2 0 0.266667 0.266667 {}
 T {@#5:name} 35 -180 2 1 0.266667 0.266667 {}
-L 3 0 -140 30 -140 {}
-B 5 -2.5 -142.5 2.5 -137.5 {pinnumber=13
-pinseq=13
-name=PDI
-dir=in
-}
-T {@#6:pinnumber} 20 -145 2 0 0.266667 0.266667 {}
-T {@#6:name} 35 -140 2 1 0.266667 0.266667 {}
-L 3 0 -100 30 -100 {}
-B 5 -2.5 -102.5 2.5 -97.5 {pinnumber=17
-pinseq=17
-name=V+
-dir=inout
-}
-T {@#7:pinnumber} 20 -105 2 0 0.266667 0.266667 {}
-T {@#7:name} 35 -100 2 1 0.266667 0.266667 {}
-L 3 230 -380 260 -380 {}
-B 5 257.5 -382.5 262.5 -377.5 {pinnumber=1
-pinseq=1
-name=REF
-dir=out
-}
-T {@#8:pinnumber} 240 -385 2 1 0.266667 0.266667 {}
-T {@#8:name} 225 -380 2 0 0.266667 0.266667 {}
+
+ {}
 L 3 230 -340 260 -340 {}
 B 5 257.5 -342.5 262.5 -337.5 {pinnumber=12
 pinseq=12
@@ -113,27 +108,11 @@ dir=out
 }
 T {@#9:pinnumber} 240 -345 2 1 0.266667 0.266667 {}
 T {@#9:name} 225 -340 2 0 0.266667 0.266667 {}
-L 3 230 -300 260 -300 {}
-B 5 257.5 -302.5 262.5 -297.5 {pinnumber=14
-pinseq=14
-name=SYNC
-dir=out
+L 3 0 -140 30 -140 {}
+B 5 -2.5 -142.5 2.5 -137.5 {pinnumber=13
+pinseq=13
+name=PDI
+dir=in
 }
-T {@#10:pinnumber} 240 -305 2 1 0.266667 0.266667 {}
-T {@#10:name} 225 -300 2 0 0.266667 0.266667 {}
-L 3 230 -260 260 -260 {}
-B 5 257.5 -262.5 262.5 -257.5 {pinnumber=19
-pinseq=19
-name=OUT
-dir=out
-}
-T {@#11:pinnumber} 240 -265 2 1 0.266667 0.266667 {}
-T {@#11:name} 225 -260 2 0 0.266667 0.266667 {}
-L 3 0 -60 30 -60 {}
-B 5 -2.5 -62.5 2.5 -57.5 {pinnumber=20
-pinseq=20
-name=V-
-dir=inout
-}
-T {@#12:pinnumber} 20 -65 2 0 0.266667 0.266667 {}
-T {@#12:name} 35 -60 2 1 0.266667 0.266667 {}
+T {@#6:pinnumber} 20 -145 2 0 0.266667 0.266667 {}
+T {@#6:name} 35 -140 2 1 0.266667 0.266667 {}

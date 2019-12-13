@@ -3,20 +3,23 @@ G {type=74265
 template="device=74265
 name=U?
 footprint=DIP16
-description=2\\\\ inverter\\\\ and\\\\ 2\\\\ NAND\\\\ with\\\\ complementary\\\\ outputs
-net=Vcc:16
-net=GND:8
+description=\\"2 inverter and 2 NAND with complementary outputs\\"
 slot=1
 numslots=2
 slotdef=1:1,2,3,4,5,6,7
 slotdef=2:15,14,13,11,12,10,9
 symversion=1.0
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="16 8"
 }
 V {}
 S {}

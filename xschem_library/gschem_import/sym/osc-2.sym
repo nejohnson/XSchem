@@ -3,16 +3,19 @@ G {type=OSC
 template="device=OSC
 name=U?
 footprint=DIP8
-description=Generic\\\\ Oscillator\\\\ Half\\\\ Can
+description=\\"Generic Oscillator Half Can\\"
 numslots=0
-net=Vcc:8
-net=GND:4
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="8 4"
 }
 V {}
 S {}
@@ -33,11 +36,5 @@ L 4 80 -30 90 -20 {}
 
 
 
-L 3 90 -30 120 -30 {}
-B 5 117.5 -32.5 122.5 -27.5 {pinnumber=5
-pinseq=5
-dir=out
-name=OUT
-}
-T {@#0:pinnumber} 95 -35 2 1 0.333333 0.333333 {}
-T {@#0:name} 40 -38.3333 0 0 0.333333 0.333333 {}
+
+ {}

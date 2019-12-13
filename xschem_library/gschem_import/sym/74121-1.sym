@@ -3,16 +3,19 @@ G {type=74121
 template="device=74121
 footprint=DIP14
 name=U?
-description=monoflop\\\\ with\\\\ schmitt-trigger\\\\ input
-net=Vcc:14
-net=GND:7
+description=\\"monoflop with schmitt-trigger input\\"
 numslots=0
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="14 7"
 }
 V {}
 S {}

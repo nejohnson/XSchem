@@ -3,17 +3,20 @@ G {type=4042
 template="name=U?
 device=4042
 footprint=DIP16
-net=VSS:8
-net=VDD:16
-description=4\\\\ D-type\\\\ flip-flops
+description=\\"4 D-type flip-flops\\"
 numslots=0
 documentation=http://www.semiconductors.philips.com/acrobat/datasheets/HEF4042B_CNV_3.pdf
+VSS=VSS
+VDD=VDD
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @VSS @VDD"
+
+extra="VSS VDD"
+extra_pinnumber="8 16"
 }
 V {}
 S {}
@@ -38,6 +41,14 @@ A 4 175 -350 5 0 360 {}
 
 
 
+L 3 0 -30 30 -30 {}
+B 5 -2.5 -32.5 2.5 -27.5 {pinnumber=6
+pinseq=1
+name=POL
+dir=in
+}
+T {@#13:pinnumber} 20 -35 2 0 0.266667 0.266667 {}
+T {@#13:name} 35 -30 2 1 0.266667 0.266667 {}
 L 3 0 -150 30 -150 {}
 B 5 -2.5 -152.5 2.5 -147.5 {pinnumber=14
 pinseq=2
@@ -142,11 +153,3 @@ dir=inout
 }
 T {@#12:pinnumber} 20 -75 2 0 0.266667 0.266667 {}
 T {@#12:name} 37.5 -70 2 1 0.266667 0.266667 {}
-L 3 0 -30 30 -30 {}
-B 5 -2.5 -32.5 2.5 -27.5 {pinnumber=6
-pinseq=1
-name=POL
-dir=in
-}
-T {@#13:pinnumber} 20 -35 2 0 0.266667 0.266667 {}
-T {@#13:name} 35 -30 2 1 0.266667 0.266667 {}

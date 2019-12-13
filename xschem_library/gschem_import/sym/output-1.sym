@@ -1,12 +1,9 @@
 v {xschem version=2.9.5_RC6 file_version=1.1}
-G {type=OUTPUT
+G {type=opin
 template="device=OUTPUT
+lab=xxx
 "
-tedax_format="footprint @name @footprint
-value @name @value
-device @name @device
-@comptag"
-format="@name @pinlist @value"
+
 }
 V {}
 S {}

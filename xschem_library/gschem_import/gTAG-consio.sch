@@ -18,14 +18,17 @@ T {$Revision$} 6680 -4060 2 1 0.333333 0.333333 {}
 
 C {title-A2.sym} 4660 -4020 0 0 {}
 C {out-1.sym} 5710 -4840 0 1 {name=usb_io+
+lab=usb_io+
 }
 C {out-1.sym} 5710 -4920 0 1 {name=usb_io-
+lab=usb_io-
 }
 C {gnd-1.sym} 5790 -5060 0 0 {}
 C {connector4-1.sym} 5610 -5090 0 0 {name=CONN2
 footprint=conn_usb
 }
 C {out-1.sym} 5940 -5190 0 0 {name=usb_power
+lab=usb_power
 }
 C {sn75240pw.sym} 5990 -4810 0 0 {name=U40
 }

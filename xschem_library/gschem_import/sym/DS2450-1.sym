@@ -4,16 +4,19 @@ template="device=DS2450
 name=U?
 footprint=SMD8
 numslots=0
-description=Dallas\\\\ Semiconductor\\\\ 1-Wire\\\\ A/D\\\\ Converter\\\\ (Travis\\\\ Sawyer)
-net=GND:4
-net=Vcc:1
+description=\\"Dallas Semiconductor 1-Wire A/D Converter (Travis Sawyer)\\"
 documentation=http://pdfserv.maxim-ic.com/en/ds/DS2450.pdf
+GND=GND
+Vcc=Vcc
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @GND @Vcc"
+
+extra="GND Vcc"
+extra_pinnumber="4 1"
 }
 V {}
 S {}

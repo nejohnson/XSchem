@@ -1,7 +1,7 @@
 v {xschem version=2.9.5_RC6 file_version=1.1}
 G {type=DS1602
 template="name=U?
-description=elapsed\\\\ time\\\\ counter
+description=\\"elapsed time counter\\"
 footprint=DIP8
 device=DS1602
 numslots=0
@@ -11,7 +11,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}
@@ -63,30 +64,6 @@ pinseq=4
 }
 T {@#3:pinnumber} 20 -45 2 0 0.266667 0.266667 {}
 T {@#3:name} 35 -40 2 1 0.266667 0.266667 {}
-L 3 150 -130 180 -130 {}
-B 5 177.5 -132.5 182.5 -127.5 {pinnumber=8
-name=Vcc
-dir=inout
-pinseq=8
-}
-T {@#4:pinnumber} 160 -135 2 1 0.266667 0.266667 {}
-T {@#4:name} 145 -130 2 0 0.266667 0.266667 {}
-L 3 150 -100 180 -100 {}
-B 5 177.5 -102.5 182.5 -97.5 {pinnumber=7
-name=X1
-dir=inout
-pinseq=7
-}
-T {@#5:pinnumber} 160 -105 2 1 0.266667 0.266667 {}
-T {@#5:name} 145 -100 2 0 0.266667 0.266667 {}
-L 3 150 -70 180 -70 {}
-B 5 177.5 -72.5 182.5 -67.5 {pinnumber=6
-name=X2
-dir=inout
-pinseq=6
-}
-T {@#6:pinnumber} 160 -75 2 1 0.266667 0.266667 {}
-T {@#6:name} 145 -70 2 0 0.266667 0.266667 {}
 L 3 150 -40 180 -40 {}
 B 5 177.5 -42.5 182.5 -37.5 {pinnumber=5
 name=Vbat
@@ -95,3 +72,27 @@ pinseq=5
 }
 T {@#7:pinnumber} 160 -45 2 1 0.266667 0.266667 {}
 T {@#7:name} 145 -40 2 0 0.266667 0.266667 {}
+L 3 150 -70 180 -70 {}
+B 5 177.5 -72.5 182.5 -67.5 {pinnumber=6
+name=X2
+dir=inout
+pinseq=6
+}
+T {@#6:pinnumber} 160 -75 2 1 0.266667 0.266667 {}
+T {@#6:name} 145 -70 2 0 0.266667 0.266667 {}
+L 3 150 -100 180 -100 {}
+B 5 177.5 -102.5 182.5 -97.5 {pinnumber=7
+name=X1
+dir=inout
+pinseq=7
+}
+T {@#5:pinnumber} 160 -105 2 1 0.266667 0.266667 {}
+T {@#5:name} 145 -100 2 0 0.266667 0.266667 {}
+L 3 150 -130 180 -130 {}
+B 5 177.5 -132.5 182.5 -127.5 {pinnumber=8
+name=Vcc
+dir=inout
+pinseq=8
+}
+T {@#4:pinnumber} 160 -135 2 1 0.266667 0.266667 {}
+T {@#4:name} 145 -130 2 0 0.266667 0.266667 {}

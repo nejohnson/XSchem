@@ -5,7 +5,7 @@ numslots=2
 slotdef=1:2,5,1,6,4,3
 slotdef=2:12,9,13,8,10,11
 name=U?
-description=2\\\\ D-flip-flops\\\\ with\\\\ preset\\\\ and\\\\ clear
+description=\\"2 D-flip-flops with preset and clear\\"
 slot=1
 documentation=http://www-s.ti.com/sc/ds/sn74hc74.pdf
 device=7474
@@ -14,7 +14,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}

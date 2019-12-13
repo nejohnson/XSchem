@@ -3,17 +3,20 @@ G {type=74154
 template="device=74154
 name=U?
 footprint=DIP24
-description=4-bit\\\\ binary\\\\ decoder/demultiplexer
+description=\\"4-bit binary decoder/demultiplexer\\"
 numslots=0
-net=Vcc:24
-net=GND:12
 documentation=http://www.semiconductors.philips.com/acrobat/datasheets/74HC_HCT154_CNV_2.pdf
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="24 12"
 }
 V {}
 S {}
@@ -138,86 +141,8 @@ dir=out
 }
 T {@#10:pinnumber} 180 -175 2 1 0.266667 0.266667 {}
 T {@#10:name} 165 -170 2 0 0.266667 0.266667 {}
-L 3 0 -470 30 -470 {}
-B 5 -2.5 -472.5 2.5 -467.5 {pinnumber=23
-pinseq=23
-name=A_SEL
-dir=in
-}
-T {@#11:pinnumber} 20 -475 2 0 0.266667 0.266667 {}
-T {@#11:name} 35 -470 2 1 0.266667 0.266667 {}
-L 3 0 -440 30 -440 {}
-B 5 -2.5 -442.5 2.5 -437.5 {pinnumber=22
-pinseq=22
-name=B_SEL
-dir=in
-}
-T {@#12:pinnumber} 20 -445 2 0 0.266667 0.266667 {}
-T {@#12:name} 35 -440 2 1 0.266667 0.266667 {}
-L 3 0 -410 30 -410 {}
-B 5 -2.5 -412.5 2.5 -407.5 {pinnumber=21
-pinseq=21
-name=C_SEL
-dir=in
-}
-T {@#13:pinnumber} 20 -415 2 0 0.266667 0.266667 {}
-T {@#13:name} 35 -410 2 1 0.266667 0.266667 {}
-L 3 0 -380 30 -380 {}
-B 5 -2.5 -382.5 2.5 -377.5 {pinnumber=20
-pinseq=20
-name=D_SEL
-dir=in
-}
-T {@#14:pinnumber} 20 -385 2 0 0.266667 0.266667 {}
-T {@#14:name} 35 -380 2 1 0.266667 0.266667 {}
-L 3 0 -50 20 -50 {}
-B 5 -2.5 -52.5 2.5 -47.5 {pinnumber=19
-pinseq=19
-name=G2
-dir=in
-}
-T {@#15:pinnumber} 20 -55 2 0 0.266667 0.266667 {}
-T {@#15:name} 35 -50 2 1 0.266667 0.266667 {}
-L 3 0 -20 20 -20 {}
-B 5 -2.5 -22.5 2.5 -17.5 {pinnumber=18
-pinseq=18
-name=G1
-dir=in
-}
-T {@#16:pinnumber} 20 -25 2 0 0.266667 0.266667 {}
-T {@#16:name} 35 -20 2 1 0.266667 0.266667 {}
-L 3 180 -20 200 -20 {}
-B 5 197.5 -22.5 202.5 -17.5 {pinnumber=17
-pinseq=17
-name=Y15
-dir=out
-}
-T {@#17:pinnumber} 180 -25 2 1 0.266667 0.266667 {}
-T {@#17:name} 165 -20 2 0 0.266667 0.266667 {}
-L 3 180 -50 200 -50 {}
-B 5 197.5 -52.5 202.5 -47.5 {pinnumber=16
-pinseq=16
-name=Y14
-dir=out
-}
-T {@#18:pinnumber} 180 -55 2 1 0.266667 0.266667 {}
-T {@#18:name} 165 -50 2 0 0.266667 0.266667 {}
-L 3 180 -80 200 -80 {}
-B 5 197.5 -82.5 202.5 -77.5 {pinnumber=15
-pinseq=15
-name=Y13
-dir=out
-}
-T {@#19:pinnumber} 180 -85 2 1 0.266667 0.266667 {}
-T {@#19:name} 165 -80 2 0 0.266667 0.266667 {}
-L 3 180 -110 200 -110 {}
-B 5 197.5 -112.5 202.5 -107.5 {pinnumber=14
-pinseq=14
-name=Y12
-dir=out
-}
-T {@#20:pinnumber} 180 -115 2 1 0.266667 0.266667 {}
-T {@#20:name} 165 -110 2 0 0.266667 0.266667 {}
+
+ {}
 L 3 180 -140 200 -140 {}
 B 5 197.5 -142.5 202.5 -137.5 {pinnumber=13
 pinseq=13
@@ -226,3 +151,75 @@ dir=out
 }
 T {@#21:pinnumber} 180 -145 2 1 0.266667 0.266667 {}
 T {@#21:name} 165 -140 2 0 0.266667 0.266667 {}
+L 3 180 -110 200 -110 {}
+B 5 197.5 -112.5 202.5 -107.5 {pinnumber=14
+pinseq=14
+name=Y12
+dir=out
+}
+T {@#20:pinnumber} 180 -115 2 1 0.266667 0.266667 {}
+T {@#20:name} 165 -110 2 0 0.266667 0.266667 {}
+L 3 180 -80 200 -80 {}
+B 5 197.5 -82.5 202.5 -77.5 {pinnumber=15
+pinseq=15
+name=Y13
+dir=out
+}
+T {@#19:pinnumber} 180 -85 2 1 0.266667 0.266667 {}
+T {@#19:name} 165 -80 2 0 0.266667 0.266667 {}
+L 3 180 -50 200 -50 {}
+B 5 197.5 -52.5 202.5 -47.5 {pinnumber=16
+pinseq=16
+name=Y14
+dir=out
+}
+T {@#18:pinnumber} 180 -55 2 1 0.266667 0.266667 {}
+T {@#18:name} 165 -50 2 0 0.266667 0.266667 {}
+L 3 180 -20 200 -20 {}
+B 5 197.5 -22.5 202.5 -17.5 {pinnumber=17
+pinseq=17
+name=Y15
+dir=out
+}
+T {@#17:pinnumber} 180 -25 2 1 0.266667 0.266667 {}
+T {@#17:name} 165 -20 2 0 0.266667 0.266667 {}
+L 3 0 -20 20 -20 {}
+B 5 -2.5 -22.5 2.5 -17.5 {pinnumber=18
+pinseq=18
+name=G1
+dir=in
+}
+T {@#16:pinnumber} 20 -25 2 0 0.266667 0.266667 {}
+T {@#16:name} 35 -20 2 1 0.266667 0.266667 {}
+L 3 0 -50 20 -50 {}
+B 5 -2.5 -52.5 2.5 -47.5 {pinnumber=19
+pinseq=19
+name=G2
+dir=in
+}
+T {@#15:pinnumber} 20 -55 2 0 0.266667 0.266667 {}
+T {@#15:name} 35 -50 2 1 0.266667 0.266667 {}
+L 3 0 -380 30 -380 {}
+B 5 -2.5 -382.5 2.5 -377.5 {pinnumber=20
+pinseq=20
+name=D_SEL
+dir=in
+}
+T {@#14:pinnumber} 20 -385 2 0 0.266667 0.266667 {}
+T {@#14:name} 35 -380 2 1 0.266667 0.266667 {}
+L 3 0 -410 30 -410 {}
+B 5 -2.5 -412.5 2.5 -407.5 {pinnumber=21
+pinseq=21
+name=C_SEL
+dir=in
+}
+T {@#13:pinnumber} 20 -415 2 0 0.266667 0.266667 {}
+T {@#13:name} 35 -410 2 1 0.266667 0.266667 {}
+L 3 0 -440 30 -440 {}
+B 5 -2.5 -442.5 2.5 -437.5 {pinnumber=22
+pinseq=22
+name=B_SEL
+dir=in
+}
+T {@#12:pinnumber} 20 -445 2 0 0.266667 0.266667 {}
+T {@#12:name} 35 -440 2 1 0.266667 0.266667 {}

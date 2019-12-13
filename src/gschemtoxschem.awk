@@ -10,6 +10,10 @@ FNR==1{
   sch = FILENAME
   sub(/\.[^.]+$/, ".sch", sch)
   if(file_exists(sch)) has_schematic = 1
+  pin = 0
+  net_assign = 0
+  pinseq=0
+  template_attrs=""
 }
 
 {
@@ -47,13 +51,29 @@ FNR==1{
       for(i = 1; i<= nlines; i++) {
         getline
         if($0 ~/=/) {
-          sub(/^refdes/, "name")
-          template_attrs = template_attrs escape_chars($0) "\n"
+          sub(/^refdes=/, "name=")
+          if($0 ~/net=/) {
+            tmp = $0
+            sub(/net=/,"", tmp)
+            net[++net_assign] = tmp
+            continue
+          }
+          if(is_symbol && has_schematic) {
+            if($0 ~/name=/ && template_attrs == "") template_attrs = template_attrs escape_chars($0) "\n"
+          } else {
+            template_attrs = template_attrs escape_chars($0) "\n"
+          }
           save = $0
           sub(/^device=/, "type=") 
+          if ($0 ~/^value=IO/) { # inconsistency in io-1.sym
+            $0 = "type=IO"
+          }
           if ($0 ~/^type=/) {
+            if($0 ~/=INPUT/) {pin = 1; sub(/=.*/, "=ipin"); template_attrs = template_attrs "lab=xxx\n"}
+            if($0 ~/=OUTPUT/) {pin = 1; sub(/=.*/, "=opin"); template_attrs = template_attrs "lab=xxx\n"}
+            if($0 ~/=IO/) {pin = 1; sub(/=.*/, "=iopin"); template_attrs = template_attrs "lab=xxx\n"}
             if(is_symbol && has_schematic) global_attrs = "type=subcircuit\n" global_attrs
-            else global_attrs = global_attrs $0 "\n"
+            else global_attrs = $0 "\n" global_attrs 
           }
           $0 = save
           if(show == 1) {
@@ -128,7 +148,7 @@ FNR==1{
             # do nothing for now
           } else {
             if($0 ~/netname=/) sub(/netname=/, "lab=")
-            propstring = propstring $0 "\n"
+            propstring = propstring $0 " "
           }
           getline
         }
@@ -137,6 +157,9 @@ FNR==1{
         continue # process again last getlined line
       }
       wires = wires "N " nx1 " " ny1 " " nx2 " " ny2 " {" propstring  "}\n"
+      if(propstring!="") {
+        wires = wires "C {lab_wire.sym} " (nx1+nx2)/2 " " (ny1+ny2)/2 " 0 0 {" propstring "}\n"
+      }
     }
     
     #               selectable angle flip 
@@ -159,6 +182,16 @@ FNR==1{
              # do nothing for now
           } else {
             if($0 ~/refdes=/) sub(/refdes=/, "name=")
+
+            if(symbol ~/(in|out|io)-1\.sym/) {
+              if($0 ~/name=/) {
+                tmp = $0
+                sub(/name=/, "lab=", tmp)
+                $0 = $0 "\n" tmp
+              }
+            }
+
+
             gsub(/ /, "\\\\ ", $0)
             propstring = propstring $0 "\n"
           }
@@ -226,6 +259,7 @@ FNR==1{
       
               if(attr == "pinseq") {
                 pin_index[value] = pin_idx
+                pinseq++
               }
               gsub(/ /, "\\\\ ", value)
               gsub(/\\_/, "_", value)
@@ -251,26 +285,84 @@ FNR==1{
   } # while(1)
 }
 
-function escape_chars(s)
+function escape_chars(s,     a, b)
 {
-  gsub(/ *= */, "=", s)
-  gsub(/\\/, "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\", s)
-  gsub(/ /, "\\\\\\\\\\\\\\\\ ", s)
+#   gsub(/ *= */, "=", s)
+#   gsub(/\\/, "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\", s)
+#   gsub(/ /, "\\\\\\\\\\\\\\\\ ", s)
+  a=b=s
+  sub(/=.*/,"",a)
+  sub(/.*=/,"",b)
+  if(s!~/=/) b = ""
+
+  sub(/"/, "\\\\", b)
+  if(b ~ / /) {
+    b = "\\\\\"" b "\\\\\""
+  }
+  s = a "=" b
   return s
 }
 
 function print_header()
 {
-  spice_attrs="format=\"@name @pinlist @value\"\n"
-  tedax_attrs = "tedax_format=\"footprint @name @footprint\n" \
-     "value @name @value\n" \
-     "device @name @device\n" \
-     "@comptag\"\n"
+  if(net_assign == 1 && pin_idx == 1) {
+    pin = 2
+    tmp = net[1]
+    sub(/:.*/, "", tmp)
+    sub(/net=/, "", tmp)
+    template_attrs = template_attrs "lab=" tmp "\n"
+  } else if(net_assign >=1) {
+    #symbol with attribute-defined connections
+    for(i = 1; i <= net_assign; i++) {
+      netname = pinnumber = net[i]
+      sub(/:.*/,"", netname)
+      sub(/.*:/, "", pinnumber)
+      template_attrs = template_attrs netname "=" netname "\n"
+      if(extra !="") extra = extra " " 
+      if(extra_format !="") extra_format = extra_format " " 
+      if(extra_pinnumber !="") extra_pinnumber = extra_pinnumber " " 
+      extra = extra netname 
+      extra_pinnumber = extra_pinnumber pinnumber 
+      extra_format = extra_format "@" netname
+    }
+    if(extra) {
+      extra = "extra=\"" extra "\""
+      extra_pinnumber = "extra_pinnumber=\"" extra_pinnumber "\""
+    }
+ 
+  }
+
+  if(pin == 1) spice_attrs = tedax_attrs="" 
+  else if(pin == 2) {
+    spice_attrs = tedax_attrs=""
+    sub(/type=[^ ]+\n/, "type=label\n", global_attrs)
+  } else {
+    if(is_symbol && has_schematic) {
+      spice_attrs="format=\"@name @pinlist @symname " extra_format "\"\n"
+    } else {
+      spice_attrs="format=\"@name @pinlist @value " extra_format "\"\n"
+    }
+    tedax_attrs = "tedax_format=\"footprint @name @footprint\n" \
+       "value @name @value\n" \
+       "device @name @device\n" \
+       "@comptag\"\n"
+  }
   print "v {xschem version=2.9.5_RC6 file_version=1.1}"
+  template_attrs = "template=\"" template_attrs "\"\n"
 
   if(FILENAME ~/\.sym$/) {
-    if(global_attrs !~ /type=/) { global_attrs = "type=symbol " global_attrs }
-    print "G {" global_attrs template_attrs tedax_attrs spice_attrs"}"
+    if(global_attrs !~ /type=/) 
+    if(pin == 2) { 
+      global_attrs = "type=label\n" global_attrs
+    } else {
+      global_attrs = "type=symbol\n" global_attrs
+    }
+    print "G {" global_attrs template_attrs tedax_attrs spice_attrs 
+    if(extra) {
+      print extra
+      print extra_pinnumber
+    }
+    print "}"
   } else {
     print "G {}"
   }
@@ -373,7 +465,6 @@ function correct_align(          hcorrect, vcorrect)
 }
 
 END{
-  template_attrs = "template=\"" template_attrs "\"\n"
   print_header()
   print texts
   print boxes
@@ -384,7 +475,12 @@ END{
   print components
   print wires
   # i is the pinseq
-  for(idx = 1; idx <= pin_idx; idx++) {
+  for(i = 1; i <= pin_idx; i++) {
+    if(pinseq == pin_idx) { 
+      idx = pin_index[i]
+    } else {
+      idx = i
+    }
     print pin_line[idx]
     nattr = pin_nattr[idx]
     attr_string=""

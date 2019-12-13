@@ -3,17 +3,20 @@ G {type=74280
 template="device=74280
 name=U?
 footprint=DIP14
-description=9-bit\\\\ parity\\\\ generater/tester
+description=\\"9-bit parity generater/tester\\"
 numslots=0
-net=Vcc:14
-net=GND:7
 documentation=http://www-s.ti.com/sc/ds/sn74hc280.pdf
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="14 7"
 }
 V {}
 S {}

@@ -3,16 +3,19 @@ G {type=40181
 template="name=U?
 device=40181
 footprint=DIP24
-net=VSS:12
-net=VDD:24
-description=4-bit\\\\ ALU
+description=\\"4-bit ALU\\"
 numslots=0
+VSS=VSS
+VDD=VDD
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @VSS @VDD"
+
+extra="VSS VDD"
+extra_pinnumber="12 24"
 }
 V {}
 S {}

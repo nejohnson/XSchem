@@ -3,17 +3,20 @@ G {type=74164
 template="device=74164
 footprint=DIP14
 name=U?
-description=8-bit\\\\ serial-in/parallel-out\\\\ shift\\\\ register
+description=\\"8-bit serial-in/parallel-out shift register\\"
 numslots=0
-net=Vcc:14
-net=GND:7
 documentation=http://www-s.ti.com/sc/ds/sn74hc164.pdf
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="14 7"
 }
 V {}
 S {}

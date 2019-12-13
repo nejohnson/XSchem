@@ -2,20 +2,23 @@ v {xschem version=2.9.5_RC6 file_version=1.1}
 G {type=MAX1005
 template="device=MAX1005
 name=U?
-description=IF\\\\ undersampler
+description=\\"IF undersampler\\"
 numslots=0
-net=VCCD:1
-net=DGND:2
-net=AGND:7
-net=VCCA:8
 footprint=QSOP16
 documentation=http://pdfserv.maxim-ic.com/en/ds/MAX1005.pdf
+VCCD=VCCD
+DGND=DGND
+AGND=AGND
+VCCA=VCCA
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @VCCD @DGND @AGND @VCCA"
+
+extra="VCCD DGND AGND VCCA"
+extra_pinnumber="1 2 7 8"
 }
 V {}
 S {}
@@ -36,6 +39,10 @@ L 4 30 -20 40 -30 {}
 
 
 
+
+ {}
+
+ {}
 L 3 0 -390 30 -390 {}
 B 5 -2.5 -392.5 2.5 -387.5 {pinnumber=3
 pinseq=3
@@ -44,6 +51,22 @@ dir=in
 }
 T {@#0:pinnumber} 20 -395 2 0 0.266667 0.266667 {}
 T {@#0:name} 35 -390 2 1 0.266667 0.266667 {}
+L 3 230 -290 260 -290 {}
+B 5 257.5 -292.5 262.5 -287.5 {pinnumber=4
+pinseq=4
+name=AIO+
+dir=inout
+}
+T {@#6:pinnumber} 240 -295 2 1 0.266667 0.266667 {}
+T {@#6:name} 225 -290 2 0 0.266667 0.266667 {}
+L 3 230 -250 260 -250 {}
+B 5 257.5 -252.5 262.5 -247.5 {pinnumber=5
+pinseq=5
+name=AIO-
+dir=inout
+}
+T {@#7:pinnumber} 240 -255 2 1 0.266667 0.266667 {}
+T {@#7:name} 225 -250 2 0 0.266667 0.266667 {}
 L 3 0 -350 30 -350 {}
 B 5 -2.5 -352.5 2.5 -347.5 {pinnumber=6
 pinseq=6
@@ -52,6 +75,10 @@ dir=in
 }
 T {@#1:pinnumber} 20 -355 2 0 0.266667 0.266667 {}
 T {@#1:name} 35 -350 2 1 0.266667 0.266667 {}
+
+ {}
+
+ {}
 L 3 0 -310 30 -310 {}
 B 5 -2.5 -312.5 2.5 -307.5 {pinnumber=9
 pinseq=9
@@ -84,51 +111,3 @@ dir=inout
 }
 T {@#5:pinnumber} 20 -195 2 0 0.266667 0.266667 {}
 T {@#5:name} 35 -190 2 1 0.266667 0.266667 {}
-L 3 230 -290 260 -290 {}
-B 5 257.5 -292.5 262.5 -287.5 {pinnumber=4
-pinseq=4
-name=AIO+
-dir=inout
-}
-T {@#6:pinnumber} 240 -295 2 1 0.266667 0.266667 {}
-T {@#6:name} 225 -290 2 0 0.266667 0.266667 {}
-L 3 230 -250 260 -250 {}
-B 5 257.5 -252.5 262.5 -247.5 {pinnumber=5
-pinseq=5
-name=AIO-
-dir=inout
-}
-T {@#7:pinnumber} 240 -255 2 1 0.266667 0.266667 {}
-T {@#7:name} 225 -250 2 0 0.266667 0.266667 {}
-L 3 0 -150 30 -150 {}
-B 5 -2.5 -152.5 2.5 -147.5 {pinnumber=13
-pinseq=13
-name=D2
-dir=inout
-}
-T {@#8:pinnumber} 20 -155 2 0 0.266667 0.266667 {}
-T {@#8:name} 35 -150 2 1 0.266667 0.266667 {}
-L 3 0 -110 30 -110 {}
-B 5 -2.5 -112.5 2.5 -107.5 {pinnumber=14
-pinseq=14
-name=D1
-dir=inout
-}
-T {@#9:pinnumber} 20 -115 2 0 0.266667 0.266667 {}
-T {@#9:name} 35 -110 2 1 0.266667 0.266667 {}
-L 3 0 -70 30 -70 {}
-B 5 -2.5 -72.5 2.5 -67.5 {pinnumber=15
-pinseq=15
-name=D0
-dir=inout
-}
-T {@#10:pinnumber} 20 -75 2 0 0.266667 0.266667 {}
-T {@#10:name} 35 -70 2 1 0.266667 0.266667 {}
-L 3 0 -30 30 -30 {}
-B 5 -2.5 -32.5 2.5 -27.5 {pinnumber=16
-pinseq=16
-name=CLK
-dir=inout
-}
-T {@#11:pinnumber} 20 -35 2 0 0.266667 0.266667 {}
-T {@#11:name} 40 -30 2 1 0.266667 0.266667 {}

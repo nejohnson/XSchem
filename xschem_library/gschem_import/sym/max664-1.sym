@@ -3,7 +3,7 @@ G {type=MAX664
 template="device=MAX664
 name=U?
 footprint=DIP8
-description=dual\\\\ mode\\\\ -5V/programmable\\\\ voltage\\\\ regulator
+description=\\"dual mode -5V/programmable voltage regulator\\"
 numslots=0
 documentation=http://pdfserv.maxim-ic.com/en/ds/MAX663-MAX666.pdf
 "
@@ -11,7 +11,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}

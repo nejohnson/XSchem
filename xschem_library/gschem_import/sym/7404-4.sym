@@ -13,14 +13,15 @@ name=U?
 pins=14
 class=IC
 footprint=DIP14
-description=6\\\\ NOT\\\\ gates
+description=\\"6 NOT gates\\"
 documentation=http://www-s.ti.com/sc/ds/sn74hc04.pdf
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}

@@ -4,14 +4,15 @@ template="name=U?
 device=IPS021
 numslots=0
 footprint=TO220
-description=Fully\\\\ Protected\\\\ Power\\\\ MOSFET\\\\ Switch
+description=\\"Fully Protected Power MOSFET Switch\\"
 documentation=http://www.irf.com/product-info/datasheets/data/ips021.pdf
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}
@@ -30,6 +31,14 @@ L 4 20 -90 20 0 {}
 
 
 
+L 3 0 -40 20 -40 {}
+B 5 -2.5 -42.5 2.5 -37.5 {pinnumber=1
+pinseq=1
+dir=in
+name=IN
+}
+T {@#2:pinnumber} 15 -45 2 0 0.266667 0.266667 {}
+T {@#2:name} 30 -40 2 1 0.266667 0.266667 {}
 L 3 130 -70 150 -70 {}
 B 5 147.5 -72.5 152.5 -67.5 {pinnumber=2
 pinseq=2
@@ -46,11 +55,3 @@ name=S
 }
 T {@#1:pinnumber} 135 -15 2 1 0.266667 0.266667 {}
 T {@#1:name} 120 -10 2 0 0.266667 0.266667 {}
-L 3 0 -40 20 -40 {}
-B 5 -2.5 -42.5 2.5 -37.5 {pinnumber=1
-pinseq=1
-dir=in
-name=IN
-}
-T {@#2:pinnumber} 15 -45 2 0 0.266667 0.266667 {}
-T {@#2:name} 30 -40 2 1 0.266667 0.266667 {}

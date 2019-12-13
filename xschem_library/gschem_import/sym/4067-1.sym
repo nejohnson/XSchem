@@ -3,17 +3,20 @@ G {type=4067
 template="name=U?
 device=4067
 footprint=DIP24
-net=VSS:12
-net=VDD:24
-description=16-1\\\\ analog\\\\ multiplexer/demultiplexer
+description=\\"16-1 analog multiplexer/demultiplexer\\"
 numslots=0
 documentation=http://www.semiconductors.philips.com/acrobat/datasheets/HEF4067B_CNV_3.pdf
+VSS=VSS
+VDD=VDD
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @VSS @VDD"
+
+extra="VSS VDD"
+extra_pinnumber="12 24"
 }
 V {}
 S {}

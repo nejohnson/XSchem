@@ -7,7 +7,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}
@@ -190,27 +191,6 @@ name=8
 dir=inout
 }
 T {@#7:pinnumber} 110 -75 2 1 0.266667 0.266667 {}
-L 3 100 -190 130 -190 {}
-B 5 127.5 -192.5 132.5 -187.5 {pinnumber=12
-pinseq=12
-name=12
-dir=inout
-}
-T {@#8:pinnumber} 110 -195 2 1 0.266667 0.266667 {}
-L 3 100 -160 130 -160 {}
-B 5 127.5 -162.5 132.5 -157.5 {pinnumber=11
-pinseq=11
-name=11
-dir=inout
-}
-T {@#9:pinnumber} 110 -165 2 1 0.266667 0.266667 {}
-L 3 100 -130 130 -130 {}
-B 5 127.5 -132.5 132.5 -127.5 {pinnumber=10
-pinseq=10
-name=10
-dir=inout
-}
-T {@#10:pinnumber} 110 -135 2 1 0.266667 0.266667 {}
 L 3 100 -100 130 -100 {}
 B 5 127.5 -102.5 132.5 -97.5 {pinnumber=9
 pinseq=9
@@ -218,3 +198,24 @@ name=9
 dir=inout
 }
 T {@#11:pinnumber} 110 -105 2 1 0.266667 0.266667 {}
+L 3 100 -130 130 -130 {}
+B 5 127.5 -132.5 132.5 -127.5 {pinnumber=10
+pinseq=10
+name=10
+dir=inout
+}
+T {@#10:pinnumber} 110 -135 2 1 0.266667 0.266667 {}
+L 3 100 -160 130 -160 {}
+B 5 127.5 -162.5 132.5 -157.5 {pinnumber=11
+pinseq=11
+name=11
+dir=inout
+}
+T {@#9:pinnumber} 110 -165 2 1 0.266667 0.266667 {}
+L 3 100 -190 130 -190 {}
+B 5 127.5 -192.5 132.5 -187.5 {pinnumber=12
+pinseq=12
+name=12
+dir=inout
+}
+T {@#8:pinnumber} 110 -195 2 1 0.266667 0.266667 {}

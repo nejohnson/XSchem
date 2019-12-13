@@ -6,16 +6,19 @@ numslots=2
 slot=1
 slotdef=1:1,2,3,4,5,6,7
 slotdef=2:15,14,13,12,11,10,9
-net=Vcc:16
-net=GND:8
 footprint=DIP16
-description=2\\\\ retriggerable,\\\\ resetable\\\\ monoflops
+description=\\"2 retriggerable, resetable monoflops\\"
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="16 8"
 }
 V {}
 S {}

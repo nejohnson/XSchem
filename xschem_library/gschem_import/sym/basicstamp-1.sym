@@ -3,7 +3,7 @@ G {type=BasicStamp2
 template="device=BasicStamp2
 name=U?
 documentation=http://www.parallax.com/dl/docs/prod/schem/bs2%20rev%20f.pdf
-description=pic\\\\ microcontroller\\\\ modul\\\\ with\\\\ basic\\\\ support
+description=\\"pic microcontroller modul with basic support\\"
 numslots=0
 footprint=none
 "
@@ -11,7 +11,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}

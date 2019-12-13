@@ -1,7 +1,7 @@
 v {xschem version=2.9.5_RC6 file_version=1.1}
 G {type=810
 template="name=U?
-author=Terry\\\\ J\\\\ Porter\\\\ techmanATd2.net.au
+author=\\"Terry J Porter techmanATd2.net.au\\"
 footprint=DIP6
 device=810
 "
@@ -9,7 +9,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}
@@ -63,20 +64,8 @@ name=cathode
 dir=inout
 }
 T {@#1:pinnumber} 10 -20 2 1 0.333333 0.333333 {}
-L 3 100 -80 130 -80 {}
-B 5 127.5 -82.5 132.5 -77.5 {pinnumber=6
-pinseq=6
-name=base
-dir=inout
-}
-T {@#2:pinnumber} 110 -90 2 1 0.333333 0.333333 {}
-L 3 100 -50 130 -50 {}
-B 5 127.5 -52.5 132.5 -47.5 {pinnumber=5
-pinseq=5
-name=collector
-dir=inout
-}
-T {@#3:pinnumber} 110 -60 2 1 0.333333 0.333333 {}
+
+ {}
 L 3 100 -20 130 -20 {}
 B 5 127.5 -22.5 132.5 -17.5 {pinnumber=4
 pinseq=4
@@ -84,3 +73,10 @@ name=emitter
 dir=inout
 }
 T {@#4:pinnumber} 110 -30 2 1 0.333333 0.333333 {}
+L 3 100 -50 130 -50 {}
+B 5 127.5 -52.5 132.5 -47.5 {pinnumber=5
+pinseq=5
+name=collector
+dir=inout
+}
+T {@#3:pinnumber} 110 -60 2 1 0.333333 0.333333 {}

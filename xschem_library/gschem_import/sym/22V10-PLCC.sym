@@ -5,14 +5,15 @@ pins=28
 device=22V10-PLCC
 class=IC
 name=U?
-NB=Pins\\\\ 1,8,15,22\\\\ For\\\\ ISP\\\\ only
-NB=Ground\\\\ Pin\\\\ 22\\\\ on\\\\ PALCE
+NB=\\"Pins 1,8,15,22 For ISP only\\"
+NB=\\"Ground Pin 22 on PALCE\\"
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}

@@ -1,22 +1,25 @@
 v {xschem version=2.9.5_RC6 file_version=1.1}
 G {type=4082
-template="net=VDD:14
-net=VSS:7
-name=U?
+template="name=U?
 numslots=2
 slotdef=1:2,3,4,5,1
 slotdef=2:9,10,11,12,13
 slot=1
 device=4082
 footprint=DIP14
-description=2\\\\ AND\\\\ gates\\\\ with\\\\ 4\\\\ inputs
+description=\\"2 AND gates with 4 inputs\\"
 documentation=http://www.semiconductors.philips.com/acrobat/datasheets/HEF4082B_CNV_3.pdf
+VDD=VDD
+VSS=VSS
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @VDD @VSS"
+
+extra="VDD VSS"
+extra_pinnumber="14 7"
 }
 V {}
 S {}
@@ -35,13 +38,6 @@ A 4 70 -70 30 270 180 {}
 
 
 
-L 3 100 -70 130 -70 {}
-B 5 127.5 -72.5 132.5 -67.5 {pinnumber=1
-pinseq=5
-dir=out
-name=Y
-}
-T {@#0:pinnumber} 110 -75 2 1 0.266667 0.266667 {}
 L 3 0 -130 30 -130 {}
 B 5 -2.5 -132.5 2.5 -127.5 {pinnumber=2
 pinseq=1
@@ -70,3 +66,10 @@ dir=in
 name=D
 }
 T {@#4:pinnumber} 20 -15 2 0 0.266667 0.266667 {}
+L 3 100 -70 130 -70 {}
+B 5 127.5 -72.5 132.5 -67.5 {pinnumber=1
+pinseq=5
+dir=out
+name=Y
+}
+T {@#0:pinnumber} 110 -75 2 1 0.266667 0.266667 {}

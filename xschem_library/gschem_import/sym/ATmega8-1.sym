@@ -1,19 +1,22 @@
 v {xschem version=2.9.5_RC6 file_version=1.1}
 G {type=ATmega8
-template="description=Low-power\\\\ AVR\\\\ 8-bit\\\\ Microcontroller
-documentation=http://rocky.digikey.com/WebLib/Atmel/Web\\\\ Data/ATmeg8(L)\\\\ Preliminary\\\\ Complete.pdf
+template="description=\\"Low-power AVR 8-bit Microcontroller\\"
+documentation=\\"http://rocky.digikey.com/WebLib/Atmel/Web Data/ATmeg8(L) Preliminary Complete.pdf\\"
 footprint=DIP28N
 name=U?
 numslots=0
-net=Vcc:7
-net=GND:8,22
 device=ATmega8
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="7 8,22"
 }
 V {}
 S {}
@@ -80,6 +83,10 @@ dir=inout
 }
 T {@#5:pinnumber} 20 -355 2 0 0.266667 0.266667 {}
 T {@#5:name} 35 -350 2 1 0.266667 0.266667 {}
+
+ {}
+
+ {}
 L 3 0 -40 30 -40 {}
 B 5 -2.5 -42.5 2.5 -37.5 {pinnumber=9
 pinseq=9
@@ -184,6 +191,8 @@ dir=in
 }
 T {@#18:pinnumber} 240 -135 2 1 0.266667 0.266667 {}
 T {@#18:name} 225 -130 2 0 0.266667 0.266667 {}
+
+ {}
 L 3 230 -330 260 -330 {}
 B 5 257.5 -332.5 262.5 -327.5 {pinnumber=23
 pinseq=23
@@ -208,27 +217,3 @@ dir=inout
 }
 T {@#21:pinnumber} 240 -295 2 1 0.266667 0.266667 {}
 T {@#21:name} 225 -290 2 0 0.266667 0.266667 {}
-L 3 230 -270 260 -270 {}
-B 5 257.5 -272.5 262.5 -267.5 {pinnumber=26
-pinseq=26
-name=(ADC3)\\ PC3
-dir=inout
-}
-T {@#22:pinnumber} 240 -275 2 1 0.266667 0.266667 {}
-T {@#22:name} 225 -270 2 0 0.266667 0.266667 {}
-L 3 230 -250 260 -250 {}
-B 5 257.5 -252.5 262.5 -247.5 {pinnumber=27
-pinseq=27
-name=(ADC4/SDA)\\ PC4
-dir=inout
-}
-T {@#23:pinnumber} 240 -255 2 1 0.266667 0.266667 {}
-T {@#23:name} 225 -250 2 0 0.266667 0.266667 {}
-L 3 230 -230 260 -230 {}
-B 5 257.5 -232.5 262.5 -227.5 {pinnumber=28
-pinseq=28
-name=(ADC5/SCL)\\ PC5
-dir=inout
-}
-T {@#24:pinnumber} 240 -235 2 1 0.266667 0.266667 {}
-T {@#24:name} 225 -230 2 0 0.266667 0.266667 {}

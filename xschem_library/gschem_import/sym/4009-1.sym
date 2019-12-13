@@ -12,17 +12,20 @@ slotdef=6:14,15
 name=U?
 pins=16
 class=IC
-net=GND:8
-net=Vcc:1
-net=VDD:16
 footprint=DIP16
-description=6\\\\ CMOS\\\\ to\\\\ TTL\\\\ inverting\\\\ converter
+description=\\"6 CMOS to TTL inverting converter\\"
+GND=GND
+Vcc=Vcc
+VDD=VDD
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @GND @Vcc @VDD"
+
+extra="GND Vcc VDD"
+extra_pinnumber="8 1 16"
 }
 V {}
 S {}

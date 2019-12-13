@@ -3,19 +3,22 @@ G {type=AT90S8535_PLCC
 template="name=U?
 device=AT90S8535_PLCC
 footprint=PLCC44
-net=GND:1,12,24
-net=Vcc:11,23,44
-net=AVcc:33
-net=AGND:34
-description=8-bit\\\\ RISC\\\\ micro\\\\ controller\\\\ (Atmel)
+description=\\"8-bit RISC micro controller (Atmel)\\"
 numslots=0
-author=Werner\\\\ Hoch\\\\ <werner.hoATgmx.de>
+author=\\"Werner Hoch <werner.hoATgmx.de>\\"
+GND=GND
+Vcc=Vcc
+AVcc=AVcc
+AGND=AGND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @GND @Vcc @AVcc @AGND"
+
+extra="GND Vcc AVcc AGND"
+extra_pinnumber="1,12,24 11,23,44 33 34"
 }
 V {}
 S {}

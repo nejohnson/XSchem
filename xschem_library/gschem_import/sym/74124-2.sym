@@ -3,22 +3,25 @@ G {type=74124
 template="device=74124
 footprint=DIP16
 name=U?
-description=2\\\\ VCOs\\\\ (voltage\\\\ controlled\\\\ oscillators)
-net=Vcc:16
-net=GND:9
-net=OSCGND:8
-net=OSCVCC:15
+description=\\"2 VCOs (voltage controlled oscillators)\\"
 slot=1
 numslots=2
 slotdef=1:6,7,2,3,4,5
 slotdef=2:11,10,1,14,12,13
 symversion=0.1
+Vcc=Vcc
+GND=GND
+OSCGND=OSCGND
+OSCVCC=OSCVCC
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND @OSCGND @OSCVCC"
+
+extra="Vcc GND OSCGND OSCVCC"
+extra_pinnumber="16 9 8 15"
 }
 V {}
 S {}

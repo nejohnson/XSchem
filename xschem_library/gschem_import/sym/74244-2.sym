@@ -7,16 +7,19 @@ slotdef=1:1,2,4,6,8,18,16,14,12
 slotdef=2:19,11,13,15,17,9,7,5,3
 name=U?
 footprint=DIP20
-description=octal\\\\ buffer/line\\\\ driver\\\\ (tristate)
-net=Vcc:20
-net=GND:10
+description=\\"octal buffer/line driver (tristate)\\"
 documentation=http://www-s.ti.com/sc/ds/sn74hc244.pdf
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="20 10"
 }
 V {}
 S {}

@@ -11,16 +11,19 @@ slotdef=5:11,10
 slotdef=6:13,12
 name=U?
 footprint=DIP14
-description=6\\\\ NOT\\\\ gates\\\\ with\\\\ open\\\\ collector\\\\ outputs
-net=Vcc:14
-net=GND:7
+description=\\"6 NOT gates with open collector outputs\\"
 documentation=http://www-s.ti.com/sc/ds/sn74hc05.pdf
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="14 7"
 }
 V {}
 S {}
@@ -41,13 +44,6 @@ A 4 25 -50 5 0 360 {}
 
 
 
-L 3 80 -50 110 -50 {}
-B 5 107.5 -52.5 112.5 -47.5 {pinnumber=2
-pinseq=2
-name=Y
-dir=inout
-}
-T {@#0:pinnumber} 90 -55 2 1 0.266667 0.266667 {}
 L 3 0 -50 20 -50 {}
 B 5 -2.5 -52.5 2.5 -47.5 {pinnumber=1
 pinseq=1
@@ -55,3 +51,10 @@ name=A
 dir=in
 }
 T {@#1:pinnumber} 20 -55 2 0 0.266667 0.266667 {}
+L 3 80 -50 110 -50 {}
+B 5 107.5 -52.5 112.5 -47.5 {pinnumber=2
+pinseq=2
+name=Y
+dir=inout
+}
+T {@#0:pinnumber} 90 -55 2 1 0.266667 0.266667 {}

@@ -11,15 +11,18 @@ slotdef=4:9,8
 slotdef=5:11,10
 slotdef=6:13,12
 footprint=DIP14
-description=6\\\\ inverters\\\\ with\\\\ open\\\\ collector\\\\ output
-net=Vcc:14
-net=GND:7
+description=\\"6 inverters with open collector output\\"
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="14 7"
 }
 V {}
 S {}

@@ -3,14 +3,15 @@ G {type=8254
 template="device=8254
 name=U?
 footprint=DIP24
-description=programmable\\\\ interval\\\\ timer
+description=\\"programmable interval timer\\"
 numslots=0
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}

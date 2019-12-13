@@ -3,14 +3,15 @@ G {type=8255A
 template="name=U?
 device=8255A
 footprint=DIP40
-description=CHMOS\\\\ programmable\\\\ peripheral\\\\ interface
+description=\\"CHMOS programmable peripheral interface\\"
 numslots=0
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}

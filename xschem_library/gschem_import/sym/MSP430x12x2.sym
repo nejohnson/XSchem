@@ -3,7 +3,7 @@ G {type=MSP430x12x2
 template="device=MSP430x12x2
 name=U?
 footprint=none
-description=16-bit\\\\ mixed\\\\ signal\\\\ microcontroller
+description=\\"16-bit mixed signal microcontroller\\"
 numslots=0
 documentation=http://www-s.ti.com/sc/ds/msp430f1222.pdf
 "
@@ -11,7 +11,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}

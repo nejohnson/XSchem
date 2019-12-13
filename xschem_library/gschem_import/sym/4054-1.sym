@@ -3,17 +3,20 @@ G {type=4054
 template="name=U?
 device=4054
 footprint=DIP16
-net=VEE:7
-net=VSS:8
-net=VDD:16
-description=liquid-crystal\\\\ display\\\\ drivers
+description=\\"liquid-crystal display drivers\\"
 numslots=0
+VEE=VEE
+VSS=VSS
+VDD=VDD
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @VEE @VSS @VDD"
+
+extra="VEE VSS VDD"
+extra_pinnumber="7 8 16"
 }
 V {}
 S {}

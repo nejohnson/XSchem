@@ -3,16 +3,19 @@ G {type=74131
 template="device=74131
 footprint=DIP16
 name=U?
-description=3\\\\ to\\\\ 8\\\\ decoder/demultiplexer\\\\ with\\\\ register
+description=\\"3 to 8 decoder/demultiplexer with register\\"
 numslots=0
-net=Vcc:16
-net=GND:8
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="16 8"
 }
 V {}
 S {}

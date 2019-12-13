@@ -1269,6 +1269,22 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(0 && (key=='~') && (state & ControlMask))    /* testmode:  for performance testing */
    {
+    int tmp;
+    char *s="(aaa,bbb)";
+    char *s1="2*(aaa(1),bbb)";
+    char *s2="2*(aaa,bbb)";
+    char *s3="aaa(vbat)";
+    char *s4="+3.3V";
+    char *s5="2*AAA(3)";
+    char *s6="usb_io+";
+
+    fprintf(errfp, "%s --> %s\n", s, expandlabel(s, &tmp)); 
+    fprintf(errfp, "%s --> %s\n", s1, expandlabel(s1, &tmp)); 
+    fprintf(errfp, "%s --> %s\n", s2, expandlabel(s2, &tmp)); 
+    fprintf(errfp, "%s --> %s\n", s3, expandlabel(s3, &tmp)); 
+    fprintf(errfp, "%s --> %s\n", s4, expandlabel(s4, &tmp)); 
+    fprintf(errfp, "%s --> %s\n", s5, expandlabel(s5, &tmp)); 
+    fprintf(errfp, "%s --> %s\n", s6, expandlabel(s6, &tmp)); 
     break;
    }
    if(0 && (key=='|') && !(state&ControlMask))         /* testmode */

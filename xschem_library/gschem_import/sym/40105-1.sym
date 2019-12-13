@@ -3,16 +3,19 @@ G {type=40105
 template="name=U?
 device=40105
 footprint=DIP16
-net=VSS:8
-net=VDD:16
-description=4-bit\\\\ x\\\\ 16-word\\\\ fifo\\\\ register
+description=\\"4-bit x 16-word fifo register\\"
 numslots=0
+VSS=VSS
+VDD=VDD
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @VSS @VDD"
+
+extra="VSS VDD"
+extra_pinnumber="8 16"
 }
 V {}
 S {}
@@ -127,14 +130,6 @@ dir=inout
 }
 T {@#11:pinnumber} 140 -355 2 1 0.266667 0.266667 {}
 T {@#11:name} 125 -350 2 0 0.266667 0.266667 {}
-L 3 130 -190 160 -190 {}
-B 5 157.5 -192.5 162.5 -187.5 {pinnumber=14
-pinseq=14
-name=DOR
-dir=out
-}
-T {@#12:pinnumber} 140 -195 2 1 0.266667 0.266667 {}
-T {@#12:name} 125 -190 2 0 0.266667 0.266667 {}
 L 3 0 -70 30 -70 {}
 B 5 -2.5 -72.5 2.5 -67.5 {pinnumber=9
 pinseq=13
@@ -143,3 +138,11 @@ dir=in
 }
 T {@#13:pinnumber} 20 -75 2 0 0.266667 0.266667 {}
 T {@#13:name} 35 -70 2 1 0.266667 0.266667 {}
+L 3 130 -190 160 -190 {}
+B 5 157.5 -192.5 162.5 -187.5 {pinnumber=14
+pinseq=14
+name=DOR
+dir=out
+}
+T {@#12:pinnumber} 140 -195 2 1 0.266667 0.266667 {}
+T {@#12:name} 125 -190 2 0 0.266667 0.266667 {}

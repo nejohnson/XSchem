@@ -21,9 +21,11 @@ T {Here: Vlo = 1.2*139/39 = 4.3V} 5840 -4840 2 1 0.333333 0.333333 {}
 
 C {title-A2.sym} 4830 -4200 0 0 {}
 C {in-1.sym} 5470 -5230 0 0 {name=usb_power
+lab=usb_power
 device=INPUT
 }
 C {in-1.sym} 5470 -5160 0 0 {name=jtag_power
+lab=jtag_power
 device=INPUT
 }
 C {max882.sym} 6100 -5100 0 0 {name=U30
@@ -78,6 +80,7 @@ footprint=sm0805
 device=RESISTOR
 }
 C {out-1.sym} 6500 -5230 0 0 {name=pon_reset#
+lab=pon_reset#
 device=OUTPUT
 }
 C {3.3V-plus-1.sym} 6390 -5370 0 0 {}

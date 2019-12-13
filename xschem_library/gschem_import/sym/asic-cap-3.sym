@@ -3,14 +3,15 @@ G {type=CAPACITOR
 template="device=CAPACITOR
 name=C?
 area=1e-6
-description=linear\\\\ poly0\\\\ /\\\\ poly1\\\\ capacitor
+description=\\"linear poly0 / poly1 capacitor\\"
 model-name=cpolylin
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}

@@ -3,20 +3,23 @@ G {type=27C2001
 template="footprint=DIP32
 numslots=0
 pins=32
-description=2Mbit\\\\ (256Kb*8)\\\\ EPROM
-author=Geert\\\\ Stappers\\\\ <stappersATstappers.nl>
+description=\\"2Mbit (256Kb*8) EPROM\\"
+author=\\"Geert Stappers <stappersATstappers.nl>\\"
 documentation=http://www.st.com/stonline/books/pdf/docs/2383.pdf
-net=GND:16
 device=27C2001
 class=IC
 name=U?
 symversion=1.0
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @GND"
+
+extra="GND"
+extra_pinnumber="16"
 }
 V {}
 S {}
@@ -38,14 +41,6 @@ A 4 35 -30 5 0 360 {}
 
 
 
-L 3 140 -720 140 -690 {}
-B 5 137.5 -722.5 142.5 -717.5 {pinnumber=32
-pinseq=32
-name=Vcc
-dir=inout
-}
-T {@#0:pinnumber} 145 -690 2 1 0.266667 0.266667 {}
-T {@#0:name} 126.4 -685 0 0 0.266667 0.266667 {}
 L 3 10 -660 40 -660 {}
 B 5 7.5 -662.5 12.5 -657.5 {pinseq=1
 pinnumber=12
@@ -286,3 +281,5 @@ dir=inout
 }
 T {@#30:pinnumber} 185 -690 2 1 0.266667 0.266667 {}
 T {@#30:name} 166.4 -685 0 0 0.266667 0.266667 {}
+
+ {}

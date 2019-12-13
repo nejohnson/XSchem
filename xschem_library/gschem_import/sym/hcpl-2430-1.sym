@@ -3,20 +3,23 @@ G {type=HCPL-2430
 template="name=U?
 device=HCPL-2430
 footprint=DIP8
-net=Vcc:8
-net=GND:5
 documentation=http://rocky.digikey.com/WebLib/Agilent/Web%20Data/HCPL-2400_2430.pdf
-description=dual\\\\ channel\\\\ 20\\\\ MBd\\\\ optocoupler
+description=\\"dual channel 20 MBd optocoupler\\"
 numslots=2
 slotdef=1:1,2,7
 slotdef=2:4,3,6
 slot=1
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="8 5"
 }
 V {}
 S {}

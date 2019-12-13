@@ -3,19 +3,22 @@ G {type=ATmega163_DIP
 template="name=U?
 device=ATmega163_DIP
 footprint=DIP40
-net=Vcc:10
-net=GND:11
-net=AVcc:30
-net=AGND:31
-description=8-bit\\\\ RISC\\\\ micro\\\\ controller\\\\ (Atmel)
+description=\\"8-bit RISC micro controller (Atmel)\\"
 numslots=0
-author=Werner\\\\ Hoch\\\\ <werner.hoATgmx.de>
+author=\\"Werner Hoch <werner.hoATgmx.de>\\"
+Vcc=Vcc
+GND=GND
+AVcc=AVcc
+AGND=AGND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND @AVcc @AGND"
+
+extra="Vcc GND AVcc AGND"
+extra_pinnumber="10 11 30 31"
 }
 V {}
 S {}

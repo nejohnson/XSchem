@@ -3,17 +3,20 @@ G {type=74148
 template="device=74148
 footprint=DIP16
 name=U?
-description=binary\\\\ 8\\\\ to\\\\ 3\\\\ priority\\\\ encoder\\\\ (scalable)
+description=\\"binary 8 to 3 priority encoder (scalable)\\"
 numslots=0
-net=Vcc:16
-net=GND:8
 documentation=http://www-s.ti.com/sc/ds/sn74hc148.pdf
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="16 8"
 }
 V {}
 S {}

@@ -10,17 +10,20 @@ slotdef=4:9,8
 slotdef=5:11,10
 slotdef=6:13,12
 name=U?
-net=GND:7
-net=Vcc:14
 footprint=DIP14
-description=6\\\\ inverters
+description=\\"6 inverters\\"
 documentation=http://www.semiconductors.philips.com/acrobat/datasheets/HEF4069UB_CNV_3.pdf
+GND=GND
+Vcc=Vcc
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @GND @Vcc"
+
+extra="GND Vcc"
+extra_pinnumber="7 14"
 }
 V {}
 S {}

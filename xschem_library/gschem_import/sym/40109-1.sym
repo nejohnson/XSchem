@@ -1,9 +1,6 @@
 v {xschem version=2.9.5_RC6 file_version=1.1}
 G {type=40109
 template="name=U?
-net=VSS:8
-net=VDD:16
-net=VCC:1
 device=40109
 slot=1
 numslots=4
@@ -12,13 +9,19 @@ slotdef=2:6,5,7
 slotdef=3:14,13,15
 slotdef=4:10,11,9
 footprint=DIP16
-description=4\\\\ LOW-to-HIGH\\\\ voltage\\\\ level\\\\ shifter
+description=\\"4 LOW-to-HIGH voltage level shifter\\"
+VSS=VSS
+VDD=VDD
+VCC=VCC
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @VSS @VDD @VCC"
+
+extra="VSS VDD VCC"
+extra_pinnumber="8 16 1"
 }
 V {}
 S {}

@@ -3,16 +3,19 @@ G {type=Z80PIO
 template="device=Z80PIO
 name=U?
 footprint=DIP40
-description=Z80\\\\ parallel\\\\ I/O\\\\ circuit
+description=\\"Z80 parallel I/O circuit\\"
 numslots=0
-net=Vcc:26
-net=GND:11
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="26 11"
 }
 V {}
 S {}
@@ -118,6 +121,46 @@ dir=in
 }
 T {@#9:pinnumber} 20 -415 2 0 0.266667 0.266667 {}
 T {@#9:name} 35 -410 2 1 0.266667 0.266667 {}
+L 3 0 -370 20 -370 {}
+B 5 -2.5 -372.5 2.5 -367.5 {pinnumber=4
+pinseq=11
+name=_CE_
+dir=in
+}
+T {@#31:pinnumber} 20 -375 2 0 0.266667 0.266667 {}
+T {@#31:name} 35 -370 2 1 0.266667 0.266667 {}
+L 3 0 -330 20 -330 {}
+B 5 -2.5 -332.5 2.5 -327.5 {pinnumber=37
+pinseq=12
+name=_M1_
+dir=in
+}
+T {@#32:pinnumber} 20 -335 2 0 0.266667 0.266667 {}
+T {@#32:name} 35 -330 2 1 0.266667 0.266667 {}
+L 3 0 -290 20 -290 {}
+B 5 -2.5 -292.5 2.5 -287.5 {pinnumber=36
+pinseq=13
+name=_IORQ_
+dir=in
+}
+T {@#37:pinnumber} 20 -295 2 0 0.266667 0.266667 {}
+T {@#37:name} 35 -290 2 1 0.266667 0.266667 {}
+L 3 0 -250 20 -250 {}
+B 5 -2.5 -252.5 2.5 -247.5 {pinnumber=35
+pinseq=14
+name=_RD_
+dir=in
+}
+T {@#33:pinnumber} 20 -255 2 0 0.266667 0.266667 {}
+T {@#33:name} 35 -250 2 1 0.266667 0.266667 {}
+L 3 0 -170 20 -170 {}
+B 5 -2.5 -172.5 2.5 -167.5 {pinnumber=23
+pinseq=15
+name=_INT_
+dir=out
+}
+T {@#34:pinnumber} 20 -175 2 0 0.266667 0.266667 {}
+T {@#34:name} 35 -170 2 1 0.266667 0.266667 {}
 L 3 0 -130 30 -130 {}
 B 5 -2.5 -132.5 2.5 -127.5 {pinnumber=24
 pinseq=16
@@ -214,6 +257,14 @@ dir=out
 }
 T {@#21:pinnumber} 340 -455 2 1 0.266667 0.266667 {}
 T {@#21:name} 325 -450 2 0 0.266667 0.266667 {}
+L 3 340 -410 360 -410 {}
+B 5 357.5 -412.5 362.5 -407.5 {pinnumber=16
+pinseq=28
+name=_A\\ STB_
+dir=in
+}
+T {@#36:pinnumber} 340 -415 2 1 0.266667 0.266667 {}
+T {@#36:name} 325 -410 2 0 0.266667 0.266667 {}
 L 3 330 -370 360 -370 {}
 B 5 357.5 -372.5 362.5 -367.5 {pinnumber=27
 pinseq=29
@@ -286,38 +337,6 @@ dir=out
 }
 T {@#30:pinnumber} 340 -55 2 1 0.266667 0.266667 {}
 T {@#30:name} 325 -50 2 0 0.266667 0.266667 {}
-L 3 0 -370 20 -370 {}
-B 5 -2.5 -372.5 2.5 -367.5 {pinnumber=4
-pinseq=11
-name=_CE_
-dir=in
-}
-T {@#31:pinnumber} 20 -375 2 0 0.266667 0.266667 {}
-T {@#31:name} 35 -370 2 1 0.266667 0.266667 {}
-L 3 0 -330 20 -330 {}
-B 5 -2.5 -332.5 2.5 -327.5 {pinnumber=37
-pinseq=12
-name=_M1_
-dir=in
-}
-T {@#32:pinnumber} 20 -335 2 0 0.266667 0.266667 {}
-T {@#32:name} 35 -330 2 1 0.266667 0.266667 {}
-L 3 0 -250 20 -250 {}
-B 5 -2.5 -252.5 2.5 -247.5 {pinnumber=35
-pinseq=14
-name=_RD_
-dir=in
-}
-T {@#33:pinnumber} 20 -255 2 0 0.266667 0.266667 {}
-T {@#33:name} 35 -250 2 1 0.266667 0.266667 {}
-L 3 0 -170 20 -170 {}
-B 5 -2.5 -172.5 2.5 -167.5 {pinnumber=23
-pinseq=15
-name=_INT_
-dir=out
-}
-T {@#34:pinnumber} 20 -175 2 0 0.266667 0.266667 {}
-T {@#34:name} 35 -170 2 1 0.266667 0.266667 {}
 L 3 340 -10 360 -10 {}
 B 5 357.5 -12.5 362.5 -7.5 {pinnumber=17
 pinseq=38
@@ -326,19 +345,3 @@ dir=in
 }
 T {@#35:pinnumber} 340 -15 2 1 0.266667 0.266667 {}
 T {@#35:name} 325 -10 2 0 0.266667 0.266667 {}
-L 3 340 -410 360 -410 {}
-B 5 357.5 -412.5 362.5 -407.5 {pinnumber=16
-pinseq=28
-name=_A\\ STB_
-dir=in
-}
-T {@#36:pinnumber} 340 -415 2 1 0.266667 0.266667 {}
-T {@#36:name} 325 -410 2 0 0.266667 0.266667 {}
-L 3 0 -290 20 -290 {}
-B 5 -2.5 -292.5 2.5 -287.5 {pinnumber=36
-pinseq=13
-name=_IORQ_
-dir=in
-}
-T {@#37:pinnumber} 20 -295 2 0 0.266667 0.266667 {}
-T {@#37:name} 35 -290 2 1 0.266667 0.266667 {}

@@ -3,20 +3,23 @@ G {type=4556
 template="name=U?
 device=4556
 footprint=DIP16
-net=VSS:8
-net=VDD:16
 slot=1
 numslots=2
 slotdef=1:1,3,2,7,6,5,4
 slotdef=2:15,13,14,9,10,11,12
-description=2\\\\ 2-bit\\\\ binary\\\\ decoders
+description=\\"2 2-bit binary decoders\\"
 documentation=http://www.semiconductors.philips.com/acrobat/datasheets/HEF4556B_CNV_3.pdf
+VSS=VSS
+VDD=VDD
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @VSS @VDD"
+
+extra="VSS VDD"
+extra_pinnumber="8 16"
 }
 V {}
 S {}

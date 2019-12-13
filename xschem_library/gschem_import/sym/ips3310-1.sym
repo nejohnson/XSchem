@@ -2,7 +2,7 @@ v {xschem version=2.9.5_RC6 file_version=1.1}
 G {type=IPS3310
 template="device=IPS3310
 documentation=http://www.irf.com/product-info/datasheets/data/ips3310.pdf
-description=Protected\\\\ HEXFET\\\\ Power\\\\ MOSFET
+description=\\"Protected HEXFET Power MOSFET\\"
 numslots=0
 footprint=TO-220AB5
 name=Q?
@@ -12,7 +12,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}
@@ -347,30 +348,6 @@ A 4 250 -330 40 0 76 {}
 
 
 
-L 3 590 -430 590 -410 {}
-B 5 587.5 -432.5 592.5 -427.5 {pinnumber=3
-name=Vcc
-pinseq=3
-dir=out
-}
-T {@#0:pinnumber} 600 -420 2 1 0.333333 0.333333 {}
-T {@#0:name} 550 -420 2 1 0.333333 0.333333 {}
-L 3 590 -30 590 -10 {}
-B 5 587.5 -12.5 592.5 -7.5 {pinnumber=5
-name=Out
-pinseq=5
-dir=out
-}
-T {@#1:pinnumber} 600 -10 2 1 0.333333 0.333333 {}
-T {@#1:name} 550 -10 2 1 0.333333 0.333333 {}
-L 3 530 -30 530 -10 {}
-B 5 527.5 -12.5 532.5 -7.5 {pinnumber=2
-name=Ifb
-pinseq=2
-dir=in
-}
-T {@#2:pinnumber} 547 -20 0 1 0.333333 0.333333 {}
-T {@#2:name} 530 -20 0 1 0.333333 0.333333 {}
 L 3 50 -30 50 -10 {}
 B 5 47.5 -12.5 52.5 -7.5 {pinnumber=1
 name=In
@@ -379,3 +356,21 @@ dir=in
 }
 T {@#3:pinnumber} 60 -10 2 1 0.333333 0.333333 {}
 T {@#3:name} 30 -10 2 1 0.333333 0.333333 {}
+L 3 530 -30 530 -10 {}
+B 5 527.5 -12.5 532.5 -7.5 {pinnumber=2
+name=Ifb
+pinseq=2
+dir=in
+}
+T {@#2:pinnumber} 547 -20 0 1 0.333333 0.333333 {}
+T {@#2:name} 530 -20 0 1 0.333333 0.333333 {}
+L 3 590 -430 590 -410 {}
+B 5 587.5 -432.5 592.5 -427.5 {pinnumber=3
+name=Vcc
+pinseq=3
+dir=out
+}
+T {@#0:pinnumber} 600 -420 2 1 0.333333 0.333333 {}
+T {@#0:name} 550 -420 2 1 0.333333 0.333333 {}
+
+ {}

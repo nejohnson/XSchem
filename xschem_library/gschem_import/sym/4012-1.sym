@@ -1,22 +1,25 @@
 v {xschem version=2.9.5_RC6 file_version=1.1}
 G {type=4012
-template="net=VDD:14
-net=VSS:7
-numslots=2
+template="numslots=2
 slotdef=1:2,3,4,5,1
 slotdef=2:12,11,10,9,13
 device=4012
 slot=1
 footprint=DIP14
-description=2\\\\ NAND-gates\\\\ with\\\\ 2\\\\ inputs
+description=\\"2 NAND-gates with 2 inputs\\"
 symversion=1.0
 name=U?
+VDD=VDD
+VSS=VSS
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @VDD @VSS"
+
+extra="VDD VSS"
+extra_pinnumber="14 7"
 }
 V {}
 S {}

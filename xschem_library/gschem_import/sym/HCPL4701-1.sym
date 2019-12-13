@@ -8,7 +8,8 @@ tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value "
+
 }
 V {}
 S {}
@@ -43,6 +44,14 @@ name=Cathode
 }
 T {@#1:pinnumber} 10 -70 2 1 0.266667 0.266667 {}
 T {@#1:name} 40 -60 2 1 0.333333 0.333333 {}
+L 3 170 -30 200 -30 {}
+B 5 197.5 -32.5 202.5 -27.5 {pinnumber=5
+pinseq=3
+dir=inout
+name=GND
+}
+T {@#5:pinnumber} 180 -40 2 1 0.266667 0.266667 {}
+T {@#5:name} 120 -30 2 1 0.333333 0.333333 {}
 L 3 170 -60 200 -60 {}
 B 5 197.5 -62.5 202.5 -57.5 {pinnumber=6
 pinseq=4
@@ -67,11 +76,3 @@ name=Vcc
 }
 T {@#4:pinnumber} 180 -130 2 1 0.266667 0.266667 {}
 T {@#4:name} 130 -120 2 1 0.333333 0.333333 {}
-L 3 170 -30 200 -30 {}
-B 5 197.5 -32.5 202.5 -27.5 {pinnumber=5
-pinseq=3
-dir=inout
-name=GND
-}
-T {@#5:pinnumber} 180 -40 2 1 0.266667 0.266667 {}
-T {@#5:name} 120 -30 2 1 0.333333 0.333333 {}

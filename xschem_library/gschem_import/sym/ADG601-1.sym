@@ -4,17 +4,20 @@ template="device=ADG601
 numslots=0
 name=U?
 footprint=MSOP8
-description=2.2\\\\ \\\\ CMOS\\\\ ±\\\\ 5\\\\ V/5V,\\\\ SPST\\\\ Switch
-net=Vcc:4
-net=GND:7
+description=\\" 2.2  CMOS ± 5 V/5V, SPST Switch\\"
 symversion=0.1
 documentation=http://www.analog.com/UploadedFiles/Data_Sheets/3597365479993ADG601_2_a.pdf
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="4 7"
 }
 V {}
 S {}
@@ -65,30 +68,6 @@ dir=inout
 }
 T {@#3:pinnumber} 20 -25 2 0 0.266667 0.266667 {}
 T {@#3:name} 35 -20 2 1 0.266667 0.266667 {}
-L 3 130 -110 160 -110 {}
-B 5 157.5 -112.5 162.5 -107.5 {pinnumber=8
-pinseq=8
-name=S
-dir=inout
-}
-T {@#4:pinnumber} 140 -115 2 1 0.266667 0.266667 {}
-T {@#4:name} 125 -110 2 0 0.266667 0.266667 {}
-L 3 130 -80 160 -80 {}
-B 5 157.5 -82.5 162.5 -77.5 {pinnumber=7
-pinseq=7
-name=GND
-dir=inout
-}
-T {@#5:pinnumber} 140 -85 2 1 0.266667 0.266667 {}
-T {@#5:name} 125 -80 2 0 0.266667 0.266667 {}
-L 3 130 -50 160 -50 {}
-B 5 157.5 -52.5 162.5 -47.5 {pinnumber=6
-pinseq=6
-name=IN
-dir=in
-}
-T {@#6:pinnumber} 140 -55 2 1 0.266667 0.266667 {}
-T {@#6:name} 125 -50 2 0 0.266667 0.266667 {}
 L 3 130 -20 160 -20 {}
 B 5 157.5 -22.5 162.5 -17.5 {pinnumber=5
 pinseq=5
@@ -97,3 +76,27 @@ dir=inout
 }
 T {@#7:pinnumber} 140 -25 2 1 0.266667 0.266667 {}
 T {@#7:name} 125 -20 2 0 0.266667 0.266667 {}
+L 3 130 -50 160 -50 {}
+B 5 157.5 -52.5 162.5 -47.5 {pinnumber=6
+pinseq=6
+name=IN
+dir=in
+}
+T {@#6:pinnumber} 140 -55 2 1 0.266667 0.266667 {}
+T {@#6:name} 125 -50 2 0 0.266667 0.266667 {}
+L 3 130 -80 160 -80 {}
+B 5 157.5 -82.5 162.5 -77.5 {pinnumber=7
+pinseq=7
+name=GND
+dir=inout
+}
+T {@#5:pinnumber} 140 -85 2 1 0.266667 0.266667 {}
+T {@#5:name} 125 -80 2 0 0.266667 0.266667 {}
+L 3 130 -110 160 -110 {}
+B 5 157.5 -112.5 162.5 -107.5 {pinnumber=8
+pinseq=8
+name=S
+dir=inout
+}
+T {@#4:pinnumber} 140 -115 2 1 0.266667 0.266667 {}
+T {@#4:name} 125 -110 2 0 0.266667 0.266667 {}

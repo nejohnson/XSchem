@@ -1,19 +1,22 @@
 v {xschem version=2.9.5_RC6 file_version=1.1}
 G {type=4078
 template="name=U?
-net=VDD:14
-net=VSS:7
 device=4078
 footprint=DIP14
-description=NOR\\\\ gate\\\\ with\\\\ 8\\\\ inputs
+description=\\"NOR gate with 8 inputs\\"
 numslots=0
-comment=/Q\\\\ is\\\\ not\\\\ available\\\\ on\\\\ all\\\\ devices
+comment=\\"/Q is not available on all devices\\"
+VDD=VDD
+VSS=VSS
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @VDD @VSS"
+
+extra="VDD VSS"
+extra_pinnumber="14 7"
 }
 V {}
 S {}

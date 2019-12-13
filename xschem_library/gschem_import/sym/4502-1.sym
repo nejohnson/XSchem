@@ -3,17 +3,20 @@ G {type=4502
 template="name=U?
 device=4502
 footprint=DIP
-net=VSS:8
-net=VDD:16
-description=strobed\\\\ hex\\\\ inverting\\\\ bus\\\\ driver
+description=\\"strobed hex inverting bus driver\\"
 numslots=0
 documentation=http://www.semiconductors.philips.com/acrobat/datasheets/HEF4502B_CNV_3.pdf
+VSS=VSS
+VDD=VDD
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @VSS @VDD"
+
+extra="VSS VDD"
+extra_pinnumber="8 16"
 }
 V {}
 S {}

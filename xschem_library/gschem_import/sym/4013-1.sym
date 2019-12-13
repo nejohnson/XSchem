@@ -7,15 +7,18 @@ slotdef=1:6,5,3,4,1,2
 slotdef=2:8,9,11,10,13,12
 name=U?
 footprint=DIP14
-description=2\\\\ D-type\\\\ flip-flops
-net=VDD:14
-net=VSS:7
+description=\\"2 D-type flip-flops\\"
+VDD=VDD
+VSS=VSS
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @VDD @VSS"
+
+extra="VDD VSS"
+extra_pinnumber="14 7"
 }
 V {}
 S {}

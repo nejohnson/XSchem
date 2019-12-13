@@ -3,16 +3,19 @@ G {type=7490
 template="device=7490
 footprint=DIP14
 name=U?
-description=decimal\\\\ counter,\\\\ div2\\\\ and\\\\ div5
-net=Vcc:5
-net=GND:10
+description=\\"decimal counter, div2 and div5\\"
 numslots=0
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="5 10"
 }
 V {}
 S {}

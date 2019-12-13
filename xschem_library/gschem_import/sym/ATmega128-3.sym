@@ -3,20 +3,23 @@ G {type=Atmega128
 template="name=U?
 device=Atmega128
 footprint=TQFP64
-net=Vcc:21,52
-net=GND:22,53
-net=AGND:63
-net=AVcc:64
-description=8-bit\\\\ RISC\\\\ micro\\\\ controller\\\\ (Atmel)
+description=\\"8-bit RISC micro controller (Atmel)\\"
 numslots=0
-author=Radoslaw\\\\ Korzeniewski\\\\ <radoslaw@korzeniewski.net>
+author=\\"Radoslaw Korzeniewski <radoslaw@korzeniewski.net>\\"
 symversion=1.0
+Vcc=Vcc
+GND=GND
+AGND=AGND
+AVcc=AVcc
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND @AGND @AVcc"
+
+extra="Vcc GND AGND AVcc"
+extra_pinnumber="21,52 22,53 63 64"
 }
 V {}
 S {}

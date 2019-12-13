@@ -6,17 +6,20 @@ numslots=2
 slotdef=1:1,13,2,4,3,14,15
 slotdef=2:9,5,10,12,11,6,7
 name=U?
-description=2\\\\ retriggerable\\\\ monoflops\\\\ with\\\\ clear
-net=Vcc:16
-net=GND:8
+description=\\"2 retriggerable monoflops with clear\\"
 slot=1
 documentation=http://www.semiconductors.philips.com/acrobat/datasheets/74HC_HCT123_CNV_2.pdf
+Vcc=Vcc
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @Vcc @GND"
+
+extra="Vcc GND"
+extra_pinnumber="16 8"
 }
 V {}
 S {}
@@ -61,30 +64,6 @@ dir=in
 }
 T {@#2:pinnumber} 20 -95 2 0 0.266667 0.266667 {}
 T {@#2:name} 35 -90 2 1 0.266667 0.266667 {}
-L 3 170 -50 200 -50 {}
-B 5 197.5 -52.5 202.5 -47.5 {pinnumber=14
-pinseq=6
-name=Ce
-dir=inout
-}
-T {@#3:pinnumber} 180 -55 2 1 0.266667 0.266667 {}
-T {@#3:name} 165 -50 2 0 0.266667 0.266667 {}
-L 3 0 -50 20 -50 {}
-B 5 -2.5 -52.5 2.5 -47.5 {pinnumber=3
-pinseq=5
-name=_CLR_
-dir=in
-}
-T {@#4:pinnumber} 20 -55 2 0 0.266667 0.266667 {}
-T {@#4:name} 35 -50 2 1 0.266667 0.266667 {}
-L 3 170 -10 200 -10 {}
-B 5 197.5 -12.5 202.5 -7.5 {pinnumber=15
-pinseq=7
-name=Re/Ce
-dir=inout
-}
-T {@#5:pinnumber} 180 -15 2 1 0.266667 0.266667 {}
-T {@#5:name} 165 -10 2 0 0.266667 0.266667 {}
 L 3 170 -90 200 -90 {}
 B 5 197.5 -92.5 202.5 -87.5 {pinnumber=4
 pinseq=4
@@ -93,3 +72,27 @@ dir=out
 }
 T {@#6:pinnumber} 180 -95 2 1 0.266667 0.266667 {}
 T {@#6:name} 165 -90 2 0 0.266667 0.266667 {}
+L 3 0 -50 20 -50 {}
+B 5 -2.5 -52.5 2.5 -47.5 {pinnumber=3
+pinseq=5
+name=_CLR_
+dir=in
+}
+T {@#4:pinnumber} 20 -55 2 0 0.266667 0.266667 {}
+T {@#4:name} 35 -50 2 1 0.266667 0.266667 {}
+L 3 170 -50 200 -50 {}
+B 5 197.5 -52.5 202.5 -47.5 {pinnumber=14
+pinseq=6
+name=Ce
+dir=inout
+}
+T {@#3:pinnumber} 180 -55 2 1 0.266667 0.266667 {}
+T {@#3:name} 165 -50 2 0 0.266667 0.266667 {}
+L 3 170 -10 200 -10 {}
+B 5 197.5 -12.5 202.5 -7.5 {pinnumber=15
+pinseq=7
+name=Re/Ce
+dir=inout
+}
+T {@#5:pinnumber} 180 -15 2 1 0.266667 0.266667 {}
+T {@#5:name} 165 -10 2 0 0.266667 0.266667 {}

@@ -3,16 +3,19 @@ G {type=4029
 template="name=U?
 device=4029
 footprint=DIP16
-net=VSS:8
-net=VDD:16
-description=synchronous\\\\ up/down,\\\\ binary/decade\\\\ counter
+description=\\"synchronous up/down, binary/decade counter\\"
 numslots=0
+VSS=VSS
+VDD=VDD
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @VSS @VDD"
+
+extra="VSS VDD"
+extra_pinnumber="8 16"
 }
 V {}
 S {}

@@ -3,13 +3,16 @@ G {type=7885
 template="device=7885
 name=U?
 pins=3
-net=GND:2
+GND=GND
 "
 tedax_format="footprint @name @footprint
 value @name @value
 device @name @device
 @comptag"
-format="@name @pinlist @value"
+format="@name @pinlist @value @GND"
+
+extra="GND"
+extra_pinnumber="2"
 }
 V {}
 S {}

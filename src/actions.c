@@ -1142,8 +1142,8 @@ void change_linewidth(double w)
   /* choose line width automatically based on zoom */
   if(w<0.) {
     if(change_lw)  {
-      lw_double=mooz * 0.150 * cadsnap;
-      bus_width = BUS_WIDTH * mooz * 0.150 * cadsnap;
+      lw_double=mooz * 0.09 * cadsnap;
+      bus_width = BUS_WIDTH * mooz * 0.09 * cadsnap;
       cadhalfdotsize = CADHALFDOTSIZE * 0.1 * cadsnap;
       changed=1;
     }
@@ -2004,9 +2004,14 @@ int text_bbox(char * str,double xscale, double yscale,
    if(length > w)
      w = length;
   }                
-  w *= (FONTWIDTH+FONTWHITESPACE)*xscale;
-  h *= (FONTHEIGHT+FONTDESCENT+FONTWHITESPACE)*yscale;
+  w *= (FONTWIDTH+FONTWHITESPACE)*xscale*nocairo_font_xscale;
+  h *= (FONTHEIGHT+FONTDESCENT+FONTWHITESPACE)*yscale*nocairo_font_yscale;
   *rx1=x1;*ry1=y1;
+  if(     rot==0) *ry1-=nocairo_vert_correct;
+  else if(rot==1) *rx1+=nocairo_vert_correct;
+  else if(rot==2) *ry1+=nocairo_vert_correct;
+  else            *rx1-=nocairo_vert_correct;
+
   ROTATION(0.0,0.0,w,h,(*rx2),(*ry2));
   *rx2+=*rx1;*ry2+=*ry1;
   RECTORDER((*rx1),(*ry1),(*rx2),(*ry2)); 

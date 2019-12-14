@@ -41,7 +41,7 @@
 /*  approximate PI definition */
 #define XSCH_PI 3.14159265358979323846264338327950288419716939937
 
-/* #include "../config.h" */
+#include "../config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -919,8 +919,12 @@ extern char cairo_font_name[1024]; /*  should be monospaced */
 extern int cairo_longest_line;
 extern int cairo_lines;
 extern double cairo_font_scale; /*  default: 1.0, allows to adjust font size */
+extern double nocairo_font_xscale;
+extern double nocairo_font_yscale;
+
 extern double cairo_font_line_spacing; /*  allows to change line spacing: default: 1.0 */
 extern double cairo_vert_correct;
+extern double nocairo_vert_correct;
 #ifdef HAS_CAIRO /*  20171105 */
 #include <cairo.h>
 #include <cairo-xlib.h>

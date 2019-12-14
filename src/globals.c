@@ -276,6 +276,8 @@ char cairo_font_name[1024]="Monospace";
 int cairo_longest_line;
 int cairo_lines;
 double cairo_font_scale=1.0; /* default: 1.0, allows to adjust font size */
+double nocairo_font_xscale=0.88;
+double nocairo_font_yscale=0.92;
 double cairo_font_line_spacing=1.0; /* allows to change line spacing: default: 1.0 */
 
 /* lift up the text by 'n' pixels (zoom corrected) within the bbox.  */
@@ -283,4 +285,5 @@ double cairo_font_line_spacing=1.0; /* allows to change line spacing: default: 1
 /* compared to the nocairo xschem version. */
 /* allowed values should be in the range [-4, 4] */
 double cairo_vert_correct=0.0;
+double nocairo_vert_correct=0.0;
                                

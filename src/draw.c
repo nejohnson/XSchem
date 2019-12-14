@@ -381,6 +381,8 @@ void draw_string(int layer, int what, char *str, int rot, int flip,
  }
  else {
   text_bbox(str, xscale, yscale, rot, flip, x1,y1, &textx1,&texty1,&textx2,&texty2);
+  xscale*=nocairo_font_xscale;
+  yscale*=nocairo_font_yscale;
   if(!textclip(areax1,areay1,areax2,areay2,textx1,texty1,textx2,texty2)) return;
   x1=textx1;y1=texty1;
   if(rot&1) {y1=texty2;rot=3;}

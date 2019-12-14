@@ -180,6 +180,9 @@ static void ps_draw_string(int gctext,  char *str,
  #else
  text_bbox(str, xscale, yscale, rot, flip, x1,y1, &rx1,&ry1,&rx2,&ry2);
  #endif
+ xscale*=nocairo_font_xscale;
+ yscale*=nocairo_font_yscale;
+
  if(!textclip(areax1,areay1,areax2,areay2,rx1,ry1,rx2,ry2)) return;
  x1=rx1;y1=ry1;
  if(rot&1) {y1=ry2;rot=3;}

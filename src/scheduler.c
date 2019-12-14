@@ -1624,6 +1624,14 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
     double s = atof(argv[3]);
     if(s>0.1 && s<10.0) cairo_font_scale = s;
   }
+  else if(!strcmp(argv[2],"nocairo_font_xscale"))  {
+    double s = atof(argv[3]);
+    if(s>0.1 && s<10.0) nocairo_font_xscale = s;
+  }
+  else if(!strcmp(argv[2],"nocairo_font_yscale"))  {
+    double s = atof(argv[3]);
+    if(s>0.1 && s<10.0) nocairo_font_yscale = s;
+  }
   else if(!strcmp(argv[2],"cairo_font_line_spacing"))  {
     double s = atof(argv[3]);
     if(s>0.1 && s<10.0) cairo_font_line_spacing = s;
@@ -1631,6 +1639,10 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
   else if(!strcmp(argv[2],"cairo_vert_correct"))  {
     double s = atof(argv[3]);
     if(s>-20. && s<20.) cairo_vert_correct = s;
+  }
+  else if(!strcmp(argv[2],"nocairo_vert_correct"))  {
+    double s = atof(argv[3]);
+    if(s>-20. && s<20.) nocairo_vert_correct = s;
   }
   else if(!strcmp(argv[2],"netlist_type"))  {
     if(!strcmp(argv[3],"vhdl")) {

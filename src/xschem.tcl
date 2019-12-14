@@ -2221,11 +2221,14 @@ set_ne ngspice_path ngspice
 
 ## cairo stuff 20171112
 set_ne cairo_font_scale 1.0
+set_ne nocairo_font_xscale .88
+set_ne nocairo_font_yscale .83
 set_ne cairo_font_line_spacing 1.0
 
 # Arial, Monospace
 set_ne cairo_font_name {Arial}
 set_ne cairo_vert_correct 1.0
+set_ne nocairo_vert_correct 2
 # has_cairo set by c program if cairo enabled
 set has_cairo 0 
 set rotated_text {} ;#20171208
@@ -2352,8 +2355,11 @@ set custom_label_prefix {}
 
 # 20171112 cairo stuff
 xschem set cairo_font_scale $cairo_font_scale
+xschem set nocairo_font_xscale $nocairo_font_xscale
+xschem set nocairo_font_yscale $nocairo_font_yscale
 xschem set cairo_font_line_spacing $cairo_font_line_spacing
 xschem set cairo_vert_correct $cairo_vert_correct
+xschem set nocairo_vert_correct $nocairo_vert_correct
 xschem set persistent_command $persistent_command
 xschem set disable_unique_names $disable_unique_names
 # font name can not be set here as we need to wait for X-initialization 

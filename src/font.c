@@ -36,7 +36,7 @@ void compile_font(void)
  {
   unselect_all();
   select_inside(code*FONTOFFSET-1,-FONTHEIGHT-1,
-                 code*FONTOFFSET+FONTWIDTH+1,FONTDESCENT+1, 1);
+                 code*FONTOFFSET+FONTWIDTH+1,FONTWHITESPACE + FONTDESCENT+1, 1);
   rebuild_selected_array();
   character[code] = my_calloc(134, lastselected*4+1, sizeof(double));
   character[code][0] = (double)lastselected;

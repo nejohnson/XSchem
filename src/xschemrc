@@ -143,6 +143,11 @@ set use_list_dirs 0
 #### Scale all fonts by this number
 # set cairo_font_scale 1.0
 
+#### default for following two is 0.85 (xscale) and 0.88 (yscale) to 
+#### match cairo font spacing
+# set nocairo_font_xscale 1.0
+# set nocairo_font_yscale 1.0
+
 #### Scale line spacing by this number
 # set cairo_font_line_spacing 1.0
 
@@ -152,7 +157,8 @@ set cairo_font_name {Arial}
 #### Lift up text by some zoom-corrected pixels for
 #### better compatibility wrt no cairo version.
 #### Useful values in the range [-1, 3]
-set cairo_vert_correct 1
+# set cairo_vert_correct 0
+# set nocairo_vert_correct 0
 
 ###########################################################################
 # KEYBINDINGS

@@ -2221,14 +2221,14 @@ set_ne ngspice_path ngspice
 
 ## cairo stuff 20171112
 set_ne cairo_font_scale 1.0
-set_ne nocairo_font_xscale .88
-set_ne nocairo_font_yscale .83
+set_ne nocairo_font_xscale .85
+set_ne nocairo_font_yscale .88
 set_ne cairo_font_line_spacing 1.0
+set_ne cairo_vert_correct 0
+set_ne nocairo_vert_correct 0
 
 # Arial, Monospace
 set_ne cairo_font_name {Arial}
-set_ne cairo_vert_correct 1.0
-set_ne nocairo_vert_correct 2
 # has_cairo set by c program if cairo enabled
 set has_cairo 0 
 set rotated_text {} ;#20171208

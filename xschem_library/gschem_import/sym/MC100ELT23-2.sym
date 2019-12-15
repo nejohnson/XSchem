@@ -43,7 +43,7 @@ name=1
 dir=inout
 pinnumber=1:4
 }
-T {@#2:pinnumber} 10 -75 2 1 0.266667 0.266667 {}
+T {@#0:pinnumber} 10 -75 2 1 0.266667 0.266667 {layer=13}
 L 3 0 -30 20 -30 {}
 B 5 -2.5 -32.5 2.5 -27.5 {
 pinseq=2
@@ -51,12 +51,12 @@ name=2
 dir=inout
 pinnumber=2:3
 }
-T {@#0:pinnumber} 10 -35 2 1 0.266667 0.266667 {}
+T {@#1:pinnumber} 10 -35 2 1 0.266667 0.266667 {layer=13}
 L 3 80 -50 110 -50 {}
 B 5 107.5 -52.5 112.5 -47.5 {
 pinseq=3
 name=7
 dir=inout
-pinnumber=
+pinnumber=7:6
 }
-T {@#1:pinnumber} 81.5 -55 2 1 0.266667 0.266667 {}
+T {@#2:pinnumber} 81.5 -55 2 1 0.266667 0.266667 {layer=13}

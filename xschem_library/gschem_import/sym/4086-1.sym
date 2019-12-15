@@ -79,74 +79,74 @@ pinseq=1
 dir=in
 name=A
 }
-T {@#9:pinnumber} 20 -45 2 0 0.266667 0.266667 {}
+T {@#0:pinnumber} 20 -45 2 0 0.266667 0.266667 {layer=13}
 L 3 0 -80 30 -80 {}
 B 5 -2.5 -82.5 2.5 -77.5 {pinnumber=2
 pinseq=2
 dir=in
 name=B
 }
-T {@#8:pinnumber} 20 -85 2 0 0.266667 0.266667 {}
+T {@#1:pinnumber} 20 -85 2 0 0.266667 0.266667 {layer=13}
 L 3 0 -140 30 -140 {}
 B 5 -2.5 -142.5 2.5 -137.5 {pinnumber=5
 pinseq=3
 dir=in
 name=C
 }
-T {@#4:pinnumber} 20 -145 2 0 0.266667 0.266667 {}
+T {@#2:pinnumber} 20 -145 2 0 0.266667 0.266667 {layer=13}
 L 3 0 -180 30 -180 {}
 B 5 -2.5 -182.5 2.5 -177.5 {pinnumber=6
 pinseq=4
 dir=in
 name=D
 }
-T {@#3:pinnumber} 20 -185 2 0 0.266667 0.266667 {}
+T {@#3:pinnumber} 20 -185 2 0 0.266667 0.266667 {layer=13}
 L 3 0 -220 30 -220 {}
 B 5 -2.5 -222.5 2.5 -217.5 {pinnumber=10
 pinseq=5
 dir=in
 name=I
 }
-T {@#10:pinnumber} 20 -225 2 0 0.266667 0.266667 {}
+T {@#4:pinnumber} 20 -225 2 0 0.266667 0.266667 {layer=13}
 L 3 0 -260 30 -260 {}
 B 5 -2.5 -262.5 2.5 -257.5 {pinnumber=11
 pinseq=6
 dir=in
 name=J
 }
-T {@#5:pinnumber} 20 -265 2 0 0.266667 0.266667 {}
+T {@#5:pinnumber} 20 -265 2 0 0.266667 0.266667 {layer=13}
 L 3 0 -300 30 -300 {}
 B 5 -2.5 -302.5 2.5 -297.5 {pinnumber=8
 pinseq=7
 dir=in
 name=E
 }
-T {@#2:pinnumber} 20 -305 2 0 0.266667 0.266667 {}
+T {@#6:pinnumber} 20 -305 2 0 0.266667 0.266667 {layer=13}
 L 3 0 -340 30 -340 {}
 B 5 -2.5 -342.5 2.5 -337.5 {pinnumber=9
 pinseq=8
 dir=in
 name=F
 }
-T {@#1:pinnumber} 20 -345 2 0 0.266667 0.266667 {}
+T {@#7:pinnumber} 20 -345 2 0 0.266667 0.266667 {layer=13}
 L 3 0 -400 30 -400 {}
 B 5 -2.5 -402.5 2.5 -397.5 {pinnumber=12
 pinseq=9
 dir=in
 name=G
 }
-T {@#7:pinnumber} 20 -405 2 0 0.266667 0.266667 {}
+T {@#8:pinnumber} 20 -405 2 0 0.266667 0.266667 {layer=13}
 L 3 0 -440 30 -440 {}
 B 5 -2.5 -442.5 2.5 -437.5 {pinnumber=13
 pinseq=10
 dir=in
 name=H
 }
-T {@#6:pinnumber} 20 -445 2 0 0.266667 0.266667 {}
+T {@#9:pinnumber} 20 -445 2 0 0.266667 0.266667 {layer=13}
 L 3 430 -240 450 -240 {}
 B 5 447.5 -242.5 452.5 -237.5 {pinnumber=3
 pinseq=11
 dir=out
 name=Y
 }
-T {@#0:pinnumber} 430 -245 2 1 0.266667 0.266667 {}
+T {@#10:pinnumber} 430 -245 2 1 0.266667 0.266667 {layer=13}

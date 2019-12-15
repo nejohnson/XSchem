@@ -39,11 +39,11 @@ pinseq=1
 name=+
 dir=inout
 }
-T {@#0:pinnumber} 15 -25 2 0 0.266667 0.266667 {}
+T {@#0:pinnumber} 15 -25 2 0 0.266667 0.266667 {layer=13}
 L 3 90 -20 110 -20 {}
 B 5 107.5 -22.5 112.5 -17.5 {pinnumber=2
 pinseq=2
 name=-
 dir=inout
 }
-T {@#1:pinnumber} 95 -25 2 1 0.266667 0.266667 {}
+T {@#1:pinnumber} 95 -25 2 1 0.266667 0.266667 {layer=13}

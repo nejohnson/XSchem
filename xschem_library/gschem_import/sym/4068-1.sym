@@ -45,67 +45,67 @@ pinseq=1
 dir=in
 name=A
 }
-T {@#0:pinnumber} 20 -295 2 0 0.266667 0.266667 {}
+T {@#0:pinnumber} 20 -295 2 0 0.266667 0.266667 {layer=13}
 L 3 0 -250 30 -250 {}
 B 5 -2.5 -252.5 2.5 -247.5 {pinnumber=3
 pinseq=2
 dir=in
 name=B
 }
-T {@#1:pinnumber} 20 -255 2 0 0.266667 0.266667 {}
+T {@#1:pinnumber} 20 -255 2 0 0.266667 0.266667 {layer=13}
 L 3 0 -210 30 -210 {}
 B 5 -2.5 -212.5 2.5 -207.5 {pinnumber=4
 pinseq=3
 dir=in
 name=C
 }
-T {@#2:pinnumber} 20 -215 2 0 0.266667 0.266667 {}
+T {@#2:pinnumber} 20 -215 2 0 0.266667 0.266667 {layer=13}
 L 3 0 -170 30 -170 {}
 B 5 -2.5 -172.5 2.5 -167.5 {pinnumber=5
 pinseq=4
 dir=in
 name=D
 }
-T {@#3:pinnumber} 20 -175 2 0 0.266667 0.266667 {}
+T {@#3:pinnumber} 20 -175 2 0 0.266667 0.266667 {layer=13}
 L 3 0 -130 30 -130 {}
 B 5 -2.5 -132.5 2.5 -127.5 {pinnumber=9
 pinseq=5
 dir=in
 name=E
 }
-T {@#4:pinnumber} 20 -135 2 0 0.266667 0.266667 {}
+T {@#4:pinnumber} 20 -135 2 0 0.266667 0.266667 {layer=13}
 L 3 0 -90 30 -90 {}
 B 5 -2.5 -92.5 2.5 -87.5 {pinnumber=10
 pinseq=6
 dir=in
 name=F
 }
-T {@#5:pinnumber} 20 -95 2 0 0.266667 0.266667 {}
+T {@#5:pinnumber} 20 -95 2 0 0.266667 0.266667 {layer=13}
 L 3 0 -50 30 -50 {}
 B 5 -2.5 -52.5 2.5 -47.5 {pinnumber=11
 pinseq=7
 dir=in
 name=G
 }
-T {@#6:pinnumber} 20 -55 2 0 0.266667 0.266667 {}
+T {@#6:pinnumber} 20 -55 2 0 0.266667 0.266667 {layer=13}
 L 3 0 -10 30 -10 {}
 B 5 -2.5 -12.5 2.5 -7.5 {pinnumber=12
 pinseq=8
 dir=in
 name=H
 }
-T {@#7:pinnumber} 20 -15 2 0 0.266667 0.266667 {}
+T {@#7:pinnumber} 20 -15 2 0 0.266667 0.266667 {layer=13}
 L 3 105 -150 130 -150 {}
 B 5 127.5 -152.5 132.5 -147.5 {pinnumber=13
 pinseq=9
 dir=out
 name=/Q
 }
-T {@#8:pinnumber} 110 -155 2 1 0.266667 0.266667 {}
+T {@#8:pinnumber} 110 -155 2 1 0.266667 0.266667 {layer=13}
 L 3 95 -190 130 -190 {}
 B 5 127.5 -192.5 132.5 -187.5 {pinnumber=1
 pinseq=10
 dir=out
 name=Q
 }
-T {@#9:pinnumber} 110 -195 2 1 0.266667 0.266667 {}
+T {@#9:pinnumber} 110 -195 2 1 0.266667 0.266667 {layer=13}

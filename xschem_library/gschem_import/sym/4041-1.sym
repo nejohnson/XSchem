@@ -47,9 +47,9 @@ B 5 -2.5 -112.5 2.5 -107.5 {
 pinseq=1
 dir=in
 name=A
-pinnumber=1:4:8:11
+pinnumber=3:6:10:13
 }
-T {@#0:pinnumber} 20 -115 2 0 0.266667 0.266667 {}
+T {@#0:pinnumber} 20 -115 2 0 0.266667 0.266667 {layer=13}
 L 3 130 -160 150 -160 {}
 B 5 147.5 -162.5 152.5 -157.5 {
 pinseq=2
@@ -57,12 +57,12 @@ dir=out
 name=/Q
 pinnumber=2:5:9:12
 }
-T {@#1:pinnumber} 130 -165 2 1 0.266667 0.266667 {}
+T {@#1:pinnumber} 130 -165 2 1 0.266667 0.266667 {layer=13}
 L 3 120 -60 150 -60 {}
 B 5 147.5 -62.5 152.5 -57.5 {
 pinseq=3
 dir=out
 name=Q
-pinnumber=3:6:10:13
+pinnumber=1:4:8:11
 }
-T {@#2:pinnumber} 130 -65 2 1 0.266667 0.266667 {}
+T {@#2:pinnumber} 130 -65 2 1 0.266667 0.266667 {layer=13}

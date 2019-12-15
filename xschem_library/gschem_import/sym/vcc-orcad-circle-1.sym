@@ -29,4 +29,4 @@ pinseq=1
 dir=inout
 name=PWR
 }
-T {@#0:pinnumber} 0 -20 2 1 0.2 0.2 {}
+T {@#0:pinnumber} 0 -20 2 1 0.2 0.2 {layer=13}

@@ -40,9 +40,9 @@ B 5 -2.5 -52.5 2.5 -47.5 {
 pinseq=1
 dir=in
 name=A
-pinnumber=
+pinnumber=3:5:7:9:11:14
 }
-T {@#0:pinnumber} 20 -55 2 0 0.266667 0.266667 {}
+T {@#0:pinnumber} 20 -55 2 0 0.266667 0.266667 {layer=13}
 L 3 90 -50 120 -50 {}
 B 5 117.5 -52.5 122.5 -47.5 {
 pinseq=2
@@ -50,4 +50,4 @@ dir=out
 name=Y
 pinnumber=2:4:6:10:12:15
 }
-T {@#1:pinnumber} 100 -55 2 1 0.266667 0.266667 {}
+T {@#1:pinnumber} 100 -55 2 1 0.266667 0.266667 {layer=13}

@@ -42,7 +42,7 @@ pinseq=1
 name=GP5/T1CKI/OSC1/CLKIN
 dir=inout
 }
-T {@#0:pinnumber} 20 -85 2 0 0.266667 0.266667 {}
+T {@#0:pinnumber} 20 -85 2 0 0.266667 0.266667 {layer=13}
 T {@#0:name} 35 -80 2 1 0.266667 0.266667 {}
 L 3 0 -50 30 -50 {}
 B 5 -2.5 -52.5 2.5 -47.5 {pinnumber=3
@@ -50,7 +50,7 @@ pinseq=2
 name=GP4/AN3/T1G/OSC2/CLKOUT
 dir=inout
 }
-T {@#1:pinnumber} 20 -55 2 0 0.266667 0.266667 {}
+T {@#1:pinnumber} 20 -55 2 0 0.266667 0.266667 {layer=13}
 T {@#1:name} 35 -50 2 1 0.266667 0.266667 {}
 L 3 0 -20 30 -20 {}
 B 5 -2.5 -22.5 2.5 -17.5 {pinnumber=4
@@ -58,17 +58,15 @@ pinseq=3
 name=GP3/MCLR/Vpp
 dir=in
 }
-T {@#2:pinnumber} 20 -25 2 0 0.266667 0.266667 {}
+T {@#2:pinnumber} 20 -25 2 0 0.266667 0.266667 {layer=13}
 T {@#2:name} 35 -20 2 1 0.266667 0.266667 {}
-
- {}
 L 3 500 -20 530 -20 {}
 B 5 527.5 -22.5 532.5 -17.5 {pinnumber=5
 pinseq=5
 name=GP2/AN2/T0CKI/INT/COUT
 dir=inout
 }
-T {@#3:pinnumber} 510 -25 2 1 0.266667 0.266667 {}
+T {@#3:pinnumber} 510 -25 2 1 0.266667 0.266667 {layer=13}
 T {@#3:name} 495 -20 2 0 0.266667 0.266667 {}
 L 3 500 -50 530 -50 {}
 B 5 527.5 -52.5 532.5 -47.5 {pinnumber=6
@@ -76,5 +74,13 @@ pinseq=6
 name=GP1/AN1/CIN-/Vref/ICSPSLK
 dir=inout
 }
-T {@#4:pinnumber} 510 -55 2 1 0.266667 0.266667 {}
+T {@#4:pinnumber} 510 -55 2 1 0.266667 0.266667 {layer=13}
 T {@#4:name} 495 -50 2 0 0.266667 0.266667 {}
+L 3 500 -80 530 -80 {}
+B 5 527.5 -82.5 532.5 -77.5 {pinnumber=7
+pinseq=7
+name=GP0/AN0/CIN+/ICSPDAT
+dir=inout
+}
+T {@#5:pinnumber} 510 -85 2 1 0.266667 0.266667 {layer=13}
+T {@#5:name} 495 -80 2 0 0.266667 0.266667 {}

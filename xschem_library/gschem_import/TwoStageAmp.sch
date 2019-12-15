@@ -160,9 +160,9 @@ symversion=0.1
 }
 C {lab_wire.sym} 3860 -5410 0 0 {lab=VColl2 }
 C {lab_wire.sym} 4130 -5410 0 0 {lab=Vout }
-C {lab_wire.sym} 2700 -4970 0 0 {lab=Vin }
+C {lab_wire.sym} 2700 -4970 0 1 {lab=Vin }
 C {lab_wire.sym} 3100 -4970 0 0 {lab=Vbase1 }
-C {lab_wire.sym} 3845 -5100 0 0 {lab=Vem2 }
+C {lab_wire.sym} 3840 -5100 0 0 {lab=Vem2 }
 C {lab_wire.sym} 3300 -4910 0 0 {lab=Vem1 }
 C {lab_wire.sym} 3660 -5310 0 0 {lab=Vbase2 }
-C {lab_wire.sym} 3250 -5310 0 0 {lab=Vcoll1 }
+C {lab_wire.sym} 3310 -5310 0 0 {lab=Vcoll1 }

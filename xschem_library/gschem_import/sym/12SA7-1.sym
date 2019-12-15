@@ -78,34 +78,39 @@ pinseq=1
 name=1
 dir=inout
 }
-T {@#3:pinnumber} 280 -180 2 1 0.266667 0.266667 {}
-
- {}
+T {@#0:pinnumber} 280 -180 2 1 0.266667 0.266667 {layer=13}
 L 3 150 -270 150 -240 {}
 B 5 147.5 -272.5 152.5 -267.5 {pinnumber=3
 pinseq=3
 name=3
 dir=inout
 }
-T {@#4:pinnumber} 160 -260 2 1 0.266667 0.266667 {}
+T {@#1:pinnumber} 160 -260 2 1 0.266667 0.266667 {layer=13}
 L 3 260 -130 290 -130 {}
 B 5 287.5 -132.5 292.5 -127.5 {pinnumber=4
 pinseq=4
 name=4
 dir=inout
 }
-T {@#2:pinnumber} 280 -140 2 1 0.266667 0.266667 {}
+T {@#2:pinnumber} 280 -140 2 1 0.266667 0.266667 {layer=13}
 L 3 250 -90 290 -90 {}
 B 5 287.5 -92.5 292.5 -87.5 {pinnumber=5
 pinseq=5
 name=5
 dir=inout
 }
-T {@#1:pinnumber} 280 -100 2 1 0.266667 0.266667 {}
+T {@#3:pinnumber} 280 -100 2 1 0.266667 0.266667 {layer=13}
 L 3 200 -40 200 0 {}
 B 5 197.5 -2.5 202.5 2.5 {pinnumber=6
 pinseq=6
 name=6
 dir=inout
 }
-T {@#0:pinnumber} 210 -10 2 1 0.266667 0.266667 {}
+T {@#4:pinnumber} 210 -10 2 1 0.266667 0.266667 {layer=13}
+L 3 0 -130 30 -130 {}
+B 5 -2.5 -132.5 2.5 -127.5 {pinnumber=8
+pinseq=8
+name=8
+dir=inout
+}
+T {@#5:pinnumber} 10 -140 2 1 0.266667 0.266667 {layer=13}

@@ -41,7 +41,7 @@
 /*  approximate PI definition */
 #define XSCH_PI 3.14159265358979323846264338327950288419716939937
 
-#include "../config.h"
+/* #include "../config.h" */
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>

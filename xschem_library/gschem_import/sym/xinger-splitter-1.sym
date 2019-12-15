@@ -51,18 +51,18 @@ pinseq=1
 name=1
 dir=inout
 }
-T {@#0:pinnumber} 10 -85 2 1 0.333333 0.333333 {}
+T {@#0:pinnumber} 10 -85 2 1 0.333333 0.333333 {layer=13}
 L 3 180 -150 200 -150 {}
 B 5 197.5 -152.5 202.5 -147.5 {pinnumber=2
 pinseq=2
 name=2
 dir=inout
 }
-T {@#1:pinnumber} 190 -155 2 1 0.333333 0.333333 {}
+T {@#1:pinnumber} 190 -155 2 1 0.333333 0.333333 {layer=13}
 L 3 180 -10 200 -10 {}
 B 5 197.5 -12.5 202.5 -7.5 {pinnumber=3
 pinseq=3
 name=3
 dir=inout
 }
-T {@#2:pinnumber} 190 -15 2 1 0.333333 0.333333 {}
+T {@#2:pinnumber} 190 -15 2 1 0.333333 0.333333 {layer=13}

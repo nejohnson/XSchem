@@ -39,21 +39,31 @@ A 4 155 -155 115 0 360 {}
 
 
 
-
- {}
-
- {}
 L 3 160 -310 160 -270 {}
 B 5 157.5 -312.5 162.5 -307.5 {pinnumber=3
 pinseq=3
 name=3
 dir=inout
 }
-T {@#2:pinnumber} 140 -290 2 1 0.333333 0.333333 {}
+T {@#0:pinnumber} 140 -290 2 1 0.333333 0.333333 {layer=13}
 L 3 270 -170 310 -170 {}
 B 5 307.5 -172.5 312.5 -167.5 {pinnumber=4
 pinseq=4
 name=4
 dir=inout
 }
-T {@#3:pinnumber} 290 -180 2 1 0.333333 0.333333 {}
+T {@#1:pinnumber} 290 -180 2 1 0.333333 0.333333 {layer=13}
+L 3 0 -140 40 -140 {}
+B 5 -2.5 -142.5 2.5 -137.5 {pinnumber=5
+pinseq=5
+name=5
+dir=inout
+}
+T {@#2:pinnumber} 20 -150 2 1 0.333333 0.333333 {layer=13}
+L 3 220 -60 220 0 {}
+B 5 217.5 -2.5 222.5 2.5 {pinnumber=8
+pinseq=8
+name=8
+dir=inout
+}
+T {@#3:pinnumber} 230 -30 2 1 0.333333 0.333333 {layer=13}

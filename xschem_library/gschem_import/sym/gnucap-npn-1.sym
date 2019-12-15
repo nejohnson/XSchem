@@ -36,14 +36,14 @@ pinseq=1
 dir=inout
 pinnumber=1
 }
-T {@#1:name} 40 -85 2 1 0.2 0.2 {}
+T {@#0:name} 40 -85 2 1 0.2 0.2 {}
 L 3 0 -50 20 -50 {}
 B 5 -2.5 -52.5 2.5 -47.5 {name=B
 pinseq=2
 dir=inout
 pinnumber=2
 }
-T {@#0:name} 10 -55 2 1 0.2 0.2 {}
+T {@#1:name} 10 -55 2 1 0.2 0.2 {}
 L 3 50 -20 50 0 {}
 B 5 47.5 -2.5 52.5 2.5 {name=E
 pinseq=3

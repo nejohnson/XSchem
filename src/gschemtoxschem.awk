@@ -13,6 +13,7 @@ FNR==1{
   pin = 0
   net_assign = 0
   pinseq=0
+  max_pinseq = 0
   template_attrs=""
   delete slotdef
   numslots=""
@@ -300,7 +301,9 @@ FNR==1{
               if(attr == "pinseq") {
                 pin_index[value] = pin_idx
                 pinseq++
+                if(value > max_pinseq) max_pinseq = value
               }
+              gsub(/\\/, "\\\\\\\\", value)
               gsub(/ /, "\\\\ ", value)
               gsub(/\\_/, "_", value)
               pin_attr[pin_idx, nattr] = attr
@@ -515,12 +518,11 @@ END{
   print components
   print wires
   # i is the pinseq
-  for(i = 1; i <= pin_idx; i++) {
-    if(pinseq == pin_idx) { 
-      idx = pin_index[i]
-    } else {
-      idx = i
-    }
+  npin = 0 # order of pins in xschem
+  for(i = 1; i <= max_pinseq; i++) {
+
+    if( i in pin_index) idx = pin_index[i]
+    else continue
     print pin_line[idx]
     nattr = pin_nattr[idx]
     attr_string=""
@@ -530,20 +532,20 @@ END{
 
 
     if(numslots > 1 ) {
-      pinnumber = attr_string
-      sub(/.*pinnumber=/,"", pinnumber)
-      sub(/[\n ].*/,"", pinnumber)
-      #print "pinnumber=" pinnumber > "/dev/stderr"
+      pinseq = attr_string
+      sub(/.*pinseq=/,"", pinseq)
+      sub(/[\n ].*/,"", pinseq)
+      # print "pinseq=" pinseq > "/dev/stderr"
       sub(/pinnumber=[^ \n]+/,"", attr_string)
-      #print "---\n" attr_string "\n---\n" > "/dev/stderr"
+      # print "---\n" attr_string "\n---\n" > "/dev/stderr"
       slotted_pinnumber = ""
       for(j = 1; j<= numslots; j++) {
-        #print "slotdef[" j "]=" slotdef[j] > "/dev/stderr"
+        # print "slotdef[" j "]=" slotdef[j] > "/dev/stderr"
         split(slotdef[j], slotdef_arr, ",")
         if(slotted_pinnumber !="") slotted_pinnumber = slotted_pinnumber ":"
-        slotted_pinnumber = slotted_pinnumber slotdef_arr[pinnumber]
+        slotted_pinnumber = slotted_pinnumber slotdef_arr[pinseq]
       }
-      #print "slotted_pinnumber=" slotted_pinnumber > "/dev/stderr"
+      # print "slotted_pinnumber=" slotted_pinnumber > "/dev/stderr"
       attr_string = attr_string "pinnumber=" slotted_pinnumber "\n"
     }
    
@@ -560,13 +562,16 @@ END{
       show = pin_show[idx, j]
       angle = pin_angle[idx, j]
       align = pin_align[idx, j]
-      attr = "@#" (idx-1) ":" pin_attr[idx, j]
+      attr = "@#" npin ":" pin_attr[idx, j]
       len = length(pin_value[idx, j])
       correct_align()
       if( visible ) {
-        print "T {" attr "} " xt " " (-yt) " " int(angle/90) " " flip " " size " " size " {}"
+        if(pin_attr[idx, j] ~/^pinnumber$/) text_attr="layer=13" 
+        else text_attr=""
+        print "T {" attr "} " xt " " (-yt) " " int(angle/90) " " flip " " size " " size " {" text_attr "}"
       }
     }
+    npin++
   }
 }
  

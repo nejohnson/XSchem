@@ -96,70 +96,46 @@ pinseq=1
 name=COIL1
 dir=inout
 }
-T {@#6:pinnumber} 20.2 -22 2 1 0.2 0.2 {}
-
- {}
+T {@#0:pinnumber} 20.2 -22 2 1 0.2 0.2 {layer=13}
 L 3 50 -90 80 -90 {}
 B 5 77.5 -92.5 82.5 -87.5 {pinnumber=3
 pinseq=3
 name=NC1
 dir=inout
 }
-T {@#1:pinnumber} 55 -92 2 1 0.2 0.2 {}
+T {@#1:pinnumber} 55 -92 2 1 0.2 0.2 {layer=13}
 L 3 0 -80 25 -80 {}
 B 5 -2.5 -82.5 2.5 -77.5 {pinnumber=4
 pinseq=4
 name=COMMON1
 dir=inout
 }
-T {@#0:pinnumber} 19 -82 2 1 0.2 0.2 {}
+T {@#2:pinnumber} 19 -82 2 1 0.2 0.2 {layer=13}
 L 3 50 -70 80 -70 {}
 B 5 77.5 -72.5 82.5 -67.5 {pinnumber=5
 pinseq=5
 name=NO1
 dir=inout
 }
-T {@#2:pinnumber} 55 -72 2 1 0.2 0.2 {}
+T {@#3:pinnumber} 55 -72 2 1 0.2 0.2 {layer=13}
 L 3 50 -50 80 -50 {}
 B 5 77.5 -52.5 82.5 -47.5 {pinnumber=6
 pinseq=6
 name=NC2
 dir=inout
 }
-T {@#4:pinnumber} 55 -52 2 1 0.2 0.2 {}
+T {@#4:pinnumber} 55 -52 2 1 0.2 0.2 {layer=13}
 L 3 0 -40 25 -40 {}
 B 5 -2.5 -42.5 2.5 -37.5 {pinnumber=7
 pinseq=7
 name=COMMON2
 dir=inout
 }
-T {@#3:pinnumber} 17.8 -42 2 1 0.2 0.2 {}
+T {@#5:pinnumber} 17.8 -42 2 1 0.2 0.2 {layer=13}
 L 3 50 -30 80 -30 {}
 B 5 77.5 -32.5 82.5 -27.5 {pinnumber=8
 pinseq=8
 name=NO2
 dir=inout
 }
-T {@#5:pinnumber} 55 -32 2 1 0.2 0.2 {}
-
- {}
-
- {}
-
- {}
-
- {}
-L 3 50 -150 80 -150 {}
-B 5 77.5 -152.5 82.5 -147.5 {pinnumber=13
-pinseq=13
-name=NO1
-dir=inout
-}
-T {@#10:pinnumber} 55 -152 2 1 0.2 0.2 {}
-L 3 0 -160 25 -160 {}
-B 5 -2.5 -162.5 2.5 -157.5 {pinnumber=14
-pinseq=14
-name=COMMON1
-dir=inout
-}
-T {@#8:pinnumber} 19 -162 2 1 0.2 0.2 {}
+T {@#6:pinnumber} 55 -32 2 1 0.2 0.2 {layer=13}

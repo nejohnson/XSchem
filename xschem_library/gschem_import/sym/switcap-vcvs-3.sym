@@ -39,11 +39,15 @@ pinseq=1
 name=OP
 dir=out
 }
-
- {}
 L 3 0 -70 20 -70 {}
 B 5 -2.5 -72.5 2.5 -67.5 {pinnumber=3
 pinseq=3
 name=IP
+dir=in
+}
+L 3 0 -30 20 -30 {}
+B 5 -2.5 -32.5 2.5 -27.5 {pinnumber=4
+pinseq=4
+name=IM
 dir=in
 }

@@ -39,9 +39,9 @@ B 5 -2.5 -22.5 2.5 -17.5 {
 pinseq=1
 dir=in
 name=IN+
-pinnumber=4:4:4:4
+pinnumber=3:5:10:12
 }
-T {@#0:pinnumber} 0 -20 2 1 0.333333 0.333333 {}
+T {@#0:pinnumber} 0 -20 2 1 0.333333 0.333333 {layer=13}
 L 3 0 -60 20 -60 {}
 B 5 -2.5 -62.5 2.5 -57.5 {
 pinseq=2
@@ -49,28 +49,28 @@ dir=in
 name=IN-
 pinnumber=2:6:9:13
 }
-T {@#1:pinnumber} 0 -60 2 1 0.333333 0.333333 {}
+T {@#1:pinnumber} 0 -60 2 1 0.333333 0.333333 {layer=13}
 L 3 50 -80 50 -60 {}
 B 5 47.5 -82.5 52.5 -77.5 {
 pinseq=3
 name=V+
 dir=inout
-pinnumber=11:11:11:11
+pinnumber=4:4:4:4
 }
-T {@#3:pinnumber} 60 -60 2 1 0.333333 0.333333 {}
+T {@#2:pinnumber} 60 -60 2 1 0.333333 0.333333 {layer=13}
 L 3 50 -20 50 0 {}
 B 5 47.5 -2.5 52.5 2.5 {
 pinseq=4
 name=V-
 dir=inout
-pinnumber=
+pinnumber=11:11:11:11
 }
-T {@#4:pinnumber} 60 -10 2 1 0.333333 0.333333 {}
+T {@#3:pinnumber} 60 -10 2 1 0.333333 0.333333 {layer=13}
 L 3 80 -40 100 -40 {}
 B 5 97.5 -42.5 102.5 -37.5 {
 pinseq=5
 dir=out
 name=OUT
-pinnumber=3:5:10:12
+pinnumber=1:7:8:14
 }
-T {@#2:pinnumber} 80 -40 2 1 0.333333 0.333333 {}
+T {@#4:pinnumber} 80 -40 2 1 0.333333 0.333333 {layer=13}

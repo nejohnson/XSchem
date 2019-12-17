@@ -63,7 +63,7 @@
 ###########################################################################
 # Directory where simulations, netlist and simulator outputs are placed
 ###########################################################################
-# If unset xschem asks user to choose one when doing a netlist
+# If unset $USER_CONF_DIR/simulations is assumed (normally ~/.xschem/simulations) 
 #
 # set netlist_dir $env(HOME)/.xschem/simulations
 
@@ -152,7 +152,7 @@ set use_list_dirs 0
 # set cairo_font_line_spacing 1.0
 
 #### Specify a font
-set cairo_font_name {Monospace regular}
+set cairo_font_name {Monospace Regular}
 
 #### Lift up text by some zoom-corrected pixels for
 #### better compatibility wrt no cairo version.

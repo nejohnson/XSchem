@@ -825,6 +825,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
   printf("top win:%lx\n", Tk_WindowId(Tk_Parent(Tk_MainWindow(interp))));
  } else if(!strcmp(argv[1],"globals")) {
   printf("*******global variables:*******\n");
+  printf("netlist_dir=%s\n", netlist_dir? netlist_dir: "<NULL>");
   printf("lw=%d\n", lw);
   printf("lastwire=%d\n", lastwire);
   printf("lastinst=%d\n", lastinst);

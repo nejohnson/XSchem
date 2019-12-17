@@ -518,15 +518,22 @@ proc myload_set_colors {} {
   }
 }
 proc myload_set_home {dir} {
-  global pathlist  myload_files1 myload_index1
+  global pathlist  myload_files1 myload_index1 current_dirname
 
+  if { $dir eq {.}} { set dir $current_dirname}
   # puts "set home: dir=$dir, pathlist=$pathlist"
-  set i [lsearch -exact $pathlist $dir]
+  set pl {}
+  foreach path_elem $pathlist {
+    if { ![string compare $path_elem .]  && [info exist current_dirname]} {
+      set path_elem $current_dirname
+    }
+    lappend pl $path_elem
+  }
+  set i [lsearch -exact $pl $dir]
   if { $i>=0 } {
     set myload_files1 $pathlist
     set myload_index1 $i
     .myload.l.paneleft.list selection set $myload_index1
-
   } else {
     set myload_files1 $dir
     set myload_index1 0
@@ -926,6 +933,7 @@ proc select_netlist_dir { force {dir {} }} {
      if {![file exist $netlist_dir]} {
        file mkdir $netlist_dir
      }
+     regsub {^~} $netlist_dir $env(HOME) netlist_dir
      xschem set_netlist_dir $netlist_dir
      return $netlist_dir
    } 
@@ -947,6 +955,7 @@ proc select_netlist_dir { force {dir {} }} {
      }
      set netlist_dir $new_dir  
    }
+   regsub {^~} $netlist_dir $env(HOME) netlist_dir
    xschem set_netlist_dir $netlist_dir
    return $netlist_dir
 }
@@ -1944,16 +1953,13 @@ proc abs_sym_path {fname {ext {} } } {
   if { $ext ne {} } { 
     set fname [file rootname $fname]$ext
   }
-
   # transform ./file_or_path to file_or_path
   if { [regexp {^\.\./} $fname ] } {
     set fname [file normalize $fname]
   } elseif {[regexp {^\./} $fname ] } {
     regsub {^\./} $fname {} fname
   }
-
   set lib_cell [get_cell $fname]
-
   if {$fname eq {} } return {}
   set name {}
   # fname is of type libname/cellname[.ext] but not ./cellname[.ext] or
@@ -1989,10 +1995,10 @@ proc abs_sym_path {fname {ext {} } } {
       set name "$current_dirname/$fname"
     }
   }
-
   if { ![string compare $name {}] } {
      set name $fname
   }
+  regsub {/\.$} $name {} name
   return $name
 }
 
@@ -2140,7 +2146,7 @@ set tclcmd_txt {}
 ## list of tcl procedures to load at end of xschem.tcl
 set_ne tcl_files {}
 set_ne use_list_dirs {1}
-set_ne netlist_dir {.}
+set_ne netlist_dir "$USER_CONF_DIR/simulations"
 set_ne bus_replacement_char {} ;# use {<>} to replace [] with <> in bussed signals
 set_ne hspice_netlist 0
 set_ne verilog_2001 1
@@ -2340,7 +2346,6 @@ regsub -all {#} $svg_colors  {0x} svg_colors
 
 # schematic to preload in new windows 20090708
 set_ne XSCHEM_START_WINDOW {}
-
 
 set INITIALLOADDIR {}
 set INITIALINSTDIR {}

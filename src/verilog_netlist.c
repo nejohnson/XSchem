@@ -29,13 +29,17 @@ void global_verilog_netlist(int global)  /* netlister driver */
  static char *sig_type = NULL;
  static char *port_value = NULL;
  static char *tmp_string=NULL;
- int i, tmp;
+ int i, tmp, save_ok;
  char netl[PATH_MAX];  /* overflow safe 20161122 */
  char netl2[PATH_MAX]; /* 20081203  overflow safe 20161122 */
  char netl3[PATH_MAX]; /* 20081203  overflow safe 20161122 */
  static char *type=NULL;
 
  if(current_type==SYMBOL) return;
+ if(modified) {
+   save_ok = save_schematic(schematic[currentsch]);
+   if(save_ok == -1) return;
+ }
  statusmsg("",2);  /* clear infowindow */
  netlist_count=0; 
  /* top sch properties used for library use declarations and type definitions */
@@ -46,7 +50,7 @@ void global_verilog_netlist(int global)  /* netlister driver */
  my_snprintf(netl3, S(netl3), "%s", skip_dir(schematic[currentsch]));
 
  if(fd==NULL){ 
-   if(debug_var>=1) fprintf(errfp, "global_verilog_netlist(): problems opening netlist file\n");
+   if(debug_var>=0) fprintf(errfp, "global_verilog_netlist(): problems opening netlist file\n");
    return;
  }
  if(debug_var>=1) fprintf(errfp, "global_verilog_netlist(): opening %s for writing\n",netl);
@@ -75,7 +79,6 @@ void global_verilog_netlist(int global)  /* netlister driver */
  if(debug_var>=1) fprintf(errfp, "global_verilog_netlist(): printing top level entity\n");
  fprintf(fd,"module %s (\n", skip_dir( schematic[currentsch]) );
  /* flush data structures (remove unused symbols) */
- if(modified) save_schematic(schematic[currentsch]);
  unselect_all();
  remove_symbols();  /* removed 25122002, readded 04112003 */
 
@@ -253,12 +256,8 @@ void global_verilog_netlist(int global)  /* netlister driver */
 
  if(global)
  {
-   if(modified) save_schematic(schematic[currentsch]); /* 20160302 prepare_netlist_structs (called above from verilog_netlist()  */
-                                 /* may change wire node labels, so save. */
-
    unselect_all();
    remove_symbols(); /* 20161205 ensure all unused symbols purged before descending hierarchy */
-
    
    load_schematic(0, 1, schematic[currentsch], 0); /* 20180927 */
 
@@ -456,7 +455,7 @@ void verilog_netlist(FILE *fd , int verilog_stop)
 
  prepared_netlist_structs = 0;
  prepare_netlist_structs(0);
- set_modify(1); /* 20160302 prepare_netlist_structs could change schematic (wire node naming for example) */
+ /* set_modify(1); */ /* 20160302 prepare_netlist_structs could change schematic (wire node naming for example) */
  if(debug_var>=2) fprintf(errfp, "verilog_netlist(): end prepare_netlist_structs\n");
  traverse_node_hash();  /* print all warnings about unconnected floatings etc */
 

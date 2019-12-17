@@ -152,7 +152,7 @@ set use_list_dirs 0
 # set cairo_font_line_spacing 1.0
 
 #### Specify a font
-set cairo_font_name {Arial}
+set cairo_font_name {Monospace regular}
 
 #### Lift up text by some zoom-corrected pixels for
 #### better compatibility wrt no cairo version.

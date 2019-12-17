@@ -27,7 +27,7 @@ void global_spice_netlist(int global)  /* netlister driver */
  FILE *fd;
  const char *str_tmp;
  int mult;
- int i;
+ int i, save_ok;
  static char *type=NULL;
  static char *place=NULL; /*20121223 */
  char netl[PATH_MAX]; /* overflow safe 20161122 */
@@ -36,14 +36,17 @@ void global_spice_netlist(int global)  /* netlister driver */
 
 
  if(current_type==SYMBOL) return;
+ if(modified) {
+   save_ok = save_schematic(schematic[currentsch]);
+   if(save_ok == -1) return;
+ }
  statusmsg("",2);  /* clear infowindow */
  netlist_count=0;
  my_snprintf(netl, S(netl), "%s/%s", netlist_dir, skip_dir(schematic[currentsch]) );
  fd=fopen(netl, "w");
  my_snprintf(netl3, S(netl3), "%s", skip_dir(schematic[currentsch]));
-
  if(fd==NULL){ 
-   if(debug_var>=1) fprintf(errfp, "global_spice_netlist(): problems opening netlist file\n");
+   if(debug_var>=0) fprintf(errfp, "global_spice_netlist(): problems opening netlist file\n");
    return;
  }
  if(debug_var>=1) fprintf(errfp, "global_spice_netlist(): opening %s for writing\n",netl);
@@ -116,8 +119,6 @@ void global_spice_netlist(int global)  /* netlister driver */
 
  if(global)
  {
-   if(modified) save_schematic(schematic[currentsch]);
-
    unselect_all();
    remove_symbols(); /* 20161205 ensure all unused symbols purged before descending hierarchy */
    load_schematic(0, 1, schematic[currentsch], 0); /* 20180927 */
@@ -277,7 +278,7 @@ void spice_netlist(FILE *fd, int spice_stop )
 
  prepared_netlist_structs = 0;
  prepare_netlist_structs(0);
- set_modify(1); /* 20160302 prepare_netlist_structs could change schematic (wire node naming for example) */
+ /* set_modify(1); */ /* 20160302 prepare_netlist_structs could change schematic (wire node naming for example) */
  traverse_node_hash();  /* print all warnings about unconnected floatings etc */
 
 

@@ -366,13 +366,14 @@ proc gtkwave {schname} {
 }
 
 proc waves {schname} {
- global netlist_dir netlist_type tcl_debug
+ global netlist_dir netlist_type tcl_debug task_error task_output
  global gtkwave_path analog_viewer waveview_path
 
  set tmpname [file rootname "$schname"]
  if { [select_netlist_dir 0] ne "" } {
    if { $netlist_type=="verilog" } {
      task "$gtkwave_path dumpfile.vcd \"$tmpname.sav\" 2>/dev/null" $netlist_dir bg
+     if {$task_error} {viewdata $task_output; return}
 
    } elseif { $netlist_type=="spice" } {
 
@@ -519,6 +520,7 @@ proc myload_set_colors {} {
 proc myload_set_home {dir} {
   global pathlist  myload_files1 myload_index1
 
+  # puts "set home: dir=$dir, pathlist=$pathlist"
   set i [lsearch -exact $pathlist $dir]
   if { $i>=0 } {
     set myload_files1 $pathlist
@@ -920,7 +922,13 @@ proc make_symbol {name} {
 proc select_netlist_dir { force {dir {} }} {
    global netlist_dir env
 
-   if { ( $force == 0 )  && ( $netlist_dir ne {} ) } { return $netlist_dir } 
+   if { ( $force == 0 )  && ( $netlist_dir ne {} ) } {
+     if {![file exist $netlist_dir]} {
+       file mkdir $netlist_dir
+     }
+     xschem set_netlist_dir $netlist_dir
+     return $netlist_dir
+   } 
    if { $dir eq {} } {
      if { $netlist_dir ne {} }  { 
        set initdir $netlist_dir
@@ -2334,7 +2342,9 @@ regsub -all {#} $svg_colors  {0x} svg_colors
 set_ne XSCHEM_START_WINDOW {}
 
 
-
+set INITIALLOADDIR {}
+set INITIALINSTDIR {}
+set INITIALPROPDIR {}
 foreach i $pathlist  {
   if { [file exists $i] } {
     set INITIALLOADDIR $i

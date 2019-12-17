@@ -98,8 +98,8 @@
 #define CADINITIALY -870
 #define CADZOOMSTEP 1.2
 #define CADMOVESTEP 200
-#define CADMAXZOOM 10000.0
-#define CADMINZOOM 0.0001
+#define CADMAXZOOM 1000000.0
+#define CADMINZOOM 0.000001
 #define CADHALFDOTSIZE 4
 #define CADNULLNODE -1      /*  no valid node number */
 #define CADWIREMINDIST 8.0

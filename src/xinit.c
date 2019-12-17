@@ -1227,10 +1227,10 @@ int Tcl_AppInit(Tcl_Interp *inter)
    tcleval("set tcl_prompt1 {}");
    tcleval("set tcl_prompt2 {}");
  }
- if(netlist_dir) {
-   set_netlist_dir(1, netlist_dir);
- } else {
-   my_strdup(50, &netlist_dir, tclgetvar("netlist_dir"));
+
+
+ if(!set_netlist_dir(0, NULL)) {
+   fprintf(errfp, "problems creating netlist directory %s\n", netlist_dir ? netlist_dir : "<NULL>");
  }
 
  enable_layers();

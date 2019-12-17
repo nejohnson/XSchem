@@ -25,13 +25,17 @@
 void global_tedax_netlist(int global)  /* netlister driver */
 {
  FILE *fd;
- int i;
+ int i, save_ok;
  char netl[PATH_MAX]; /* overflow safe 20161122 */
  char netl2[PATH_MAX]; /* 20081211 overflow safe 20161122 */
  char netl3[PATH_MAX]; /* 20081211 overflow safe 20161122 */
 
 
  if(current_type==SYMBOL) return;
+ if(modified) {
+   save_ok = save_schematic(schematic[currentsch]);
+   if(save_ok == -1) return;
+ }
  statusmsg("",2);  /* clear infowindow */
  netlist_count=0;
 
@@ -40,7 +44,7 @@ void global_tedax_netlist(int global)  /* netlister driver */
  my_snprintf(netl3, S(netl3), "%s", skip_dir(schematic[currentsch]));
 
  if(fd==NULL){ 
-   if(debug_var>=1) fprintf(errfp, "global_tedax_netlist(): problems opening netlist file\n");
+   if(debug_var>=0) fprintf(errfp, "global_tedax_netlist(): problems opening netlist file\n");
    return;
  }
  if(debug_var>=1) fprintf(errfp, "global_tedax_netlist(): opening %s for writing\n",netl);
@@ -56,7 +60,6 @@ void global_tedax_netlist(int global)  /* netlister driver */
  /* /20100217 */
 
  fprintf(fd, "end netlist\n");
- if(modified) save_schematic(schematic[currentsch]);
 
  if(0) /* was if(global) ... 20180901 no hierarchical tEDAx netlist for now */
  {
@@ -162,7 +165,7 @@ void tedax_netlist(FILE *fd, int tedax_stop )
  
   prepared_netlist_structs = 0;
   prepare_netlist_structs(0);
-  set_modify(1); /* 20160302 prepare_netlist_structs could change schematic (wire node naming for example) */
+  /* set_modify(1); */ /* 20160302 prepare_netlist_structs could change schematic (wire node naming for example) */
   traverse_node_hash();  /* print all warnings about unconnected floatings etc */
   if(!tedax_stop) {
     for(i=0;i<lastinst;i++) /* print first ipin/opin defs ... */

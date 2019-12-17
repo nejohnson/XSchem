@@ -276,7 +276,7 @@ void push_undo(void)
     uslot[slot].iptr[i].name = NULL;
     uslot[slot].iptr[i].instname = NULL;
     uslot[slot].iptr[i].node = NULL;
-    my_strdup(191, &uslot[slot].iptr[i].instname, inst_ptr[i].instname);
+    my_strdup2(191, &uslot[slot].iptr[i].instname, inst_ptr[i].instname);
     my_strdup(192, &uslot[slot].iptr[i].prop_ptr, inst_ptr[i].prop_ptr);
     my_strdup(193, &uslot[slot].iptr[i].name, inst_ptr[i].name);
   }

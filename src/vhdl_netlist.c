@@ -30,7 +30,7 @@ void global_vhdl_netlist(int global)  /* netlister driver */
  char *dir_tmp = NULL;
  static char *sig_type = NULL;
  static char *port_value = NULL;
- int i,j, tmp;
+ int i,j, tmp, save_ok;
  char netl[PATH_MAX];   /* overflow safe 20161122 */
  char netl2[PATH_MAX];  /* 20081202 overflow safe 20161122 */
  char netl3[PATH_MAX];  /* 20081202 overflow safe 20161122 */
@@ -42,13 +42,17 @@ void global_vhdl_netlist(int global)  /* netlister driver */
  /* to be printed before any entity declarations */
 
  if(current_type==SYMBOL) return;
+ if(modified) {
+   save_ok = save_schematic(schematic[currentsch]);
+   if(save_ok == -1) return;
+ }
  netlist_count=0;
  my_snprintf(netl, S(netl), "%s/%s", netlist_dir, skip_dir(schematic[currentsch]) );
  fd=fopen(netl, "w"); 
  my_snprintf(netl3, S(netl3), "%s", skip_dir(schematic[currentsch]));
 
  if(fd==NULL){ 
-   if(debug_var>=1) fprintf(errfp, "global_vhdl_netlist(): problems opening netlist file\n");
+   if(debug_var>=0) fprintf(errfp, "global_vhdl_netlist(): problems opening netlist file\n");
    return;
  }
  if(debug_var>=1) fprintf(errfp, "global_vhdl_netlist(): opening %s for writing\n",netl);
@@ -96,7 +100,6 @@ void global_vhdl_netlist(int global)  /* netlister driver */
  /* 20071015 end */
 
  /* flush data structures (remove unused symbols) */
- if(modified) save_schematic(schematic[currentsch]); /* save and flush unused symbols */
  unselect_all();
  remove_symbols();  /* removed 25122002, readded 04112003.. this removes unused symbols */
  load_schematic(0, 1, schematic[currentsch], 0);  /* 20180927 */
@@ -297,9 +300,6 @@ void global_vhdl_netlist(int global)  /* netlister driver */
 
  if(global)
  {
-   if(modified) save_schematic(schematic[currentsch]); /* 20160302 prepare_netlist_structs (called above from verilog_netlist()  */
-                                 /* may change wire node labels, so save. */
-
    unselect_all();
    remove_symbols(); /* 20161205 ensure all unused symbols purged before descending hierarchy */
    load_schematic(0, 1, schematic[currentsch], 0); /* 20180927 */
@@ -546,7 +546,7 @@ void vhdl_netlist(FILE *fd , int vhdl_stop)
 
  prepared_netlist_structs = 0;
  prepare_netlist_structs(0);
- set_modify(1); /* 20160302 prepare_netlist_structs could change schematic (wire node naming for example) */
+ /* set_modify(1); */ /* 20160302 prepare_netlist_structs could change schematic (wire node naming for example) */
  traverse_node_hash();  /* print all warnings about unconnected floatings etc */
 
 

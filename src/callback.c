@@ -1285,6 +1285,7 @@ int callback(int event, int mx, int my, KeySym key,
     fprintf(errfp, "%s --> %s\n", s4, expandlabel(s4, &tmp)); 
     fprintf(errfp, "%s --> %s\n", s5, expandlabel(s5, &tmp)); 
     fprintf(errfp, "%s --> %s\n", s6, expandlabel(s6, &tmp)); 
+    fprintf(errfp, "%s\n", get_tok_value("type=diode template=\"name=D1 m=1\"", "template", 2));
     break;
    }
    if(0 && (key=='|') && !(state&ControlMask))         /* testmode */

@@ -862,8 +862,8 @@ int Tcl_AppInit(Tcl_Interp *inter)
 
  /* create USER_CONF_DIR if it was not installed */
  my_snprintf(tmp, S(tmp),"regsub {^~} {%s} {%s}", USER_CONF_DIR, home_dir);
- tclsetvar("USER_CONF_DIR",USER_CONF_DIR);
  tcleval(tmp);
+ tclsetvar("USER_CONF_DIR",Tcl_GetStringResult(interp));
  if(stat(Tcl_GetStringResult(interp), &buf)) {
    if(!mkdir(Tcl_GetStringResult(interp), 0700)) {
      if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): created %s dir\n", USER_CONF_DIR);

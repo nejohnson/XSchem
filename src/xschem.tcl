@@ -532,7 +532,7 @@ proc myload_set_home {dir} {
     set myload_index1 $i
     .myload.l.paneleft.list selection set $myload_index1
   } else {
-    set myload_files1 $dir
+    set myload_files1 [list $dir]
     set myload_index1 0
     .myload.l.paneleft.list selection set 0
   }

@@ -376,7 +376,7 @@ void new_window(const char *cell, int symbol)
 const char *get_file_path(char *f)
 {
   char tmp[2*PATH_MAX+100];
-  my_snprintf(tmp, S(tmp),"get_file_path %s", f);
+  my_snprintf(tmp, S(tmp),"get_file_path \"%s\"", f);
   tcleval(tmp);
   return Tcl_GetStringResult(interp);
 }

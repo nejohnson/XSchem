@@ -920,9 +920,9 @@ void print_hilight_net(int show)
  FILE *fd;
  struct hilight_hashentry *entry;
  struct node_hashentry *node_entry;
- static char *cmd = NULL;  /* 20161122 overflow safe */
- static char *cmd2 = NULL;  /* 20161122 overflow safe */
- static char *cmd3 = NULL;  /* 20161122 overflow safe */
+ char cmd[2*PATH_MAX];  /* 20161122 overflow safe */
+ char cmd2[2*PATH_MAX];  /* 20161122 overflow safe */
+ char cmd3[2*PATH_MAX];  /* 20161122 overflow safe */
  char a[] = "create_pins";
  char b[] = "add_lab_prefix";
  char b1[] = "add_lab_no_prefix";
@@ -959,26 +959,13 @@ void print_hilight_net(int show)
    if(debug_var>=1) fprintf(errfp, "print_hilight_net(): problems creating tmpfiles\n");
    return;
  }
- /* /20111106 */
- my_strdup(149, &cmd, tclgetvar("XSCHEM_SHAREDIR"));
- my_strcat(150, &cmd, "/order_labels.awk");
- my_strdup(151, &cmd2, cmd);
- my_strcat(152, &cmd2," ");
- my_strcat(153, &cmd2,filetmp1);
- my_strcat(154, &cmd2,">");
- my_strcat(155, &cmd2,filetmp2);
-
- /* 20111106 */
- my_strdup(156, &cmd3, tclgetvar("XSCHEM_SHAREDIR"));
- my_strcat(157, &cmd3, "/sort_labels.awk ");
- my_strcat(158, &cmd3, filetmp1);
-
- /*fd=fopen(filetmp1, "w"); */
  if(fd==NULL){ 
     if(debug_var>=1) fprintf(errfp, "print_hilight_net(): problems opening netlist file\n");
     return;
  }
-
+ my_snprintf(cmd, S(cmd), "\"%s/order_labels.awk\"", tclgetvar("XSCHEM_SHAREDIR"));
+ my_snprintf(cmd2, S(cmd2), "%s %s > %s", cmd, filetmp1, filetmp2);
+ my_snprintf(cmd3, S(cmd3), "\"%s/sort_labels.awk\" %s", tclgetvar("XSCHEM_SHAREDIR"), filetmp1);
  for(i=0;i<HASHSIZE;i++) {
    entry=table[i];
    while(entry) {
@@ -1016,9 +1003,7 @@ void print_hilight_net(int show)
    tcleval(b1);
  }
  if(show==1) {
-   my_strdup(159, &cmd, "set ::retval [ read_data_nonewline ");
-   my_strcat(160, &cmd, filetmp2);
-   my_strcat(161, &cmd, " ]");
+   my_snprintf(cmd, S(cmd), "set ::retval [ read_data_nonewline %s ]", filetmp2);
    tcleval(cmd);
    tcleval("viewdata $::retval");
  }
@@ -1026,9 +1011,8 @@ void print_hilight_net(int show)
    if(system(cmd3)==-1) {
      fprintf(errfp, "print_hilight_net(): error executing cmd3\n");
    }
-   my_strdup(162, &cmd, "set ::retval [ read_data_nonewline ");
-   my_strcat(163, &cmd, filetmp1);
-   my_strcat(164, &cmd, " ]");
+
+   my_snprintf(cmd, S(cmd), "set ::retval [ read_data_nonewline %s ]", filetmp1);
    tcleval(cmd);
    tcleval("viewdata $::retval");
  }

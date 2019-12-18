@@ -529,10 +529,14 @@ proc myload_set_home {dir} {
   set i [lsearch -exact $pl $dir]
   if { $i>=0 } {
     set myload_files1 $pathlist
+    update
+    .myload.l.paneleft.list xview moveto 1
     set myload_index1 $i
     .myload.l.paneleft.list selection set $myload_index1
   } else {
     set myload_files1 [list $dir]
+    update
+    .myload.l.paneleft.list xview moveto 1
     set myload_index1 0
     .myload.l.paneleft.list selection set 0
   }
@@ -602,6 +606,8 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
     bind .myload.l.paneright.pre <Expose> {}
     .myload.l.paneright.pre configure -background white
     set myload_files1 $pathlist
+    update
+    .myload.l.paneleft.list xview moveto 1
     set myload_index1 0
     set myload_dir1 [abs_sym_path [.myload.l.paneleft.list get $myload_index1]]
     set myload_files2 [lsort [glob -directory $myload_dir1 -tails \{.*,*\}]]
@@ -659,6 +665,7 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
   bind .myload <Configure> {
     set myload_sash_pos [.myload.l sash coord 0]
     set myload_default_geometry [wm geometry .myload]
+    update
     .myload.l.paneleft.list xview moveto 1
     # regsub {\+.*} $myload_default_geometry {} myload_default_geometry
   }

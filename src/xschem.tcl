@@ -2054,6 +2054,16 @@ proc launcher {} {
   eval exec  [subst $launcher_program] {[subst $launcher_var]} &
 }
 
+proc reconfigure_layers_button {} {
+   global colors dark_colorscheme
+   set c [xschem get rectcolor]
+   .menubar.layers configure -background [lindex $colors $c]
+   if { $dark_colorscheme == 1 && $c == 0} {
+     .menubar.layers configure -foreground white
+   } else {
+     .menubar.layers configure -foreground black
+   }
+}
 
 proc reconfigure_layers_menu {} {
    global colors dark_colorscheme
@@ -2077,7 +2087,7 @@ proc reconfigure_layers_menu {} {
         -background $i -foreground $layfg -activeforeground $layfg
      incr j
    }
-   .menubar.layers configure -background [lindex $colors [xschem get rectcolor]]
+   reconfigure_layers_button
 }
 
 proc get_file_path {ff} {
@@ -2617,10 +2627,7 @@ font configure Underline-Font -underline true -size 24
 
      .menubar.layers.menu add command -label $laylab  -activeforeground $layfg \
         -foreground $layfg -background $i -activebackground $i \
-        -command " 
-           .menubar.layers configure -background [lindex $colors $j]
-           xschem set rectcolor $j
-         "
+        -command "xschem set rectcolor $j; reconfigure_layers_button"
      if { [expr $j%10] == 0 } { .menubar.layers.menu entryconfigure $j -columnbreak 1 }
      incr j
      

@@ -665,7 +665,6 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
   bind .myload <Configure> {
     set myload_sash_pos [.myload.l sash coord 0]
     set myload_default_geometry [wm geometry .myload]
-    update
     .myload.l.paneleft.list xview moveto 1
     # regsub {\+.*} $myload_default_geometry {} myload_default_geometry
   }

@@ -2,9 +2,10 @@
 ## set prefix for installation
 ## XSCHEM will install in ${prefix}/bin, ${prefix}/share/xschem 
 ## and ${prefix}/share/doc/xschem
-prefix=$(HOME)
+# prefix=$(HOME)
+prefix=/usr/local
 sharedir=$(prefix)/share/xschem
-userconfdir=$(prefix)/.xschem
+userconfdir=$(HOME)/.xschem
 
 ## specify user schematic/symbol libraries; 
 ## you may redefine it later in .xschem or xschemrc startup files
@@ -104,58 +105,57 @@ clean:
 
 .PHONY: install
 install: xschem
-	mkdir -p $(prefix)/bin
-	mkdir -p $(prefix)/share/xschem
-	mkdir -p $(prefix)/share/xschem/utile
-	mkdir -p $(prefix)/share/doc/xschem
-	mkdir -p $(system_library_dir)
-	mkdir -p $(user_library_dir)
-	mkdir -p $(user_library_dir)/simulations
-	cp xschem $(prefix)/bin
-	cp rawtovcd $(prefix)/bin
-	cp xschem $(prefix)/share/xschem
-	cp keys.help  $(prefix)/share/xschem
-	cp xschem.help  $(prefix)/share/xschem
-	cp xschem.tcl  $(prefix)/share/xschem
-	cp -r systemlib $(prefix)/share/xschem
-	cp break.awk $(prefix)/share/xschem
-	cp convert_to_verilog2001.awk $(prefix)/share/xschem
-	cp flatten.awk $(prefix)/share/xschem
-	cp make_sym.awk $(prefix)/share/xschem
-	cp symgen.awk $(prefix)/share/xschem
-	cp order_labels.awk $(prefix)/share/xschem
-	cp sort_labels.awk $(prefix)/share/xschem
-	cp spice.awk $(prefix)/share/xschem
-	cp tedax.awk $(prefix)/share/xschem
-	cp verilog.awk $(prefix)/share/xschem
-	cp xschemrc $(prefix)/share/xschem
-	cp vhdl.awk $(prefix)/share/xschem
-	cp hspice_backannotate.tcl $(prefix)/share/xschem
-	cp ngspice_backannotate.tcl $(prefix)/share/xschem
-	cp gschemtoxschem.awk $(prefix)/share/xschem
-	cp change_index.tcl $(prefix)/share/xschem
-	cp -r ../doc/* $(prefix)/share/doc/xschem/
-	cp ./utile/* $(prefix)/share/xschem/utile
-	cp -ru ../xschem_library/devices/* $(system_library_dir)
-	cp -ru ../xschem_library/binto7seg $(prefix)/share/doc/xschem/
-	cp -ru ../xschem_library/examples $(prefix)/share/doc/xschem/
-	cp -ru ../xschem_library/xTAG $(prefix)/share/doc/xschem/
-	cp -ru ../xschem_library/rulz-r8c33 $(prefix)/share/doc/xschem/
-	cp -ru ../xschem_library/ngspice $(prefix)/share/doc/xschem/
-	cp -ru ../xschem_library/pcb $(prefix)/share/doc/xschem/
-	cp -ru ../xschem_library/logic $(prefix)/share/doc/xschem/
-	mkdir -p $(prefix)/share/doc/xschem/symgen
-	cp -ru ../xschem_library/symgen/*.sym $(prefix)/share/doc/xschem/symgen
-	cp -ru ../xschem_library/symgen/*.symdef $(prefix)/share/doc/xschem/symgen
-	mkdir -p $(prefix)/share/doc/xschem/gschem_import/sym
-	cp -u ../xschem_library/gschem_import/*.sym $(prefix)/share/doc/xschem/gschem_import
-	cp -u ../xschem_library/gschem_import/*.sch $(prefix)/share/doc/xschem/gschem_import
-	cp -u ../xschem_library/gschem_import/sym/*.sym $(prefix)/share/doc/xschem/gschem_import/sym
+	mkdir -p "$(prefix)"/bin
+	mkdir -p "$(prefix)"/share/xschem
+	mkdir -p "$(prefix)"/share/xschem/utile
+	mkdir -p "$(prefix)"/share/doc/xschem
+	mkdir -p "$(system_library_dir)"
+	mkdir -p "$(user_library_dir)"
+	mkdir -p "$(user_library_dir)"/simulations
+	cp xschem "$(prefix)"/bin
+	cp rawtovcd "$(prefix)"/bin
+	cp xschem "$(prefix)"/share/xschem
+	cp keys.help  "$(prefix)"/share/xschem
+	cp xschem.help  "$(prefix)"/share/xschem
+	cp xschem.tcl  "$(prefix)"/share/xschem
+	cp -r systemlib "$(prefix)"/share/xschem
+	cp break.awk "$(prefix)"/share/xschem
+	cp convert_to_verilog2001.awk "$(prefix)"/share/xschem
+	cp flatten.awk "$(prefix)"/share/xschem
+	cp make_sym.awk "$(prefix)"/share/xschem
+	cp symgen.awk "$(prefix)"/share/xschem
+	cp order_labels.awk "$(prefix)"/share/xschem
+	cp sort_labels.awk "$(prefix)"/share/xschem
+	cp spice.awk "$(prefix)"/share/xschem
+	cp tedax.awk "$(prefix)"/share/xschem
+	cp verilog.awk "$(prefix)"/share/xschem
+	cp xschemrc "$(prefix)"/share/xschem
+	cp vhdl.awk "$(prefix)"/share/xschem
+	cp hspice_backannotate.tcl "$(prefix)"/share/xschem
+	cp ngspice_backannotate.tcl "$(prefix)"/share/xschem
+	cp gschemtoxschem.awk "$(prefix)"/share/xschem
+	cp change_index.tcl "$(prefix)"/share/xschem
+	cp -r ../doc/* "$(prefix)"/share/doc/xschem/
+	cp ./utile/* "$(prefix)"/share/xschem/utile
+	cp -ru ../xschem_library/devices/* "$(system_library_dir)"
+	cp -ru ../xschem_library/binto7seg "$(prefix)"/share/doc/xschem/
+	cp -ru ../xschem_library/examples "$(prefix)"/share/doc/xschem/
+	cp -ru ../xschem_library/xTAG "$(prefix)"/share/doc/xschem/
+	cp -ru ../xschem_library/rulz-r8c33 "$(prefix)"/share/doc/xschem/
+	cp -ru ../xschem_library/ngspice "$(prefix)"/share/doc/xschem/
+	cp -ru ../xschem_library/pcb "$(prefix)"/share/doc/xschem/
+	cp -ru ../xschem_library/logic "$(prefix)"/share/doc/xschem/
+	mkdir -p "$(prefix)"/share/doc/xschem/symgen
+	cp -ru ../xschem_library/symgen/*.symdef "$(prefix)"/share/doc/xschem/symgen
+	mkdir -p "$(prefix)"/share/doc/xschem/gschem_import/sym
+	cp -u ../xschem_library/gschem_import/*.sym "$(prefix)"/share/doc/xschem/gschem_import
+	cp -u ../xschem_library/gschem_import/*.sch "$(prefix)"/share/doc/xschem/gschem_import
+	cp -u ../xschem_library/gschem_import/sym/*.sym "$(prefix)"/share/doc/xschem/gschem_import/sym
 
 .PHONY: uninstall
 uninstall:
-	rm $(prefix)/bin/xschem
-	rm $(prefix)/bin/rawtovcd
-	rm -rf $(prefix)/share/xschem
-	rm -rf $(prefix)/share/doc/xschem
+	rm "$(prefix)"/bin/xschem
+	rm "$(prefix)"/bin/rawtovcd
+	rm -rf "$(prefix)"/share/xschem
+	rm -rf "$(prefix)"/share/doc/xschem
 

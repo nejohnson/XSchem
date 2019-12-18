@@ -100,46 +100,45 @@ proc netlist {source_file show netlist_file} {
      set hspice {}
    }
    if {$flat_netlist==0} then {
-     eval exec "awk -f ${XSCHEM_SHAREDIR}/spice.awk -- $hspice $netlist_dir/$source_file \
-             | awk -f ${XSCHEM_SHAREDIR}/break.awk > $netlist_dir/$netlist_file"
+     eval exec {awk -f ${XSCHEM_SHAREDIR}/spice.awk -- $hspice $netlist_dir/$source_file | \
+          awk -f ${XSCHEM_SHAREDIR}/break.awk > $netlist_dir/$netlist_file}
    } else {
-     eval exec awk -f "${XSCHEM_SHAREDIR}/spice.awk -- $hspice $netlist_dir/$source_file \
-             | awk -f ${XSCHEM_SHAREDIR}/flatten.awk | awk -f ${XSCHEM_SHAREDIR}/break.awk > $netlist_dir/$netlist_file"
+     eval exec {awk -f "${XSCHEM_SHAREDIR}/spice.awk -- $hspice $netlist_dir/$source_file | \
+          awk -f ${XSCHEM_SHAREDIR}/flatten.awk | awk -f ${XSCHEM_SHAREDIR}/break.awk > $netlist_dir/$netlist_file}
    }
    if ![string compare $show "show"] {
       textwindow $netlist_dir/$netlist_file
    }
  } 
  if [regexp {\.vhdl} $netlist_file ] {
-   eval exec "awk -f ${XSCHEM_SHAREDIR}/vhdl.awk $netlist_dir/$source_file \
-              > $netlist_dir/$netlist_file"
+   eval exec {awk -f $XSCHEM_SHAREDIR/vhdl.awk $netlist_dir/$source_file > $netlist_dir/$netlist_file}
    if ![string compare $show "show"] {
      textwindow $netlist_dir/$netlist_file
    }
  }
  if [regexp {\.tdx$} $netlist_file ] {
-   eval exec "awk -f ${XSCHEM_SHAREDIR}/tedax.awk $netlist_dir/$source_file \
-              > $netlist_dir/$netlist_file"
+   eval exec {awk -f $XSCHEM_SHAREDIR/tedax.awk $netlist_dir/$source_file \
+              > $netlist_dir/$netlist_file}
    if ![string compare $show "show"] {
      textwindow $netlist_dir/$netlist_file
    }
  }
  if [regexp {\.v$} $netlist_file ] {
-   eval exec "awk -f ${XSCHEM_SHAREDIR}/verilog.awk $netlist_dir/$source_file \
-              > $netlist_dir/$netlist_file"
+   eval exec {awk -f ${XSCHEM_SHAREDIR}/verilog.awk $netlist_dir/$source_file \
+              > $netlist_dir/$netlist_file}
 
    # 20140409
    if { $verilog_2001==1 } { 
-     eval exec "awk -f ${XSCHEM_SHAREDIR}/convert_to_verilog2001.awk $netlist_dir/$netlist_file > $netlist_dir/${netlist_file}vv"
-     eval exec mv $netlist_dir/${netlist_file}vv $netlist_dir/$netlist_file
+     eval exec {awk -f ${XSCHEM_SHAREDIR}/convert_to_verilog2001.awk $netlist_dir/$netlist_file > $netlist_dir/${netlist_file}vv}
+     eval exec {mv $netlist_dir/${netlist_file}vv $netlist_dir/$netlist_file}
    }
    if ![string compare $show "show"] {
-     textwindow $netlist_dir/$netlist_file
+     textwindow "$netlist_dir/$netlist_file"
    }
  }
 
  if ![string compare $netlist_file "netlist"] {
-         textwindow $netlist_dir/netlist
+         textwindow "$netlist_dir/netlist"
  }
  return {}
 }
@@ -148,11 +147,11 @@ proc netlist {source_file show netlist_file} {
 proc task { cmd {dir .}  {background fg}} {
   global task_output task_error
   if {![string compare $background {bg} ] } {
-    set task_error [catch {exec sh -c "cd $dir; exec $cmd" &} task_output]
+    set task_error [catch {exec sh -c "cd \"$dir\"; exec $cmd" &} task_output]
   } elseif {![string compare $background  {fg} ] } {
-    set task_error [catch {exec sh -c "cd $dir; exec $cmd"} task_output]
+    set task_error [catch {exec sh -c "cd \"$dir\"; exec $cmd"} task_output]
   } elseif {![string compare $background {tk_exec} ] } {
-    set task_error [catch {tk_exec sh -c "cd $dir; exec $cmd"} task_output]
+    set task_error [catch {tk_exec sh -c "cd \"$dir\"; exec $cmd"} task_output]
   }
 }
 
@@ -260,23 +259,23 @@ proc simulate {filename} {
    if { $netlist_type=="verilog" } {
      # 20150916 added modelsim
      if { $verilog_simulator == "iverilog" } { ;# icarus verilog
-       task "$iverilog_path $iverilog_opts -o .verilog_object $filename" $netlist_dir fg
+       task "$iverilog_path $iverilog_opts -o .verilog_object $filename" "$netlist_dir" fg
        if {$task_error} {viewdata $task_output; return}
-       task  "$vvp_path $netlist_dir/.verilog_object" $netlist_dir fg
+       task  "$vvp_path \"$netlist_dir/.verilog_object\"" "$netlist_dir" fg
        if {$task_error} {viewdata $task_output; return}
-       write_data $task_output $netlist_dir/.sim_output.txt
-       task "$terminal  -e less $netlist_dir/.sim_output.txt" $netlist_dir bg
+       write_data $task_output "$netlist_dir/.sim_output.txt"
+       task "$terminal  -e less \"$netlist_dir/.sim_output.txt\"" "$netlist_dir" bg
      } elseif { $verilog_simulator =="modelsim" } { ;# modelsim
        #puts {start compile}
-       task "${modelsim_path}/vlog +acc $filename" $netlist_dir fg
+       task "${modelsim_path}/vlog +acc $filename" "$netlist_dir" fg
        if {$task_error} {viewdata $task_output; return}
        #puts {start simulation}
        task "${modelsim_path}/vsim -c -do \"run -all\" [file rootname $filename]" $netlist_dir fg
        if {$task_error} {viewdata $task_output; return}
        #puts {end simulation}
-       write_data $task_output $netlist_dir/.sim_output.txt
+       write_data $task_output "$netlist_dir/.sim_output.txt"
        #puts {end log file}
-       task "$terminal  -e less $netlist_dir/.sim_output.txt" $netlist_dir bg
+       task "$terminal  -e less \"$netlist_dir/.sim_output.txt\"" "$netlist_dir" bg
      } else {
        alert_ "ERROR: undefined verilog simulator: $verilog_simulator"
      }
@@ -285,22 +284,22 @@ proc simulate {filename} {
      ## run utile before firing simulator if any UTILE stimuli file found
      set schname [ file tail [ file rootname $filename] ]
      if { [file exists stimuli.$schname ] } {
-       task "$utile_cmd_path stimuli.$schname" $netlist_dir fg
+       task "$utile_cmd_path stimuli.$schname" "$netlist_dir" fg
      }
      if { $spice_simulator == "hspicerf" } {
        # added computerfarm
-       task "$terminal -e \"$computerfarm $hspicerf_path $filename ; bash\"" $netlist_dir bg
+       task "$terminal -e \"$computerfarm $hspicerf_path $filename ; bash\"" "$netlist_dir" bg
      } elseif { $spice_simulator == "ngspice"} {
-       task "$terminal -e \"$computerfarm $ngspice_path -i $filename -a || sh\""  $netlist_dir bg
+       task "$terminal -e \"$computerfarm $ngspice_path -i $filename -a || sh\""  "$netlist_dir" bg
        if {$task_error} {viewdata $task_output; return}
      } elseif { $spice_simulator == "ngspice_batch"} {
        set rawfile [ file tail [ file rootname $filename] ].raw
-       task "$computerfarm $ngspice_path -b -r $rawfile  -o ${schname}.out $filename "  $netlist_dir bg
+       task "$computerfarm $ngspice_path -b -r $rawfile  -o ${schname}.out $filename "  "$netlist_dir" bg
        if {$task_error} {viewdata $task_output; return}
      } elseif { $spice_simulator == "hspice"} {
-       task "$terminal -e \"$computerfarm $hspice_path -i $filename | tee hspice.out ; bash\""  $netlist_dir bg
+       task "$terminal -e \"$computerfarm $hspice_path -i $filename | tee hspice.out ; bash\""  "$netlist_dir" bg
      } elseif {$spice_simulator == "finesim"} {
-       task "$terminal -e \"$computerfarm $finesim_path $finesim_opts $filename ; bash \""  $netlist_dir bg
+       task "$terminal -e \"$computerfarm $finesim_path $finesim_opts $filename ; bash \""  "$netlist_dir" bg
        # 20170410
      } else {
        alert_ "ERROR: undefined SPICE simulator: $spice_simulator"
@@ -308,13 +307,13 @@ proc simulate {filename} {
    } elseif { $netlist_type=="vhdl" } { 
      set schname [ file tail [ file rootname $filename] ]
      if { $vhdl_simulator == "modelsim" } { 
-       task "${modelsim_path}/vsim -i" $netlist_dir bg
+       task "${modelsim_path}/vsim -i" "$netlist_dir" bg
      #20170921 added ghdl
      } elseif { $vhdl_simulator == "ghdl" } { 
        task  "$ghdl_path -c $ghdl_elaborate_opts $filename -r $ghdl_run_opts $schname --wave=${schname}.ghw" $netlist_dir fg
        if {$task_error} {viewdata $task_output; return}
-       write_data $task_output $netlist_dir/.sim_output.txt
-       task "$terminal  -e less $netlist_dir/.sim_output.txt" $netlist_dir bg
+       write_data $task_output "$netlist_dir/.sim_output.txt"
+       task "$terminal  -e less \"$netlist_dir/.sim_output.txt\"" "$netlist_dir" bg
      } 
    } else { 
      alert_ "ERROR: netlist_type: $netlist_type , filename: $filename"
@@ -326,43 +325,41 @@ proc simulate {filename} {
 proc modelsim {schname} {
   global netlist_dir netlist_type
   global iverilog_path vvp_path hspice_path modelsim_path
-  task "${modelsim_path}/vsim -i" $netlist_dir bg
+  task "${modelsim_path}/vsim -i" "$netlist_dir" bg
 }
 
 proc utile_translate {schname} { 
   global netlist_dir netlist_type tcl_debug XSCHEM_SHAREDIR
   global utile_gui_path utile_cmd_path
   set tmpname [file rootname "$schname"]
-  exec sh -c "cd $netlist_dir; XSCHEM_SHAREDIR=$XSCHEM_SHAREDIR $utile_cmd_path \"stimuli.$tmpname\""
+  eval exec {sh -c "cd \"$netlist_dir\"; XSCHEM_SHAREDIR=\"$XSCHEM_SHAREDIR\" \"$utile_cmd_path\" stimuli.$tmpname"}
 }
 
 proc utile_gui {schname} { 
   global netlist_dir netlist_type tcl_debug XSCHEM_SHAREDIR
   global utile_gui_path utile_cmd_path
   set tmpname [file rootname "$schname"]
-  exec sh -c "cd $netlist_dir; XSCHEM_SHAREDIR=$XSCHEM_SHAREDIR $utile_gui_path \"stimuli.$tmpname\"" &
+  eval exec {sh -c "cd \"$netlist_dir\"; XSCHEM_SHAREDIR=\"$XSCHEM_SHAREDIR\" \"$utile_gui_path\" stimuli.$tmpname"} &
 }
 
 proc utile_edit {schname} { 
   global netlist_dir netlist_type tcl_debug editor XSCHEM_SHAREDIR
   global utile_gui_path utile_cmd_path 
   set tmpname [file rootname "$schname"]
-  exec sh -c "cd $netlist_dir; $editor stimuli.$tmpname ; 
-        cd $netlist_dir; 
-        XSCHEM_SHAREDIR=$XSCHEM_SHAREDIR $utile_cmd_path \"stimuli.$tmpname\"" &
+  eval exec {sh -c "cd \"$netlist_dir\"; $editor stimuli.$tmpname ; cd \"$netlist_dir\"; XSCHEM_SHAREDIR=\"$XSCHEM_SHAREDIR\" \"$utile_cmd_path\" stimuli.$tmpname"} &
 }
 
 proc waveview {schname} {
   global netlist_dir netlist_type tcl_debug
   global waveview_path
   set tmpname [file rootname "$schname"]
-  task "$waveview_path -k -x \"$tmpname.sx\"" $netlist_dir bg
+  task "$waveview_path -k -x \"$tmpname.sx\"" "$netlist_dir" bg
 }
 
 proc gtkwave {schname} {
   global netlist_dir netlist_type tcl_debug
   global gtkwave_path
-  task "$gtkwave_path 2>/dev/null" $netlist_dir bg
+  task "$gtkwave_path 2>/dev/null" "$netlist_dir" bg
 }
 
 proc waves {schname} {
@@ -372,18 +369,18 @@ proc waves {schname} {
  set tmpname [file rootname "$schname"]
  if { [select_netlist_dir 0] ne "" } {
    if { $netlist_type=="verilog" } {
-     task "$gtkwave_path dumpfile.vcd \"$tmpname.sav\" 2>/dev/null" $netlist_dir bg
+     task "$gtkwave_path dumpfile.vcd \"$tmpname.sav\" 2>/dev/null" "$netlist_dir" bg
      if {$task_error} {viewdata $task_output; return}
 
    } elseif { $netlist_type=="spice" } {
 
      if { [info exists analog_viewer] && $analog_viewer == "waveview" } { 
-       task "$waveview_path -k -x \"$tmpname.sx\"" $netlist_dir bg ; # 20170415 bg instead of tk_init exec mode
+       task "$waveview_path -k -x \"$tmpname.sx\"" "$netlist_dir" bg ; # 20170415 bg instead of tk_init exec mode
      } else {
        alert_ { Unsupported default wiever... } 
      }
    } elseif { $netlist_type=="vhdl" } { 
-     task "$gtkwave_path \"${tmpname}.ghw\" \"${tmpname}.sav\" 2>/dev/null" $netlist_dir bg
+     task "$gtkwave_path \"${tmpname}.ghw\" \"${tmpname}.sav\" 2>/dev/null" "$netlist_dir" bg
    }
  }
  return {}
@@ -403,15 +400,15 @@ proc edit_netlist {schname } {
 
  if { [regexp vim $editor] } { set ftype "-c \":set filetype=$netlist_type\"" } else { set ftype {} }
  if { [select_netlist_dir 0] ne "" } {
-   # puts "edit_netlist: \"$editor $ftype  ${schname}.v\" $netlist_dir bg"
+   # puts "edit_netlist: \"$editor $ftype  ${schname}.v\" \"$netlist_dir\" bg"
    if { $netlist_type=="verilog" } {
-     task "$editor $ftype  \"${tmpname}.v\"" $netlist_dir bg
+     task "$editor $ftype  \"${tmpname}.v\"" "$netlist_dir" bg
    } elseif { $netlist_type=="spice" } {
-     task "$editor $ftype \"${tmpname}.spice\"" $netlist_dir bg
+     task "$editor $ftype \"${tmpname}.spice\"" "$netlist_dir" bg
    } elseif { $netlist_type=="tedax" } {
-     task "$editor $ftype \"${tmpname}.tdx\"" $netlist_dir bg
+     task "$editor $ftype \"${tmpname}.tdx\"" "$netlist_dir" bg
    } elseif { $netlist_type=="vhdl" } { 
-     task "$editor $ftype \"${tmpname}.vhdl\"" $netlist_dir bg
+     task "$editor $ftype \"${tmpname}.vhdl\"" "$netlist_dir" bg
    }
  }
  return {}
@@ -922,7 +919,7 @@ proc make_symbol {name} {
  global XSCHEM_SHAREDIR symbol_width
  set name [abs_sym_path $name ]
  # puts "make_symbol{}, executing: ${XSCHEM_SHAREDIR}/make_sym.awk $symbol_width ${name}"
- eval exec "awk -f ${XSCHEM_SHAREDIR}/make_sym.awk $symbol_width {$name}"
+ eval exec {awk -f ${XSCHEM_SHAREDIR}/make_sym.awk $symbol_width $name}
  return {}
 }
 
@@ -2048,7 +2045,7 @@ proc input_number {txt cmd} {
 
 ## 20161102
 proc launcher {} {
-  global launcher_var launcher_default_program launcher_program env XSCHEM_SHAREDIR XSCHEM_LIBRARY_PATH
+  global launcher_var launcher_default_program launcher_program env
   
   ## puts ">>> $launcher_program $launcher_var "
   # 20170413
@@ -2114,7 +2111,7 @@ if { [info exists XSCHEM_LIBRARY_PATH] } {
 }
 
 if { [xschem get help ]} {
-  set fd [open ${XSCHEM_SHAREDIR}/xschem.help r]
+  set fd [open "${XSCHEM_SHAREDIR}/xschem.help" r]
   set helpfile [read $fd]
   puts $helpfile
   close $fd
@@ -2214,8 +2211,8 @@ set_ne gtkwave_path gtkwave
 # set_ne waveview_path wv
 
 ## utile
-set_ne utile_gui_path ${XSCHEM_SHAREDIR}/utile/utile3
-set_ne utile_cmd_path ${XSCHEM_SHAREDIR}/utile/utile
+set_ne utile_gui_path "${XSCHEM_SHAREDIR}/utile/utile3"
+set_ne utile_cmd_path "${XSCHEM_SHAREDIR}/utile/utile"
 
 ## modelsim
 # set_ne modelsim_path $env(HOME)/modeltech/bin
@@ -2429,9 +2426,9 @@ font configure Underline-Font -underline true -size 24
    menu .menubar.simulation.menu -tearoff 0
    menubutton .menubar.help -text "Help" -menu .menubar.help.menu
    menu .menubar.help.menu -tearoff 0
-   .menubar.help.menu add command -label "help" -command "textwindow ${XSCHEM_SHAREDIR}/xschem.help" \
+   .menubar.help.menu add command -label "help" -command "textwindow \"${XSCHEM_SHAREDIR}/xschem.help\"" \
         -accelerator {?}
-   .menubar.help.menu add command -label "keys" -command "textwindow ${XSCHEM_SHAREDIR}/keys.help"
+   .menubar.help.menu add command -label "keys" -command "textwindow \"${XSCHEM_SHAREDIR}/keys.help\""
    .menubar.help.menu add command -label "About XSCHEM" -command "about"
    
    .menubar.file.menu add command -label "New Schematic"  -accelerator Ctrl+N\
@@ -2845,7 +2842,7 @@ font configure Underline-Font -underline true -size 24
     wm withdraw .infotext
     set show_infowindow 0
    }
-   bind .drw  "?" { textwindow ${XSCHEM_SHAREDIR}/xschem.help }
+   bind .drw  "?" { textwindow "${XSCHEM_SHAREDIR}/xschem.help" }
 
    if {[array exists replace_key]} {
      foreach i [array names replace_key] {

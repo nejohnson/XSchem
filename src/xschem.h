@@ -460,6 +460,7 @@ extern FILE *errfp;
 extern int no_readline;
 extern char *filename;
 extern char home_dir[PATH_MAX]; /* home dir obtained via getpwuid */
+extern char user_conf_dir[PATH_MAX]; /* usually ~/.xschem */
 extern char pwd_dir[PATH_MAX]; /* obtained via getcwd() */
 extern int load_initfile;
 extern char rcfile[PATH_MAX];

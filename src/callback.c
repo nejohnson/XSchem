@@ -74,7 +74,8 @@ int callback(int event, int mx, int my, KeySym key,
                  int button, int aux, int state)  
 {
  char str[PATH_MAX];/* overflow safe 20161122 */
- FILE *fp;
+ static char sel_or_clip[PATH_MAX] = "";/* overflow safe 20161122 */
+ struct stat buf;
  unsigned short sel;
 
  state &=~Mod2Mask; /* 20170511 filter out NumLock status */
@@ -99,24 +100,20 @@ int callback(int event, int mx, int my, KeySym key,
  switch(event)
  {
   case EnterNotify:
-  my_snprintf(str, S(str), "%s/%s", home_dir, 
-              ".xschem_selection.sch"); /* 20181002 */
-  if( (fp=fopen(str, "r"))==NULL && (ui_state & STARTCOPY) ) 
-  {
-   copy_objects(ABORT);
-   unselect_all();
-  }
-  else if(fp) fclose(fp);
-  if(lastselected==0)
-  {
-    if(debug_var>=2) fprintf(errfp, "callback(): Enter event\n");
-   mousex_snap = 490;
-   mousey_snap = -340;
-   
-   merge_file(1, ".sch");
-   unlink(str);
-  }
-  break;
+    if(!sel_or_clip[0]) my_snprintf(sel_or_clip, S(sel_or_clip), "%s/%s", user_conf_dir, ".selection.sch"); /* 20181002 */
+    if( stat(sel_or_clip, &buf)  && (ui_state & STARTCOPY) ) 
+    {
+      copy_objects(ABORT); /* also unlinks sel_or_flip file */
+      unselect_all(); 
+    }
+    if(lastselected == 0 ) {
+      if(debug_var>=2) fprintf(errfp, "callback(): Enter event\n");
+      mousex_snap = 490;
+      mousey_snap = -340;
+      merge_file(1, ".sch");
+      unlink(sel_or_clip);
+    }
+    break;
 
   case Expose:
     XCopyArea(display, save_pixmap, window, gctiled, mx,my,button,aux,mx,my);
@@ -132,7 +129,6 @@ int callback(int event, int mx, int my, KeySym key,
       draw_selection(gc[SELLAYER],0);
       XSetClipMask(display, gc[SELLAYER], None);
     }
-
     if(debug_var>=1) fprintf(errfp, "callback(): Expose\n");
     break;
   case ConfigureNotify:
@@ -234,10 +230,9 @@ int callback(int event, int mx, int my, KeySym key,
         }
       }
     }
-
-  break;
+    break;
   case KeyRelease:  /* 20161118 */
-  break;
+    break;
   case KeyPress: /* 20161118 */
    if(key==' ') {
      if(ui_state & STARTWIRE) { /*  & instead of == 20190409 */
@@ -1345,7 +1340,7 @@ int callback(int event, int mx, int my, KeySym key,
      break_wires_at_pins();
      break;
    }
-  break;
+   break;
 
   case ButtonPress:                     /* end operation */
    if(debug_var>=1) fprintf(errfp, "callback(): ButtonPress  ui_state=%ld state=%d\n",ui_state,state);

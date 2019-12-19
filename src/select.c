@@ -538,7 +538,7 @@ void unselect_all(void)
     drawtempline(gctiled,END, 0.0, 0.0, 0.0, 0.0);
     ui_state &= ~SELECTION;
     /*\statusmsg("",2); */
-    my_snprintf(str, S(str), "%s/%s", home_dir, ".xschem_selection.sch"); /* 20161115  PWD->HOME */
+    my_snprintf(str, S(str), "%s/%s", user_conf_dir, ".selection.sch"); /* 20161115  PWD->HOME */
     unlink(str);
     if(event_reporting) {
       printf("xschem unselect_all\n");

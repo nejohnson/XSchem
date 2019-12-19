@@ -808,49 +808,63 @@ int Tcl_AppInit(Tcl_Interp *inter)
 
  Tcl_CreateExitHandler(tclexit, 0);
 
- my_snprintf(tmp, S(tmp),"regsub -all {~} {.:%s} {%s}", XSCHEM_LIBRARY_PATH, home_dir);
+ my_snprintf(tmp, S(tmp),"regsub -all {~/} {.:%s} {%s/}", XSCHEM_LIBRARY_PATH, home_dir);
  tcleval(tmp);
  tclsetvar("XSCHEM_LIBRARY_PATH", Tcl_GetStringResult(interp));
  
- if( !stat("./xschem.tcl", &buf)) {
+ if( !stat("./xschem.tcl", &buf) && !stat("./systemlib", &buf) && !stat("./xschem", &buf)) {
    tclsetvar("XSCHEM_SHAREDIR",pwd_dir); /* for testing xschem builds in src dir*/
    my_snprintf(tmp, S(tmp), "subst .:[file normalize \"%s/../xschem_library/devices\"]", pwd_dir);
    tcleval(tmp);
    tclsetvar("XSCHEM_LIBRARY_PATH", Tcl_GetStringResult(interp));
  } else if( !stat(XSCHEM_SHAREDIR, &buf) ) {  /* 20180918 */
    tclsetvar("XSCHEM_SHAREDIR",XSCHEM_SHAREDIR);
- /* ... else give up searching, may set XSCHEM_LIBRARY_PATH later after loading xschemrc and .xschem */
+   /* ... else give up searching, may set later after loading xschemrc */
  }
+ /* create user conf dir , remove ~ if present */
+ my_snprintf(tmp, S(tmp),"regsub {^~/} {%s} {%s/}", USER_CONF_DIR, home_dir);
+ tcleval(tmp);
+ my_snprintf(user_conf_dir, S(user_conf_dir), "%s", Tcl_GetStringResult(interp));
+ tclsetvar("USER_CONF_DIR", user_conf_dir);
 
-
-/* */
-/*  START LOOKING FOR xschemrc */
-/* */
-
+ /* create USER_CONF_DIR if it was not installed */
+ if(stat(user_conf_dir, &buf)) {
+   if(!mkdir(user_conf_dir, 0700)) {
+     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): created %s dir\n", user_conf_dir);
+   } else {
+    fprintf(errfp, "Tcl_AppInit(): failure creating %s\n", user_conf_dir);
+    Tcl_Exit(EXIT_FAILURE);
+   }
+ }
+  
+ /*                         */
+ /*    SOURCE xschemrc file */
+ /*                         */
  if(load_initfile) {
    if(rcfile[0]) {
      my_snprintf(name, S(name), rcfile);
      if(stat(name, &buf) ) {
+       /* rcfile given on cmdline is not existing */
        fprintf(errfp, "Tcl_AppInit() err 2: cannot find %s\n", name);
        Tcl_ResetResult(interp);
        Tcl_Exit(EXIT_FAILURE);
        return TCL_ERROR; /* 20121110 */
      }
-
-   } else {
+   } else { /* look in current dir */
      my_snprintf(name, S(name), "%s/xschemrc",pwd_dir);
    }
+   /* source command-line given rcfile or xschemrc in present directory if existing ... */
    if(!stat(name, &buf)) {
      if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): sourcing %s\n", name);
      source_tcl_file(name);
    } else {
-     my_snprintf(tmp, S(tmp),"regsub {^~} {%s} {%s}", USER_CONF_DIR, home_dir);
-     tcleval(tmp);
-     my_snprintf(name, S(name), "%s/xschemrc",Tcl_GetStringResult(interp));
+     /* ... else look for (user_conf_dir)/xschemrc ... */
+     my_snprintf(name, S(name), "%s/xschemrc", user_conf_dir);
      if(!stat(name, &buf)) {
        if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): sourcing %s\n", name);
        source_tcl_file(name);
      } else if(tclgetvar("XSCHEM_SHAREDIR")) {
+       /* ... else get systemwide xschemrc */
        my_snprintf(name, S(name), "%s/xschemrc",tclgetvar("XSCHEM_SHAREDIR"));
        if(!stat(name, &buf)) {
          if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): sourcing %s\n", name);
@@ -859,30 +873,13 @@ int Tcl_AppInit(Tcl_Interp *inter)
      }
    }
  }
-
- /* create USER_CONF_DIR if it was not installed */
- my_snprintf(tmp, S(tmp),"regsub {^~} {%s} {%s}", USER_CONF_DIR, home_dir);
- tcleval(tmp);
- tclsetvar("USER_CONF_DIR",Tcl_GetStringResult(interp));
- if(stat(Tcl_GetStringResult(interp), &buf)) {
-   if(!mkdir(Tcl_GetStringResult(interp), 0700)) {
-     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): created %s dir\n", USER_CONF_DIR);
-   } else {
-    fprintf(errfp, "Tcl_AppInit(): failure creating %s\n", USER_CONF_DIR);
-    Tcl_Exit(EXIT_FAILURE);
-   }
- }
-  
- /* */
- /*  END LOOKING FOR .xschem */
- /* */
+ /* END LOOKING FOR xschemrc */
 
  if(rainbow_colors) tclsetvar("rainbow_colors","1"); /* 20171013 */
  
-
- /* */
+ /*                               */
  /*  START LOOKING FOR xschem.tcl */
- /* */
+ /*                               */
  if(!tclgetvar("XSCHEM_SHAREDIR")) {
    fprintf(errfp, "Tcl_AppInit() err 3: cannot find xschem.tcl\n");
    if(has_x) {
@@ -897,10 +894,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
    Tcl_Exit(EXIT_FAILURE);
    return TCL_ERROR; /* 20121110 */
  }
-
- /* */
- /*  END LOOKING FOR xschem.tcl */
- /* */
+ /*  END LOOKING FOR xschem.tcl   */
 
  if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): XSCHEM_SHAREDIR=%s  XSCHEM_LIBRARY_PATH=%s\n",
        tclgetvar("XSCHEM_SHAREDIR"), 
@@ -908,16 +902,16 @@ int Tcl_AppInit(Tcl_Interp *inter)
  );
  if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done step a of xinit()\n");
 
- /* */
+ /*                                */
  /* CREATE XSCHEM 'xschem' COMMAND */
- /* */
+ /*                                */
  Tcl_CreateCommand(interp, "xschem",   (myproc *) xschem, NULL, NULL);
 
  if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done step a1 of xinit()\n");
  
- /* */
- /*  EXECUTE xschem.tcl */
- /* */
+ /*                                */
+ /*  EXECUTE xschem.tcl            */
+ /*                                */
  my_snprintf(name, S(name), "%s/%s", tclgetvar("XSCHEM_SHAREDIR"), "xschem.tcl");
  if(stat(name, &buf) ) {
    fprintf(errfp, "Tcl_AppInit() err 4: cannot find %s\n", name);
@@ -936,19 +930,14 @@ int Tcl_AppInit(Tcl_Interp *inter)
  if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): sourcing %s\n", name);
  source_tcl_file(name);
  if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done executing xschem.tcl\n");
-
- /* */
  /*  END EXECUTE xschem.tcl */
- /* */
 
  /* resolve absolute pathname of xschem (argv[0]) for future usage */
  my_strdup(44, &xschem_executable, get_file_path(xschem_executable));
  if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): resolved xschem_executable=%s\n", xschem_executable);
 
  /* READ COLORS */
- my_snprintf(tmp, S(tmp),"regsub {^~} {%s} {%s}", USER_CONF_DIR, home_dir);
- tcleval(tmp);
- my_snprintf(name, S(name), "%s/colors",Tcl_GetStringResult(interp));
+ my_snprintf(name, S(name), "%s/colors", user_conf_dir);
  if(!stat(name, &buf)) {
    source_tcl_file(name);
  }
@@ -998,10 +987,9 @@ int Tcl_AppInit(Tcl_Interp *inter)
  cadlayers=atoi(tclgetvar("cadlayers"));
  if(debug_var==-10) debug_var=0;
 
- /* */
+ /*                             */
  /*  [m]allocate dynamic memory */
- /* */
-
+ /*                             */
  alloc_data();
 
  #ifndef IN_MEMORY_UNDO
@@ -1041,11 +1029,9 @@ int Tcl_AppInit(Tcl_Interp *inter)
  my_snprintf(tmp, S(tmp), "set current_dirname \"%s\"", pwd_dir);
  tcleval(tmp);
 
-
- /* */
- /*  X INITIALIZATION */
- /* */
-
+ /*                      */
+ /*  X INITIALIZATION    */
+ /*                      */
  if( has_x ) {
     mainwindow=Tk_MainWindow(interp);
     if(!mainwindow) {
@@ -1208,17 +1194,14 @@ int Tcl_AppInit(Tcl_Interp *inter)
     set_grid(0); /* set default value specified in xschemrc as 'grid' else CADGRID */
  } /* if(has_x) */
  if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done X init\n");
-
- /*  */
  /*  END X INITIALIZATION */
- /* */
 
  init_done=1;  /* 20171008 moved before option processing, otherwise xwin_exit will not be invoked */
                /* leaving undo buffer and other garbage around. */
 
- /* */
+ /*                                */
  /*  START PROCESSING USER OPTIONS */
- /* */
+ /*                                */
  if(tcl_command) {
    tcleval(tcl_command);
  }

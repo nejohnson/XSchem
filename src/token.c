@@ -26,7 +26,6 @@
 
 /* 20150317 */
 #define SPACE2(c) ( SPACE(c) || c=='\'' || c== '"')
-#define SPACE3(c) ( SPACE(c) || c=='*' ) /* 20150418 used in translate() */
 
 enum status {XBEGIN, XTOKEN, XSEPARATOR, XVALUE, XEND, XENDTOK};
 
@@ -2281,7 +2280,7 @@ char *translate(int inst, char* s)
    escape=0;
   /* /20161210 */
 
-  space=SPACE3(c); /* 20150418 use SPACE3 */
+  space=SPACE2(c);
   if( state==XBEGIN && c=='@' && !escape  ) state=XTOKEN; /* 20161210 escape */
   else if( state==XTOKEN && ( 
                               (space && !escape)  || 

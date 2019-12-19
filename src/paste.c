@@ -295,11 +295,11 @@ void merge_file(int selection_load, const char ext[])
     }
     else if(selection_load==1)
     {
-      my_snprintf(name, S(name), "%s/.xschem_selection.sch", home_dir);
+      my_snprintf(name, S(name), "%s/.selection.sch", user_conf_dir);
     }
     else    /* clipboard load */
     {
-      my_snprintf(name, S(name), "%s/.xschem_clipboard.sch", home_dir);
+      my_snprintf(name, S(name), "%s/.clipboard.sch", user_conf_dir);
     }
     if( (fd=fopen(name,"r"))!= NULL)
     {

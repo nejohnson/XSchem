@@ -36,6 +36,7 @@ int rainbow_colors=0;
 int manhattan_lines=0;
 FILE *errfp; 
 char *filename=NULL; /* filename given on cmdline */
+char user_conf_dir[PATH_MAX];
 char home_dir[PATH_MAX]; /* home dir obtained via getpwuid */
 char pwd_dir[PATH_MAX];  /* obtained via getcwd() */
 int load_initfile=1;

@@ -1700,9 +1700,9 @@ void save_selection(int what)
 
  if(debug_var>=3) fprintf(errfp, "save_selection():\n");
  if(what==1)
-   my_snprintf(name, S(name), "%s/%s.sch",home_dir , ".xschem_selection"); /* 20150502 changed PWD to HOME */
+   my_snprintf(name, S(name), "%s/%s.sch",user_conf_dir , ".selection"); /* 20150502 changed PWD to HOME */
  else /* what=2 */
-   my_snprintf(name, S(name), "%s/%s.sch",home_dir , ".xschem_clipboard"); /* 20150502 changed PWD to HOME */
+   my_snprintf(name, S(name), "%s/%s.sch",user_conf_dir , ".clipboard"); /* 20150502 changed PWD to HOME */
 
  if(!(fd=fopen(name,"w")))
  {

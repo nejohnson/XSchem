@@ -1568,7 +1568,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
   }
   else if(!strcmp(argv[2],"userconfdir"))  {  /* 20121121 */
         char s[30]; /* overflow safe 20161122 */
-        my_snprintf(s, S(s), "%s",USER_CONF_DIR);
+        my_snprintf(s, S(s), "%s",user_conf_dir);
         Tcl_AppendResult(interp, s,NULL);
   }
   else {

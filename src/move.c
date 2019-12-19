@@ -443,8 +443,8 @@ void copy_objects(int what)
   draw_selection(gctiled,0);
   rot=flip=deltax=deltay=0;
   ui_state&=~STARTCOPY;
-  my_strdup(225, &str, home_dir);
-  my_strcat(226, &str, "/.xschem_selection.sch");
+  my_strdup(225, &str, user_conf_dir);
+  my_strcat(226, &str, "/.selection.sch");
   unlink(str);
 
  }

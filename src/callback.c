@@ -1277,6 +1277,8 @@ int callback(int event, int mx, int my, KeySym key,
     char *s4="+3.3V";
     char *s5="2*AAA(3)";
     char *s6="usb_io+";
+    char *s7="LDY[3:0]*4";
+    char *s8="LDY[3..0]*4";
 
     fprintf(errfp, "%s --> %s\n", s, expandlabel(s, &tmp)); 
     fprintf(errfp, "%s --> %s\n", s1, expandlabel(s1, &tmp)); 
@@ -1285,6 +1287,8 @@ int callback(int event, int mx, int my, KeySym key,
     fprintf(errfp, "%s --> %s\n", s4, expandlabel(s4, &tmp)); 
     fprintf(errfp, "%s --> %s\n", s5, expandlabel(s5, &tmp)); 
     fprintf(errfp, "%s --> %s\n", s6, expandlabel(s6, &tmp)); 
+    fprintf(errfp, "%s --> %s\n", s7, expandlabel(s7, &tmp)); 
+    fprintf(errfp, "%s --> %s\n", s8, expandlabel(s8, &tmp)); 
     fprintf(errfp, "%s\n", get_tok_value("type=diode template=\"name=D1 m=1\"", "template", 2));
     break;
    }

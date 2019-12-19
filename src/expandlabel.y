@@ -105,17 +105,21 @@ static char *my_strmult2(int n, char *s)
  register char *pos,*prev;
  char *str, *ss;
 
+ if(debug_var >= 2 ) fprintf(errfp, "my_strmult2: n=%d s=%s\n", n, s);
  if(n==0) return expandlabel_strdup("");
  len=strlen(s);
  prev=s;
  ss = str=my_malloc(124,  (len+1)*n);
  str[0]='\0';
  for(pos=s;pos<=s+len;pos++) {
-   if(*pos==',' || pos==s+len) {
-     for(i=1;i<=n;i++) {
-       /* strncat(str,prev,pos-prev); */
-       memcpy(ss, prev, pos-prev+1); /* 20180923 */
-       /*if(i<n) strcat(str,","); */
+   if(*pos==',' || *pos=='\0') {
+     for(i=0;i<n;i++) {
+       memcpy(ss, prev, pos-prev); /* 20180923 */
+       if(i == n - 1 && *pos == '\0') {
+         ss[pos - prev] = '\0';
+       } else {
+         ss[pos - prev] = ',';
+       }
        ss += pos-prev+1; /* 20180923 */
      }
      /* if(*pos==',') strcat(str,","); */

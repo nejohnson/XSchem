@@ -2,8 +2,9 @@
 ## set prefix for installation
 ## XSCHEM will install in ${prefix}/bin, ${prefix}/share/xschem 
 ## and ${prefix}/share/doc/xschem
-# prefix=$(HOME)
-prefix=/usr/local
+prefix=$(HOME)
+# prefix=/usr/local
+
 sharedir=$(prefix)/share/xschem
 userconfdir=$(HOME)/.xschem
 

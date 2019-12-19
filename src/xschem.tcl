@@ -264,7 +264,8 @@ proc simulate {filename} {
        task  "$vvp_path \"$netlist_dir/.verilog_object\"" "$netlist_dir" fg
        if {$task_error} {viewdata $task_output; return}
        write_data $task_output "$netlist_dir/.sim_output.txt"
-       task "$terminal  -e less \"$netlist_dir/.sim_output.txt\"" "$netlist_dir" bg
+       # task "$terminal  -e less \"$netlist_dir/.sim_output.txt\"" "$netlist_dir" bg
+       textwindow $netlist_dir/.sim_output.txt
      } elseif { $verilog_simulator =="modelsim" } { ;# modelsim
        #puts {start compile}
        task "${modelsim_path}/vlog +acc $filename" "$netlist_dir" fg
@@ -275,7 +276,8 @@ proc simulate {filename} {
        #puts {end simulation}
        write_data $task_output "$netlist_dir/.sim_output.txt"
        #puts {end log file}
-       task "$terminal  -e less \"$netlist_dir/.sim_output.txt\"" "$netlist_dir" bg
+       # task "$terminal  -e less \"$netlist_dir/.sim_output.txt\"" "$netlist_dir" bg
+       textwindow $netlist_dir/.sim_output.txt
      } else {
        alert_ "ERROR: undefined verilog simulator: $verilog_simulator"
      }
@@ -313,7 +315,8 @@ proc simulate {filename} {
        task  "$ghdl_path -c $ghdl_elaborate_opts $filename -r $ghdl_run_opts $schname --wave=${schname}.ghw" $netlist_dir fg
        if {$task_error} {viewdata $task_output; return}
        write_data $task_output "$netlist_dir/.sim_output.txt"
-       task "$terminal  -e less \"$netlist_dir/.sim_output.txt\"" "$netlist_dir" bg
+       # task "$terminal  -e less \"$netlist_dir/.sim_output.txt\"" "$netlist_dir" bg
+       textwindow $netlist_dir/.sim_output.txt
      } 
    } else { 
      alert_ "ERROR: netlist_type: $netlist_type , filename: $filename"

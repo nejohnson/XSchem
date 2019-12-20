@@ -507,7 +507,7 @@ proc list_dirs {pathlist } {
 
 proc myload_set_colors {} {
   global myload_index1 myload_files2
-  update
+  #### update
   set dir1 [abs_sym_path [.myload.l.paneleft.list get $myload_index1]]
   for {set i 0} { $i< [.myload.l.paneright.list index end] } { incr i} {
     if {[ file isdirectory "$dir1/[lindex $myload_files2 $i]"]} {
@@ -566,7 +566,7 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
   panedwindow  .myload.l -orient horizontal
 
   frame .myload.l.paneleft
-  listbox .myload.l.paneleft.list -listvariable myload_files1 -width 20 -height 18\
+  listbox .myload.l.paneleft.list -listvariable myload_files1 -width 20 -height 18 -justify right\
     -yscrollcommand ".myload.l.paneleft.yscroll set" -selectmode browse \
     -xscrollcommand ".myload.l.paneleft.xscroll set"
   scrollbar .myload.l.paneleft.yscroll -command ".myload.l.paneleft.list yview" 
@@ -637,6 +637,9 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
   pack .myload.buttons.entry -side left -fill x -expand true
   pack .myload.l -expand true -fill both
   pack .myload.buttons -side top -fill x
+  if { [info exists myload_default_geometry]} {
+     wm geometry .myload "${myload_default_geometry}"
+  }
   myload_set_home $initdir
   bind .myload <Return> { 
     set myload_retval [.myload.buttons.entry get]
@@ -652,9 +655,6 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
   }
   bind .myload <Escape> { set myload_retval {}; destroy .myload}
 
-  if { [info exists myload_default_geometry]} {
-     wm geometry .myload "${myload_default_geometry}"
-  }
   update
   if { [ info exists myload_sash_pos] } {
     eval .myload.l sash mark 0 [.myload.l sash coord 0]

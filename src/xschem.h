@@ -194,7 +194,8 @@
 #define THICK 1024 /*  used to draw thick lines (buses) */
 #define ROTATELOCAL 2048 /*  rotate each selected object around its own anchor point 20171208 */
 #define CLEAR 4096 /* used in new_wire to clear previous rubber when switching manhattan_lines */
-#define DRAW 8192  /* used in bbox() to draw things by using XCopyArea after setting clip rectangle */
+/* #define DRAW 8192 */  /* was used in bbox() to draw things by using XCopyArea after setting clip rectangle */
+#define HILIGHT 8192  /* used when calling draw_*symbol_outline() for hilighting instead of normal draw */
 #define FONTWIDTH 20
 #define FONTOFFSET 40
 #define FONTHEIGHT 40
@@ -610,6 +611,7 @@ extern size_t get_tok_value_size;
 extern size_t get_tok_size;
 
 /*  functions */
+extern void here(void);
 extern void print_version(void);
 extern int set_netlist_dir(int force, char *dir);
 extern void netlist_options(int i);
@@ -693,7 +695,7 @@ extern void find_closest_net_or_symbol_pin(double mx,double my, double *x, doubl
 extern void drawline(int c, int what, double x1,double y1,double x2,double y2);
 extern void draw_string(int layer,int what, char *str, int rot, int flip, 
        double x1, double y1, double xscale, double yscale);
-extern void draw_symbol_outline(int what,int c, int n,int layer,
+extern void draw_symbol(int what,int c, int n,int layer,
             int tmp_flip, int tmp_rot, double xoffset, double yoffset);
 extern void drawrect(int c, int what, double rectx1,double recty1,
             double rectx2,double recty2);
@@ -710,7 +712,7 @@ extern void drawarc(int c, int what, double x, double y, double r, double a, dou
 extern void filledarc(int c, int what, double x, double y, double r, double a, double b);
 extern void drawtemppolygon(GC gc, int what, double *x, double *y, int points);
 extern void drawpolygon(int c, int what, double *x, double *y, int points, int poly_fill);
-extern void draw_temp_symbol_outline(int what, GC gc, int n,int layer,
+extern void draw_temp_symbol(int what, GC gc, int n,int layer,
             int tmp_flip, int tmp_rot, double xoffset, double yoffset);
 extern void draw_temp_string(GC gc,int what, char *str, int rot, int flip, 
        double x1, double y1, double xscale, double yscale);

@@ -23,6 +23,11 @@
 #include "xschem.h"
 #include <sys/wait.h>  /* waitpid */
 
+void here(void)
+{ 
+  fprintf(stderr, "here\n");
+}
+
 void set_modify(int mod) 
 {
   static int prev = -1;

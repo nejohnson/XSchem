@@ -431,50 +431,52 @@ void draw_temp_string(GC gctext, int what, char *str, int rot, int flip,
  drawtemprect(gctext,what, textx1,texty1,textx2,texty2);
 }
 
-void draw_symbol_outline(int what,int c, int n,int layer,int tmp_flip, int rot, 
+void draw_symbol(int what,int c, int n,int layer,int tmp_flip, int rot, 
         double xoffset, double yoffset) 
                             /* draws current layer only, should be called within  */
 {                           /* a "for(i=0;i<cadlayers;i++)" loop */
- register int j;
- register double x0,y0,x1,y1,x2,y2;
- int flip;
- Line line;
- Box box;
- Arc arc;
- Polygon polygon; /* 20171115 */
- Text text;
- register Instdef *symptr; /*20150408 */
- int textlayer;
- double angle;
+  register int j;
+  register double x0,y0,x1,y1,x2,y2;
+  int flip;
+  Line line;
+  Box box;
+  Arc arc;
+  Polygon polygon; /* 20171115 */
+  Text text;
+  register Instdef *symptr; /*20150408 */
+  int textlayer;
+  double angle;
+  #ifdef HAS_CAIRO
+  char *textfont;
+  #endif
 
- /* 20171112 */
- #ifdef HAS_CAIRO
- char *textfont;
- #endif
   if(inst_ptr[n].ptr == -1) return;
   if( (layer != PINLAYER && !enable_layer[layer]) ) return;
   if(!has_x) return;
+  if((what & HILIGHT) && (inst_ptr[n].flags & 4) ) return;
   if(layer==0) {
-   x1=X_TO_SCREEN(inst_ptr[n].x1+xoffset);  /* 20150729 added xoffset, yoffset */
-   x2=X_TO_SCREEN(inst_ptr[n].x2+xoffset);
-   y1=Y_TO_SCREEN(inst_ptr[n].y1+yoffset);
-   y2=Y_TO_SCREEN(inst_ptr[n].y2+yoffset);
-   if(!only_probes && (x2-x1)< 0.3 && (y2-y1)< 0.3) {
+    x1=X_TO_SCREEN(inst_ptr[n].x1+xoffset);  /* 20150729 added xoffset, yoffset */
+    x2=X_TO_SCREEN(inst_ptr[n].x2+xoffset);
+    y1=Y_TO_SCREEN(inst_ptr[n].y1+yoffset);
+    y2=Y_TO_SCREEN(inst_ptr[n].y2+yoffset);
+ 
+ 
+    if(!only_probes && (x2-x1)< 0.3 && (y2-y1)< 0.3) {
+      inst_ptr[n].flags|=1;
+      return; /* 20171210 */
+    }
+    else if(OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2)) 
+    {
      inst_ptr[n].flags|=1;
-     return; /* 20171210 */
-   }
-   else if(OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2)) 
-   {
-    inst_ptr[n].flags|=1;
-    return;
-   }
-   else inst_ptr[n].flags&=~1;
-
-   /* following code handles different text color for labels/pins 06112002 */
-
+     return;
+    }
+    else inst_ptr[n].flags&=~1;
+ 
+    /* following code handles different text color for labels/pins 06112002 */
+ 
   } else if(inst_ptr[n].flags&1) {  
-   if(debug_var>=2) fprintf(errfp, "draw_symbol_outline(): skippinginst %d\n", n);
-   return;
+    if(debug_var>=2) fprintf(errfp, "draw_symbol(): skipping inst %d\n", n);
+    return;
   }
 
   flip = inst_ptr[n].flip;
@@ -571,7 +573,7 @@ void draw_symbol_outline(int what,int c, int n,int layer,int tmp_flip, int rot,
   }
 }
 
-void draw_temp_symbol_outline(int what, GC gc, int n,int layer,int tmp_flip, int rot,
+void draw_temp_symbol(int what, GC gc, int n,int layer,int tmp_flip, int rot,
         double xoffset, double yoffset)
                             /* draws current layer only, should be called within */
 {                           /* a "for(i=0;i<cadlayers;i++)" loop */
@@ -608,7 +610,7 @@ void draw_temp_symbol_outline(int what, GC gc, int n,int layer,int tmp_flip, int
    /* following code handles different text color for labels/pins 06112002 */
 
  } else if(inst_ptr[n].flags&1) {
-   if(debug_var>=2) fprintf(errfp, "draw_symbol_outline(): skippinginst %d\n", n);
+   if(debug_var>=2) fprintf(errfp, "draw_symbol(): skipping inst %d\n", n);
    return;
  } /* /20150424 */
 
@@ -629,7 +631,7 @@ void draw_temp_symbol_outline(int what, GC gc, int n,int layer,int tmp_flip, int
  }
  for(j=0;j< symptr->polygons[layer];j++) /* 20171115 */
  {
-   /*fprintf(errfp, "draw_temp_symbol_outline: polygon\n"); */
+   /*fprintf(errfp, "draw_temp_symbol: polygon\n"); */
    polygon = (symptr->polygonptr[layer])[j];
 
    {   /* scope block so we declare some auxiliary arrays for coord transforms. 20171115 */
@@ -745,7 +747,7 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
 
  if(!has_x) return;
  rr=r;
- if(what==ADD)
+ if(what & ADD)
  {
   if(i>=CADDRAWBUFFERSIZE)
   {
@@ -768,7 +770,7 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
    i++;
   }
  }
- else if(what==NOW)
+ else if(what & NOW)
  {
   x1=X_TO_SCREEN(linex1);
   y1=Y_TO_SCREEN(liney1);
@@ -783,7 +785,7 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
   }
  } 
 
- else if(what==THICK)           /* 26122004 */
+ else if(what & THICK)           /* 26122004 */
  { 
   x1=X_TO_SCREEN(linex1);
   y1=Y_TO_SCREEN(liney1);
@@ -798,8 +800,8 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
    XSetLineAttributes (display, gc[c], lw, LineSolid, CapRound , JoinRound);
   }
  }
- else if(what==BEGIN) i=0;
- else if(what==END && i)
+ else if(what & BEGIN) i=0;
+ else if((what & END) && i)
  {
   if(draw_window) XDrawSegments(display, window, gc[c], rr,i);
   if(draw_pixmap) XDrawSegments(display, save_pixmap, gc[c], rr,i);
@@ -814,7 +816,7 @@ void drawtempline(GC gc, int what, double linex1,double liney1,double linex2,dou
  double x1,y1,x2,y2;
 
  if(!has_x) return;
- if(what==ADD)
+ if(what & ADD)
  {
   if(i>=CADDRAWBUFFERSIZE)
   {
@@ -834,7 +836,7 @@ void drawtempline(GC gc, int what, double linex1,double liney1,double linex2,dou
    i++;
   }
  }
- else if(what==NOW)
+ else if(what & NOW)
  {
   x1=X_TO_SCREEN(linex1);
   y1=Y_TO_SCREEN(liney1);
@@ -845,7 +847,7 @@ void drawtempline(GC gc, int what, double linex1,double liney1,double linex2,dou
    XDrawLine(display, window, gc, x1, y1, x2, y2);
   }
  } 
- else if(what==THICK)           /* 26122004 */
+ else if(what & THICK)           /* 26122004 */
  {
   x1=X_TO_SCREEN(linex1);
   y1=Y_TO_SCREEN(liney1);
@@ -863,8 +865,8 @@ void drawtempline(GC gc, int what, double linex1,double liney1,double linex2,dou
   }
  }
 
- else if(what==BEGIN) i=0;
- else if(what==END && i)
+ else if(what & BEGIN) i=0;
+ else if((what & END) && i)
  {
   XDrawSegments(display, window, gc, r,i);
   i=0;
@@ -879,7 +881,7 @@ void drawtemparc(GC gc, int what, double x, double y, double r, double a, double
  double xx1, yy1, xx2, yy2; /* complete circle bbox in screen coords */
 
  if(!has_x) return;
- if(what==ADD)
+ if(what & ADD)
  {
   if(i>=CADDRAWBUFFERSIZE)
   {
@@ -906,7 +908,7 @@ void drawtemparc(GC gc, int what, double x, double y, double r, double a, double
    i++;
   }
  }
- else if(what==NOW)
+ else if(what & NOW)
  {
   xx1=X_TO_SCREEN(x-r);
   yy1=Y_TO_SCREEN(y-r);
@@ -922,8 +924,8 @@ void drawtemparc(GC gc, int what, double x, double y, double r, double a, double
    XDrawArc(display, window, gc, xx1, yy1, xx2-xx1, yy2-yy1, a*64, b*64);
   }
  }
- else if(what==BEGIN) i=0;
- else if(what==END && i)
+ else if(what & BEGIN) i=0;
+ else if((what & END) && i)
  {
   XDrawArcs(display, window, gc, arc,i);
   i=0;
@@ -973,7 +975,7 @@ void filledarc(int c, int what, double x, double y, double r, double a, double b
  double xx1, yy1, xx2, yy2; /* complete circle bbox in screen coords */
 
  if(!has_x) return;
- if(what==ADD)
+ if(what & ADD)
  {
   if(i>=CADDRAWBUFFERSIZE)
   {
@@ -1001,7 +1003,7 @@ void filledarc(int c, int what, double x, double y, double r, double a, double b
    i++;
   }
  }
- else if(what==NOW)
+ else if(what & NOW)
  {
   xx1=X_TO_SCREEN(x-r);
   yy1=Y_TO_SCREEN(y-r);
@@ -1018,8 +1020,8 @@ void filledarc(int c, int what, double x, double y, double r, double a, double b
    if(draw_pixmap) XFillArc(display, save_pixmap, gc[c], xx1, yy1, xx2-xx1, yy2-yy1, a*64, b*64);
   }
  }
- else if(what==BEGIN) i=0;
- else if(what==END && i)
+ else if(what & BEGIN) i=0;
+ else if((what & END) && i)
  {
   if(draw_window) XFillArcs(display, window, gc[c], arc,i);
   if(draw_pixmap) XFillArcs(display, save_pixmap, gc[c], arc,i);
@@ -1036,7 +1038,7 @@ void drawarc(int c, int what, double x, double y, double r, double a, double b)
  double xx1, yy1, xx2, yy2; /* complete circle bbox in screen coords */
 
  if(!has_x) return;
- if(what==ADD)
+ if(what & ADD)
  {
   if(i>=CADDRAWBUFFERSIZE)
   {
@@ -1064,7 +1066,7 @@ void drawarc(int c, int what, double x, double y, double r, double a, double b)
    i++;
   }
  }
- else if(what==NOW)
+ else if(what & NOW)
  {
   xx1=X_TO_SCREEN(x-r);
   yy1=Y_TO_SCREEN(y-r);
@@ -1081,8 +1083,8 @@ void drawarc(int c, int what, double x, double y, double r, double a, double b)
    if(draw_pixmap) XDrawArc(display, save_pixmap, gc[c], xx1, yy1, xx2-xx1, yy2-yy1, a*64, b*64);
   }
  }
- else if(what==BEGIN) i=0;
- else if(what==END && i)
+ else if(what & BEGIN) i=0;
+ else if((what & END) && i)
  {
   if(draw_window) XDrawArcs(display, window, gc[c], arc,i);
   if(draw_pixmap) XDrawArcs(display, save_pixmap, gc[c], arc,i);
@@ -1099,7 +1101,7 @@ void filledrect(int c, int what, double rectx1,double recty1,double rectx2,doubl
 
  if(!has_x) return;
  if(!fill || !fill_type[c]) return;
- if(what==NOW)
+ if(what & NOW)
  {
   x1=X_TO_SCREEN(rectx1);
   y1=Y_TO_SCREEN(recty1);
@@ -1117,8 +1119,8 @@ void filledrect(int c, int what, double rectx1,double recty1,double rectx2,doubl
       (unsigned int)y2 - (unsigned int)y1);
   }
  }
- else if(what==BEGIN) i=0;
- else if(what==ADD)
+ else if(what & BEGIN) i=0;
+ else if(what & ADD)
  {
   if(i>=CADDRAWBUFFERSIZE)
   {
@@ -1141,7 +1143,7 @@ void filledrect(int c, int what, double rectx1,double recty1,double rectx2,doubl
    i++;
   }
  }
- else if(what==END && i)
+ else if((what & END) && i)
  {
   if(draw_window) XFillRectangles(display, window, gcstipple[c], r,i);
   if(draw_pixmap) XFillRectangles(display, save_pixmap, gcstipple[c], r,i);
@@ -1283,7 +1285,7 @@ void drawrect(int c, int what, double rectx1,double recty1,double rectx2,double 
  double x1,y1,x2,y2;
 
  if(!has_x) return;
- if(what==NOW)
+ if(what & NOW)
  {
   x1=X_TO_SCREEN(rectx1);
   y1=Y_TO_SCREEN(recty1);
@@ -1303,8 +1305,8 @@ void drawrect(int c, int what, double rectx1,double recty1,double rectx2,double 
    }
   }
  }
- else if(what==BEGIN) i=0;
- else if(what==ADD)
+ else if(what & BEGIN) i=0;
+ else if(what & ADD)
  {
   if(i>=CADDRAWBUFFERSIZE)
   {
@@ -1327,7 +1329,7 @@ void drawrect(int c, int what, double rectx1,double recty1,double rectx2,double 
    i++;
   }
  }
- else if(what==END && i)
+ else if((what & END) && i)
  {
   if(draw_window) XDrawRectangles(display, window, gc[c], r,i);
   if(draw_pixmap) XDrawRectangles(display, save_pixmap, gc[c], r,i);
@@ -1342,7 +1344,7 @@ void drawtemprect(GC gc, int what, double rectx1,double recty1,double rectx2,dou
  double x1,y1,x2,y2;
 
  if(!has_x) return;
- if(what==NOW)
+ if(what & NOW)
  {
   x1=X_TO_SCREEN(rectx1);
   y1=Y_TO_SCREEN(recty1);
@@ -1356,8 +1358,8 @@ void drawtemprect(GC gc, int what, double rectx1,double recty1,double rectx2,dou
     (unsigned int)y2 - (unsigned int)y1);
   }
  }
- else if(what==BEGIN) i=0;
- else if(what==ADD)
+ else if(what & BEGIN) i=0;
+ else if(what & ADD)
  {
   if(i>=CADDRAWBUFFERSIZE)
   {
@@ -1378,7 +1380,7 @@ void drawtemprect(GC gc, int what, double rectx1,double recty1,double rectx2,dou
    i++;
   }
  }
- else if(what==END && i)
+ else if((what & END) && i)
  {
   XDrawRectangles(display, window, gc, r,i);
   i=0;
@@ -1387,7 +1389,6 @@ void drawtemprect(GC gc, int what, double rectx1,double recty1,double rectx2,dou
 
 void draw(void)
 {
-
  /* inst_ptr  and wire hash iterator 20171224 */
  double x1, y1, x2, y2;
  struct instentry *instanceptr;
@@ -1415,7 +1416,7 @@ void draw(void)
     y1 = Y_TO_XSCHEM(areay1);
     x2 = X_TO_XSCHEM(areax2);
     y2 = Y_TO_XSCHEM(areay2);
-    use_hash = (lastwire> 2000 || lastinst > 2000 ) &&  (x2 - x1  < ITERATOR_THRESHOLD);
+    use_hash =  (lastwire> 2000 || lastinst > 2000 ) &&  (x2 - x1  < ITERATOR_THRESHOLD);
         
     if(use_hash) {
       hash_instances();
@@ -1453,10 +1454,11 @@ void draw(void)
             /*loop thru all squares that intersect drawing area */
             for(init_inst_iterator(x1, y1, x2, y2); ( instanceptr = inst_iterator_next() ) ;) {
               int ptr;
-              ptr = inst_ptr[instanceptr->n].ptr;
+              i = instanceptr->n;
+              ptr = inst_ptr[i].ptr;
               if( ptr !=-1) { /* 20180921 */
                 symptr = ptr+instdef;
-                if( c==0 || /*20150408 draw_symbol_outline call is needed on layer 0 to avoid redundant work (outside check) */
+                if( c==0 || /*20150408 draw_symbol call is needed on layer 0 to avoid redundant work (outside check) */
                     symptr->lines[c] ||  /* 20150408 */
                     symptr->arcs[c] ||
                     symptr->rects[c] ||   /* 20150408 */
@@ -1464,12 +1466,22 @@ void draw(void)
                     ((c==TEXTWIRELAYER || c==TEXTLAYER) && symptr->texts)) {  /* 20150408 */
     
                   type = symptr->type;
-                  if( (!hilight_nets ||
-                    !type  ||
-                    (strcmp(type,"label") && strcmp(type,"ipin") && strcmp(type,"iopin") && strcmp(type,"opin")) ||
-                    !bus_hilight_lookup( get_tok_value(inst_ptr[instanceptr->n].prop_ptr,"lab",0) , 0, 2 ) )
+                  if(!(
+                       hilight_nets &&
+                       type  &&
+                       (
+                        (
+                          !(strcmp(type,"label") && strcmp(type,"ipin") && strcmp(type,"iopin") && strcmp(type,"opin")) &&
+                          bus_hilight_lookup( get_tok_value(inst_ptr[i].prop_ptr,"lab",0) , 0, 2 )
+                        ) ||
+                        (
+                          (strcmp(type,"label") && strcmp(type,"ipin") && strcmp(type,"iopin") && strcmp(type,"opin")) && 
+                          (inst_ptr[i].flags & 4) 
+                        )
+                       )
+                      )
                   ) {
-                    draw_symbol_outline(ADD, c, instanceptr->n,c,0,0,0.0,0.0);
+                    draw_symbol(ADD, c, instanceptr->n,c,0,0,0.0,0.0);
                   }
                 }  /* 20150408 */
               } /*if( ptr !=-1)  */
@@ -1479,7 +1491,7 @@ void draw(void)
             for(i=0;i<lastinst;i++) {
               if(inst_ptr[i].ptr == -1) continue;
               symptr = (inst_ptr[i].ptr+instdef);
-              if( c==0 || /*20150408 draw_symbol_outline call is needed on layer 0 to avoid redundant work (outside check) */
+              if( c==0 || /*20150408 draw_symbol call is needed on layer 0 to avoid redundant work (outside check) */
                   symptr->lines[c] ||  /* 20150408 */
                   symptr->arcs[c] ||
                   symptr->rects[c] ||   /* 20150408 */
@@ -1488,12 +1500,22 @@ void draw(void)
   
   
                 type = (inst_ptr[i].ptr+instdef)->type;
-                if( (!hilight_nets ||
-                  !type ||
-                  (strcmp(type,"label") && strcmp(type,"ipin") && strcmp(type,"iopin") && strcmp(type,"opin")) ||
-                  !bus_hilight_lookup( get_tok_value(inst_ptr[i].prop_ptr,"lab",0) , 0, 2 ) )
+                if(!(
+                     hilight_nets &&
+                     type  &&
+                     (
+                      (
+                        !(strcmp(type,"label") && strcmp(type,"ipin") && strcmp(type,"iopin") && strcmp(type,"opin")) &&
+                        bus_hilight_lookup( get_tok_value(inst_ptr[i].prop_ptr,"lab",0) , 0, 2 )
+                      ) ||
+                      (
+                        (strcmp(type,"label") && strcmp(type,"ipin") && strcmp(type,"iopin") && strcmp(type,"opin")) && 
+                        (inst_ptr[i].flags & 4) 
+                      )
+                     )
+                    )
                 ) {
-                  draw_symbol_outline(ADD, c, i,c,0,0,0.0,0.0);
+                  draw_symbol(ADD, c, i,c,0,0,0.0,0.0);
                 }
               }  /* 20150408 */
             }

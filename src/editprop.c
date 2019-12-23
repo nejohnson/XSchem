@@ -369,11 +369,8 @@ void set_inst_prop(int i)
   ptr = (inst_ptr[i].ptr+instdef)->templ; /*20150409 */
   if(debug_var>=1) fprintf(errfp, "set_inst_prop(): i=%d, name=%s, prop_ptr = %s, template=%s\n", 
      i, inst_ptr[i].name, inst_ptr[i].prop_ptr, ptr);
-  if(!inst_ptr[i].prop_ptr && get_tok_value(ptr,"name",0)[0]) 
-  {
-    my_strdup(69, &inst_ptr[i].prop_ptr, ptr);
-  }
-  my_strdup2(70, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name",0)); /* 20150409 */
+  my_strdup(69, &inst_ptr[i].prop_ptr, ptr);
+  my_strdup2(70, &inst_ptr[i].instname, get_tok_value(ptr, "name",0)); /* 20150409 */
   if(inst_ptr[i].instname[0]) {
     my_strdup(101, &tmp, inst_ptr[i].prop_ptr);
     new_prop_string(i, tmp, 0, disable_unique_names);

@@ -245,7 +245,7 @@ static void ps_drawgrid()
 
 
 
-static void ps_draw_symbol_outline(int n,int layer,int tmp_flip, int rot, 
+static void ps_draw_symbol(int n,int layer,int tmp_flip, int rot, 
         double xoffset, double yoffset) 
                             /* draws current layer only, should be called within  */
 {                           /* a "for(i=0;i<cadlayers;i++)" loop */
@@ -277,7 +277,7 @@ static void ps_draw_symbol_outline(int n,int layer,int tmp_flip, int rot,
   }
   else if(inst_ptr[n].flags&1)
   {
-   if(debug_var>=1) fprintf(errfp, "draw_symbol_outline(): skippinginst %d\n", n);
+   if(debug_var>=1) fprintf(errfp, "draw_symbol(): skippinginst %d\n", n);
    return;
   }
 
@@ -498,7 +498,7 @@ void ps_draw(void)
 
 
   for(i=0;i<lastinst;i++)
-   ps_draw_symbol_outline(i,c,0,0,0.0,0.0);
+   ps_draw_symbol(i,c,0,0,0.0,0.0);
 
  }
  set_ps_colors(WIRELAYER);

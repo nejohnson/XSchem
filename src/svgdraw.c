@@ -264,7 +264,7 @@ static void svg_drawgrid()
 
 
 
-static void svg_draw_symbol_outline(int n,int layer,int tmp_flip, int rot, 
+static void svg_draw_symbol(int n,int layer,int tmp_flip, int rot, 
         double xoffset, double yoffset) 
                             /* draws current layer only, should be called within  */
 {                           /* a "for(i=0;i<cadlayers;i++)" loop */
@@ -295,7 +295,7 @@ static void svg_draw_symbol_outline(int n,int layer,int tmp_flip, int rot,
   }
   else if(inst_ptr[n].flags&1)
   {
-   if(debug_var>=1) fprintf(errfp, "draw_symbol_outline(): skippinginst %d\n", n);
+   if(debug_var>=1) fprintf(errfp, "draw_symbol(): skippinginst %d\n", n);
    return;
   }
 
@@ -504,7 +504,7 @@ void svg_draw(void)
       svg_drawpolygon(c, NOW, polygon[c][i].x, polygon[c][i].y, polygon[c][i].points);
     }
     for(i=0;i<lastinst;i++) {
-      svg_draw_symbol_outline(i,c,0,0,0.0,0.0);
+      svg_draw_symbol(i,c,0,0,0.0,0.0);
     }
    }
 

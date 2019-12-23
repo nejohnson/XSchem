@@ -389,7 +389,7 @@ void draw_selection(GC g, int interruptable)
        ROTATION(x1, y_1, inst_ptr[n].x0, inst_ptr[n].y0, rx1,ry1);
      }
      for(k=0;k<cadlayers;k++)
-      draw_temp_symbol_outline(ADD, g, n, k, flip,
+      draw_temp_symbol(ADD, g, n, k, flip,
        ( flip && (inst_ptr[n].rot & 1) ) ? rot+2 : rot,
        rx1-inst_ptr[n].x0+deltax,ry1-inst_ptr[n].y0+deltay);
      break;
@@ -744,6 +744,7 @@ void copy_objects(int what)
          ROTATION(x1, y_1, inst_ptr[n].x0, inst_ptr[n].y0, rx1,ry1);
        }
        inst_ptr[lastinst] = inst_ptr[n];
+       inst_ptr[lastinst].flags &= ~4; /* do not propagate hilight */
        inst_ptr[lastinst].prop_ptr=NULL;
        inst_ptr[lastinst].instname=NULL; /* 20150409 */
        inst_ptr[lastinst].node=NULL;
@@ -766,10 +767,11 @@ void copy_objects(int what)
        n=selectedgroup[i].n=lastinst;
        symbol_bbox(lastinst, &inst_ptr[lastinst].x1, &inst_ptr[lastinst].y1,
                          &inst_ptr[lastinst].x2, &inst_ptr[lastinst].y2);
+       bbox(ADD, inst_ptr[lastinst].x1, inst_ptr[lastinst].y1, inst_ptr[lastinst].x2, inst_ptr[lastinst].y2 );
        lastinst++;
       }
 
-      draw_symbol_outline(ADD,k, n,k, 0, 0, 0.0, 0.0);
+      /* draw_symbol(ADD,k, n,k, 0, 0, 0.0, 0.0); */
       break;
     }
    }
@@ -1203,7 +1205,7 @@ void move_objects(int what, int merge, double dx, double dy)
                          &inst_ptr[n].x2, &inst_ptr[n].y2);
       }
       
-      draw_symbol_outline(ADD,k, n,k, 0, 0, 0.0, 0.0);
+      draw_symbol(ADD,k, n,k, 0, 0, 0.0, 0.0);
       break;
     }
    }

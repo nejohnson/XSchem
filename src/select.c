@@ -429,11 +429,14 @@ void bbox(int what,double x1,double y1, double x2, double y2)
    cairo_clip(save_ctx);
    #endif
    break;
+  /* 
   case DRAW:
    XCopyArea(display, save_pixmap, window, gctiled, xrect[0].x, xrect[0].y,
-       xrect[0].width, xrect[0].height, xrect[0].x, xrect[0].y); /* 20181009 */
+       xrect[0].width, xrect[0].height, xrect[0].x, xrect[0].y);
+  */
 
-  break;
+  default: 
+   break;
  }
 }
 
@@ -471,7 +474,7 @@ void unselect_all(void)
      {
       inst_ptr[i].sel = 0;
       for(c=0;c<cadlayers;c++)
-        draw_temp_symbol_outline(ADD, gctiled, i, c,0,0,0.0,0.0);
+        draw_temp_symbol(ADD, gctiled, i, c,0,0,0.0,0.0);
       if(event_reporting) { 
         char n[PATH_MAX];
         printf("xschem search exact %d name %s\n", -1, escape_chars(n, inst_ptr[i].instname, PATH_MAX)); 
@@ -627,11 +630,11 @@ void select_element(int i,unsigned short select_mode, int fast, int override_loc
   inst_ptr[i].sel = select_mode;
   if(select_mode) {
     for(c=0;c<cadlayers;c++) {
-      draw_temp_symbol_outline(ADD, gc[SELLAYER], i,c,0,0,0.0,0.0);
+      draw_temp_symbol(ADD, gc[SELLAYER], i,c,0,0,0.0,0.0);
     }
   } else {
     for(c=0;c<cadlayers;c++) {
-      draw_temp_symbol_outline(NOW, gctiled, i,c,0,0,0.0,0.0);
+      draw_temp_symbol(NOW, gctiled, i,c,0,0,0.0,0.0);
     }
   }
   need_rebuild_selected_array=1;

@@ -17,8 +17,8 @@ END  { endfile(_filename_) }
 BEGIN{
 }
 
-/CADHALFDOTSIZE/{
-  sub(/CADHALFDOTSIZE/, "cadhalfdotsize")
+/draw_temp_symbol_outline/{
+  sub(/draw_temp_symbol_outline/, "draw_temp_symbol")
   found = 1
 }
 

@@ -353,14 +353,14 @@ void search(const char *tok, const char *val, int sub, int sel, int what)
               ) {
               if(!bus_hilight_lookup(str, col,0)) hilight_nets = 1;
               if(what==NOW) for(c=0;c<cadlayers;c++)
-                draw_symbol_outline(NOW, hilight_layer, i,c,0,0,0.0,0.0);
+                draw_symbol(NOW, hilight_layer, i,c,0,0,0.0,0.0);
             }
             else {
               if(debug_var>=1) fprintf(errfp, "search(): setting hilight flag on inst %d\n",i);
               hilight_nets=1;
               inst_ptr[i].flags |= 4;
               if(what==NOW) for(c=0;c<cadlayers;c++)
-                draw_symbol_outline(NOW, hilight_layer, i,c,0,0,0.0,0.0);  /* 20150804 */
+                draw_symbol(NOW, hilight_layer, i,c,0,0,0.0,0.0);  /* 20150804 */
             }
           }
           if(sel==1) {
@@ -660,7 +660,6 @@ void unhilight_net(void)
   unselect_all();
 }
 
-
 void draw_hilight_net(int on_window)
 {
  char *str;
@@ -771,45 +770,50 @@ void draw_hilight_net(int on_window)
  }
 
  for(c=0;c<cadlayers;c++) {
-  /* 20160414 from draw() */
-  if(draw_single_layer!=-1 && c != draw_single_layer) continue; /* 20151117 */
-
-  for(i=0;i<lastinst;i++)
-  {
-    if(inst_color[i] )
-    {
-     /* 20150409 */
-     x1=X_TO_SCREEN(inst_ptr[i].x1);
-     x2=X_TO_SCREEN(inst_ptr[i].x2);
-     y1=Y_TO_SCREEN(inst_ptr[i].y1);
-     y2=Y_TO_SCREEN(inst_ptr[i].y2);
-     if(OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2)) continue;
-     if(debug_var>=1) fprintf(errfp, "draw_hilight_net(): instance:%d\n",i);
-     drawline(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0);
-     drawrect(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0);
-     filledrect(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0);
-     drawarc(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
-     /* 20160414 from draw() */
-     symptr = (inst_ptr[i].ptr+instdef);
-     if( c==0 || /*draw_symbol_outline call is needed on layer 0 to avoid redundant work (outside check) */
-         symptr->lines[c] ||
-         symptr->rects[c] ||
-         symptr->arcs[c] ||
-         symptr->polygons[c] ||
-         ((c==TEXTWIRELAYER || c==TEXTLAYER) && symptr->texts)) {
-       draw_symbol_outline(ADD, inst_color[i], i,c,0,0,0.0,0.0);
+   /* 20160414 from draw() */
+   if(draw_single_layer!=-1 && c != draw_single_layer) continue; /* 20151117 */
+ 
+   for(i=0;i<lastinst;i++)
+   {
+     if(inst_color[i] )
+     {
+      /* 20150409 */
+      x1=X_TO_SCREEN(inst_ptr[i].x1);
+      x2=X_TO_SCREEN(inst_ptr[i].x2);
+      y1=Y_TO_SCREEN(inst_ptr[i].y1);
+      y2=Y_TO_SCREEN(inst_ptr[i].y2);
+      if(OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2)) continue;
+      if(debug_var>=1) fprintf(errfp, "draw_hilight_net(): instance:%d\n",i);
+      drawline(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0);
+      drawrect(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0);
+      filledrect(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0);
+      drawarc(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
+      /* 20160414 from draw() */
+      symptr = (inst_ptr[i].ptr+instdef);
+      if( c==0 || /*draw_symbol call is needed on layer 0 to avoid redundant work (outside check) */
+          symptr->lines[c] ||
+          symptr->rects[c] ||
+          symptr->arcs[c] ||
+          symptr->polygons[c] ||
+          ((c==TEXTWIRELAYER || c==TEXTLAYER) && symptr->texts)) {
+        draw_symbol(ADD, inst_color[i], i,c,0,0,0.0,0.0);
+      }
+      filledrect(inst_color[i], END, 0.0, 0.0, 0.0, 0.0);
+      drawarc(inst_color[i], END, 0.0, 0.0, 0.0, 0.0, 0.0);
+      drawrect(inst_color[i], END, 0.0, 0.0, 0.0, 0.0);
+      drawline(inst_color[i], END, 0.0, 0.0, 0.0, 0.0);
      }
-     filledrect(inst_color[i], END, 0.0, 0.0, 0.0, 0.0);
-     drawarc(inst_color[i], END, 0.0, 0.0, 0.0, 0.0, 0.0);
-     drawrect(inst_color[i], END, 0.0, 0.0, 0.0, 0.0);
-     drawline(inst_color[i], END, 0.0, 0.0, 0.0, 0.0);
-    }
-  }
+   }
  }
  draw_window = save_draw;
 }
 
 void undraw_hilight_net(int on_window) /* 20160413 */
+{
+  draw();
+}
+
+void xundraw_hilight_net(int on_window) /* 20160413 */
 {
  char *str;
  int save_draw; /* 20181009 */
@@ -852,7 +856,6 @@ void undraw_hilight_net(int on_window) /* 20160413 */
         }
      }
    }
-
  }
  my_realloc(146, &inst_color,lastinst*sizeof(int)); 
  for(i=0;i<lastinst;i++)
@@ -894,13 +897,13 @@ void undraw_hilight_net(int on_window) /* 20160413 */
      if(debug_var>=1) fprintf(errfp, "draw_hilight_net(): instance:%d\n",i);
      /* 20160414 from draw() */
      symptr = (inst_ptr[i].ptr+instdef);
-     if( c==0 || /*draw_symbol_outline call is needed on layer 0 to avoid redundant work (outside check) */
+     if( c==0 || /*draw_symbol call is needed on layer 0 to avoid redundant work (outside check) */
          symptr->lines[c] ||
          symptr->rects[c] ||
          symptr->arcs[c] ||
          symptr->polygons[c] ||
          ((c==TEXTWIRELAYER || c==TEXTLAYER) && symptr->texts)) {
-       draw_symbol_outline(ADD, c, i,c,0,0,0.0,0.0);
+       draw_symbol(ADD, c, i,c,0,0,0.0,0.0);
      }
     }
   }
@@ -909,6 +912,7 @@ void undraw_hilight_net(int on_window) /* 20160413 */
   drawrect(c, END, 0.0, 0.0, 0.0, 0.0);
   drawline(c, END, 0.0, 0.0, 0.0, 0.0);
  }
+
  if(ui_state & SELECTION) draw_selection(gc[SELLAYER], 0); /* 20171211 */
  draw_window = save_draw;
 }

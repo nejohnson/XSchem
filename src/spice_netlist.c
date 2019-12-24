@@ -315,7 +315,7 @@ void spice_netlist(FILE *fd, int spice_stop )
     }
    }
  }
- if(!netlist_count) draw_hilight_net(1);
+ if(!netlist_count) redraw_hilights(); /* draw_hilight_net(1); */
 
 }
 

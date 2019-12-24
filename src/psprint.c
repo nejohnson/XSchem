@@ -377,7 +377,6 @@ static void fill_ps_colors()
 
 void ps_draw(void)
 {
- Box bb; 
  double dx, dy, delta,scale;
  int c,i; 
  static char *tmp=NULL; /* 20161121 */
@@ -407,7 +406,6 @@ void ps_draw(void)
  old_grid=draw_grid;
  draw_grid=0;
 
- calc_drawing_bbox(&bb, 0);
  dx=areax2-areax1;
  dy=areay2-areay1;
  if(debug_var>=1) fprintf(errfp, "ps_draw(): dx=%.16g  dy=%.16g\n", dx, dy);

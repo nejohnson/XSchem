@@ -860,6 +860,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
   printf("modified=%d\n", modified);
   printf("color_ps=%d\n", color_ps);
   printf("a3page=%d\n", a3page);
+  printf("hilight_nets=%d\n", hilight_nets);
   printf("need_rebuild_selected_array=%d\n", need_rebuild_selected_array);
   printf("******* end global variables:*******\n");
  } else if(!strcmp(argv[1],"help")) {
@@ -1254,7 +1255,8 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
  else if(!strcmp(argv[1],"hilight"))
  {
    hilight_net();
-   draw_hilight_net(1);
+   /* draw_hilight_net(1); */
+   redraw_hilights();
    Tcl_ResetResult(interp);
  }
 

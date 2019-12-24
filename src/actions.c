@@ -1285,18 +1285,30 @@ void calc_drawing_bbox(Box *boundbox, int selected)
   if(selected == 1 && !inst_ptr[i].sel) continue;
   
   if(selected == 2) {
+    int j, rects, found, hilight_connected_inst;
     type = (inst_ptr[i].ptr+instdef)->type; /* 20150409 */
-    if( type &&
-        !(strcmp(type,"label") && strcmp(type,"ipin") &&
-          strcmp(type,"iopin") && strcmp(type,"opin") )
-      )
-    {
-     entry=bus_hilight_lookup( get_tok_value(inst_ptr[i].prop_ptr,"lab",0) , 0, 2 );
-     if(!entry) continue;
+    found = 0;
+    hilight_connected_inst = !strcmp(get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr, "highlight", 0), "true");
+    if( hilight_connected_inst && (rects = (inst_ptr[i].ptr+instdef)->rects[PINLAYER]) > 0 ) {
+      prepare_netlist_structs(1);
+      for(j=0;j<rects;j++) {
+        if( inst_ptr[i].node && inst_ptr[i].node[j]) {
+          entry=bus_hilight_lookup(inst_ptr[i].node[j], 0, 2);
+          if(entry) {
+            found = 1;
+            break;
+          }
+        }
+      }
     }
-    else if( !(inst_ptr[i].flags & 4) ) {
-      continue;
+    else if( type && !(strcmp(type,"label") && strcmp(type,"ipin") && strcmp(type,"iopin") && strcmp(type,"opin") )) {
+      entry=bus_hilight_lookup( get_tok_value(inst_ptr[i].prop_ptr,"lab",0) , 0, 2 );
+      if(entry) found = 1;
     }
+    else if( (inst_ptr[i].flags & 4) ) {
+      found = 1;
+    }
+    if(!found) continue;
   }
 
 

@@ -888,7 +888,7 @@ extern void print_verilog_param(FILE *fd, int symbol);
 extern void hilight_net();
 extern void unhilight_net();
 extern void draw_hilight_net(int on_window);
-extern void undraw_hilight_net(int on_window); /*  20160413 */
+extern void redraw_hilights(void);
 extern void prepare_netlist_structs(int for_hilight_only);
 extern void delete_netlist_structs(void);
 extern void delete_inst_node(int i);

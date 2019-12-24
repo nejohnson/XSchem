@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC5 file_version=1.1}
+v {xschem version=2.9.5_RC6 file_version=1.1}
 G {}
 V {}
 S {}
@@ -47,6 +47,9 @@ N 870 -300 990 -300 {lab=#net1}
 N 910 -340 910 -250 {lab=#net2}
 N 910 -270 970 -270 {lab=#net2}
 N 930 -310 960 -300 {lab=#net1}
+N 380 -530 700 -530 {lab=BUS[4:0]}
+N 510 -640 510 -540 {lab=BUS[1]}
+N 410 -600 410 -540 {lab=BUS[2]}
 C {poweramp.sym} 160 -310 0 0 {name=x1}
 C {tesla.sym} 160 -230 0 0 {name=x2}
 C {test_ne555.sym} 160 -190 0 0 {name=x3}
@@ -73,3 +76,7 @@ program=x-www-browser
 
 }
 C {rlc.sym} 160 -470 0 0 {name=x0}
+C {lab_pin.sym} 700 -530 0 1 {name=l2 sig_type=std_logic lab=BUS[4:0]}
+C {bus_connect.sym} 500 -530 0 0 {name=l3 lab=BUS[1]}
+C {bus_connect_nolab.sym} 400 -530 0 0 {name=r1}
+C {lab_pin.sym} 410 -600 3 1 {name=l4 sig_type=std_logic lab=BUS[2]}

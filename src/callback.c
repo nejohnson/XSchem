@@ -485,7 +485,8 @@ int callback(int event, int mx, int my, KeySym key,
        }
 
      } 
-     draw_hilight_net(1);
+     redraw_hilights();
+     /* draw_hilight_net(1);*/
 
      /* /20130628 */
      break;
@@ -896,11 +897,17 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='k' && state==ControlMask)                           /* unhilight net */
    {
-    /* 20160413 */
+    Box boundbox;
     if(semaphore==2) break;
+    calc_drawing_bbox(&boundbox, 2);
+
     unhilight_net();
-    undraw_hilight_net(1);
-    /* draw(); */
+    /* undraw_hilight_net(1); */
+    bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0);
+    bbox(ADD, boundbox.x1, boundbox.y1, boundbox.x2, boundbox.y2);
+    bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
+    draw();
+    bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
     break;
    }
    if(key=='K' && state==(ControlMask|ShiftMask))       /* hilight net drilling thru elements  */
@@ -909,7 +916,8 @@ int callback(int event, int mx, int my, KeySym key,
     if(semaphore==2) break;
     enable_drill=1;
     hilight_net();
-    draw_hilight_net(1);
+    redraw_hilights();
+    /* draw_hilight_net(1); */
     break;
    }
    if(key=='k' && state==0)                             /* hilight net */
@@ -917,17 +925,23 @@ int callback(int event, int mx, int my, KeySym key,
     if(semaphore==2) break;
     enable_drill=0;
     hilight_net();
-    draw_hilight_net(1);
+    redraw_hilights();
+    /* draw_hilight_net(1); */
     break;
    }
    if(key=='K' && state == ShiftMask)                           /* delete hilighted nets */
    {
+    Box boundbox;
     if(semaphore==2) break;
     enable_drill=0;
+    calc_drawing_bbox(&boundbox, 2);
     delete_hilight_net();
-    /* 20160413 */
-    undraw_hilight_net(1);
-    /* draw(); */
+    /* undraw_hilight_net(1); */
+    bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0);
+    bbox(ADD, boundbox.x1, boundbox.y1, boundbox.x2, boundbox.y2);
+    bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
+    draw();
+    bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
     break;
    }
    if(key=='g' && state==0)                         /* half snap factor */
@@ -1574,15 +1588,23 @@ int callback(int event, int mx, int my, KeySym key,
          launcher();
        }
        if( !(state & ShiftMask) )  {
+         Box boundbox;
          if(auto_hilight && hilight_nets && sel == 0 ) { /* 20160413 20160503 */
+           calc_drawing_bbox(&boundbox, 2);
            delete_hilight_net();
-           undraw_hilight_net(1);
+           /* undraw_hilight_net(1); */
+           bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0);
+           bbox(ADD, boundbox.x1, boundbox.y1, boundbox.x2, boundbox.y2);
+           bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
+           draw();
+           bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
          }
        }
        if(auto_hilight) { /* 20160413 */
          hilight_net();
          if(lastselected) {
-           draw_hilight_net(1);
+           redraw_hilights();
+           /* draw_hilight_net(1); */
          }
        }
        break;

@@ -456,7 +456,7 @@ void search(const char *tok, const char *val, int sub, int sel, int what)
       }
     }
  }
- else if(what==END) draw_hilight_net(1);
+ else if(what==END) redraw_hilights(); /* draw_hilight_net(1); */
  if(sel) {
    drawtemparc(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0, 0.0);
    drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
@@ -594,12 +594,10 @@ void hilight_net(void)
   }
 }
 
-
 void unhilight_net(void)
 {
   int i,n;
   char *str;
-
 
   prepare_netlist_structs(1);
   if(debug_var>=1) fprintf(errfp, "unhilight_net(): entering\n");
@@ -610,55 +608,59 @@ void unhilight_net(void)
    switch(selectedgroup[i].type)
    {
     case WIRE: 
-     if(wire[n].sel==SELECTED)
-     {
-      str = get_tok_value(wire[n].prop_ptr, "lab",0);
-      /*str = wire[n].node; */
-      if(str && str[0])
-      {
-       if(event_reporting) {
-         char n[PATH_MAX];
-         printf("xschem search exact %d lab %s\n", 1, escape_chars(n, str, PATH_MAX));
-         printf("xschem unhilight\n");
-         fflush(stdout);
-       }
-       bus_hilight_lookup(str, hilight_color,1);
-
+     str = get_tok_value(wire[n].prop_ptr, "lab",0);
+     if(str && str[0]) {
+      if(event_reporting) {
+        char n[PATH_MAX];
+        printf("xschem search exact %d lab %s\n", 1, escape_chars(n, str, PATH_MAX));
+        printf("xschem unhilight\n");
+        fflush(stdout);
       }
+      bus_hilight_lookup(str, hilight_color,1);
+
      }
      break;
-
     case ELEMENT:
-     if(inst_ptr[n].sel==SELECTED)
-     {
-      str = get_tok_value(inst_ptr[n].prop_ptr, "lab",0);
-      /*str = wire[n].node; */
-      inst_ptr[n].flags &= ~4;
-      if(str && str[0])
-      {
-       if(event_reporting) {
-         printf("xschem unhilight\n");
-         fflush(stdout);
-       }
-       bus_hilight_lookup(str, hilight_color,1);
-      } else {
-       if(event_reporting) {
-         char nn[PATH_MAX];
-         printf("xschem search exact %d name %s\n", 1, escape_chars(nn, inst_ptr[n].instname, PATH_MAX));
-         printf("xschem unhilight\n");
-         fflush(stdout);
-       }
+     str = get_tok_value(inst_ptr[n].prop_ptr, "lab",0);
+     inst_ptr[n].flags &= ~4;
+     if(str && str[0]) {
+      if(event_reporting) {
+        printf("xschem unhilight\n");
+        fflush(stdout);
+      }
+      bus_hilight_lookup(str, hilight_color,1);
+     } else {
+      if(event_reporting) {
+        char nn[PATH_MAX];
+        printf("xschem search exact %d name %s\n", 1, escape_chars(nn, inst_ptr[n].instname, PATH_MAX));
+        printf("xschem unhilight\n");
+        fflush(stdout);
       }
      }
      break;
-
-
     default:
      break;
    }
   }
   unselect_all();
 }
+
+
+
+
+
+
+void redraw_hilights(void)
+{
+  Box boundbox;
+  calc_drawing_bbox(&boundbox, 2);
+  bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0);
+  bbox(ADD, boundbox.x1, boundbox.y1, boundbox.x2, boundbox.y2);
+  bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
+  draw();
+  bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
+}
+
 
 void draw_hilight_net(int on_window)
 {
@@ -673,6 +675,7 @@ void draw_hilight_net(int on_window)
  struct wireentry *wireptr;
  int hilight_connected_inst;
 
+ prepare_netlist_structs(1);
  if(!hilight_nets) return;
  save_draw = draw_window; /* 20181009 */
  draw_window = on_window;
@@ -748,6 +751,7 @@ void draw_hilight_net(int on_window)
   }
   else if(hilight_connected_inst) {
     int rects, j;
+    if(debug_var >= 2) fprintf(errfp, "draw_hilight_net(): hilight_connected_inst inst=%d, node=%s\n", i, inst_ptr[i].node[0]);
     if( (rects = (inst_ptr[i].ptr+instdef)->rects[PINLAYER]) > 0 ) {
       for(j=0;j<rects;j++) {
         if( inst_ptr[i].node && inst_ptr[i].node[j]) {
@@ -805,115 +809,6 @@ void draw_hilight_net(int on_window)
      }
    }
  }
- draw_window = save_draw;
-}
-
-void undraw_hilight_net(int on_window) /* 20160413 */
-{
-  draw();
-}
-
-void xundraw_hilight_net(int on_window) /* 20160413 */
-{
- char *str;
- int save_draw; /* 20181009 */
- char *type=NULL;
- int i,c;
- struct hilight_hashentry *entry;
- register double x1,y1,x2,y2; /* 20150409 */
- Instdef *symptr; /* 20160414 */
-
- save_draw = draw_window; /* 20181009 */
- draw_window = on_window;
-
- for(i=0;i<lastwire;i++)
- {
-   /* 20150409 */
-   x1=X_TO_SCREEN(wire[i].x1);
-   x2=X_TO_SCREEN(wire[i].x2);
-   y1=Y_TO_SCREEN(wire[i].y1);
-   y2=Y_TO_SCREEN(wire[i].y2);
-   if( LINE_OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2)) continue;
-   /* /20150409 */
-
-   str = get_tok_value(wire[i].prop_ptr, "lab",0);
-   /*str = wire[i].node; */
-   if(str && str[0]) {
-     if( (!bus_hilight_lookup(str, 0,2)) ) {
-       if(wire[i].bus)  /* 20171201 */
-         drawline(WIRELAYER, THICK, 
-            wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
-       else
-         drawline(WIRELAYER, NOW, 
-            wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
-        if(cadhalfdotsize*mooz>=0.7) {
-          if( wire[i].end1 >1 ) { /* 20150331 draw_dots */
-            filledarc(WIRELAYER, NOW, wire[i].x1, wire[i].y1, cadhalfdotsize, 0, 360);
-          }
-          if( wire[i].end2 >1 ) { /* 20150331 draw_dots */
-            filledarc(WIRELAYER, NOW, wire[i].x2, wire[i].y2, cadhalfdotsize, 0, 360);
-          }
-        }
-     }
-   }
- }
- my_realloc(146, &inst_color,lastinst*sizeof(int)); 
- for(i=0;i<lastinst;i++)
- {
-   /* 20150409 */
-   x1=X_TO_SCREEN(inst_ptr[i].x1);
-   x2=X_TO_SCREEN(inst_ptr[i].x2);
-   y1=Y_TO_SCREEN(inst_ptr[i].y1);
-   y2=Y_TO_SCREEN(inst_ptr[i].y2);
-   inst_color[i]=0;
-   if(OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2)) continue;
-   /* /20150409 */
-
-  type = (inst_ptr[i].ptr+instdef)->type; /* 20150409 */
-  if( type &&
-      !(strcmp(type,"label") && strcmp(type,"ipin") &&
-        strcmp(type,"iopin") && strcmp(type,"opin") )
-    )
-  {
-   entry=bus_hilight_lookup( get_tok_value(inst_ptr[i].prop_ptr,"lab",0) , 0, 2 );
-   if(entry) inst_color[i]=get_color(entry->value);
-  }
-  else if( inst_ptr[i].flags & 4) {
-    inst_color[i]=PINLAYER;
-  }
- }
-
- for(c=0;c<cadlayers;c++) {
-  /* 20160414 from draw() */
-  if(draw_single_layer!=-1 && c != draw_single_layer) continue; /* 20151117 */
-  drawline(c, BEGIN, 0.0, 0.0, 0.0, 0.0);
-  drawrect(c, BEGIN, 0.0, 0.0, 0.0, 0.0);
-  filledrect(c, BEGIN, 0.0, 0.0, 0.0, 0.0);
-  drawarc(c, BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
-  for(i=0;i<lastinst;i++)
-  {
-    if(!inst_color[i] )
-    {
-     if(debug_var>=1) fprintf(errfp, "draw_hilight_net(): instance:%d\n",i);
-     /* 20160414 from draw() */
-     symptr = (inst_ptr[i].ptr+instdef);
-     if( c==0 || /*draw_symbol call is needed on layer 0 to avoid redundant work (outside check) */
-         symptr->lines[c] ||
-         symptr->rects[c] ||
-         symptr->arcs[c] ||
-         symptr->polygons[c] ||
-         ((c==TEXTWIRELAYER || c==TEXTLAYER) && symptr->texts)) {
-       draw_symbol(ADD, c, i,c,0,0,0.0,0.0);
-     }
-    }
-  }
-  filledrect(c, END, 0.0, 0.0, 0.0, 0.0);
-  drawarc(c, END, 0.0, 0.0, 0.0, 0.0, 0.0);
-  drawrect(c, END, 0.0, 0.0, 0.0, 0.0);
-  drawline(c, END, 0.0, 0.0, 0.0, 0.0);
- }
-
- if(ui_state & SELECTION) draw_selection(gc[SELLAYER], 0); /* 20171211 */
  draw_window = save_draw;
 }
 

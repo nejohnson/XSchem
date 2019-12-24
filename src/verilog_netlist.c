@@ -501,6 +501,6 @@ void verilog_netlist(FILE *fd , int verilog_stop)
    }
  }
  if(debug_var>=1) fprintf(errfp, "verilog_netlist():       end\n");
- if(!netlist_count) draw_hilight_net(1);
+ if(!netlist_count) redraw_hilights(); /*draw_hilight_net(1); */
 
 }

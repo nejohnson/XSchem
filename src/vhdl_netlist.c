@@ -624,6 +624,6 @@ void vhdl_netlist(FILE *fd , int vhdl_stop)
    }
  }
  if(debug_var>=1) fprintf(errfp, "vhdl_netlist():       end\n");
- if(!netlist_count) draw_hilight_net(1);
+ if(!netlist_count) redraw_hilights(); /* draw_hilight_net(1); */
 
 }

@@ -183,9 +183,16 @@ void check_unique_names(int rename)
   /* int save_draw; */
 
   if(hilight_nets) {
+    Box boundbox;
+    calc_drawing_bbox(&boundbox, 2);
     enable_drill=0;
     delete_hilight_net();
-    undraw_hilight_net(1);
+    /* undraw_hilight_net(1); */
+    bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0);
+    bbox(ADD, boundbox.x1, boundbox.y1, boundbox.x2, boundbox.y2);
+    bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
+    draw();
+    bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
   }
   free_hash();
   for(i=0;i<lastinst;i++) {
@@ -236,7 +243,8 @@ void check_unique_names(int rename)
     draw();
     bbox(END,0.0,0.0,0.0,0.0);
   }
-  draw_hilight_net(1);
+  /* draw_hilight_net(1); */
+  redraw_hilights();
   /* draw_window = save_draw; */
 }
 

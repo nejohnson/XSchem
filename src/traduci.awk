@@ -17,9 +17,12 @@ END  { endfile(_filename_) }
 BEGIN{
 }
 
-/draw_temp_symbol_outline/{
-  sub(/draw_temp_symbol_outline/, "draw_temp_symbol")
-  found = 1
+/draw_hilights/{
+  if($0 ~ /redraw_hilights/) {
+  } else if($0 ~/draw_hilights/){
+    sub(/draw_hilights/, "redraw_hilights")
+    found = 1
+  }
 }
 
 

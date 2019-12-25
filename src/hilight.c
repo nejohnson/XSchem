@@ -635,11 +635,6 @@ void unhilight_net(void)
   unselect_all();
 }
 
-
-
-
-
-
 void redraw_hilights(void)
 {
   Box boundbox;
@@ -650,7 +645,6 @@ void redraw_hilights(void)
   draw();
   bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
 }
-
 
 void draw_hilight_net(int on_window)
 {
@@ -909,7 +903,5 @@ void print_hilight_net(int show)
  prepared_hilight_structs=0; /* 20171212 */
  prepared_netlist_structs=0; /* 20171212 */
  /* delete_netlist_structs(); */
-
-
 }
 

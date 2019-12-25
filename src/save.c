@@ -876,6 +876,8 @@ void load_schematic(int symbol, int load_symbols, const char *filename, int rese
   if(filename && filename[0]) {
     my_strncpy(name, filename, S(name));
     my_strncpy(schematic[currentsch], name, S(schematic[currentsch]));
+    my_snprintf(msg, S(msg), "set current_dirname \"[file dirname {%s}]\"", name);
+    tcleval(msg);
     my_strncpy(current_name, rel_sym_path(name), S(current_name)); /* 20190519 */
     if(debug_var>=1) fprintf(errfp, "load_schematic(): opening file for loading:%s, filename=%s\n", name, filename);
     if(debug_var>=1) fprintf(errfp, "load_schematic(): schematic[currentsch]=%s\n", schematic[currentsch]);
@@ -892,8 +894,6 @@ void load_schematic(int symbol, int load_symbols, const char *filename, int rese
       tcleval(msg);
       clear_drawing();
     } else {
-      my_snprintf(msg, S(msg), "set current_dirname \"[file dirname {%s}]\"", name);
-      tcleval(msg);
       clear_drawing();
       if(debug_var>=1) fprintf(errfp, "load_schematic(): reading file: %s\n", name);
       read_xschem_file(fd);

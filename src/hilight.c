@@ -349,9 +349,9 @@ void search(const char *tok, const char *val, int sub, int sel, int what)
             type = (inst_ptr[i].ptr+instdef)->type;
             if( type && 
                 !(strcmp(type,"label") && strcmp(type,"ipin") &&
-                  strcmp(type,"iopin") && strcmp(type,"opin")) && (str = get_tok_value(inst_ptr[i].prop_ptr, "lab",0))[0] 
+                  strcmp(type,"iopin") && strcmp(type,"opin")) 
               ) {
-              if(!bus_hilight_lookup(str, col,0)) hilight_nets = 1;
+              if(!bus_hilight_lookup(inst_ptr[i].node[0], col,0)) hilight_nets = 1;
               if(what==NOW) for(c=0;c<cadlayers;c++)
                 draw_symbol(NOW, hilight_layer, i,c,0,0,0.0,0.0);
             }
@@ -381,10 +381,9 @@ void search(const char *tok, const char *val, int sub, int sel, int what)
         if(   (!regexec(&re, str,0 , NULL, 0) && !sub )  ||       /* 20071120 regex instead of strcmp */
               ( !strcmp(str, val) &&  sub )
           ) {
-            str = get_tok_value(wire[i].prop_ptr, "lab",0);
-            if(debug_var>=2) fprintf(errfp, "search(): wire=%d, tok=%s, val=%s \n", i,tok, str);
-            if(!sel && str[0]) { /* !sel 20190525 */
-              bus_hilight_lookup(str, col, 0);
+            if(debug_var>=2) fprintf(errfp, "search(): wire=%d, tok=%s, val=%s \n", i,tok, wire[i].node);
+            if(!sel) {
+              bus_hilight_lookup(wire[i].node, col, 0);
               if(what == NOW) {
                 if(wire[i].bus) /* 20171201 */
                   drawline(hilight_layer, THICK,
@@ -523,7 +522,7 @@ void drill_hilight(void)
 void hilight_net(void)
 {
   int i, n;
-  char *str;
+  char *type;
 
   prepare_netlist_structs(1);
   if(debug_var>=1) fprintf(errfp, "hilight_net(): entering\n");
@@ -534,55 +533,45 @@ void hilight_net(void)
    switch(selectedgroup[i].type)
    {
     case WIRE: 
-     if(wire[n].sel==SELECTED)
-     {
-      str = get_tok_value(wire[n].prop_ptr, "lab",0);
-      if(str && str[0])
-      {
         if(event_reporting) {
-          char n[PATH_MAX];
-          printf("xschem search exact %d lab %s\n", 0, escape_chars(n, str, PATH_MAX));
+          char s[PATH_MAX];
+          printf("xschem search exact %d lab %s\n", 0, escape_chars(s, wire[n].node, PATH_MAX));
           fflush(stdout);
         }
-
         hilight_nets=1;
-        if(!bus_hilight_lookup(str, hilight_color,0)) {
+        if(!bus_hilight_lookup(wire[n].node, hilight_color,0)) {
           if(incr_hilight) hilight_color++;
         }
-      }
-     }
      break;
 
     case ELEMENT:
-     if(inst_ptr[n].sel==SELECTED)
+     type = (inst_ptr[n].ptr+instdef)->type;
+     if( type &&
+         inst_ptr[n].node &&   /* instance must have a pin! */
+         !(strcmp(type,"label") && strcmp(type,"ipin") &&
+           strcmp(type,"iopin") && strcmp(type,"opin") )
+       )
      {
-      str = get_tok_value(inst_ptr[n].prop_ptr, "lab",0);
-      if(str && str[0])
-      {
        if(event_reporting) {
-         char n[PATH_MAX];
-         printf("xschem search exact %d lab %s\n", 0, escape_chars(n, str, PATH_MAX));
+         char s[PATH_MAX];
+         printf("xschem search exact %d lab %s\n", 0, escape_chars(s, inst_ptr[n].node[0], PATH_MAX));
          fflush(stdout);
        }
-       if(!bus_hilight_lookup(str, hilight_color,0)) {
+       if(!bus_hilight_lookup(inst_ptr[n].node[0], hilight_color,0)) {
          hilight_nets=1;
          if(incr_hilight) hilight_color++;
        }
-      }
-      else {
+     } else {
        if(event_reporting) {
-         char nn[PATH_MAX];
-         printf("xschem search exact %d name %s\n", 0, escape_chars(nn, inst_ptr[n].instname, PATH_MAX));
+         char s[PATH_MAX];
+         printf("xschem search exact %d name %s\n", 0, escape_chars(s, inst_ptr[n].instname, PATH_MAX));
          fflush(stdout);
        }
        if(debug_var>=1) fprintf(errfp, "hilight_net(): setting hilight flag on inst %d\n",n);
        hilight_nets=1;
        inst_ptr[n].flags |= 4;
-      }
      }
      break;
-
-
     default:
      break;
    }
@@ -597,7 +586,7 @@ void hilight_net(void)
 void unhilight_net(void)
 {
   int i,n;
-  char *str;
+  char *type;
 
   prepare_netlist_structs(1);
   if(debug_var>=1) fprintf(errfp, "unhilight_net(): entering\n");
@@ -608,35 +597,36 @@ void unhilight_net(void)
    switch(selectedgroup[i].type)
    {
     case WIRE: 
-     str = get_tok_value(wire[n].prop_ptr, "lab",0);
-     if(str && str[0]) {
       if(event_reporting) {
-        char n[PATH_MAX];
-        printf("xschem search exact %d lab %s\n", 1, escape_chars(n, str, PATH_MAX));
+        char s[PATH_MAX];
+        printf("xschem search exact %d lab %s\n", 1, escape_chars(s, wire[n].node, PATH_MAX));
         printf("xschem unhilight\n");
         fflush(stdout);
       }
-      bus_hilight_lookup(str, hilight_color,1);
-
-     }
+      bus_hilight_lookup(wire[n].node, hilight_color,1);
      break;
     case ELEMENT:
-     str = get_tok_value(inst_ptr[n].prop_ptr, "lab",0);
-     inst_ptr[n].flags &= ~4;
-     if(str && str[0]) {
+     type = (inst_ptr[n].ptr+instdef)->type;
+     if( type &&
+         inst_ptr[n].node &&   /* instance must have a pin! */
+         !(strcmp(type,"label") && strcmp(type,"ipin") &&
+           strcmp(type,"iopin") && strcmp(type,"opin") )
+       )
+     {
       if(event_reporting) {
         printf("xschem unhilight\n");
         fflush(stdout);
       }
-      bus_hilight_lookup(str, hilight_color,1);
+      bus_hilight_lookup(inst_ptr[n].node[0], hilight_color,1);
      } else {
       if(event_reporting) {
-        char nn[PATH_MAX];
-        printf("xschem search exact %d name %s\n", 1, escape_chars(nn, inst_ptr[n].instname, PATH_MAX));
+        char s[PATH_MAX];
+        printf("xschem search exact %d name %s\n", 1, escape_chars(s, inst_ptr[n].instname, PATH_MAX));
         printf("xschem unhilight\n");
         fflush(stdout);
       }
      }
+     inst_ptr[n].flags &= ~4;
      break;
     default:
      break;
@@ -664,7 +654,6 @@ void redraw_hilights(void)
 
 void draw_hilight_net(int on_window)
 {
- char *str;
  int save_draw;
  char *type=NULL;
  int i,c;
@@ -689,9 +678,7 @@ void draw_hilight_net(int on_window)
  }
  if(!use_hash) for(i=0;i<lastwire;i++)
  {
-    str = get_tok_value(wire[i].prop_ptr, "lab",0);
-    if(str[0]) {
-      if( (entry = bus_hilight_lookup(str, 0,2)) ) {
+      if( (entry = bus_hilight_lookup(wire[i].node, 0,2)) ) {
         if(wire[i].bus) /* 20171201 */
           drawline(get_color(entry->value), THICK,
              wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
@@ -707,12 +694,9 @@ void draw_hilight_net(int on_window)
           }
         }
       }
-    }
  } else for(init_wire_iterator(x1, y1, x2, y2); ( wireptr = wire_iterator_next() ) ;) {
     i = wireptr->n;
-    str = get_tok_value(wire[i].prop_ptr, "lab",0);
-    if(str[0]) {
-      if( (entry = bus_hilight_lookup(str, 0,2)) ) {
+      if( (entry = bus_hilight_lookup(wire[i].node, 0,2)) ) {
         if(wire[i].bus) /* 20171201 */
           drawline(get_color(entry->value), THICK,
              wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
@@ -728,7 +712,6 @@ void draw_hilight_net(int on_window)
           }
         }
       }
-    }
  }
  my_realloc(145, &inst_color,lastinst*sizeof(int)); 
  for(i=0;i<lastinst;i++)

@@ -1126,6 +1126,7 @@ void go_back(int confirm) /*  20171006 add confirm */
   if(prev_curr_type==SCHEMATIC) {
     hilight_parent_pins();
   }
+  if(enable_drill) drill_hilight(); /*  20171212 */
   xorigin=zoom_array[currentsch].x;
   yorigin=zoom_array[currentsch].y;
   zoom=zoom_array[currentsch].zoom;

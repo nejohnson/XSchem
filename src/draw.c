@@ -256,39 +256,6 @@ void cairo_draw_string_line(cairo_t *ctx, char *s,
   else if(rot==2 && flip==1) {iy=iy-fontheight-lines+line_delta+fontascent+vc;}
   else if(rot==3 && flip==1) {iy=iy+xadvance+line_offset;ix+=line_delta+fontascent-vc;}
 
-/* clear area before drawing antialiased text. */
-/* 
-  save_rot=rot;
-  save_flip=flip;
-  rot=rot1;
-  flip=0;
-
-  if(rot==0 || rot==2) {
-    ROTATION(ix, iy-ext.height, ix+ext.width, iy, rx2, ry2);
-    rx1 = ix;
-    ry1 = iy-ext.height;
-  } else {
-    ROTATION(ix, iy, ix+ext.width, iy+ext.height, rx2, ry2);
-    rx1 = ix-ext.height;
-    rx2 = rx2-ext.height;
-    ry1 = iy;
-  }
-  RECTORDER(rx1,ry1,rx2,ry2);
- 
-  if(hilight_nets) gcclear=gc[BACKLAYER];
-  else gcclear=gctiled;                 
-  if(ctx == save_ctx) {
-    XFillRectangle(display, save_pixmap, gcclear,  (int)rx1, (int)ry1,
-        (unsigned int)rx2 - (unsigned int)rx1,
-        (unsigned int)ry2 - (unsigned int)ry1);
-  } else {
-    XFillRectangle(display, window, gcclear,  (int)rx1, (int)ry1,
-        (unsigned int)rx2 - (unsigned int )rx1,
-        (unsigned int)ry2 - (unsigned int)ry1);
-  }
-  rot=save_rot;
-  flip=save_flip;
-*/
   cairo_save(ctx);
   cairo_translate(ctx, ix, iy);
   cairo_rotate(ctx, XSCH_PI/2*rot1);

@@ -241,6 +241,138 @@ proc edit_file {filename} {
  return {}
 }
 
+# ============================================================
+#      SIMULATION CONTROL
+# ============================================================
+
+# ============================================================
+#      SIMCONF 
+# ============================================================
+
+## $N : netlist file full path (/home/schippes/simulations/opamp.spice) 
+## $n : netlist file full path with extension chopped (/home/schippes/simulations/opamp)
+## $s : schematic name (opamp)
+##
+## Other global vars:
+## netlist_dir
+## netlist_type
+## computerfarm
+## terminal
+
+### spice 
+proc set_sim_defaults {} {
+  global sim
+  set_ne sim(spice,0,cmd) {/home/schippes/ngspice/bin/ngspice -i $N -a}
+  set_ne sim(spice,0,name) {Ngspice}
+  set_ne sim(spice,0,terminal) 1
+  set_ne sim(spice,0,fg) 0
+  
+  set_ne sim(spice,1,cmd) {/home/schippes/ngspice/bin/ngspice -b -r $n.raw -o $n.out $N}
+  set_ne sim(spice,1,name) {Ngspice batch}
+  set_ne sim(spice,1,terminal) 0
+  set_ne sim(spice,1,fg) 0
+  
+  set_ne sim(spice,2,cmd) {}
+  set_ne sim(spice,2,name) {free}
+  set_ne sim(spice,2,terminal) 1
+  set_ne sim(spice,2,fg) 0
+  # number of configured spice simulators, and default one
+  set_ne sim(spice,n) 3
+  set_ne sim(spice,enable) 0
+  
+  ### spice wave view
+  set_ne sim(spicewave,0,cmd) {some_cmd} 
+  set_ne sim(spicewave,0,name) {Spice Viewer}
+  set_ne sim(spicewave,0,terminal) 0
+  set_ne sim(spicewave,0,fg) 0
+  # number of configured spice wave viewers, and default one
+  set_ne sim(spicewave,n) 1
+  set_ne sim(spicewave,enable) 0
+  
+  ### verilog
+  set_ne sim(verilog,0,cmd) {/home/schippes/verilog/bin/iverilog -o .verilog_object -g2012 $N 
+  /home/schippes/verilog/bin/vvp .verilog_object}
+  set_ne sim(verilog,0,name) {Icarus verilog}
+  set_ne sim(verilog,0,terminal) 1
+  set_ne sim(verilog,0,fg) 1
+  # number of configured verilog simulators, and default one
+  set_ne sim(verilog,n) 1
+  set_ne sim(verilog,enable) 0
+  
+  ### verilog wave view
+  set_ne sim(verilogwave,0,cmd) {/home/schippes/gtkwave/bin/gtkwave dumpfile.vcd $n.sav 2>/dev/null}
+  set_ne sim(verilogwave,0,name) {verilog viewer}
+  set_ne sim(verilogwave,0,terminal) 0
+  set_ne sim(verilogwave,0,fg) 0
+  # number of configured verilog wave viewers, and default one
+  set_ne sim(verilogwave,n) 1
+  set_ne sim(verilogwave,enable) 0
+  
+  ### vhdl
+  set_ne sim(vhdl,0,cmd) {/home/schippes/ghdl/bin/ghdl -c --ieee=synopsys -fexplicit $N -r $s --wave=$n.ghw}
+  set_ne sim(vhdl,0,name) {Ghdl}
+  set_ne sim(vhdl,0,terminal) 1
+  set_ne sim(vhdl,0,fg) 1
+  # number of configured vhdl simulators, and default one
+  set_ne sim(vhdl,n) 1
+  set_ne sim(vhdl,enable) 0
+  
+  ### vhdl wave view
+  set_ne sim(vhdlwave,0,cmd) {/home/schippes/gtkwave/bin/gtkwave $n.ghw $n.sav 2>/dev/null}
+  set_ne sim(vhdlwave,0,name) {VHDL viewer}
+  set_ne sim(vhdlwave,0,terminal) 0
+  set_ne sim(vhdlwave,0,fg) 0
+  # number of configured vhdl wave viewers, and default one
+  set_ne sim(vhdlwave,n) 1
+  set_ne sim(vhdlwave,enable) 0
+} 
+
+proc simconf {} {
+  global sim
+
+  toplevel .sim -class dialog
+  frame .sim.top
+  frame .sim.center
+  frame .sim.bottom
+  pack .sim.top
+  pack .sim.center
+  pack .sim.bottom
+  
+
+  foreach tool { spice spicewave verilog verilogwave vhdl vhdlwave} {
+    frame .sim.center.$tool
+    pack .sim.center.$tool
+    for {set i 0} { $i < $sim($tool,n)} {incr i} {
+      frame .sim.center.$tool.$i
+      pack .sim.center.$tool.$i
+
+      label .sim.center.$tool.$i.lab -text $sim($tool,$i,name) -width 20 -anchor e
+      text .sim.center.$tool.$i.cmd -width 70 -height 3 -wrap none
+      .sim.center.$tool.$i.cmd insert 1.0 $sim($tool,$i,cmd)
+      radiobutton .sim.center.$tool.$i.enable -value $i -variable sim($tool,enable)
+      checkbutton .sim.center.$tool.$i.term -text Terminal -variable sim($tool,$i,terminal)
+      checkbutton .sim.center.$tool.$i.fg -text Foreground -variable sim($tool,$i,fg)
+
+      pack .sim.center.$tool.$i.lab -side left
+      pack .sim.center.$tool.$i.cmd -side left
+      pack .sim.center.$tool.$i.enable -side left
+      pack .sim.center.$tool.$i.term -side left
+      pack .sim.center.$tool.$i.fg -side left
+      
+      puts "$tool $i"
+    }
+  }
+  button .sim.bottom.dismiss  -text Dismiss -command {destroy .sim}
+  pack .sim.bottom.dismiss
+
+}
+
+
+
+
+
+# ============================================================
+
 # filename here is rootname of schematic without extension
 # as returned by 'xschem simulate'
 proc simulate {filename} {
@@ -325,6 +457,31 @@ proc simulate {filename} {
  return {}
 }
 
+proc waves {schname} {
+ global netlist_dir netlist_type tcl_debug task_error task_output
+ global gtkwave_path analog_viewer waveview_path
+
+ set tmpname [file rootname "$schname"]
+ if { [select_netlist_dir 0] ne "" } {
+   if { $netlist_type=="verilog" } {
+     task "$gtkwave_path dumpfile.vcd \"$tmpname.sav\" 2>/dev/null" "$netlist_dir" bg
+     if {$task_error} {viewdata $task_output; return}
+
+   } elseif { $netlist_type=="spice" } {
+
+     if { [info exists analog_viewer] && $analog_viewer == "waveview" } { 
+       task "$waveview_path -k -x \"$tmpname.sx\"" "$netlist_dir" bg ; # 20170415 bg instead of tk_init exec mode
+     } else {
+       alert_ { Unsupported default wiever... } 
+     }
+   } elseif { $netlist_type=="vhdl" } { 
+     task "$gtkwave_path \"${tmpname}.ghw\" \"${tmpname}.sav\" 2>/dev/null" "$netlist_dir" bg
+   }
+ }
+ return {}
+}
+# ============================================================
+
 proc modelsim {schname} {
   global netlist_dir netlist_type
   global iverilog_path vvp_path hspice_path modelsim_path
@@ -365,30 +522,6 @@ proc gtkwave {schname} {
   task "$gtkwave_path 2>/dev/null" "$netlist_dir" bg
 }
 
-proc waves {schname} {
- global netlist_dir netlist_type tcl_debug task_error task_output
- global gtkwave_path analog_viewer waveview_path
-
- set tmpname [file rootname "$schname"]
- if { [select_netlist_dir 0] ne "" } {
-   if { $netlist_type=="verilog" } {
-     task "$gtkwave_path dumpfile.vcd \"$tmpname.sav\" 2>/dev/null" "$netlist_dir" bg
-     if {$task_error} {viewdata $task_output; return}
-
-   } elseif { $netlist_type=="spice" } {
-
-     if { [info exists analog_viewer] && $analog_viewer == "waveview" } { 
-       task "$waveview_path -k -x \"$tmpname.sx\"" "$netlist_dir" bg ; # 20170415 bg instead of tk_init exec mode
-     } else {
-       alert_ { Unsupported default wiever... } 
-     }
-   } elseif { $netlist_type=="vhdl" } { 
-     task "$gtkwave_path \"${tmpname}.ghw\" \"${tmpname}.sav\" 2>/dev/null" "$netlist_dir" bg
-   }
- }
- return {}
-}
-
 proc get_shell { curpath } {
  global netlist_dir netlist_type tcl_debug
  global gtkwave_path waveview_path terminal
@@ -416,7 +549,6 @@ proc edit_netlist {schname } {
  }
  return {}
 }
-
 
 # 20180926
 # global_initdir should be set to:
@@ -547,7 +679,7 @@ proc myload_set_home {dir} {
 
 proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
   global myload_index1 myload_files2 myload_files1 myload_retval myload_dir1 pathlist
-  global myload_default_geometry myload_sash_pos myload_yview
+  global myload_default_geometry myload_sash_pos myload_yview tcl_version
   upvar #0 $global_initdir initdir
   toplevel .myload -class dialog
   wm title .myload $msg
@@ -566,9 +698,10 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
   panedwindow  .myload.l -orient horizontal
 
   frame .myload.l.paneleft
-  listbox .myload.l.paneleft.list -listvariable myload_files1 -width 20 -height 18 -justify right\
+  if {$tcl_version > 8.5} { set just {-justify right}} else {set just {}}
+  eval [subst {listbox .myload.l.paneleft.list -listvariable myload_files1 -width 20 -height 18 $just \
     -yscrollcommand ".myload.l.paneleft.yscroll set" -selectmode browse \
-    -xscrollcommand ".myload.l.paneleft.xscroll set"
+    -xscrollcommand ".myload.l.paneleft.xscroll set"}]
   scrollbar .myload.l.paneleft.yscroll -command ".myload.l.paneleft.list yview" 
   scrollbar .myload.l.paneleft.xscroll -command ".myload.l.paneleft.list xview" -orient horiz
   pack  .myload.l.paneleft.yscroll -side right -fill y

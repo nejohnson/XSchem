@@ -223,6 +223,16 @@ void resetwin(void)
       xrect[0].height = xschem_h;
   
       XFreePixmap(display,save_pixmap);
+ 
+      /* 
+      {
+        unsigned int w, h;
+        XQueryBestSize(display, TileShape, window,  xschem_w, xschem_h, &w, &h);
+        if(debug_var>=0) fprintf(errfp, "XQueryBestSize: req: w=%d, h=%d, opt: w=%d h=%d\n", 
+                         xschem_w, xschem_h, w, h);
+      }
+      */
+
       save_pixmap = XCreatePixmap(display, window, xschem_w, xschem_h, depth); /*  20171111 */
       XSetTile(display,gctiled, save_pixmap);
 

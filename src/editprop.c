@@ -801,38 +801,25 @@ void update_symbol(const char *result, int x)
   only_different=atoi(tclgetvar("preserve_unchanged_attrs") );
   copy_cell=atoi(tclgetvar("user_wants_copy_cell") ); /* 20150911 */
 
-
+  /* 20191227 necessary? */
   if(copy_cell) { /* 20150911 */
    remove_symbols();
    link_symbols_to_instances();
   }
   
-
   prefix=0;
-
-  /* 20150911 */
-  /*   | */
-  if(copy_cell || (strcmp(symbol, inst_ptr[i].name)) ) /* user wants to change symbol ; added strcmp 30102003 */
-  {
-   if(debug_var>=1) fprintf(errfp, "update_symbol(): changing symbol: %s --> %s\n", symbol, inst_ptr[i].name);
-
-   /* 20150911 */
-   /*     | */
-   if(strcmp(symbol, inst_ptr[i].name)) {
-     set_modify(1);
-     prepared_hash_instances=0; /* 20171224 */
-     prepared_netlist_structs=0;
-     prepared_hilight_structs=0;
-   }
-   sym_number=match_symbol(symbol); /* check if exist */
-   if(sym_number>=0)
-   {
-    my_strdup(81, &template, (instdef+sym_number)->templ); /* 20150409 */
-    prefix=(get_tok_value(template, "name",0))[0]; /* get new symbol prefix  */
-   }
+  sym_number = -1;
+  if(strcmp(symbol, inst_ptr[i].name)) {
+    set_modify(1);
+    prepared_hash_instances=0; /* 20171224 */
+    prepared_netlist_structs=0;
+    prepared_hilight_structs=0;
+    sym_number=match_symbol(symbol); /* check if exist */
+    if(sym_number>=0) {
+      my_strdup(81, &template, (instdef+sym_number)->templ); /* 20150409 */
+      prefix=(get_tok_value(template, "name",0))[0]; /* get new symbol prefix  */
+    }
   }
-  else sym_number=-1;
-
   bbox(BEGIN,0.0,0.0,0.0,0.0);
 
   for(k=0;k<lastselected;k++)
@@ -840,7 +827,6 @@ void update_symbol(const char *result, int x)
    if(debug_var>=1) fprintf(errfp, "update_symbol(): for k loop: k=%d\n", k);
    if(selectedgroup[k].type!=ELEMENT) continue;
    i=selectedgroup[k].n;
-   if(!pushed) { push_undo(); pushed=1;} /* 20150327 push_undo */
 
    /* 20171220 calculate bbox before changes to correctly redraw areas */
    /* must be recalculated as cairo text extents vary with zoom factor. */
@@ -848,12 +834,11 @@ void update_symbol(const char *result, int x)
 
    if(sym_number>=0) /* changing symbol ! */
    {
+     if(!pushed) { push_undo(); pushed=1;}
      delete_inst_node(i); /* 20180208 fix crashing bug: delete node info if changing symbol */
                           /* if number of pins is different we must delete these data *before* */
                           /* changing ysmbol, otherwise i might end up deleting non allocated data. */
      my_strdup(82, &inst_ptr[i].name, rel_sym_path(symbol));
- 
- 
      if(event_reporting) {
        char n1[PATH_MAX];
        char n2[PATH_MAX];
@@ -863,20 +848,19 @@ void update_symbol(const char *result, int x)
        );
        fflush(stdout);
      }
- 
- 
- 
      inst_ptr[i].ptr=sym_number;
    }
-
    bbox(ADD, inst_ptr[i].x1, inst_ptr[i].y1, inst_ptr[i].x2, inst_ptr[i].y2);
-
    /* update property string from tcl dialog */
    if(!no_change_props)
    {
     if(debug_var>=1) fprintf(errfp, "update_symbol(): no_change_props=%d\n", no_change_props);
     if(only_different) {
-          if( set_different_token(&inst_ptr[i].prop_ptr, new_prop, old_prop, 0, 0) ) {
+          char * ss;
+          if( set_different_token(&ss, new_prop, old_prop, 0, 0) ) {
+            if(!pushed) { push_undo(); pushed=1;}
+            my_strdup(111, &inst_ptr[i].prop_ptr, ss);
+            my_free(&ss);
             set_modify(1);
             prepared_hash_instances=0; /* 20171224 */
             prepared_netlist_structs=0;
@@ -885,10 +869,9 @@ void update_symbol(const char *result, int x)
     }
     else {
       if(new_prop) {  /* 20111205 */
-
-        /* .................... <-- 20111205 20160308 changed from if(inst_ptr... && strcmp...) */
         if(!inst_ptr[i].prop_ptr || strcmp(inst_ptr[i].prop_ptr, new_prop)) {
           if(debug_var>=1) fprintf(errfp, "update_symbol(): changing prop: |%s| -> |%s|\n", inst_ptr[i].prop_ptr, new_prop);
+          if(!pushed) { push_undo(); pushed=1;}
           my_strdup(84, &inst_ptr[i].prop_ptr, new_prop);
           set_modify(1);
           prepared_hash_instances=0; /* 20171224 */
@@ -896,6 +879,7 @@ void update_symbol(const char *result, int x)
           prepared_hilight_structs=0;
         }
       }  else {  /* 20111205 */
+        if(!pushed) { push_undo(); pushed=1;}
         my_strdup(86, &inst_ptr[i].prop_ptr, "");
       }
     }
@@ -907,30 +891,26 @@ void update_symbol(const char *result, int x)
 
     /* 20110325 only modify prefix if prefix not NUL */
     if(prefix) name[0]=prefix; /* change prefix if changing symbol type; */
-
     if(debug_var>=1) fprintf(errfp, "update_symbol(): name=%s, inst_ptr[i].prop_ptr=%s\n", name, inst_ptr[i].prop_ptr);
     my_strdup(89, &ptr,subst_token(inst_ptr[i].prop_ptr, "name", name) );
                    /* set name of current inst */
     if(sym_number >=0) {
+      if(!pushed) { push_undo(); pushed=1;}
       if(!k) hash_all_names(i);
       new_prop_string(i, ptr, k, disable_unique_names); /* set new prop_ptr */
     }
- 
     type=instdef[inst_ptr[i].ptr].type; /* 20150409 */
     cond= !type || (strcmp(type,"label") && strcmp(type,"ipin") &&
           strcmp(type,"opin") &&  strcmp(type,"iopin"));
     if(cond) inst_ptr[i].flags|=2;
     else inst_ptr[i].flags &=~2;
    }
-
    if(event_reporting) {
      char *ss=NULL;
      set_different_token(&ss, new_prop, old_prop, ELEMENT, i);
      my_free(&ss);
    }
    my_strdup2(90, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name",0)); /* 20150409 */
-  
-
    /* new symbol bbox after prop changes (may change due to text length) */
    symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1, &inst_ptr[i].x2, &inst_ptr[i].y2);
  

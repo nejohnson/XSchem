@@ -608,7 +608,7 @@ void select_element(int i,unsigned short select_mode, int fast, int override_loc
     my_snprintf(str, S(str), "symbol .name=%s", inst_ptr[i].name==NULL?"(null)":inst_ptr[i].name);
     statusmsg(str,2);
     /* 20190526 */ /*Why this? 20191125 only on small schematics. slow down on big schematics */
-    if(lastinst < 30000) {
+    if(lastinst < 150) {
       prepare_netlist_structs(0);
       for(j=0;j< (inst_ptr[i].ptr+instdef)->rects[PINLAYER] ;j++) 
       {

@@ -23,7 +23,7 @@
 #ifndef CADGLOBALS
 #define CADGLOBALS
 
-#define XSCHEM_VERSION "2.9.5_RC6"
+#define XSCHEM_VERSION "2.9.5_RC7"
 #define XSCHEM_FILE_VERSION "1.1"
 
 #if HAS_PIPE == 1

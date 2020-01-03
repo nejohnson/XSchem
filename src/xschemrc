@@ -183,18 +183,6 @@ set terminal {xterm -geometry 100x35 -fn 9x15 -bg black -fg white -cr white -ms 
 set editor {gvim -f -geometry 90x28}
 
 
-###########################################################################
-# alternatives: ngspice hspice, hspicerf, finesim
-###########################################################################
-set spice_simulator ngspice
-set finesim_opts {}
-set ngspice_opts {}
-#### alternatives: iverilog, modelsim
-set verilog_simulator iverilog
-
-#### alternatives: ghdl, modelsim
-set vhdl_simulator ghdl
-
 #### command to translate xpm to png (assumes command takes source 
 #### and dest file as arguments, example: gm convert plot.xpm plot.png)
 set to_png {gm convert}
@@ -205,41 +193,9 @@ set to_png {gm convert}
 #### LSF BSUB
 # set computerfarm {bsub -Is}
 
-#### icarus verilog (open source verilog simulator)
-# set iverilog_path $env(HOME)/verilog/bin/iverilog
-# set vvp_path $env(HOME)/verilog/bin/vvp
-set iverilog_opts {-g2012}
-
-#### default analog wiewer (waveview) 
-# set analog_viewer waveview
-
-#### waveview
-# set waveview_path $env(HOME)/waveview/bin/wv
-# set waveview_path $env(HOME)/waveview_2013/bin/wv
-
 #### utile (stefan's spice stimuli editor)
 set utile_gui_path ${XSCHEM_SHAREDIR}/utile/utile3
 set utile_cmd_path ${XSCHEM_SHAREDIR}/utile/utile
-
-#### gtkwave (open source digital wave viewer)
-# set gtkwave_path $env(HOME)/gtkwave/bin/gtkwave
-
-#### modelsim
-# set modelsim_path $env(HOME)/modelsim/modeltech/bin
-
-#### ghdl (open source vhdl simulator)
-# set ghdl_path $env(HOME)/ghdl/bin/ghdl
-set ghdl_elaborate_opts {--ieee=synopsys -fexplicit}
-set ghdl_run_opts {}
-
-#### ngspice (open source spice simulator)
-# set ngspice_path $env(HOME)/ngspice/bin/ngspice
-
-#### hspice  and modelsim license files (sample syntax)
-# set env(LM_LICENSE_FILE) $env(HOME)/modelsim/license.dat:$env(HOME)/hspice_2008/license.dat:$env(HOME)/hspice_2013/lic.dat
-
-# set hspice_path "$env(HOME)/hspice_2013/bin/hspice64 -mt 8"
-# set hspicerf_path $env(HOME)/hspice_2013/bin/hspicerf64
 
 # lappend tcl_files ${XSCHEM_SHAREDIR}/change_index.tcl
 # lappend tcl_files ${XSCHEM_SHAREDIR}/hspice_backannotate.tcl

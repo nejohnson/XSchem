@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC5 file_version=1.1}
+v {xschem version=2.9.5_RC6 file_version=1.1}
 G {}
 V {}
 S {}
@@ -21,7 +21,6 @@ C {code.sym} 750 -190 0 0 {
 name=STIMULI 
 value=".option RUNLVL=6 post 
 vvss vss 0 dc 0
-
 .save all
 .temp 30
 .tran 10n 100u 

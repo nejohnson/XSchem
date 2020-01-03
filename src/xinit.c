@@ -742,7 +742,8 @@ void preview_window(const char *what, const char *tk_win_path, const char *filen
     remove_symbols();
 
     /* preview */
-    check_version = 1; /* refuse to load and preview anything if not an xschem file */
+    check_version = 0; /* if set refuse to load and preview anything if not an xschem file */
+                       /* heuristics is done in xschem.tcl to ensure it is an xschem file */
     load_schematic(0, 1,filename, 0);
     window = pre_window;
     resetwin();
@@ -1275,7 +1276,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
      fprintf(errfp, "xschem: can't do a simulation without a filename\n");
      tcleval( "exit");
    }
-   tcleval( "xschem simulate");
+   tcleval( "simulate");
  }
 
  if(do_waves) {

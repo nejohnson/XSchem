@@ -839,7 +839,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
   printf("zoom=%.16g\n", zoom);
   printf("xorigin=%.16g\n", xorigin);
   printf("yorigin=%.16g\n", yorigin);
-  for(i=0;i<cadlayers;i++)
+  for(i=0;i<8;i++)
   {
     printf("lastrect[%d]=%d\n", i, lastrect[i]);
     printf("lastline[%d]=%d\n", i, lastline[i]);
@@ -850,8 +850,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
     printf("enable_layer[%d]=%d\n", i, enable_layer[i]);
   }
   printf("currentsch=%d\n", currentsch);
-  printf("schematic[%d]=%s\n", currentsch, schematic[currentsch]);
-  for(i=0;i<currentsch;i++)
+  for(i=0;i<=currentsch;i++)
   {
     printf("previous_instance[%d]=%d\n",i,previous_instance[i]);
     printf("sch_prefix[%d]=%s\n",i,sch_prefix[i]? sch_prefix[i]:"<NULL>");
@@ -1003,22 +1002,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
 
  else if(!strcmp(argv[1],"simulate") ) {
    if( set_netlist_dir(0, NULL) ) {
-
-     /* 20140404 added CAD_SPICE_NETLIST */
-     if(netlist_type==CAD_VERILOG_NETLIST) {
-       my_snprintf(name, S(name), "simulate {%s.v}",
-                skip_dir(schematic[currentsch]));
-       tcleval(name);
-     } else if(netlist_type==CAD_SPICE_NETLIST) {
-       my_snprintf(name, S(name), "simulate {%s.spice}",
-                skip_dir(schematic[currentsch]));
-       tcleval(name);
-     } else if(netlist_type==CAD_VHDL_NETLIST) {
-       my_snprintf(name, S(name), "simulate {%s.vhdl}",
-                skip_dir(schematic[currentsch]));
-       tcleval(name);
-     }
-     /* /20140404 */
+     tcleval("simulate");
    }
  }
 
@@ -1374,16 +1358,6 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
      else 
         Tcl_AppendResult(interp, "SCHEMATIC",NULL);
   }
-  else if(!strcmp(argv[2],"netlist_type"))  {
-     if( netlist_type == CAD_VHDL_NETLIST )
-        Tcl_AppendResult(interp, "vhdl",NULL);
-     else if( netlist_type == CAD_SPICE_NETLIST )
-        Tcl_AppendResult(interp, "spice",NULL);
-     else if( netlist_type == CAD_TEDAX_NETLIST )
-        Tcl_AppendResult(interp, "tedax",NULL);
-     else 
-        Tcl_AppendResult(interp, "verilog",NULL);
-  }
   else if(!strcmp(argv[2],"incr_hilight"))  {
      if( incr_hilight != 0 )
         Tcl_AppendResult(interp, "1",NULL);
@@ -1568,11 +1542,6 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
         my_snprintf(s, S(s), "XSCHEM V%s",XSCHEM_VERSION);
         Tcl_AppendResult(interp, s,NULL);
   }
-  else if(!strcmp(argv[2],"userconfdir"))  {  /* 20121121 */
-        char s[30]; /* overflow safe 20161122 */
-        my_snprintf(s, S(s), "%s",user_conf_dir);
-        Tcl_AppendResult(interp, s,NULL);
-  }
   else {
     fprintf(errfp, "xschem get %s: invalid command.\n", argv[2]);
   }
@@ -1647,17 +1616,6 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
     double s = atof(argv[3]);
     if(s>-20. && s<20.) nocairo_vert_correct = s;
   }
-  else if(!strcmp(argv[2],"netlist_type"))  {
-    if(!strcmp(argv[3],"vhdl")) {
-     netlist_type = CAD_VHDL_NETLIST ;
-    } else if(!strcmp(argv[3],"verilog")) {
-     netlist_type = CAD_VERILOG_NETLIST ;
-    } else if(!strcmp(argv[3],"tedax")) {
-     netlist_type = CAD_TEDAX_NETLIST ;
-    } else {
-     netlist_type = CAD_SPICE_NETLIST ;
-    }
-  }
   else if(!strcmp(argv[2],"current_type")) { /* 20171025 */
     if(!strcmp(argv[3],"SYMBOL")) {
       current_type=SYMBOL;
@@ -1726,6 +1684,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
   }
   else if(!strcmp(argv[2],"rectcolor"))  {
      rectcolor=atoi(argv[3]);
+     tcleval("reconfigure_layers_button");
      rebuild_selected_array();
      if(lastselected) {
        change_layer();

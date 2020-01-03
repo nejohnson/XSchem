@@ -56,38 +56,38 @@ proc set_ne { var val } {
 # equivalent to the 'exec' tcl function but keeps the event loop
 # responding, so widgets get updated properly
 # while waiting for process to end.
-  proc tk_exec {args} {
-    global tk_exec_id
-    global tk_exec_data
-    global tk_exec_cond
-    global tk_exec_pipe
+proc tk_exec {args} {
+  global tk_exec_id
+  global tk_exec_data
+  global tk_exec_cond
+  global tk_exec_pipe
 
-    if {![info exists tk_exec_id]} {
-        set tk_exec_id 0
-    } else {
-        incr tk_exec_id
-    }
-
-    set pipe [open "|$args" r]
-    set tk_exec_pipe($tk_exec_id) $pipe
-    set tk_exec_data($tk_exec_id) ""
-    set tk_exec_cond($tk_exec_id) 0
-
-    set id $tk_exec_id
-    fconfigure $pipe -blocking 0
-    fileevent $pipe readable "tk_exec_fileevent $id"
-    vwait tk_exec_cond($id)
-    set data [string trimright $tk_exec_data($id) \n]
-
-    if {[catch {close $tk_exec_pipe($id)} err]} {
-        error "pipe error: $err"
-    }
-    unset tk_exec_pipe($id)
-    unset tk_exec_data($id)
-    unset tk_exec_cond($id)
-    #puts ">>>> exiting process: $id"
-    return $data
+  if {![info exists tk_exec_id]} {
+      set tk_exec_id 0
+  } else {
+      incr tk_exec_id
   }
+
+  set pipe [open "|$args" r]
+  set tk_exec_pipe($tk_exec_id) $pipe
+  set tk_exec_data($tk_exec_id) ""
+  set tk_exec_cond($tk_exec_id) 0
+
+  set id $tk_exec_id
+  fconfigure $pipe -blocking 0
+  fileevent $pipe readable "tk_exec_fileevent $id"
+  vwait tk_exec_cond($id)
+  set data [string trimright $tk_exec_data($id) \n]
+
+  if {[catch {close $tk_exec_pipe($id)} err]} {
+      error "pipe error: $err"
+  }
+  unset tk_exec_pipe($id)
+  unset tk_exec_data($id)
+  unset tk_exec_cond($id)
+  #puts ">>>> exiting process: $id"
+  return $data
+}
 
 proc netlist {source_file show netlist_file} {
  global XSCHEM_SHAREDIR flat_netlist hspice_netlist netlist_dir
@@ -146,13 +146,16 @@ proc netlist {source_file show netlist_file} {
 # 20161216 execute task in other work dir
 proc task { cmd {dir .}  {background fg}} {
   global task_output task_error
+  # puts "task: $cmd"
   if {![string compare $background {bg} ] } {
-    set task_error [catch {exec sh -c "cd \"$dir\"; exec $cmd" &} task_output]
+    set task_error [catch {exec sh -c "cd '$dir'; $cmd" &} task_output]
   } elseif {![string compare $background  {fg} ] } {
-    set task_error [catch {exec sh -c "cd \"$dir\"; exec $cmd"} task_output]
+    set task_error [catch {exec sh -c "cd '$dir'; $cmd"} task_output]
   } elseif {![string compare $background {tk_exec} ] } {
-    set task_error [catch {tk_exec sh -c "cd \"$dir\"; exec $cmd"} task_output]
+    set task_error [catch {tk_exec sh -c "cd '$dir'; $cmd"} task_output]
   }
+  # puts "task_error: $task_error"
+  # puts "task_output: $task_output"
 }
 
 
@@ -252,6 +255,7 @@ proc edit_file {filename} {
 ## $N : netlist file full path (/home/schippes/simulations/opamp.spice) 
 ## $n : netlist file full path with extension chopped (/home/schippes/simulations/opamp)
 ## $s : schematic name (opamp)
+## $d : netlist directory
 ##
 ## Other global vars:
 ## netlist_dir
@@ -259,234 +263,343 @@ proc edit_file {filename} {
 ## computerfarm
 ## terminal
 
-### spice 
+proc save_sim_defaults {f} {
+  global sim 
+  
+  set a [catch "open $f w" fd]
+  if { $a } {
+    puts "save_sim_defaults: error opening file $f: $fd"
+    return
+  }
+  puts $fd {# set the list of tools known to xschem}
+  puts $fd {# Note that no spaces are allowed around commas in array keys}
+  puts $fd "set sim(tool_list) {$sim(tool_list)}"
+  puts $fd {}
+  foreach tool $sim(tool_list) {
+    puts $fd "#Specify the number of configured $tool tools."
+    puts $fd "set sim($tool,n) $sim($tool,n) ;# number of configured $tool tools"
+    puts $fd "# Specify the default $tool tool to use (first=0)"
+    puts $fd "set sim($tool,default) $sim($tool,default) ;# default $tool tool to launch"
+    puts $fd {}
+    for {set i 0} {$i < $sim($tool,n)} { incr i} {
+      puts $fd "# specify tool command (cmd), name (name), and if tool must run in foreground"
+      puts $fd "set sim($tool,$i,cmd) {$sim($tool,$i,cmd)}"
+      puts $fd "set sim($tool,$i,name) {$sim($tool,$i,name)}"
+      puts $fd "set sim($tool,$i,fg) $sim($tool,$i,fg)"
+      puts $fd {}
+    }
+    puts $fd {}
+  }
+  close $fd
+}
+
 proc set_sim_defaults {} {
-  global sim
-  set_ne sim(spice,0,cmd) {/home/schippes/ngspice/bin/ngspice -i $N -a}
-  set_ne sim(spice,0,name) {Ngspice}
-  set_ne sim(spice,0,terminal) 1
-  set_ne sim(spice,0,fg) 0
-  
-  set_ne sim(spice,1,cmd) {/home/schippes/ngspice/bin/ngspice -b -r $n.raw -o $n.out $N}
-  set_ne sim(spice,1,name) {Ngspice batch}
-  set_ne sim(spice,1,terminal) 0
-  set_ne sim(spice,1,fg) 0
-  
-  set_ne sim(spice,2,cmd) {}
-  set_ne sim(spice,2,name) {free}
-  set_ne sim(spice,2,terminal) 1
-  set_ne sim(spice,2,fg) 0
-  # number of configured spice simulators, and default one
-  set_ne sim(spice,n) 3
-  set_ne sim(spice,enable) 0
-  
-  ### spice wave view
-  set_ne sim(spicewave,0,cmd) {some_cmd} 
-  set_ne sim(spicewave,0,name) {Spice Viewer}
-  set_ne sim(spicewave,0,terminal) 0
-  set_ne sim(spicewave,0,fg) 0
-  # number of configured spice wave viewers, and default one
-  set_ne sim(spicewave,n) 1
-  set_ne sim(spicewave,enable) 0
-  
-  ### verilog
-  set_ne sim(verilog,0,cmd) {/home/schippes/verilog/bin/iverilog -o .verilog_object -g2012 $N 
-  /home/schippes/verilog/bin/vvp .verilog_object}
-  set_ne sim(verilog,0,name) {Icarus verilog}
-  set_ne sim(verilog,0,terminal) 1
-  set_ne sim(verilog,0,fg) 1
-  # number of configured verilog simulators, and default one
-  set_ne sim(verilog,n) 1
-  set_ne sim(verilog,enable) 0
-  
-  ### verilog wave view
-  set_ne sim(verilogwave,0,cmd) {/home/schippes/gtkwave/bin/gtkwave dumpfile.vcd $n.sav 2>/dev/null}
-  set_ne sim(verilogwave,0,name) {verilog viewer}
-  set_ne sim(verilogwave,0,terminal) 0
-  set_ne sim(verilogwave,0,fg) 0
-  # number of configured verilog wave viewers, and default one
-  set_ne sim(verilogwave,n) 1
-  set_ne sim(verilogwave,enable) 0
-  
-  ### vhdl
-  set_ne sim(vhdl,0,cmd) {/home/schippes/ghdl/bin/ghdl -c --ieee=synopsys -fexplicit $N -r $s --wave=$n.ghw}
-  set_ne sim(vhdl,0,name) {Ghdl}
-  set_ne sim(vhdl,0,terminal) 1
-  set_ne sim(vhdl,0,fg) 1
-  # number of configured vhdl simulators, and default one
-  set_ne sim(vhdl,n) 1
-  set_ne sim(vhdl,enable) 0
-  
-  ### vhdl wave view
-  set_ne sim(vhdlwave,0,cmd) {/home/schippes/gtkwave/bin/gtkwave $n.ghw $n.sav 2>/dev/null}
-  set_ne sim(vhdlwave,0,name) {VHDL viewer}
-  set_ne sim(vhdlwave,0,terminal) 0
-  set_ne sim(vhdlwave,0,fg) 0
-  # number of configured vhdl wave viewers, and default one
-  set_ne sim(vhdlwave,n) 1
-  set_ne sim(vhdlwave,enable) 0
+  ### spice 
+  global sim terminal USER_CONF_DIR
+
+  if { ![info exists sim] } {
+    set sim(tool_list) {spice spicewave verilog verilogwave vhdl vhdlwave}
+    set_ne sim(spice,0,cmd) {$terminal -e 'ngspice -i "$N" -a || sh'}
+    set_ne sim(spice,0,name) {Ngspice}
+    set_ne sim(spice,0,fg) 0
+    
+    set_ne sim(spice,1,cmd) {ngspice -b -r "$n.raw" -o "$n.out" "$N"}
+    set_ne sim(spice,1,name) {Ngspice batch}
+    set_ne sim(spice,1,fg) 0
+    
+    # number of configured spice simulators, and default one
+    set_ne sim(spice,n) 2
+    set_ne sim(spice,default) 0
+    
+    ### spice wave view
+    set_ne sim(spicewave,0,cmd) {gaw "$n.raw" } 
+    set_ne sim(spicewave,0,name) {Gaw viewer}
+    set_ne sim(spicewave,0,fg) 0
+   
+    set_ne sim(spicewave,1,cmd) {echo load "$n.raw" > .spiceinit
+  $terminal -e ngspice
+  rm .spiceinit} 
+    set_ne sim(spicewave,1,name) {Ngpice Viewer}
+    set_ne sim(spicewave,1,fg) 0
+
+    set_ne sim(spicewave,2,cmd) {rawtovcd "$n.raw" > "$n.vcd" && gtkwave "$n.vcd" "$n.sav" 2>/dev/null} 
+    set_ne sim(spicewave,2,name) {Rawtovcd}
+    set_ne sim(spicewave,2,fg) 0
+    # number of configured spice wave viewers, and default one
+    set_ne sim(spicewave,n) 3
+    set_ne sim(spicewave,default) 0
+    
+    ### verilog
+    set_ne sim(verilog,0,cmd) {iverilog -o .verilog_object -g2012 "$N" && vvp .verilog_object}
+    set_ne sim(verilog,0,name) {Icarus verilog}
+    set_ne sim(verilog,0,fg) 1
+    # number of configured verilog simulators, and default one
+    set_ne sim(verilog,n) 1
+    set_ne sim(verilog,default) 0
+    
+    ### verilog wave view
+    set_ne sim(verilogwave,0,cmd) {gtkwave dumpfile.vcd "$n.sav' 2>/dev/null}
+    set_ne sim(verilogwave,0,name) {Gtkwave}
+    set_ne sim(verilogwave,0,fg) 0
+    # number of configured verilog wave viewers, and default one
+    set_ne sim(verilogwave,n) 1
+    set_ne sim(verilogwave,default) 0
+    
+    ### vhdl
+    set_ne sim(vhdl,0,cmd) {ghdl -c --ieee=synopsys -fexplicit "$N" -r "$s" --wave="$n.ghw"}
+    set_ne sim(vhdl,0,name) {Ghdl}
+    set_ne sim(vhdl,0,fg) 1
+    # number of configured vhdl simulators, and default one
+    set_ne sim(vhdl,n) 1
+    set_ne sim(vhdl,default) 0
+    
+    ### vhdl wave view
+    set_ne sim(vhdlwave,0,cmd) {gtkwave "$n.ghw" "$n.sav" 2>/dev/null}
+    set_ne sim(vhdlwave,0,name) {Gtkwave}
+    set_ne sim(vhdlwave,0,fg) 0
+    # number of configured vhdl wave viewers, and default one
+    set_ne sim(vhdlwave,n) 1
+    set_ne sim(vhdlwave,default) 0
+  }
+
+
+  if { [file exists ${USER_CONF_DIR}/simrc] } {
+    unset sim
+    source ${USER_CONF_DIR}/simrc
+    #puts "sourcing simrc"
+  }
 } 
 
+proc simconf_yview { args } {
+  global simconf_vpos
+  # puts "simconf_yview: $args"
+  set_ne simconf_vpos 0
+  if {[lindex $args 0] eq {place}} {
+    place .sim.topf.f.scrl -in .sim.topf.f -x 0 -y 0 -relwidth 1
+    update
+  } 
+  set ht [winfo height .sim.topf.f]
+  set hs [winfo height .sim.topf.f.scrl]
+  # puts "ht=$ht hs=$hs"
+  set frac [expr {double($ht)/$hs}]
+  if { [lindex $args 0] eq {scroll}} {
+    set simconf_vpos [expr $simconf_vpos + [lindex $args 1] *(1.0/$frac)/5]
+  } elseif { [lindex $args 0] eq {moveto}} {
+    set simconf_vpos [lindex $args 1]
+  }
+  if { $simconf_vpos < 0.0 } { set simconf_vpos 0.0}
+  if { $simconf_vpos > 1.0-$frac } { set simconf_vpos [expr 1.0 - $frac]}
+  .sim.topf.vs set $simconf_vpos [expr $simconf_vpos + $frac]
+  place .sim.topf.f.scrl -in .sim.topf.f -x 0 -y [expr -$hs * $simconf_vpos] -relwidth 1
+}
+
 proc simconf {} {
-  global sim
+  global sim USER_CONF_DIR simconf_default_geometry
 
+  set_sim_defaults
   toplevel .sim -class dialog
-  frame .sim.top
-  frame .sim.center
+  wm geometry .sim 700x340
+  frame .sim.topf
+  frame .sim.topf.f
+  frame .sim.topf.f.scrl 
+  scrollbar .sim.topf.vs -command {simconf_yview}
+  pack .sim.topf.f -fill both -expand yes -side left
+  pack .sim.topf.vs -fill y -expand yes
+  frame .sim.topf.f.scrl.top
+  frame .sim.topf.f.scrl.center
   frame .sim.bottom
-  pack .sim.top
-  pack .sim.center
-  pack .sim.bottom
-  
-
-  foreach tool { spice spicewave verilog verilogwave vhdl vhdlwave} {
-    frame .sim.center.$tool
-    pack .sim.center.$tool
+  pack .sim.topf.f.scrl.top -fill x 
+  pack .sim.topf.f.scrl.center -fill both -expand yes
+  set bg(0) {#44eeee}
+  set bg(1) {#44aaaa}
+  set toggle 0
+  foreach tool $sim(tool_list) {
+    frame .sim.topf.f.scrl.center.$tool
+    label .sim.topf.f.scrl.center.$tool.l -width 12 -text $tool  -bg $bg($toggle)
+    frame .sim.topf.f.scrl.center.$tool.r
+    pack .sim.topf.f.scrl.center.$tool -fill both -expand yes
+    pack .sim.topf.f.scrl.center.$tool.l -fill y -side left
+    pack .sim.topf.f.scrl.center.$tool.r -fill both -expand yes
     for {set i 0} { $i < $sim($tool,n)} {incr i} {
-      frame .sim.center.$tool.$i
-      pack .sim.center.$tool.$i
+      frame .sim.topf.f.scrl.center.$tool.r.$i
+      pack .sim.topf.f.scrl.center.$tool.r.$i -fill x -expand yes
+      entry .sim.topf.f.scrl.center.$tool.r.$i.lab -textvariable sim($tool,$i,name) -width 15 -bg $bg($toggle)
+      radiobutton .sim.topf.f.scrl.center.$tool.r.$i.radio -bg $bg($toggle) \
+         -variable sim($tool,default) -value $i
+      text .sim.topf.f.scrl.center.$tool.r.$i.cmd -width 20 -height 3 -wrap none -bg $bg($toggle)
+      .sim.topf.f.scrl.center.$tool.r.$i.cmd insert 1.0 $sim($tool,$i,cmd)
+      checkbutton .sim.topf.f.scrl.center.$tool.r.$i.fg -text Foreground -variable sim($tool,$i,fg) -bg $bg($toggle)
 
-      label .sim.center.$tool.$i.lab -text $sim($tool,$i,name) -width 20 -anchor e
-      text .sim.center.$tool.$i.cmd -width 70 -height 3 -wrap none
-      .sim.center.$tool.$i.cmd insert 1.0 $sim($tool,$i,cmd)
-      radiobutton .sim.center.$tool.$i.enable -value $i -variable sim($tool,enable)
-      checkbutton .sim.center.$tool.$i.term -text Terminal -variable sim($tool,$i,terminal)
-      checkbutton .sim.center.$tool.$i.fg -text Foreground -variable sim($tool,$i,fg)
+      pack .sim.topf.f.scrl.center.$tool.r.$i.lab -side left -fill y 
+      pack .sim.topf.f.scrl.center.$tool.r.$i.radio -side left -fill y 
+      pack .sim.topf.f.scrl.center.$tool.r.$i.cmd -side left -fill x -expand yes
+      pack .sim.topf.f.scrl.center.$tool.r.$i.fg -side left -fill y 
+    }
+    incr toggle
+    set toggle [expr {$toggle %2}]
+  }
+  button .sim.bottom.cancel  -text Cancel -command {destroy .sim}
+  button .sim.bottom.help  -text help -command {
+    set h {The following variables are defined and will get substituted by
+XSCHEM before sending commands to the shell:
 
-      pack .sim.center.$tool.$i.lab -side left
-      pack .sim.center.$tool.$i.cmd -side left
-      pack .sim.center.$tool.$i.enable -side left
-      pack .sim.center.$tool.$i.term -side left
-      pack .sim.center.$tool.$i.fg -side left
+ - N: complete filename of netlist for current netlisting mode
+   (example: /home/schippes/.xschem/simulations/opamp.spice for spice)
+   (example: /home/schippes/.xschem/simulations/opamp.v for verilog)
+ - n: complete filename of netlist as above but without extension
+   (example: /home/schippes/.xschem/simulations/opamp)
+ - s: name of schematic being used (example: opamp)
+ - d: simulation directory (example: /home/schippes/.xschem/simulations)
+ - terminal: terminal to be used for applications that need to be
+   executed in terminal (example: $terminal -e ngspice -i "$N" -a)
+If for a given tool there are multiple rows then the radiobutton
+tells which one will be called by xschem.
+Variables should be used with the usual substitution character $: $n, $N, etc.
+Foreground checkbutton tells xschem to wait for child process to finish.
+This is useful for tasks that execute quickly and for which xschem may display
+the result / error reporting.
+Any changes made in the command or tool name entries will be saved in 
+~/.xschem/simrc when 'Save Configuration' button is pressed.
+If no ~/.xschem/simrc is present then a bare minumum skeleton setup is presented.
+To reset to default just delete the ~/.xschem/simrc file manually.
+    }
+    viewdata $h ro
+  }
+  button .sim.bottom.ok  -text {Save Configuration} -command {
+    foreach tool $sim(tool_list) {
+      for {set i 0} { $i < $sim($tool,n)} {incr i} {
+        set sim($tool,$i,cmd) [.sim.topf.f.scrl.center.$tool.r.$i.cmd get 1.0 {end - 1 chars}]
+      }
+    }
+    destroy .sim
+    save_sim_defaults ${USER_CONF_DIR}/simrc
+    # puts "saving simrc"
+  }
+
+  pack .sim.bottom.cancel -side left -anchor w
+  pack .sim.bottom.help -side left
+  #foreach tool $sim(tool_list) {
+  #  button .sim.bottom.add${tool} -text +${tool} -command "
+  #    simconf_add $tool
+  #    destroy .sim
+  #    save_sim_defaults ${USER_CONF_DIR}/simrc
+  ##    simconf
+  #  "
+  #  pack .sim.bottom.add${tool} -side left
+  #}
+  pack .sim.bottom.ok -side right -anchor e
+  pack .sim.topf -fill both -expand yes
+  pack .sim.bottom -fill x
+  if { [info exists simconf_default_geometry]} {
+     wm geometry .sim "${simconf_default_geometry}"
+  }
+ 
+  bind .sim.topf.f <Configure> {simconf_yview}
+  bind .sim <Configure> {
+    set simconf_default_geometry [wm geometry .sim]
+  }
+  bind .sim <ButtonPress-4> { simconf_yview scroll -0.2}
+  bind .sim <ButtonPress-5> { simconf_yview scroll 0.2}
+  simconf_yview place
+  set maxsize [expr [winfo height .sim.topf.f.scrl] + [winfo height .sim.bottom]]
+  wm maxsize .sim 9999 $maxsize
+  tkwait window .sim
+}
+
+proc simconf_add {tool} {
+  global sim
+  set n $sim($tool,n)
+  set sim($tool,$n,cmd) {}
+  set sim($tool,$n,name) {}
+  set sim($tool,$n,fg) 0
+  incr sim($tool,n)
+}
+
+proc simulate {} { 
+  ## $N : netlist file full path (/home/schippes/simulations/opamp.spice) 
+  ## $n : netlist file full path with extension chopped (/home/schippes/simulations/opamp)
+  ## $s : schematic name (opamp)
+  ## $d : netlist directory
+
+  global netlist_dir netlist_type computerfarm terminal current_dirname
+  global sim task_error task_output
+
+  set_sim_defaults
+  
+  if { [select_netlist_dir 0] ne {}} {
+    set d ${netlist_dir}
+    set tool $netlist_type
+    set s [file tail [file rootname [xschem get schname]]]
+    set n ${netlist_dir}/${s}
+    if {$tool eq {verilog}} {
+      set N ${n}.v
+    } else {
+      set N ${n}.${tool}
+    }
+    set def $sim($tool,default)
+    set fg  $sim($tool,$def,fg)
+    if {$fg} {
+      set fg {fg}
+    } else {
+      set fg {bg}
+    }
+    set cmd [subst -nocommands $sim($tool,$def,cmd)]
+   
+    # eval exec $cmd
+    task $cmd "$netlist_dir" $fg
+    if {$task_error} {viewdata $task_output; return}
+    # if { $fg eq {fg}  && $task_output ne {}  && ![regexp $cmd {$terminal}]} { }
+    if { $fg eq {fg} && ![regexp $cmd {$terminal}]} {
       
-      puts "$tool $i"
+      write_data $task_output "$netlist_dir/.sim_output.txt"
+      textwindow $netlist_dir/.sim_output.txt ro
     }
   }
-  button .sim.bottom.dismiss  -text Dismiss -command {destroy .sim}
-  pack .sim.bottom.dismiss
-
 }
 
 
+proc waves {} { 
+  ## $N : netlist file full path (/home/schippes/simulations/opamp.spice) 
+  ## $n : netlist file full path with extension chopped (/home/schippes/simulations/opamp)
+  ## $s : schematic name (opamp)
+  ## $d : netlist directory
 
+  global netlist_dir netlist_type computerfarm terminal current_dirname
+  global sim task_error task_output
 
+  set_sim_defaults
+  
+  if { [select_netlist_dir 0] ne {}} {
+    set d ${netlist_dir}
+    set tool ${netlist_type}
+    set s [file tail [file rootname [xschem get schname]]]
+    set n ${netlist_dir}/${s}
+    if {$tool eq {verilog}} {
+      set N ${n}.v
+    } else {
+      set N ${n}.${tool}
+    }
 
-# ============================================================
-
-# filename here is rootname of schematic without extension
-# as returned by 'xschem simulate'
-proc simulate {filename} {
- global env netlist_dir netlist_type
- global task_output task_error
- global iverilog_path vvp_path ngspice_path hspice_path hspicerf_path spice_simulator 
- global modelsim_path verilog_simulator
- global vhdl_simulator ghdl_path ghdl_elaborate_opts ghdl_run_opts
- global finesim_path finesim_opts
- global utile_cmd_path terminal
- global iverilog_opts ;# 20161118
- global computerfarm ;# 20151007
-
- if { [select_netlist_dir 0] ne "" } {
-
-   if { $netlist_type=="verilog" } {
-     # 20150916 added modelsim
-     if { $verilog_simulator == "iverilog" } { ;# icarus verilog
-       task "$iverilog_path $iverilog_opts -o .verilog_object $filename" "$netlist_dir" fg
-       if {$task_error} {viewdata $task_output; return}
-       task  "$vvp_path \"$netlist_dir/.verilog_object\"" "$netlist_dir" fg
-       if {$task_error} {viewdata $task_output; return}
-       write_data $task_output "$netlist_dir/.sim_output.txt"
-       # task "$terminal  -e less \"$netlist_dir/.sim_output.txt\"" "$netlist_dir" bg
-       textwindow $netlist_dir/.sim_output.txt
-     } elseif { $verilog_simulator =="modelsim" } { ;# modelsim
-       #puts {start compile}
-       task "${modelsim_path}/vlog +acc $filename" "$netlist_dir" fg
-       if {$task_error} {viewdata $task_output; return}
-       #puts {start simulation}
-       task "${modelsim_path}/vsim -c -do \"run -all\" [file rootname $filename]" $netlist_dir fg
-       if {$task_error} {viewdata $task_output; return}
-       #puts {end simulation}
-       write_data $task_output "$netlist_dir/.sim_output.txt"
-       #puts {end log file}
-       # task "$terminal  -e less \"$netlist_dir/.sim_output.txt\"" "$netlist_dir" bg
-       textwindow $netlist_dir/.sim_output.txt
-     } else {
-       alert_ "ERROR: undefined verilog simulator: $verilog_simulator"
-     }
-
-   } elseif { $netlist_type=="spice" } { 
-     ## run utile before firing simulator if any UTILE stimuli file found
-     set schname [ file tail [ file rootname $filename] ]
-     if { [file exists stimuli.$schname ] } {
-       task "$utile_cmd_path stimuli.$schname" "$netlist_dir" fg
-     }
-     if { $spice_simulator == "hspicerf" } {
-       # added computerfarm
-       task "$terminal -e \"$computerfarm $hspicerf_path $filename ; bash\"" "$netlist_dir" bg
-     } elseif { $spice_simulator == "ngspice"} {
-       task "$terminal -e \"$computerfarm $ngspice_path -i $filename -a || sh\""  "$netlist_dir" bg
-       if {$task_error} {viewdata $task_output; return}
-     } elseif { $spice_simulator == "ngspice_batch"} {
-       set rawfile [ file tail [ file rootname $filename] ].raw
-       task "$computerfarm $ngspice_path -b -r $rawfile  -o ${schname}.out $filename "  "$netlist_dir" bg
-       if {$task_error} {viewdata $task_output; return}
-     } elseif { $spice_simulator == "hspice"} {
-       task "$terminal -e \"$computerfarm $hspice_path -i $filename | tee hspice.out ; bash\""  "$netlist_dir" bg
-     } elseif {$spice_simulator == "finesim"} {
-       task "$terminal -e \"$computerfarm $finesim_path $finesim_opts $filename ; bash \""  "$netlist_dir" bg
-       # 20170410
-     } else {
-       alert_ "ERROR: undefined SPICE simulator: $spice_simulator"
-     }
-   } elseif { $netlist_type=="vhdl" } { 
-     set schname [ file tail [ file rootname $filename] ]
-     if { $vhdl_simulator == "modelsim" } { 
-       task "${modelsim_path}/vsim -i" "$netlist_dir" bg
-     #20170921 added ghdl
-     } elseif { $vhdl_simulator == "ghdl" } { 
-       task  "$ghdl_path -c $ghdl_elaborate_opts $filename -r $ghdl_run_opts $schname --wave=${schname}.ghw" $netlist_dir fg
-       if {$task_error} {viewdata $task_output; return}
-       write_data $task_output "$netlist_dir/.sim_output.txt"
-       # task "$terminal  -e less \"$netlist_dir/.sim_output.txt\"" "$netlist_dir" bg
-       textwindow $netlist_dir/.sim_output.txt
-     } 
-   } else { 
-     alert_ "ERROR: netlist_type: $netlist_type , filename: $filename"
-   }
- }
- return {}
-}
-
-proc waves {schname} {
- global netlist_dir netlist_type tcl_debug task_error task_output
- global gtkwave_path analog_viewer waveview_path
-
- set tmpname [file rootname "$schname"]
- if { [select_netlist_dir 0] ne "" } {
-   if { $netlist_type=="verilog" } {
-     task "$gtkwave_path dumpfile.vcd \"$tmpname.sav\" 2>/dev/null" "$netlist_dir" bg
-     if {$task_error} {viewdata $task_output; return}
-
-   } elseif { $netlist_type=="spice" } {
-
-     if { [info exists analog_viewer] && $analog_viewer == "waveview" } { 
-       task "$waveview_path -k -x \"$tmpname.sx\"" "$netlist_dir" bg ; # 20170415 bg instead of tk_init exec mode
-     } else {
-       alert_ { Unsupported default wiever... } 
-     }
-   } elseif { $netlist_type=="vhdl" } { 
-     task "$gtkwave_path \"${tmpname}.ghw\" \"${tmpname}.sav\" 2>/dev/null" "$netlist_dir" bg
-   }
- }
- return {}
+    set tool ${tool}wave
+    set def $sim($tool,default)
+    set fg  $sim($tool,$def,fg)
+    if {$fg} {
+      set fg {fg}
+    } else {
+      set fg {bg}
+    }
+    set cmd [subst -nocommands $sim($tool,$def,cmd)]
+   
+    # eval exec $cmd
+    task $cmd "$netlist_dir" $fg
+    if {$task_error} {viewdata $task_output; return}
+    if { $fg eq {fg} } {
+      write_data $task_output "$netlist_dir/.sim_output.txt"
+      textwindow $netlist_dir/.sim_output.txt ro
+    }
+  }
 }
 # ============================================================
-
-proc modelsim {schname} {
-  global netlist_dir netlist_type
-  global iverilog_path vvp_path hspice_path modelsim_path
-  task "${modelsim_path}/vsim -i" "$netlist_dir" bg
-}
 
 proc utile_translate {schname} { 
   global netlist_dir netlist_type tcl_debug XSCHEM_SHAREDIR
@@ -509,29 +622,16 @@ proc utile_edit {schname} {
   eval exec {sh -c "cd \"$netlist_dir\"; $editor stimuli.$tmpname ; cd \"$netlist_dir\"; XSCHEM_SHAREDIR=\"$XSCHEM_SHAREDIR\" \"$utile_cmd_path\" stimuli.$tmpname"} &
 }
 
-proc waveview {schname} {
-  global netlist_dir netlist_type tcl_debug
-  global waveview_path
-  set tmpname [file rootname "$schname"]
-  task "$waveview_path -k -x \"$tmpname.sx\"" "$netlist_dir" bg
-}
-
-proc gtkwave {schname} {
-  global netlist_dir netlist_type tcl_debug
-  global gtkwave_path
-  task "$gtkwave_path 2>/dev/null" "$netlist_dir" bg
-}
-
 proc get_shell { curpath } {
  global netlist_dir netlist_type tcl_debug
- global gtkwave_path waveview_path terminal
+ global  terminal
 
  task "$terminal" "$curpath" bg
 }
 
 proc edit_netlist {schname } {
  global netlist_dir netlist_type tcl_debug
- global gtkwave_path waveview_path editor terminal
+ global editor terminal
  set tmpname [file rootname "$schname"]
 
  if { [regexp vim $editor] } { set ftype "-c \":set filetype=$netlist_type\"" } else { set ftype {} }
@@ -583,16 +683,25 @@ proc save_file_dialog { msg ext global_initdir {initialfile {}} {overwrt 1} } {
 
 proc is_xschem_file {f} {
   set fd [open $f r]
-  if { [gets $fd line] >=0 } {
-    if {[regexp "^v\[ \t\]+\{xschem\[ \t\]+version\[ \t\]*=.*\[ \t\]+file_version\[ \t\]*=" $line]} {
-      set ret 1
-    } else {
-      set ret 0
-    }
+  set a [catch "open $f r" fd]
+  set ret 0
+  set score 0
+  if {$a} {
+    puts stderr "Can not open file $f"
   } else {
-   set ret 0
+    while { [gets $fd line] >=0 } {
+      if { [regexp {^[TGVSE] \{} $line] } { incr score }
+      if { [regexp {^[BL] +[0-9]+ +[-0-9.eE]+ +[-0-9.eE]+ +[-0-9.eE]+ +[-0-9.eE]+ +\{} $line] } { incr score }
+      if { [regexp {^N +[-0-9.eE]+ +[-0-9.eE]+ +[-0-9.eE]+ +[-0-9.eE]+ +\{} $line] } { incr score }
+      if { [regexp {^C +\{[^{}]+\} +[-0-9.eE]+ +[-0-9.eE]+ +[0-3]+ +[0-3]+ +\{} $line] } { incr score }
+      if { [regexp "^v\[ \t\]+\{xschem\[ \t\]+version\[ \t\]*=.*\[ \t\]+file_version\[ \t\]*=" $line] } {
+        set ret 1
+      }
+    } 
+    if { $score > 6 }  { set ret 1} ;# Heuristic decision :-)
+    close $fd
   }
-  close $fd
+  # puts "score=$score"
   return $ret
 }
 
@@ -601,8 +710,8 @@ proc list_dirs {pathlist } {
   toplevel .list -class dialog
   wm title .list {Select Library:}
   wm protocol .list WM_DELETE_WINDOW { set list_dirs_selected_dir {} } 
-  set X [expr [winfo pointerx .list] - 30]
-  set Y [expr [winfo pointery .list] - 25]
+  set X [expr {[winfo pointerx .list] - 30}]
+  set Y [expr {[winfo pointery .list] - 25}]
   if { $::wm_fix } { tkwait visibility .list }
   wm geometry .list "+$X+$Y"
 
@@ -614,7 +723,7 @@ proc list_dirs {pathlist } {
   pack .list.title -fill x -side top
   foreach elem $pathlist {
     frame .list.${x}
-    label .list.${x}.l -text [expr $x+1] -width 4
+    label .list.${x}.l -text [expr {$x+1}] -width 4
     button .list.${x}.b -text $elem -command "set list_dirs_selected_dir $elem"
     pack .list.${x}.l -side left
     pack .list.${x}.b -side left -fill x -expand yes
@@ -622,7 +731,7 @@ proc list_dirs {pathlist } {
     incr x
   }
   frame .list.${x}
-  label .list.${x}.l -text [expr $x+1] -width 4
+  label .list.${x}.l -text [expr {$x+1}] -width 4
   button .list.${x}.b -text {Last used dir} -command "set list_dirs_selected_dir $INITIALINSTDIR"
   pack .list.${x}.l -side left
   pack .list.${x}.b -side left -fill x -expand yes
@@ -897,7 +1006,7 @@ proc delete_files { dir } {
 }
 
 proc create_pins {} {
-  global env retval 
+  global env retval USER_CONF_DIR
   global filetmp1 filetmp2
 
   set retval [ read_data_nonewline $filetmp2 ]
@@ -912,7 +1021,7 @@ proc create_pins {} {
   # viewdata $retval
   set pcnt 0
   set y 0
-  set fd [open $env(HOME)/.xschem_clipboard.sch "w"]
+  set fd [open $USER_CONF_DIR/.clipboard.sch "w"]
   foreach i $lines { 
     if {$indirect} {
       puts $fd "C \{[rel_sym_path devices/[lindex $i 1].sym]\} 0 [set y [expr $y-20]]  0 0 \{ name=p[incr pcnt] lab=[lindex $i 0] \}"
@@ -921,7 +1030,7 @@ proc create_pins {} {
     }
   }
   close $fd
-  xschem merge $env(HOME)/.xschem_clipboard.sch
+  xschem merge $USER_CONF_DIR/.clipboard.sch
 }
 
 proc rectorder {x1 y1 x2 y2} {
@@ -937,21 +1046,21 @@ proc order {x1 y1 x2 y2} {
 }
 
 proc rotation {x0 y0 x y rot flip} {
-  set tmp [expr $flip? 2*$x0-$x : $x]
+  set tmp [expr {$flip? 2*$x0-$x : $x}]
   if {$rot==0} {set rx $tmp; set ry $y }
-  if {$rot==1} {set rx [expr $x0 - $y +$y0]; set ry [expr $y0+$tmp-$x0]}
-  if {$rot==2} {set rx [expr 2*$x0-$tmp]; set ry [expr 2*$y0-$y]}
-  if {$rot==3} {set rx [expr $x0+$y-$y0]; set ry [expr $y0-$tmp+$x0]}
+  if {$rot==1} {set rx [expr {$x0 - $y +$y0}]; set ry [expr {$y0+$tmp-$x0}]}
+  if {$rot==2} {set rx [expr {2*$x0-$tmp}]; set ry [expr {2*$y0-$y}]}
+  if {$rot==3} {set rx [expr {$x0+$y-$y0}]; set ry [expr {$y0-$tmp+$x0}]}
   return [list $rx $ry]
 }
 
 proc schpins_to_sympins {} {
-  global env
+  global env USER_CONF_DIR
   set pinhsize 2.5
   xschem copy
-  set clipboard [read_data_nonewline $env(HOME)/.xschem_clipboard.sch]
+  set clipboard [read_data_nonewline $USER_CONF_DIR/.clipboard.sch]
   set lines [split $clipboard \n]
-  set fd [open $env(HOME)/.xschem_clipboard.sch "w"]
+  set fd [open $USER_CONF_DIR/.clipboard.sch "w"]
   foreach i $lines {
     if {[regexp {^C \{.*(i|o|io)pin} $i ]} {
       if {[regexp {ipin} [lindex $i 1]]} { set dir in }
@@ -963,26 +1072,26 @@ proc schpins_to_sympins {} {
       regsub {[\} ].*} $lab {} lab
       set x0 [lindex $i 2]
       set y0 [lindex $i 3]
-      set pinx1 [expr $x0-$pinhsize]
-      set pinx2 [expr $x0+$pinhsize]
-      set piny1 [expr $y0-$pinhsize]
-      set piny2 [expr $y0+$pinhsize]
+      set pinx1 [expr {$x0-$pinhsize}]
+      set pinx2 [expr {$x0+$pinhsize}]
+      set piny1 [expr {$y0-$pinhsize}]
+      set piny2 [expr {$y0+$pinhsize}]
       if {![string compare $dir  "out"] || ![string compare $dir "inout"] } {
-        set linex1 [expr $x0-20]
+        set linex1 [expr {$x0-20}]
         set liney1 $y0
         set linex2 $x0
         set liney2 $y0
-        set textx0 [expr $x0-25] 
-        set texty0 [expr $y0-4]
-        set textflip [expr !$flip]
+        set textx0 [expr {$x0-25}] 
+        set texty0 [expr {$y0-4}]
+        set textflip [expr {!$flip}]
       } else {
-        set linex1 [expr $x0+20]
+        set linex1 [expr {$x0+20}]
         set liney1 $y0
         set linex2 $x0
         set liney2 $y0
-        set textx0 [expr $x0+25]
-        set texty0 [expr $y0-4]
-        set textflip [expr $flip]
+        set textx0 [expr {$x0+25}]
+        set texty0 [expr {$y0-4}]
+        set textflip [expr {$flip}]
       }
       lassign [rotation $x0 $y0 $linex1 $liney1 $rot $flip] linex1 liney1
       lassign [rotation $x0 $y0 $linex2 $liney2 $rot $flip] linex2 liney2
@@ -1000,7 +1109,7 @@ proc schpins_to_sympins {} {
 
 # 20120913
 proc add_lab_no_prefix {} { 
-  global env retval
+  global env retval USER_CONF_DIR
   global filetmp1 filetmp2
 
   if { [file exists [abs_sym_path devices/ipin.sym]] } {
@@ -1015,7 +1124,7 @@ proc add_lab_no_prefix {} {
   # viewdata $retval
   set pcnt 0
   set y 0
-  set fd [open $env(HOME)/.xschem_clipboard.sch "w"]
+  set fd [open $USER_CONF_DIR/.clipboard.sch "w"]
   foreach i $lines {
     if {$indirect} {
       puts $fd "C \{devices/lab_pin.sym\} 0 [set y [expr $y+20]]  0 0 \{ name=p[incr pcnt] verilog_type=wire lab=[lindex $i 0] \}"
@@ -1024,12 +1133,12 @@ proc add_lab_no_prefix {} {
     }
   }
   close $fd
-  xschem merge $env(HOME)/.xschem_clipboard.sch
+  xschem merge $USER_CONF_DIR/.clipboard.sch
 }
 
 
 proc add_lab_prefix {} {
-  global env retval
+  global env retval USER_CONF_DIR
   global filetmp1 filetmp2
 
   if { [file exists [abs_sym_path devices/ipin.sym]] } {
@@ -1044,7 +1153,7 @@ proc add_lab_prefix {} {
   # viewdata $retval
   set pcnt 0
   set y 0
-  set fd [open $env(HOME)/.xschem_clipboard.sch "w"]
+  set fd [open $USER_CONF_DIR/.clipboard.sch "w"]
   foreach i $lines {
     if {$indirect} {
       puts $fd "C \{devices/lab_pin.sym\} 0 [set y [expr $y+20]]  0 0 \{ name=p[incr pcnt] verilog_type=reg lab=i[lindex $i 0] \}"
@@ -1053,7 +1162,7 @@ proc add_lab_prefix {} {
     }
   }
   close $fd
-  xschem merge $env(HOME)/.xschem_clipboard.sch
+  xschem merge $USER_CONF_DIR/.clipboard.sch
 }
 
 
@@ -1072,7 +1181,7 @@ proc select_netlist_dir { force {dir {} }} {
      if {![file exist $netlist_dir]} {
        file mkdir $netlist_dir
      }
-     regsub {^~} $netlist_dir $env(HOME) netlist_dir
+     regsub {^~/} $netlist_dir ${env(HOME)}/ netlist_dir
      xschem set_netlist_dir $netlist_dir
      return $netlist_dir
    } 
@@ -1094,7 +1203,7 @@ proc select_netlist_dir { force {dir {} }} {
      }
      set netlist_dir $new_dir  
    }
-   regsub {^~} $netlist_dir $env(HOME) netlist_dir
+   regsub {^~/} $netlist_dir ${env(HOME)}/ netlist_dir
    xschem set_netlist_dir $netlist_dir
    return $netlist_dir
 }
@@ -1597,7 +1706,7 @@ proc change_color {} {
     set savedata "$savedata set cadlayers $cadlayers\n"
     set savedata "$savedata set light_colors {$light_colors}\n"
     set savedata "$savedata set dark_colors {$dark_colors}\n"
-    write_data $savedata [xschem get userconfdir]/colors
+    write_data $savedata ${USER_CONF_DIR}/colors
   }
 }
 
@@ -1967,84 +2076,90 @@ proc infowindow {} {
   bind $z <Escape> {wm withdraw .infotext; set show_infowindow 0}
   return {}
 }
-proc textwindow {filename} {
-   global wcounter
-   global w
-   set wcounter [expr $wcounter+1]
-   set w .win$wcounter
-   catch {destroy $w}
+proc textwindow {filename {ro {}}} {
+   global textwindow_wcounter
+   global textwindow_w
+   set textwindow_w .win$textwindow_wcounter
+   # catch {destroy $textwindow_w}
+   set textwindow_wcounter [expr $textwindow_wcounter+1]
+   set textwindow_w .win$textwindow_wcounter
 
 
    global fff
    global fileid
    set fff $filename
-   toplevel $w
-   wm title $w $filename
-   wm iconname $w $filename
-  frame $w.buttons
-   pack $w.buttons -side bottom -fill x -pady 2m
-   button $w.buttons.dismiss -text Dismiss -command  \
-    " destroy $w; set wcounter [expr $wcounter-1] "
-   button $w.buttons.save -text "Save" -command \
-    { 
-     set fileid [open $fff "w"]
-     puts -nonewline $fileid [$w.text get 1.0 {end - 1 chars}]
-     close $fileid 
-     destroy $w
-    }
-   pack $w.buttons.dismiss $w.buttons.save  -side left -expand 1
+   toplevel $textwindow_w
+   wm title $textwindow_w $filename
+   wm iconname $textwindow_w $filename
+  frame $textwindow_w.buttons
+   pack $textwindow_w.buttons -side bottom -fill x -pady 2m
+   button $textwindow_w.buttons.dismiss -text Dismiss -command "destroy $textwindow_w"
+   pack $textwindow_w.buttons.dismiss -side left -expand 1
+   if { $ro eq {} } {
+     button $textwindow_w.buttons.save -text "Save" -command \
+      { 
+       set fileid [open $fff "w"]
+       puts -nonewline $fileid [$textwindow_w.text get 1.0 {end - 1 chars}]
+       close $fileid 
+       destroy $textwindow_w
+      }
+     pack $textwindow_w.buttons.save  -side left -expand 1
+   }
 
-   text $w.text -relief sunken -bd 2 -yscrollcommand "$w.yscroll set" -setgrid 1 \
-        -xscrollcommand "$w.xscroll set" -wrap none -height 30
-   scrollbar $w.yscroll -command  "$w.text yview" 
-   scrollbar $w.xscroll -command "$w.text xview" -orient horiz
-   pack $w.yscroll -side right -fill y
-   pack $w.text -expand yes -fill both
-   pack $w.xscroll -side bottom -fill x
-   bind $w <Escape> "$w.buttons.dismiss invoke"
+   text $textwindow_w.text -relief sunken -bd 2 -yscrollcommand "$textwindow_w.yscroll set" -setgrid 1 \
+        -xscrollcommand "$textwindow_w.xscroll set" -wrap none -height 30
+   scrollbar $textwindow_w.yscroll -command  "$textwindow_w.text yview" 
+   scrollbar $textwindow_w.xscroll -command "$textwindow_w.text xview" -orient horiz
+   pack $textwindow_w.yscroll -side right -fill y
+   pack $textwindow_w.text -expand yes -fill both
+   pack $textwindow_w.xscroll -side bottom -fill x
+   bind $textwindow_w <Escape> "$textwindow_w.buttons.dismiss invoke"
    set fileid [open $filename "r"]
 
    # 20171103 insert at insertion cursor(insert tag) instead of 0.0
-   $w.text insert insert [read $fileid]
+   $textwindow_w.text insert insert [read $fileid]
    close $fileid
    return {}
 }
 
 
-proc viewdata {data} {
-   global wcounter  rcode
-   global w
-   set wcounter [expr $wcounter+1]
+proc viewdata {data {ro {}}} {
+   global viewdata_wcounter  rcode
+   global viewdata_w
+   set viewdata_w .win$viewdata_wcounter
+   # catch {destroy $viewdata_w}
+   set viewdata_wcounter [expr $viewdata_wcounter+1]
    set rcode {}
-   set w .win$wcounter
-   catch {destroy $w}
-   toplevel $w
-   wm title $w {Wiew data}
-   frame $w.buttons
-   pack $w.buttons -side bottom -fill x -pady 2m
+   set viewdata_w .win$viewdata_wcounter
+   toplevel $viewdata_w
+   wm title $viewdata_w {Wiew data}
+   frame $viewdata_w.buttons
+   pack $viewdata_w.buttons -side bottom -fill x -pady 2m
 
-   # 20111106
-   button $w.buttons.saveas -text {Save As} -command  {
-     set fff [tk_getSaveFile -initialdir $env(PWD) ]
-     if { $fff != "" } {
-       set fileid [open $fff "w"]
-       puts -nonewline $fileid [$w.text get 1.0 {end - 1 chars}]
-       close $fileid
-     }
-   } 
-   button $w.buttons.dismiss -text Dismiss -command  \
-    " destroy $w; set wcounter [expr $wcounter-1] " 
-   pack $w.buttons.dismiss   $w.buttons.saveas  -side left -expand 1
+   button $viewdata_w.buttons.dismiss -text Dismiss -command  "destroy $viewdata_w" 
+   pack $viewdata_w.buttons.dismiss -side left -expand 1
 
-   text $w.text -relief sunken -bd 2 -yscrollcommand "$w.yscroll set" -setgrid 1 \
-        -xscrollcommand "$w.xscroll set" -wrap none -height 30
-   scrollbar $w.yscroll -command  "$w.text yview" 
-   scrollbar $w.xscroll -command "$w.text xview" -orient horiz
-   pack $w.yscroll -side right -fill y
-   pack $w.text -expand yes -fill both
-   pack $w.xscroll -side bottom -fill x
+   if { $ro eq {} } {
+     button $viewdata_w.buttons.saveas -text {Save As} -command  {
+       set fff [tk_getSaveFile -initialdir $env(PWD) ]
+       if { $fff != "" } {
+         set fileid [open $fff "w"]
+         puts -nonewline $fileid [$viewdata_w.text get 1.0 {end - 1 chars}]
+         close $fileid
+       }
+     } 
+     pack $viewdata_w.buttons.saveas  -side left -expand 1
+   }
+
+   text $viewdata_w.text -relief sunken -bd 2 -yscrollcommand "$viewdata_w.yscroll set" -setgrid 1 \
+        -xscrollcommand "$viewdata_w.xscroll set" -wrap none -height 30
+   scrollbar $viewdata_w.yscroll -command  "$viewdata_w.text yview" 
+   scrollbar $viewdata_w.xscroll -command "$viewdata_w.text xview" -orient horiz
+   pack $viewdata_w.yscroll -side right -fill y
+   pack $viewdata_w.text -expand yes -fill both
+   pack $viewdata_w.xscroll -side bottom -fill x
    # 20171103 insert at insertion cursor(insert tag) instead of 0.0
-   $w.text insert insert $data
+   $viewdata_w.text insert insert $data
    return $rcode
 }
 
@@ -2234,7 +2349,7 @@ proc reconfigure_layers_menu {} {
 
 proc get_file_path {ff} {
   global env
-  if { [regexp {\/} $ff] } { return $ff } 
+  if { [regexp {/} $ff] } { return $ff } 
   set pathlist [split $env(PATH) :]
   foreach i $pathlist {
     set ii $i/$ff
@@ -2277,7 +2392,8 @@ set_ne xschem_libs {}
 set_ne tcl_debug 0
 # used to activate debug from menu
 set_ne menu_tcl_debug 0
-set wcounter 1
+set textwindow_wcounter 1
+set viewdata_wcounter 1
 set retval ""
 set prev_symbol ""
 set symbol ""
@@ -2294,16 +2410,10 @@ set tclcmd_txt {}
 
 ## list of tcl procedures to load at end of xschem.tcl
 set_ne tcl_files {}
-set_ne use_list_dirs {1}
 set_ne netlist_dir "$USER_CONF_DIR/simulations"
 set_ne bus_replacement_char {} ;# use {<>} to replace [] with <> in bussed signals
 set_ne hspice_netlist 0
 set_ne verilog_2001 1
-set_ne spice_simulator ngspice
-set_ne ngspice_opts {}
-set_ne finesim_opts {}
-set_ne verilog_simulator iverilog
-set_ne vhdl_simulator ghdl ;# 20170921
 set_ne split_files 0
 set_ne flat_netlist 0
 set_ne netlist_type vhdl
@@ -2348,39 +2458,10 @@ set_ne terminal xterm
 
 # set_ne analog_viewer waveview
 set_ne computerfarm {} ;# 20151007
-## icarus verilog compiler and simulator 20140404
-set_ne iverilog_path iverilog
-set_ne vvp_path vvp
-set_ne iverilog_opts {} ;# 20161118 allows to add -g2012 for example 
-## ghdl 20170921
-set_ne ghdl_path ghdl
-set_ne ghdl_elaborate_opts {}
-set_ne ghdl_run_opts {}
-## gtkwave
-set_ne gtkwave_path gtkwave
-
-## waveview
-# set_ne waveview_path wv
 
 ## utile
 set_ne utile_gui_path "${XSCHEM_SHAREDIR}/utile/utile3"
 set_ne utile_cmd_path "${XSCHEM_SHAREDIR}/utile/utile"
-
-## modelsim
-# set_ne modelsim_path $env(HOME)/modeltech/bin
-
-## ngspice simulator path
-set_ne ngspice_path ngspice 
-
-## hspice license 20140404
-# set_ne env(LM_LICENSE_FILE) $env(HOME)/hspice/license.dat
-
-## hspice simulator path 20140404
-# set_ne hspice_path hspice
-# set_ne hspicerf_path hspicerf
-
-## finesim simulator path 20140404
-# set_ne finesim_path finesim
 
 ## cairo stuff 20171112
 set_ne cairo_font_scale 1.0
@@ -2578,9 +2659,9 @@ font configure Underline-Font -underline true -size 24
    menu .menubar.simulation.menu -tearoff 0
    menubutton .menubar.help -text "Help" -menu .menubar.help.menu
    menu .menubar.help.menu -tearoff 0
-   .menubar.help.menu add command -label "help" -command "textwindow \"${XSCHEM_SHAREDIR}/xschem.help\"" \
+   .menubar.help.menu add command -label "Help" -command "textwindow \"${XSCHEM_SHAREDIR}/xschem.help\" ro" \
         -accelerator {?}
-   .menubar.help.menu add command -label "keys" -command "textwindow \"${XSCHEM_SHAREDIR}/keys.help\""
+   .menubar.help.menu add command -label "Keys" -command "textwindow \"${XSCHEM_SHAREDIR}/keys.help\" ro"
    .menubar.help.menu add command -label "About XSCHEM" -command "about"
    
    .menubar.file.menu add command -label "New Schematic"  -accelerator Ctrl+N\
@@ -2723,14 +2804,14 @@ font configure Underline-Font -underline true -size 24
    .menubar.edit.menu add command -label "Pop" -command "xschem go_back" -accelerator Ctrl+E
    button .menubar.waves -text "Waves"  -activebackground red  -takefocus 0\
      -command {
-       waves [file tail [xschem get schname]]
+       waves
       }
    button .menubar.simulate -text "Simulate"  -activebackground red  -takefocus 0\
      -command {
        set oldbg [.menubar.simulate cget -bg]
        .menubar.simulate configure -bg red
        xschem set semaphore [expr [xschem get semaphore] +1]
-       xschem simulate
+       simulate
        xschem set semaphore [expr [xschem get semaphore] -1]
        .menubar.simulate configure -bg $oldbg
       }
@@ -2876,16 +2957,10 @@ font configure Underline-Font -underline true -size 24
      -command {
            select_netlist_dir 1
      }
-   if { [info exists waveview_path] } {
-     .menubar.simulation.menu add command -label {WaveView} -command {waveview [file tail [xschem get schname]]}
-   } 
-   .menubar.simulation.menu add command -label {Gtkwave} -command {gtkwave [file tail [xschem get schname]]}
+   .menubar.simulation.menu add command -label {Configure simulators and tools} -command {simconf}
    .menubar.simulation.menu add command -label {Utile Stimuli Editor (GUI)} -command {utile_gui [file tail [xschem get schname]]}
    .menubar.simulation.menu add command -label "Utile Stimuli Editor ([lindex $editor 0])" -command {utile_edit [file tail [xschem get schname]]}
    .menubar.simulation.menu add command -label {Utile Stimuli Translate} -command {utile_translate [file tail [xschem get schname]]}
-   if { [info exists modelsim_path] } {
-     .menubar.simulation.menu add command -label {Modelsim} -command {modelsim [file tail [xschem get schname]]}
-   }
    .menubar.simulation.menu add command -label {Shell [simulation path]} \
       -command {
          if { [select_netlist_dir 0] ne "" } {
@@ -2893,34 +2968,6 @@ font configure Underline-Font -underline true -size 24
          }
        }
    .menubar.simulation.menu add command -label {Edit Netlist} -command {edit_netlist [file tail [xschem get schname]]}
-   .menubar.simulation.menu add separator
-   if { [info exists waveview_path] } {
-     .menubar.simulation.menu add radiobutton -label "WaveView viewer" -variable analog_viewer -value waveview
-     .menubar.simulation.menu add separator
-   } 
-   if { [info exists modelsim_path] } {
-     .menubar.simulation.menu add radiobutton -label "Modelsim Verilog simulator" -variable verilog_simulator -value modelsim
-   }
-   .menubar.simulation.menu add radiobutton -label "Icarus Verilog simulator" -variable verilog_simulator -value iverilog
-   #20170921
-   .menubar.simulation.menu add separator
-   if { [info exists modelsim_path] } {
-     .menubar.simulation.menu add radiobutton -label "Modelsim VHDL simulator" -variable vhdl_simulator -value modelsim
-   }
-   .menubar.simulation.menu add radiobutton -label "GHDL VHDL simulator" -variable vhdl_simulator -value ghdl
-   #20170410
-   .menubar.simulation.menu add separator
-   .menubar.simulation.menu add radiobutton -label "Ngspice Interactive Spice simulator" -variable spice_simulator -value ngspice
-   .menubar.simulation.menu add radiobutton -label "Ngspice Batch Spice simulator" -variable spice_simulator -value ngspice_batch
-   if { [info exists hspicerf_path] } {
-     .menubar.simulation.menu add radiobutton -label "Hspicerf Spice simulator" -variable spice_simulator -value hspicerf
-   }
-   if { [info exists hspice_path] } {
-     .menubar.simulation.menu add radiobutton -label "Hspice Spice simulator" -variable spice_simulator -value hspice
-   }
-   if { [info exists finesim_path] } {
-     .menubar.simulation.menu add radiobutton -label "Finesim Spice simulator" -variable spice_simulator -value finesim
-   }
 
    pack .menubar.file -side left
    pack .menubar.edit -side left

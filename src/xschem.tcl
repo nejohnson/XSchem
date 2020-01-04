@@ -1214,12 +1214,6 @@ proc enter_text {textlabel} {
    toplevel .t -class Dialog
    wm title .t {Enter text}
 
-   ## not honored by fvwm ... 20110322
-   # wm attributes .t -topmost 1
-   ## ... use alternate method instead 20110322
-   # bind .t <Visibility> { if { [regexp Obscured %s] } {raise .t; wm attributes  .t -topmost 1} }
-   ## 
-
    set X [expr [winfo pointerx .t] - 30]
    set Y [expr [winfo pointery .t] - 25]
 
@@ -1443,10 +1437,11 @@ proc property_search {} {
 
   toplevel .lw -class Dialog
   wm title .lw {Search}
-  ## not honored by fvwm ... 20110322
-  # wm attributes .lw -topmost 1
-  ## ... use alternate method instead 20110322
-  bind .lw <Visibility> { if { [regexp Obscured %s] } {raise .lw; if { $tcl_version > 8.4 } {wm attributes  .lw -topmost 1} } }
+  bind .lw <Visibility> {
+    if { [regexp Obscured %s] } {
+      raise .lw .drw 
+    }
+  }
   ## 
   # 20100408
   set X [expr [winfo pointerx .lw] - 60]
@@ -1519,7 +1514,11 @@ proc attach_labels_to_inst {} {
   toplevel .label -class Dialog
   set rcode {}
   wm title .label {Add labels to instances}
-  bind .label <Visibility> { if { [regexp Obscured %s] } {raise .label; if { $tcl_version > 8.4 } {wm attributes  .label -topmost 1} } }
+  bind .label <Visibility> {
+    if { [regexp Obscured %s] } {
+      raise .label .drw 
+    }
+  }
 
   # 20100408
   set X [expr [winfo pointerx .label] - 60]
@@ -1572,10 +1571,11 @@ proc ask_save { {ask {save file?}} } {
    toplevel .ent2 -class Dialog
    wm title .ent2 {Ask Save}
 
-   ## not honored by fvwm ... 20110322
-   # wm attributes .ent2 -topmost 1
-   ## ... use alternate method instead 20110322
-   bind .ent2 <Visibility> { if { [regexp Obscured %s] } {raise .ent2; if { $tcl_version > 8.4 } {wm attributes  .ent2 -topmost 1} } }
+   bind .ent2 <Visibility> {
+     if { [regexp Obscured %s] } {
+       raise .ent2 .drw 
+     }
+   }
    ## 
 
    set X [expr [winfo pointerx .ent2] - 60]
@@ -1728,14 +1728,7 @@ proc edit_prop {txtlabel} {
 
    wm geometry .ent2 "${edit_prop_default_geometry}+$X+$Y"
 
-   ## not honored by fvwm ... 20110322
-   # wm attributes .ent2 -topmost 1
-   ## ... use alternate method instead 20110322
-
-   
-   #bind .ent2 <Visibility> { if { [regexp Obscured %s] } {raise .ent2; if { $tcl_version > 8.4 } {wm attributes  .ent2 -topmost 1} } } 
-   bind .ent2 <Visibility> { if { [regexp Obscured %s] } {raise .ent2}  }
-   ## 
+   bind .ent2 <Visibility> { if { [regexp Obscured %s] } {raise .ent2 .drw}  }
 
    # 20160325 change and remember widget size
    bind .ent2 <Configure> { 
@@ -1770,8 +1763,8 @@ proc edit_prop {txtlabel} {
        .ent2.f1.e2 delete 0 end
        .ent2.f1.e2 insert 0 $r
      }
-     raise .ent2
-     bind .ent2 <Visibility> { if { [regexp Obscured %s] } {raise .ent2}  }
+     raise .ent2 .drw
+     bind .ent2 <Visibility> { if { [regexp Obscured %s] } {raise .ent2 .drw}  }
    }
 
    button .ent2.f1.b1 -text "OK" -command   {
@@ -1916,13 +1909,9 @@ proc text_line {txtlabel clear {preserve_disabled disabled} } {
    set X [expr [winfo pointerx .ent2] - 60]
    set Y [expr [winfo pointery .ent2] - 35]
 
-   ## not honored by fvwm ... 20110322
-   # wm attributes .ent2 -topmost 1
-   ## ... use alternate method instead 20110322
    bind .ent2 <Visibility> { 
      if { [regexp Obscured %s] } {
-       raise .ent2
-       if { $tcl_version > 8.4 } {wm attributes  .ent2 -topmost 1}
+       raise .ent2 .drw
      } 
    }
    ## 
@@ -2014,7 +2003,7 @@ proc alert_ {txtlabel {position +200+300}} {
    # 20100203
    if { $::wm_fix } { tkwait visibility .ent3 }
    bind .ent3 <Visibility> { 
-     if { [regexp Obscured %s] } {raise .ent3 }
+     if { [regexp Obscured %s] } {raise .ent3 .drw}
    }
    if { [string compare $position ""] != 0 } {
      wm geometry .ent3 $position
@@ -2275,10 +2264,12 @@ proc input_number {txt cmd} {
           if { $::wm_fix } { tkwait visibility .lw }
           wm geometry .lw "+$X+$Y"
 
-          ## not honored by fvwm ... 20110322
-          # wm attributes .lw -topmost 1
-          ## ... use alternate method instead 20110322
-          bind .lw <Visibility> { if { [regexp Obscured %s] } {raise .lw; if { $tcl_version > 8.4 } {wm attributes  .lw -topmost 1} } }
+          bind .lw <Visibility> {
+            if { [regexp Obscured %s] } {
+              raise .lw .drw 
+            }
+          } 
+
           ## 
 
 

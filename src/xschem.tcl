@@ -1438,7 +1438,7 @@ proc property_search {} {
   toplevel .lw -class Dialog
   wm title .lw {Search}
   bind .lw <Visibility> {
-    if { [regexp Obscured %s] } {
+    if { [wm stackorder .lw isbelow . ]} {
       raise .lw .drw 
     }
   }
@@ -1515,7 +1515,7 @@ proc attach_labels_to_inst {} {
   set rcode {}
   wm title .label {Add labels to instances}
   bind .label <Visibility> {
-    if { [regexp Obscured %s] } {
+    if {[wm stackorder .label isbelow . ]} {
       raise .label .drw 
     }
   }
@@ -1572,7 +1572,7 @@ proc ask_save { {ask {save file?}} } {
    wm title .ent2 {Ask Save}
 
    bind .ent2 <Visibility> {
-     if { [regexp Obscured %s] } {
+     if {[wm stackorder .ent2 isbelow . ]} {
        raise .ent2 .drw 
      }
    }
@@ -1728,7 +1728,7 @@ proc edit_prop {txtlabel} {
 
    wm geometry .ent2 "${edit_prop_default_geometry}+$X+$Y"
 
-   bind .ent2 <Visibility> { if { [regexp Obscured %s] } {raise .ent2 .drw}  }
+   bind .ent2 <Visibility> { if { [wm stackorder .ent2 isbelow . ] } {raise .ent2 .drw}  }
 
    # 20160325 change and remember widget size
    bind .ent2 <Configure> { 
@@ -1764,7 +1764,7 @@ proc edit_prop {txtlabel} {
        .ent2.f1.e2 insert 0 $r
      }
      raise .ent2 .drw
-     bind .ent2 <Visibility> { if { [regexp Obscured %s] } {raise .ent2 .drw}  }
+     bind .ent2 <Visibility> { if {[wm stackorder .ent2 isbelow . ]} {raise .ent2 .drw}  }
    }
 
    button .ent2.f1.b1 -text "OK" -command   {
@@ -1910,7 +1910,7 @@ proc text_line {txtlabel clear {preserve_disabled disabled} } {
    set Y [expr [winfo pointery .ent2] - 35]
 
    bind .ent2 <Visibility> { 
-     if { [regexp Obscured %s] } {
+     if {[wm stackorder .ent2 isbelow . ]} {
        raise .ent2 .drw
      } 
    }
@@ -2003,7 +2003,7 @@ proc alert_ {txtlabel {position +200+300}} {
    # 20100203
    if { $::wm_fix } { tkwait visibility .ent3 }
    bind .ent3 <Visibility> { 
-     if { [regexp Obscured %s] } {raise .ent3 .drw}
+     if { [wm stackorder .ent3 isbelow . ] } {raise .ent3 .drw}
    }
    if { [string compare $position ""] != 0 } {
      wm geometry .ent3 $position
@@ -2265,7 +2265,7 @@ proc input_number {txt cmd} {
           wm geometry .lw "+$X+$Y"
 
           bind .lw <Visibility> {
-            if { [regexp Obscured %s] } {
+            if { [wm stackorder .lw isbelow . ]} {
               raise .lw .drw 
             }
           } 

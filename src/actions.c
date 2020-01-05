@@ -1270,7 +1270,7 @@ void calc_drawing_bbox(Box *boundbox, int selected)
    count++;
    updatebbox(count,boundbox,&tmp);
  }
- for(i=0;i<lasttext;i++)
+ if(has_x) for(i=0;i<lasttext;i++)
  {
    if(selected == 1 && !textelement[i].sel) continue;
    if(selected == 2) continue;

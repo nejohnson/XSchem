@@ -43,11 +43,9 @@ proc set_ne { var val } {
     global tk_exec_pipe
     global tk_exec_data
     global tk_exec_cond
-
     if {[eof $tk_exec_pipe($id)]} {
         fileevent $tk_exec_pipe($id) readable ""
         set tk_exec_cond($id) 1
-        #puts ">>>> eof process: $id"
         return
     }
     append tk_exec_data($id) [read $tk_exec_pipe($id) 1024]
@@ -61,24 +59,20 @@ proc tk_exec {args} {
   global tk_exec_data
   global tk_exec_cond
   global tk_exec_pipe
-
   if {![info exists tk_exec_id]} {
       set tk_exec_id 0
   } else {
       incr tk_exec_id
   }
-
   set pipe [open "|$args" r]
   set tk_exec_pipe($tk_exec_id) $pipe
   set tk_exec_data($tk_exec_id) ""
   set tk_exec_cond($tk_exec_id) 0
-
   set id $tk_exec_id
   fconfigure $pipe -blocking 0
   fileevent $pipe readable "tk_exec_fileevent $id"
   vwait tk_exec_cond($id)
   set data [string trimright $tk_exec_data($id) \n]
-
   if {[catch {close $tk_exec_pipe($id)} err]} {
       error "pipe error: $err"
   }
@@ -2217,18 +2211,15 @@ proc abs_sym_path {fname {ext {} } } {
       # --> $pathlist/libname/cellname
       # cellname and $pathlist/cellname exists
       # --> $pathlist/cellname
-      if { ([file exists "${path_elem}/[file dirname $fname]"] ) &&
-        [regexp {\/} $fname] 
-      } {
-        #puts here1
-        set name  "$path_elem/$lib_cell" ;# remove file normalize
+      if { [regexp {/} $fname] && [file exists "${path_elem}/${fname}"] } {
+        set name  "$path_elem/$lib_cell"
         break
       }
       if { [file exists "${path_elem}/${fname}"] &&
-        ![regexp {\/} $fname] 
+        ![regexp {/} $fname] 
       } {
         #puts here2
-        set name  "$path_elem/$lib_cell" ;# remove file normalize
+        set name  "$path_elem/$lib_cell"
         break
       }
     }

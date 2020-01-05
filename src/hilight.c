@@ -638,6 +638,7 @@ void unhilight_net(void)
 void redraw_hilights(void)
 {
   Box boundbox;
+  if(!has_x) return;
   calc_drawing_bbox(&boundbox, 2);
   bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0);
   bbox(ADD, boundbox.x1, boundbox.y1, boundbox.x2, boundbox.y2);

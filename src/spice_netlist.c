@@ -136,7 +136,8 @@ void global_spice_netlist(int global)  /* netlister driver */
       else if(split_files && strcmp(get_tok_value(instdef[i].prop_ptr,"verilog_netlist",0),"true")==0 )
         verilog_block_netlist(fd, i); /* 20081209 */
       else
-        spice_block_netlist(fd, i); /* 20081205 */
+        if( strcmp(get_tok_value(instdef[i].prop_ptr,"spice_primitive",0),"true") )
+          spice_block_netlist(fd, i); /* 20081205 */
     }
    }
    /*clear_drawing(); */

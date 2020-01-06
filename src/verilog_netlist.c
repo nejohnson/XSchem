@@ -274,8 +274,10 @@ void global_verilog_netlist(int global)  /* netlister driver */
         vhdl_block_netlist(fd, i); /* 20081209 */
       else if(split_files && strcmp(get_tok_value(instdef[i].prop_ptr,"spice_netlist",0),"true")==0 )
         spice_block_netlist(fd, i); /* 20081209 */
-      else 
-        verilog_block_netlist(fd, i); /* 20081205 */
+      else {
+        if( strcmp(get_tok_value(instdef[i].prop_ptr,"verilog_primitive",0), "true")) 
+          verilog_block_netlist(fd, i); /* 20081205 */
+      }
     }
    }
    my_strncpy(schematic[currentsch] , "", S(schematic[currentsch]));

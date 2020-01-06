@@ -234,6 +234,7 @@ void global_vhdl_netlist(int global)  /* netlister driver */
  /* print all components */
  for(j=0;j<lastinstdef;j++)
  { 
+  if( strcmp(get_tok_value(instdef[j].prop_ptr,"vhdl_primitive",0),"true")==0 ) continue;
   if( strcmp(get_tok_value(instdef[j].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; /* 20070726 */
   /* if(get_tok_value(instdef[j].prop_ptr,"vhdl_format",2)[0] != '\0') continue; */
   if(strcmp(instdef[j].type,"subcircuit")!=0) continue; /*20080611 */
@@ -317,7 +318,8 @@ void global_vhdl_netlist(int global)  /* netlister driver */
       else if( split_files && strcmp(get_tok_value(instdef[i].prop_ptr,"spice_netlist",0),"true")==0 )
         spice_block_netlist(fd, i); /* 20081209 */
       else
-        vhdl_block_netlist(fd, i);  /* 20081205 */
+        if( strcmp(get_tok_value(instdef[i].prop_ptr,"vhdl_primitive",0),"true"))
+          vhdl_block_netlist(fd, i);  /* 20081205 */
     }
    }
    my_strncpy(schematic[currentsch] , "", S(schematic[currentsch]));
@@ -458,6 +460,7 @@ void  vhdl_block_netlist(FILE *fd, int i)  /*20081204 */
      if(!vhdl_stop)
        for(j=0;j<lastinstdef;j++)
        {
+        if( strcmp(get_tok_value(instdef[j].prop_ptr,"vhdl_primitive",0),"true")==0 ) continue;
         if(strcmp(instdef[j].type,"subcircuit")==0 && 
            check_lib(instdef[j].name))
         {

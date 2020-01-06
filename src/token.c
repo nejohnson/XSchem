@@ -902,12 +902,12 @@ void print_vhdl_element(FILE *fd, int inst) /* 20071217 */
  s=inst_ptr[inst].prop_ptr;
 
 /* print instance name and subckt */
-  if(debug_var>=2) fprintf(errfp, "print_vhdl_element(): printing inst name & subcircuit name\n");
+ if(debug_var>=2) fprintf(errfp, "print_vhdl_element(): printing inst name & subcircuit name\n");
  if( (lab = expandlabel(name, &tmp)) != NULL)
    fprintf(fd, "%d %s : %s\n", tmp, lab, skip_dir(inst_ptr[inst].name) );
  else  /*  name in some strange format, probably an error */
    fprintf(fd, "1 %s : %s\n", name, skip_dir(inst_ptr[inst].name) );
-  if(debug_var>=2) fprintf(errfp, "print_vhdl_element(): printing generics passed as properties\n");
+ if(debug_var>=2) fprintf(errfp, "print_vhdl_element(): printing generics passed as properties\n");
 
 
  /* -------- print generics passed as properties */

@@ -34,6 +34,7 @@ N 60 -640 150 -640 {lab=VCC}
 N 370 -400 370 -290 {lab=CTRL1}
 N 690 -550 690 -470 {lab=VO}
 N 690 -640 690 -610 {lab=SW}
+N 880 -730 880 -700 {lab=COMP}
 C {title.sym} 160 -40 0 0 {name=l1 author="Stefan Schippers"}
 C {isource_table.sym} 780 -310 0 0 {name=G1 CTRL="V(VLED)" TABLE="
 + (0, 0)
@@ -89,4 +90,19 @@ footprint=1206
 device="ceramic capacitor"}
 C {ammeter.sym} 180 -640 3 0 {name=Vvcc}
 C {lab_pin.sym} 690 -430 0 1 {name=l8 sig_type=std_logic lab=VO}
-C {bsource.sym} 690 -580 0 0 {name=B1 VAR=I FUNC="V(SW,VO) > 0 ? V(SW,VO)/0.1 : V(SW,VO)/1e9"}
+C {res.sym} 690 -580 0 0 {name=R2
+value="r='V(SW,VO) > 0 ? 0.1 : 1e9'"
+footprint=1206
+device=resistor
+m=1
+}
+C {bsource.sym} 880 -670 0 0 {name=B1 VAR=V FUNC="pwl(V(VLED,VCC), 
++ -0.006, 0,
++ -0.005, 0, 
++ -0.001, 0.5, 
++ 0.001, 4.5, 
++ 0.005, 5,
++ 0.006, 5)"
+}
+C {lab_pin.sym} 880 -640 0 0 {name=l9 sig_type=std_logic lab=0}
+C {lab_pin.sym} 880 -730 0 0 {name=l10 sig_type=std_logic lab=COMP}

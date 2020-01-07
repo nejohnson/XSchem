@@ -36,6 +36,14 @@ double timescale=1e11; /* spice times will be multiplied by this number to get a
 double rel_timestep_precision = 5e-3;
 double abs_timestep_precision = 1e-10;
 
+void replace_bracket(char *s)
+{
+  while(*s) {
+   if(*s =='[' || *s == ']') *s='_';
+   s++;
+  }
+}
+
 /* get a short unique ascii identifier to identify node */
 const char *get_vcd_id(int idx)
 {
@@ -114,6 +122,7 @@ int read_dataset(void)
         sscanf(line, "%d %s", &i, varname); /* read index and name of saved waveform */
         names[i] = malloc(strlen(varname) + 1);
         strcpy(names[i], varname);
+        replace_bracket(names[i]);
         id = get_vcd_id(i);
         vcd_ids[i] = malloc(strlen(id) + 1) ;
         strcpy(vcd_ids[i], id);

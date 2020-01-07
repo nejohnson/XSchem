@@ -195,11 +195,11 @@ void check_unique_names(int rename)
     bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
   }
   free_hash();
+  first = 1;
   for(i=0;i<lastinst;i++) {
     if(inst_ptr[i].instname && inst_ptr[i].instname[0]) {
-      my_strdup(111, &expanded_instname, expandlabel(inst_ptr[i].instname, &mult));
+      my_strdup(118, &expanded_instname, expandlabel(inst_ptr[i].instname, &mult));
       comma_pos = 0;
-      first = 1;
       for(j =0; j< mult; j++) {
         if(j == 0) start = expanded_instname; 
         else start = comma_pos;

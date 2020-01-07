@@ -856,7 +856,8 @@ void update_symbol(const char *result, int x)
    {
     if(debug_var>=1) fprintf(errfp, "update_symbol(): no_change_props=%d\n", no_change_props);
     if(only_different) {
-          char * ss;
+          char * ss=NULL;
+          my_strdup(119, &ss, inst_ptr[i].prop_ptr);
           if( set_different_token(&ss, new_prop, old_prop, 0, 0) ) {
             if(!pushed) { push_undo(); pushed=1;}
             my_strdup(111, &inst_ptr[i].prop_ptr, ss);
@@ -907,6 +908,7 @@ void update_symbol(const char *result, int x)
    }
    if(event_reporting) {
      char *ss=NULL;
+     my_strdup(120, &ss, inst_ptr[i].prop_ptr);
      set_different_token(&ss, new_prop, old_prop, ELEMENT, i);
      my_free(&ss);
    }

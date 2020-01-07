@@ -1,11 +1,53 @@
-v {xschem version=2.9.5_RC6 file_version=1.1}
-G {}
-V {}
-S {}
+v {xschem version=2.9.5_RC7 file_version=1.1}
+G {process
+begin
+  if now = 0 ns then
+    A <= "00000000";
+  elsif A = "00000000" and now > 100 ns then
+    wait;
+  end if;
+  wait for 100 ns;
+  A <= A + 1;
+end process;}
+V {initial begin
+  $dumpfile("dumpfile.vcd");
+  $dumpvars;
+  A=0;
+end
+
+always begin
+  #100000;
+  $display("%08b %08b", A, B);
+  A=A + 1;
+  if(A==0) $finish;
+end}
+S {
+.tran 1n 2000n
+
+* to generate following file copy .../share/doc/xschem/examples/stimuli.greycnt
+* to the simulation directory and run simulation -> Utile Stimuli Editor (GUI), 
+* and press 'Translate'
+.include stimuli_greycnt.cir
+
+.model nmos NMOS
++ LEVEL=1
++ LMIN=0.5e-6 LMAX=50e-6 WMIN=0.9e-6 WMAX=1
++ VTO=0.7 GAMMA=0.45 PHI=0.9
++ NSUB=9e14 LD=0.08e-6 UO=350 LAMBDA=0.1
++ TOX=9e-9 PB=0.9 CJ=0.56e-3 CJSW=0.35e-11
++ MJ=0.45 MJSW=0.2 CGDO=0.4e-9 JS=1.0e-8
+.model pmos PMOS
++ LEVEL=1
++ LMIN=0.5e-6 LMAX=50e-6 WMIN=0.9e-6 WMAX=1
++ VTO=-0.8 GAMMA=0.4 PHI=0.8
++ NSUB=5e14 LD=0.09e-6 UO=100 LAMBDA=0.2
++ TOX=9e-9 PB=0.9 CJ=0.94e-3 CJSW=0.32e-11
++ MJ=0.5 MJSW=0.3 CGDO=0.3e-9 JS=0.5e-8}
 E {}
 T {BINARY} 500 -780 0 0 0.4 0.4 {}
 T {GRAY} 830 -780 0 0 0.4 0.4 {}
 T {BINARY} 1210 -780 0 0 0.4 0.4 {}
+T {This example can be simulated in SPICE, VHDL, VERILOG} 50 -860 0 0 0.6 0.6 {layer=7}
 N 720 -630 830 -630 {lab=B[6]}
 N 570 -610 620 -610 {lab=A[6]}
 N 570 -530 620 -530 {lab=A[5]}
@@ -78,9 +120,9 @@ N 620 -290 620 -250 {lab=A[2]}
 N 620 -210 620 -170 {lab=A[1]}
 C {title.sym} 160 -30 0 0 {name=l3 author="Stefan Schippers"}
 C {verilog_timescale.sym} 30 -110 0 0 {name=s1 timestep="1ps" precision="1ps" }
-C {xnor.sym} 660 -470 0 0 {name=x2 risedel=1 falldel=1}
-C {xnor.sym} 660 -550 0 0 {name=x3 risedel=1 falldel=1}
-C {xnor.sym} 660 -630 0 0 {name=x14 risedel=1 falldel=1}
+C {xnor.sym} 660 -470 0 0 {name=x2}
+C {xnor.sym} 660 -550 0 0 {name=x3}
+C {xnor.sym} 660 -630 0 0 {name=x14}
 C {lab_pin.sym} 570 -690 0 0 {name=p9 lab=A[7] }
 C {lab_pin.sym} 570 -610 0 0 {name=p1 lab=A[6] }
 C {lab_pin.sym} 570 -530 0 0 {name=p2 lab=A[5] }
@@ -90,28 +132,28 @@ C {lab_pin.sym} 830 -630 0 1 {name=p0 lab=B[6]}
 C {lab_pin.sym} 830 -550 0 1 {name=p5 lab=B[5]}
 C {lab_pin.sym} 830 -470 0 1 {name=p6 lab=B[4]}
 C {assign.sym} 660 -690 0 0 {name=v1 delay=1}
-C {xnor.sym} 660 -230 0 0 {name=x1 risedel=1 falldel=1}
-C {xnor.sym} 660 -310 0 0 {name=x4 risedel=1 falldel=1}
-C {xnor.sym} 660 -390 0 0 {name=x5 risedel=1 falldel=1}
+C {xnor.sym} 660 -230 0 0 {name=x1}
+C {xnor.sym} 660 -310 0 0 {name=x4}
+C {xnor.sym} 660 -390 0 0 {name=x5}
 C {lab_pin.sym} 570 -370 0 0 {name=p7 lab=A[3] }
 C {lab_pin.sym} 570 -290 0 0 {name=p8 lab=A[2] }
 C {lab_pin.sym} 570 -210 0 0 {name=p10 lab=A[1]}
 C {lab_pin.sym} 830 -390 0 1 {name=p11 lab=B[3]}
 C {lab_pin.sym} 830 -310 0 1 {name=p12 lab=B[2]}
 C {lab_pin.sym} 830 -230 0 1 {name=p13 lab=B[1]}
-C {xnor.sym} 660 -150 0 0 {name=x6 risedel=1 falldel=1}
+C {xnor.sym} 660 -150 0 0 {name=x6}
 C {lab_pin.sym} 570 -130 0 0 {name=p14 lab=A[0]}
 C {lab_pin.sym} 830 -150 0 1 {name=p15 lab=B[0]}
-C {opin.sym} 150 -220 0 0 { name=p16 lab=B[7:0] }
+C {lab_pin.sym} 150 -220 0 1 { name=l16 lab=B[7:0] }
 C {lab_pin.sym} 90 -200 0 0 { name=l17 lab=A[7:0]  verilog_type=reg}
-C {xnor.sym} 1060 -470 0 0 {name=x7 risedel=1 falldel=1}
-C {xnor.sym} 1060 -550 0 0 {name=x8 risedel=1 falldel=1}
-C {xnor.sym} 1060 -630 0 0 {name=x9 risedel=1 falldel=1}
+C {xnor.sym} 1060 -470 0 0 {name=x7}
+C {xnor.sym} 1060 -550 0 0 {name=x8}
+C {xnor.sym} 1060 -630 0 0 {name=x9}
 C {assign.sym} 1060 -690 0 0 {name=v0 delay=1}
-C {xnor.sym} 1060 -230 0 0 {name=x10 risedel=1 falldel=1}
-C {xnor.sym} 1060 -310 0 0 {name=x11 risedel=1 falldel=1}
-C {xnor.sym} 1060 -390 0 0 {name=x12 risedel=1 falldel=1}
-C {xnor.sym} 1060 -150 0 0 {name=x13 risedel=1 falldel=1}
+C {xnor.sym} 1060 -230 0 0 {name=x10}
+C {xnor.sym} 1060 -310 0 0 {name=x11}
+C {xnor.sym} 1060 -390 0 0 {name=x12}
+C {xnor.sym} 1060 -150 0 0 {name=x13}
 C {lab_pin.sym} 1230 -710 0 1 {name=p18 lab=C[7]}
 C {lab_pin.sym} 1230 -630 0 1 {name=p19 lab=C[6]}
 C {lab_pin.sym} 1230 -550 0 1 {name=p20 lab=C[5]}
@@ -120,17 +162,12 @@ C {lab_pin.sym} 1230 -390 0 1 {name=p22 lab=C[3]}
 C {lab_pin.sym} 1230 -310 0 1 {name=p23 lab=C[2]}
 C {lab_pin.sym} 1230 -230 0 1 {name=p24 lab=C[1]}
 C {lab_pin.sym} 1230 -150 0 1 {name=p25 lab=C[0]}
-C {opin.sym} 150 -190 0 0 { name=p26 lab=C[7:0] }
-C {code.sym} 330 -250 0 0 {name=TESTBENCH only_toplevel=false value="initial begin
-  $dumpfile(\\"dumpfile.vcd\\");
-  $dumpvars;
-  A=0;
-end
+C {lab_pin.sym} 150 -190 0 1 { name=l26 lab=C[7:0] }
+C {use.sym} 60 -650 0 0 {library ieee;
+use std.TEXTIO.all;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_arith.all;
+use ieee.std_logic_unsigned.all;
 
-always begin
-  #1000;
-  $display(\\"%08b %08b\\", A, B);
-  A=A + 1;
-  if(A==0) $finish;
-end
-"}
+
+}

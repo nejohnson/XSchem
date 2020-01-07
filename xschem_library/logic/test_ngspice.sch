@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC6 file_version=1.1}
+v {xschem version=2.9.5_RC7 file_version=1.1}
 G {process
 begin
 A<='0';
@@ -106,7 +106,7 @@ verilog_ignore=true
 only_toplevel=true
 tclcommand="xschem edit_vi_prop"
 value="
-* to generate following file copy ..share/doc/xschem/logic/stimuli.test_ngspice
+* to generate following file copy .../share/doc/xschem/logic/stimuli.test_ngspice
 * to the simulation directory and run simulation -> Utile Stimuli Editor (GUI), 
 * and press 'Translate'
 .include stimuli_test_ngspice.cir

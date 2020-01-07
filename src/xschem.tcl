@@ -332,7 +332,7 @@ proc set_sim_defaults {} {
     set_ne sim(verilog,default) 0
     
     ### verilog wave view
-    set_ne sim(verilogwave,0,cmd) {gtkwave dumpfile.vcd "$n.sav' 2>/dev/null}
+    set_ne sim(verilogwave,0,cmd) {gtkwave dumpfile.vcd "$n.sav" 2>/dev/null}
     set_ne sim(verilogwave,0,name) {Gtkwave}
     set_ne sim(verilogwave,0,fg) 0
     # number of configured verilog wave viewers, and default one

@@ -81,12 +81,13 @@ int callback(int event, int mx, int my, KeySym key,
  state &=~Mod2Mask; /* 20170511 filter out NumLock status */
  if(semaphore)
  {
-   if(debug_var>=2) 
-     fprintf(errfp, "callback(): reentrant call of callback(), semaphore=%d\n", semaphore);
-   if(event==Expose) {
-     XCopyArea(display, save_pixmap, window, gctiled, mx,my,button,aux,mx,my);
-     
-   }
+   if(debug_var>=0) 
+     if(event != MotionNotify) fprintf(errfp, "callback(): reentrant call of callback(), semaphore=%d\n", semaphore);
+   /* if(event==Expose) {
+    *   XCopyArea(display, save_pixmap, window, gctiled, mx,my,button,aux,mx,my);
+    * 
+    * }
+    */
    /* return 0; */
  }
  semaphore++;           /* used to debug Tcl-Tk frontend */
@@ -137,7 +138,7 @@ int callback(int event, int mx, int my, KeySym key,
     break;
 
   case MotionNotify:
-    if(semaphore==2) break;
+    if(semaphore >= 2) break;
     if(ui_state & STARTPAN2)   pan2(RUBBER, mx, my); /* 20121123 -  20160425 moved up */
     if(ui_state) {
       #ifdef TURBOX_FIX
@@ -301,25 +302,25 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key == 'j'  && state==0 )                 /* print list of highlight nets */
    {
-     if(semaphore==2) break;
+     if(semaphore >= 2) break;
      print_hilight_net(1);
      break;
    }
    if(key == 'j'  && state==ControlMask)        /* create ipins from highlight nets */
    {
-     if(semaphore==2) break;
+     if(semaphore >= 2) break;
      print_hilight_net(0);
      break;
    }
    if(key == 'j'  && state==Mod1Mask)   /* create labels without i prefix from hilight nets */
    {
-     if(semaphore==2) break;
+     if(semaphore >= 2) break;
      print_hilight_net(4);
      break;
    }
    if(key == 'J'  && state==(Mod1Mask | ShiftMask) )    /* create labels with i prefix from hilight nets 20120913 */
    {
-     if(semaphore==2) break;
+     if(semaphore >= 2) break;
      print_hilight_net(2);
      break;
    }
@@ -494,7 +495,7 @@ int callback(int event, int mx, int my, KeySym key,
    if(key== 'W' && state == ShiftMask) {                        /* 20171022 create wire snapping to closest instance pin */
      double x, y;
      int xx, yy;
-     if(semaphore==2) break;
+     if(semaphore >= 2) break;
      if(!(ui_state & STARTWIRE)){
        find_closest_net_or_symbol_pin(mousex, mousey, &x, &y);
        xx = X_TO_SCREEN(x);
@@ -515,7 +516,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key == 'w'&& state==0)    /* place wire. */
    {
-     if(semaphore==2) break;
+     if(semaphore >= 2) break;
      start_wire(mx, my); 
      break;
    }
@@ -526,7 +527,7 @@ int callback(int event, int mx, int my, KeySym key,
    if(key == XK_Escape )                        /* abort & redraw */
    {
     no_draw = 0;
-    if(semaphore==2) break;
+    if(semaphore >= 2) break;
     tcleval("set vertical_move 0; set horizontal_move 0" );
     last_command=0;
     horizontal_move = vertical_move = 0; /* 20171023 */
@@ -565,7 +566,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='w' && !ui_state && state==ControlMask)              /* start polygon, 20171115 */
    {
-     if(semaphore==2) break;
+     if(semaphore >= 2) break;
      if(debug_var>=1) fprintf(errfp, "callback(): start polygon\n");
      mx_save = mx; my_save = my;       /* 20070323 */
      mx_double_save=mousex_snap;
@@ -596,7 +597,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key==XK_Delete && (ui_state & SELECTION) )        /* delete objects */
    {
-     if(semaphore==2) break;
+     if(semaphore >= 2) break;
      delete();break;
    }
    if(key==XK_Right)                    /* left */
@@ -625,7 +626,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='q' && state == ControlMask) /* exit */
    {
-     if(semaphore==2) break;
+     if(semaphore >= 2) break;
      if(modified) {
        tcleval("tk_messageBox -type okcancel -message {UNSAVED data: want to exit?}");
        if(strcmp(Tcl_GetStringResult(interp),"ok")==0) {
@@ -639,7 +640,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='t' && state == 0)                        /* place text */
    {
-     if(semaphore==2) break;
+     if(semaphore >= 2) break;
      last_command = 0;
      place_text(1, mousex_snap, mousey_snap); /* 1 = draw text 24122002 */
      break;
@@ -678,7 +679,7 @@ int callback(int event, int mx, int my, KeySym key,
 
    if(key=='s' && (state == ControlMask) )      /* save 20121201 */
    {
-     if(semaphore==2) break;
+     if(semaphore >= 2) break;
      if(!strcmp(schematic[currentsch],"")) { /* 20170622 check if unnamed schematic, use saveas in this case... */
        saveas(NULL);
      } else {
@@ -688,20 +689,20 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='s' && state == (ControlMask | Mod1Mask) )           /* save as symbol */
    {
-     if(semaphore==2) break;
+     if(semaphore >= 2) break;
      current_type=SYMBOL;
      saveas(NULL);
      break;
    }
    if(key=='S' && state == (ShiftMask | ControlMask)) /* save as schematic */
    {
-     if(semaphore==2) break;
+     if(semaphore >= 2) break;
      saveas(NULL);
      break;
    }
    if(key=='e' && state == 0)           /* descend to schematic */
    {
-    if(semaphore==2) break;
+    if(semaphore >= 2) break;
     descend_schematic();break;
    }
    if(key=='e' && state == Mod1Mask)            /* edit schematic in new window */
@@ -716,13 +717,13 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if( (key=='e' && state == ControlMask) || (key==XK_BackSpace))  /* back */
    {
-    if(semaphore==2) break;
+    if(semaphore >= 2) break;
     go_back(1);break;
    }
 
    if(key=='a' && state == 0)   /* make symbol */
    {
-    if(semaphore==2) break; /* 20180914 */
+    if(semaphore >= 2) break; /* 20180914 */
     if(current_type==SCHEMATIC) {
       tcleval("tk_messageBox -type okcancel -message {do you want to make symbol view ?}");
       if(strcmp(Tcl_GetStringResult(interp),"ok")==0) 
@@ -754,7 +755,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='x' && state == ControlMask) /* cut into clipboard */
    {
-    if(semaphore==2) break;
+    if(semaphore >= 2) break;
     rebuild_selected_array();
     if(lastselected) {  /* 20071203 check if something selected */
       save_selection(2);
@@ -764,7 +765,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='c' && state == ControlMask)   /* save clipboard */
    {
-     if(semaphore==2) break;
+     if(semaphore >= 2) break;
      rebuild_selected_array();
      if(lastselected) {  /* 20071203 check if something selected */
        save_selection(2);
@@ -773,7 +774,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='C' && state == ShiftMask)   /* place arc */
    {
-     if(semaphore==2) break;
+     if(semaphore >= 2) break;
      mx_save = mx; my_save = my;
      mx_double_save=mousex_snap;
      my_double_save=mousey_snap;
@@ -783,7 +784,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='C' && state == (ControlMask|ShiftMask))   /* place circle */
    {
-     if(semaphore==2) break;
+     if(semaphore >= 2) break;
      mx_save = mx; my_save = my;
      mx_double_save=mousex_snap;
      my_double_save=mousey_snap;
@@ -802,7 +803,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='v' && state == ControlMask)   /* load clipboard */
    {
-    if(semaphore==2) break;
+    if(semaphore >= 2) break;
     merge_file(2,".sch");
     break;
    }
@@ -812,13 +813,13 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='q' && state==0)                     /* edit prop */
    {
-    if(semaphore==2) break;
+    if(semaphore >= 2) break;
     edit_property(0);
     break;
    }
    if(key=='q' && state==Mod1Mask)                      /* edit .sch file (DANGER!!) */
    {
-    if(semaphore==2) break;
+    if(semaphore >= 2) break;
     rebuild_selected_array();
     if(lastselected==0 ) {
       my_snprintf(str, S(str), "edit_file {%s}", abs_sym_path(schematic[currentsch], ""));
@@ -834,17 +835,17 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='Q' && state == ShiftMask)                           /* edit prop with vim */
    {
-    if(semaphore==2) break;
+    if(semaphore >= 2) break;
     edit_property(1);break;
    }
    if(key=='i' && state==0)                     /* descend to  symbol */
    {
-    if(semaphore==2) break;
+    if(semaphore >= 2) break;
     descend_symbol();break;
    }
    if(key==XK_Insert)                   /* insert sym */
    {
-    if(semaphore==2) break;
+    if(semaphore >= 2) break;
     last_command = 0;
 
     /* place_symbol(-1,NULL,mousex_snap, mousey_snap, 0, 0, NULL,3, 1);*/
@@ -861,7 +862,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='s' && state & Mod1Mask)                     /* reload */
    {
-    if(semaphore==2) break;
+    if(semaphore >= 2) break;
      tcleval("tk_messageBox -type okcancel -message {Are you sure you want to reload from disk?}");
      if(strcmp(Tcl_GetStringResult(interp),"ok")==0) {
         char filename[PATH_MAX];
@@ -880,13 +881,13 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='o' && state == ControlMask)   /* load */
    {
-    if(semaphore==2) break;
+    if(semaphore >= 2) break;
     ask_new_file();
     break;
    }
    if(key=='S' && state == ShiftMask)   /* change element order */
    {
-    if(semaphore==2) break;
+    if(semaphore >= 2) break;
     change_elem_order();
     break;
    }
@@ -898,7 +899,7 @@ int callback(int event, int mx, int my, KeySym key,
    if(key=='k' && state==ControlMask)                           /* unhilight net */
    {
     Box boundbox;
-    if(semaphore==2) break;
+    if(semaphore >= 2) break;
     calc_drawing_bbox(&boundbox, 2);
 
     unhilight_net();
@@ -913,7 +914,7 @@ int callback(int event, int mx, int my, KeySym key,
    if(key=='K' && state==(ControlMask|ShiftMask))       /* hilight net drilling thru elements  */
                                                         /* with 'propagate_to' prop set on pins */
    {
-    if(semaphore==2) break;
+    if(semaphore >= 2) break;
     enable_drill=1;
     hilight_net();
     redraw_hilights();
@@ -922,7 +923,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='k' && state==0)                             /* hilight net */
    {
-    if(semaphore==2) break;
+    if(semaphore >= 2) break;
     enable_drill=0;
     hilight_net();
     redraw_hilights();
@@ -932,7 +933,7 @@ int callback(int event, int mx, int my, KeySym key,
    if(key=='K' && state == ShiftMask)                           /* delete hilighted nets */
    {
     Box boundbox;
-    if(semaphore==2) break;
+    if(semaphore >= 2) break;
     enable_drill=0;
     calc_drawing_bbox(&boundbox, 2);
     delete_hilight_net();
@@ -964,25 +965,25 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='*' && state==(Mod1Mask|ShiftMask) )         /* svg print , 20121108 */
    {
-    if(semaphore==2) break;
+    if(semaphore >= 2) break;
     svg_draw();
     break;
    }
    if(key=='*' && state==ShiftMask )                    /* postscript print */
    {
-    if(semaphore==2) break;
+    if(semaphore >= 2) break;
     ps_draw();
     break;
    }
    if(key=='*' && state==(ControlMask|ShiftMask) )      /* xpm print */
    {
-    if(semaphore==2) break;
+    if(semaphore >= 2) break;
     print_image();
     break;
    }
    if(key=='u' && state==Mod1Mask)                      /* align to grid */
    {
-    if(semaphore==2) break;
+    if(semaphore >= 2) break;
     push_undo(); /* 20150327 */
     round_schematic_to_grid(cadsnap);
     set_modify(1);
@@ -1027,21 +1028,21 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='u' && state==0)                             /* undo */
    {
-    if(semaphore==2) break;
+    if(semaphore >= 2) break;
     pop_undo(0);
     draw();
     break;
    }
    if(key=='U' && state==ShiftMask)                     /* redo */
    {
-    if(semaphore==2) break;
+    if(semaphore >= 2) break;
     pop_undo(1);
     draw();
     break;
    }
    if(key=='&')                         /* check wire connectivity */
    {
-    if(semaphore==2) break;
+    if(semaphore >= 2) break;
     push_undo(); /* 20150327 */
     trim_wires();
     draw();
@@ -1049,7 +1050,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='l' && state == ControlMask) { /* create schematic from selected symbol 20171004 */
      
-     if(semaphore==2) break;
+     if(semaphore >= 2) break;
      create_sch_from_sym();
      break;
    }
@@ -1139,7 +1140,7 @@ int callback(int event, int mx, int my, KeySym key,
    if(key=='c' && state==0 &&           /* copy selected obj.  */
      !(ui_state & (STARTMOVE | STARTCOPY)))
    {
-    if(semaphore==2) break;
+    if(semaphore >= 2) break;
     mx_save = mx; my_save = my; /* 20070323 */
     mx_double_save=mousex_snap;
     my_double_save=mousey_snap;
@@ -1148,17 +1149,17 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='n' && state==ControlMask)              /* New schematic */
    {
-     if(semaphore==2) break;
+     if(semaphore >= 2) break;
      tcleval("xschem clear SCHEMATIC");
    }
    if(key=='N' && state==(ShiftMask|ControlMask) )    /* New symbol */
    {
-     if(semaphore==2) break;
+     if(semaphore >= 2) break;
      tcleval("xschem clear SYMBOL");
    }
    if(key=='N' && state==ShiftMask)              /* hierarchical netlist */
    {
-    if(semaphore==2) break;
+    if(semaphore >= 2) break;
     unselect_all(); /* 20180929 */
     if(set_netlist_dir(0, NULL)) {
       if(debug_var>=1) fprintf(errfp, "callback(): -------------\n");
@@ -1176,7 +1177,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='n' && state==0)              /* netlist */
    {
-    if(semaphore==2) break;
+    if(semaphore >= 2) break;
     unselect_all(); /* 20180929 */
     if( set_netlist_dir(0, NULL) ) {
       if(debug_var>=1) fprintf(errfp, "callback(): -------------\n");
@@ -1206,13 +1207,13 @@ int callback(int event, int mx, int my, KeySym key,
     break;
    }
    if(key=='>') { /* 20151117 */
-     if(semaphore==2) break;
+     if(semaphore >= 2) break;
      if(draw_single_layer< cadlayers-1) draw_single_layer++; 
      draw();
      break;
    }
    if(key=='<') { /* 20151117 */
-     if(semaphore==2) break;
+     if(semaphore >= 2) break;
      if(draw_single_layer>=0 ) draw_single_layer--; 
      draw();
      break;
@@ -1232,14 +1233,14 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='b' && state==0)                     /* merge schematic */
    {
-    if(semaphore==2) break;
+    if(semaphore >= 2) break;
     merge_file(0, ""); /* 2nd parameter not used any more for merge 25122002 */
     break;
    }
    if(key=='B' && state==ShiftMask)                     /* delete files */
    {
 
-    if(semaphore==2) break; /* 20160423 */
+    if(semaphore >= 2) break; /* 20160423 */
     rebuild_selected_array();
     if(lastselected && selectedgroup[0].type==ELEMENT) {
       my_snprintf(str, S(str), "delete_files {%s}",  
@@ -1334,7 +1335,7 @@ int callback(int event, int mx, int my, KeySym key,
 
    if(key=='f' && state == ControlMask)         /* search */
    {
-    if(semaphore==2) break;
+    if(semaphore >= 2) break;
     tcleval("property_search");
     break;
    }
@@ -1350,7 +1351,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='!')
    {
-     if(semaphore==2) break;
+     if(semaphore >= 2) break;
      break_wires_at_pins();
      break;
    }
@@ -1414,7 +1415,7 @@ int callback(int event, int mx, int my, KeySym key,
      ui_state |= STARTPAN2;
      break;
    }
-   else if(semaphore==2) {
+   else if(semaphore >= 2) {
      if(button==Button1 && state==0) {
        tcleval("set editprop_semaphore 2"); /* 20160423 */
      }
@@ -1621,7 +1622,7 @@ int callback(int event, int mx, int my, KeySym key,
      break;
    }
    if(debug_var>=1) fprintf(errfp, "callback(): ButtonRelease  ui_state=%ld state=%d\n",ui_state,state);
-   if(semaphore==2) break; /* 20160423 */
+   if(semaphore >= 2) break; /* 20160423 */
    if(ui_state & STARTSELECT) {
      if(state & ControlMask) {
        enable_stretch=1;
@@ -1635,7 +1636,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    break;
   case -3:  /* double click  : edit prop */
-   if(semaphore==2) break;
+   if(semaphore >= 2) break;
    if(debug_var>=1) fprintf(errfp, "callback(): DoubleClick  ui_state=%ld state=%d\n",ui_state,state);
    if(button==Button1) {
      if(ui_state == STARTWIRE) {

@@ -2190,11 +2190,11 @@ void select_rect(int what, int select)
  static double xr,yr,xr2,yr2;
  static double xx1,xx2,yy1,yy2;
  static int sel;
- static int semaphore=0; /*  20171130 */
+ static int sem=0; /*  20171130 */
 
  if(what & RUBBER)
  {
-    if(semaphore==0) {
+    if(sem==0) {
       fprintf(errfp, "ERROR: select_rect() RUBBER called before BEGIN\n");
       tcleval("alert_ {ERROR: select_rect() RUBBER called before BEGIN} {}"); /*  20171020 */
     }
@@ -2218,7 +2218,7 @@ void select_rect(int what, int select)
  else if(what & BEGIN)
  {
     /*
-     * if(semaphore==1) {
+     * if(sem==1) {
      *  fprintf(errfp, "ERROR: reentrant call of select_rect()\n");
      *  tcleval("alert_ {ERROR: reentrant call of select_rect()} {}");
      * }
@@ -2234,7 +2234,7 @@ void select_rect(int what, int select)
     /* yr=yr2=mousey_snap; */
     xr=xr2=mx_double_save;
     yr=yr2=my_double_save;
-    semaphore=1;
+    sem=1;
  }
  else if(what & END)
  {
@@ -2252,7 +2252,7 @@ void select_rect(int what, int select)
     /*  /20171219 */
 
     ui_state &= ~STARTSELECT;
-    semaphore=0;
+    sem=0;
  }
 }
 

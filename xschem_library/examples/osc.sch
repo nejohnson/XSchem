@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC6 file_version=1.1}
+v {xschem version=2.9.5_RC7 file_version=1.1}
 G {}
 V {}
 S {}
@@ -23,7 +23,7 @@ value=".option RUNLVL=6 post
 vvss vss 0 dc 0
 .save all
 .temp 30
-.tran 10n 100u 
+.tran 1n 100u 
 .probe tran i1(Q1) i2(Q1) i3(Q1) i(L1) i(c1) i(c2) i(r1) i(r2) i(r3)
 "}
 C {npn.sym} 360 -270 0 0 {name=Q1 model=q2n2222a area=1

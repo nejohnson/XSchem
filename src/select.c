@@ -331,13 +331,13 @@ void bbox(int what,double x1,double y1, double x2, double y2)
  int i;
  static int bbx1, bbx2, bby1, bby2; 
  static int savew, saveh, savex1, savex2, savey1, savey2;
- static int semaphore=0;
+ static int sem=0;
 
  /* fprintf(errfp, "bbox: what=%d\n", what); */
  switch(what)
  {
   case BEGIN:
-   if(semaphore==1) {
+   if(sem==1) {
      fprintf(errfp, "ERROR: rentrant bbox() call\n"); 
      tcleval("alert_ {ERROR: reentrant bbox() call} {}");/*20171215 */
    }
@@ -351,10 +351,10 @@ void bbox(int what,double x1,double y1, double x2, double y2)
    savey2 = areay2;
    savew = areaw;
    saveh = areah;
-   semaphore=1;
+   sem=1;
    break;
   case ADD:
-   if(semaphore==0) {
+   if(sem==0) {
      fprintf(errfp, "ERROR: bbox(ADD) call before bbox(BEGIN)\n"); 
      tcleval("alert_ {ERROR: bbox(ADD) call before bbox(BEGIN)} {}");/*20171215 */
    }
@@ -396,10 +396,10 @@ void bbox(int what,double x1,double y1, double x2, double y2)
    cairo_reset_clip(ctx);
    cairo_reset_clip(save_ctx);
    #endif
-   semaphore=0;
+   sem=0;
    break;
   case SET:
-   if(semaphore==0) {
+   if(sem==0) {
      fprintf(errfp, "ERROR: bbox(SET) call before bbox(BEGIN)\n"); 
      tcleval("alert_ {ERROR: bbox(SET) call before bbox(BEGIN)} {}");/*20171215 */
    }

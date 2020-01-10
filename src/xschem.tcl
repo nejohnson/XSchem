@@ -37,50 +37,79 @@ proc set_ne { var val } {
 ###
 ### Tk procedures
 ###
-# tk_exec service function
-  proc tk_exec_fileevent {id} {
-    global tk_exec_id
-    global tk_exec_pipe
-    global tk_exec_data
-    global tk_exec_cond
-    if {[eof $tk_exec_pipe($id)]} {
-        fileevent $tk_exec_pipe($id) readable ""
-        set tk_exec_cond($id) 1
-        return
-    }
-    append tk_exec_data($id) [read $tk_exec_pipe($id) 1024]
+# execute service function
+proc execute_fileevent {id} {
+  global execute_id execute_pipe execute_data execute_cmd execute_wait_flag simulate_oldbg
+  global task_output task_error execute_status
+  append execute_data($id) [read $execute_pipe($id) 1024]
+  if {[eof $execute_pipe($id)]} {
+      fileevent $execute_pipe($id) readable ""
+      # setting pipe to blocking before closing allows to see if pipeline failed
+      fconfigure $execute_pipe($id) -blocking 1
+      set status 0
+      if {[catch {close $execute_pipe($id)} err options]} {
+        set details [dict get $options -errorcode]
+        if {[lindex $details 0] eq "CHILDSTATUS"} {
+            set status [lindex $details 2]
+            if { $execute_status($id) } {
+              viewdata "pipe error: $execute_cmd($id)\nstderr:\n$err\ndata:\n$execute_data($id)" ro
+            }
+        } else {
+          if { $execute_status($id) } {
+            viewdata "$execute_cmd($id) completed.\nstderr:\n$err\ndata:\n$execute_data($id)" ro
+          }
+        }
+      } 
+      if { $status == 0 } {
+        if { $execute_status($id) } {
+          viewdata "$execute_cmd($id) completed.\ndata:\n$execute_data($id)" ro
+        }
+      }
+      if {[info exists execute_wait_flag]} {
+        set task_error $err
+        set task_output $execute_data($id)
+      }
+      unset execute_pipe($id)
+      unset execute_data($id)
+      unset execute_status($id)
+      unset execute_cmd($id)
+      if { [info exists simulate_oldbg] } { .menubar.simulate configure -bg $simulate_oldbg; unset simulate_oldbg}
   }
+}
+
+
+proc execute_wait {status args} {
+  global execute_pipe execute_wait_flag
+  xschem set semaphore [expr [xschem get semaphore] +1]
+  set execute_wait_flag 1
+  set id [eval execute $status $args]
+  vwait execute_pipe($id)
+  xschem set semaphore [expr [xschem get semaphore] -1]
+  unset execute_wait_flag
+}
 
 # equivalent to the 'exec' tcl function but keeps the event loop
 # responding, so widgets get updated properly
 # while waiting for process to end.
-proc tk_exec {args} {
-  global tk_exec_id
-  global tk_exec_data
-  global tk_exec_cond
-  global tk_exec_pipe
-  if {![info exists tk_exec_id]} {
-      set tk_exec_id 0
+proc execute {status args} {
+  global execute_id execute_status
+  global execute_data
+  global execute_cmd
+  global execute_pipe
+  if {![info exists execute_id]} {
+      set execute_id 0
   } else {
-      incr tk_exec_id
+      incr execute_id
   }
   set pipe [open "|$args" r]
-  set tk_exec_pipe($tk_exec_id) $pipe
-  set tk_exec_data($tk_exec_id) ""
-  set tk_exec_cond($tk_exec_id) 0
-  set id $tk_exec_id
+  set execute_status($execute_id) $status
+  set execute_pipe($execute_id) $pipe
+  set execute_cmd($execute_id) $args
+  set execute_data($execute_id) ""
+  set id $execute_id
   fconfigure $pipe -blocking 0
-  fileevent $pipe readable "tk_exec_fileevent $id"
-  vwait tk_exec_cond($id)
-  set data [string trimright $tk_exec_data($id) \n]
-  if {[catch {close $tk_exec_pipe($id)} err]} {
-      error "pipe error: $err"
-  }
-  unset tk_exec_pipe($id)
-  unset tk_exec_data($id)
-  unset tk_exec_cond($id)
-  #puts ">>>> exiting process: $id"
-  return $data
+  fileevent $pipe readable "execute_fileevent $id"
+  return $execute_id
 }
 
 proc netlist {source_file show netlist_file} {
@@ -138,18 +167,18 @@ proc netlist {source_file show netlist_file} {
 }
 
 # 20161216 execute task in other work dir
-proc task { cmd {dir .}  {background fg}} {
+proc task { cmd {dir .}  {background fg} {status 0}} {
   global task_output task_error
   # puts "task: $cmd"
   if {![string compare $background {bg} ] } {
     set task_error [catch {exec sh -c "cd '$dir'; $cmd" &} task_output]
   } elseif {![string compare $background  {fg} ] } {
     set task_error [catch {exec sh -c "cd '$dir'; $cmd"} task_output]
-  } elseif {![string compare $background {tk_exec} ] } {
-    set task_error [catch {tk_exec sh -c "cd '$dir'; $cmd"} task_output]
+  } elseif {![string compare $background {execute} ] } {
+    catch {execute $status sh -c "cd '$dir'; $cmd"}
+  } elseif {![string compare $background {execute_wait} ] } {
+    catch {execute_wait $status sh -c "cd '$dir'; $cmd"}
   }
-  # puts "task_error: $task_error"
-  # puts "task_output: $task_output"
 }
 
 
@@ -280,6 +309,7 @@ proc save_sim_defaults {f} {
       puts $fd "set sim($tool,$i,cmd) {$sim($tool,$i,cmd)}"
       puts $fd "set sim($tool,$i,name) {$sim($tool,$i,name)}"
       puts $fd "set sim($tool,$i,fg) $sim($tool,$i,fg)"
+      puts $fd "set sim($tool,$i,st) $sim($tool,$i,st)"
       puts $fd {}
     }
     puts $fd {}
@@ -296,10 +326,12 @@ proc set_sim_defaults {} {
     set_ne sim(spice,0,cmd) {$terminal -e 'ngspice -i "$N" -a || sh'}
     set_ne sim(spice,0,name) {Ngspice}
     set_ne sim(spice,0,fg) 0
+    set_ne sim(spice,0,st) 1
     
     set_ne sim(spice,1,cmd) {ngspice -b -r "$n.raw" -o "$n.out" "$N"}
     set_ne sim(spice,1,name) {Ngspice batch}
     set_ne sim(spice,1,fg) 0
+    set_ne sim(spice,1,st) 1
     
     # number of configured spice simulators, and default one
     set_ne sim(spice,n) 2
@@ -309,16 +341,19 @@ proc set_sim_defaults {} {
     set_ne sim(spicewave,0,cmd) {gaw "$n.raw" } 
     set_ne sim(spicewave,0,name) {Gaw viewer}
     set_ne sim(spicewave,0,fg) 0
+    set_ne sim(spicewave,0,st) 0
    
     set_ne sim(spicewave,1,cmd) {echo load "$n.raw" > .spiceinit
   $terminal -e ngspice
   rm .spiceinit} 
     set_ne sim(spicewave,1,name) {Ngpice Viewer}
     set_ne sim(spicewave,1,fg) 0
+    set_ne sim(spicewave,1,st) 0
 
     set_ne sim(spicewave,2,cmd) {rawtovcd "$n.raw" > "$n.vcd" && gtkwave "$n.vcd" "$n.sav" 2>/dev/null} 
     set_ne sim(spicewave,2,name) {Rawtovcd}
     set_ne sim(spicewave,2,fg) 0
+    set_ne sim(spicewave,2,st) 0
     # number of configured spice wave viewers, and default one
     set_ne sim(spicewave,n) 3
     set_ne sim(spicewave,default) 0
@@ -327,6 +362,7 @@ proc set_sim_defaults {} {
     set_ne sim(verilog,0,cmd) {iverilog -o .verilog_object -g2012 "$N" && vvp .verilog_object}
     set_ne sim(verilog,0,name) {Icarus verilog}
     set_ne sim(verilog,0,fg) 1
+    set_ne sim(verilog,0,st) 0
     # number of configured verilog simulators, and default one
     set_ne sim(verilog,n) 1
     set_ne sim(verilog,default) 0
@@ -335,6 +371,7 @@ proc set_sim_defaults {} {
     set_ne sim(verilogwave,0,cmd) {gtkwave dumpfile.vcd "$n.sav" 2>/dev/null}
     set_ne sim(verilogwave,0,name) {Gtkwave}
     set_ne sim(verilogwave,0,fg) 0
+    set_ne sim(verilogwave,0,st) 0
     # number of configured verilog wave viewers, and default one
     set_ne sim(verilogwave,n) 1
     set_ne sim(verilogwave,default) 0
@@ -343,6 +380,7 @@ proc set_sim_defaults {} {
     set_ne sim(vhdl,0,cmd) {ghdl -c --ieee=synopsys -fexplicit "$N" -r "$s" --wave="$n.ghw"}
     set_ne sim(vhdl,0,name) {Ghdl}
     set_ne sim(vhdl,0,fg) 1
+    set_ne sim(vhdl,0,st) 0
     # number of configured vhdl simulators, and default one
     set_ne sim(vhdl,n) 1
     set_ne sim(vhdl,default) 0
@@ -351,6 +389,7 @@ proc set_sim_defaults {} {
     set_ne sim(vhdlwave,0,cmd) {gtkwave "$n.ghw" "$n.sav" 2>/dev/null}
     set_ne sim(vhdlwave,0,name) {Gtkwave}
     set_ne sim(vhdlwave,0,fg) 0
+    set_ne sim(vhdlwave,0,st) 0
     # number of configured vhdl wave viewers, and default one
     set_ne sim(vhdlwave,n) 1
     set_ne sim(vhdlwave,default) 0
@@ -422,12 +461,14 @@ proc simconf {} {
          -variable sim($tool,default) -value $i
       text .sim.topf.f.scrl.center.$tool.r.$i.cmd -width 20 -height 3 -wrap none -bg $bg($toggle)
       .sim.topf.f.scrl.center.$tool.r.$i.cmd insert 1.0 $sim($tool,$i,cmd)
-      checkbutton .sim.topf.f.scrl.center.$tool.r.$i.fg -text Foreground -variable sim($tool,$i,fg) -bg $bg($toggle)
+      checkbutton .sim.topf.f.scrl.center.$tool.r.$i.fg -text Fg -variable sim($tool,$i,fg) -bg $bg($toggle)
+      checkbutton .sim.topf.f.scrl.center.$tool.r.$i.st -text Status -variable sim($tool,$i,st) -bg $bg($toggle)
 
       pack .sim.topf.f.scrl.center.$tool.r.$i.lab -side left -fill y 
       pack .sim.topf.f.scrl.center.$tool.r.$i.radio -side left -fill y 
       pack .sim.topf.f.scrl.center.$tool.r.$i.cmd -side left -fill x -expand yes
       pack .sim.topf.f.scrl.center.$tool.r.$i.fg -side left -fill y 
+      pack .sim.topf.f.scrl.center.$tool.r.$i.st -side left -fill y 
     }
     incr toggle
     set toggle [expr {$toggle %2}]
@@ -506,6 +547,7 @@ proc simconf_add {tool} {
   set sim($tool,$n,cmd) {}
   set sim($tool,$n,name) {}
   set sim($tool,$n,fg) 0
+  set sim($tool,$n,st) 0
   incr sim($tool,n)
 }
 
@@ -532,16 +574,17 @@ proc simulate {} {
     }
     set def $sim($tool,default)
     set fg  $sim($tool,$def,fg)
+    set st  $sim($tool,$def,st)
     if {$fg} {
       set fg {fg}
     } else {
-      set fg {bg}
+      set fg {execute}
     }
     set cmd [subst -nocommands $sim($tool,$def,cmd)]
    
     # eval exec $cmd
-    task $cmd "$netlist_dir" $fg
-    if {$task_error} {viewdata $task_output; return}
+    task $cmd "$netlist_dir" $fg $st
+    if {$fg eq {fg} && $task_error} {viewdata $task_output; return}
     # if { $fg eq {fg}  && $task_output ne {}  && ![regexp $cmd {$terminal}]} { }
     if { $fg eq {fg} && ![regexp $cmd {$terminal}]} {
       
@@ -577,6 +620,7 @@ proc waves {} {
     set tool ${tool}wave
     set def $sim($tool,default)
     set fg  $sim($tool,$def,fg)
+    set st  $sim($tool,$def,st)
     if {$fg} {
       set fg {fg}
     } else {
@@ -585,8 +629,8 @@ proc waves {} {
     set cmd [subst -nocommands $sim($tool,$def,cmd)]
    
     # eval exec $cmd
-    task $cmd "$netlist_dir" $fg
-    if {$task_error} {viewdata $task_output; return}
+    task $cmd "$netlist_dir" $fg $st
+    if {$fg eq {fg} && $task_error} {viewdata $task_output; return}
     if { $fg eq {fg} } {
       write_data $task_output "$netlist_dir/.sim_output.txt"
       textwindow $netlist_dir/.sim_output.txt ro
@@ -620,7 +664,7 @@ proc get_shell { curpath } {
  global netlist_dir netlist_type tcl_debug
  global  terminal
 
- task "$terminal" "$curpath" bg
+ task "$terminal" "$curpath" bg 0
 }
 
 proc edit_netlist {schname } {
@@ -632,13 +676,13 @@ proc edit_netlist {schname } {
  if { [select_netlist_dir 0] ne "" } {
    # puts "edit_netlist: \"$editor $ftype  ${schname}.v\" \"$netlist_dir\" bg"
    if { $netlist_type=="verilog" } {
-     task "$editor $ftype  \"${tmpname}.v\"" "$netlist_dir" bg
+     task "$editor $ftype  \"${tmpname}.v\"" "$netlist_dir" bg 0
    } elseif { $netlist_type=="spice" } {
-     task "$editor $ftype \"${tmpname}.spice\"" "$netlist_dir" bg
+     task "$editor $ftype \"${tmpname}.spice\"" "$netlist_dir" bg 0
    } elseif { $netlist_type=="tedax" } {
-     task "$editor $ftype \"${tmpname}.tdx\"" "$netlist_dir" bg
+     task "$editor $ftype \"${tmpname}.tdx\"" "$netlist_dir" bg 0
    } elseif { $netlist_type=="vhdl" } { 
-     task "$editor $ftype \"${tmpname}.vhdl\"" "$netlist_dir" bg
+     task "$editor $ftype \"${tmpname}.vhdl\"" "$netlist_dir" bg 0
    }
  }
  return {}
@@ -1419,8 +1463,8 @@ proc about {} {
   pack .about.descr
   pack .about.copyright
   pack .about.close
-  bind .about.link <Button-1> { task {xdg-open http://repo.hu/projects/xschem} . tk_exec }
-  bind .about.link2 <Button-1> { task {xdg-open http://repo.hu/projects/coraleda} . tk_exec }
+  bind .about.link <Button-1> { task {xdg-open http://repo.hu/projects/xschem} . execute 0 }
+  bind .about.link2 <Button-1> { task {xdg-open http://repo.hu/projects/coraleda} . execute 0 }
 }
 
 proc property_search {} {
@@ -1620,7 +1664,7 @@ proc edit_vi_prop {txtlabel} {
  set filename $filename.$suffix
 
  write_data $retval $XSCHEM_TMP_DIR/$filename
- eval tk_exec $editor $XSCHEM_TMP_DIR/$filename ;# 20161119
+ eval execute_wait $editor $XSCHEM_TMP_DIR/$filename ;# 20161119
 
  if $tcl_debug<=-1 then {puts "edit_vi_prop{}:\n--------\nretval=$retval\n---------\n"}
  if $tcl_debug<=-1 then {puts "edit_vi_prop{}:\n--------\nsymbol=$symbol\n---------\n"}
@@ -1652,7 +1696,7 @@ proc edit_vi_netlist_prop {txtlabel} {
  regsub -all {\\?"} $retval {"} retval
  write_data $retval $XSCHEM_TMP_DIR/$filename
  if { [regexp vim $editor] } { set ftype "\{-c :set filetype=$netlist_type\}" } else { set ftype {} }
- eval tk_exec $editor  $ftype $XSCHEM_TMP_DIR/$filename
+ eval execute_wait $editor  $ftype $XSCHEM_TMP_DIR/$filename
 
  if $tcl_debug<=-1 then {puts "edit_vi_prop{}:\n--------\n$retval\n---------\n"}
 
@@ -2005,7 +2049,7 @@ proc alert_ {txtlabel {position +200+300}} {
      wm geometry .ent3 "+$X+$Y"
    }
    
-   label .ent3.l1  -text $txtlabel             
+   label .ent3.l1  -text $txtlabel -wraplength 700
    button .ent3.b1 -text "OK" -command  \
    {
      destroy .ent3
@@ -2790,12 +2834,10 @@ font configure Underline-Font -underline true -size 24
       }
    button .menubar.simulate -text "Simulate"  -activebackground red  -takefocus 0\
      -command {
-       set oldbg [.menubar.simulate cget -bg]
+       set simulate_oldbg [.menubar.simulate cget -bg]
        .menubar.simulate configure -bg red
-       xschem set semaphore [expr [xschem get semaphore] +1]
        simulate
-       xschem set semaphore [expr [xschem get semaphore] -1]
-       .menubar.simulate configure -bg $oldbg
+       # .menubar.simulate configure -bg $simulate_oldbg
       }
    button .menubar.netlist -text "Netlist"  -activebackground red  -takefocus 0\
      -command {

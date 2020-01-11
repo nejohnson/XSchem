@@ -52,17 +52,17 @@ proc execute_fileevent {id} {
         if {[lindex $details 0] eq "CHILDSTATUS"} {
             set status [lindex $details 2]
             if { $execute_status($id) } {
-              viewdata "pipe error: $execute_cmd($id)\nstderr:\n$err\ndata:\n$execute_data($id)" ro
+              viewdata "Failed: $execute_cmd($id)\nstderr:\n$err\ndata:\n$execute_data($id)" ro
             }
         } else {
           if { $execute_status($id) } {
-            viewdata "$execute_cmd($id) completed.\nstderr:\n$err\ndata:\n$execute_data($id)" ro
+            viewdata "Completed: $execute_cmd($id)\nstderr:\n$err\ndata:\n$execute_data($id)" ro
           }
         }
       } 
       if { $status == 0 } {
         if { $execute_status($id) } {
-          viewdata "$execute_cmd($id) completed.\ndata:\n$execute_data($id)" ro
+          viewdata "Completed: $execute_cmd($id)\ndata:\n$execute_data($id)" ro
         }
       }
       if {[info exists execute_wait_flag]} {
@@ -263,7 +263,7 @@ proc key_binding {  s  d } {
 proc edit_file {filename} {
  
  global editor
- eval exec $editor  $filename & ;# 20161119
+ eval execute_wait 0  $editor  $filename & ;# 20161119
  return {}
 }
 
@@ -321,12 +321,20 @@ proc set_sim_defaults {} {
   ### spice 
   global sim terminal USER_CONF_DIR
 
-  if { ![info exists sim] } {
+  if { [winfo exists .sim] } {
+    foreach tool $sim(tool_list) {
+      for {set i 0} {$i < $sim($tool,n)} { incr i} {
+        set sim($tool,$i,cmd) [.sim.topf.f.scrl.center.$tool.r.$i.cmd get 1.0 {end - 1 chars}]
+      }
+    }
+    return
+  }  else {
+    if { [info exists sim] } {unset sim}
     set sim(tool_list) {spice spicewave verilog verilogwave vhdl vhdlwave}
     set_ne sim(spice,0,cmd) {$terminal -e 'ngspice -i "$N" -a || sh'}
     set_ne sim(spice,0,name) {Ngspice}
     set_ne sim(spice,0,fg) 0
-    set_ne sim(spice,0,st) 1
+    set_ne sim(spice,0,st) 0
     
     set_ne sim(spice,1,cmd) {ngspice -b -r "$n.raw" -o "$n.out" "$N"}
     set_ne sim(spice,1,name) {Ngspice batch}
@@ -429,6 +437,7 @@ proc simconf_yview { args } {
 proc simconf {} {
   global sim USER_CONF_DIR simconf_default_geometry
 
+  catch { destroy .sim } 
   set_sim_defaults
   toplevel .sim -class dialog
   wm geometry .sim 700x340
@@ -491,6 +500,8 @@ If for a given tool there are multiple rows then the radiobutton
 tells which one will be called by xschem.
 Variables should be used with the usual substitution character $: $n, $N, etc.
 Foreground checkbutton tells xschem to wait for child process to finish.
+Status checkbutton tells xschem to report a status dialog (stdout, stderr,
+exit status) when process finishes.
 This is useful for tasks that execute quickly and for which xschem may display
 the result / error reporting.
 Any changes made in the command or tool name entries will be saved in 
@@ -506,11 +517,13 @@ To reset to default just delete the ~/.xschem/simrc file manually.
         set sim($tool,$i,cmd) [.sim.topf.f.scrl.center.$tool.r.$i.cmd get 1.0 {end - 1 chars}]
       }
     }
-    destroy .sim
+    # destroy .sim
     save_sim_defaults ${USER_CONF_DIR}/simrc
     # puts "saving simrc"
   }
-
+  button .sim.bottom.close -text Close -command {
+    destroy .sim
+  }
   pack .sim.bottom.cancel -side left -anchor w
   pack .sim.bottom.help -side left
   #foreach tool $sim(tool_list) {
@@ -523,6 +536,7 @@ To reset to default just delete the ~/.xschem/simrc file manually.
   #  pack .sim.bottom.add${tool} -side left
   #}
   pack .sim.bottom.ok -side right -anchor e
+  pack .sim.bottom.close -side right
   pack .sim.topf -fill both -expand yes
   pack .sim.bottom -fill x
   if { [info exists simconf_default_geometry]} {
@@ -538,7 +552,7 @@ To reset to default just delete the ~/.xschem/simrc file manually.
   simconf_yview place
   set maxsize [expr [winfo height .sim.topf.f.scrl] + [winfo height .sim.bottom]]
   wm maxsize .sim 9999 $maxsize
-  tkwait window .sim
+  # tkwait window .sim
 }
 
 proc simconf_add {tool} {
@@ -576,13 +590,12 @@ proc simulate {} {
     set fg  $sim($tool,$def,fg)
     set st  $sim($tool,$def,st)
     if {$fg} {
-      set fg {fg}
+      set fg {execute_wait}
     } else {
       set fg {execute}
     }
     set cmd [subst -nocommands $sim($tool,$def,cmd)]
    
-    # eval exec $cmd
     task $cmd "$netlist_dir" $fg $st
     if {$fg eq {fg} && $task_error} {viewdata $task_output; return}
     # if { $fg eq {fg}  && $task_output ne {}  && ![regexp $cmd {$terminal}]} { }
@@ -622,13 +635,12 @@ proc waves {} {
     set fg  $sim($tool,$def,fg)
     set st  $sim($tool,$def,st)
     if {$fg} {
-      set fg {fg}
+      set fg {execute_wait}
     } else {
-      set fg {bg}
+      set fg {execute}
     }
     set cmd [subst -nocommands $sim($tool,$def,cmd)]
    
-    # eval exec $cmd
     task $cmd "$netlist_dir" $fg $st
     if {$fg eq {fg} && $task_error} {viewdata $task_output; return}
     if { $fg eq {fg} } {
@@ -716,7 +728,7 @@ proc save_file_dialog { msg ext global_initdir {initialfile {}} {overwrt 1} } {
   set dir [file dirname $r]
   # 20181011 no change initdir if operation cancelled by user
   if { $r ne {} } { set initdir $dir }
-  return $r ;# removed file normalize
+  return $r
 }
 
 proc is_xschem_file {f} {
@@ -975,7 +987,7 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
       } elseif { $dir2 eq {.} } {
         set d  $myload_dir1
       } else {
-        set d "$myload_dir1/$dir2" ;# removed file normalize
+        set d "$myload_dir1/$dir2"
       }
       if { [file isdirectory $d]} {
         bind .myload.l.paneright.pre <Expose> {}
@@ -1005,7 +1017,7 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
   xschem preview_window destroy {} {} 
   set initdir "$myload_dir1"
   if { $myload_retval ne {} } {
-    return "$myload_dir1/$myload_retval" ;# removed file normalize
+    return "$myload_dir1/$myload_retval"
   } else {
     return {}
   }
@@ -1664,7 +1676,7 @@ proc edit_vi_prop {txtlabel} {
  set filename $filename.$suffix
 
  write_data $retval $XSCHEM_TMP_DIR/$filename
- eval execute_wait $editor $XSCHEM_TMP_DIR/$filename ;# 20161119
+ eval execute_wait 0 $editor $XSCHEM_TMP_DIR/$filename ;# 20161119
 
  if $tcl_debug<=-1 then {puts "edit_vi_prop{}:\n--------\nretval=$retval\n---------\n"}
  if $tcl_debug<=-1 then {puts "edit_vi_prop{}:\n--------\nsymbol=$symbol\n---------\n"}
@@ -1696,7 +1708,7 @@ proc edit_vi_netlist_prop {txtlabel} {
  regsub -all {\\?"} $retval {"} retval
  write_data $retval $XSCHEM_TMP_DIR/$filename
  if { [regexp vim $editor] } { set ftype "\{-c :set filetype=$netlist_type\}" } else { set ftype {} }
- eval execute_wait $editor  $ftype $XSCHEM_TMP_DIR/$filename
+ eval execute_wait 0 $editor  $ftype $XSCHEM_TMP_DIR/$filename
 
  if $tcl_debug<=-1 then {puts "edit_vi_prop{}:\n--------\n$retval\n---------\n"}
 
@@ -2834,10 +2846,12 @@ font configure Underline-Font -underline true -size 24
       }
    button .menubar.simulate -text "Simulate"  -activebackground red  -takefocus 0\
      -command {
-       set simulate_oldbg [.menubar.simulate cget -bg]
-       .menubar.simulate configure -bg red
-       simulate
-       # .menubar.simulate configure -bg $simulate_oldbg
+       if { ![info exists simulate_oldbg] } {
+         set simulate_oldbg [.menubar.simulate cget -bg]
+         .menubar.simulate configure -bg red
+         simulate
+         # .menubar.simulate configure -bg $simulate_oldbg
+       }
       }
    button .menubar.netlist -text "Netlist"  -activebackground red  -takefocus 0\
      -command {

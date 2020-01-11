@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC6 file_version=1.1}
+v {xschem version=2.9.5_RC7 file_version=1.1}
 G {}
 V {// test}
 S {* test}
@@ -16,8 +16,9 @@ voltages, strengths and capacitive loading of all nodes.
 
 this allows to simulate voltage transients, charge sharing,
 floating conditions and more.
-the example uses bidirectional analog switches and simulates charge pumps 
-which have a finite driving capability (output impedance)} 10 -410 0 0 0.3 0.3 {}
+the example uses bidirectional analog switches
+and simulates charge pumps which have a finite
+driving capability (output impedance)} 10 -410 0 0 0.3 0.3 {}
 T {VHDL DESIGN EXAMPLE} 140 -1290 0 0 1 1 {}
 T {set netlist mode to VHDL
 - create netlist

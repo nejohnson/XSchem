@@ -1223,9 +1223,12 @@ int Tcl_AppInit(Tcl_Interp *inter)
  enable_layers();
 
  if(filename) {
+    char s[PATH_MAX+100];
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): filename %s given, removing symbols\n", filename);
     remove_symbols();
-    load_schematic(0, 1, abs_sym_path(filename, ""), 1); /* 20180925.1 */
+    my_snprintf(s, S(s), "file normalize %s", filename);
+    tcleval(s);
+    load_schematic(0, 1, abs_sym_path(Tcl_GetStringResult(interp), ""), 1); /* 20180925.1 */
  }
  else { 
    char * tmp; /* 20121110 */

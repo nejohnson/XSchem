@@ -81,7 +81,7 @@ int callback(int event, int mx, int my, KeySym key,
  state &=~Mod2Mask; /* 20170511 filter out NumLock status */
  if(semaphore)
  {
-   if(debug_var>=0) 
+   if(debug_var>=2) 
      if(event != MotionNotify) fprintf(errfp, "callback(): reentrant call of callback(), semaphore=%d\n", semaphore);
    /* if(event==Expose) {
     *   XCopyArea(display, save_pixmap, window, gctiled, mx,my,button,aux,mx,my);

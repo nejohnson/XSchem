@@ -195,8 +195,8 @@ h3{
 
 /* mobile rendering  */
 @media all and (-webkit-min-device-pixel-ratio: 2) and (min-resolution: 192dpi)  and (orientation : portrait){ 
-  :not(table) {
-    font-size:40px;
+  * {
+    font-size:20px;
   }
   .prev {
     width: 10%;
@@ -218,8 +218,8 @@ h3{
   }
 }
 @media all and (-webkit-min-device-pixel-ratio: 2) and (min-resolution: 192dpi)  and (orientation : landscape){ 
-  :not(table) {
-    font-size:30px;
+  * {
+    font-size:25px;
   }
 
   li{

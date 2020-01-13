@@ -7,6 +7,7 @@
 /* Local styling goes here */
 p{padding: 15px  30px 10px;}
 .content{ background-image:url('xschem_bg2.png');}
+th,td {font-size: 75%;padding: 3px;}
 </style>
 
 </head>
@@ -16,7 +17,7 @@ p{padding: 15px  30px 10px;}
 <!-- navigation buttons -->
 <a href="tutorial_xschem_slides07.html" class="prev">PREV</a>
 <a href="tutorial_xschem_slides01.html" class="home">UP</a>
-<a href="tutorial_xschem_slides09.html" class="next">NEXT</a>
+<a href="tutorial_xschem_slides081.html" class="next">NEXT</a>
 
 
  <!-- slide title -->
@@ -27,7 +28,19 @@ p{padding: 15px  30px 10px;}
    <li>In XSCHEM a schematic usually contains all the details needed to run a simulation.</li>
    <li> When a schematic is correctly drawn just generate the netlist pushing the Netlist button, and then start simulation
         by pressing the Simulate button.</li>
-   <li> XSCHEM has bindings to waveform viewers as well as simulators. Press the Waves button after simulation is completed to view the results.</li>
+   <li> XSCHEM has bindings to waveform viewers as well as simulators. Press the Waves button after simulation
+        is completed to view the results.<br>
+    <table style="margin-top:20px;margin-bottom: 0px;">
+     <tr><th>TOOL</th><th>TYPE</th><th>XSCHEM SUPPORT</th></tr>
+     <tr><td>ngspice</td><td>Simulator</td><td>Works</td></tr>
+     <tr><td>Icarus Verilog</td><td>Simulator</td><td>Works</td></tr>
+     <tr><td>GHDL</td><td>Simulator</td><td>Works</td></tr>
+     <tr><td>Hspice</td><td>Proprietary Simulator</td><td>Works</td></tr>
+     <tr><td>Gtkwave</td><td>Viewer</td><td>Works</td></tr>
+     <tr><td>Gaw</td><td>Viewer</td><td>Works</td></tr>
+     <tr><td>Waveview</td><td>Proprietary Viewer</td><td>Works</td></tr>
+    </table>
+   </li>
    <li> With proper netlisting attributes on leaf cells the same design can be simulated unchanged in Spice, Verilog, VHDL.
   </ul>
  </h3>

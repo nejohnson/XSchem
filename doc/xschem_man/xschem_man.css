@@ -36,7 +36,7 @@ li{
 table {
  border-collapse: collapse;
  margin-left: 5%;
- margin-right: 3%;
+ margin-right: 5%;
  margin-bottom: 40px;
 }
 th{
@@ -195,7 +195,7 @@ h3{
 
 /* mobile rendering  */
 @media all and (-webkit-min-device-pixel-ratio: 2) and (min-resolution: 192dpi)  and (orientation : portrait){ 
-  * {
+  :not(table) {
     font-size:40px;
   }
   .prev {
@@ -218,7 +218,7 @@ h3{
   }
 }
 @media all and (-webkit-min-device-pixel-ratio: 2) and (min-resolution: 192dpi)  and (orientation : landscape){ 
-  * {
+  :not(table) {
     font-size:30px;
   }
 

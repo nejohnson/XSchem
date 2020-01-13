@@ -40,7 +40,7 @@ proc set_ne { var val } {
 # execute service function
 proc execute_fileevent {id} {
   global execute_id execute_pipe execute_data execute_cmd execute_wait_flag simulate_oldbg
-  global task_output task_error execute_status
+  global execute_status execute_callback
   append execute_data($id) [read $execute_pipe($id) 1024]
   if {[eof $execute_pipe($id)]} {
       fileevent $execute_pipe($id) readable ""
@@ -65,15 +65,11 @@ proc execute_fileevent {id} {
           viewdata "Completed: $execute_cmd($id)\ndata:\n$execute_data($id)" ro
         }
       }
-      if {[info exists execute_wait_flag]} {
-        set task_error $err
-        set task_output $execute_data($id)
-      }
+      if { [info exists execute_callback($id)] } { eval $execute_callback($id); unset execute_callback($id) } 
       unset execute_pipe($id)
       unset execute_data($id)
       unset execute_status($id)
       unset execute_cmd($id)
-      if { [info exists simulate_oldbg] } { .menubar.simulate configure -bg $simulate_oldbg; unset simulate_oldbg}
   }
 }
 
@@ -86,6 +82,7 @@ proc execute_wait {status args} {
   vwait execute_pipe($id)
   xschem set semaphore [expr [xschem get semaphore] -1]
   unset execute_wait_flag
+  return $id
 }
 
 # equivalent to the 'exec' tcl function but keeps the event loop
@@ -165,22 +162,6 @@ proc netlist {source_file show netlist_file} {
  }
  return {}
 }
-
-# 20161216 execute task in other work dir
-proc task { cmd {dir .}  {background fg} {status 0}} {
-  global task_output task_error
-  # puts "task: $cmd"
-  if {![string compare $background {bg} ] } {
-    set task_error [catch {exec sh -c "cd '$dir'; $cmd" &} task_output]
-  } elseif {![string compare $background  {fg} ] } {
-    set task_error [catch {exec sh -c "cd '$dir'; $cmd"} task_output]
-  } elseif {![string compare $background {execute} ] } {
-    catch {execute $status sh -c "cd '$dir'; $cmd"}
-  } elseif {![string compare $background {execute_wait} ] } {
-    catch {execute_wait $status sh -c "cd '$dir'; $cmd"}
-  }
-}
-
 
 # 20161121
 proc convert_to_pdf {filename dest} {
@@ -263,7 +244,7 @@ proc key_binding {  s  d } {
 proc edit_file {filename} {
  
  global editor
- eval execute_wait 0  $editor  $filename & ;# 20161119
+ eval execute 0  $editor  $filename
  return {}
 }
 
@@ -369,14 +350,14 @@ proc set_sim_defaults {} {
     ### verilog
     set_ne sim(verilog,0,cmd) {iverilog -o .verilog_object -g2012 "$N" && vvp .verilog_object}
     set_ne sim(verilog,0,name) {Icarus verilog}
-    set_ne sim(verilog,0,fg) 1
-    set_ne sim(verilog,0,st) 0
+    set_ne sim(verilog,0,fg) 0
+    set_ne sim(verilog,0,st) 1
     # number of configured verilog simulators, and default one
     set_ne sim(verilog,n) 1
     set_ne sim(verilog,default) 0
     
     ### verilog wave view
-    set_ne sim(verilogwave,0,cmd) {gtkwave dumpfile.vcd "$n.sav" 2>/dev/null}
+    set_ne sim(verilogwave,0,cmd) {gtkwave dumpfile.vcd "$N.sav" 2>/dev/null}
     set_ne sim(verilogwave,0,name) {Gtkwave}
     set_ne sim(verilogwave,0,fg) 0
     set_ne sim(verilogwave,0,st) 0
@@ -387,14 +368,14 @@ proc set_sim_defaults {} {
     ### vhdl
     set_ne sim(vhdl,0,cmd) {ghdl -c --ieee=synopsys -fexplicit "$N" -r "$s" --wave="$n.ghw"}
     set_ne sim(vhdl,0,name) {Ghdl}
-    set_ne sim(vhdl,0,fg) 1
-    set_ne sim(vhdl,0,st) 0
+    set_ne sim(vhdl,0,fg) 0
+    set_ne sim(vhdl,0,st) 1
     # number of configured vhdl simulators, and default one
     set_ne sim(vhdl,n) 1
     set_ne sim(vhdl,default) 0
     
     ### vhdl wave view
-    set_ne sim(vhdlwave,0,cmd) {gtkwave "$n.ghw" "$n.sav" 2>/dev/null}
+    set_ne sim(vhdlwave,0,cmd) {gtkwave "$n.ghw" "$N.sav" 2>/dev/null}
     set_ne sim(vhdlwave,0,name) {Gtkwave}
     set_ne sim(vhdlwave,0,fg) 0
     set_ne sim(vhdlwave,0,st) 0
@@ -565,15 +546,14 @@ proc simconf_add {tool} {
   incr sim($tool,n)
 }
 
-proc simulate {} { 
+proc simulate {{callback {}}} { 
   ## $N : netlist file full path (/home/schippes/simulations/opamp.spice) 
   ## $n : netlist file full path with extension chopped (/home/schippes/simulations/opamp)
   ## $s : schematic name (opamp)
   ## $d : netlist directory
 
-  global netlist_dir netlist_type computerfarm terminal current_dirname
-  global sim task_error task_output
-
+  global netlist_dir netlist_type computerfarm terminal current_dirname sim
+  global execute_callback
   set_sim_defaults
   
   if { [select_netlist_dir 0] ne {}} {
@@ -596,14 +576,8 @@ proc simulate {} {
     }
     set cmd [subst -nocommands $sim($tool,$def,cmd)]
    
-    task $cmd "$netlist_dir" $fg $st
-    if {$fg eq {fg} && $task_error} {viewdata $task_output; return}
-    # if { $fg eq {fg}  && $task_output ne {}  && ![regexp $cmd {$terminal}]} { }
-    if { $fg eq {fg} && ![regexp $cmd {$terminal}]} {
-      
-      write_data $task_output "$netlist_dir/.sim_output.txt"
-      textwindow $netlist_dir/.sim_output.txt ro
-    }
+    set id [$fg $st sh -c "cd $netlist_dir; $cmd"]
+    set execute_callback($id) $callback
   }
 }
 
@@ -614,8 +588,7 @@ proc waves {} {
   ## $s : schematic name (opamp)
   ## $d : netlist directory
 
-  global netlist_dir netlist_type computerfarm terminal current_dirname
-  global sim task_error task_output
+  global netlist_dir netlist_type computerfarm terminal current_dirname sim
 
   set_sim_defaults
   
@@ -641,12 +614,7 @@ proc waves {} {
     }
     set cmd [subst -nocommands $sim($tool,$def,cmd)]
    
-    task $cmd "$netlist_dir" $fg $st
-    if {$fg eq {fg} && $task_error} {viewdata $task_output; return}
-    if { $fg eq {fg} } {
-      write_data $task_output "$netlist_dir/.sim_output.txt"
-      textwindow $netlist_dir/.sim_output.txt ro
-    }
+    $fg $st sh -c "cd $netlist_dir; $cmd"
   }
 }
 # ============================================================
@@ -676,7 +644,7 @@ proc get_shell { curpath } {
  global netlist_dir netlist_type tcl_debug
  global  terminal
 
- task "$terminal" "$curpath" bg 0
+ execute 0 sh -c "cd $curpath; $terminal"
 }
 
 proc edit_netlist {schname } {
@@ -688,13 +656,13 @@ proc edit_netlist {schname } {
  if { [select_netlist_dir 0] ne "" } {
    # puts "edit_netlist: \"$editor $ftype  ${schname}.v\" \"$netlist_dir\" bg"
    if { $netlist_type=="verilog" } {
-     task "$editor $ftype  \"${tmpname}.v\"" "$netlist_dir" bg 0
+     execute 0  sh -c "cd $netlist_dir; $editor $ftype  \"${tmpname}.v\""
    } elseif { $netlist_type=="spice" } {
-     task "$editor $ftype \"${tmpname}.spice\"" "$netlist_dir" bg 0
+     execute 0  sh -c "cd $netlist_dir; $editor $ftype \"${tmpname}.spice\""
    } elseif { $netlist_type=="tedax" } {
-     task "$editor $ftype \"${tmpname}.tdx\"" "$netlist_dir" bg 0
+     execute 0 sh -c "cd $netlist_dir; $editor $ftype \"${tmpname}.tdx\""
    } elseif { $netlist_type=="vhdl" } { 
-     task "$editor $ftype \"${tmpname}.vhdl\"" "$netlist_dir" bg 0
+     execute 0 sh -c "cd $netlist_dir; $editor $ftype \"${tmpname}.vhdl\""
    }
  }
  return {}
@@ -1475,8 +1443,8 @@ proc about {} {
   pack .about.descr
   pack .about.copyright
   pack .about.close
-  bind .about.link <Button-1> { task {xdg-open http://repo.hu/projects/xschem} . execute 0 }
-  bind .about.link2 <Button-1> { task {xdg-open http://repo.hu/projects/coraleda} . execute 0 }
+  bind .about.link <Button-1> { execute 0  xdg-open http://repo.hu/projects/xschem}
+  bind .about.link2 <Button-1> { execute 0  xdg-open http://repo.hu/projects/coraleda}
 }
 
 proc property_search {} {
@@ -2274,7 +2242,6 @@ proc abs_sym_path {fname {ext {} } } {
       if { [file exists "${path_elem}/${fname}"] &&
         ![regexp {/} $fname] 
       } {
-        #puts here2
         set name  "$path_elem/$lib_cell"
         break
       }
@@ -2849,8 +2816,7 @@ font configure Underline-Font -underline true -size 24
        if { ![info exists simulate_oldbg] } {
          set simulate_oldbg [.menubar.simulate cget -bg]
          .menubar.simulate configure -bg red
-         simulate
-         # .menubar.simulate configure -bg $simulate_oldbg
+         simulate {.menubar.simulate configure -bg $::simulate_oldbg; unset ::simulate_oldbg}
        }
       }
    button .menubar.netlist -text "Netlist"  -activebackground red  -takefocus 0\

@@ -97,10 +97,6 @@ set initial_geometry {800x600}
 ## Warning: this is normally not allowed in any simulation netlist.
 set disable_unique_names 0
 
-## set to 1 to present a dialog with list of defined library directories
-## to select symbols / schematics from
-set use_list_dirs 0
-
 ## if set to 1 continue drawing lines / wires after click
 # set persistent_command 1
 

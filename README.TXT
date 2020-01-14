@@ -38,6 +38,57 @@ If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
 
+2.9.5_RC8
+xschem presentation slides for F-Si conference.
+
+better tk_exec: collect exit status from spawn background processes via async pipe fileevent
+
+new 'simconf' framework: all bindings to simulators / external tools are defined in a 'simrc' file
+decide which simulator/viewer to use, add or change command options.
+No tools / paths are now hardcoded anywhere in the core files.
+
+Add 'vhdl_primitive', 'verilog_primitive', 'spice_primitive' attributes for symbols.
+If any of these is set to true corresponding netlister will ignore completely symbol definition (no 'entity/component' for VHDL, 
+no 'module' for verilog, no '.subckt' for spice) and print in netlist only the items as specified in 
+'vhdl_format', 'verilog_format' or 'format' respectively.
+
+raise toplevel dialogs above xschem drawing area, not above everything 
+
+heuristic test added in preview code to decide if file is a valid xschem format
+(so preview is possible on older xschem formats too)
+
+preserve instance name up to numeric index when copying instances and 'Allow duplicated instance names' is not active:
+DIODE1 --> DIODE2 instead of D2
+eliminated numerous graphical artifacts due to AA text.
+
+better align nocairo text with cairo text for more consistent pdf / svg plots.
+gschemtoxschem.awk imports gschem schematic / symbols
+all gschem example circuits and all gedasymbols.org (1289 symbols) translated to xschem
+
+block attribute deletion works (no special DELETE key anymore needed)
+do not populate attribute string from symbol template if empty when editing symbol attributes.
+pick refdes from symbol template when netlisting if missing from instance attributes.
+code cleanup, removed some static storage.
+
+default key for fullscreen set to '\' 
+
+remap-able pinnumbers on symbols created by symgen.awk, disabled tclreadline autocompleter,
+use only default (file expansion).
+
+allow more exotic pin names in symbols (slashes, leading digits etc)
+add comptag lines for additional key-value attributes in tedax netlist
+
+lock=true attribute makes component unselectable (good for page title )
+locked components can be unlocked by right-clicking on them (to bring up the edit attribute form) and
+deleting or changing the lock=true attribute
+
+preview window when opening files - inserting components.
+add --tcl command option to execute tcl commands before 
+ngspice raw file to vcd converter so gtkwave can be used for analog sims
+file browser is a paned window (left: dirs, right: files). Remember window size and pane position across invocations.
+newly inserted symbols now immediately start following the mouse so
+devices/ symbols changed putting all pinnumber texts to layer 13 so they can be disabled
+
 2.9.5_RC1
 - added comments in xschemrc for new available options (tk_scaling and enable_layer() )
  

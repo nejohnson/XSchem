@@ -1477,7 +1477,8 @@ void create_sch_from_sym(void)
   if(lastselected==1 && selectedgroup[0].type==ELEMENT)
   {
     my_snprintf(schname, S(schname), "%s", 
-                abs_sym_path(inst_ptr[selectedgroup[0].n].name, ".sch"));
+                add_ext(abs_sym_path(inst_ptr[selectedgroup[0].n].name, ""), ".sch"));
+
     if( !stat(schname, &buf) ) {
       my_strdup(353, &savecmd, "ask_save \" create schematic file: ");
       my_strcat(354, &savecmd, schname);

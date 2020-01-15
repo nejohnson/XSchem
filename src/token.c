@@ -2405,7 +2405,12 @@ char *translate(int inst, char* s)
      my_free(&pin_num_or_name);
    } else if(strcmp(token,"@sch_last_modified")==0) {
 
-    my_strncpy(file_name, abs_sym_path(inst_ptr[inst].name, ".sch"), S(file_name));
+    my_strncpy(file_name, abs_sym_path(get_tok_value(
+      (inst_ptr[inst].ptr+instdef)->prop_ptr, "schematic",0 ), "")
+      , S(file_name));
+    if(!file_name[0]) {
+      my_strncpy(file_name, add_ext(abs_sym_path(inst_ptr[inst].name, ""), ".sch"), S(file_name));
+    }
     if(!stat(file_name , &time_buf)) {
       tm=localtime(&(time_buf.st_mtime) );
       tmp=strftime(date, sizeof(date), "%Y-%m-%d  %H:%M:%S", tm);

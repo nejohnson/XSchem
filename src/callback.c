@@ -1277,29 +1277,11 @@ int callback(int event, int mx, int my, KeySym key,
     draw();
     break;
    }
-   if(0 && (key=='~') && (state & ControlMask))    /* testmode:  for performance testing */
+   if((0 && key=='~') && (state & ControlMask))    /* testmode:  for performance testing */
    {
-    int tmp;
-    char *s="(aaa,bbb)";
-    char *s1="2*(aaa(1),bbb)";
-    char *s2="2*(aaa,bbb)";
-    char *s3="aaa(vbat)";
-    char *s4="+3.3V";
-    char *s5="2*AAA(3)";
-    char *s6="usb_io+";
-    char *s7="LDY[3:0]*4";
-    char *s8="LDY[3..0]*4";
-
-    fprintf(errfp, "%s --> %s\n", s, expandlabel(s, &tmp)); 
-    fprintf(errfp, "%s --> %s\n", s1, expandlabel(s1, &tmp)); 
-    fprintf(errfp, "%s --> %s\n", s2, expandlabel(s2, &tmp)); 
-    fprintf(errfp, "%s --> %s\n", s3, expandlabel(s3, &tmp)); 
-    fprintf(errfp, "%s --> %s\n", s4, expandlabel(s4, &tmp)); 
-    fprintf(errfp, "%s --> %s\n", s5, expandlabel(s5, &tmp)); 
-    fprintf(errfp, "%s --> %s\n", s6, expandlabel(s6, &tmp)); 
-    fprintf(errfp, "%s --> %s\n", s7, expandlabel(s7, &tmp)); 
-    fprintf(errfp, "%s --> %s\n", s8, expandlabel(s8, &tmp)); 
-    fprintf(errfp, "%s\n", get_tok_value("type=diode template=\"name=D1 m=1\"", "template", 2));
+    char s[100]= "pippo.sym";
+    fprintf(errfp, "%s\n", add_ext(s, ".sch"));
+    
     break;
    }
    if(0 && (key=='|') && !(state&ControlMask))         /* testmode */

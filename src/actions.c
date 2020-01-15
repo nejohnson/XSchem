@@ -179,7 +179,7 @@ const char *add_ext(const char *f, const char *ext)
 
   if(debug_var>=1) fprintf(errfp, "add_ext(): f=%s ext=%s\n", f, ext);
   if((p=strrchr(f,'.'))) {
-    my_strncpy(ff, f, (p-f));
+    my_strncpy(ff, f, (p-f) + 1);
     p = ff + (p-f);
     if(debug_var>=1) fprintf(errfp, "add_ext() 1: ff=%s\n", ff);
   } else {

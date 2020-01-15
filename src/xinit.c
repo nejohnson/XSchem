@@ -913,6 +913,10 @@ int Tcl_AppInit(Tcl_Interp *inter)
 
  if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done step a1 of xinit()\n");
  
+ if(tcl_command) {
+   tcleval(tcl_command);
+ }
+ 
  /*                                */
  /*  EXECUTE xschem.tcl            */
  /*                                */
@@ -1206,10 +1210,6 @@ int Tcl_AppInit(Tcl_Interp *inter)
  /*                                */
  /*  START PROCESSING USER OPTIONS */
  /*                                */
- if(tcl_command) {
-   tcleval(tcl_command);
- }
- 
  if(event_reporting) {
    tcleval("set tcl_prompt1 {}");
    tcleval("set tcl_prompt2 {}");

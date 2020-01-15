@@ -355,7 +355,7 @@ int my_strncpy(char *d, const char *s, int n)
       d[i] = '\0';
       return i; 
     }
-   i++;
+    i++;
   }
   return i;
 }

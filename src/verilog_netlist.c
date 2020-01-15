@@ -341,8 +341,8 @@ void verilog_block_netlist(FILE *fd, int i)  /*20081205 */
        my_strncpy(filename, abs_sym_path(str_tmp, ""), S(filename));
        load_schematic(0, 1,filename, 0);
      } else {
-       verilog_stop? load_schematic(0, 0, abs_sym_path(instdef[i].name, ".sch"), 0) :   /* 20190518 */
-                     load_schematic(0, 1, abs_sym_path(instdef[i].name, ".sch"), 0);
+       verilog_stop? load_schematic(0, 0, add_ext(abs_sym_path(instdef[i].name, ""), ".sch"), 0) :   /* 20190518 */
+                     load_schematic(0, 1, add_ext(abs_sym_path(instdef[i].name, ""), ".sch"), 0);
      }
 
 

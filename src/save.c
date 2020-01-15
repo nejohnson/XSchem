@@ -1476,9 +1476,12 @@ void create_sch_from_sym(void)
   if(lastselected > 1)  return;
   if(lastselected==1 && selectedgroup[0].type==ELEMENT)
   {
-    my_snprintf(schname, S(schname), "%s", 
-                add_ext(abs_sym_path(inst_ptr[selectedgroup[0].n].name, ""), ".sch"));
-
+    my_strncpy(schname, abs_sym_path(get_tok_value(
+      (inst_ptr[selectedgroup[0].n].ptr+instdef)->prop_ptr, "schematic",0 ), "")
+      , S(schname));
+    if(!schname[0]) {
+      my_strncpy(schname, add_ext(abs_sym_path(inst_ptr[selectedgroup[0].n].name, ""), ".sch"), S(schname));
+    }
     if( !stat(schname, &buf) ) {
       my_strdup(353, &savecmd, "ask_save \" create schematic file: ");
       my_strcat(354, &savecmd, schname);

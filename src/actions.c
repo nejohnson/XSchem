@@ -179,7 +179,7 @@ const char *add_ext(const char *f, const char *ext)
 
   if(debug_var>=1) fprintf(errfp, "add_ext(): f=%s ext=%s\n", f, ext);
   if((p=strrchr(f,'.'))) {
-    my_strncpy(ff, f, (p-f)+1);
+    my_strncpy(ff, f, (p-f));
     p = ff + (p-f);
     if(debug_var>=1) fprintf(errfp, "add_ext() 1: ff=%s\n", ff);
   } else {
@@ -964,7 +964,7 @@ void schematic_in_new_window(void)
     (inst_ptr[selectedgroup[0].n].ptr+instdef)->prop_ptr, "schematic",0 ), "")
     , S(filename));
   if(!filename[0]) {
-    my_strncpy(filename, abs_sym_path(inst_ptr[selectedgroup[0].n].name, ".sch"), S(filename));
+    my_strncpy(filename, add_ext(abs_sym_path(inst_ptr[selectedgroup[0].n].name, ""), ".sch"), S(filename));
   }
 
   new_window(filename, 0);
@@ -1077,7 +1077,7 @@ void descend_schematic(void)
   if(filename[0]) {
     load_schematic(0, 1,filename, 1);
   } else {
-    my_strncpy(filename, abs_sym_path(inst_ptr[selectedgroup[0].n].name, ".sch"), S(filename));
+    my_strncpy(filename, add_ext(abs_sym_path(inst_ptr[selectedgroup[0].n].name, ""), ".sch"), S(filename));
     load_schematic(0, 1, filename, 1);
   }
   if(hilight_nets) 

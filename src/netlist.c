@@ -1018,18 +1018,15 @@ int sym_vs_sch_pins()
   int endfile;
   char c;
   char filename[PATH_MAX];
-  fprintf(errfp, "sch: %s  : %d\n", schematic[currentsch], currentsch);
   n_syms = lastinstdef;
   for(i=0;i<n_syms;i++)
   {
-    fprintf(errfp, "i=%d, sym: %s\n", i, instdef[i].name);
     if( instdef[i].type && !strcmp(instdef[i].type,"subcircuit")) {
       rects = instdef[i].rects[PINLAYER];
       my_strncpy(filename, abs_sym_path(get_tok_value(instdef[i].prop_ptr, "schematic", 0), "") , S(filename));
       if(!filename[0]) {
         my_strncpy(filename, add_ext(abs_sym_path(instdef[i].name, ""), ".sch"), S(filename));
       }
-      fprintf(errfp, "filename=%s\n", filename);
       if(!stat(filename, &buf)) {
         fd = fopen(filename, "r");
         pin_cnt = 0;
@@ -1113,10 +1110,7 @@ int sym_vs_sch_pins()
               my_strdup(272, &type, instdef[symbol].type);
               if(type && (!strcmp(type, "ipin") || !strcmp(type, "opin") || !strcmp(type, "iopin"))) { 
                 pin_cnt++;
-                fprintf(errfp, "name=%s, lastinstdef=%d\n", name, lastinstdef);
                 my_strdup(272, &lab, get_tok_value(tmp, "lab", 0));
-                /* fprintf(errfp, "lab=%s\n", lab); */
-                /* fprintf(errfp, "type=%s\n", type); */
                 pin_match = 0;
                 for(j=0; j < rects; j++) {
                   my_strdup(272, &pin_name, get_tok_value(instdef[i].boxptr[PINLAYER][j].prop_ptr, "name", 0));

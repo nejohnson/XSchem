@@ -1107,14 +1107,14 @@ int sym_vs_sch_pins()
               }
               load_ascii_string(&tmp,fd);
               symbol = match_symbol(name);
-              my_strdup(272, &type, instdef[symbol].type);
+              my_strdup(276, &type, instdef[symbol].type);
               if(type && (!strcmp(type, "ipin") || !strcmp(type, "opin") || !strcmp(type, "iopin"))) { 
                 pin_cnt++;
-                my_strdup(272, &lab, get_tok_value(tmp, "lab", 0));
+                my_strdup(292, &lab, get_tok_value(tmp, "lab", 0));
                 pin_match = 0;
                 for(j=0; j < rects; j++) {
-                  my_strdup(272, &pin_name, get_tok_value(instdef[i].boxptr[PINLAYER][j].prop_ptr, "name", 0));
-                  my_strdup(272, &pin_dir, get_tok_value(instdef[i].boxptr[PINLAYER][j].prop_ptr, "dir", 0));
+                  my_strdup(293, &pin_name, get_tok_value(instdef[i].boxptr[PINLAYER][j].prop_ptr, "name", 0));
+                  my_strdup(294, &pin_dir, get_tok_value(instdef[i].boxptr[PINLAYER][j].prop_ptr, "dir", 0));
                   if( !strcmp(pin_name, lab)) {
                     if(!(
                           ( !strcmp(type, "ipin") && !strcmp(pin_dir, "in") ) ||

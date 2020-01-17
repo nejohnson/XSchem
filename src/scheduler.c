@@ -539,6 +539,16 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
      }
    }
 
+ } else if( !strcmp(argv[1],"symbols")) { /* 20171028 */
+   int i;
+   char n[100];
+   Tcl_AppendResult(interp, "\n", NULL);
+   for(i=0; i<lastinstdef; i++) {
+     my_snprintf(n , S(n), "%d", i);
+     Tcl_AppendResult(interp, "  {", n, " ", "{", instdef[i].name, "}", "}\n", NULL);
+   }
+   Tcl_AppendResult(interp, "\n", NULL);
+
  } else if( !strcmp(argv[1],"getprop")) { /* 20171028 */
 
 
@@ -1701,11 +1711,13 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
   }
   else {
     fprintf(errfp, "xschem set %s %s : invalid command.\n", argv[2], argv[3]);
+     return TCL_ERROR;
   }
  }
 
  else {
    fprintf(errfp, "xschem %s: invalid command.\n", argv[1]);
+   return TCL_ERROR;
  }
  return TCL_OK;
 }

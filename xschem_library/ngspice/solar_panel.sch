@@ -127,7 +127,7 @@ device="ceramic capacitor"}
 C {ammeter.sym} 280 -450 3 0 {name=Vpanel}
 C {lab_pin.sym} 1050 -440 0 1 {name=l10 sig_type=std_logic lab=VO}
 C {res.sym} 860 -500 0 0 {name=R2
-value="r='V(SW) < 0 ? 0.1 : 1e9'"
+value="r='V(SW) < 0 ? 0.01 : 1e9'"
 footprint=1206
 device=resistor
 m=1
@@ -135,7 +135,7 @@ m=1
 C {vsource.sym} 610 -780 0 0 {name=Vset1 value="pulse 0 1 0 1n 1n 1.9u 5u"}
 C {lab_pin.sym} 610 -750 0 0 {name=l13 sig_type=std_logic lab=0}
 C {res.sym} 800 -650 3 0 {name=R3
-value="r='V(CTRL1) > 0.5 ? 0.2 : 1e7'"
+value="r='V(CTRL1) > 0.5 ? 0.01 : 1e7'"
 footprint=1206
 device=resistor
 m=1

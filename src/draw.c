@@ -420,7 +420,6 @@ void draw_symbol(int what,int c, int n,int layer,int tmp_flip, int rot,
   if(inst_ptr[n].ptr == -1) return;
   if( (layer != PINLAYER && !enable_layer[layer]) ) return;
   if(!has_x) return;
-  if((what & HILIGHT) && (inst_ptr[n].flags & 4) ) return;
   if(layer==0) {
     x1=X_TO_SCREEN(inst_ptr[n].x1+xoffset);  /* 20150729 added xoffset, yoffset */
     x2=X_TO_SCREEN(inst_ptr[n].x2+xoffset);
@@ -512,10 +511,12 @@ void draw_symbol(int what,int c, int n,int layer,int tmp_flip, int rot,
 
       textlayer = c;
       #ifdef HAS_CAIRO
-      textlayer = symptr->txtptr[j].layer;
-      if(textlayer < 0 || textlayer >= cadlayers) textlayer = c;
+      if( !(c == PINLAYER && (inst_ptr[n].flags & 4))) {
+        textlayer = symptr->txtptr[j].layer;
+        if(textlayer < 0 || textlayer >= cadlayers) textlayer = c;
+      }
       #endif
-      if(enable_layer[textlayer]) {
+      if((c == PINLAYER && inst_ptr[n].flags & 4) ||  enable_layer[textlayer]) {
         #ifdef HAS_CAIRO
         textfont = symptr->txtptr[j].font;
         if(textfont && textfont[0]) {

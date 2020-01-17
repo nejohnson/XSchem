@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC7 file_version=1.1}
+v {xschem version=2.9.5_RC8 file_version=1.1}
 G {}
 V {}
 S {}
@@ -38,7 +38,6 @@ N 660 -240 670 -240 {lab=GND}
 N 590 -130 600 -130 {lab=GND}
 N 350 -280 450 -280 {lab=#net1}
 N 350 -370 350 -280 {lab=#net1}
-C {ipin.sym} 90 -330 0 0 {name=g0 lab=A}
 C {ipin.sym} 90 -280 0 0 {name=g1 lab=B}
 C {opin.sym} 700 -330 0 0 {name=g2 lab=Z verilog_type=wire}
 C {gnd.sym} 350 -100 0 0 {name=lg1 lab=GND}
@@ -72,3 +71,4 @@ C {lab_pin.sym} 540 -240 0 1 {name=l15 sig_type=std_logic lab=GND}
 C {lab_pin.sym} 670 -240 0 1 {name=l16 sig_type=std_logic lab=GND}
 C {lab_pin.sym} 600 -130 0 1 {name=l17 sig_type=std_logic lab=GND}
 C {title.sym} 160 -30 0 0 {name=l18 author="Stefan Schippers"}
+C {ipin.sym} 90 -330 0 0 {name=g0 lab=A}

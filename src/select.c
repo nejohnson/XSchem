@@ -609,7 +609,7 @@ void select_element(int i,unsigned short select_mode, int fast, int override_loc
     statusmsg(str,2);
     /* 20190526 */ /*Why this? 20191125 only on small schematics. slow down on big schematics */
     if(lastinst < 150) {
-      prepare_netlist_structs(0);
+      prepare_netlist_structs(1);
       for(j=0;j< (inst_ptr[i].ptr+instdef)->rects[PINLAYER] ;j++) 
       {
         if(inst_ptr[i].node && (inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][j].prop_ptr)
@@ -742,7 +742,7 @@ void select_connected_nets(void)
 {
   int i, n;
   char *str = NULL;
-  prepare_netlist_structs(1);
+  prepare_netlist_structs(0);
   rebuild_selected_array();
   for(i=0;i<lastselected;i++)
   {

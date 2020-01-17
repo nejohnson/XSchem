@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC7 file_version=1.1}
+v {xschem version=2.9.5_RC8 file_version=1.1}
 G {}
 V {}
 S {}
@@ -35,7 +35,7 @@ C {code_shown.sym} 30 -310 0 0 {name=CONTROL place=end value=".ac oct 1000 100 1
    write amp_xschem.raw
    let response = db(v(out)/v(in))
    settype decibel response
-   * gnuplot amp_xschem response xlog
+   gnuplot amp_xschem response xlog
    save all
    op
    write amp_xschem.raw

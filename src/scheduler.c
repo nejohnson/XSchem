@@ -351,7 +351,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
      prepared_hash_wires=0;
      prepared_netlist_structs=0;
      prepared_hilight_structs=0;
-     prepare_netlist_structs(1);
+     prepare_netlist_structs(0);
  }
  else if(!strcmp(argv[1],"clear"))
  {  
@@ -670,7 +670,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
      Tcl_AppendResult(interp, "xschem getprop: instance not found", NULL);
      return TCL_ERROR;
    }
-   prepare_netlist_structs(1);
+   prepare_netlist_structs(0);
    no_of_pins= (inst_ptr[i].ptr+instdef)->rects[PINLAYER];
    for(p=0;p<no_of_pins;p++) {
      if(!strcmp( get_tok_value((inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][p].prop_ptr,"name",0), argv[3])) {
@@ -1315,7 +1315,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
  else if(!strcmp(argv[1],"instance_pins")) {
    char *pins = NULL;
    int p, i, no_of_pins;
-   prepare_netlist_structs(1);
+   prepare_netlist_structs(0);
 
    if( (i = get_instance(argv[2])) < 0 ) {
      Tcl_AppendResult(interp, "xschem instance_pins: instance not found", NULL);

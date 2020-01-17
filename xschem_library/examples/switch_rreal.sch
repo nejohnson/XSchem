@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC5 file_version=1.1}
+v {xschem version=2.9.5_RC8 file_version=1.1}
 G {
 
 -- process
@@ -89,7 +89,6 @@ C {use.sym} 0 -310 0 0 {    library ieee,work;
     use std.textio.all;
 }
 C {ipin.sym} 80 -120 0 0 {name=p3 lab=ENAB}
-C {iopin.sym} 170 -40 0 0 {name=p1 lab=B sig_type=rreal}
 C {iopin.sym} 40 -40 0 1 {name=p2 lab=A sig_type=rreal}
 C {arch_declarations.sym} 20 -190 0 0 {
 
@@ -103,3 +102,4 @@ begin
   print("       " & x'SIMPLE_NAME & ".conduct=" & real'image(x.conduct) & " t= " & time'image(now));
 end print2;
 }
+C {iopin.sym} 170 -40 0 0 {name=p1 lab=B sig_type=rreal}

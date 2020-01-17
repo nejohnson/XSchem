@@ -287,7 +287,7 @@ void hash_inst_pin(int what, int i, int j)
   if(!prop_ptr || !get_tok_value(prop_ptr, "name",0)[0] || !get_tok_value(prop_ptr, "dir",0)[0]) {
     char str[2048];
 
-    my_snprintf(str, S(str), "symbol %s: missing all or name or dir attributes on pin %d\n", 
+    my_snprintf(str, S(str), "symbol %s: missing all or name or dir attributes on pin %d", 
         inst_ptr[i].name, j);
     statusmsg(str,2);
     if(!netlist_count) {
@@ -431,7 +431,7 @@ static void signal_short( char *n1, char *n2)
  if( n1 && n2 && strcmp( n1, n2) )
  {
    my_snprintf(str, S(str), "shorted: %s - %s", n1, n2);
-   if(debug_var>=1) fprintf(errfp, "signal_short(): signal_short: shorted: %s - %s \n", n1, n2);
+   if(debug_var>=1) fprintf(errfp, "signal_short(): signal_short: shorted: %s - %s", n1, n2);
    statusmsg(str,2);
    if(!netlist_count) {
       bus_hilight_lookup(n1, hilight_color,0);
@@ -586,7 +586,7 @@ void record_global_node(int what, FILE *fp, char *node)
    
 }
 
-void prepare_netlist_structs(int for_hilight_only)
+void prepare_netlist_structs(int for_netlist)
 {
  Box *rect;
  char tmp_str[30]; /* overflow safe */
@@ -612,8 +612,8 @@ void prepare_netlist_structs(int for_hilight_only)
  static char *global_node=NULL;
  int inst_mult, pin_mult;
 
- if(!for_hilight_only && prepared_netlist_structs ) return; /* 20160413 */
- else if(for_hilight_only && prepared_hilight_structs ) return; /* 20171210 */
+ if(for_netlist>0 && prepared_netlist_structs ) return; /* 20160413 */
+ else if(!for_netlist && prepared_hilight_structs ) return; /* 20171210 */
  else delete_netlist_structs(); 
 
  my_snprintf(nn, S(nn), "-----------%s", schematic[currentsch]);
@@ -652,7 +652,7 @@ void prepare_netlist_structs(int for_hilight_only)
         strcmp(type,"iopin") && strcmp(type,"opin") )
     )
   {  
-   if(!for_hilight_only) {
+   if(for_netlist>0) {
      /* 20150918 skip labels / pins if ignore property specified on instance */
      if( netlist_type == CAD_VERILOG_NETLIST && 
        strcmp(get_tok_value(inst_ptr[i].prop_ptr,"verilog_ignore",0),"true")==0 ) continue; 
@@ -667,7 +667,7 @@ void prepare_netlist_structs(int for_hilight_only)
    if( strcmp(type,"label") ){  /* instance is a port (not a label) */
      port=1; 
      /* 20071204 only define a dir property if instance is not a label */
-     if(for_hilight_only) my_strdup(249, &dir, "");
+     if(!for_netlist) my_strdup(249, &dir, "");
      else
        my_strdup(250, &dir, get_tok_value( (inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][0].prop_ptr, "dir",0) );
    }
@@ -682,7 +682,7 @@ void prepare_netlist_structs(int for_hilight_only)
                                     /* previous code, to avoid nasty segfaults if pins not correctly defined */
 
    /* obtain ipin/opin/label signal type (default: std_logic) */
-   if(for_hilight_only) {
+   if(!for_netlist) {
      my_free(&sig_type);
      my_free(&verilog_type);
      my_free(&value);
@@ -734,7 +734,7 @@ void prepare_netlist_structs(int for_hilight_only)
               wire[wptr->n].x2, wire[wptr->n].y2, x0,y0) )
     {
      /* short circuit check */
-     if(!for_hilight_only) signal_short(wire[wptr->n].node, inst_ptr[i].node[0]);
+     if(for_netlist>0) signal_short(wire[wptr->n].node, inst_ptr[i].node[0]);
      my_strdup(263,  &wire[wptr->n].node, inst_ptr[i].node[0]);
      my_strdup(264, &wire[wptr->n].prop_ptr, 
        subst_token(wire[wptr->n].prop_ptr, "lab", wire[wptr->n].node));
@@ -818,7 +818,7 @@ void prepare_netlist_structs(int for_hilight_only)
            
            /*my_strdup(269,  &inst_ptr[i].node[j], inst_ptr[iptr->n].node[iptr->pin] ); */
 
-           if(for_hilight_only) {
+           if(!for_netlist) {
              my_strdup(270, &sig_type,"");
              bus_hash_lookup(inst_ptr[iptr->n].node[iptr->pin],"none",
                0,1, sig_type,"", "","");
@@ -849,6 +849,9 @@ void prepare_netlist_structs(int for_hilight_only)
 
  /* END NAME GENERICS  */
 
+
+ /* symbol vs schematic pin check */
+ if(for_netlist==2) sym_vs_sch_pins();
 
  /* name instance pins  of non (label,pin) instances */
  if(debug_var>=2) fprintf(errfp, "prepare_netlist_structs(): assigning node names on instance pins\n");
@@ -891,7 +894,7 @@ void prepare_netlist_structs(int for_hilight_only)
        /* short circuit check */
        if( touches )
        {
-          if(!for_hilight_only) signal_short(inst_ptr[i].node[j],  wire[wptr->n].node);
+          if(for_netlist>0) signal_short(inst_ptr[i].node[j],  wire[wptr->n].node);
        }
 
        if(!touches)
@@ -931,12 +934,12 @@ void prepare_netlist_structs(int for_hilight_only)
          /* short circuit check */
          if(touches)
          {
-             if(!for_hilight_only) signal_short(inst_ptr[i].node[j],  inst_ptr[iptr->n].node[iptr->pin]);
+             if(for_netlist>0) signal_short(inst_ptr[i].node[j],  inst_ptr[iptr->n].node[iptr->pin]);
          }
          if(!touches)
          {
            my_strdup(274,  &inst_ptr[i].node[j], inst_ptr[iptr->n].node[iptr->pin] );
-           if(for_hilight_only) {
+           if(!for_netlist) {
              bus_hash_lookup(inst_ptr[i].node[j],
                 "none", 0,0,"","","","");
            } else {
@@ -978,7 +981,7 @@ void prepare_netlist_structs(int for_hilight_only)
         /* inst_ptr[i].prop_ptr,"name",0), &inst_mult); */
         my_snprintf( tmp_str, S(tmp_str), "#net%d", get_unnamed_node(1, pin_mult * inst_mult, 0) );
         my_strdup(275,  &inst_ptr[i].node[j], tmp_str );
-        if(for_hilight_only) {
+        if(!for_netlist) {
           bus_hash_lookup(inst_ptr[i].node[j],
              "none", 0,0,"","","","");
         } else {
@@ -995,7 +998,7 @@ void prepare_netlist_structs(int for_hilight_only)
  } /* end for(i...) */
 /*---------------------- */
  rebuild_selected_array();
- if(!for_hilight_only) prepared_netlist_structs=1;
+ if(for_netlist>0) prepared_netlist_structs=1;
  else prepared_hilight_structs=1;
  if(debug_var>=1) fprintf(errfp, "prepare_netlist_structs(): returning\n");
 }

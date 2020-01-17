@@ -144,8 +144,11 @@ void global_spice_netlist(int global)  /* netlister driver */
    my_strncpy(schematic[currentsch] , "", S(schematic[currentsch]));
    currentsch--;
    unselect_all();
-   remove_symbols();
+   /* remove_symbols(); */
    load_schematic(0, 1, schematic[currentsch], 0); /* 20180927 */
+   /* symbol vs schematic pin check, we do it here since now we have ALL symbols loaded */
+   sym_vs_sch_pins();
+   draw();
  }
 
  /* print globals nodes found in netlist 28032003 */

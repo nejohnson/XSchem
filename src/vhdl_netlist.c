@@ -329,7 +329,7 @@ void global_vhdl_netlist(int global)  /* netlister driver */
    load_schematic(0, 1, schematic[currentsch], 0); /* 20180927 */
    /* symbol vs schematic pin check, we do it here since now we have ALL symbols loaded */
    sym_vs_sch_pins();
-   draw();
+   draw_hilight_net(1);
  }
  if(debug_var>=1) fprintf(errfp, "global_vhdl_netlist(): starting awk on netlist!\n");
  if(!split_files) {

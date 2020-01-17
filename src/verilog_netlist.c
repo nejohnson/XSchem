@@ -287,7 +287,7 @@ void global_verilog_netlist(int global)  /* netlister driver */
    load_schematic(0, 1,schematic[currentsch], 0);
    /* symbol vs schematic pin check, we do it here since now we have ALL symbols loaded */
    sym_vs_sch_pins();
-   draw();
+   draw_hilight_net(1);
  }
 
  if(debug_var>=1) fprintf(errfp, "global_verilog_netlist(): starting awk on netlist!\n");

@@ -257,3 +257,4 @@ C {spice_probe.sym} 130 -70 0 1 {name=p53 analysis=tran voltage=-50}
 C {opin.sym} 600 -130 0 0 {name=p5 lab=OUT}
 C {ipin.sym} 530 -180 0 0 {name=p1 lab=MINUS}
 C {ipin.sym} 530 -140 0 0 {name=p4 lab=VSS}
+C {ipin.sym} 680 -180 0 0 {name=p54 lab=MINdsfUS}

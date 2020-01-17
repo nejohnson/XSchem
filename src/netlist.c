@@ -616,9 +616,11 @@ void prepare_netlist_structs(int for_netlist)
  else if(!for_netlist && prepared_hilight_structs ) return; /* 20171210 */
  else delete_netlist_structs(); 
 
- my_snprintf(nn, S(nn), "-----------%s", schematic[currentsch]);
- statusmsg(nn,2);
-/* reset wire & inst node labels  */
+ if(for_netlist>0) {
+   my_snprintf(nn, S(nn), "-----------%s", schematic[currentsch]);
+   statusmsg(nn,2);
+ }
+ /* reset wire & inst node labels  */
  if(debug_var>=1) fprintf(errfp, "prepare_netlist_structs(): resetting node hash tables\n");
  hash_wires();
  for(i=0;i<lastinst;i++)
@@ -849,10 +851,6 @@ void prepare_netlist_structs(int for_netlist)
 
  /* END NAME GENERICS  */
 
-
- /* symbol vs schematic pin check */
- if(for_netlist==2) sym_vs_sch_pins();
-
  /* name instance pins  of non (label,pin) instances */
  if(debug_var>=2) fprintf(errfp, "prepare_netlist_structs(): assigning node names on instance pins\n");
  for(i=0;i<lastinst;i++) /* ... assign node fields on all (non label) instances */
@@ -1001,6 +999,204 @@ void prepare_netlist_structs(int for_netlist)
  if(for_netlist>0) prepared_netlist_structs=1;
  else prepared_hilight_structs=1;
  if(debug_var>=1) fprintf(errfp, "prepare_netlist_structs(): returning\n");
+}
+
+int sym_vs_sch_pins()
+{
+  int i, j, symbol, n_syms, rects, pin_cnt=0, pin_match;
+  struct stat buf;
+  char name[PATH_MAX];
+  char *type = NULL;
+  char *tmp = NULL;
+  char *lab=NULL;
+  char *pin_name=NULL;
+  char *pin_dir=NULL;
+  double tmpd;
+  FILE *fd;
+  int version_found;
+  int tmpi;
+  int endfile;
+  char c;
+  char filename[PATH_MAX];
+  fprintf(errfp, "sch: %s  : %d\n", schematic[currentsch], currentsch);
+  n_syms = lastinstdef;
+  for(i=0;i<n_syms;i++)
+  {
+    fprintf(errfp, "i=%d, sym: %s\n", i, instdef[i].name);
+    if( instdef[i].type && !strcmp(instdef[i].type,"subcircuit")) {
+      rects = instdef[i].rects[PINLAYER];
+      my_strncpy(filename, abs_sym_path(get_tok_value(instdef[i].prop_ptr, "schematic", 0), "") , S(filename));
+      if(!filename[0]) {
+        my_strncpy(filename, add_ext(abs_sym_path(instdef[i].name, ""), ".sch"), S(filename));
+      }
+      fprintf(errfp, "filename=%s\n", filename);
+      if(!stat(filename, &buf)) {
+        fd = fopen(filename, "r");
+        pin_cnt = 0;
+        endfile = 0;
+        version_found=0;
+        file_version[0] = '\0';
+        while(!endfile) {
+          if(fscanf(fd," %c",&c)==EOF) break;
+          switch(c) {
+            case 'v':
+             load_ascii_string(&xschem_version_string, fd);
+             my_snprintf(file_version, S(file_version), "%s", get_tok_value(xschem_version_string, "file_version", 0));
+             version_found = 1;
+            break;
+
+            case 'E':
+            case 'S':
+            case 'V':
+            case 'G':
+              load_ascii_string(&tmp, fd);
+              break;
+            case 'L':
+            case 'B':
+              fscanf(fd, "%d",&tmpi);
+            case 'N':
+              if(fscanf(fd, "%lf %lf %lf %lf ",&tmpd, &tmpd, &tmpd, &tmpd) < 4) {
+                 fprintf(errfp,"WARNING:  missing fields for LINE/BOX object, ignoring\n");
+                 read_line(fd);
+                 break;
+               }
+               load_ascii_string(&tmp, fd);
+              break;
+            case 'P':
+              if(fscanf(fd, "%d %d",&tmpi, &tmpi)<2) {
+                fprintf(errfp,"WARNING: missing fields for POLYGON object, ignoring.\n");
+                read_line(fd);
+                break;
+              }
+              for(j=0;j<tmpi;j++) {
+                if(fscanf(fd, "%lf %lf ",&tmpd, &tmpd)<2) {
+                  fprintf(errfp,"WARNING: missing fields for POLYGON points, ignoring.\n");
+                  read_line(fd);
+                }
+              }
+              load_ascii_string( &tmp, fd);
+              break;
+            case 'A':
+              fscanf(fd, "%d",&tmpi);
+              if(fscanf(fd, "%lf %lf %lf %lf %lf ",&tmpd, &tmpd, &tmpd, &tmpd, &tmpd) < 5) {
+                fprintf(errfp,"WARNING:  missing fields for ARC object, ignoring\n");
+                read_line(fd);
+                break;
+              }
+              load_ascii_string(&tmp, fd);
+              break;
+            case 'T':
+              load_ascii_string(&tmp,fd);
+              if(fscanf(fd, "%lf %lf %d %d %lf %lf ", &tmpd, &tmpd, &tmpi, &tmpi, &tmpd, &tmpd) < 6 ) {
+                fprintf(errfp,"WARNING:  missing fields for TEXT object, ignoring\n");
+                read_line(fd);
+                break;
+              }
+              load_ascii_string(&tmp,fd);
+              break;
+            case 'C':
+              load_ascii_string(&tmp, fd);
+              my_strncpy(name, tmp, S(name));
+
+              if(!strcmp(file_version,"1.0") ) {
+                if(debug_var>=1) fprintf(errfp, "load_inst(): add_ext(name,\".sym\") = %s\n", add_ext(name, ".sym") );
+                my_strncpy(name, add_ext(name, ".sym"), S(name));
+              }
+
+              if(fscanf(fd, "%lf %lf %d %d", &tmpd, &tmpd, &tmpi, &tmpi) < 4) {
+                fprintf(errfp,"sym_vs_sch_pins() WARNING: missing fields for INSTANCE object, filename=%s\n", filename);
+                read_line(fd);
+                break;
+              }
+              load_ascii_string(&tmp,fd);
+              symbol = match_symbol(name);
+              my_strdup(272, &type, instdef[symbol].type);
+              if(type && (!strcmp(type, "ipin") || !strcmp(type, "opin") || !strcmp(type, "iopin"))) { 
+                pin_cnt++;
+                fprintf(errfp, "name=%s, lastinstdef=%d\n", name, lastinstdef);
+                my_strdup(272, &lab, get_tok_value(tmp, "lab", 0));
+                /* fprintf(errfp, "lab=%s\n", lab); */
+                /* fprintf(errfp, "type=%s\n", type); */
+                pin_match = 0;
+                for(j=0; j < rects; j++) {
+                  my_strdup(272, &pin_name, get_tok_value(instdef[i].boxptr[PINLAYER][j].prop_ptr, "name", 0));
+                  my_strdup(272, &pin_dir, get_tok_value(instdef[i].boxptr[PINLAYER][j].prop_ptr, "dir", 0));
+                  if( !strcmp(pin_name, lab)) {
+                    if(!(
+                          ( !strcmp(type, "ipin") && !strcmp(pin_dir, "in") ) ||
+                          ( !strcmp(type, "opin") && !strcmp(pin_dir, "out") ) ||
+                          ( !strcmp(type, "iopin") && !strcmp(pin_dir, "inout") )
+                        )
+                      ) {
+                      char str[2048];
+                      my_snprintf(str, S(str), "Symbol %s: Unmatched subcircuit schematic pin direction: %s", instdef[i].name, lab);
+                      statusmsg(str,2);
+                      my_snprintf(str, S(str), "    %s <--> %s", type, pin_dir);
+                      statusmsg(str,2);
+                      for(j = 0; j < lastinst; j++) {
+                        if(!strcmp(inst_ptr[j].name, instdef[i].name)) {
+                          inst_ptr[j].flags |=4;
+                          hilight_nets=1;
+                        }
+                      }
+                    }
+                    pin_match++;
+                    break;
+                  }
+                }
+                if(!pin_match) {
+                  char str[2048];
+                  /* fprintf(errfp, "  unmatched sch / sym pin: %s\n", lab); */
+                  my_snprintf(str, S(str), "Symbol %s: Unmatched subcircuit schematic pin: %s", instdef[i].name, lab);
+                  statusmsg(str,2);
+                  for(j = 0; j < lastinst; j++) {
+                    if(!strcmp(inst_ptr[j].name, instdef[i].name)) {
+                      inst_ptr[j].flags |=4;
+                      hilight_nets=1;
+                    }
+                  }
+                }
+              }
+              break;
+            case '[':
+              load_symbol_definition(name, fd);
+              break;
+            case ']':
+              read_line(fd);
+              endfile=1;
+              break;
+            default: 
+              read_line(fd);
+              break;
+          }
+          if(check_version && !version_found) break;
+          if(!file_version[0]) {
+            my_snprintf(file_version, S(file_version), "1.0");
+            if(debug_var >= 1) fprintf(errfp, "read_xschem_file(): no file_version, assuming file_version=%s\n", file_version);
+          }
+        }
+        fclose(fd);
+      }
+      if(pin_cnt != rects) {
+        char str[2048];
+        my_snprintf(str, S(str), "Symbol %s has %d pins, its schematic has %d pins", instdef[i].name, rects, pin_cnt);
+        statusmsg(str,2);
+        for(j = 0; j < lastinst; j++) {
+          if(!strcmp(inst_ptr[j].name, instdef[i].name)) {
+            inst_ptr[j].flags |=4;
+            hilight_nets=1;
+          }
+        }
+      }
+    }
+    my_free(&type);
+    my_free(&tmp);
+    my_free(&lab);
+    my_free(&pin_name);
+    my_free(&pin_dir);
+  }
+  while(lastinstdef > n_syms) remove_symbol();
+  return 0;
 }
 
 void delete_inst_node(int i)

@@ -464,7 +464,7 @@ proc simconf {} {
     set toggle [expr {$toggle %2}]
   }
   button .sim.bottom.cancel  -text Cancel -command {destroy .sim}
-  button .sim.bottom.help  -text help -command {
+  button .sim.bottom.help  -text Help -command {
     set h {The following variables are defined and will get substituted by
 XSCHEM before sending commands to the shell:
 
@@ -1699,7 +1699,7 @@ proc edit_vi_netlist_prop {txtlabel} {
 }
 
 proc change_color {} {
-  global colors dark_colors light_colors dark_colorscheme cadlayers ctrl_down
+  global colors dark_colors light_colors dark_colorscheme cadlayers ctrl_down USER_CONF_DIR
 
 
   set n [xschem get rectcolor]

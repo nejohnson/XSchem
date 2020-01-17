@@ -278,7 +278,7 @@ void spice_netlist(FILE *fd, int spice_stop )
  static char *place=NULL;  /* 20121223 */
 
  prepared_netlist_structs = 0;
- prepare_netlist_structs(0);
+ prepare_netlist_structs(2);
  /* set_modify(1); */ /* 20160302 prepare_netlist_structs could change schematic (wire node naming for example) */
  traverse_node_hash();  /* print all warnings about unconnected floatings etc */
  if(!spice_stop) {  /* 20111113 */

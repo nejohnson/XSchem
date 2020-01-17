@@ -768,6 +768,7 @@ extern void descend_symbol(void);
 extern int place_symbol(int pos, const char *symbol_name, double x, double y, int rot, int flip, 
                          const char *inst_props, int draw_sym, int first_call);
 extern void attach_labels_to_inst(void);
+extern int sym_vs_sch_pins(void);
 extern int match_symbol(char name[]);
 extern int save_schematic(char *); /*  20171020 added return value */
 extern void push_undo(void);
@@ -889,7 +890,7 @@ extern void hilight_net();
 extern void unhilight_net();
 extern void draw_hilight_net(int on_window);
 extern void redraw_hilights(void);
-extern void prepare_netlist_structs(int for_hilight_only);
+extern void prepare_netlist_structs(int for_netlist);
 extern void delete_netlist_structs(void);
 extern void delete_inst_node(int i);
 extern void delete_hilight_net(void);

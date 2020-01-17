@@ -462,7 +462,7 @@ int callback(int event, int mx, int my, KeySym key,
      Box *rect;
 
      rebuild_selected_array();
-     prepare_netlist_structs(1);
+     prepare_netlist_structs(0);
      for(k=0; k<lastselected; k++) {
        if(selectedgroup[k].type!=ELEMENT) continue;
        j = selectedgroup[k].n ;

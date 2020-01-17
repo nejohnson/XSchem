@@ -204,7 +204,7 @@ void hilight_parent_pins(void)
  struct hilight_hashentry *entry;
  
  if(!hilight_nets) return;
- prepare_netlist_structs(1);
+ prepare_netlist_structs(0);
  save_currentsch=currentsch;
  i=previous_instance[currentsch];
  if(debug_var>=1) fprintf(errfp, "hilight_parent_pins(): previous_instance=%d\n", previous_instance[currentsch]);
@@ -242,7 +242,7 @@ void hilight_child_pins(int i)
 
  if(!hilight_nets) return;
  save_currentsch=currentsch;
- prepare_netlist_structs(1);
+ prepare_netlist_structs(0);
  rects = (inst_ptr[i].ptr+instdef)->rects[PINLAYER];
  for(j=0;j<rects;j++)
  {
@@ -314,7 +314,7 @@ void search(const char *tok, const char *val, int sub, int sel, int what)
       if(incr_hilight) hilight_color++;
     }
     has_token = 0;
-    prepare_netlist_structs(1);
+    prepare_netlist_structs(0);
     bus=bus_search(val);
     for(i=0;i<lastinst;i++) {
       if(!strcmp(tok,"cell::name")) {
@@ -489,7 +489,7 @@ void drill_hilight(void)
   struct hilight_hashentry *entry, *propag_entry;
   int count;
 
-  prepare_netlist_structs(1);
+  prepare_netlist_structs(0);
   count=0;
   while(1) { 
     found=0;
@@ -524,7 +524,7 @@ void hilight_net(void)
   int i, n;
   char *type;
 
-  prepare_netlist_structs(1);
+  prepare_netlist_structs(0);
   if(debug_var>=1) fprintf(errfp, "hilight_net(): entering\n");
   rebuild_selected_array();
   for(i=0;i<lastselected;i++)
@@ -588,7 +588,7 @@ void unhilight_net(void)
   int i,n;
   char *type;
 
-  prepare_netlist_structs(1);
+  prepare_netlist_structs(0);
   if(debug_var>=1) fprintf(errfp, "unhilight_net(): entering\n");
   rebuild_selected_array();
   for(i=0;i<lastselected;i++)
@@ -659,7 +659,7 @@ void draw_hilight_net(int on_window)
  struct wireentry *wireptr;
  int hilight_connected_inst;
 
- prepare_netlist_structs(1);
+ prepare_netlist_structs(0);
  if(!hilight_nets) return;
  save_draw = draw_window; /* 20181009 */
  draw_window = on_window;
@@ -809,7 +809,7 @@ void print_hilight_net(int show)
 
 
  /* 20111116 20111201 */
- prepare_netlist_structs(0); /* use full prepare_netlist_structs(0)  to recognize pin direction */
+ prepare_netlist_structs(1); /* use full prepare_netlist_structs(1)  to recognize pin direction */
                              /* when creating pins from hilight nets 20171221 */
 
  /* 20180924 */

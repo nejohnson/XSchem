@@ -179,6 +179,8 @@ set terminal {xterm -geometry 100x35 -fn 9x15 -bg black -fg white -cr white -ms 
 # set editor { xterm -geometry 100x40 -e pico }
 set editor {gvim -f -geometry 90x28}
 
+#### show info window (ERC rules errors warnings etc) 
+# set show_infowindow 1
 
 #### command to translate xpm to png (assumes command takes source 
 #### and dest file as arguments, example: gm convert plot.xpm plot.png)

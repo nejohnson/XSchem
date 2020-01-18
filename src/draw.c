@@ -279,7 +279,7 @@ void draw_string(int layer, int what, char *s, int rot, int flip, double x, doub
 
   (void)what; /* UNUSED in cairo version, avoid compiler warning */
   if(s==NULL || !has_x ) return;
-  size = (xscale+yscale)*26.*cairo_font_scale;
+  size = xscale*52.*cairo_font_scale;
   /*fprintf(errfp, "size=%.16g\n", size*mooz); */
   if(size*mooz<3.0) return; /* too small */
   if(size*mooz>800) return; /* too big */

@@ -605,7 +605,7 @@ void select_element(int i,unsigned short select_mode, int fast, int override_loc
   {
     my_snprintf(str, S(str), "selected element %d: %s properties: %s", i, inst_ptr[i].name,s);
     statusmsg(str,2);
-    my_snprintf(str, S(str), "symbol .name=%s", inst_ptr[i].name==NULL?"(null)":inst_ptr[i].name);
+    my_snprintf(str, S(str), "symbol name=%s", inst_ptr[i].name==NULL?"(null)":inst_ptr[i].name);
     statusmsg(str,2);
     /* 20190526 */ /*Why this? 20191125 only on small schematics. slow down on big schematics */
     if(lastinst < 150) {

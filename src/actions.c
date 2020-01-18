@@ -1962,7 +1962,7 @@ int text_bbox(char *str, double xscale, double yscale,
   double ww, hh;
 
   if(!has_x) return 0;
-  size = (xscale+yscale)*26.*cairo_font_scale;
+  size = xscale*52.*cairo_font_scale;
 
   /*  if(size*mooz>800.) { */
   /*    return 0; */

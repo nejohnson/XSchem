@@ -1774,7 +1774,7 @@ proc edit_prop {txtlabel} {
    label .ent2.f1.l2 -text "Symbol"
    entry .ent2.f1.e2 -width 30
    .ent2.f1.e2 insert 0 $symbol
-   button .ent2.f1.b5 -text "BROWSE" -command {
+   button .ent2.f1.b5 -text "Browse" -command {
      bind .ent2 <Visibility> {}
      set r [save_file_dialog  {New symbol} .sym INITIALINSTDIR {} 0]
      if {$r ne {} } {
@@ -1827,9 +1827,9 @@ proc edit_prop {txtlabel} {
    button .ent2.f1.b4 -text "Del" -command {
      .ent2.e1 delete 1.0 end
    }
-   checkbutton .ent2.f2.r1 -text "no change properties" -variable no_change_attrs -state normal
-   checkbutton .ent2.f2.r2 -text "preserve unchanged props" -variable preserve_unchanged_attrs -state normal
-   checkbutton .ent2.f2.r3 -text "copy cell" -variable copy_cell -state normal
+   checkbutton .ent2.f2.r1 -text "No change properties" -variable no_change_attrs -state normal
+   checkbutton .ent2.f2.r2 -text "Preserve unchanged props" -variable preserve_unchanged_attrs -state normal
+   checkbutton .ent2.f2.r3 -text "Copy cell" -variable copy_cell -state normal
 
    pack .ent2.f1.l2 .ent2.f1.e2 .ent2.f1.b1 .ent2.f1.b2 .ent2.f1.b3 .ent2.f1.b4 .ent2.f1.b5 -side left -expand 1
    pack .ent2.f4 -side top  -anchor nw

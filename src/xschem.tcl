@@ -3051,6 +3051,7 @@ font configure Underline-Font -underline true -size 24
    }
 }
 
+if { $show_infowindow } { wm deiconify .infotext } 
 
 foreach i $tcl_files {
   source $i

@@ -53,7 +53,8 @@ value=".option PARHIER=LOCAL RUNLVL=6 post MODMONTE=1 warn maxwarns=400
 ** SPICE models for active devices and put them  into the below 
 ** referenced file in netlist/simulation directory.
 .include \\"models_cmos_example.txt\\"
-.dc VPLUS 1.3 1.7 0.001
+* .dc VPLUS 1.3 1.7 0.001
+.tran 0.02n 20n
 .probe i(*) 
 "}
 C {lab_pin.sym} 60 -150 0 0 {name=p17 lab=0}
@@ -81,7 +82,7 @@ C {lab_pin.sym} 690 -360 0 1 {name=p11 lab=DIFFOUT}
 C {lab_pin.sym} 430 -380 0 0 {name=p12 lab=GP}
 C {lab_pin.sym} 240 -230 0 0 {name=p13 lab=GN}
 C {lab_pin.sym} 60 -280 0 0 {name=p14 lab=0}
-C {vsource.sym} 60 -310 0 0 {name=VPLUS value=1.5}
+C {vsource.sym} 60 -310 0 0 {name=VPLUS value="1.5 pwl 0 0 10n 0 10.1n 3"}
 C {lab_pin.sym} 90 -370 0 1 {name=p15 lab=PLUS}
 C {lab_pin.sym} 60 -430 0 0 {name=p16 lab=0}
 C {vsource.sym} 60 -460 0 0 {name=V1 value=1.5}

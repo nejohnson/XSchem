@@ -398,6 +398,7 @@ void netlist_options(int i)
   /* fprintf(errfp, "netlist_options(): bus_replacement_char=%s\n", str); */
 }
 
+/* used only for debug */
 void print_wires(void)
 {
  int i,j;

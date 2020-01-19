@@ -31,6 +31,7 @@ void global_vhdl_netlist(int global)  /* netlister driver */
  static char *sig_type = NULL;
  static char *port_value = NULL;
  int i,j, tmp, save_ok;
+ unsigned int *stored_flags;
  char netl[PATH_MAX];   /* overflow safe 20161122 */
  char netl2[PATH_MAX];  /* 20081202 overflow safe 20161122 */
  char netl3[PATH_MAX];  /* 20081202 overflow safe 20161122 */
@@ -299,6 +300,10 @@ void global_vhdl_netlist(int global)  /* netlister driver */
  }
  netlist_count++;
 
+ /* preserve current level instance flags before descending hierarchy for netlisting, restore later */
+ stored_flags = my_calloc(111, lastinst, sizeof(unsigned int));
+ for(i=0;i<lastinst;i++) stored_flags[i] = inst_ptr[i].flags & 4;
+
  if(global)
  {
    unselect_all();
@@ -329,6 +334,11 @@ void global_vhdl_netlist(int global)  /* netlister driver */
    load_schematic(0, 1, schematic[currentsch], 0); /* 20180927 */
    /* symbol vs schematic pin check, we do it here since now we have ALL symbols loaded */
    sym_vs_sch_pins();
+
+   /* restore hilight flags from errors found analyzing top level before descending hierarchy */
+   for(i=0;i<lastinst; i++) inst_ptr[i].flags |= stored_flags[i];
+   my_free(&stored_flags);
+
    draw_hilight_net(1);
  }
  if(debug_var>=1) fprintf(errfp, "global_vhdl_netlist(): starting awk on netlist!\n");
@@ -551,7 +561,7 @@ void vhdl_netlist(FILE *fd , int vhdl_stop)
  static char *type=NULL;
 
  prepared_netlist_structs = 0;
- prepare_netlist_structs(2);
+ prepare_netlist_structs(1);
  /* set_modify(1); */ /* 20160302 prepare_netlist_structs could change schematic (wire node naming for example) */
  traverse_node_hash();  /* print all warnings about unconnected floatings etc */
 

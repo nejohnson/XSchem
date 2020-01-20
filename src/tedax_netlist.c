@@ -63,7 +63,7 @@ void global_tedax_netlist(int global)  /* netlister driver */
  fprintf(fd, "end netlist\n");
 
  /* preserve current level instance flags before descending hierarchy for netlisting, restore later */
- stored_flags = my_calloc(111, lastinst, sizeof(unsigned int));
+ stored_flags = my_calloc(149, lastinst, sizeof(unsigned int));
  for(i=0;i<lastinst;i++) stored_flags[i] = inst_ptr[i].flags & 4;
 
  if(0) /* was if(global) ... 20180901 no hierarchical tEDAx netlist for now */

@@ -426,6 +426,7 @@ proc simconf {} {
   catch { destroy .sim } 
   set_sim_defaults
   toplevel .sim -class dialog
+  wm title .sim {Simulation Configuration}
   wm geometry .sim 700x340
   frame .sim.topf
   frame .sim.topf.f

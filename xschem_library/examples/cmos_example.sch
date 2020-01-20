@@ -5,8 +5,8 @@ S {}
 E {}
 T {CMOS DIFFERENTIAL AMPLIFIER
 EXAMPLE} 810 -570 0 0 0.4 0.4 {}
-N 60 -240 60 -210 {lab=VCC}
-N 60 -240 90 -240 {lab=VCC}
+N 30 -240 30 -210 {lab=VCC}
+N 30 -240 60 -240 {lab=VCC}
 N 240 -260 240 -210 {lab=GN}
 N 240 -210 280 -210 {lab=GN}
 N 280 -210 280 -180 {lab=GN}
@@ -29,10 +29,10 @@ N 430 -500 570 -500 {lab=VCC}
 N 430 -500 430 -460 {lab=VCC}
 N 500 -520 500 -500 {lab=VCC}
 N 570 -360 690 -360 {lab=DIFFOUT}
-N 60 -370 60 -340 {lab=PLUS}
-N 60 -370 90 -370 {lab=PLUS}
-N 60 -520 60 -490 {lab=MINUS}
-N 60 -520 90 -520 {lab=MINUS}
+N 30 -370 30 -340 {lab=PLUS}
+N 30 -370 60 -370 {lab=PLUS}
+N 30 -520 30 -490 {lab=MINUS}
+N 30 -520 60 -520 {lab=MINUS}
 N 500 -150 500 -120 {lab=0}
 N 500 -150 520 -150 {lab=0}
 N 520 -180 520 -150 {lab=0}
@@ -66,13 +66,13 @@ value="
 ** xyce, not needed if -r given om cmdline
 * .print tran format=raw v(diffout) v(plus) v(minus)
 "}
-C {lab_pin.sym} 60 -150 0 0 {name=p17 lab=0}
+C {lab_pin.sym} 30 -150 0 0 {name=p17 lab=0}
 C {title.sym} 160 -30 0 0 {name=l1 author="Stefan Schippers"}
 C {nmos4.sym} 480 -180 0 0 {name=m1 model=cmosn w=5u l=2u m=1}
 C {pmos4.sym} 550 -430 0 0 {name=m2 model=cmosp w=5u l=2u m=1}
-C {vsource.sym} 60 -180 0 0 {name=VVCC value=3}
+C {vsource.sym} 30 -180 0 0 {name=VVCC value=3}
 C {lab_pin.sym} 500 -120 0 0 {name=p1 lab=0}
-C {lab_pin.sym} 90 -240 0 1 {name=p2 lab=VCC}
+C {lab_pin.sym} 60 -240 0 1 {name=p2 lab=VCC}
 C {nmos4.sym} 260 -180 0 1 {name=m3 model=cmosn w=5u l=2u m=1}
 C {lab_pin.sym} 240 -120 0 0 {name=p3 lab=0}
 C {isource.sym} 240 -290 0 0 {name=IBIAS value=10u}
@@ -90,10 +90,10 @@ C {lab_pin.sym} 630 -280 0 1 {name=p10 lab=MINUS}
 C {lab_pin.sym} 690 -360 0 1 {name=p11 lab=DIFFOUT}
 C {lab_pin.sym} 430 -380 0 0 {name=p12 lab=GP}
 C {lab_pin.sym} 240 -230 0 0 {name=p13 lab=GN}
-C {lab_pin.sym} 60 -280 0 0 {name=p14 lab=0}
-C {vsource.sym} 60 -310 0 0 {name=VPLUS value="1.5 pwl 0 1.4 10n 1.4 10.1n 1.6"}
-C {lab_pin.sym} 90 -370 0 1 {name=p15 lab=PLUS}
-C {lab_pin.sym} 60 -430 0 0 {name=p16 lab=0}
-C {vsource.sym} 60 -460 0 0 {name=V1 value=1.5}
-C {lab_pin.sym} 90 -520 0 1 {name=p18 lab=MINUS}
+C {lab_pin.sym} 30 -280 0 0 {name=p14 lab=0}
+C {vsource.sym} 30 -310 0 0 {name=VPLUS value="1.5 pwl 0 1.4 10n 1.4 10.1n 1.6"}
+C {lab_pin.sym} 60 -370 0 1 {name=p15 lab=PLUS}
+C {lab_pin.sym} 30 -430 0 0 {name=p16 lab=0}
+C {vsource.sym} 30 -460 0 0 {name=V1 value=1.5}
+C {lab_pin.sym} 60 -520 0 1 {name=p18 lab=MINUS}
 C {lab_pin.sym} 500 -230 0 0 {name=p19 lab=SN}

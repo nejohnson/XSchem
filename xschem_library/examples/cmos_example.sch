@@ -43,19 +43,28 @@ N 220 -180 220 -150 {lab=0}
 N 220 -180 240 -180 {lab=0}
 C {code.sym} 870 -190 0 0 {name=STIMULI
 only_toplevel=true
-value=".option PARHIER=LOCAL RUNLVL=6 post MODMONTE=1 warn maxwarns=400
-.option sampling_method = SRS 
-.option method=gear
-.temp 30
+value="
+** ngspice
+* .temp 30
 
-.save all
+** xyce
+.step temp list 30
+
+** ngspice
+* .save all
+
 ** models are generally not free: you must download
 ** SPICE models for active devices and put them  into the below 
 ** referenced file in netlist/simulation directory.
 .include \\"models_cmos_example.txt\\"
-* .dc VPLUS 1.3 1.7 0.001
+
 .tran 0.02n 20n
-.probe i(*) 
+
+** ngspice
+* .save all
+
+** xyce, not needed if -r given om cmdline
+* .print tran format=raw v(diffout) v(plus) v(minus)
 "}
 C {lab_pin.sym} 60 -150 0 0 {name=p17 lab=0}
 C {title.sym} 160 -30 0 0 {name=l1 author="Stefan Schippers"}
@@ -82,7 +91,7 @@ C {lab_pin.sym} 690 -360 0 1 {name=p11 lab=DIFFOUT}
 C {lab_pin.sym} 430 -380 0 0 {name=p12 lab=GP}
 C {lab_pin.sym} 240 -230 0 0 {name=p13 lab=GN}
 C {lab_pin.sym} 60 -280 0 0 {name=p14 lab=0}
-C {vsource.sym} 60 -310 0 0 {name=VPLUS value="1.5 pwl 0 0 10n 0 10.1n 3"}
+C {vsource.sym} 60 -310 0 0 {name=VPLUS value="1.5 pwl 0 1.4 10n 1.4 10.1n 1.6"}
 C {lab_pin.sym} 90 -370 0 1 {name=p15 lab=PLUS}
 C {lab_pin.sym} 60 -430 0 0 {name=p16 lab=0}
 C {vsource.sym} 60 -460 0 0 {name=V1 value=1.5}

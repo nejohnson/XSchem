@@ -33,7 +33,7 @@ C {lab_pin.sym} 290 -310 0 1 {name=l3 sig_type=std_logic lab=VSS}
 C {lab_pin.sym} 290 -190 0 1 {name=l4 sig_type=std_logic lab=VSS}
 C {lab_pin.sym} 290 -440 0 1 {name=l5 sig_type=std_logic lab=VCC}
 C {lab_pin.sym} 440 -440 0 1 {name=l6 sig_type=std_logic lab=VCC}
-C {nmos4.sym} 270 -310 0 0 {name=m1 model=CMOSN w=W_N l=L_N m=1}
-C {nmos4.sym} 270 -190 0 0 {name=m4 model=CMOSN w=W_N l=L_N m=1}
-C {pmos4.sym} 270 -440 0 0 {name=m2 model=CMOSP w=W_P l=L_P m=1}
-C {pmos4.sym} 420 -440 0 0 {name=m3 model=CMOSP w=W_P l=L_P m=1}
+C {nmos4.sym} 270 -310 0 0 {name=m1 model=CMOSN w=WN l=LLN m=1}
+C {nmos4.sym} 270 -190 0 0 {name=m1 model=CMOSN w=WN l=LLN m=1}
+C {pmos4.sym} 270 -440 0 0 {name=m2 model=CMOSP w=WP l=LP m=1}
+C {pmos4.sym} 420 -440 0 0 {name=m2 model=CMOSP w=WP l=LP m=1}

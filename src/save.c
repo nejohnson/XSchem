@@ -796,6 +796,7 @@ int save_schematic(char *schname) /* 20171020 added return value */
   unselect_all();
   write_xschem_file(fd);
   fclose(fd);
+  my_strncpy(current_name, rel_sym_path(name), S(current_name)); /* 20190519 */
   prepared_hilight_structs=0; /* 20171212 */
   prepared_netlist_structs=0; /* 20171212 */
   prepared_hash_instances=0; /* 20171224 */
@@ -907,6 +908,7 @@ void load_schematic(int symbol, int load_symbols, const char *filename, int rese
     set_modify(0);
     clear_drawing();
     my_strncpy(schematic[currentsch], "untitled.sch", S(schematic[currentsch]));
+    my_strncpy(current_name, rel_sym_path(schematic[currentsch]), S(current_name)); /* 20190519 */
   }
   if(has_x) { /* 20161207 moved after if( (fd=..))  */
     if(strcmp(get_cell(schematic[currentsch],1), "systemlib/font")) {

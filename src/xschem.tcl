@@ -322,8 +322,13 @@ proc set_sim_defaults {} {
     set_ne sim(spice,1,fg) 0
     set_ne sim(spice,1,st) 1
     
+    set_ne sim(spice,2,cmd) {Xyce "$N" -r "$n.raw"}
+    set_ne sim(spice,2,name) {Xyce batch}
+    set_ne sim(spice,2,fg) 0
+    set_ne sim(spice,2,st) 1
+    
     # number of configured spice simulators, and default one
-    set_ne sim(spice,n) 2
+    set_ne sim(spice,n) 3
     set_ne sim(spice,default) 0
     
     ### spice wave view

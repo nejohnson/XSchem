@@ -124,6 +124,12 @@ type=nmos
     Only the global property of the schematic will be netlisted. This allows to insert some 
     behavioral VHDL code in the global schematic property that describes the block in a way
     the VHDL simulator can understand.</p>
+  <li><kbd>spice_primitive</kbd></li>
+  <li><kbd>vhdl_primitive</kbd></li>
+  <li><kbd>verilog_primitive</kbd></li>
+  <p> same as above <kbd>_stop</kbd> attributes, but in this case the schematic subcircuit is completely ignored,
+   only the 'format' string is dumped to netlist. No component/entity is generated in vhdl netlist, 
+   no module declaration in verilog, no .subckt in spice, no schematic global attributes are exported to netlist.</p>
   <li><kbd>place</kbd></li>
   <p> this attribute is only useable in <kbd>netlist_commands</kbd> type symbols (<kbd>netlist.sym, code.sym,...</kbd>) 
     if set to <kbd>end</kbd> it tells XSCHEM that 
@@ -252,7 +258,7 @@ m5 net1 b net2 VSSPIN nlv w=wn l=ln geomod=0 m=1
    <img src="symbol_property_syntax2.png">
   <li><kbd>global</kbd></li>
   <p>
-  a <kbd>global=1</kbd> property in a <kbd>label</kbd> type symbol will declare the corresponding net as 'global'.
+  a <kbd>global=true</kbd> property in a <kbd>label</kbd> type symbol will declare the corresponding net as 'global'.
   Global nets in spice netlists are like global variables in a C program, these nets are accessible at any
   hierarchical level without the need of passing them through pin connections.
   </p>
@@ -276,6 +282,10 @@ verilog_format="xnor #(@risedel , @falldel ) @name ( @@Z , @@A , @@B );"
   <li><kbd>vhdl_format</kbd></li>
   <p>
    same as above for VHDL primitives.
+  </p>
+  <li><kbd>tedax_format</kbd></li>
+  <p>
+   same as above for tEDAx netlists.
   </p>
  </ul>
  <h3>PREDEFINED SYMBOL VALUES</h3>

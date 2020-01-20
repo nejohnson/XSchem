@@ -119,7 +119,7 @@ void global_spice_netlist(int global)  /* netlister driver */
  }
 
  /* preserve current level instance flags before descending hierarchy for netlisting, restore later */
- stored_flags = my_calloc(111, lastinst, sizeof(unsigned int));
+ stored_flags = my_calloc(146, lastinst, sizeof(unsigned int));
  for(i=0;i<lastinst;i++) stored_flags[i] = inst_ptr[i].flags & 4;
 
  if(global)

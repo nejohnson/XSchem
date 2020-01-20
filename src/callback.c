@@ -535,6 +535,10 @@ int callback(int event, int mx, int my, KeySym key,
     if(ui_state & STARTMOVE)
     {
      move_objects(ABORT,0,0,0);
+     if(ui_state & START_SYMPIN) {
+       delete();
+       ui_state &= ~START_SYMPIN;
+     }
      break;
     }
     if(ui_state & STARTCOPY)
@@ -546,6 +550,7 @@ int callback(int event, int mx, int my, KeySym key,
       delete();
       set_modify(0); /* aborted merge: no change, so reset modify flag set by delete() */
     }
+     
     ui_state = 0;
     unselect_all(); 
     draw();
@@ -560,9 +565,15 @@ int callback(int event, int mx, int my, KeySym key,
    {
     view_zoom(0.0); break;
    }
-   if(key=='p' && state == 0)                           /* pan */
+   if(key=='p' && state == Mod1Mask)                           /* add symbol pin */
    {
-    pan(BEGIN);break;
+    unselect_all();
+    storeobject(-1, mousex_snap-2.5, mousey_snap-2.5, mousex_snap+2.5, mousey_snap+2.5, 
+                RECT, PINLAYER, SELECTED, "name=XXX\ndir=inout");
+    need_rebuild_selected_array=1;
+    rebuild_selected_array();
+    move_objects(BEGIN,0,0,0);
+    ui_state |= START_SYMPIN;
    }
    if(key=='w' && !ui_state && state==ControlMask)              /* start polygon, 20171115 */
    {
@@ -1277,11 +1288,8 @@ int callback(int event, int mx, int my, KeySym key,
     draw();
     break;
    }
-   if((0 && key=='~') && (state & ControlMask))    /* testmode:  for performance testing */
+   if(0 && key=='~' && (state & ControlMask))    /* testmode */
    {
-    char s[100]= "pippo.sym";
-    fprintf(errfp, "%s\n", add_ext(s, ".sch"));
-    
     break;
    }
    if(0 && (key=='|') && !(state&ControlMask))         /* testmode */
@@ -1552,6 +1560,7 @@ int callback(int event, int mx, int my, KeySym key,
      }
      if(ui_state & STARTMOVE) {
        move_objects(END,0,0,0);
+       ui_state &=~START_SYMPIN;
        break;
      }
      if(ui_state & STARTCOPY) {

@@ -152,6 +152,7 @@
 #define MENUSTARTARC 1048576
 #define MENUSTARTCIRCLE 2097152
 #define PLACE_SYMBOL 4194304 /* used in move_objects after place_symbol to avoid storing intermediate undo state */
+#define START_SYMPIN 8388608 
 #define SELECTED 1          /*  used in the .sel field for selected objs. */
 #define SELECTED1 2         /*  first point selected... */
 #define SELECTED2 4         /*  second point selected... */

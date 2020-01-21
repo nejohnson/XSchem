@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC6 file_version=1.1}
+v {xschem version=2.9.5_RC8 file_version=1.1}
 G {}
 V {}
 S {}
@@ -34,8 +34,10 @@ C {74ls00.sym} 420 -350 0 0 {name=U1:2  risedel=100 falldel=200}
 C {74ls00.sym} 870 -440 0 0 {name=U1:1  risedel=100 falldel=200}
 C {lab_pin.sym} 970 -440 0 1 {name=p0 lab=OUTPUT_Y}
 C {capa.sym} 590 -160 0 0 {name=C0 m=1 value=100u device="electrolitic capacitor"}
-C {74ls00.sym} 420 -460 0 0 {name=U1:4 risedel=100 falldel=200 power=VCC5
-url="http://www.engrcs.com/components/74LS00.pdf"}
+C {74ls00.sym} 420 -460 0 0 {name=U1:4 risedel=100 falldel=200
+url="http://www.engrcs.com/components/74LS00.pdf" 
+power=VCC5 
+___net:14=VCC5}
 C {7805.sym} 730 -190 0 0 {name=U0 
 spiceprefix=X
 url="https://www.sparkfun.com/datasheets/Components/LM7805.pdf"}

@@ -308,92 +308,89 @@ proc set_sim_defaults {} {
         set sim($tool,$i,cmd) [.sim.topf.f.scrl.center.$tool.r.$i.cmd get 1.0 {end - 1 chars}]
       }
     }
-    return
-  }  else {
-    if { [info exists sim] } {unset sim}
-    set sim(tool_list) {spice spicewave verilog verilogwave vhdl vhdlwave}
-    set_ne sim(spice,0,cmd) {$terminal -e 'ngspice -i "$N" -a || sh'}
-    set_ne sim(spice,0,name) {Ngspice}
-    set_ne sim(spice,0,fg) 0
-    set_ne sim(spice,0,st) 0
-    
-    set_ne sim(spice,1,cmd) {ngspice -b -r "$n.raw" -o "$n.out" "$N"}
-    set_ne sim(spice,1,name) {Ngspice batch}
-    set_ne sim(spice,1,fg) 0
-    set_ne sim(spice,1,st) 1
-    
-    set_ne sim(spice,2,cmd) {Xyce "$N" -r "$n.raw"}
-    set_ne sim(spice,2,name) {Xyce batch}
-    set_ne sim(spice,2,fg) 0
-    set_ne sim(spice,2,st) 1
-    
-    # number of configured spice simulators, and default one
-    set_ne sim(spice,n) 3
-    set_ne sim(spice,default) 0
-    
-    ### spice wave view
-    set_ne sim(spicewave,0,cmd) {gaw "$n.raw" } 
-    set_ne sim(spicewave,0,name) {Gaw viewer}
-    set_ne sim(spicewave,0,fg) 0
-    set_ne sim(spicewave,0,st) 0
-   
-    set_ne sim(spicewave,1,cmd) {echo load "$n.raw" > .spiceinit
-  $terminal -e ngspice
-  rm .spiceinit} 
-    set_ne sim(spicewave,1,name) {Ngpice Viewer}
-    set_ne sim(spicewave,1,fg) 0
-    set_ne sim(spicewave,1,st) 0
-
-    set_ne sim(spicewave,2,cmd) {rawtovcd "$n.raw" > "$n.vcd" && gtkwave "$n.vcd" "$n.sav" 2>/dev/null} 
-    set_ne sim(spicewave,2,name) {Rawtovcd}
-    set_ne sim(spicewave,2,fg) 0
-    set_ne sim(spicewave,2,st) 0
-    # number of configured spice wave viewers, and default one
-    set_ne sim(spicewave,n) 3
-    set_ne sim(spicewave,default) 0
-    
-    ### verilog
-    set_ne sim(verilog,0,cmd) {iverilog -o .verilog_object -g2012 "$N" && vvp .verilog_object}
-    set_ne sim(verilog,0,name) {Icarus verilog}
-    set_ne sim(verilog,0,fg) 0
-    set_ne sim(verilog,0,st) 1
-    # number of configured verilog simulators, and default one
-    set_ne sim(verilog,n) 1
-    set_ne sim(verilog,default) 0
-    
-    ### verilog wave view
-    set_ne sim(verilogwave,0,cmd) {gtkwave dumpfile.vcd "$N.sav" 2>/dev/null}
-    set_ne sim(verilogwave,0,name) {Gtkwave}
-    set_ne sim(verilogwave,0,fg) 0
-    set_ne sim(verilogwave,0,st) 0
-    # number of configured verilog wave viewers, and default one
-    set_ne sim(verilogwave,n) 1
-    set_ne sim(verilogwave,default) 0
-    
-    ### vhdl
-    set_ne sim(vhdl,0,cmd) {ghdl -c --ieee=synopsys -fexplicit "$N" -r "$s" --wave="$n.ghw"}
-    set_ne sim(vhdl,0,name) {Ghdl}
-    set_ne sim(vhdl,0,fg) 0
-    set_ne sim(vhdl,0,st) 1
-    # number of configured vhdl simulators, and default one
-    set_ne sim(vhdl,n) 1
-    set_ne sim(vhdl,default) 0
-    
-    ### vhdl wave view
-    set_ne sim(vhdlwave,0,cmd) {gtkwave "$n.ghw" "$N.sav" 2>/dev/null}
-    set_ne sim(vhdlwave,0,name) {Gtkwave}
-    set_ne sim(vhdlwave,0,fg) 0
-    set_ne sim(vhdlwave,0,st) 0
-    # number of configured vhdl wave viewers, and default one
-    set_ne sim(vhdlwave,n) 1
-    set_ne sim(vhdlwave,default) 0
-  }
-
-
-  if { [file exists ${USER_CONF_DIR}/simrc] } {
-    unset sim
-    source ${USER_CONF_DIR}/simrc
-    #puts "sourcing simrc"
+  } elseif { ![info exists sim] } {
+    if { [file exists ${USER_CONF_DIR}/simrc] } {
+      # get conf from simrc
+      source ${USER_CONF_DIR}/simrc
+    } else {
+      # no simrc, set a reasonable default
+      set sim(tool_list) {spice spicewave verilog verilogwave vhdl vhdlwave}
+      set_ne sim(spice,0,cmd) {$terminal -e 'ngspice -i "$N" -a || sh'}
+      set_ne sim(spice,0,name) {Ngspice}
+      set_ne sim(spice,0,fg) 0
+      set_ne sim(spice,0,st) 0
+      
+      set_ne sim(spice,1,cmd) {ngspice -b -r "$n.raw" -o "$n.out" "$N"}
+      set_ne sim(spice,1,name) {Ngspice batch}
+      set_ne sim(spice,1,fg) 0
+      set_ne sim(spice,1,st) 1
+      
+      set_ne sim(spice,2,cmd) {Xyce "$N" -r "$n.raw"}
+      set_ne sim(spice,2,name) {Xyce batch}
+      set_ne sim(spice,2,fg) 0
+      set_ne sim(spice,2,st) 1
+      
+      # number of configured spice simulators, and default one
+      set_ne sim(spice,n) 3
+      set_ne sim(spice,default) 0
+      
+      ### spice wave view
+      set_ne sim(spicewave,0,cmd) {gaw "$n.raw" } 
+      set_ne sim(spicewave,0,name) {Gaw viewer}
+      set_ne sim(spicewave,0,fg) 0
+      set_ne sim(spicewave,0,st) 0
+     
+      set_ne sim(spicewave,1,cmd) {echo load "$n.raw" > .spiceinit
+    $terminal -e ngspice
+    rm .spiceinit} 
+      set_ne sim(spicewave,1,name) {Ngpice Viewer}
+      set_ne sim(spicewave,1,fg) 0
+      set_ne sim(spicewave,1,st) 0
+  
+      set_ne sim(spicewave,2,cmd) {rawtovcd "$n.raw" > "$n.vcd" && gtkwave "$n.vcd" "$n.sav" 2>/dev/null} 
+      set_ne sim(spicewave,2,name) {Rawtovcd}
+      set_ne sim(spicewave,2,fg) 0
+      set_ne sim(spicewave,2,st) 0
+      # number of configured spice wave viewers, and default one
+      set_ne sim(spicewave,n) 3
+      set_ne sim(spicewave,default) 0
+      
+      ### verilog
+      set_ne sim(verilog,0,cmd) {iverilog -o .verilog_object -g2012 "$N" && vvp .verilog_object}
+      set_ne sim(verilog,0,name) {Icarus verilog}
+      set_ne sim(verilog,0,fg) 0
+      set_ne sim(verilog,0,st) 1
+      # number of configured verilog simulators, and default one
+      set_ne sim(verilog,n) 1
+      set_ne sim(verilog,default) 0
+      
+      ### verilog wave view
+      set_ne sim(verilogwave,0,cmd) {gtkwave dumpfile.vcd "$N.sav" 2>/dev/null}
+      set_ne sim(verilogwave,0,name) {Gtkwave}
+      set_ne sim(verilogwave,0,fg) 0
+      set_ne sim(verilogwave,0,st) 0
+      # number of configured verilog wave viewers, and default one
+      set_ne sim(verilogwave,n) 1
+      set_ne sim(verilogwave,default) 0
+      
+      ### vhdl
+      set_ne sim(vhdl,0,cmd) {ghdl -c --ieee=synopsys -fexplicit "$N" -r "$s" --wave="$n.ghw"}
+      set_ne sim(vhdl,0,name) {Ghdl}
+      set_ne sim(vhdl,0,fg) 0
+      set_ne sim(vhdl,0,st) 1
+      # number of configured vhdl simulators, and default one
+      set_ne sim(vhdl,n) 1
+      set_ne sim(vhdl,default) 0
+      
+      ### vhdl wave view
+      set_ne sim(vhdlwave,0,cmd) {gtkwave "$n.ghw" "$N.sav" 2>/dev/null}
+      set_ne sim(vhdlwave,0,name) {Gtkwave}
+      set_ne sim(vhdlwave,0,fg) 0
+      set_ne sim(vhdlwave,0,st) 0
+      # number of configured vhdl wave viewers, and default one
+      set_ne sim(vhdlwave,n) 1
+      set_ne sim(vhdlwave,default) 0
+    }
   }
 } 
 
@@ -489,8 +486,6 @@ Variables should be used with the usual substitution character $: $n, $N, etc.
 Foreground checkbutton tells xschem to wait for child process to finish.
 Status checkbutton tells xschem to report a status dialog (stdout, stderr,
 exit status) when process finishes.
-This is useful for tasks that execute quickly and for which xschem may display
-the result / error reporting.
 Any changes made in the command or tool name entries will be saved in 
 ~/.xschem/simrc when 'Save Configuration' button is pressed.
 If no ~/.xschem/simrc is present then a bare minumum skeleton setup is presented.
@@ -509,8 +504,10 @@ To reset to default just delete the ~/.xschem/simrc file manually.
     # puts "saving simrc"
   }
   button .sim.bottom.close -text Close -command {
+    set_sim_defaults
     destroy .sim
   }
+  wm protocol .sim WM_DELETE_WINDOW { set_sim_defaults; destroy .sim }
   pack .sim.bottom.cancel -side left -anchor w
   pack .sim.bottom.help -side left
   #foreach tool $sim(tool_list) {
@@ -2092,7 +2089,7 @@ proc infowindow {} {
 proc textwindow {filename {ro {}}} {
    global textwindow_wcounter
    global textwindow_w
-   set textwindow_w .win$textwindow_wcounter
+   # set textwindow_w .win$textwindow_wcounter
    # catch {destroy $textwindow_w}
    set textwindow_wcounter [expr $textwindow_wcounter+1]
    set textwindow_w .win$textwindow_wcounter
@@ -2139,11 +2136,11 @@ proc textwindow {filename {ro {}}} {
 proc viewdata {data {ro {}}} {
    global viewdata_wcounter  rcode
    global viewdata_w
-   set viewdata_w .win$viewdata_wcounter
+   # set viewdata_w .win$viewdata_wcounter
    # catch {destroy $viewdata_w}
    set viewdata_wcounter [expr $viewdata_wcounter+1]
-   set rcode {}
    set viewdata_w .win$viewdata_wcounter
+   set rcode {}
    toplevel $viewdata_w
    wm title $viewdata_w {Wiew data}
    frame $viewdata_w.buttons

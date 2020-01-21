@@ -57,12 +57,12 @@ value="
 ** SPICE models for active devices and put them  into the below 
 ** referenced file in netlist/simulation directory.
 .include \\"models_cmos_example.txt\\"
-
 .control
 let cap = 2e-12
+set filetype=binary
 while cap <= 20e-12
 alter CL cap
-tran 0.2n 2000n
+tran 0.8n 2000n
 write cmos_example.raw
 set appendwrite
 let cap = cap + 2e-12

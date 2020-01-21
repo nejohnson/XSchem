@@ -31,16 +31,16 @@ L 4 35 -745 45 -745 {}
 L 4 35 -785 45 -785 {}
 L 4 35 -825 45 -825 {}
 L 4 35 -865 45 -865 {}
-L 8 790 -500 790 -480 {}
-L 8 770 -510 810 -510 {}
-L 8 790 -530 790 -510 {}
-L 8 770 -610 790 -610 {}
-L 8 790 -610 807.5 -620 {}
-L 8 810 -610 830 -610 {}
+L 8 760 -500 760 -480 {}
+L 8 740 -510 780 -510 {}
+L 8 760 -530 760 -510 {}
+L 8 770 -720 790 -720 {}
+L 8 790 -720 807.5 -730 {}
+L 8 810 -720 830 -720 {}
 B 18 45 -850 300 -665 {}
 A 8 300 -850 5.590169943749475 243.434948822922 360 {}
 P 7 6 375 -665 320 -821.25 315 -835 302.5 -850 290 -855 45 -865 {}
-P 8 5 790 -500 800 -500 790 -510 780 -500 790 -500 {fill=true}
+P 8 5 760 -500 770 -500 760 -510 750 -500 760 -500 {fill=true}
 T {2.5} 75 -645 0 0 0.2 0.2 {}
 T {5.0} 115 -645 0 0 0.2 0.2 {}
 T {7.5} 155 -645 0 0 0.2 0.2 {}
@@ -60,7 +60,7 @@ T {I} 20 -910 0 0 0.4 0.4 {}
 T {SOLAR PANEL} 125 -945 0 0 0.4 0.4 {}
 T {Maximum Power} 287.5 -870 0 0 0.2 0.2 {layer=8}
 T {2x10 1W white LED} 1230 -340 0 0 0.4 0.4 {layer=8}
-T {IDEAL Diode} 690 -470 0 0 0.4 0.4 {layer=8}
+T {IDEAL Diode} 660 -470 0 0 0.4 0.4 {layer=8}
 T {2xseries 1W white LEDs} 1250 -230 0 0 0.4 0.4 {}
 N 80 -450 80 -430 {lab=SRC}
 N 1050 -250 1140 -250 {lab=0}
@@ -77,16 +77,21 @@ N 860 -650 860 -530 {lab=SW}
 N 830 -650 860 -650 {lab=SW}
 N 80 -450 170 -450 {lab=SRC}
 N 860 -250 1050 -250 {lab=0}
-N 570 -250 860 -250 {lab=0}
 N 1020 -650 1050 -650 {lab=VO}
 N 385 -450 385 -420 {lab=PANEL}
 N 385 -360 385 -310 {lab=0}
 N 1140 -480 1180 -480 {lab=LED}
 N 1140 -480 1140 -350 {lab=LED}
 N 230 -450 310 -450 {lab=PANEL2}
-N 370 -450 460 -450 {lab=PANEL}
+N 385 -450 460 -450 {lab=PANEL}
 N 860 -470 860 -430 {lab=#net1}
 N 860 -370 860 -250 {lab=0}
+N 820 -500 820 -470 {lab=#net1}
+N 820 -470 860 -470 {lab=#net1}
+N 820 -530 820 -520 {lab=SW}
+N 820 -530 860 -530 {lab=SW}
+N 370 -450 385 -450 {lab=PANEL}
+N 570 -250 860 -250 {lab=0}
 C {title.sym} 160 -40 0 0 {name=l1 author="Stefan Schippers"}
 C {code_shown.sym} 345 -235 0 0 {name=CONTROL value="* .control
 * save all
@@ -98,7 +103,7 @@ C {code_shown.sym} 345 -235 0 0 {name=CONTROL value="* .control
 * .dc VP 0 21 0.01
 "}
 C {code.sym} 15 -225 0 0 {name=MODELS value=".MODEL DIODE D(IS=1.139e-08 RS=0.99 CJO=9.3e-12 VJ=1.6 M=0.411 BV=30 EG=0.7 ) 
-.MODEL swmod SW(VT=0.1 VH=0.01 RON=0.01 ROFF=10000000)
+.MODEL SWMOD1 VSWITCH VON=0.01 VOFF=-0.01 RON=0.01 ROFF=1e7
 "}
 C {vsource.sym} 80 -340 0 0 {name=V1 value=21}
 C {lab_pin.sym} 80 -310 0 0 {name=l3 sig_type=std_logic lab=0}
@@ -126,7 +131,7 @@ footprint=1206
 device="ceramic capacitor"}
 C {ammeter.sym} 340 -450 3 0 {name=Vpanel}
 C {lab_pin.sym} 1050 -440 0 1 {name=l10 sig_type=std_logic lab=VO}
-C {vsource.sym} 610 -780 0 0 {name=Vset1 value="pulse 0 1 0 1n 1n 1.9u 5u"}
+C {vsource.sym} 610 -780 0 0 {name=Vset1 value="pulse -1 1 0 1n 1n 1.9u 5u"}
 C {lab_pin.sym} 610 -750 0 0 {name=l13 sig_type=std_logic lab=0}
 C {lab_pin.sym} 570 -650 0 0 {name=l2 sig_type=std_logic lab=PANEL}
 C {ammeter.sym} 990 -650 3 0 {name=Vind}
@@ -163,11 +168,9 @@ C {bsource.sym} 200 -450 3 1 {name=B1 VAR=V FUNC="\{ (15-V(PANEL2) > 0) ?
 + I(Vpanel)*((18-V(PANEL2))**1.1/3) : 
 + I(Vpanel)*(0.001) \}"
 }
-C {bsource.sym} 860 -500 0 0 {name=B2 VAR=V FUNC="\{V(SW) < 0 ?
-+ I(Vdiode)*0.01 : I(Vdiode)*1e7 \}"
-}
-C {bsource.sym} 800 -650 3 0 {name=B3 VAR=V FUNC="\{V(CTRL1) > 0.5 ?  
-+ I(Vsw)*0.01 : I(Vsw)*1e7 \}"
-}
 C {lab_wire.sym} 740 -650 0 0 {name=l12 sig_type=std_logic lab=PANEL1}
 C {lab_wire.sym} 290 -450 0 0 {name=l14 sig_type=std_logic lab=PANEL2}
+C {switch_v_xyce.sym} 800 -650 3 1 {name=S1 model=SWMOD1 state=OFF}
+C {lab_pin.sym} 820 -690 0 1 {name=l15 sig_type=std_logic lab=0}
+C {lab_pin.sym} 800 -690 0 0 {name=l16 sig_type=std_logic lab=CTRL1}
+C {switch_v_xyce.sym} 860 -500 2 1 {name=S2 model=SWMOD1 state=OFF}

@@ -770,12 +770,12 @@ proc list_dirs {pathlist } {
 proc myload_set_colors {} {
   global myload_index1 myload_files2
   #### update
-  set dir1 [abs_sym_path [.myload.l.paneleft.list get $myload_index1]]
-  for {set i 0} { $i< [.myload.l.paneright.list index end] } { incr i} {
+  set dir1 [abs_sym_path [.dialog.l.paneleft.list get $myload_index1]]
+  for {set i 0} { $i< [.dialog.l.paneright.list index end] } { incr i} {
     if {[ file isdirectory "$dir1/[lindex $myload_files2 $i]"]} {
-      .myload.l.paneright.list itemconfigure $i -foreground blue
+      .dialog.l.paneright.list itemconfigure $i -foreground blue
     } else {
-      .myload.l.paneright.list itemconfigure $i -foreground black
+      .dialog.l.paneright.list itemconfigure $i -foreground black
     }
   }
 }
@@ -795,15 +795,15 @@ proc myload_set_home {dir} {
   if { $i>=0 } {
     set myload_files1 $pathlist
     update
-    .myload.l.paneleft.list xview moveto 1
+    .dialog.l.paneleft.list xview moveto 1
     set myload_index1 $i
-    .myload.l.paneleft.list selection set $myload_index1
+    .dialog.l.paneleft.list selection set $myload_index1
   } else {
     set myload_files1 [list $dir]
     update
-    .myload.l.paneleft.list xview moveto 1
+    .dialog.l.paneleft.list xview moveto 1
     set myload_index1 0
-    .myload.l.paneleft.list selection set 0
+    .dialog.l.paneleft.list selection set 0
   }
 }
 
@@ -811,8 +811,8 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
   global myload_index1 myload_files2 myload_files1 myload_retval myload_dir1 pathlist
   global myload_default_geometry myload_sash_pos myload_yview tcl_version
   upvar #0 $global_initdir initdir
-  toplevel .myload -class dialog
-  wm title .myload $msg
+  toplevel .dialog -class dialog
+  wm title .dialog $msg
   set_ne myload_index1 0
   if { ![info exists myload_files1]} {
     set myload_files1 $pathlist
@@ -825,134 +825,134 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
 
   # set files [lsort [glob -directory . -tails \{.*,*\}]]
   
-  panedwindow  .myload.l -orient horizontal
+  panedwindow  .dialog.l -orient horizontal
 
-  frame .myload.l.paneleft
+  frame .dialog.l.paneleft
   if {$tcl_version > 8.5} { set just {-justify right}} else {set just {}}
-  eval [subst {listbox .myload.l.paneleft.list -listvariable myload_files1 -width 20 -height 18 $just \
-    -yscrollcommand ".myload.l.paneleft.yscroll set" -selectmode browse \
-    -xscrollcommand ".myload.l.paneleft.xscroll set"}]
-  scrollbar .myload.l.paneleft.yscroll -command ".myload.l.paneleft.list yview" 
-  scrollbar .myload.l.paneleft.xscroll -command ".myload.l.paneleft.list xview" -orient horiz
-  pack  .myload.l.paneleft.yscroll -side right -fill y
-  pack  .myload.l.paneleft.xscroll -side bottom -fill x
-  pack  .myload.l.paneleft.list -fill both -expand true
-  bind .myload.l.paneleft.list <<ListboxSelect>> { 
-    # bind .myload.l.paneright.pre <Expose> {}
-    # .myload.l.paneright.pre configure -background white
-    set sel [.myload.l.paneleft.list curselection]
+  eval [subst {listbox .dialog.l.paneleft.list -listvariable myload_files1 -width 20 -height 18 $just \
+    -yscrollcommand ".dialog.l.paneleft.yscroll set" -selectmode browse \
+    -xscrollcommand ".dialog.l.paneleft.xscroll set"}]
+  scrollbar .dialog.l.paneleft.yscroll -command ".dialog.l.paneleft.list yview" 
+  scrollbar .dialog.l.paneleft.xscroll -command ".dialog.l.paneleft.list xview" -orient horiz
+  pack  .dialog.l.paneleft.yscroll -side right -fill y
+  pack  .dialog.l.paneleft.xscroll -side bottom -fill x
+  pack  .dialog.l.paneleft.list -fill both -expand true
+  bind .dialog.l.paneleft.list <<ListboxSelect>> { 
+    # bind .dialog.l.paneright.pre <Expose> {}
+    # .dialog.l.paneright.pre configure -background white
+    set sel [.dialog.l.paneleft.list curselection]
     if { $sel ne {} } {
-      set myload_dir1 [abs_sym_path [.myload.l.paneleft.list get $sel]]
+      set myload_dir1 [abs_sym_path [.dialog.l.paneleft.list get $sel]]
       set myload_index1 $sel
       set myload_files2 [lsort [glob -directory $myload_dir1 -tails \{.*,*\}]]
       myload_set_colors
     }
   }
 
-  frame .myload.l.paneright
-  frame .myload.l.paneright.pre -background white -width 200 -height 200
-  listbox .myload.l.paneright.list  -listvariable myload_files2 -width 20 -height 18\
-    -yscrollcommand ".myload.l.paneright.yscroll set" -selectmode browse \
-    -xscrollcommand ".myload.l.paneright.xscroll set"
-  scrollbar .myload.l.paneright.yscroll -command ".myload.l.paneright.list yview"
-  scrollbar .myload.l.paneright.xscroll -command ".myload.l.paneright.list xview" -orient horiz
-  pack .myload.l.paneright.pre -side bottom -anchor s -fill x 
-  pack  .myload.l.paneright.yscroll -side right -fill y
-  pack  .myload.l.paneright.xscroll -side bottom -fill x
-  pack  .myload.l.paneright.list -side bottom  -fill both -expand true
+  frame .dialog.l.paneright
+  frame .dialog.l.paneright.pre -background white -width 200 -height 200
+  listbox .dialog.l.paneright.list  -listvariable myload_files2 -width 20 -height 18\
+    -yscrollcommand ".dialog.l.paneright.yscroll set" -selectmode browse \
+    -xscrollcommand ".dialog.l.paneright.xscroll set"
+  scrollbar .dialog.l.paneright.yscroll -command ".dialog.l.paneright.list yview"
+  scrollbar .dialog.l.paneright.xscroll -command ".dialog.l.paneright.list xview" -orient horiz
+  pack .dialog.l.paneright.pre -side bottom -anchor s -fill x 
+  pack  .dialog.l.paneright.yscroll -side right -fill y
+  pack  .dialog.l.paneright.xscroll -side bottom -fill x
+  pack  .dialog.l.paneright.list -side bottom  -fill both -expand true
 
-  .myload.l  add .myload.l.paneleft -minsize 40
-  .myload.l  add .myload.l.paneright -minsize 40
-  # .myload.l paneconfigure .myload.l.paneleft -stretch always
-  # .myload.l paneconfigure .myload.l.paneright -stretch always
-  frame .myload.buttons 
-  button .myload.buttons.ok -text OK -command { set myload_retval [.myload.buttons.entry get]; destroy .myload} 
-  button .myload.buttons.cancel -text Cancel -command {set myload_retval {}; destroy .myload}
-  button .myload.buttons.home -text Home -command {
-    bind .myload.l.paneright.pre <Expose> {}
-    .myload.l.paneright.pre configure -background white
+  .dialog.l  add .dialog.l.paneleft -minsize 40
+  .dialog.l  add .dialog.l.paneright -minsize 40
+  # .dialog.l paneconfigure .dialog.l.paneleft -stretch always
+  # .dialog.l paneconfigure .dialog.l.paneright -stretch always
+  frame .dialog.buttons 
+  button .dialog.buttons.ok -text OK -command { set myload_retval [.dialog.buttons.entry get]; destroy .dialog} 
+  button .dialog.buttons.cancel -text Cancel -command {set myload_retval {}; destroy .dialog}
+  button .dialog.buttons.home -text Home -command {
+    bind .dialog.l.paneright.pre <Expose> {}
+    .dialog.l.paneright.pre configure -background white
     set myload_files1 $pathlist
     update
-    .myload.l.paneleft.list xview moveto 1
+    .dialog.l.paneleft.list xview moveto 1
     set myload_index1 0
-    set myload_dir1 [abs_sym_path [.myload.l.paneleft.list get $myload_index1]]
+    set myload_dir1 [abs_sym_path [.dialog.l.paneleft.list get $myload_index1]]
     set myload_files2 [lsort [glob -directory $myload_dir1 -tails \{.*,*\}]]
     myload_set_colors
-    .myload.buttons.entry delete 0 end
-    .myload.l.paneleft.list selection set $myload_index1
+    .dialog.buttons.entry delete 0 end
+    .dialog.l.paneleft.list selection set $myload_index1
   }
-  label .myload.buttons.label  -text {File:}
-  entry .myload.buttons.entry
-  button .myload.buttons.up -text UP -command {
-    bind .myload.l.paneright.pre <Expose> {}
-    .myload.l.paneright.pre configure -background white
+  label .dialog.buttons.label  -text {File:}
+  entry .dialog.buttons.entry
+  button .dialog.buttons.up -text UP -command {
+    bind .dialog.l.paneright.pre <Expose> {}
+    .dialog.l.paneright.pre configure -background white
     set d [file dirname $myload_dir1]
     if { [file isdirectory $d]} {
       myload_set_home $d
       set myload_files2 [lsort [glob -directory $d -tails \{.*,*\}]]
       myload_set_colors
       set myload_dir1 $d
-      .myload.buttons.entry delete 0 end
+      .dialog.buttons.entry delete 0 end
     }
   }
-  pack .myload.buttons.ok .myload.buttons.up .myload.buttons.cancel \
-       .myload.buttons.home .myload.buttons.label -side left
-  pack .myload.buttons.entry -side left -fill x -expand true
-  pack .myload.l -expand true -fill both
-  pack .myload.buttons -side top -fill x
+  pack .dialog.buttons.ok .dialog.buttons.up .dialog.buttons.cancel \
+       .dialog.buttons.home .dialog.buttons.label -side left
+  pack .dialog.buttons.entry -side left -fill x -expand true
+  pack .dialog.l -expand true -fill both
+  pack .dialog.buttons -side top -fill x
   if { [info exists myload_default_geometry]} {
-     wm geometry .myload "${myload_default_geometry}"
+     wm geometry .dialog "${myload_default_geometry}"
   }
   myload_set_home $initdir
-  bind .myload <Return> { 
-    set myload_retval [.myload.buttons.entry get]
+  bind .dialog <Return> { 
+    set myload_retval [.dialog.buttons.entry get]
     if {$myload_retval ne {} } {
-      destroy .myload
+      destroy .dialog
     }
   }
-  bind .myload.l.paneright.list <Double-Button-1> {
-    set myload_retval [.myload.buttons.entry get]
+  bind .dialog.l.paneright.list <Double-Button-1> {
+    set myload_retval [.dialog.buttons.entry get]
     if {$myload_retval ne {} } {
-      destroy .myload
+      destroy .dialog
     }
   }
-  bind .myload <Escape> { set myload_retval {}; destroy .myload}
+  bind .dialog <Escape> { set myload_retval {}; destroy .dialog}
 
   update
   if { [ info exists myload_sash_pos] } {
-    eval .myload.l sash mark 0 [.myload.l sash coord 0]
-    eval .myload.l sash dragto 0 [subst $myload_sash_pos]
+    eval .dialog.l sash mark 0 [.dialog.l sash coord 0]
+    eval .dialog.l sash dragto 0 [subst $myload_sash_pos]
   }
   update
   if { [ info exists myload_yview]} {
-   .myload.l.paneright.list yview moveto  [lindex $myload_yview 0]
+   .dialog.l.paneright.list yview moveto  [lindex $myload_yview 0]
   }
-  .myload.l.paneleft.list xview moveto 1
-  bind .myload <Configure> {
-    set myload_sash_pos [.myload.l sash coord 0]
-    set myload_default_geometry [wm geometry .myload]
-    .myload.l.paneleft.list xview moveto 1
+  .dialog.l.paneleft.list xview moveto 1
+  bind .dialog <Configure> {
+    set myload_sash_pos [.dialog.l sash coord 0]
+    set myload_default_geometry [wm geometry .dialog]
+    .dialog.l.paneleft.list xview moveto 1
     # regsub {\+.*} $myload_default_geometry {} myload_default_geometry
   }
 
-  bind .myload.l.paneright.yscroll <Motion> {
-    set myload_yview [.myload.l.paneright.list yview]
+  bind .dialog.l.paneright.yscroll <Motion> {
+    set myload_yview [.dialog.l.paneright.list yview]
   }
 
-  xschem preview_window create .myload.l.paneright.pre {}
-  set myload_dir1 [abs_sym_path [.myload.l.paneleft.list get $myload_index1]]
+  xschem preview_window create .dialog.l.paneright.pre {}
+  set myload_dir1 [abs_sym_path [.dialog.l.paneleft.list get $myload_index1]]
   set myload_files2 [lsort [glob -directory $myload_dir1 -tails \{.*,*\}]]
   myload_set_colors
 
-  bind .myload.l.paneright.list <ButtonPress> { 
-    set myload_yview [.myload.l.paneright.list yview]
+  bind .dialog.l.paneright.list <ButtonPress> { 
+    set myload_yview [.dialog.l.paneright.list yview]
   }
-  bind .myload.l.paneright.list <<ListboxSelect>> {
-    set myload_yview [.myload.l.paneright.list yview] 
-    set sel [.myload.l.paneright.list curselection]
+  bind .dialog.l.paneright.list <<ListboxSelect>> {
+    set myload_yview [.dialog.l.paneright.list yview] 
+    set sel [.dialog.l.paneright.list curselection]
     if { $sel ne {} } {
-      set myload_dir1 [abs_sym_path [.myload.l.paneleft.list get $myload_index1]]
-      set dir2 [.myload.l.paneright.list get $sel]
+      set myload_dir1 [abs_sym_path [.dialog.l.paneleft.list get $myload_index1]]
+      set dir2 [.dialog.l.paneright.list get $sel]
       if {$dir2 eq {..}} {
         set d [file dirname $myload_dir1]
       } elseif { $dir2 eq {.} } {
@@ -961,30 +961,30 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
         set d "$myload_dir1/$dir2"
       }
       if { [file isdirectory $d]} {
-        bind .myload.l.paneright.pre <Expose> {}
-        .myload.l.paneright.pre configure -background white
+        bind .dialog.l.paneright.pre <Expose> {}
+        .dialog.l.paneright.pre configure -background white
         myload_set_home $d
         set myload_files2 [lsort [glob -directory $d -tails \{.*,*\}]]
         myload_set_colors
         set myload_dir1 $d
-        .myload.buttons.entry delete 0 end
+        .dialog.buttons.entry delete 0 end
       } else {
-        .myload.buttons.entry delete 0 end
-        .myload.buttons.entry insert 0 $dir2
+        .dialog.buttons.entry delete 0 end
+        .dialog.buttons.entry insert 0 $dir2
          if { [is_xschem_file $myload_dir1/$dir2] } {
-           .myload.l.paneright.pre configure -background {}
+           .dialog.l.paneright.pre configure -background {}
 	   update
-           xschem preview_window draw .myload.l.paneright.pre "$myload_dir1/$dir2"
-           bind .myload.l.paneright.pre <Expose> {xschem preview_window draw .myload.l.paneright.pre "$myload_dir1/$dir2"}
+           xschem preview_window draw .dialog.l.paneright.pre "$myload_dir1/$dir2"
+           bind .dialog.l.paneright.pre <Expose> {xschem preview_window draw .dialog.l.paneright.pre "$myload_dir1/$dir2"}
          } else {
-           bind .myload.l.paneright.pre <Expose> {}
-           .myload.l.paneright.pre configure -background white
+           bind .dialog.l.paneright.pre <Expose> {}
+           .dialog.l.paneright.pre configure -background white
          }
-         # puts "xschem preview_window draw .myload.l.paneright.pre \"$myload_dir1/$dir2\""
+         # puts "xschem preview_window draw .dialog.l.paneright.pre \"$myload_dir1/$dir2\""
       }
     }
   }
-  tkwait window .myload
+  tkwait window .dialog
   xschem preview_window destroy {} {} 
   set initdir "$myload_dir1"
   if { $myload_retval ne {} } {
@@ -1456,59 +1456,54 @@ proc property_search {} {
   global search_select
   global custom_token
 
-  toplevel .lw -class Dialog
-  wm title .lw {Search}
-  bind .lw <Visibility> {
-    if { [winfo ismapped .] && [wm stackorder .lw isbelow . ]} {
-      raise .lw .drw 
-    }
-  }
+  toplevel .dialog -class Dialog
+  wm title .dialog {Search}
   ## 
   # 20100408
-  set X [expr [winfo pointerx .lw] - 60]
-  set Y [expr [winfo pointery .lw] - 35]
-  wm geometry .lw "+$X+$Y"
-  frame .lw.custom 
-  label .lw.custom.l -text "Token"
-  entry .lw.custom.e -width 32
-  .lw.custom.e insert 0 $custom_token
-  pack .lw.custom.e .lw.custom.l -side right
-  frame .lw.val 
-  label .lw.val.l -text "Value"
-  entry .lw.val.e -width 32
-  .lw.val.e insert 0 $search_value
-  pack .lw.val.e .lw.val.l -side right
-  frame .lw.but
-  button .lw.but.ok -text OK -command {
-        set search_value [.lw.val.e get]
-        set custom_token [.lw.custom.e get]
+  set X [expr [winfo pointerx .dialog] - 60]
+  set Y [expr [winfo pointery .dialog] - 35]
+  wm geometry .dialog "+$X+$Y"
+  frame .dialog.custom 
+  label .dialog.custom.l -text "Token"
+  entry .dialog.custom.e -width 32
+  .dialog.custom.e insert 0 $custom_token
+  pack .dialog.custom.e .dialog.custom.l -side right
+  frame .dialog.val 
+  label .dialog.val.l -text "Value"
+  entry .dialog.val.e -width 32
+  .dialog.val.e insert 0 $search_value
+  pack .dialog.val.e .dialog.val.l -side right
+  frame .dialog.but
+  button .dialog.but.ok -text OK -command {
+        set search_value [.dialog.val.e get]
+        set custom_token [.dialog.custom.e get]
         if $tcl_debug<=-1 then { puts stderr "|$custom_token|" }
         set token $custom_token
         if { $search_exact==1 } { xschem search exact $search_select $token $search_value
         } else { xschem search regex $search_select $token $search_value }
-        destroy .lw 
+        destroy .dialog 
   }
-  button .lw.but.cancel -text Cancel -command { destroy .lw }
-  checkbutton .lw.but.sub -text Exact_search -variable search_exact
-  radiobutton .lw.but.nosel -text {Highlight} -variable search_select -value 0
-  radiobutton .lw.but.sel -text {Select} -variable search_select -value 1
+  button .dialog.but.cancel -text Cancel -command { destroy .dialog }
+  checkbutton .dialog.but.sub -text Exact_search -variable search_exact
+  radiobutton .dialog.but.nosel -text {Highlight} -variable search_select -value 0
+  radiobutton .dialog.but.sel -text {Select} -variable search_select -value 1
   # 20171211 added unselect
-  radiobutton .lw.but.unsel -text {Unselect} -variable search_select -value -1
-  pack .lw.but.ok  -anchor w -side left
-  pack .lw.but.sub  -side left
-  pack .lw.but.nosel  -side left
-  pack .lw.but.sel  -side left
-  pack .lw.but.unsel  -side left
-  pack .lw.but.cancel -anchor e
-  pack .lw.custom  -anchor e
-  pack .lw.val  -anchor e
-  pack .lw.but -expand yes -fill x
-  focus  .lw
-  bind .lw <Escape> {.lw.but.cancel invoke}
-  bind .lw <Return> {.lw.but.ok invoke}
-  bind .lw <Control-Return> {.lw.but.ok invoke}
-  grab set .lw
-  tkwait window .lw
+  radiobutton .dialog.but.unsel -text {Unselect} -variable search_select -value -1
+  pack .dialog.but.ok  -anchor w -side left
+  pack .dialog.but.sub  -side left
+  pack .dialog.but.nosel  -side left
+  pack .dialog.but.sel  -side left
+  pack .dialog.but.unsel  -side left
+  pack .dialog.but.cancel -anchor e
+  pack .dialog.custom  -anchor e
+  pack .dialog.val  -anchor e
+  pack .dialog.but -expand yes -fill x
+  focus  .dialog
+  bind .dialog <Escape> {.dialog.but.cancel invoke}
+  bind .dialog <Return> {.dialog.but.ok invoke}
+  bind .dialog <Control-Return> {.dialog.but.ok invoke}
+  grab set .dialog
+  tkwait window .dialog
   return {}
 }
 
@@ -1532,104 +1527,92 @@ proc tclpropeval {s instname symname} {
 proc attach_labels_to_inst {} {
   global use_lab_wire use_label_prefix custom_label_prefix rcode do_all_inst rotated_text
 
-  toplevel .label -class Dialog
+  toplevel .dialog -class Dialog
   set rcode {}
-  wm title .label {Add labels to instances}
-  bind .label <Visibility> {
-    if {[winfo ismapped .] && [wm stackorder .label isbelow . ]} {
-      raise .label .drw 
-    }
-  }
+  wm title .dialog {Add labels to instances}
 
   # 20100408
-  set X [expr [winfo pointerx .label] - 60]
-  set Y [expr [winfo pointery .label] - 35]
-  wm geometry .label "+$X+$Y"
+  set X [expr [winfo pointerx .dialog] - 60]
+  set Y [expr [winfo pointery .dialog] - 35]
+  wm geometry .dialog "+$X+$Y"
 
-  frame .label.custom 
-  label .label.custom.l -text "Prefix"
-  entry .label.custom.e -width 32
-  .label.custom.e insert 0 $custom_label_prefix
-  pack .label.custom.e .label.custom.l -side right
+  frame .dialog.custom 
+  label .dialog.custom.l -text "Prefix"
+  entry .dialog.custom.e -width 32
+  .dialog.custom.e insert 0 $custom_label_prefix
+  pack .dialog.custom.e .dialog.custom.l -side right
 
 
-  frame .label.but
-  button .label.but.ok -text OK -command {
-        set custom_label_prefix [.label.custom.e get]
+  frame .dialog.but
+  button .dialog.but.ok -text OK -command {
+        set custom_label_prefix [.dialog.custom.e get]
         set token $custom_token
         #### put command here
         set rcode yes
-        destroy .label 
+        destroy .dialog 
   }
-  button .label.but.cancel -text Cancel -command { set rcode {}; destroy .label }
-  checkbutton .label.but.wire -text {use wire labels} -variable use_lab_wire
-  checkbutton .label.but.do_all -text {Do all} -variable do_all_inst
-  label .label.but.rot -text {Rotated Text}
-  entry .label.but.rotated -textvariable rotated_text -width 2
-  checkbutton .label.but.prefix -text {use prefix} -variable use_label_prefix
-  pack .label.but.ok  -anchor w -side left
-  pack .label.but.prefix  -side left
-  pack .label.but.wire  -side left
-  pack .label.but.do_all  -side left
-  pack .label.but.rotated  -side left
-  pack .label.but.rot  -side left
-  pack .label.but.cancel -anchor e
+  button .dialog.but.cancel -text Cancel -command { set rcode {}; destroy .dialog }
+  checkbutton .dialog.but.wire -text {use wire labels} -variable use_lab_wire
+  checkbutton .dialog.but.do_all -text {Do all} -variable do_all_inst
+  label .dialog.but.rot -text {Rotated Text}
+  entry .dialog.but.rotated -textvariable rotated_text -width 2
+  checkbutton .dialog.but.prefix -text {use prefix} -variable use_label_prefix
+  pack .dialog.but.ok  -anchor w -side left
+  pack .dialog.but.prefix  -side left
+  pack .dialog.but.wire  -side left
+  pack .dialog.but.do_all  -side left
+  pack .dialog.but.rotated  -side left
+  pack .dialog.but.rot  -side left
+  pack .dialog.but.cancel -anchor e
 
-  pack .label.custom  -anchor e
-  pack .label.but -expand yes -fill x
+  pack .dialog.custom  -anchor e
+  pack .dialog.but -expand yes -fill x
 
-  focus  .label
-  bind .label <Escape> {.label.but.cancel invoke}
-  bind .label <Return> {.label.but.ok invoke}
-  bind .label <Control-Return> {.label.but.ok invoke}
-  grab set .label
-  tkwait window .label
+  focus  .dialog
+  bind .dialog <Escape> {.dialog.but.cancel invoke}
+  bind .dialog <Return> {.dialog.but.ok invoke}
+  bind .dialog <Control-Return> {.dialog.but.ok invoke}
+  grab set .dialog
+  tkwait window .dialog
   return {}
 }
 
 proc ask_save { {ask {save file?}} } {
    global rcode
-   toplevel .ent2 -class Dialog
-   wm title .ent2 {Ask Save}
+   toplevel .dialog -class Dialog
+   wm title .dialog {Ask Save}
 
-   bind .ent2 <Visibility> {
-     if {[winfo ismapped .] && [wm stackorder .ent2 isbelow . ]} {
-       raise .ent2 .drw 
-     }
-   }
-   ## 
-
-   set X [expr [winfo pointerx .ent2] - 60]
-   set Y [expr [winfo pointery .ent2] - 35]
+   set X [expr [winfo pointerx .dialog] - 60]
+   set Y [expr [winfo pointery .dialog] - 35]
 
    # 20100203
-   if { $::wm_fix } { tkwait visibility .ent2 }
+   if { $::wm_fix } { tkwait visibility .dialog }
 
-   wm geometry .ent2 "+$X+$Y"
-   label .ent2.l1  -text $ask
-   frame .ent2.f1
-   button .ent2.f1.b1 -text {Yes} -command\
+   wm geometry .dialog "+$X+$Y"
+   label .dialog.l1  -text $ask
+   frame .dialog.f1
+   button .dialog.f1.b1 -text {Yes} -command\
    {
     set rcode {yes}
-    destroy .ent2
+    destroy .dialog
    }
-   button .ent2.f1.b2 -text {Cancel} -command\
+   button .dialog.f1.b2 -text {Cancel} -command\
    {
     set rcode {}
-    destroy .ent2
+    destroy .dialog
    }
-   button .ent2.f1.b3 -text {No} -command\
+   button .dialog.f1.b3 -text {No} -command\
    {
     set rcode {no}
-    destroy .ent2
+    destroy .dialog
    }
-   pack .ent2.l1 .ent2.f1 -side top -fill x
-   pack .ent2.f1.b1 .ent2.f1.b2 .ent2.f1.b3 -side left -fill x -expand yes
-   bind .ent2 <Escape> {.ent2.f1.b2 invoke}
+   pack .dialog.l1 .dialog.f1 -side top -fill x
+   pack .dialog.f1.b1 .dialog.f1.b2 .dialog.f1.b3 -side left -fill x -expand yes
+   bind .dialog <Escape> {.dialog.f1.b2 invoke}
    # needed, otherwise problems when descending with double clixk 23012004
-   tkwait visibility .ent2
-   grab set .ent2
-   tkwait window .ent2
+   tkwait visibility .dialog
+   grab set .dialog
+   tkwait window .dialog
    return $rcode
 }
 
@@ -1739,59 +1722,55 @@ proc edit_prop {txtlabel} {
    set rcode {}
    set editprop_semaphore 1
    if $tcl_debug<=-1 then {puts " edit_prop{}: retval=$retval"}
-   toplevel .ent2  -class Dialog 
-   wm title .ent2 {Edit Properties}
-   set X [expr [winfo pointerx .ent2] - 60]
-   set Y [expr [winfo pointery .ent2] - 35]
+   toplevel .dialog  -class Dialog 
+   wm title .dialog {Edit Properties}
+   set X [expr [winfo pointerx .dialog] - 60]
+   set Y [expr [winfo pointery .dialog] - 35]
 
    # 20100203
-   if { $::wm_fix } { tkwait visibility .ent2 }
+   if { $::wm_fix } { tkwait visibility .dialog }
 
-   wm geometry .ent2 "${edit_prop_default_geometry}+$X+$Y"
-
-   bind .ent2 <Visibility> { if { [winfo ismapped .] && [wm stackorder .ent2 isbelow . ] } {raise .ent2 .drw}  }
+   wm geometry .dialog "${edit_prop_default_geometry}+$X+$Y"
 
    # 20160325 change and remember widget size
-   bind .ent2 <Configure> { 
-     # puts [wm geometry .ent2]
-     set geom [wm geometry .ent2]
+   bind .dialog <Configure> { 
+     # puts [wm geometry .dialog]
+     set geom [wm geometry .dialog]
      regsub {\+.*} $geom {} geom
      set edit_prop_default_geometry $geom
    }
 
    set prev_symbol $symbol
    set editprop_sympath [file dirname [abs_sym_path $symbol]]
-   frame .ent2.f4
-   label .ent2.f4.l1  -text $txtlabel
-   label .ent2.f4.path  -text "Path:"
-   entry .ent2.f4.e1  -textvariable editprop_sympath -width 0 -state readonly
-   text .ent2.e1   -yscrollcommand ".ent2.yscroll set" -setgrid 1 \
-                   -xscrollcommand ".ent2.xscroll set" -wrap none
-     .ent2.e1 delete 1.0 end
-     .ent2.e1 insert 1.0 $retval
+   frame .dialog.f4
+   label .dialog.f4.l1  -text $txtlabel
+   label .dialog.f4.path  -text "Path:"
+   entry .dialog.f4.e1  -textvariable editprop_sympath -width 0 -state readonly
+   text .dialog.e1   -yscrollcommand ".dialog.yscroll set" -setgrid 1 \
+                   -xscrollcommand ".dialog.xscroll set" -wrap none
+     .dialog.e1 delete 1.0 end
+     .dialog.e1 insert 1.0 $retval
 
-   scrollbar .ent2.yscroll -command  ".ent2.e1 yview"
-   scrollbar .ent2.xscroll -command ".ent2.e1 xview" -orient horiz
-   frame .ent2.f1
-   frame .ent2.f2
-   label .ent2.f1.l2 -text "Symbol"
-   entry .ent2.f1.e2 -width 30
-   .ent2.f1.e2 insert 0 $symbol
-   button .ent2.f1.b5 -text "Browse" -command {
-     bind .ent2 <Visibility> {}
+   scrollbar .dialog.yscroll -command  ".dialog.e1 yview"
+   scrollbar .dialog.xscroll -command ".dialog.e1 xview" -orient horiz
+   frame .dialog.f1
+   frame .dialog.f2
+   label .dialog.f1.l2 -text "Symbol"
+   entry .dialog.f1.e2 -width 30
+   .dialog.f1.e2 insert 0 $symbol
+   button .dialog.f1.b5 -text "Browse" -command {
      set r [save_file_dialog  {New symbol} .sym INITIALINSTDIR {} 0]
      if {$r ne {} } {
-       .ent2.f1.e2 delete 0 end
-       .ent2.f1.e2 insert 0 $r
+       .dialog.f1.e2 delete 0 end
+       .dialog.f1.e2 insert 0 $r
      }
-     raise .ent2 .drw
-     bind .ent2 <Visibility> { if {[winfo ismapped .] && [wm stackorder .ent2 isbelow . ]} {raise .ent2 .drw}  }
+     raise .dialog .drw
    }
 
-   button .ent2.f1.b1 -text "OK" -command   {
-     set retval [.ent2.e1 get 1.0 {end - 1 chars}] 
-     set abssymbol [abs_sym_path [ .ent2.f1.e2 get]]
-     set symbol [.ent2.f1.e2 get]
+   button .dialog.f1.b1 -text "OK" -command   {
+     set retval [.dialog.e1 get 1.0 {end - 1 chars}] 
+     set abssymbol [abs_sym_path [ .dialog.f1.e2 get]]
+     set symbol [.dialog.f1.e2 get]
      set rcode {ok}
      set editprop_semaphore 0
      set user_wants_copy_cell $copy_cell
@@ -1815,53 +1794,53 @@ proc edit_prop {txtlabel} {
      #puts "symbol: $symbol , prev_symbol: $prev_symbol"
      set copy_cell 0 ;# 20120919
    }
-   button .ent2.f1.b2 -text "Cancel" -command  {
+   button .dialog.f1.b2 -text "Cancel" -command  {
      set rcode {}
      set editprop_semaphore 0
    }
-   button .ent2.f1.b3 -text "Load" -command {
+   button .dialog.f1.b3 -text "Load" -command {
      global INITIALPROPDIR
-     set a [tk_getOpenFile -parent .ent2 -initialdir $INITIALPROPDIR ]
+     set a [tk_getOpenFile -parent .dialog -initialdir $INITIALPROPDIR ]
      if [string compare $a ""] {
       set INITIALPROPDIR [file dirname $a]
-      read_data_window  .ent2.e1  $a
+      read_data_window  .dialog.e1  $a
      }
    }
-   button .ent2.f1.b4 -text "Del" -command {
-     .ent2.e1 delete 1.0 end
+   button .dialog.f1.b4 -text "Del" -command {
+     .dialog.e1 delete 1.0 end
    }
-   checkbutton .ent2.f2.r1 -text "No change properties" -variable no_change_attrs -state normal
-   checkbutton .ent2.f2.r2 -text "Preserve unchanged props" -variable preserve_unchanged_attrs -state normal
-   checkbutton .ent2.f2.r3 -text "Copy cell" -variable copy_cell -state normal
+   checkbutton .dialog.f2.r1 -text "No change properties" -variable no_change_attrs -state normal
+   checkbutton .dialog.f2.r2 -text "Preserve unchanged props" -variable preserve_unchanged_attrs -state normal
+   checkbutton .dialog.f2.r3 -text "Copy cell" -variable copy_cell -state normal
 
-   pack .ent2.f1.l2 .ent2.f1.e2 .ent2.f1.b1 .ent2.f1.b2 .ent2.f1.b3 .ent2.f1.b4 .ent2.f1.b5 -side left -expand 1
-   pack .ent2.f4 -side top  -anchor nw
-   #pack .ent2.f4.path .ent2.f4.e1 .ent2.f4.l1 -side left -fill x 
-   pack .ent2.f4.path -side left
-   pack .ent2.f4.e1 -side left 
-   pack .ent2.f1 .ent2.f2 -side top -fill x 
-   pack .ent2.f2.r1 -side left
-   pack .ent2.f2.r2 -side left
-   pack .ent2.f2.r3 -side left
-   pack .ent2.yscroll -side right -fill y 
-   pack .ent2.xscroll -side bottom -fill x
-   pack .ent2.e1  -fill both -expand yes
-   bind .ent2 <Control-Return> {.ent2.f1.b1 invoke}
-   bind .ent2 <Escape> {
-     if { ![string compare $retval [.ent2.e1 get 1.0 {end - 1 chars}]] && \
-          ![string compare $symbol [ .ent2.f1.e2 get]] } {
-       .ent2.f1.b2 invoke
+   pack .dialog.f1.l2 .dialog.f1.e2 .dialog.f1.b1 .dialog.f1.b2 .dialog.f1.b3 .dialog.f1.b4 .dialog.f1.b5 -side left -expand 1
+   pack .dialog.f4 -side top  -anchor nw
+   #pack .dialog.f4.path .dialog.f4.e1 .dialog.f4.l1 -side left -fill x 
+   pack .dialog.f4.path -side left
+   pack .dialog.f4.e1 -side left 
+   pack .dialog.f1 .dialog.f2 -side top -fill x 
+   pack .dialog.f2.r1 -side left
+   pack .dialog.f2.r2 -side left
+   pack .dialog.f2.r3 -side left
+   pack .dialog.yscroll -side right -fill y 
+   pack .dialog.xscroll -side bottom -fill x
+   pack .dialog.e1  -fill both -expand yes
+   bind .dialog <Control-Return> {.dialog.f1.b1 invoke}
+   bind .dialog <Escape> {
+     if { ![string compare $retval [.dialog.e1 get 1.0 {end - 1 chars}]] && \
+          ![string compare $symbol [ .dialog.f1.e2 get]] } {
+       .dialog.f1.b2 invoke
      }
    }
-   #tkwait visibility .ent2
-   #grab set .ent2
-   #focus .ent2.e1
-   #tkwait window .ent2
+   #tkwait visibility .dialog
+   #grab set .dialog
+   #focus .dialog.e1
+   #tkwait window .dialog
    while {1} {
      tkwait  variable editprop_semaphore
      if { $editprop_semaphore == 2 } {
-       set retval [.ent2.e1 get 1.0 {end - 1 chars}] 
-       set symbol [ .ent2.f1.e2 get]
+       set retval [.dialog.e1 get 1.0 {end - 1 chars}] 
+       set symbol [ .dialog.f1.e2 get]
        xschem update_symbol ok 
        set editprop_semaphore 1
        xschem fill_symbol_editprop_form
@@ -1873,18 +1852,18 @@ proc edit_prop {txtlabel} {
        }
        # 20110325 update symbol variable after clicking another element to avoid 
        #          modified flag to be set even when nothing changed
-       ## set symbol [ .ent2.f1.e2 get]
+       ## set symbol [ .dialog.f1.e2 get]
 
-       .ent2.e1 delete 1.0 end
-       .ent2.e1 insert 1.0 $retval
-       .ent2.f1.e2  delete 0 end
-       .ent2.f1.e2 insert 0 $symbol
+       .dialog.e1 delete 1.0 end
+       .dialog.e1 insert 1.0 $retval
+       .dialog.f1.e2  delete 0 end
+       .dialog.f1.e2 insert 0 $symbol
      } else {
        break
      }
     
    }
-   destroy .ent2
+   destroy .dialog
    set editprop_semaphore 0
    return $rcode
 }
@@ -1925,126 +1904,116 @@ proc text_line {txtlabel clear {preserve_disabled disabled} } {
    if $clear==1 then {set retval ""}
    if $tcl_debug<=-1 then {puts " text_line{}: clear=$clear"}
    if $tcl_debug<=-1 then {puts " text_line{}: retval=$retval"}
-   toplevel .ent2  -class Dialog
-   wm title .ent2 {Text input}
-   set X [expr [winfo pointerx .ent2] - 60]
-   set Y [expr [winfo pointery .ent2] - 35]
-
-   bind .ent2 <Visibility> { 
-     if {[winfo ismapped .] && [wm stackorder .ent2 isbelow . ]} {
-       raise .ent2 .drw
-     } 
-   }
-   ## 
+   toplevel .dialog  -class Dialog
+   wm title .dialog {Text input}
+   set X [expr [winfo pointerx .dialog] - 60]
+   set Y [expr [winfo pointery .dialog] - 35]
 
    # 20160325 change and remember widget size
-   bind .ent2 <Configure> {
-     # puts [wm geometry .ent2]
-     set geom [wm geometry .ent2]
+   bind .dialog <Configure> {
+     # puts [wm geometry .dialog]
+     set geom [wm geometry .dialog]
      regsub {\+.*} $geom {} geom
      set text_line_default_geometry $geom
    }
 
    # 20100203
-   if { $::wm_fix } { tkwait visibility .ent2 }
-   wm geometry .ent2 "${text_line_default_geometry}+$X+$Y"
+   if { $::wm_fix } { tkwait visibility .dialog }
+   wm geometry .dialog "${text_line_default_geometry}+$X+$Y"
 
-   frame .ent2.f0
-   frame .ent2.f1
-   label .ent2.f0.l1  -text $txtlabel
+   frame .dialog.f0
+   frame .dialog.f1
+   label .dialog.f0.l1  -text $txtlabel
 
-   text .ent2.e1 -relief sunken -bd 2 -yscrollcommand ".ent2.yscroll set" -setgrid 1 \
-        -xscrollcommand ".ent2.xscroll set" -wrap none -width 90 -height 40
-   scrollbar .ent2.yscroll -command  ".ent2.e1 yview"
-   scrollbar .ent2.xscroll -command ".ent2.e1 xview" -orient horiz
-   .ent2.e1 delete 1.0 end
-   .ent2.e1 insert 1.0 $retval
-   button .ent2.f1.b1 -text "OK" -command  \
+   text .dialog.e1 -relief sunken -bd 2 -yscrollcommand ".dialog.yscroll set" -setgrid 1 \
+        -xscrollcommand ".dialog.xscroll set" -wrap none -width 90 -height 40
+   scrollbar .dialog.yscroll -command  ".dialog.e1 yview"
+   scrollbar .dialog.xscroll -command ".dialog.e1 xview" -orient horiz
+   .dialog.e1 delete 1.0 end
+   .dialog.e1 insert 1.0 $retval
+   button .dialog.f1.b1 -text "OK" -command  \
    {
-     set retval [.ent2.e1 get 1.0 {end - 1 chars}] 
-     destroy .ent2
+     set retval [.dialog.e1 get 1.0 {end - 1 chars}] 
+     destroy .dialog
      set rcode {ok}
    }
-   button .ent2.f1.b2 -text "Cancel" -command  \
+   button .dialog.f1.b2 -text "Cancel" -command  \
    {
-     set retval [.ent2.e1 get 1.0 {end - 1 chars}]
+     set retval [.dialog.e1 get 1.0 {end - 1 chars}]
      set rcode {}
-     destroy .ent2
+     destroy .dialog
    }
-   button .ent2.f1.b3 -text "Load" -command \
+   button .dialog.f1.b3 -text "Load" -command \
    {
      global INITIALPROPDIR
-     set a [tk_getOpenFile -parent .ent2 -initialdir $INITIALPROPDIR ]
+     set a [tk_getOpenFile -parent .dialog -initialdir $INITIALPROPDIR ]
      if [string compare $a ""] {
       set INITIALPROPDIR [file dirname $a]
-      read_data_window  .ent2.e1  $a
+      read_data_window  .dialog.e1  $a
      }
    }
-   button .ent2.f1.b4 -text "Del" -command \
+   button .dialog.f1.b4 -text "Del" -command \
    {
-     .ent2.e1 delete 1.0 end
+     .dialog.e1 delete 1.0 end
    }
-   checkbutton .ent2.f0.l2 -text "preserve unchanged props" -variable preserve_unchanged_attrs -state $preserve_disabled
-   pack .ent2.f0 -fill x
-   pack .ent2.f0.l2 -side left
-   pack .ent2.f0.l1 -side left -expand yes
-   pack .ent2.f1  -fill x
-   pack .ent2.f1.b1 -side left -fill x -expand yes
-   pack .ent2.f1.b2 -side left -fill x -expand yes
-   pack .ent2.f1.b3 -side left -fill x -expand yes
-   pack .ent2.f1.b4 -side left -fill x -expand yes
+   checkbutton .dialog.f0.l2 -text "preserve unchanged props" -variable preserve_unchanged_attrs -state $preserve_disabled
+   pack .dialog.f0 -fill x
+   pack .dialog.f0.l2 -side left
+   pack .dialog.f0.l1 -side left -expand yes
+   pack .dialog.f1  -fill x
+   pack .dialog.f1.b1 -side left -fill x -expand yes
+   pack .dialog.f1.b2 -side left -fill x -expand yes
+   pack .dialog.f1.b3 -side left -fill x -expand yes
+   pack .dialog.f1.b4 -side left -fill x -expand yes
  
 
-   pack .ent2.yscroll -side right -fill y 
-   pack .ent2.xscroll -side bottom -fill x
-   pack .ent2.e1   -expand yes -fill both
-   bind .ent2 <Escape> {
-     if ![string compare $retval [.ent2.e1 get 1.0 {end - 1 chars}]] {
-       .ent2.f1.b2 invoke
+   pack .dialog.yscroll -side right -fill y 
+   pack .dialog.xscroll -side bottom -fill x
+   pack .dialog.e1   -expand yes -fill both
+   bind .dialog <Escape> {
+     if ![string compare $retval [.dialog.e1 get 1.0 {end - 1 chars}]] {
+       .dialog.f1.b2 invoke
      }
    }
-   bind .ent2 <Control-Return> {.ent2.f1.b1 invoke}
-   #tkwait visibility .ent2
-   #grab set .ent2
-   #focus .ent2.e1
+   bind .dialog <Control-Return> {.dialog.f1.b1 invoke}
+   #tkwait visibility .dialog
+   #grab set .dialog
+   #focus .dialog.e1
 
    # 20100208
    set rcode {}   
 
-   tkwait window .ent2
+   tkwait window .dialog
    return $rcode
 }
 
 proc alert_ {txtlabel {position +200+300}} {
-   toplevel .ent3 -class Dialog
-   wm title .ent3 {Alert}
-   set X [expr [winfo pointerx .ent3] - 60]
-   set Y [expr [winfo pointery .ent3] - 60]
+   toplevel .dialog -class Dialog
+   wm title .dialog {Alert}
+   set X [expr [winfo pointerx .dialog] - 60]
+   set Y [expr [winfo pointery .dialog] - 60]
 
    # 20100203
-   if { $::wm_fix } { tkwait visibility .ent3 }
-   bind .ent3 <Visibility> { 
-     if { [winfo ismapped .] && [wm stackorder .ent3 isbelow . ] } {raise .ent3 .drw}
-   }
+   if { $::wm_fix } { tkwait visibility .dialog }
    if { [string compare $position ""] != 0 } {
-     wm geometry .ent3 $position
+     wm geometry .dialog $position
    } else {
-     wm geometry .ent3 "+$X+$Y"
+     wm geometry .dialog "+$X+$Y"
    }
    
-   label .ent3.l1  -text $txtlabel -wraplength 700
-   button .ent3.b1 -text "OK" -command  \
+   label .dialog.l1  -text $txtlabel -wraplength 700
+   button .dialog.b1 -text "OK" -command  \
    {
-     destroy .ent3
+     destroy .dialog
    } 
-   pack .ent3.l1 -side top -fill x
-   pack .ent3.b1 -side top -fill x
-   grab set .ent3
-   focus .ent3.b1
-   bind .ent3 <Return> { destroy .ent3 }
-   bind .ent3 <Escape> { destroy .ent3 }
+   pack .dialog.l1 -side top -fill x
+   pack .dialog.b1 -side top -fill x
+   grab set .dialog
+   focus .dialog.b1
+   bind .dialog <Return> { destroy .dialog }
+   bind .dialog <Escape> { destroy .dialog }
 
-   tkwait window .ent3  
+   tkwait window .dialog  
    return {}
 }
 
@@ -2273,39 +2242,29 @@ proc add_ext {fname ext} {
 
 proc input_number {txt cmd} {
           global xx
-          toplevel .lw -class Dialog
-          wm title .lw {Input number}
-          set X [expr [winfo pointerx .lw] - 60]
-          set Y [expr [winfo pointery .lw] - 35]
+          toplevel .dialog -class Dialog
+          wm title .dialog {Input number}
+          set X [expr [winfo pointerx .dialog] - 60]
+          set Y [expr [winfo pointery .dialog] - 35]
           # 20100203
-          if { $::wm_fix } { tkwait visibility .lw }
-          wm geometry .lw "+$X+$Y"
-
-          bind .lw <Visibility> {
-            if { [winfo ismapped .] && [wm stackorder .lw isbelow . ]} {
-              raise .lw .drw 
-            }
-          } 
-
-          ## 
-
-
+          if { $::wm_fix } { tkwait visibility .dialog }
+          wm geometry .dialog "+$X+$Y"
           set xx $cmd
-          frame .lw.f1
-          label .lw.f1.l -text $txt
-          entry .lw.f1.e -width 12
-          pack .lw.f1.l .lw.f1.e -side left
-          frame .lw.f2
-          button .lw.f2.ok -text OK -command {  eval [subst "$xx [.lw.f1.e get]"] ; destroy .lw }
-          button .lw.f2.cancel -text Cancel -command { destroy .lw }
-          pack .lw.f2.ok  -anchor w -side left
-          pack .lw.f2.cancel -anchor e
-          pack .lw.f1
-          pack .lw.f2 -expand yes -fill x
-          bind .lw <Escape> {.lw.f2.cancel invoke}
-          grab set .lw
-          focus .lw
-          tkwait window .lw
+          frame .dialog.f1
+          label .dialog.f1.l -text $txt
+          entry .dialog.f1.e -width 12
+          pack .dialog.f1.l .dialog.f1.e -side left
+          frame .dialog.f2
+          button .dialog.f2.ok -text OK -command {  eval [subst "$xx [.dialog.f1.e get]"] ; destroy .dialog }
+          button .dialog.f2.cancel -text Cancel -command { destroy .dialog }
+          pack .dialog.f2.ok  -anchor w -side left
+          pack .dialog.f2.cancel -anchor e
+          pack .dialog.f1
+          pack .dialog.f2 -expand yes -fill x
+          bind .dialog <Escape> {.dialog.f2.cancel invoke}
+          grab set .dialog
+          focus .dialog
+          tkwait window .dialog
 }
 
 ## 20161102
@@ -3029,6 +2988,11 @@ font configure Underline-Font -underline true -size 24
 ###
 ### bind .drv <event> {xschem callback <type> <x> <y> <keysym> <button of w> <h> <state>}
 ###
+   bind . <Visibility> {
+     if { [winfo exists .dialog] && [winfo ismapped .dialog] && [winfo ismapped .] && [wm stackorder .dialog isbelow . ]} {
+       raise .dialog .drw 
+     }
+   }
    bind .drw <Double-Button-1> {xschem callback -3 %x %y 0 %b 0 %s}
    bind .drw <Double-Button-2> {xschem callback -3 %x %y 0 %b 0 %s}
    bind .drw <Double-Button-3> {xschem callback -3 %x %y 0 %b 0 %s}

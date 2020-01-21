@@ -2136,10 +2136,10 @@ proc textwindow {filename {ro {}}} {
 proc viewdata {data {ro {}}} {
    global viewdata_wcounter  rcode
    global viewdata_w
-   # set viewdata_w .win$viewdata_wcounter
+   # set viewdata_w .view$viewdata_wcounter
    # catch {destroy $viewdata_w}
    set viewdata_wcounter [expr $viewdata_wcounter+1]
-   set viewdata_w .win$viewdata_wcounter
+   set viewdata_w .view$viewdata_wcounter
    set rcode {}
    toplevel $viewdata_w
    wm title $viewdata_w {Wiew data}

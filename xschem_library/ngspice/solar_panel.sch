@@ -94,7 +94,7 @@ C {code_shown.sym} 245 -245 0 0 {name=CONTROL value="* .control
 * write led_driver.raw
 * .endc
 .save all
-.tran 5n 1000u
+.tran 5n 1000u uic
 * .dc VP 0 21 0.01
 "}
 C {code.sym} 15 -225 0 0 {name=MODELS value=".MODEL DIODE D(IS=1.139e-08 RS=0.99 CJO=9.3e-12 VJ=1.6 M=0.411 BV=30 EG=0.7 ) 

@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
  * simulation.
- * Copyright (C) 1998-2019 Stefan Frederik Schippers
+ * Copyright (C) 1998-2020 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@
 /*  approximate PI definition */
 #define XSCH_PI 3.14159265358979323846264338327950288419716939937
 
-/* #include "../config.h" */
+#include "../config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>

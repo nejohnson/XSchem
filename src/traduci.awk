@@ -17,14 +17,10 @@ END  { endfile(_filename_) }
 BEGIN{
 }
 
-/draw_hilights/{
-  if($0 ~ /redraw_hilights/) {
-  } else if($0 ~/draw_hilights/){
-    sub(/draw_hilights/, "redraw_hilights")
-    found = 1
-  }
+/Copyright \(C\) 1998-2019/{
+ sub(/Copyright \(C\) 1998-2019/, "Copyright (C) 1998-2020")
+ found = 1
 }
-
 
 function replace_pattern(old, new)
 {

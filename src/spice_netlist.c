@@ -288,7 +288,6 @@ void spice_netlist(FILE *fd, int spice_stop )
 {
  int i;
  static char *type=NULL;
- static char *place=NULL;  /* 20121223 */
 
  prepared_netlist_structs = 0;
  prepare_netlist_structs(1);
@@ -303,7 +302,6 @@ void spice_netlist(FILE *fd, int spice_stop )
       continue;
     }
     my_strdup(388, &type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
-    my_strdup(389, &place,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"place",0));  /* 20121223 */
     if( type && (/*strcmp(type,"label") && */ strcmp(type,"ipin")&&strcmp(type,"opin")&&strcmp(type,"iopin") )==0)
     {
       print_spice_element(fd, i) ;  /* this is the element line  */
@@ -319,7 +317,6 @@ void spice_netlist(FILE *fd, int spice_stop )
     }                                                                                             /*20070726 */
   
     my_strdup(390, &type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
-    my_strdup(391, &place,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"place",0));  /* 20121223 */
     if( type && (strcmp(type,"label")&&strcmp(type,"ipin")&& strcmp(type,"opin")&&strcmp(type,"iopin")))
     {
       if(!strcmp(type,"netlist_commands") && netlist_count==0) continue; /* already done in global_spice_netlist */
@@ -330,7 +327,6 @@ void spice_netlist(FILE *fd, int spice_stop )
    }
  }
  if(!netlist_count) redraw_hilights(); /* draw_hilight_net(1); */
-
 }
 
 

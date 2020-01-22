@@ -174,7 +174,6 @@ void tedax_netlist(FILE *fd, int tedax_stop )
 {
   int i;
   static char *type=NULL;
-  static char *place=NULL;  /* 20121223 */
  
   prepared_netlist_structs = 0;
   prepare_netlist_structs(1);
@@ -189,7 +188,6 @@ void tedax_netlist(FILE *fd, int tedax_stop )
        continue;
      }
      my_strdup(421, &type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
-     my_strdup(422, &place,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"place",0));  /* 20121223 */
      if( type && (/*strcmp(type,"label") && */ strcmp(type,"ipin")&&strcmp(type,"opin")&&strcmp(type,"iopin") )==0)
      {
        print_tedax_element(fd, i) ;  /* this is the element line  */
@@ -203,7 +201,6 @@ void tedax_netlist(FILE *fd, int tedax_stop )
        continue;                                                                                   /*20070726 */
      }                                                                                             /*20070726 */
      my_strdup(423, &type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
-     my_strdup(424, &place,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"place",0));  /* 20121223 */
      if( type && (/* strcmp(type,"label")&& */ strcmp(type,"ipin")&& strcmp(type,"opin")&&strcmp(type,"iopin")))
      {
        if(!strcmp(type,"netlist_commands") && netlist_count==0) continue; /* already done in global_tedax_netlist */

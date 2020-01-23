@@ -40,6 +40,7 @@ void replace_bracket(char *s)
 {
   while(*s) {
    if(*s =='[' || *s == ']') *s='_';
+   if(*s ==':') *s='.';
    s++;
   }
 }

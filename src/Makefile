@@ -105,7 +105,7 @@ clean:
 	rm -rf xschem rawtovcd *.o expandlabel.[ch] parselabel.c 
 
 .PHONY: install
-install: xschem
+install: xschem rawtovcd
 	mkdir -p "$(prefix)"/bin
 	mkdir -p "$(prefix)"/share/xschem
 	mkdir -p "$(prefix)"/share/xschem/utile

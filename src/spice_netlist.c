@@ -165,25 +165,31 @@ void global_spice_netlist(int global)  /* netlister driver */
  record_global_node(0,fd,NULL);
 
  /* =================================== 20121223 */
- if(!split_files) for(i=0;i<lastinst;i++) /* print netlist_commands of top level cell with 'place=end' property */
- {
-  if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"spice_ignore",0),"true")==0 ) continue; /* 20140416 */
-  if(inst_ptr[i].ptr<0) continue;
-  if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "spice_ignore",0 ), "true") ) {
-    continue;
-  }
-  my_strdup(384, &type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
-  my_strdup(385, &place,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"place",0));  /* 20121223 */
-  if( type && !strcmp(type,"netlist_commands") ) {
-   if(place && !strcmp(place, "end" )) {  /* 20121223 */
-     print_spice_element(fd, i) ;  /* this is the element line  */
-   } else { /* 20160920 */
-     my_strdup(386, &place,get_tok_value(inst_ptr[i].prop_ptr,"place",0));  /*20160920 */
-     if(place && !strcmp(place, "end" )) {  /* 20160920 */
-       print_spice_element(fd, i) ;  /* 20160920 */
+ if(!split_files) {
+   fprintf(fd,"**** begin user architecture code\n");
+   for(i=0;i<lastinst;i++) /* print netlist_commands of top level cell with 'place=end' property */
+   {
+  
+  
+    if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"spice_ignore",0),"true")==0 ) continue; /* 20140416 */
+    if(inst_ptr[i].ptr<0) continue;
+    if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "spice_ignore",0 ), "true") ) {
+      continue;
+    }
+    my_strdup(384, &type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
+    my_strdup(385, &place,get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr,"place",0));  /* 20121223 */
+    if( type && !strcmp(type,"netlist_commands") ) {
+     if(place && !strcmp(place, "end" )) {  /* 20121223 */
+       print_spice_element(fd, i) ;  /* this is the element line  */
+     } else { /* 20160920 */
+       my_strdup(386, &place,get_tok_value(inst_ptr[i].prop_ptr,"place",0));  /*20160920 */
+       if(place && !strcmp(place, "end" )) {  /* 20160920 */
+         print_spice_element(fd, i) ;  /* 20160920 */
+       }
      }
+    }
    }
-  }
+   fprintf(fd,"**** end user architecture code\n");
  }
  /* =================================== /20121223 */
 

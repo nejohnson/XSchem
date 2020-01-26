@@ -27,7 +27,7 @@ BEGIN{ quote=0 }
 
 {
  pos=0
- if(NF==0) print ""
+ if(NF==0) { print ""; next }
  first = substr($0,1,1)
  # 20151203 faster executionif no {}' present
  if($0 ~/[{}']/ || quote) {
@@ -47,6 +47,7 @@ BEGIN{ quote=0 }
    }
    printf "\n" 
  } else {  #20151203
+   split($0, a, /[^ \t]+/)
    for(i=1;i<=NF;i++) {
      pos += length($i)+1
      if(pos>100) {
@@ -56,10 +57,10 @@ BEGIN{ quote=0 }
          printf "%s", "\n+"
        }
        pos=0
-     } else if(i>1) {
-       printf " "
-     }
-     printf "%s", $i
+     } # else if(i>1) {
+       # printf " "
+     # }
+     printf "%s%s", a[i], $i
    }
    printf "\n"
  }

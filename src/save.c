@@ -422,7 +422,7 @@ static void load_text(FILE *fd)
    textelement[i].font=NULL;
    textelement[i].sel=0;
    load_ascii_string(&textelement[i].prop_ptr,fd);
-   my_strdup(318, &textelement[i].font, get_tok_value(textelement[i].prop_ptr, "font", 0));/*20171206 */
+   if( textelement[i].prop_ptr) my_strdup(318, &textelement[i].font, get_tok_value(textelement[i].prop_ptr, "font", 0));/*20171206 */
    strlayer = get_tok_value(textelement[i].prop_ptr, "layer", 0); /*20171206 */
    if(strlayer[0]) textelement[i].layer = atoi(strlayer);
    else textelement[i].layer = -1;
@@ -457,6 +457,7 @@ static void load_inst(int k, FILE *fd)
     i=lastinst;
     check_inst_storage();
     load_ascii_string(&tmp, fd);
+    if(!tmp) return;
     if(debug_var>=1) fprintf(errfp, "load_inst(): tmp=%s\n", tmp);
     my_strncpy(name, tmp, S(name));
     if(debug_var>=1) fprintf(errfp, "load_inst() 1: name=%s\n", name);
@@ -480,7 +481,7 @@ static void load_inst(int k, FILE *fd)
       inst_ptr[i].node=NULL;
       load_ascii_string(&prop_ptr,fd);
       my_strdup(319, &inst_ptr[i].prop_ptr, prop_ptr);
-      my_strdup2(320, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); /* 20150409 */
+      if(inst_ptr[i].prop_ptr) my_strdup2(320, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); /* 20150409 */
       if(debug_var>=2) fprintf(errfp, "load_inst(): n=%d name=%s prop=%s\n",
             i, inst_ptr[i].name? inst_ptr[i].name:"<NULL>", inst_ptr[i].prop_ptr? inst_ptr[i].prop_ptr:"<NULL>");
       lastinst++;
@@ -638,8 +639,10 @@ void read_xschem_file(FILE *fd) /* 20180912 */
     {
      case 'v':
       load_ascii_string(&xschem_version_string, fd);
-      my_snprintf(file_version, S(file_version), "%s", get_tok_value(xschem_version_string, "file_version", 0));
-      version_found = 1;
+      if(xschem_version_string) {
+        my_snprintf(file_version, S(file_version), "%s", get_tok_value(xschem_version_string, "file_version", 0));
+        version_found = 1;
+      }
       if(debug_var >= 1) fprintf(errfp, "read_xschem_file(): file_version=%s\n", file_version);
       break;
      case 'E':
@@ -1201,6 +1204,7 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
       break;
      case 'G':
       load_ascii_string(&instdef[lastinstdef].prop_ptr,fd);
+      if(!instdef[lastinstdef].prop_ptr) break;
       my_strdup2(341, &instdef[lastinstdef].templ, get_tok_value(instdef[lastinstdef].prop_ptr, "template",2)); /* 20150409 */
       my_strdup2(342, &instdef[lastinstdef].type, get_tok_value(instdef[lastinstdef].prop_ptr, "type",0)); /* 20150409 */
       if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): loaded symbol prop: \"%s\"\n", 

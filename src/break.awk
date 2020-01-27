@@ -49,7 +49,7 @@ BEGIN{ quote=0 }
  } else {  #20151203
    split($0, a, /[^ \t]+/)
    for(i=1;i<=NF;i++) {
-     pos += length($i)+1
+     pos += length($i)+length(a[i])
      if(pos>100) {
        if(first=="*") {
          printf "%s", "\n*+"

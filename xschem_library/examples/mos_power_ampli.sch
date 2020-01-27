@@ -180,7 +180,7 @@ rload out 0 4
 
 ** models are generally not free: you must download
 ** SPICE models for active devices and put them  into the below 
-** referenced file in netlist/simulation directory.
+** referenced file in simulation directory.
 .include \\"models_poweramp.txt\\"
 .dc vplus '-1.5' '1.5' 0.1
 .save all

@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC7 file_version=1.1}
+v {xschem version=2.9.5_RC8 file_version=1.1}
 G {}
 V {}
 S {}
@@ -23,6 +23,15 @@ value=".option RUNLVL=6 post
 vvss vss 0 dc 0
 .save all
 .temp 30
+
+** models are generally not free: you must download
+** SPICE models for active devices 
+** (https://www.centralsemi.com/docs/csm/2N2222A.LIB)
+** and put them  into the below 
+** referenced file in simulation directory.
+.include \\"models_osc.txt\\"
+
+
 .tran 1n 100u 
 .probe tran i1(Q1) i2(Q1) i3(Q1) i(L1) i(c1) i(c2) i(r1) i(r2) i(r3)
 "}
@@ -42,13 +51,3 @@ C {lab_pin.sym} 240 -270 0 0 {name=p4 lab=B}
 C {res.sym} 380 -130 0 1 {name=R1 m=1 value=1k}
 C {res.sym} 380 -370 0 1 {name=R2 m=1 value=2}
 C {capa.sym} 550 -170 0 1 {name=C2 m=1 value=100p}
-C {code.sym} 750 -340 0 0 {name=MODELS 
-only_toplevel=true
-value=".MODEL Q2N2222A NPN IS =3.0611E-14 NF =1.00124 BF =220 IKF=0.52 
-+              VAF=104 ISE=7.5E-15 NE =1.41 NR =1.005 BR =4 IKR=0.24 
-+              VAR=28 ISC=1.06525E-11 NC =1.3728 RB =0.13 RE =0.22 
-+              RC =0.12 CJC=9.12E-12 MJC=0.3508 VJC=0.4089 
-+              CJE=27.01E-12 TF =0.325E-9 TR =100E-9
-+              vce_max=45 vbe_max=6
-
-"}

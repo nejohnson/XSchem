@@ -102,7 +102,7 @@ vvss vss 0 dc 0
 
 ** models are generally not free: you must download
 ** SPICE models for active devices and put them  into the below 
-** referenced file in netlist/simulation directory.
+** referenced file in simulation directory.
 .include \\"models_poweramp.txt\\"
 .save all
 * .FOUR 20k v(outm,outp)

@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC5 file_version=1.1}
+v {xschem version=2.9.5_RC8 file_version=1.1}
 G {}
 V {}
 S {}
@@ -107,7 +107,7 @@ vvss vss 0 dc 0
 
 ** models are generally not free: you must download
 ** SPICE models for active devices and put them  into the below 
-** referenced file in netlist/simulation directory.
+** referenced file in simulation directory.
 .include models_tesla.txt
 .temp 30
 .tran 1n 1m  uic

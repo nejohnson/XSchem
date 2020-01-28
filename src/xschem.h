@@ -23,7 +23,7 @@
 #ifndef CADGLOBALS
 #define CADGLOBALS
 
-#define XSCHEM_VERSION "2.9.5_RC8"
+#define XSCHEM_VERSION "2.9.5"
 #define XSCHEM_FILE_VERSION "1.1"
 
 #if HAS_PIPE == 1
@@ -776,7 +776,7 @@ extern void push_undo(void);
 extern void pop_undo(int redo);
 extern void delete_undo(void);
 extern void clear_undo(void);
-extern void load_schematic(int symbol, int load_symbol, const char *abs_name, int reset_undo);
+extern void load_schematic(int load_symbol, const char *abs_name, int reset_undo);
 extern void link_symbols_to_instances(void);
 extern void load_ascii_string(char **ptr, FILE *fd);
 extern void read_xschem_file(FILE *fd); /*  20180912 */

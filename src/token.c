@@ -439,7 +439,7 @@ char *get_tok_value(const char *s,const char *tok, int with_quotes)
     my_realloc(435, &token,sizetok);
   }
   if(s==NULL){result[0]='\0'; return result;}
-    if(debug_var>=2) fprintf(errfp, "get_tok_value(): looking for <%s> in <%s>\n",tok,s);
+  if(debug_var>=2) fprintf(errfp, "get_tok_value(): looking for <%s> in <%s>\n",tok,s);
   while(1) {
     c=*s++;
     space=SPACE(c) ;

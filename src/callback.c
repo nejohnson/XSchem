@@ -880,12 +880,7 @@ int callback(int event, int mx, int my, KeySym key,
         unselect_all();
         remove_symbols();
         my_strncpy(filename, abs_sym_path(schematic[currentsch], ""), S(filename));
-        if(current_type==SCHEMATIC) 
-          load_schematic(0, 1, filename, 1);
-        else 
-          /* load_symbol(abs_sym_path(schematic[currentsch], "")); */
-          load_schematic(1, 0, filename, 1);
-        /* zoom_full(1, 0); */
+        load_schematic(1, filename, 1);
         draw();
      }
      break;

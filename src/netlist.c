@@ -1097,7 +1097,7 @@ int sym_vs_sch_pins()
               my_strncpy(name, tmp, S(name));
 
               if(!strcmp(file_version,"1.0") ) {
-                if(debug_var>=1) fprintf(errfp, "load_inst(): add_ext(name,\".sym\") = %s\n", add_ext(name, ".sym") );
+                if(debug_var>=1) fprintf(errfp, "sym_vs_sch_pins(): add_ext(name,\".sym\") = %s\n", add_ext(name, ".sym") );
                 my_strncpy(name, add_ext(name, ".sym"), S(name));
               }
 
@@ -1167,7 +1167,7 @@ int sym_vs_sch_pins()
           if(check_version && !version_found) break;
           if(!file_version[0]) {
             my_snprintf(file_version, S(file_version), "1.0");
-            if(debug_var >= 1) fprintf(errfp, "read_xschem_file(): no file_version, assuming file_version=%s\n", file_version);
+            if(debug_var >= 1) fprintf(errfp, "sym_vs_sch_pins(): no file_version, assuming file_version=%s\n", file_version);
           }
         }
         fclose(fd);

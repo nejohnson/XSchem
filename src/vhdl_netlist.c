@@ -42,7 +42,12 @@ void global_vhdl_netlist(int global)  /* netlister driver */
  /* top sch properties used for library use declarations and type definitions */
  /* to be printed before any entity declarations */
 
- if(current_type==SYMBOL) return;
+ if(current_type==SYMBOL) {
+   tcleval("alert_ {This is a symbol, no netlisting can be done.\n"
+           "If this is a schematic delete any 'type=...'\n"
+           "from global properties, save and restart xschem}");
+   return;
+ }
  if(modified) {
    save_ok = save_schematic(schematic[currentsch]);
    if(save_ok == -1) return;
@@ -103,7 +108,7 @@ void global_vhdl_netlist(int global)  /* netlister driver */
  /* flush data structures (remove unused symbols) */
  unselect_all();
  remove_symbols();  /* removed 25122002, readded 04112003.. this removes unused symbols */
- load_schematic(0, 1, schematic[currentsch], 0);  /* 20180927 */
+ load_schematic(1, schematic[currentsch], 0);  /* 20180927 */
 
 
  /* 20071009 print top level generics if defined in symbol */
@@ -289,7 +294,9 @@ void global_vhdl_netlist(int global)  /* netlister driver */
    }
  }
 
- if(schvhdlprop && schvhdlprop[0]) fprintf(fd, "%s\n", schvhdlprop); 
+ if(schvhdlprop && schvhdlprop[0]) {
+   fprintf(fd, "%s\n", schvhdlprop); 
+ }
  fprintf(fd, "end arch_%s ;\n\n", skip_dir( schematic[currentsch]) );
 
  if(split_files) { /* 20081204 */
@@ -308,7 +315,7 @@ void global_vhdl_netlist(int global)  /* netlister driver */
  {
    unselect_all();
    remove_symbols(); /* 20161205 ensure all unused symbols purged before descending hierarchy */
-   load_schematic(0, 1, schematic[currentsch], 0); /* 20180927 */
+   load_schematic(1, schematic[currentsch], 0); /* 20180927 */
 
    currentsch++;
     if(debug_var>=2) fprintf(errfp, "global_vhdl_netlist(): last defined symbol=%d\n",lastinstdef);
@@ -331,7 +338,7 @@ void global_vhdl_netlist(int global)  /* netlister driver */
    currentsch--;
    unselect_all();
    /* remove_symbols(); */
-   load_schematic(0, 1, schematic[currentsch], 0); /* 20180927 */
+   load_schematic(1, schematic[currentsch], 0); /* 20180927 */
    /* symbol vs schematic pin check, we do it here since now we have ALL symbols loaded */
    sym_vs_sch_pins();
 
@@ -390,9 +397,9 @@ void  vhdl_block_netlist(FILE *fd, int i)  /*20081204 */
 
      if((str_tmp = get_tok_value(instdef[i].prop_ptr, "schematic",0 ))[0]) {
        my_strncpy(filename, abs_sym_path(str_tmp, ""), S(filename));
-       load_schematic(0, 1,filename, 0);
+       load_schematic(1,filename, 0);
      } else {
-       load_schematic(0, 1, add_ext(abs_sym_path(instdef[i].name, ""), ".sch"), 0); /* 20190518 */
+       load_schematic(1, add_ext(abs_sym_path(instdef[i].name, ""), ".sch"), 0); /* 20190518 */
      }
 
 

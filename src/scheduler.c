@@ -392,7 +392,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
  {
    unselect_all(); /* 20180929 */
    remove_symbols();
-   load_schematic(0, 1, schematic[currentsch], 1);
+   load_schematic(1, schematic[currentsch], 1);
    zoom_full(1, 0);
  }
  
@@ -835,6 +835,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
   printf("top win:%lx\n", Tk_WindowId(Tk_Parent(Tk_MainWindow(interp))));
  } else if(!strcmp(argv[1],"globals")) {
   printf("*******global variables:*******\n");
+  printf("current_type=%s\n", current_type == SCHEMATIC ? "SCHEMATIC" : "SYMBOL");
   printf("netlist_dir=%s\n", netlist_dir? netlist_dir: "<NULL>");
   printf("lw=%d\n", lw);
   printf("lastwire=%d\n", lastwire);
@@ -1065,7 +1066,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
       unselect_all(); /* 20180929 */
       remove_symbols();
       /* load_symbol(argv[2]); */
-      load_schematic(1, 0, argv[2], 1);
+      load_schematic(0, argv[2], 1);
       my_strdup(374, &sch_prefix[currentsch],".");
       zoom_full(1, 0);
     }
@@ -1079,7 +1080,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
       currentsch = 0;
       unselect_all(); /* 20180929 */
       remove_symbols();
-      load_schematic(0, 1, abs_sym_path(argv[2], ""), 1);
+      load_schematic(1, abs_sym_path(argv[2], ""), 1);
       my_strdup(375, &sch_prefix[currentsch],".");
       zoom_full(1, 0);
     }

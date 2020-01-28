@@ -1,26 +1,6 @@
-v {xschem version=2.9.5_RC6 file_version=1.1}
+v {xschem version=2.9.5 file_version=1.1}
 G {}
-V {// Copyright (C) 2008 DJ Delorie <dj@delorie.com>
-// Distributed under the terms of the GNU General Public License,
-// either verion 2 or (at your choice) any later version.
-
-always @ (ibcd)
-begin
-  case (ibcd)  // abcdefg
-    0 : oseg = 7'b1111110;
-    1 : oseg = 7'b0110000;
-    2 : oseg = 7'b1101101;
-    3 : oseg = 7'b1111001;
-    4 : oseg = 7'b0110011;
-    5 : oseg = 7'b1011011;
-    6 : oseg = 7'b1011111;
-    7 : oseg = 7'b1110000;
-    8 : oseg = 7'b1111111;
-    9 : oseg = 7'b1111011;
-    default : oseg = 0;
-  endcase
-end
-}
+V {}
 S {}
 E {}
 T {Copyright (C) 2008 DJ Delorie (dj delorie com)

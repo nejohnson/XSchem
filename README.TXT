@@ -41,6 +41,7 @@ CHANGELOG
 2.9.5
 - Added xyce simulator launch
 - Show infowindow (erc, warnings etc) on startup if show_infowindow set in conf file
+- Alt-p command to place a symbol pin
 - Hilight subcircuit symbols during netlist if there is a pin mismatch with underlying schematic
 - Xschem presentation slides for F-Si conference.
 - better tk_exec: collect exit status from spawn background processes via async pipe fileevent

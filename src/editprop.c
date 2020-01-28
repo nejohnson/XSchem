@@ -671,10 +671,10 @@ void edit_text_property(int x)
                if(
                    /* 20171206 20171221 */
                    (fabs( (yy1+yy2)/2 - pcy) < cadgrid/2 && 
-                   (fabs(xx1 - pcx) < cadgrid*6 || fabs(xx2 - pcx) < cadgrid*6) )
+                   (fabs(xx1 - pcx) < cadgrid*3 || fabs(xx2 - pcx) < cadgrid*3) )
                    || 
                    (fabs( (xx1+xx2)/2 - pcx) < cadgrid/2 && 
-                   (fabs(yy1 - pcy) < cadgrid*6 || fabs(yy2 - pcy) < cadgrid*6) )
+                   (fabs(yy1 - pcy) < cadgrid*3 || fabs(yy2 - pcy) < cadgrid*3) )
                ) {
                  if(x==0)  /* 20080804 */
                    my_strdup(71, &rect[PINLAYER][l].prop_ptr, 

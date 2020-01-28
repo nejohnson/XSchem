@@ -1115,7 +1115,9 @@ void edit_property(int x)
    /* the schvhdlprop string. 04102001 */
    for(j=0;j<lastinst;j++)
    {
-    if( inst_ptr[j].ptr !=-1 && !strcmp( (inst_ptr[j].ptr+instdef)->type, "architecture") ) /* 20150409 */
+    if( inst_ptr[j].ptr !=-1 && 
+        (inst_ptr[j].ptr+instdef)->type &&
+        !strcmp( (inst_ptr[j].ptr+instdef)->type, "architecture") ) /* 20150409 */
     {
       if(debug_var>=1) fprintf(errfp, "edit_property(): updating vhdl architecture\n");
       symbol_bbox(j, &inst_ptr[j].x1, &inst_ptr[j].y1,

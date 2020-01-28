@@ -364,19 +364,23 @@ void write_xschem_file(FILE *fd)
   fprintf(fd, "v {xschem version=%s file_version=%s}\n", XSCHEM_VERSION, XSCHEM_FILE_VERSION);
   fprintf(fd, "G ");
   /* 20171025 for symbol only put G {} field and look for format or type props in the 3 global prop strings. */
-  if(schvhdlprop && (strstr(schvhdlprop,"type=") || strstr(schvhdlprop,"format="))) {
+  if(current_type == SYMBOL) {
     save_ascii_string(schvhdlprop,fd);
     fprintf(fd, "\nV {}\nS {}\nE {}\n");
   }
-  else if(schtedaxprop && (strstr(schtedaxprop,"type=") || strstr(schtedaxprop,"format="))) {
+  else if(schvhdlprop && !strncmp(schvhdlprop,"type=", 5)) {
+    save_ascii_string(schvhdlprop,fd);
+    fprintf(fd, "\nV {}\nS {}\nE {}\n");
+  }
+  else if(schtedaxprop && !strncmp(schtedaxprop,"type=", 5)) {
     save_ascii_string(schtedaxprop,fd);
     fprintf(fd, "\nV {}\nS {}\nE {}\n");
   }
-  else if(schprop && (strstr(schprop,"type=") || strstr(schprop,"format="))) {
+  else if(schprop && !strncmp(schprop,"type=", 5)) {
     save_ascii_string(schprop,fd);
     fprintf(fd, "\nV {}\nS {}\nE {}\n");
   }
-  else if(schverilogprop && (strstr(schverilogprop,"type=") || strstr(schverilogprop,"format="))) {
+  else if(schverilogprop && !strncmp(schverilogprop,"type=", 5)) {
     save_ascii_string(schverilogprop,fd);
     fprintf(fd, "\nV {}\nS {}\nE {}\n");
   } else {
@@ -481,7 +485,7 @@ static void load_inst(int k, FILE *fd)
       inst_ptr[i].node=NULL;
       load_ascii_string(&prop_ptr,fd);
       my_strdup(319, &inst_ptr[i].prop_ptr, prop_ptr);
-      if(inst_ptr[i].prop_ptr) my_strdup2(320, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); /* 20150409 */
+      my_strdup2(320, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); /* 20150409 */
       if(debug_var>=2) fprintf(errfp, "load_inst(): n=%d name=%s prop=%s\n",
             i, inst_ptr[i].name? inst_ptr[i].name:"<NULL>", inst_ptr[i].prop_ptr? inst_ptr[i].prop_ptr:"<NULL>");
       lastinst++;
@@ -629,7 +633,7 @@ void read_xschem_file(FILE *fd) /* 20180912 */
   int inst_cnt;
   int version_found = 0;
 
-  if(debug_var>=3) fprintf(errfp, "read_xschem_file(): start\n");
+  if(debug_var>=2) fprintf(errfp, "read_xschem_file(): start\n");
   inst_cnt = endfile = 0;
   file_version[0] = '\0';
   while(!endfile)
@@ -679,6 +683,9 @@ void read_xschem_file(FILE *fd) /* 20180912 */
       load_wire(fd);
       break;
      case 'C':
+      if(current_type == SYMBOL) {
+        current_type=SCHEMATIC;
+      }
       load_inst(inst_cnt++, fd);
       break;
      case '[':
@@ -865,7 +872,7 @@ void link_symbols_to_instances(void) /* 20150326 separated from load_schematic()
 
 }
 
-void load_schematic(int symbol, int load_symbols, const char *filename, int reset_undo) /* 20150327 added reset_undo */
+void load_schematic(int load_symbols, const char *filename, int reset_undo) /* 20150327 added reset_undo */
 {
   FILE *fd;
   char name[PATH_MAX];
@@ -904,7 +911,7 @@ void load_schematic(int symbol, int load_symbols, const char *filename, int rese
       fclose(fd); /* 20150326 moved before load symbols */
       set_modify(0);
       if(debug_var>=2) fprintf(errfp, "load_schematic(): loaded file:wire=%d inst=%d\n",lastwire , lastinst);
-      if(load_symbols) link_symbols_to_instances();
+      if(load_symbols && current_type == SCHEMATIC) link_symbols_to_instances();
     }
     if(debug_var>=1) fprintf(errfp, "load_schematic(): %s, returning\n", schematic[currentsch]);
   } else {
@@ -1616,12 +1623,12 @@ void descend_symbol(void)
     unselect_all();
     remove_symbols(); /* must follow save (if) embedded */
     /* load_symbol(name_embedded); */
-    load_schematic(1, 1, name_embedded, 1);
+    load_schematic(1, name_embedded, 1);
   } else {
     /* load_symbol(abs_sym_path(name, "")); */
     unselect_all();
     remove_symbols(); /* must follow save (if) embedded */
-    load_schematic(1, 1, abs_sym_path(name, ""), 1);
+    load_schematic(1, abs_sym_path(name, ""), 1);
   }
   zoom_full(1, 0);
 }

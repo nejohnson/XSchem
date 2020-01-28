@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC8 file_version=1.1}
+v {xschem version=2.9.5 file_version=1.1}
 G {}
 V {}
 S {}
@@ -20,9 +20,9 @@ L 7 1090 -260 2520 -260 {}
 T {CAL} 140 -180 0 1 0.4 0.4 {}
 T {EN} 140 -130 0 1 0.4 0.4 {}
 T {CALIBRATION
-  20ns} 400 -300 0 1 0.4 0.4 {}
+  30ns} 400 -300 0 1 0.4 0.4 {}
 T {SENSING
-  20ns} 530 -300 0 1 0.4 0.4 {}
+  30ns} 530 -300 0 1 0.4 0.4 {}
 T {OFF} 660 -300 0 1 0.4 0.4 {}
 T {OFF} 210 -300 0 1 0.4 0.4 {}
 T {NGSPICE MONTE CARLO SIMULATION} 1210 -310 0 0 0.8 0.8 {}

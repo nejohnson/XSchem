@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC8 file_version=1.1}
+v {xschem version=2.9.5 file_version=1.1}
 G {}
 V {}
 S {}
@@ -18,15 +18,15 @@ L 4 700 -180 700 -160 {}
 L 4 700 -180 820 -180 {}
 T {CAL} 270 -190 0 1 0.4 0.4 {}
 T {EN} 270 -140 0 1 0.4 0.4 {}
-T {CALIBRATION
-  20ns} 530 -310 0 1 0.4 0.4 {}
-T {SENSING
-  20ns} 660 -310 0 1 0.4 0.4 {}
 T {OFF} 790 -310 0 1 0.4 0.4 {}
 T {OFF} 340 -310 0 1 0.4 0.4 {}
 T {Offset-compensated comparator. Detects +/- 2mv differential signal on PLUS, MINUS.
 Output on SAOUT
 } 1190 -280 0 0 0.6 0.6 {}
+T {CALIBRATION
+  30ns} 540 -320 0 1 0.4 0.4 {}
+T {SENSING
+  30ns} 670 -320 0 1 0.4 0.4 {}
 N 160 -1180 190 -1180 {lab=VSS}
 N 160 -1150 160 -1130 {lab=VSS}
 N 160 -1230 160 -1210 {lab=VSSI}

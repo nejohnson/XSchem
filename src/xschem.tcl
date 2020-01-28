@@ -1988,32 +1988,32 @@ proc text_line {txtlabel clear {preserve_disabled disabled} } {
 }
 
 proc alert_ {txtlabel {position +200+300}} {
-   toplevel .dialog -class Dialog
-   wm title .dialog {Alert}
-   set X [expr [winfo pointerx .dialog] - 60]
-   set Y [expr [winfo pointery .dialog] - 60]
+   toplevel .alert -class Dialog
+   wm title .alert {Alert}
+   set X [expr [winfo pointerx .alert] - 60]
+   set Y [expr [winfo pointery .alert] - 60]
 
    # 20100203
-   if { $::wm_fix } { tkwait visibility .dialog }
+   if { $::wm_fix } { tkwait visibility .alert }
    if { [string compare $position ""] != 0 } {
-     wm geometry .dialog $position
+     wm geometry .alert $position
    } else {
-     wm geometry .dialog "+$X+$Y"
+     wm geometry .alert "+$X+$Y"
    }
    
-   label .dialog.l1  -text $txtlabel -wraplength 700
-   button .dialog.b1 -text "OK" -command  \
+   label .alert.l1  -text $txtlabel -wraplength 700
+   button .alert.b1 -text "OK" -command  \
    {
-     destroy .dialog
+     destroy .alert
    } 
-   pack .dialog.l1 -side top -fill x
-   pack .dialog.b1 -side top -fill x
-   grab set .dialog
-   focus .dialog.b1
-   bind .dialog <Return> { destroy .dialog }
-   bind .dialog <Escape> { destroy .dialog }
+   pack .alert.l1 -side top -fill x
+   pack .alert.b1 -side top -fill x
+   grab set .alert
+   focus .alert.b1
+   bind .alert <Return> { destroy .alert }
+   bind .alert <Escape> { destroy .alert }
 
-   tkwait window .dialog  
+   tkwait window .alert  
    return {}
 }
 

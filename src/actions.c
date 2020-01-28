@@ -457,10 +457,7 @@ void ask_new_file(void)
      currentsch = 0;
      unselect_all(); /* 20180929 */
      remove_symbols();
-     if(strstr(fullname,".sym"))
-       /*  load_symbol( fullname); */
-       load_schematic(1, 0, fullname,1);
-     else load_schematic(0, 1, fullname,1); /* 20180925.1 */
+     load_schematic(1, fullname,1); /* 20180925.1 */
      my_strdup(1, &sch_prefix[currentsch],".");
      zoom_full(1, 0);
     }
@@ -1075,10 +1072,10 @@ void descend_schematic(void)
   unselect_all();
   remove_symbols();
   if(filename[0]) {
-    load_schematic(0, 1,filename, 1);
+    load_schematic(1,filename, 1);
   } else {
     my_strncpy(filename, add_ext(abs_sym_path(inst_ptr[selectedgroup[0].n].name, ""), ".sch"), S(filename));
-    load_schematic(0, 1, filename, 1);
+    load_schematic(1, filename, 1);
   }
   if(hilight_nets) 
   {
@@ -1130,7 +1127,7 @@ void go_back(int confirm) /*  20171006 add confirm */
                             /* by default) to parent schematic if going back from embedded symbol */
 
   my_strncpy(filename, abs_sym_path(schematic[currentsch], ""), S(filename));
-  load_schematic(0, 1, filename, 1);
+  load_schematic(1, filename, 1);
   if(from_embedded_sym) modified=save_modified; /* to force ask save embedded sym in parent schematic */
 
   if(prev_curr_type==SCHEMATIC) {

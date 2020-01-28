@@ -744,7 +744,7 @@ void preview_window(const char *what, const char *tk_win_path, const char *filen
     /* preview */
     check_version = 0; /* if set refuse to load and preview anything if not an xschem file */
                        /* heuristics is done in xschem.tcl to ensure it is an xschem file */
-    load_schematic(0, 1,filename, 0);
+    load_schematic(1,filename, 0);
     window = pre_window;
     resetwin();
     zoom_full(1, 0); /* draw */
@@ -1228,7 +1228,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
     remove_symbols();
     my_snprintf(s, S(s), "file normalize %s", filename);
     tcleval(s);
-    load_schematic(0, 1, abs_sym_path(Tcl_GetStringResult(interp), ""), 1); /* 20180925.1 */
+    load_schematic(1, abs_sym_path(Tcl_GetStringResult(interp), ""), 1); /* 20180925.1 */
  }
  else { 
    char * tmp; /* 20121110 */
@@ -1236,7 +1236,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
    tmp = (char *) tclgetvar("XSCHEM_START_WINDOW"); /* 20121110 */
    if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): tmp=%s\n", tmp? tmp: "NULL");
    my_strncpy(filename, abs_sym_path(tmp, ""), S(filename));
-   load_schematic(0, 1, filename, 1);
+   load_schematic(1, filename, 1);
  }
  zoom_full(0, 0);   /* Necessary to tell xschem the 
                   * initial area to display

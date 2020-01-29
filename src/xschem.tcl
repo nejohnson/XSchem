@@ -1798,6 +1798,12 @@ proc edit_prop {txtlabel} {
      set rcode {}
      set editprop_semaphore 0
    }
+
+   wm protocol .dialog  WM_DELETE_WINDOW {
+     set rcode {}
+     set editprop_semaphore 0
+   }
+
    button .dialog.f1.b3 -text "Load" -command {
      global INITIALPROPDIR
      set a [tk_getOpenFile -parent .dialog -initialdir $INITIALPROPDIR ]

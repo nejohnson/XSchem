@@ -422,9 +422,18 @@ void saveas(const char *f) /*  changed name from ask_save_file to saveas 2012120
     char name[PATH_MAX+1000];
     char filename[PATH_MAX];
     char res[PATH_MAX];
+    char *p;
     if(!f) {
       my_strncpy(filename , abs_sym_path(schematic[currentsch], ""), S(filename));
-      my_snprintf(name, S(name), "save_file_dialog {Save file} .sch.sym INITIALLOADDIR {%s}", filename);
+      if(current_type == SCHEMATIC) {
+        my_snprintf(name, S(name), "save_file_dialog {Save file} .sch.sym INITIALLOADDIR {%s}", filename);
+      } else {
+        if( (p = strrchr(filename, '.')) && !strcmp(p, ".sch") ) {
+          my_strncpy(filename, add_ext(filename, ".sym"), S(filename));
+        }
+        my_snprintf(name, S(name), "save_file_dialog {Save file} .sym.sch INITIALLOADDIR {%s}", filename);
+      }
+
       tcleval(name);
       my_strncpy(res, Tcl_GetStringResult(interp), S(res));
     }

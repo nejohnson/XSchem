@@ -364,7 +364,7 @@ void write_xschem_file(FILE *fd)
   fprintf(fd, "v {xschem version=%s file_version=%s}\n", XSCHEM_VERSION, XSCHEM_FILE_VERSION);
   fprintf(fd, "G ");
   /* 20171025 for symbol only put G {} field and look for format or type props in the 3 global prop strings. */
-  if(current_type == SYMBOL) {
+  if(current_type == SYMBOL && schvhdlprop && schvhdlprop[0]) {
     save_ascii_string(schvhdlprop,fd);
     fprintf(fd, "\nV {}\nS {}\nE {}\n");
   }

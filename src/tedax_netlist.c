@@ -42,6 +42,7 @@ void global_tedax_netlist(int global)  /* netlister driver */
    if(save_ok == -1) return;
  }
  statusmsg("",2);  /* clear infowindow */
+ record_global_node(2, NULL, NULL); /* delete list of global nodes */
  netlist_count=0;
 
  my_snprintf(netl, S(netl), "%s/%s", netlist_dir, skip_dir(schematic[currentsch]) );

@@ -58,6 +58,14 @@ void global_spice_netlist(int global)  /* netlister driver */
  if(debug_var>=1) fprintf(errfp, "global_spice_netlist(): opening %s for writing\n",netl);
  fprintf(fd,"**.subckt %s", skip_dir( schematic[currentsch]) );
 
+ /* netlist_options */
+ for(i=0;i<lastinst;i++)
+ {
+   if( (inst_ptr[i].ptr+instdef)->type && !strcmp((inst_ptr[i].ptr+instdef)->type,"netlist_options") ) {
+     netlist_options(i);
+   }
+ }
+
  /* print top subckt ipin/opins */
  for(i=0;i<lastinst;i++)
  {
@@ -69,7 +77,7 @@ void global_spice_netlist(int global)  /* netlister driver */
   my_strdup(380, &type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
   if(debug_var>=1) fprintf(errfp, "global_spice_netlist(): |%s|\n", type);
   if( type && !strcmp(type,"netlist_options") ) {
-    netlist_options(i);
+    continue;
   }
   if( type && !(strcmp(type,"ipin")&&strcmp(type,"opin")&&strcmp(type,"iopin")) )
   {

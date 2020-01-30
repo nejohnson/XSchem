@@ -2261,7 +2261,7 @@ proc input_number {txt cmd} {
           entry .dialog.f1.e -width 12
           pack .dialog.f1.l .dialog.f1.e -side left
           frame .dialog.f2
-          button .dialog.f2.ok -text OK -command {  eval [subst "$xx [.dialog.f1.e get]"] ; destroy .dialog }
+          button .dialog.f2.ok -text OK -command {  eval [subst -nocommands "$xx {[.dialog.f1.e get]}"] ; destroy .dialog }
           button .dialog.f2.cancel -text Cancel -command { destroy .dialog }
           pack .dialog.f2.ok  -anchor w -side left
           pack .dialog.f2.cancel -anchor e
@@ -2386,6 +2386,7 @@ set_ne tcl_files {}
 set_ne netlist_dir "$USER_CONF_DIR/simulations"
 set_ne bus_replacement_char {} ;# use {<>} to replace [] with <> in bussed signals
 set_ne hspice_netlist 0
+set_ne top_subckt 0
 set_ne verilog_2001 1
 set_ne split_files 0
 set_ne flat_netlist 0
@@ -2706,6 +2707,12 @@ font configure Underline-Font -underline true -size 24
       -command {
          if { $hspice_netlist==1 } {xschem set hspice_netlist 1} else { xschem set hspice_netlist 0} 
       }
+   .menubar.option.menu add command -label "Replace \[ and \] for buses in SPICE netlist" \
+      -command {
+        input_number "Enter two characters to replace default bus \[\] delimiters:" "set tmp_bus_char"
+        if { [info exists tmp_bus_char] && [string length $tmp_bus_char] >=2} { set bus_replacement_char $tmp_bus_char } 
+      }
+   .menubar.option.menu add checkbutton -label "Top level is a .subckt in SPICE netlist" -variable top_subckt 
    .menubar.option.menu add checkbutton -label "Verilog 2001 netlist variant" -variable verilog_2001 \
    
    .menubar.option.menu add checkbutton -label "Draw grid" -variable draw_grid \

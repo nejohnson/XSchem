@@ -895,11 +895,13 @@ void update_symbol(const char *result, int x)
     if(debug_var>=1) fprintf(errfp, "update_symbol(): name=%s, inst_ptr[i].prop_ptr=%s\n", name, inst_ptr[i].prop_ptr);
     my_strdup(89, &ptr,subst_token(inst_ptr[i].prop_ptr, "name", name) );
                    /* set name of current inst */
-    if(sym_number >=0) {
-      if(!pushed) { push_undo(); pushed=1;}
-      if(!k) hash_all_names(i);
-      new_prop_string(i, ptr, k, disable_unique_names); /* set new prop_ptr */
-    }
+
+    /* if(sym_number >=0) { */
+    if(!pushed) { push_undo(); pushed=1;}
+    if(!k) hash_all_names(i);
+    new_prop_string(i, ptr, k, disable_unique_names); /* set new prop_ptr */
+    /* } */
+
     type=instdef[inst_ptr[i].ptr].type; /* 20150409 */
     cond= !type || (strcmp(type,"label") && strcmp(type,"ipin") &&
           strcmp(type,"opin") &&  strcmp(type,"iopin"));

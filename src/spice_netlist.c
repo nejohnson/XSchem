@@ -49,30 +49,34 @@ void global_spice_netlist(int global)  /* netlister driver */
  statusmsg("",2);  /* clear infowindow */
  record_global_node(2, NULL, NULL); /* delete list of global nodes */
  top_subckt = 0;
+ bus_replacement_char[0] = bus_replacement_char[1] = '\0';
+ str_tmp = tclgetvar("bus_replacement_char");
+ if(str_tmp && str_tmp[0] && str_tmp[1]) {
+   bus_replacement_char[0] = str_tmp[0];
+   bus_replacement_char[1] = str_tmp[1];
+ }
  netlist_count=0;
  my_snprintf(netl, S(netl), "%s/%s", netlist_dir, skip_dir(schematic[currentsch]) );
  if(debug_var>=1) fprintf(errfp, "global_spice_netlist(): opening %s for writing\n",netl);
  fd=fopen(netl, "w");
  my_snprintf(netl3, S(netl3), "%s", skip_dir(schematic[currentsch]));
- if(fd==NULL){ 
+ if(fd==NULL) { 
    if(debug_var>=0) fprintf(errfp, "global_spice_netlist(): problems opening netlist file\n");
    return;
  }
-
  /* netlist_options */
- for(i=0;i<lastinst;i++)
- {
+ for(i=0;i<lastinst;i++) {
    if( (inst_ptr[i].ptr+instdef)->type && !strcmp((inst_ptr[i].ptr+instdef)->type,"netlist_options") ) {
      netlist_options(i);
    }
  }
+ if(!strcmp(tclgetvar("top_subckt"), "1")) top_subckt = 1;
 
  if(!top_subckt) fprintf(fd,"**");
  fprintf(fd,".subckt %s", skip_dir( schematic[currentsch]) );
 
  /* print top subckt ipin/opins */
- for(i=0;i<lastinst;i++)
- {
+ for(i=0;i<lastinst;i++) {
   if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"spice_ignore",0),"true")==0 ) continue; /* 20140416 */
   if(inst_ptr[i].ptr<0) continue;
   if(!strcmp(get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "spice_ignore",0 ), "true") ) {

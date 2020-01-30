@@ -644,7 +644,7 @@ void new_prop_string(int i, const char *old_prop, int fast, int disable_unique_n
  int n;
  char *old_name_base = NULL;
  
- if(debug_var>=0) fprintf(errfp, "new_prop_string(): i=%d, old_prop=%s, fast=%d\n", i, old_prop, fast);
+ if(debug_var>=1) fprintf(errfp, "new_prop_string(): i=%d, old_prop=%s, fast=%d\n", i, old_prop, fast);
  if(!fast) { /* on 1st invocation of new_prop_string */
    for(q=1;q<=255;q++) last[q]=1;
  }

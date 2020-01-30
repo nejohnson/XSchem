@@ -51,15 +51,13 @@ void global_spice_netlist(int global)  /* netlister driver */
  top_subckt = 0;
  netlist_count=0;
  my_snprintf(netl, S(netl), "%s/%s", netlist_dir, skip_dir(schematic[currentsch]) );
+ if(debug_var>=1) fprintf(errfp, "global_spice_netlist(): opening %s for writing\n",netl);
  fd=fopen(netl, "w");
  my_snprintf(netl3, S(netl3), "%s", skip_dir(schematic[currentsch]));
  if(fd==NULL){ 
    if(debug_var>=0) fprintf(errfp, "global_spice_netlist(): problems opening netlist file\n");
    return;
  }
- if(debug_var>=1) fprintf(errfp, "global_spice_netlist(): opening %s for writing\n",netl);
- if(!top_subckt) fprintf(fd,"**");
- fprintf(fd,".subckt %s", skip_dir( schematic[currentsch]) );
 
  /* netlist_options */
  for(i=0;i<lastinst;i++)
@@ -68,6 +66,9 @@ void global_spice_netlist(int global)  /* netlister driver */
      netlist_options(i);
    }
  }
+
+ if(!top_subckt) fprintf(fd,"**");
+ fprintf(fd,".subckt %s", skip_dir( schematic[currentsch]) );
 
  /* print top subckt ipin/opins */
  for(i=0;i<lastinst;i++)

@@ -397,6 +397,7 @@ void netlist_options(int i)
   }
   /* fprintf(errfp, "netlist_options(): bus_replacement_char=%s\n", str); */
   str = get_tok_value(inst_ptr[i].prop_ptr, "top_subckt", 0);
+  /* fprintf(errfp, "netlist_options(): prop_ptr=%s\n", inst_ptr[i].prop_ptr); */
   if(!strcmp(str, "true")) top_subckt = 1;
 }
 

@@ -48,6 +48,7 @@ void global_spice_netlist(int global)  /* netlister driver */
  }
  statusmsg("",2);  /* clear infowindow */
  record_global_node(2, NULL, NULL); /* delete list of global nodes */
+ top_subckt = 0;
  netlist_count=0;
  my_snprintf(netl, S(netl), "%s/%s", netlist_dir, skip_dir(schematic[currentsch]) );
  fd=fopen(netl, "w");
@@ -57,7 +58,8 @@ void global_spice_netlist(int global)  /* netlister driver */
    return;
  }
  if(debug_var>=1) fprintf(errfp, "global_spice_netlist(): opening %s for writing\n",netl);
- fprintf(fd,"**.subckt %s", skip_dir( schematic[currentsch]) );
+ if(!top_subckt) fprintf(fd,"**");
+ fprintf(fd,".subckt %s", skip_dir( schematic[currentsch]) );
 
  /* netlist_options */
  for(i=0;i<lastinst;i++)
@@ -128,7 +130,8 @@ void global_spice_netlist(int global)  /* netlister driver */
  if(first) fprintf(fd,"**** end user architecture code\n");
  /* /20100217 */
 
- fprintf(fd, "**.ends\n");
+ if(!top_subckt) fprintf(fd,"**");
+ fprintf(fd, ".ends\n");
 
 
  if(split_files) { /* 20081205 */

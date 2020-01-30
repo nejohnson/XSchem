@@ -198,6 +198,7 @@ int do_netlist=0;  /* set by process_options if user wants netllist from cmdline
 int do_simulation=0;  /* 20171007 */
 int do_waves=0;  /* 20171007 */
 int netlist_count=0; /* netlist counter incremented at any cell being netlisted */
+int top_subckt = 0;
 int netlist_show=0;
 int flat_netlist=0;
 int netlist_type=-1;

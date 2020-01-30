@@ -396,6 +396,8 @@ void netlist_options(int i)
     tclsetvar("bus_replacement_char", str);
   }
   /* fprintf(errfp, "netlist_options(): bus_replacement_char=%s\n", str); */
+  str = get_tok_value(inst_ptr[i].prop_ptr, "top_subckt", 0);
+  if(!strcmp(str, "true")) top_subckt = 1;
 }
 
 /* used only for debug */

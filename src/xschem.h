@@ -586,6 +586,7 @@ extern int do_netlist;
 extern int do_simulation;
 extern int do_waves;
 extern int netlist_count;
+extern int top_subckt;
 extern int quit;
 extern int show_erc;
 extern int hilight_nets;

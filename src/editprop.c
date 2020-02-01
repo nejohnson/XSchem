@@ -852,6 +852,7 @@ void update_symbol(const char *result, int x)
    }
    bbox(ADD, inst_ptr[i].x1, inst_ptr[i].y1, inst_ptr[i].x2, inst_ptr[i].y2);
    /* update property string from tcl dialog */
+   my_strdup(88, &name, get_tok_value(inst_ptr[i].prop_ptr, "name", 0));
    if(!no_change_props)
    {
     if(debug_var>=1) fprintf(errfp, "update_symbol(): no_change_props=%d\n", no_change_props);
@@ -885,7 +886,6 @@ void update_symbol(const char *result, int x)
       }
     }
    }
-   my_strdup(88, &name, get_tok_value(inst_ptr[i].prop_ptr, "name", 0));
    if(name && name[0] )  /* 30102003 */
    {  
     if(debug_var>=1) fprintf(errfp, "update_symbol(): prefix!='\\0', name=%s\n", name);

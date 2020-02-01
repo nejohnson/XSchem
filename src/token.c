@@ -76,15 +76,14 @@ int name_strcmp(char *s, char *d) /* compare strings up to '\0' or'[' */
  * 1: lookup only 
  * 2: delete token entry, return NULL
  */
-static struct hashentry *hash_lookup(char *token, int remove, size_t token_size)
+static struct hashentry *hash_lookup(char *token, int value, int remove, size_t token_size)
 {
   unsigned int hashcode; 
   unsigned int index;
   struct hashentry *entry, *saveptr, **preventry;
-  int s, value;
+  int s;
  
   if(token==NULL) return NULL;
-  value = -1;
   hashcode=hash(token); 
   index=hashcode % HASHSIZE; 
   entry=table[index];
@@ -112,7 +111,7 @@ static struct hashentry *hash_lookup(char *token, int remove, size_t token_size)
         *preventry=saveptr;
         return NULL;
       } else if(remove == 0) {
-        if(value > entry->value) entry->value = value;
+        entry->value = value;
       }
       /* if(debug_var>=1) fprintf(errfp, "hash_lookup: returning: %s , %d\n", entry->token, entry->value); */
       return entry;        /* found matching entry, return the address */
@@ -129,8 +128,8 @@ void hash_all_names(int n)
   int i;
   free_hash();
   for(i=0; i<lastinst; i++) {
-    if(i == n) continue;
-    hash_lookup(inst_ptr[i].instname, 0, strlen(inst_ptr[i].instname));
+    /* if(i == n) continue; */
+    hash_lookup(inst_ptr[i].instname, i, 0, strlen(inst_ptr[i].instname));
   }
 }
 
@@ -180,6 +179,7 @@ void check_unique_names(int rename)
   char *start;
   char *comma_pos;
   char *expanded_instname = NULL;
+  struct hashentry *entry;
   /* int save_draw; */
 
   if(hilight_nets) {
@@ -206,7 +206,7 @@ void check_unique_names(int rename)
         comma_pos = strchr(start, ',');
         if(comma_pos) *comma_pos = '\0';
         if(debug_var>=1) fprintf(errfp, "check_unique_names: checking %s\n", start);
-        if(hash_lookup(start, 0, strlen(start))) {
+        if( (entry = hash_lookup(start, i, 0, strlen(start)) ) && entry->value != i) {
           inst_ptr[i].flags |=4;
           hilight_nets=1;
           if(rename == 1) {
@@ -230,7 +230,7 @@ void check_unique_names(int rename)
         my_strdup(511, &tmp, inst_ptr[i].prop_ptr);
         new_prop_string(i, tmp, newpropcnt++, !rename);
         my_strdup2(512, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); /* 20150409 */
-        hash_lookup(inst_ptr[i].instname, 0, strlen(inst_ptr[i].instname));
+        hash_lookup(inst_ptr[i].instname, i, 0, strlen(inst_ptr[i].instname));
         symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1, &inst_ptr[i].x2, &inst_ptr[i].y2);
         bbox(ADD, inst_ptr[i].x1, inst_ptr[i].y1, inst_ptr[i].x2, inst_ptr[i].y2);
         my_free(&tmp);
@@ -643,6 +643,7 @@ void new_prop_string(int i, const char *old_prop, int fast, int disable_unique_n
  int new_name_len;
  int n;
  char *old_name_base = NULL;
+ struct hashentry *entry;
  
  if(debug_var>=1) fprintf(errfp, "new_prop_string(): i=%d, old_prop=%s, fast=%d\n", i, old_prop, fast);
  if(!fast) { /* on 1st invocation of new_prop_string */
@@ -662,9 +663,9 @@ void new_prop_string(int i, const char *old_prop, int fast, int disable_unique_n
  }
  prefix=old_name[0];
  /* don't change old_prop if name does not conflict. */
- if(disable_unique_names || hash_lookup(old_name, 1, old_name_len) == NULL)
+ if(disable_unique_names || (entry = hash_lookup(old_name, i, 1, old_name_len)) == NULL || entry->value == i)
  {
-  hash_lookup(old_name, 0, old_name_len);
+  hash_lookup(old_name, i, 0, old_name_len);
   my_strdup(447, &inst_ptr[i].prop_ptr, old_prop);
   return;
  }
@@ -680,7 +681,7 @@ void new_prop_string(int i, const char *old_prop, int fast, int disable_unique_n
    } else {
      new_name_len = my_snprintf(new_name, old_name_len + 40, "%c%d%s", prefix,q, tmp); /* added new_name_len 20180926 */
    }
-   if(hash_lookup(new_name, 1, new_name_len) == NULL) 
+   if((entry = hash_lookup(new_name, i, 1, new_name_len)) == NULL || entry->value == i) 
    {
     last[(int)prefix]=q+1;
     break;
@@ -691,7 +692,7 @@ void new_prop_string(int i, const char *old_prop, int fast, int disable_unique_n
  if(strcmp(tmp2, old_prop) ) {
    my_strdup(449, &inst_ptr[i].prop_ptr, tmp2);
  }
- hash_lookup(new_name, 0, new_name_len); /* reinsert in hash */
+ hash_lookup(new_name, i, 0, new_name_len); /* reinsert in hash */
 }
 
 char *subst_token(const char *s, const char *tok, const char *new_val)

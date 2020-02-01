@@ -2018,6 +2018,11 @@ proc alert_ {txtlabel {position +200+300}} {
    focus .alert.b1
    bind .alert <Return> { destroy .alert }
    bind .alert <Escape> { destroy .alert }
+   bind .alert <Visibility> {
+     if { [winfo exists .alert] && [winfo ismapped .alert] && [winfo ismapped .] && [wm stackorder .alert isbelow . ]} {
+       raise .alert .drw
+     }
+   }
 
    tkwait window .alert  
    return {}

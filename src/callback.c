@@ -384,6 +384,7 @@ int callback(int event, int mx, int my, KeySym key,
      break;
    }
    if(key == 'J' && state==ShiftMask) { /* testmode */
+    print_all_hilights();
     break;
    }
    if(key == '$'  && ( state == ShiftMask) )            /* toggle pixmap  saving */

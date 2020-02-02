@@ -590,6 +590,7 @@ extern int top_subckt;
 extern int quit;
 extern int show_erc;
 extern int hilight_nets;
+extern void print_all_hilights();
 extern char *sch_prefix[];
 extern int modified;
 extern int color_ps;

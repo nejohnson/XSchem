@@ -142,6 +142,9 @@ function process(        i, iprefix)
    if($0 ~ /^D/ ) sub(/PERI[ \t]*=/,"PJ=")
  }
 
+
+
+
  # .probe tran v( @1 DL[3],DL[2],DL[1],DL[0] , @1 WL[3],WL{2],WL[1],WL[0] )
  if($1 ==".probe" && $4 ~/^@/ && $7 ~/^@/ && NF==9) {
    num1=split($5,name,",")
@@ -152,24 +155,46 @@ function process(        i, iprefix)
      print $1 " " $2 " " $3 " " name[(i-1)%num1+1]  " , " name2[(i-1)%num2+1] " " $9 
    }
 
+ # .save v( @1 DL[3],DL[2],DL[1],DL[0] , @1 WL[3],WL{2],WL[1],WL[0] )
+ } else if($1 ==".save" && $3 ~/^@/ && $6 ~/^@/ && NF==8) {
+   num1=split($4,name,",")
+   num2=split($7,name2,",")
+
+   num = num1>num2? num1: num2
+   for(i=1;i<=num;i++) {
+     print $1 " " $2 " " name[(i-1)%num1+1]  " , " name2[(i-1)%num2+1] " " $8
+   }
+
+
  # .probe tran v( @1 LDY1_B[1],LDY1_B[0]  )
  } else if($1 ==".probe" && $4 ~/^@/ && NF==6) {
    num=split($5,name,",")
    for(i=1;i<=num;i++) {
      print $1 " " $2 " " $3 " " name[i] " " $6
    }
- ## 20170407
+ # .save v( @1 LDY1_B[1],LDY1_B[0]  )
+ } else if($1 ==".save" && $3 ~/^@/ && NF==5) {
+   num=split($4,name,",")
+   for(i=1;i<=num;i++) { 
+     print $1 " " $2 " " name[i] " " $5
+   }
+
+
  # .probe i( v1[15],v1[14],v1[13],v1[12],v1[11],v1[10],v1[9],v1[8],v1[7],v1[6],v1[5],v1[4],v1[3],v1[2],v1[1],v1[0] )
- } else if($0 ~ /^\.probe +[iIvVxX] *\(.*\)/) {
+ } else if($0 ~ /^\.(probe|save) +[iIvVxX] *\(.*\)/) {
    num=$0
    sub(/.*\( */,"",num)
    sub(/ *\).*/,"",num)
    num=split(num,name,",")
    num1 = $0
    sub(/^.*probe */,"",num1)
+   sub(/^.*save */,"",num1)
    sub(/\(.*/,"(",num1)
    for(i=1;i<=num;i++) {
-     print ".probe " num1 name[i] ")"
+     if($0 ~ /^\.probe/) 
+       print ".probe " num1 name[i] ")"
+     else
+       print ".save " num1 name[i] ")"
    }
  } else if( $1 ~ /^\*\.(ipin|opin|iopin)/ ) {
    num=split($2,name,",")

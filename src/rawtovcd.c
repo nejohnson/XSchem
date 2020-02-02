@@ -27,6 +27,9 @@
 #include <string.h>
 #include <math.h>
 #define BUFSIZE 4095
+int binary_waves=0;
+double vth=0.9;
+double vtl=0.3;
 int debug = 1;
 FILE *fd;
 int nvars = 0 , npoints = 0;
@@ -162,6 +165,13 @@ int read_dataset(void)
   return variables;
 }
 
+unsigned char tobin(double v)
+{
+  if(v > vth) return '1';
+  else if(v < vtl) return '0';
+  else return 'x';
+}
+
 void write_vcd_header()
 {
   char t[20];
@@ -187,7 +197,8 @@ void write_vcd_header()
   printf("   %s\n", t);
   printf("$end\n");
   for(v = 1; v < nvars; v++) {
-    printf("$var real 1 %s %s $end\n", vcd_ids[v], names[v]);
+    if(binary_waves) printf("$var reg 1 %s %s $end\n", vcd_ids[v], names[v]);
+    else             printf("$var real 1 %s %s $end\n", vcd_ids[v], names[v]);
   }
   printf("$enddefinitions $end\n");
 }
@@ -203,7 +214,8 @@ void dump_vcd_waves()
       printf("#0\n");
       printf("$dumpvars\n");
       for(v = 1 ; val = values[p][v], v < nvars; v++) {
-        printf("r%.3g %s\n", val, vcd_ids[v]);
+        if(binary_waves) printf("%c%s\n", tobin(val), vcd_ids[v]);
+        else             printf("r%.3g %s\n", val, vcd_ids[v]);
         lastvalue[v] = val;
       }
       printf("$end\n");
@@ -214,7 +226,8 @@ void dump_vcd_waves()
            (val != 0.0 &&  fabs((val - lastvalue[v]) / val) > rel_timestep_precision) ||
            (val == 0.0 && fabs(val - lastvalue[v]) > abs_timestep_precision) 
           ) {
-          printf("r%.3g %s\n", val, vcd_ids[v]);
+          if(binary_waves) printf("%c%s\n", tobin(val), vcd_ids[v]);
+          else             printf("r%.3g %s\n", val, vcd_ids[v]);
           lastvalue[v] = val;
         }
       }
@@ -242,12 +255,17 @@ void free_storage()
 int main(int argc, char *argv[])
 {
   int res;
-  if(argc != 2) {
+  int i = 1;
+  if(argc < 2) {
     fprintf(stderr, "usage: rawtovcd rawfile > vcdfile\n");
     exit(EXIT_FAILURE);
   }
-  if(!strcmp(argv[1], "-")) fd = stdin;
-  else fd = fopen(argv[1], "r");
+  if(argc == 3 && !strcmp(argv[i], "-b")) {
+    binary_waves = 1;
+    i++;
+  }
+  if(!strcmp(argv[i], "-")) fd = stdin;
+  else fd = fopen(argv[i], "r");
   if(fd) for(;;) {
     if((res = read_dataset()) == 1) {
       write_vcd_header();

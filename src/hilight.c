@@ -68,6 +68,25 @@ void free_hilight_hash(void) /* remove the whole hash table  */
 }
 
 
+void print_all_hilights()
+{
+  int i;
+  struct hilight_hashentry *entry;
+
+  for(i=0;i<HASHSIZE;i++)
+  {
+    entry = table[i];
+    while(entry) {
+      if(!strcmp(entry->path, ".") )
+        fprintf(errfp, "%s\n", entry->token);
+      else
+        fprintf(errfp, "%s%s\n", (entry->path)+1, entry->token);
+      entry = entry->next;
+    }
+  }
+
+}
+
 struct hilight_hashentry *hilight_lookup(char *token, int value, int remove)
 /*    token           remove    ... what ... */
 /* -------------------------------------------------------------------------- */

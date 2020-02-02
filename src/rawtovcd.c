@@ -216,19 +216,26 @@ void dump_vcd_waves()
       for(v = 1 ; val = values[p][v], v < nvars; v++) {
         if(binary_waves) printf("%c%s\n", tobin(val), vcd_ids[v]);
         else             printf("r%.3g %s\n", val, vcd_ids[v]);
-        lastvalue[v] = val;
+        if(binary_waves) lastvalue[v] = tobin(val);
+        else             lastvalue[v] = val;
       }
       printf("$end\n");
     } else {
       printf("#%d\n", (int) (values[p][0] * timescale));
       for(v = 1 ; val = values[p][v], v < nvars; v++) {
-        if(
-           (val != 0.0 &&  fabs((val - lastvalue[v]) / val) > rel_timestep_precision) ||
-           (val == 0.0 && fabs(val - lastvalue[v]) > abs_timestep_precision) 
-          ) {
-          if(binary_waves) printf("%c%s\n", tobin(val), vcd_ids[v]);
-          else             printf("r%.3g %s\n", val, vcd_ids[v]);
-          lastvalue[v] = val;
+        if(binary_waves) {
+          if( tobin(val) != lastvalue[v] ) {
+            printf("%c%s\n", tobin(val), vcd_ids[v]);
+            lastvalue[v] = tobin(val);
+          }
+        } else {
+          if(
+             (val != 0.0 &&  fabs((val - lastvalue[v]) / val) > rel_timestep_precision) ||
+             (val == 0.0 && fabs(val - lastvalue[v]) > abs_timestep_precision) 
+            ) {
+            printf("r%.3g %s\n", val, vcd_ids[v]);
+            lastvalue[v] = val;
+          }
         }
       }
     }

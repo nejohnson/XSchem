@@ -28,8 +28,9 @@
 #include <math.h>
 #define BUFSIZE 4095
 int binary_waves=0;
-double vth=0.9;
-double vtl=0.3;
+double voltage = 3;
+double vth=2.5;
+double vtl=0.5;
 int debug = 1;
 FILE *fd;
 int nvars = 0 , npoints = 0;
@@ -263,13 +264,23 @@ int main(int argc, char *argv[])
 {
   int res;
   int i = 1;
-  if(argc < 2) {
-    fprintf(stderr, "usage: rawtovcd rawfile > vcdfile\n");
-    exit(EXIT_FAILURE);
+
+  for(i = 1; i < argc; i++) {
+    if(!strcmp(argv[i], "-v")) {
+      i++;
+      if(i + 1 >= argc) continue;
+      binary_waves = 1;
+      voltage = atof(argv[i]);
+      vth = voltage * 5.0 / 6.0;
+      vtl = voltage * 1.0 / 6.0;
+    } else {
+      break;
+    }
   }
-  if(argc == 3 && !strcmp(argv[i], "-b")) {
-    binary_waves = 1;
-    i++;
+
+  if(i >= argc) {
+    fprintf(stderr, "usage: rawtovcd [-v voltage] rawfile > vcdfile\n");
+    exit(EXIT_FAILURE);
   }
   if(!strcmp(argv[i], "-")) fd = stdin;
   else fd = fopen(argv[i], "r");

@@ -71,10 +71,6 @@ T {CP} 810 -210 0 1 0.4 0.4 {}
 T {PRECH} 810 -160 0 1 0.4 0.4 {}
 T {current
 monitors} 30 -1030 0 0 0.4 0.4 {}
-T {ridurre capac LX1[]
-modifiche row decoder 
-modifiche predecodifica L1X (anche L1Y? )
-buffer LDCP_ROWDEC in ROM8K_CTRL} 240 -310 0 0 0.4 0.4 {}
 T {MODIFICHE 20130213
 - precharge transistors m1 e m3 in rom2_sacell portata L a 1.0, ratio 10:2
   p-ch ref current from 4.4/4.4 to 3.3/4.4
@@ -110,11 +106,11 @@ C {code.sym} 590 -160 0 0 {name=S4 value="
 
 vvss vss 0 0
 
-.include stimuli.cir
+.include stimuli_rom8k.cir
 
 * .op ALL  4n
 *.dc vvcc 0 2 0.1
-.tran 0.2n 480n uic $$ sweep monte=list 4
+.tran 0.2n 480n uic
 
 ** download models from here: 
 ** http://www.amarketplaceofideas.com/wp-content/uploads/2014/11/180nm-V1.7z

@@ -1547,14 +1547,6 @@ void create_sch_from_sym(void)
         sub_prop=strstr(prop,"name=")+5;
         if(!sub_prop) continue;
         /* remove dir=... from prop string 20171004 */
-
-        /* 
-        if( strstr(sub_prop, "dir=")) {
-          my_strndup(359, &sub2_prop, sub_prop, strstr(sub_prop, "dir=")-sub_prop);
-          my_strcat(360, &sub2_prop, strstr(strstr(sub_prop, "dir=")," "));
-        }
-        */
-        /* better way to remove dir=... */
         my_strdup(360, &sub2_prop, subst_token(sub_prop, "dir", NULL));
 
         my_strdup(361, &dir, get_tok_value(rect[i].prop_ptr,"dir",0));

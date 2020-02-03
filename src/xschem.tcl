@@ -347,7 +347,7 @@ proc set_sim_defaults {} {
       set_ne sim(spicewave,1,fg) 0
       set_ne sim(spicewave,1,st) 0
   
-      set_ne sim(spicewave,2,cmd) {rawtovcd "$n.raw" > "$n.vcd" && gtkwave "$n.vcd" "$n.sav" 2>/dev/null} 
+      set_ne sim(spicewave,2,cmd) {rawtovcd -v 1.5 "$n.raw" > "$n.vcd" && gtkwave "$n.vcd" "$n.sav" 2>/dev/null} 
       set_ne sim(spicewave,2,name) {Rawtovcd}
       set_ne sim(spicewave,2,fg) 0
       set_ne sim(spicewave,2,st) 0

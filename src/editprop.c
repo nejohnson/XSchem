@@ -773,8 +773,8 @@ void update_symbol(const char *result, int x)
   static char *name=NULL,*ptr=NULL, *template=NULL;
   char symbol[PATH_MAX];
   static char *new_prop=NULL;
-  char *type;
-  int cond;
+  char *type, *new_name;
+  int cond, allow_change_name;
   int pushed=0; /* 20150327 */
 
   i=selectedgroup[0].n; /* 20110413 */
@@ -822,6 +822,12 @@ void update_symbol(const char *result, int x)
   }
   bbox(BEGIN,0.0,0.0,0.0,0.0);
 
+  allow_change_name = 0;
+  if(new_prop) {
+    my_strdup(88, &name, get_tok_value(inst_ptr[i].prop_ptr, "name", 0));
+    new_name = get_tok_value(new_prop, "name", 0);
+    if(new_name[0] != name[0]) allow_change_name = 1;
+  }
   for(k=0;k<lastselected;k++)
   {
    if(debug_var>=1) fprintf(errfp, "update_symbol(): for k loop: k=%d\n", k);
@@ -852,7 +858,7 @@ void update_symbol(const char *result, int x)
    }
    bbox(ADD, inst_ptr[i].x1, inst_ptr[i].y1, inst_ptr[i].x2, inst_ptr[i].y2);
    /* update property string from tcl dialog */
-   my_strdup(88, &name, get_tok_value(inst_ptr[i].prop_ptr, "name", 0));
+   my_strdup(152, &name, get_tok_value(inst_ptr[i].prop_ptr, "name", 0));
    if(!no_change_props)
    {
     if(debug_var>=1) fprintf(errfp, "update_symbol(): no_change_props=%d\n", no_change_props);
@@ -890,7 +896,8 @@ void update_symbol(const char *result, int x)
    {  
     if(debug_var>=1) fprintf(errfp, "update_symbol(): prefix!='\\0', name=%s\n", name);
 
-    if(lastselected == 1) my_strdup(88, &name, get_tok_value(inst_ptr[i].prop_ptr, "name", 0));
+    new_name = get_tok_value(inst_ptr[i].prop_ptr, "name", 0);
+    if(allow_change_name || (lastselected == 1) ) my_strdup(153, &name, new_name);
     /* 20110325 only modify prefix if prefix not NUL */
     if(prefix) name[0]=prefix; /* change prefix if changing symbol type; */
     if(debug_var>=1) fprintf(errfp, "update_symbol(): name=%s, inst_ptr[i].prop_ptr=%s\n", name, inst_ptr[i].prop_ptr);

@@ -2,7 +2,7 @@
 unit n
 voltage VCC
 slope 0.2
-format eldo_simple
+format hspice
 
 buswidth LDA 13 [ ]
 
@@ -28,7 +28,7 @@ alias cycle add en oe
 endalias
 
 
-beginfile stimuli.cir
+beginfile stimuli_rom8k.cir
 
 set VCC 0
 set LDCP 0

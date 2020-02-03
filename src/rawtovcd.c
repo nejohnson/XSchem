@@ -43,7 +43,7 @@ double abs_timestep_precision = 1e-10;
 void replace_bracket(char *s)
 {
   while(*s) {
-   if(*s =='[' || *s == ']') *s='_';
+   /* if(*s =='[' || *s == ']') *s='_'; */
    if(*s ==':') *s='.';
    s++;
   }
@@ -273,6 +273,8 @@ int main(int argc, char *argv[])
       voltage = atof(argv[i]);
       vth = voltage * 5.0 / 6.0;
       vtl = voltage * 1.0 / 6.0;
+    } else if(argv[i][0] == '-') {
+      i++;
     } else {
       break;
     }

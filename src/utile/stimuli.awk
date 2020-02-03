@@ -463,7 +463,7 @@ function end_file(){
        # as per new eldo syntax. this makes it compatible w eldo and hspice
        print "R" ix " XX" ix " " i " value='v(VR" ix ")'">file
      else 
-       print "R" ix " XX" ix " " i " \"v(VR" ix ")\"">file
+       print "R" ix " XX" ix " " i " 'v(VR" ix ")'">file
      printf "%s",signalres[i]>file
      for(j=1;j<=signal[i,"n"];j++)
        printf "%.9g%c %s ",signal[i,"time",j],unit,signalres[i,"value",j] >file

@@ -144,6 +144,7 @@ install: xschem rawtovcd
 	cp -ru ../xschem_library/xTAG "$(prefix)"/share/doc/xschem/
 	cp -ru ../xschem_library/rulz-r8c33 "$(prefix)"/share/doc/xschem/
 	cp -ru ../xschem_library/ngspice "$(prefix)"/share/doc/xschem/
+	cp -ru ../xschem_library/rom8k "$(prefix)"/share/doc/xschem/
 	cp -ru ../xschem_library/pcb "$(prefix)"/share/doc/xschem/
 	cp -ru ../xschem_library/logic "$(prefix)"/share/doc/xschem/
 	mkdir -p "$(prefix)"/share/doc/xschem/symgen

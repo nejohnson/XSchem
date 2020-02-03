@@ -71,20 +71,6 @@ T {CP} 810 -210 0 1 0.4 0.4 {}
 T {PRECH} 810 -160 0 1 0.4 0.4 {}
 T {current
 monitors} 30 -1030 0 0 0.4 0.4 {}
-T {MODIFICHE 20130213
-- precharge transistors m1 e m3 in rom2_sacell portata L a 1.0, ratio 10:2
-  p-ch ref current from 4.4/4.4 to 3.3/4.4
-- decodifica colonna matrice e ref portata a L=1.0um
-
-- inverter di uscita in rom2_sacell portato da n5/p20 a n=4/p=20
-- rom2_sa: p-ch del tristate di ingresso del latch portati da 16u a 12u
-           n-ch portati  da 8 a 12u
-- nand2 30/30 che genera PRECH cambiata con nand3 n:40/p:30, al posto di LDCP_REF
-  entra LDCP e LDEN_LAT
-
-- entra LDCPB al posto di LDCP_REF_B nella NOR che genera LDPRECHREF
-- n-ch row decoder collegato a LDL1X aumentato da 5 a 7u, L portata a 1.0um
-} 350 -1440 0 0 0.4 0.4 {}
 T {was: vss} 880 -980 0 0 0.4 0.4 {}
 N 150 -580 150 -560 {lab=vss}
 N 150 -420 150 -400 {lab=vss}

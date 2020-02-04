@@ -359,15 +359,31 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
 
   cancel=save(1);
   if(!cancel){  /* 20161209 */
+     char name[PATH_MAX];
+     struct stat buf;
+     int i;
+
      currentsch = 0;
      unselect_all(); /* 20180929 */
      remove_symbols();
      clear_drawing();
      if(argc>=3 && !strcmp(argv[2],"SYMBOL")) { /* 20171025 */
-       my_strncpy(schematic[currentsch], "untitled.sym", S(schematic[currentsch]));
+       for(i=0;;i++) {
+         if(i == 0) my_snprintf(name, S(name), "%s.sym", "untitled");
+         else my_snprintf(name, S(name), "%s-%d.sym", "untitled", i);
+         if(stat(name, &buf)) break;
+       }
+       my_strncpy(schematic[currentsch], name, S(schematic[currentsch]));
+       my_strncpy(current_name, rel_sym_path(schematic[currentsch]), S(current_name));
        current_type=SYMBOL;
      } else {
-       my_strncpy(schematic[currentsch], "untitled.sch", S(schematic[currentsch]));
+       for(i=0;;i++) {
+         if(i == 0) my_snprintf(name, S(name), "%s.sym", "untitled");
+         else my_snprintf(name, S(name), "%s-%d.sym", "untitled", i);
+         if(stat(name, &buf)) break;
+       }
+       my_strncpy(schematic[currentsch], name, S(schematic[currentsch]));
+       my_strncpy(current_name, rel_sym_path(schematic[currentsch]), S(current_name));
        current_type=SCHEMATIC;
      }
      draw();

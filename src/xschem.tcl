@@ -1447,6 +1447,7 @@ proc about {} {
   label .about.descr -text "Schematic editor / netlister for VHDL, Verilog, SPICE, tEDAx"
   button .about.link -text "http://repo.hu/projects/xschem" -font Underline-Font -fg blue -relief flat
   button .about.link2 -text "http://repo.hu/projects/coraleda" -font Underline-Font -fg blue -relief flat
+  button .about.link3 -text "Online XSCHEM Manual" -font Underline-Font -fg blue -relief flat
   label .about.copyright -text "\n Copyright 1998-2020 Stefan Schippers (stefan.schippers@gmail.com) \n
  This is free software; see the source for copying conditions.  There is NO warranty;
  not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE\n"
@@ -1454,11 +1455,13 @@ proc about {} {
   pack .about.xschem
   pack .about.link
   pack .about.link2
+  pack .about.link3
   pack .about.descr
   pack .about.copyright
   pack .about.close
   bind .about.link <Button-1> { execute 0  xdg-open http://repo.hu/projects/xschem}
   bind .about.link2 <Button-1> { execute 0  xdg-open http://repo.hu/projects/coraleda}
+  bind .about.link3 <Button-1> { execute 0  xdg-open https://xschem.sourceforge.io/stefan/index.html}
 }
 
 proc property_search {} {

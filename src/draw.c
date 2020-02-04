@@ -41,7 +41,7 @@ int textclip(int x1,int y1,int x2,int y2,
 
 void print_image()
 {
-  int w, h, tmp, ww, hh;
+  int w, h, tmp, ww, hh, save_draw_grid;
   int modified_save; /* 20161121 */
   char cmd[PATH_MAX+100];
   const char *r;
@@ -119,6 +119,7 @@ void print_image()
   }
   XSetClipRectangles(display, gctiled, 0,0, xrect, 1, Unsorted);
 
+  save_draw_grid = draw_grid;
   draw_grid=0;
   draw_pixmap=1;
   /* zoom_full(0, 0); */
@@ -185,7 +186,7 @@ void print_image()
   XSetClipMask(display, gctiled, None); /*20171110  */
 
   XMapWindow(display, window);
-  draw_grid=1;
+  draw_grid=save_draw_grid;
   draw_pixmap=1;
   draw();
 }

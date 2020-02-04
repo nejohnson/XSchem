@@ -987,8 +987,19 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
   tkwait window .dialog
   xschem preview_window destroy {} {} 
   set initdir "$myload_dir1"
-  if { $myload_retval ne {} } {
-    return "$myload_dir1/$myload_retval"
+  if { $myload_retval ne {}} {
+    if { ![is_xschem_file "$myload_dir1/$myload_retval"] } {
+      set answer [tk_messageBox -message  "$myload_dir1/$myload_retval does not seem to be an xschem file...\nContinue?" \
+           -icon warning -parent . -type yesno]
+      if { $answer eq "no"} {
+        set myload_retval {}
+        return {}
+      } else {
+        return "$myload_dir1/$myload_retval"
+      }
+    } else {
+      return "$myload_dir1/$myload_retval"
+    }
   } else {
     return {}
   }
@@ -2000,7 +2011,7 @@ proc alert_ {txtlabel {position +200+300}} {
    set Y [expr [winfo pointery .alert] - 60]
 
    # 20100203
-   if { $::wm_fix } { tkwait visibility .alert }
+   tkwait visibility .alert
    if { [string compare $position ""] != 0 } {
      wm geometry .alert $position
    } else {

@@ -82,7 +82,7 @@ void global_tedax_netlist(int global)  /* netlister driver */
    for(i=0;i<lastinstdef;i++)
    {
     if( strcmp(get_tok_value(instdef[i].prop_ptr,"tedax_ignore",0),"true")==0 ) continue; /* 20070726 */
-
+    if(!instdef[i].type) continue;
     if(strcmp(instdef[i].type,"subcircuit")==0 && check_lib(instdef[i].name)) /* 20150409 */
     {
       tedax_block_netlist(fd, i); /* 20081205 */

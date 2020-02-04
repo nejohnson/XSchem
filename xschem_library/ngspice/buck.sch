@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC6 file_version=1.1}
+v {xschem version=2.9.5 file_version=1.1}
 G {}
 V {}
 S {}
@@ -70,3 +70,4 @@ C {launcher.sym} 90 -580 0 0 {name=h1
 descr="Ctrl-click to go to Delorie's 
 project page for info"
 url="http://www.delorie.com/electronics/spice-stuff"}
+C {test5.sch} 1070 -290 0 0 {}

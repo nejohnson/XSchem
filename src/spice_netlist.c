@@ -157,7 +157,7 @@ void global_spice_netlist(int global)  /* netlister driver */
    load_schematic(1, schematic[currentsch], 0); /* 20180927 */
 
    currentsch++;
-    if(debug_var>=2) fprintf(errfp, "global_spice_netlist(): last defined symbol=%d\n",lastinstdef);
+    if(debug_var>=0) fprintf(errfp, "global_spice_netlist(): last defined symbol=%d\n",lastinstdef);
    for(i=0;i<lastinstdef;i++)
    {
     if( strcmp(get_tok_value(instdef[i].prop_ptr,"spice_ignore",0),"true")==0 ) continue; /* 20070726 */

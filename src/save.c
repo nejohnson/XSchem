@@ -877,6 +877,8 @@ void load_schematic(int load_symbols, const char *filename, int reset_undo) /* 2
   FILE *fd;
   char name[PATH_MAX];
   static char msg[PATH_MAX+100];
+  struct stat buf;
+  int i;
 
   current_type=SCHEMATIC; /* correct type is set later by read_xschem_file() */
   prepared_hilight_structs=0; /* 20171212 */
@@ -917,7 +919,12 @@ void load_schematic(int load_symbols, const char *filename, int reset_undo) /* 2
   } else {
     set_modify(0);
     clear_drawing();
-    my_strncpy(schematic[currentsch], "untitled.sch", S(schematic[currentsch]));
+    for(i=0;;i++) {
+      if(i == 0) my_snprintf(name, S(name), "%s.sch", "untitled");
+      else my_snprintf(name, S(name), "%s-%d.sch", "untitled", i);
+      if(stat(name, &buf)) break;
+    }
+    my_strncpy(schematic[currentsch], name, S(schematic[currentsch]));
     my_strncpy(current_name, rel_sym_path(schematic[currentsch]), S(current_name)); /* 20190519 */
   }
   if(has_x) { /* 20161207 moved after if( (fd=..))  */

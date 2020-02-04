@@ -322,8 +322,8 @@ void global_vhdl_netlist(int global)  /* netlister driver */
    for(i=0;i<lastinstdef;i++)
    {
     if( strcmp(get_tok_value(instdef[i].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; /* 20070726 */
-    if(strcmp(instdef[i].type,"subcircuit")==0 && 
-       check_lib(instdef[i].name))
+    if(!instdef[i].type) continue;
+    if(strcmp(instdef[i].type,"subcircuit")==0 && check_lib(instdef[i].name))
     {
       if( split_files && strcmp(get_tok_value(instdef[i].prop_ptr,"verilog_netlist",0),"true")==0 )
         verilog_block_netlist(fd, i); /* 20081209 */

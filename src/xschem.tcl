@@ -707,6 +707,7 @@ proc is_xschem_file {f} {
   set a [catch "open $f r" fd]
   set ret 0
   set score 0
+  set instances 0
   if {$a} {
     puts stderr "Can not open file $f"
   } else {
@@ -714,12 +715,19 @@ proc is_xschem_file {f} {
       if { [regexp {^[TGVSE] \{} $line] } { incr score }
       if { [regexp {^[BL] +[0-9]+ +[-0-9.eE]+ +[-0-9.eE]+ +[-0-9.eE]+ +[-0-9.eE]+ +\{} $line] } { incr score }
       if { [regexp {^N +[-0-9.eE]+ +[-0-9.eE]+ +[-0-9.eE]+ +[-0-9.eE]+ +\{} $line] } { incr score }
-      if { [regexp {^C +\{[^{}]+\} +[-0-9.eE]+ +[-0-9.eE]+ +[0-3]+ +[0-3]+ +\{} $line] } { incr score }
+      if { [regexp {^C +\{[^{}]+\} +[-0-9.eE]+ +[-0-9.eE]+ +[0-3]+ +[0-3]+ +\{} $line] } { incr instances; incr score }
       if { [regexp "^v\[ \t\]+\{xschem\[ \t\]+version\[ \t\]*=.*\[ \t\]+file_version\[ \t\]*=" $line] } {
         set ret 1
       }
     } 
     if { $score > 6 }  { set ret 1} ;# Heuristic decision :-)
+    if { $ret } {
+      if { $instances} {
+        set ret SCHEMATIC
+      } else { 
+        set ret SYMBOL
+      }
+    }
     close $fd
   }
   # puts "score=$score"
@@ -971,7 +979,8 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
       } else {
         .dialog.buttons.entry delete 0 end
         .dialog.buttons.entry insert 0 $dir2
-         if { [is_xschem_file $myload_dir1/$dir2] } {
+         set t [is_xschem_file $myload_dir1/$dir2]
+         if { $t ne {0}  } {
            .dialog.l.paneright.pre configure -background {}
 	   update
            xschem preview_window draw .dialog.l.paneright.pre "$myload_dir1/$dir2"
@@ -988,7 +997,8 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
   xschem preview_window destroy {} {} 
   set initdir "$myload_dir1"
   if { $myload_retval ne {}} {
-    if { ![is_xschem_file "$myload_dir1/$myload_retval"] } {
+    set t [is_xschem_file "$myload_dir1/$myload_retval"]
+    if { $t eq {0}  } {
       set answer [tk_messageBox -message  "$myload_dir1/$myload_retval does not seem to be an xschem file...\nContinue?" \
            -icon warning -parent . -type yesno]
       if { $answer eq "no"} {
@@ -997,6 +1007,18 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
       } else {
         return "$myload_dir1/$myload_retval"
       }
+    } elseif { $t ne {SYMBOL} && ($ext eq {.sym}) } {
+      set answer [tk_messageBox -message  "$myload_dir1/$myload_retval does not seem to be a SYMBOL file...\nContinue?" \
+           -icon warning -parent . -type yesno]
+      if { $answer eq "no"} {
+        set myload_retval {}
+        return {}
+      } else {
+        return "$myload_dir1/$myload_retval"
+      }
+
+
+
     } else {
       return "$myload_dir1/$myload_retval"
     }

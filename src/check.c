@@ -167,7 +167,6 @@ void trim_wires(void)
     for(j=i+1;j<lastwire;j++)
     {
       check_touch(i,j, &parallel,&breaks,&broken,&touches,&included,&includes, &xt,&yt);
-   
       if(included) 
       {
          freenet_nocheck(i);
@@ -181,8 +180,7 @@ void trim_wires(void)
          changed=1;
          j--;
          continue;
-                        /* new net contains net, so delete that */
-      }                 /* net and repeat current iteration */
+      }
       if(touches)
       { 
          if(broken)

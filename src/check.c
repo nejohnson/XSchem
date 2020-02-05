@@ -166,8 +166,7 @@ void trim_wires(void)
    {
     for(j=i+1;j<lastwire;j++)
     {
-      check_touch(i,j, 
-       &parallel,&breaks,&broken,&touches,&included,&includes, &xt,&yt);
+      check_touch(i,j, &parallel,&breaks,&broken,&touches,&included,&includes, &xt,&yt);
    
       if(included) 
       {
@@ -186,33 +185,6 @@ void trim_wires(void)
       }                 /* net and repeat current iteration */
       if(touches)
       { 
-         if(parallel)
-         {
-            if(wire[j].x1 == xt && wire[j].y1 == yt) /* touch in x1, y1 */
-            {
-               if(wire[i].end2 == 0)  /* merge wire */
-               {
-                  changed=1;
-                  wire[i].x2 = wire[j].x2;wire[i].y2 = wire[j].y2;
-                  wire[i].end2=wire[j].end2;
-                  freenet_nocheck(j);
-                  j--;
-                  break;
-               }
-            }
-            else  /* touch in x2,y2 */
-            {
-               if(wire[i].end1 == 0)  /* merge wire */
-               {
-                  changed=1;
-                  wire[i].x1 = wire[j].x1;wire[i].y1 = wire[j].y1;
-                  wire[i].end1=wire[j].end1;
-                  freenet_nocheck(j);
-                  j--;
-                  break;
-               }
-            }
-         } /* end if parallel */
          if(broken)
          {
            check_wire_storage();
@@ -278,6 +250,38 @@ void trim_wires(void)
             {wire[i].end2++;wire[j].end2++;}
          }
       } /* end if touches */
+    } /* end for j */
+   } /* end for i  */
+   for(i=0;i<lastwire;i++) {
+    for(j=i+1;j<lastwire;j++) {
+      check_touch(i,j, &parallel,&breaks,&broken,&touches,&included,&includes, &xt,&yt);
+      if( touches && parallel)
+      {
+         if(wire[j].x1 == xt && wire[j].y1 == yt) /* touch in x1, y1 */
+         {
+            if(wire[i].end2 == 1 && wire[j].end1 == 1)  /* merge wire */
+            {
+               changed=1;
+               wire[i].x2 = wire[j].x2;wire[i].y2 = wire[j].y2;
+               wire[i].end2=wire[j].end2;
+               freenet_nocheck(j);
+               j--;
+               break;
+            }
+         }
+         else  /* touch in x2,y2 */
+         {
+            if(wire[i].end1 == 1 && wire[j].end2 == 1)  /* merge wire */
+            {
+               changed=1;
+               wire[i].x1 = wire[j].x1;wire[i].y1 = wire[j].y1;
+               wire[i].end1=wire[j].end1;
+               freenet_nocheck(j);
+               j--;
+               break;
+            }
+         }
+      } /* end if touches && parallel */
     } /* end for j */
    } /* end for i  */
    if(changed) {

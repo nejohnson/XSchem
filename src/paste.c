@@ -279,6 +279,7 @@ void merge_file(int selection_load, const char ext[])
     char name1[PATH_MAX]; /* overflow safe */
     char tmp[256]; /* 20161122 overflow safe */
     char *aux_ptr=NULL;
+    int got_mouse;
 
     if(selection_load==0)
     {
@@ -303,6 +304,7 @@ void merge_file(int selection_load, const char ext[])
     }
     if( (fd=fopen(name,"r"))!= NULL)
     {
+     got_mouse = 0;
      push_undo(); /* 20150327 */
      unselect_all();
      old=lastinst;
@@ -327,7 +329,10 @@ void merge_file(int selection_load, const char ext[])
         load_ascii_string(&aux_ptr, fd);
         if(selection_load) 
         {
+          mx_double_save = mousex_snap;
+          my_double_save = mousey_snap;
           sscanf( aux_ptr, "%lf %lf", &mousex_snap, &mousey_snap);
+          got_mouse = 1;
         }
         break;
        case 'L':
@@ -360,12 +365,21 @@ void merge_file(int selection_load, const char ext[])
         break;
       }
      }
+     if(!got_mouse) {
+       mx_double_save = mousex_snap;
+       my_double_save = mousey_snap;
+       mousex_snap = 0.;
+       mousey_snap = 0.;
+     }
      my_free(&aux_ptr);
      match_merged_inst(old);
      fclose(fd);
      ui_state |= STARTMERGE;
      if(debug_var>=1) fprintf(errfp, "merge_file(): loaded file:wire=%d inst=%d ui_state=%ld\n",
              lastwire , lastinst, ui_state);
-     move_objects(BEGIN,!selection_load,0,0);
+     move_objects(BEGIN,0,0,0);
+     mousex_snap = mx_double_save;
+     mousey_snap = my_double_save;
+     move_objects(RUBBER,0,0,0);
     }
 }

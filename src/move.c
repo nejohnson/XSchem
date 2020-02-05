@@ -795,7 +795,7 @@ void copy_objects(int what)
  draw_selection(gc[SELLAYER], 0);
 }
 
-
+/* merge param unused, RFU */
 void move_objects(int what, int merge, double dx, double dy)
 {
  int c, i, n, k;
@@ -817,13 +817,12 @@ void move_objects(int what, int merge, double dx, double dy)
   deltax = deltay = 0.0;
   rebuild_selected_array();
   lastsel = lastselected;
-   if(merge) x1=y_1=0.0;
-   else if(lastselected==1 && selectedgroup[0].type==ARC &&
-           arc[c=selectedgroup[0].col][n=selectedgroup[0].n].sel!=SELECTED) {
-     x1 = arc[c][n].x;
-     y_1 = arc[c][n].y;
-   } else {x1=mousex_snap;y_1=mousey_snap;}
-   flip = 0;rot = 0;
+  if(lastselected==1 && selectedgroup[0].type==ARC &&
+          arc[c=selectedgroup[0].col][n=selectedgroup[0].n].sel!=SELECTED) {
+    x1 = arc[c][n].x;
+    y_1 = arc[c][n].y;
+  } else {x1=mousex_snap;y_1=mousey_snap;}
+  flip = 0;rot = 0;
   ui_state|=STARTMOVE;
  }
  if(what & ABORT)                               /* draw objects while moving */

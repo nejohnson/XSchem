@@ -575,6 +575,7 @@ int callback(int event, int mx, int my, KeySym key,
     rebuild_selected_array();
     move_objects(BEGIN,0,0,0);
     ui_state |= START_SYMPIN;
+    break;
    }
    if(key=='w' && !ui_state && state==ControlMask)              /* start polygon, 20171115 */
    {
@@ -1064,6 +1065,29 @@ int callback(int event, int mx, int my, KeySym key,
    if(key=='l' && state == 0) /* start line */
    {
     start_line(mx, my);
+    break;
+   }
+   if(key=='l' && state == Mod1Mask) {                         /* add pin label*/
+    struct stat buf;
+    if(!stat(abs_sym_path("lab_pin.sym", ""), &buf)) {
+      place_symbol(-1, "lab_pin.sym", mousex_snap, mousey_snap, 0, 0, NULL, 4, 1);
+    } else if(!stat(abs_sym_path("devices/lab_pin.sym", ""), &buf)) {
+      place_symbol(-1, "devices/lab_pin.sym", mousex_snap, mousey_snap, 0, 0, NULL, 4, 1);
+    }
+    move_objects(BEGIN,0,0,0);
+    ui_state |= START_SYMPIN;
+    break;
+   }
+
+   if(key=='L' && state == (Mod1Mask | ShiftMask)) {                         /* add pin label*/
+    struct stat buf;
+    if(!stat(abs_sym_path("lab_wire.sym", ""), &buf)) {
+      place_symbol(-1, "lab_wire.sym", mousex_snap, mousey_snap, 0, 0, NULL, 4, 1);
+    } else if(!stat(abs_sym_path("devices/lab_wire.sym", ""), &buf)) {
+      place_symbol(-1, "devices/lab_wire.sym", mousex_snap, mousey_snap, 0, 0, NULL, 4, 1);
+    }
+    move_objects(BEGIN,0,0,0);
+    ui_state |= START_SYMPIN;
     break;
    }
    if(key=='F' && state==ShiftMask)                     /* Flip */

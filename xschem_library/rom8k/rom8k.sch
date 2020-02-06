@@ -72,6 +72,8 @@ T {PRECH} 810 -160 0 1 0.4 0.4 {}
 T {current
 monitors} 30 -1030 0 0 0.4 0.4 {}
 T {was: vss} 880 -980 0 0 0.4 0.4 {}
+T {16KB ROM Macrocell
+16 bit Data I/O x 8KWords} 210 -1120 0 0 0.7 0.7 {}
 N 150 -580 150 -560 {lab=vss}
 N 150 -420 150 -400 {lab=vss}
 N 10 -270 10 -250 {lab=vss}
@@ -84,7 +86,7 @@ N 1540 -530 1540 -510 {lab=vss}
 N 1720 -180 1720 -160 {lab=vss}
 N 1540 -180 1540 -160 {lab=vss}
 C {title.sym} 170 0 0 0 {name=l3 author="Stefan Schippers"}
-C {code.sym} 590 -160 0 0 {name=S4 value="
+C {code.sym} 590 -160 0 0 {name=STIMULI value="
 .options SCALE=0.10
 .param VCC=1.5
 .temp 25

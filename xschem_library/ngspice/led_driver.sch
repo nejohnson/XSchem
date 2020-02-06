@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC7 file_version=1.1}
+v {xschem version=2.9.5 file_version=1.1}
 G {}
 V {}
 S {}
@@ -91,7 +91,7 @@ device="ceramic capacitor"}
 C {ammeter.sym} 180 -640 3 0 {name=Vvcc}
 C {lab_pin.sym} 690 -430 0 1 {name=l8 sig_type=std_logic lab=VO}
 C {res.sym} 690 -580 0 0 {name=R2
-value="r='V(SW,VO) > 0 ? 0.1 : 1e9'"
+value="r='V(SW,VO) > 0 ? 0.1 : 1e7'"
 footprint=1206
 device=resistor
 m=1

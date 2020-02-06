@@ -271,8 +271,8 @@ int main(int argc, char *argv[])
       if(i + 1 >= argc) continue;
       binary_waves = 1;
       voltage = atof(argv[i]);
-      vth = voltage * 5.0 / 6.0;
-      vtl = voltage * 1.0 / 6.0;
+      vth = voltage * 0.75;
+      vtl = voltage * 0.25;
     } else if(argv[i][0] == '-') {
       i++;
     } else {

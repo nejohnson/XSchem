@@ -1117,7 +1117,8 @@ proc schpins_to_sympins {} {
   set lines [split $clipboard \n]
   set fd [open $USER_CONF_DIR/.clipboard.sch "w"]
   foreach i $lines {
-    set ii [split $i]
+    set ii [split [regexp -all -inline {\S+} $i]]
+
     if {[regexp {^C \{.*(i|o|io)pin} $i ]} {
       if {[regexp {ipin} [lindex $ii 1]]} { set dir in }
       if {[regexp {opin} [lindex $ii 1]]} { set dir out }

@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC6 file_version=1.1}
+v {xschem version=2.9.5 file_version=1.1}
 G {}
 V {}
 S {}
@@ -11,8 +11,8 @@ N 190 -340 380 -340 {lab=LDEN}
 N 580 -340 610 -340 {lab=LDEN_LAT}
 N 540 -340 580 -340 {lab=LDEN_LAT}
 N 540 -550 600 -550 {lab=#net1}
-N 760 -550 760 -450 {}
-N 680 -550 680 -450 {}
+N 760 -550 760 -450 {lab=LDAI[12:0]}
+N 680 -550 680 -450 {lab=#net2}
 C {LD2QHDX4stef.sym} 460 -510 0 0 {name=x0[12:0]}
 C {lab_pin.sym} 380 -550 0 0 {name=p30 lab=LDA[12:0]}
 C {lab_pin.sym} 430 -440 3 0 {name=p33 lab=VCC}

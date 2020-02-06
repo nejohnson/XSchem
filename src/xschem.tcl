@@ -1111,21 +1111,32 @@ proc rotation {x0 y0 x y rot flip} {
 proc schpins_to_sympins {} {
   global env USER_CONF_DIR
   set pinhsize 2.5
+  set first 1
   xschem copy
   set clipboard [read_data_nonewline $USER_CONF_DIR/.clipboard.sch]
   set lines [split $clipboard \n]
   set fd [open $USER_CONF_DIR/.clipboard.sch "w"]
   foreach i $lines {
+    set ii [split $i]
     if {[regexp {^C \{.*(i|o|io)pin} $i ]} {
-      if {[regexp {ipin} [lindex $i 1]]} { set dir in }
-      if {[regexp {opin} [lindex $i 1]]} { set dir out }
-      if {[regexp {iopin} [lindex $i 1]]} { set dir inout }
-      set rot [lindex $i 4]
-      set flip [lindex $i 5]
-      regsub {^.*lab=} $i {} lab
-      regsub {[\} ].*} $lab {} lab
-      set x0 [lindex $i 2]
-      set y0 [lindex $i 3]
+      if {[regexp {ipin} [lindex $ii 1]]} { set dir in }
+      if {[regexp {opin} [lindex $ii 1]]} { set dir out }
+      if {[regexp {iopin} [lindex $ii 1]]} { set dir inout }
+      set rot [lindex $ii 4]
+      set flip [lindex $ii 5]
+      while {1} {
+        if { [regexp {lab=} $i] } {
+          regsub {^.*lab=} $i {} lab
+          regsub {[\} ].*} $lab {} lab
+        } 
+        if { [regexp {\}} $i]} { break} 
+      }
+      set x0 [lindex $ii 2]
+      set y0 [lindex $ii 3]
+      if {$first} {
+        puts $fd "G { $x0 $y0 } "
+        set first 0
+      }
       set pinx1 [expr {$x0-$pinhsize}]
       set pinx2 [expr {$x0+$pinhsize}]
       set piny1 [expr {$y0-$pinhsize}]

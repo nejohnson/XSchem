@@ -1285,7 +1285,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
  }
 
  if(quit) {
-   tcleval( "exit");
+   tcleval( "after 1000 exit");
  }
 
  /* */

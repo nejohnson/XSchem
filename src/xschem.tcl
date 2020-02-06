@@ -300,9 +300,9 @@ proc save_sim_defaults {f} {
 
 proc set_sim_defaults {} {
   ### spice 
-  global sim terminal USER_CONF_DIR
+  global sim terminal USER_CONF_DIR no_x
 
-  if { [winfo exists .sim] } {
+  if { ![info exists no_x] && [winfo exists .sim] } {
     foreach tool $sim(tool_list) {
       for {set i 0} {$i < $sim($tool,n)} { incr i} {
         set sim($tool,$i,cmd) [.sim.topf.f.scrl.center.$tool.r.$i.cmd get 1.0 {end - 1 chars}]

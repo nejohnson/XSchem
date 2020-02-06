@@ -73,12 +73,12 @@ END{
     for(k=3;k<=NF;k++)			# subckt["name", "port","node"]=
 					# port number (1,2,...)
     {
-     if($k ~ /\=/) break
+     if($k ~ /=/) break
      subckt[subname,"port",$k]=k-2
     }
     subckt[subname,"ports"]=k-3         
     for(;k<=NF;k++)			# subckt["name", "param", "parname"]=
-     if($k ~ /\=/)			# default value
+     if($k ~ /=/)			# default value
      {
       split($k,tmp,"=")
       subckt[subname,"param",tmp[1]]=tmp[2]
@@ -124,7 +124,7 @@ function expand(name, path, param,ports,   		# func. params
    paramlist = ""; portlist = ""; subname=""
    for(k=num;k>=2;k--)
    {
-    if(line[k] ~ /\=/) 
+    if(line[k] ~ /=/) 
     {
      split(line[k],parameter,"=")
      if(parameter[2] in paramarray2)           
@@ -160,9 +160,9 @@ function expand(name, path, param,ports,   		# func. params
     for(; k<=num;k++)
     {
      if(line[1] ~ /[FH]/ && k==4)  printf "%s ", line[k] pathname
-     else if(line[k] ~/.*VALUE\=.*/)
+     else if(line[k] ~/.*VALUE=.*/)
        printf "%s ",general_sub(line[k],name,pathnode,portarray)
-     else if(line[k] ~/\=/)
+     else if(line[k] ~/=/)
      {
       split(line[k],parameter,"=")
       if(parameter[2] in paramarray2)

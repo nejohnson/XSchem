@@ -119,11 +119,11 @@ proc netlist {source_file show netlist_file} {
    } else {
      set hspice {}
    }
-   if {$flat_netlist==0} then {
+   if {$flat_netlist==0} {
      eval exec {awk -f ${XSCHEM_SHAREDIR}/spice.awk -- $hspice $netlist_dir/$source_file | \
           awk -f ${XSCHEM_SHAREDIR}/break.awk > $netlist_dir/$netlist_file}
    } else {
-     eval exec {awk -f "${XSCHEM_SHAREDIR}/spice.awk -- $hspice $netlist_dir/$source_file | \
+     eval exec {awk -f ${XSCHEM_SHAREDIR}/spice.awk -- $hspice $netlist_dir/$source_file | \
           awk -f ${XSCHEM_SHAREDIR}/flatten.awk | awk -f ${XSCHEM_SHAREDIR}/break.awk > $netlist_dir/$netlist_file}
    }
    if ![string compare $show "show"] {

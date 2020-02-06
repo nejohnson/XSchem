@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC8 file_version=1.1}
+v {xschem version=2.9.5 file_version=1.1}
 G {}
 V {}
 S {}
@@ -50,7 +50,8 @@ N 930 -310 960 -300 {lab=#net1}
 N 380 -530 700 -530 {lab=BUS[4:0]}
 N 510 -640 510 -540 {lab=BUS[1]}
 N 410 -600 410 -540 {lab=BUS[2]}
-C {poweramp.sym} 160 -310 0 0 {name=x1}
+C {poweramp.sym} 160 -310 0 0 {name=x1
+tclcommand="xschem descend"}
 C {tesla.sym} 160 -230 0 0 {name=x2}
 C {test_ne555.sym} 160 -190 0 0 {name=x3}
 C {test_lm324.sym} 160 -150 0 0 {name=x4}

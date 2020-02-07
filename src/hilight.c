@@ -872,7 +872,8 @@ void print_hilight_net(int show)
      /* before invoking this function, in this case --> skip */
      if(node_entry && !strcmp(sch_prefix[currentsch], entry->path)) {
        if(show==3) {
-         fprintf(fd, "%s%s\n",  entry->path, entry->token); /* 20111106 */
+         
+         fprintf(fd, "%s%s\n", !strcmp(entry->path, ".") ? "" : entry->path, entry->token); /* 20111106 */
 
        } else if(show==1) { /* 20120926 */
          fprintf(fd, "%s\n",  entry->token); /* 20120926 */

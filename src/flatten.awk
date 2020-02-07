@@ -40,12 +40,12 @@ BEGIN{
  # ARGC=2
  pathsep="_"
  nodes["M"]=4; nodes["R"]=2; nodes["D"]=2; nodes["V"]=2
- nodes["I"]=2; nodes["C"]=2; nodes["L"]=2; nodes["Q"]=4
+ nodes["I"]=2; nodes["C"]=2; nodes["L"]=2; nodes["Q"]=3
  nodes["E"]=4; nodes["G"]=4; nodes["H"]=2; nodes["F"]=2
 }
 
 {
- $0=toupper($0)
+ if( ($0 !~/^\.include/) && ($0 !~/^\.INCLUDE/) ) $0=toupper($0)
  if($0 ~ /\*\*\.SUBCKT/) {
    topcell=$2
    sub(/^\*\*/,"",$0)
@@ -88,7 +88,9 @@ END{
     subckt[subname,"last"]=j
   }
  }
+ print "** " topcell " flat netlist"
  expand(topcell,"","","")
+ print ".end"
  # parameters: 
  #	- subckt name to expand
  #	- current path (will be prefixed to inst & node names)

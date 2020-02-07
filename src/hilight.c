@@ -678,8 +678,8 @@ void draw_hilight_net(int on_window)
  struct wireentry *wireptr;
  int hilight_connected_inst;
 
- prepare_netlist_structs(0);
  if(!hilight_nets) return;
+ prepare_netlist_structs(0);
  save_draw = draw_window; /* 20181009 */
  draw_window = on_window;
  x1 = X_TO_XSCHEM(areax1);

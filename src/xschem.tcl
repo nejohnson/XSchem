@@ -2047,14 +2047,11 @@ proc alert_ {txtlabel {position +200+300}} {
    set X [expr [winfo pointerx .alert] - 60]
    set Y [expr [winfo pointery .alert] - 60]
 
-   # 20100203
-   tkwait visibility .alert
    if { [string compare $position ""] != 0 } {
      wm geometry .alert $position
    } else {
      wm geometry .alert "+$X+$Y"
    }
-   
    label .alert.l1  -text $txtlabel -wraplength 700
    button .alert.b1 -text "OK" -command  \
    {
@@ -2062,6 +2059,7 @@ proc alert_ {txtlabel {position +200+300}} {
    } 
    pack .alert.l1 -side top -fill x
    pack .alert.b1 -side top -fill x
+   tkwait visibility .alert
    grab set .alert
    focus .alert.b1
    bind .alert <Return> { destroy .alert }

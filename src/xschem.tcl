@@ -2940,8 +2940,18 @@ font configure Underline-Font -underline true -size 24
    .menubar.sym.menu add command -label "Make symbol from schematic" -command "xschem make_symbol" -accelerator A
    .menubar.sym.menu add command -label "Make schematic from symbol" -command "xschem make_sch" -accelerator Ctrl+L
    .menubar.sym.menu add command -label "Attach pins to component instance" -command "xschem attach_pins" -accelerator Shift+H
-   .menubar.sym.menu add command -label "Create Symbol pins from selected schematic pins" \
+   .menubar.sym.menu add command -label "Create symbol pins from selected schematic pins" \
            -command "schpins_to_sympins" -accelerator Alt+H
+   .menubar.sym.menu add command -label "Print list of highlight nets" \
+           -command "xschem print_hilight_net 1" -accelerator J
+   .menubar.sym.menu add command -label "Print list of highlight nets, with buses expanded" \
+           -command "xschem print_hilight_net 3" -accelerator Alt-Ctrl-J
+   .menubar.sym.menu add command -label "Create labels from highlight nets" \
+           -command "xschem print_hilight_net 4" -accelerator Alt-J
+   .menubar.sym.menu add command -label "Create labels from highlight nets with 'i' prefix" \
+           -command "xschem print_hilight_net 2" -accelerator Alt-Shift-J
+   .menubar.sym.menu add command -label "Create pins from highlight nets" \
+           -command "xschem print_hilight_net 0" -accelerator Ctrl-J
 
    .menubar.tools.menu add checkbutton -label "Remember last command" -variable persistent_command \
       -accelerator {} \

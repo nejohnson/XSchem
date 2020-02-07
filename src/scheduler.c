@@ -1036,9 +1036,16 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
  else if(!strcmp(argv[1],"fill_symbol_editprop_form") ) {
    fill_symbol_editprop_form(0);
  }
+
  else if(!strcmp(argv[1],"update_symbol") ) {
-   update_symbol(argv[2],0);
+   if(argc >= 3) update_symbol(argv[2],0);
  }
+
+ else if(!strcmp(argv[1], "print_hilight_net") && argc == 3) {
+   print_hilight_net(atoi(argv[2]));
+   Tcl_ResetResult(interp);
+ }
+   
  else if(!strcmp(argv[1],"clear_netlist_dir") ) {
    my_strdup(373, &netlist_dir, "");
  }

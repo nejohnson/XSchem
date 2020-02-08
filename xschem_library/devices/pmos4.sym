@@ -1,7 +1,7 @@
-v {xschem version=2.9.5_RC8 file_version=1.1}
+v {xschem version=2.9.5 file_version=1.1}
 G {type=pmos
-format="@name @pinlist @model w=@w l=@l delvto=@delvto m=@m"
-template="name=M1 model=pmos w=5u l=0.18u delvto=0 m=1"}
+format="@name @pinlist @model w=@w l=@l m=@m"
+template="name=M1 model=pmos w=5u l=0.18u m=1"}
 V {}
 S {}
 E {}

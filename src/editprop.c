@@ -826,7 +826,7 @@ void update_symbol(const char *result, int x)
   if(new_prop) {
     my_strdup(88, &name, get_tok_value(inst_ptr[i].prop_ptr, "name", 0));
     new_name = get_tok_value(new_prop, "name", 0);
-    if(new_name[0] != name[0]) allow_change_name = 1;
+    if(!name || new_name[0] != name[0]) allow_change_name = 1;
   }
   for(k=0;k<lastselected;k++)
   {
@@ -889,6 +889,10 @@ void update_symbol(const char *result, int x)
       }  else {  /* 20111205 */
         if(!pushed) { push_undo(); pushed=1;}
         my_strdup(86, &inst_ptr[i].prop_ptr, "");
+        set_modify(1);
+        prepared_hash_instances=0; /* 20171224 */
+        prepared_netlist_structs=0;
+        prepared_hilight_structs=0;
       }
     }
    }

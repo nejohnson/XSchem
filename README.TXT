@@ -39,13 +39,15 @@ If destination paths are correctly set in the Makefile: 'make install'
 CHANGELOG
 
 2.9.5
- warnings when opening a non xschem file or placing a non symbol file.
+- Added symbol menu entries to create labels / pins or print highlight nets
+- warnings when opening a non xschem file or placing a non symbol file.
 - rawtovcd: option -v <voltage> to digitize all analog variables to digital (vth=3/4 voltage, vtl=1/4 voltage)
 - menu entry to wrap top level in .subckt / .ends (spice netlists)
 - video tutorials added
 - Added xyce simulator launch
 - Show infowindow (erc, warnings etc) on startup if show_infowindow set in conf file
 - Alt-p command to place a symbol pin
+- Alt-l or Shift-Alt-l to place a schematic net label
 - Hilight subcircuit symbols during netlist if there is a pin mismatch with underlying schematic
 - Xschem presentation slides for F-Si conference.
 - better tk_exec: collect exit status from spawn background processes via async pipe fileevent

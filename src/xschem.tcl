@@ -2326,7 +2326,8 @@ proc input_number {txt cmd} {
 
 ## 20161102
 proc launcher {} {
-  global launcher_var launcher_default_program launcher_program env
+  # XSCHEM_SHAREDIR and netlist_dir not used directly but useful in paths passed thru launcher_var
+  global launcher_var launcher_default_program launcher_program env XSCHEM_SHAREDIR netlist_dir
   
   ## puts ">>> $launcher_program $launcher_var "
   # 20170413

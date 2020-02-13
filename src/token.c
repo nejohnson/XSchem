@@ -1385,12 +1385,16 @@ void print_spice_element(FILE *fd, int inst)
   {
    token[token_pos]='\0'; 
    token_pos=0;
-   if(debug_var >=1) fprintf(errfp, "print_spice_element(): token: |%s|\n", token);
-   value = get_tok_value(inst_ptr[inst].prop_ptr, token+1, 2);
-   if(value[0] == '\0')
-   value=get_tok_value(template, token+1, 0);
 
-   if(value[0]!='\0')
+   if(top_subckt && !strcmp(token, "@spiceprefix")) { 
+     value=NULL;
+   } else {
+     if(debug_var >=1) fprintf(errfp, "print_spice_element(): token: |%s|\n", token);
+     value = get_tok_value(inst_ptr[inst].prop_ptr, token+1, 2);
+     if(value[0] == '\0')
+     value=get_tok_value(template, token+1, 0);
+   }
+   if(value && value[0]!='\0')
    {  /* instance names (name) and node labels (lab) go thru the expandlabel function. */
       /*if something else must be parsed, put an if here! */
 

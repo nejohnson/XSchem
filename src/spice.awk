@@ -76,6 +76,12 @@ function process(        i, iprefix)
     return
   }
 
+ # 20181208 do not process commented lines
+ if($1 ~/^\*/) {
+   print
+   return
+ }
+
  #20150922 handle the case of pmos elements that netlist also a diode
  # format="@name @pinlist @model w=@w l=@l geomod=0 m=@m
  # #dx#name 0 @@b dnwell area=... pj=..."
@@ -90,11 +96,6 @@ function process(        i, iprefix)
  # dxm6[1] 0 HDD dnwell area='(50u + 73u)*(10u + 32u)' pj='2*(50u +73u)+2*(10u +32u)' 
  # dxm6[0] 0 HDD dnwell area='(50u + 73u)*(10u + 32u)' pj='2*(50u +73u)+2*(10u +32u)' 
  #20151027 do this for all fields
- # 20181208 do not process commented lines
- if($1 ~/^\*/) {
-   print
-   return
- }
  for(i=1; i<=NF;i++) {
    if($i ~/^#[a-zA-Z_0-9]+#[a-zA-Z_]+/) {
      iprefix=$i

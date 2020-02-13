@@ -2764,7 +2764,7 @@ font configure Underline-Font -underline true -size 24
         input_number "Enter two characters to replace default bus \[\] delimiters:" "set tmp_bus_char"
         if { [info exists tmp_bus_char] && [string length $tmp_bus_char] >=2} { set bus_replacement_char $tmp_bus_char } 
       }
-   .menubar.option.menu add checkbutton -label "Top level is a .subckt in SPICE netlist" -variable top_subckt 
+   .menubar.option.menu add checkbutton -label "LVS netlist: Top level is a .subckt" -variable top_subckt 
    .menubar.option.menu add checkbutton -label "Verilog 2001 netlist variant" -variable verilog_2001 \
    
    .menubar.option.menu add checkbutton -label "Draw grid" -variable draw_grid \

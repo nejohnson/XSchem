@@ -871,7 +871,7 @@ extern void select_arc(int c, int i, unsigned short select_mode, int fast);
 extern void select_line(int c, int i, unsigned short select_mode, int fast);
 extern void select_polygon(int c, int i, unsigned short select_mode, int fast );
 extern const char *pin_node(int i, int j, int *mult, int hash_prefix_unnamed_net);
-extern void record_global_node(int what, FILE *fp, char *node);
+extern int record_global_node(int what, FILE *fp, char *node);
 extern int count_labels(char *s);
 extern int get_unnamed_node(int what, int mult, int node);
 extern void free_node_hash(void);

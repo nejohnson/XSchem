@@ -327,43 +327,44 @@ void traverse_node_hash()
   entry = table[i];
   while(entry)
   {
-   if(entry->d.out + entry->d.inout + entry->d.in == 1)
-   {
-     my_snprintf(str, S(str), "open net: %s", entry->token);
-     if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color,0);
-     if(incr_hilight) hilight_color++;
-     statusmsg(str,2);
+   if( !record_global_node(3, NULL, entry->token)) {
+     if(entry->d.out + entry->d.inout + entry->d.in == 1)
+     {
+       my_snprintf(str, S(str), "open net: %s", entry->token);
+       if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color,0);
+       if(incr_hilight) hilight_color++;
+       statusmsg(str,2);
+     }
+     else if(entry->d.out ==0  && entry->d.inout == 0) 
+     {
+       my_snprintf(str, S(str), "undriven node: %s", entry->token);
+       if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color,0);
+       if(incr_hilight) hilight_color++;
+       statusmsg(str,2);
+     }
+     else if(entry->d.out >=2 && entry->d.port>=0)  /*  era d.port>=2   03102001 */
+     {
+       my_snprintf(str, S(str), "shorted output node: %s", entry->token);
+       if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color,0);
+       if(incr_hilight) hilight_color++;
+       statusmsg(str,2);
+     }
+     else if(entry->d.in ==0 && entry->d.inout == 0) 
+     {
+       my_snprintf(str, S(str), "node: %s goes nowhere", entry->token);
+       if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color,0);
+       if(incr_hilight) hilight_color++;
+       statusmsg(str,2);
+     }
+     else if(entry->d.out >=2 && entry->d.inout == 0 && entry->d.port>=0)  /*  era d.port>=2   03102001 */
+     {
+       my_snprintf(str, S(str), "shorted output node: %s", entry->token);
+       if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color,0);
+       if(incr_hilight) hilight_color++;
+       statusmsg(str,2);
+     }
    }
-   else if(entry->d.out ==0  && entry->d.inout == 0) 
-   {
-     my_snprintf(str, S(str), "undriven node: %s", entry->token);
-     if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color,0);
-     if(incr_hilight) hilight_color++;
-     statusmsg(str,2);
-   }
-   else if(entry->d.out >=2 && entry->d.port>=0)  /*  era d.port>=2   03102001 */
-   {
-     my_snprintf(str, S(str), "shorted output node: %s", entry->token);
-     if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color,0);
-     if(incr_hilight) hilight_color++;
-     statusmsg(str,2);
-   }
-   else if(entry->d.in ==0 && entry->d.inout == 0) 
-   {
-     my_snprintf(str, S(str), "node: %s goes nowhere", entry->token);
-     if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color,0);
-     if(incr_hilight) hilight_color++;
-     statusmsg(str,2);
-   }
-   else if(entry->d.out >=2 && entry->d.inout == 0 && entry->d.port>=0)  /*  era d.port>=2   03102001 */
-   {
-     my_snprintf(str, S(str), "shorted output node: %s", entry->token);
-     if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color,0);
-     if(incr_hilight) hilight_color++;
-     statusmsg(str,2);
-   }
-
-    if(debug_var>=1) fprintf(errfp, "traverse_node_hash(): node: %s in=%d out=%d inout=%d port=%d\n", 
+   if(debug_var>=1) fprintf(errfp, "traverse_node_hash(): node: %s in=%d out=%d inout=%d port=%d\n", 
         entry->token, entry->d.in, entry->d.out, entry->d.inout, entry->d.port);
 
    entry = entry->next;

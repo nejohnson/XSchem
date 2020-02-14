@@ -562,18 +562,21 @@ int get_unnamed_node(int what, int mult,int node)
 /*      0: print list of global nodes and delete list */
 /*      1: add entry */
 /*      2: delete list only, no print */
-void record_global_node(int what, FILE *fp, char *node)
+/*      3: look if node is a global */
+int record_global_node(int what, FILE *fp, char *node)
 {
  static int max_globals=0;
  static int size_globals=0;
  static char **globals=NULL;
  int i;
 
- if( what==1) {
-    if(!node) return;
+ if( what==1 || what==3) {
+    if(!node) return 0;
+    if(!strcmp(node, "0")) return 1; 
     for(i=0;i<max_globals;i++) {
-      if( !strcmp(node, globals[i] )) return; /* entry found, do nothing */
+      if( !strcmp(node, globals[i] )) return 1; /* node is a global */
     }
+    if(what == 3) return 0; /* node is not a global */
     if(max_globals>=size_globals) {
        size_globals+=CADCHUNKALLOC;
        my_realloc(243, &globals, size_globals*sizeof(char *) );
@@ -589,7 +592,7 @@ void record_global_node(int what, FILE *fp, char *node)
     my_free(&globals);
     size_globals=max_globals=0;
  } 
-   
+ return 0;
 }
 
 void prepare_netlist_structs(int for_netlist)

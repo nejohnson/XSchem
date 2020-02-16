@@ -39,6 +39,9 @@ If destination paths are correctly set in the Makefile: 'make install'
 CHANGELOG
 
 2.9.5
+- Avoid printing erc violations (open net and such) for global nodes, as they are resolved outside current schematic scope
+- @spiceprefix can be added in front of @name in symbol format string to change prefix for device spice simulations.
+  This prefix is not used if LVS netlist is enabled
 - Added symbol menu entries to create labels / pins or print highlight nets
 - warnings when opening a non xschem file or placing a non symbol file.
 - rawtovcd: option -v <voltage> to digitize all analog variables to digital (vth=3/4 voltage, vtl=1/4 voltage)

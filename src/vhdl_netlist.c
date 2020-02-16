@@ -624,6 +624,7 @@ void vhdl_netlist(FILE *fd , int vhdl_stop)
     if( type && 
        ( strcmp(type,"label")&&
          strcmp(type,"ipin")&&
+         strcmp(type,"generic")&&
          strcmp(type,"opin")&&
          strcmp(type,"iopin")&&
          strcmp(type,"use")&&

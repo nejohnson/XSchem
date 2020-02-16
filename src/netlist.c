@@ -284,7 +284,7 @@ void hash_inst_pin(int what, int i, int j)
   }
 
 
-  if(!prop_ptr || !get_tok_value(prop_ptr, "name",0)[0] || !get_tok_value(prop_ptr, "dir",0)[0]) {
+  if(j<rects && (!prop_ptr || !get_tok_value(prop_ptr, "name",0)[0] || !get_tok_value(prop_ptr, "dir",0)[0]) ) {
     char str[2048];
 
     my_snprintf(str, S(str), "symbol %s: missing all or name or dir attributes on pin %d", 

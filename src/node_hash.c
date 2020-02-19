@@ -53,6 +53,11 @@ void print_vhdl_signals(FILE *fd)
   ptr = table[i];
   while(ptr)
   {
+   if(strstr(ptr->token, ".")) {
+     if(debug_var>=2) fprintf(errfp, "print_vhdl_signals(): record field, skipping: %s\n", ptr->token);
+     ptr = ptr->next; 
+     continue; /* signal is a record field, no declaration */
+   }
    if(ptr->d.port == 0 )
    {
     found = 1;

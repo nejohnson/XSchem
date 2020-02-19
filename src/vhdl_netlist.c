@@ -243,7 +243,7 @@ void global_vhdl_netlist(int global)  /* netlister driver */
   if( strcmp(get_tok_value(instdef[j].prop_ptr,"vhdl_primitive",0),"true")==0 ) continue;
   if( strcmp(get_tok_value(instdef[j].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; /* 20070726 */
   /* if(get_tok_value(instdef[j].prop_ptr,"vhdl_format",2)[0] != '\0') continue; */
-  if(strcmp(instdef[j].type,"subcircuit")!=0) continue; /*20080611 */
+  if(strcmp(instdef[j].type,"primitive")!=0 && strcmp(instdef[j].type,"subcircuit")!=0) continue; /*20080611 */
   if((
       strcmp(instdef[j].type,"subcircuit")==0 ||
       strcmp(instdef[j].type,"primitive")==0 
@@ -481,9 +481,14 @@ void  vhdl_block_netlist(FILE *fd, int i)  /*20081204 */
        for(j=0;j<lastinstdef;j++)
        {
         if( strcmp(get_tok_value(instdef[j].prop_ptr,"vhdl_primitive",0),"true")==0 ) continue;
-        if(strcmp(instdef[j].type,"subcircuit")==0 && 
-           check_lib(instdef[j].name))
+        if(strcmp(instdef[j].type,"primitive")!=0 && strcmp(instdef[j].type,"subcircuit")!=0) continue;
+        if((
+            strcmp(instdef[j].type,"subcircuit")==0 ||
+            strcmp(instdef[j].type,"primitive")==0
+           ) && check_lib(instdef[j].name)
+          )
         {
+
          /* only print component declaration if used in current subcircuit */
          found=0;
          for(l=0;l<lastinst;l++)

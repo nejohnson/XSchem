@@ -21,7 +21,9 @@
  */
 
 #include "xschem.h"
+#ifdef __linux__
 #include <sys/wait.h>  /* waitpid */
+#endif
 
 void here(void)
 { 
@@ -197,6 +199,7 @@ void resetwin(void)
   int i;
   XWindowAttributes wattr;
   if(has_x) {
+#ifdef __linux__
     i = XGetWindowAttributes(display, window, &wattr); /*  should call only when resized */
                                               /*  to avoid server roundtrip replies */
     if(!i) { /*  20171105 */
@@ -235,7 +238,34 @@ void resetwin(void)
 
       save_pixmap = XCreatePixmap(display, window, xschem_w, xschem_h, depth); /*  20171111 */
       XSetTile(display,gctiled, save_pixmap);
-
+#else
+    Tk_Window mainwindow = Tk_MainWindow(interp);
+    HWND hwnd = Tk_GetHWND(Tk_WindowId(mainwindow));
+    RECT rect;
+    if (GetWindowRect(hwnd, &rect))
+    {
+      unsigned int width = rect.right - rect.left;
+      unsigned int height = rect.bottom - rect.top;
+      xschem_w = width;
+      xschem_h = height;
+      areax2 = xschem_w + 2 * lw;
+      areay2 = xschem_h + 2 * lw;
+      areax1 = -2 * lw;
+      areay1 = -2 * lw;
+      areaw = areax2 - areax1;
+      areah = areay2 - areay1;
+      if (xschem_w != xrect[0].width || xschem_h != xrect[0].height) { /* 20171123 avoid unnecessary work if no resize */
+        if (debug_var >= 1) fprintf(errfp, "resetwin(): x=%d y=%d   xschem_w=%d xschem_h=%d\n",
+          rect.right, rect.bottom, xschem_w, xschem_h);
+        if (debug_var >= 1) fprintf(errfp, "resetwin(): changing size\n\n");
+        xrect[0].x = 0;
+        xrect[0].y = 0;
+        xrect[0].width = xschem_w;
+        xrect[0].height = xschem_h;
+        Tk_FreePixmap(display, save_pixmap);
+        save_pixmap = Tk_GetPixmap(display, window, xschem_w, xschem_h, depth); /*  20171111 */
+      }
+#endif
       #ifdef HAS_CAIRO
       cairo_destroy(save_ctx);
       cairo_surface_destroy(save_sfc);
@@ -333,7 +363,7 @@ void toggle_fullscreen()
     pending_fullzoom=1;
 }
 
-
+#ifdef __linux__
 void new_window(const char *cell, int symbol)
 {
      
@@ -387,7 +417,21 @@ void new_window(const char *cell, int symbol)
        tcleval( "exit");
      }
 }
+#else
 
+void new_window(const char* cell, int symbol)
+{
+  char f[PATH_MAX]; /*  overflow safe 20161122 */
+  struct stat buf;
+  if (debug_var >= 1) fprintf(errfp, "new_window(): executable: %s, cell=%s, symbol=%d\n", xschem_executable, cell, symbol);
+  if (stat(xschem_executable, &buf)) { /*  20121110 */
+    fprintf(errfp, "new_window(): executable not found\n");
+    return;
+  }
+  fprintf(errfp, "new_window(): fork error 1\n");
+  tcleval("exit");
+}
+#endif
 const char *get_file_path(char *f)
 {
   char tmp[2*PATH_MAX+100];
@@ -1475,7 +1519,7 @@ void draw_stuff(void)
      y2=y1+h;
      ORDER(x1,y1,x2,y2);
      rectcolor = (int) (16.0*rand()/(RAND_MAX+1.0))+4;
-     storeobject(-1, x1,y1,x2,y2,RECT,rectcolor, 0, NULL);
+     storeobject(-1, x1,y1,x2,y2, xRECT,rectcolor, 0, NULL);
    }
 
    for(i=0;i<=210000;i++)
@@ -1488,7 +1532,7 @@ void draw_stuff(void)
      y2=y1+h;
      ORDER(x1,y1,x2,y2);
      rectcolor = (int) (16.0*rand()/(RAND_MAX+1.0))+4;
-     storeobject(-1, x1,y1,x2,y2,RECT,rectcolor, 0, NULL);
+     storeobject(-1, x1,y1,x2,y2,xRECT,rectcolor, 0, NULL);
    }
 
    for(i=0;i<=210000;i++)
@@ -1501,7 +1545,7 @@ void draw_stuff(void)
      y2=y1+h;
      rectcolor = (int) (10.0*rand()/(RAND_MAX+1.0))+4;
      RECTORDER(x1,y1,x2,y2);
-     storeobject(-1, x1,y1,x2,y2,RECT,rectcolor, 0, NULL);
+     storeobject(-1, x1,y1,x2,y2,xRECT,rectcolor, 0, NULL);
    }
 }
 
@@ -1683,12 +1727,12 @@ void change_layer()
      if(type==POLYGON && polygon[c][n].sel==SELECTED) {
         store_polygon(-1, polygon[c][n].x, polygon[c][n].y, polygon[c][n].points, rectcolor, 0, polygon[c][n].prop_ptr);
      }
-     else if(type==RECT && rect[c][n].sel==SELECTED) {
+     else if(type==xRECT && rect[c][n].sel==SELECTED) {
        x1 = rect[c][n].x1;
        y1 = rect[c][n].y1;
        x2 = rect[c][n].x2;
        y2 = rect[c][n].y2;
-       storeobject(-1, x1,y1,x2,y2,RECT,rectcolor, 0, rect[c][n].prop_ptr);
+       storeobject(-1, x1,y1,x2,y2,xRECT,rectcolor, 0, rect[c][n].prop_ptr);
      }
    }
    if(lastselected) delete_only_rect_line_arc_poly();
@@ -1868,7 +1912,7 @@ void new_rect(int what)
      draw_window = 1; /* 20181009 */
      filledrect(rectcolor, NOW, x1,y1,x2,y2); /* draw fill pattern even in XCopyArea mode */
      draw_window = save_draw; 
-     storeobject(-1, x1,y1,x2,y2,RECT,rectcolor, 0, NULL);
+     storeobject(-1, x1,y1,x2,y2,xRECT,rectcolor, 0, NULL);
     }
     x1=x2=mousex_snap;y1=y2=mousey_snap;
     ui_state |= STARTRECT;

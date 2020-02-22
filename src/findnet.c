@@ -238,7 +238,7 @@ void find_closest_box(double mx,double my)
  if(debug_var>=1) fprintf(errfp, "find_closest_box(): distance=%.16g\n", distance);
  if( r!=-1)
  {
-  sel.n = r; sel.type = RECT;
+  sel.n = r; sel.type = xRECT;
  }
 }
 
@@ -295,7 +295,7 @@ void find_closest_text(double mx,double my)
   } /* end for i */
  if( distance <= threshold && r!=-1)
  {
-  sel.n = r; sel.type = TEXT;
+  sel.n = r; sel.type = xTEXT;
  }
 }               
 

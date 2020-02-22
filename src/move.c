@@ -41,7 +41,7 @@ void rebuild_selected_array() /* can be used only if new selected set is lower *
   if(textelement[i].sel) 
   {
    check_selected_storage();
-   selectedgroup[lastselected].type = TEXT;
+   selectedgroup[lastselected].type = xTEXT;
    selectedgroup[lastselected].n = i;
    selectedgroup[lastselected++].col = TEXTLAYER;
   }
@@ -75,7 +75,7 @@ void rebuild_selected_array() /* can be used only if new selected set is lower *
    if(rect[c][i].sel) 
    {
     check_selected_storage();
-    selectedgroup[lastselected].type = RECT;
+    selectedgroup[lastselected].type = xRECT;
     selectedgroup[lastselected].n = i;
     selectedgroup[lastselected++].col = c;
    }
@@ -186,7 +186,7 @@ void draw_selection(GC g, int interruptable)
    c = selectedgroup[i].col;n = selectedgroup[i].n;
    switch(selectedgroup[i].type)
    {
-    case TEXT:
+    case xTEXT:
      if(rotatelocal) {
        ROTATION(textelement[n].x0, textelement[n].y0, textelement[n].x0, textelement[n].y0, rx1,ry1);
      } else {
@@ -206,7 +206,7 @@ void draw_selection(GC g, int interruptable)
      #endif
 
      break;
-    case RECT:
+    case xRECT:
      if(rotatelocal) {
        ROTATION(rect[c][n].x1, rect[c][n].y1, rect[c][n].x1, rect[c][n].y1, rx1,ry1);
        ROTATION(rect[c][n].x1, rect[c][n].y1, rect[c][n].x2, rect[c][n].y2, rx2,ry2);
@@ -394,6 +394,7 @@ void draw_selection(GC g, int interruptable)
        rx1-inst_ptr[n].x0+deltax,ry1-inst_ptr[n].y0+deltay);
      break;
    }
+#ifdef __linux__
    if(XPending(display) && interruptable)
    {
     drawtemparc(g, END, 0.0, 0.0, 0.0, 0.0, 0.0);
@@ -402,6 +403,16 @@ void draw_selection(GC g, int interruptable)
     lastsel = i+1;
     return;
    }
+#else
+   if (interruptable)
+   {
+     drawtemparc(g, END, 0.0, 0.0, 0.0, 0.0, 0.0);
+     drawtemprect(g, END, 0.0, 0.0, 0.0, 0.0);
+     drawtempline(g, END, 0.0, 0.0, 0.0, 0.0);
+     lastsel = i + 1;
+     return;
+   }
+#endif
   }
   drawtemparc(g, END, 0.0, 0.0, 0.0, 0.0, 0.0);
   drawtemprect(g, END, 0.0, 0.0, 0.0, 0.0);
@@ -445,7 +456,7 @@ void copy_objects(int what)
   ui_state&=~STARTCOPY;
   my_strdup(225, &str, user_conf_dir);
   my_strcat(226, &str, "/.selection.sch");
-  unlink(str);
+  xunlink(str);
 
  }
  if(what & RUBBER)                              /* draw objects while moving */
@@ -641,7 +652,7 @@ void copy_objects(int what)
                  arc[c][n].r, angle, arc[c][n].b, c, SELECTED, arc[c][n].prop_ptr);
       break;
 
-     case RECT:
+     case xRECT:
       if(c!=k) break;
       bbox(ADD, rect[c][n].x1, rect[c][n].y1, rect[c][n].x2, rect[c][n].y2); /* 20181009 */
       if(rotatelocal) {
@@ -657,10 +668,10 @@ void copy_objects(int what)
       filledrect(k, ADD, rx1+deltax, ry1+deltay, rx2+deltax, ry2+deltay);
       selectedgroup[i].n=lastrect[c];
       storeobject(-1, rx1+deltax, ry1+deltay, 
-                 rx2+deltax, ry2+deltay,RECT, c, SELECTED, rect[c][n].prop_ptr);
+                 rx2+deltax, ry2+deltay,xRECT, c, SELECTED, rect[c][n].prop_ptr);
       break;
 
-     case TEXT:
+     case xTEXT:
       if(k!=TEXTLAYER) break;
       check_text_storage();
       /* 20181009 */
@@ -1055,7 +1066,7 @@ void move_objects(int what, int merge, double dx, double dy)
       drawarc(k, ADD, arc[c][n].x, arc[c][n].y, arc[c][n].r, arc[c][n].a, arc[c][n].b);
       break;
 
-     case RECT:
+     case xRECT:
       if(c!=k) break;
       bbox(ADD, rect[c][n].x1, rect[c][n].y1, rect[c][n].x2, rect[c][n].y2);
       if(rotatelocal) {
@@ -1132,7 +1143,7 @@ void move_objects(int what, int merge, double dx, double dy)
   
       break;
 
-     case TEXT:
+     case xTEXT:
       if(k!=TEXTLAYER) break;
       #ifdef HAS_CAIRO
       customfont = set_text_custom_font(&textelement[n]);

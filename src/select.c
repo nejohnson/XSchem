@@ -414,13 +414,27 @@ void bbox(int what,double x1,double y1, double x2, double y2)
    xrect[0].y = bby1-lw;
    xrect[0].width = bbx2-bbx1+2*lw;
    xrect[0].height = bby2-bby1+2*lw;
-
+#ifdef __linux__
    for(i=0;i<cadlayers;i++)
    {
      XSetClipRectangles(display, gc[i], 0,0, xrect, 1, Unsorted);
      XSetClipRectangles(display, gcstipple[i], 0,0, xrect, 1, Unsorted);
    }
    XSetClipRectangles(display, gctiled, 0,0, xrect, 1, Unsorted);
+#else
+   for (i = 0; i < cadlayers; i++)
+   {
+     xSetClipRectangles(display, gc[i], 0, 0, xrect);
+     xSetClipRectangles(display, gcstipple[i], 0, 0, xrect);
+   }
+   xSetClipRectangles(display, gctiled, 0, 0, xrect);
+   /*
+   int save_draw;
+   save_draw = draw_window;
+   draw_window = 1;
+   draw();
+   draw_window = save_draw;*/
+#endif
    if(debug_var>=1) fprintf(errfp, "bbox(): bbox= %d %d %d %d\n",areax1,areay1,areax2,areay2);     
    #ifdef HAS_CAIRO
    cairo_rectangle(ctx, xrect[0].x, xrect[0].y, xrect[0].width, xrect[0].height);
@@ -542,7 +556,7 @@ void unselect_all(void)
     ui_state &= ~SELECTION;
     /*\statusmsg("",2); */
     my_snprintf(str, S(str), "%s/%s", user_conf_dir, ".selection.sch"); /* 20161115  PWD->HOME */
-    unlink(str);
+    xunlink(str);
     if(event_reporting) {
       printf("xschem unselect_all\n");
       fflush(stdout);
@@ -837,7 +851,7 @@ unsigned short select_object(double mousex,double mousey, unsigned short select_
     case WIRE:
      select_wire(sel.n, select_mode, 0);
      break;
-    case TEXT:
+    case xTEXT:
      select_text(sel.n, select_mode, 0);
      break;
     case LINE:
@@ -846,7 +860,7 @@ unsigned short select_object(double mousex,double mousey, unsigned short select_
     case POLYGON:
      select_polygon(sel.col, sel.n, select_mode,0);
      break;
-    case RECT:
+    case xRECT:
      select_box(sel.col,sel.n, select_mode,0);
      break;
     case ARC:

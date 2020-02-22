@@ -310,7 +310,9 @@ void search(const char *tok, const char *val, int sub, int sel, int what)
  int has_token;
  const char empty_string[] = "";
  static char *tmpname=NULL;
+#ifdef __linux__
  regex_t re;
+#endif
 
  if(!val) {
    fprintf(errfp, "search(): warning: null val key\n");
@@ -318,7 +320,9 @@ void search(const char *tok, const char *val, int sub, int sel, int what)
  }
  save_draw = draw_window;
  draw_window=1;
+#ifdef __linux__
  if(regcomp(&re, val , REG_EXTENDED)) return;
+#endif
  if(debug_var>=1) fprintf(errfp, "search():val=%s\n", val);
  if(sel==1) {
    drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
@@ -361,8 +365,12 @@ void search(const char *tok, const char *val, int sub, int sel, int what)
        str=expandlabel(str,&tmp);
       }
       if(str && has_token) {
+#ifdef __linux__
         if( (!regexec(&re, str,0 , NULL, 0) && !sub) ||           /* 20071120 regex instead of strcmp */
             (!strcmp(str,val) && sub) ) 
+#else
+        if (!strcmp(str, val) && sub)
+#endif
         {
           if(!sel) { /*20190525 */
             type = (inst_ptr[i].ptr+instdef)->type;
@@ -397,8 +405,12 @@ void search(const char *tok, const char *val, int sub, int sel, int what)
     for(i=0;i<lastwire;i++) {
       str = get_tok_value(wire[i].prop_ptr, tok,0);
       if(get_tok_size ) {
+#ifdef __linux__
         if(   (!regexec(&re, str,0 , NULL, 0) && !sub )  ||       /* 20071120 regex instead of strcmp */
               ( !strcmp(str, val) &&  sub )
+#else
+        if (!strcmp(str, val) && sub
+#endif
           ) {
             if(debug_var>=2) fprintf(errfp, "search(): wire=%d, tok=%s, val=%s \n", i,tok, wire[i].node);
             if(!sel) {
@@ -436,8 +448,12 @@ void search(const char *tok, const char *val, int sub, int sel, int what)
     if(sel) for(c = 0; c < cadlayers; c++) for(i=0;i<lastline[c];i++) {
       str = get_tok_value(line[c][i].prop_ptr, tok,0);
       if(get_tok_size) {
+#ifdef __linux__
         if( (!regexec(&re, str,0 , NULL, 0) && !sub ) ||
             ( !strcmp(str, val) &&  sub )
+#else
+        if ((!strcmp(str, val) && sub)
+#endif
           ) {
             if(sel==1) {
               select_line(c, i,SELECTED, 1);
@@ -456,8 +472,12 @@ void search(const char *tok, const char *val, int sub, int sel, int what)
     if(sel) for(c = 0; c < cadlayers; c++) for(i=0;i<lastrect[c];i++) {
       str = get_tok_value(rect[c][i].prop_ptr, tok,0);
       if(get_tok_size) {
+#ifdef __linux__
         if( (!regexec(&re, str,0 , NULL, 0) && !sub ) ||
             ( !strcmp(str, val) &&  sub )
+#else
+        if ((!strcmp(str, val) && sub)
+#endif
           ) {
             if(sel==1) {
               select_box(c, i,SELECTED, 1);
@@ -480,8 +500,9 @@ void search(const char *tok, const char *val, int sub, int sel, int what)
    drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
    drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
  }
-
+#ifdef __linux__
  regfree(&re);
+#endif
  draw_window = save_draw;
 
  if(event_reporting) {
@@ -916,8 +937,8 @@ void print_hilight_net(int show)
  if(show==0)  {
    tcleval(a);
  }
- unlink(filetmp2);
- unlink(filetmp1);
+ xunlink(filetmp2);
+ xunlink(filetmp1);
 
  /* 20170323 this delete_netlist_structs is necessary, without it segfaults when going back (ctrl-e)  */
  /* from a schematic after placing pins (ctrl-j) and changing some pin direction (ipin -->iopin) */

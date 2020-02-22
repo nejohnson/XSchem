@@ -118,7 +118,7 @@ void global_tedax_netlist(int global)  /* netlister driver */
   my_snprintf(netl2, S(netl2), "netlist {%s} noshow {%s.tdx}", netl3, netl3);
   tcleval(netl2);
  }
- if(!debug_var) unlink(netl);
+ if(!debug_var) xunlink(netl);
 }
 
 
@@ -171,7 +171,7 @@ void tedax_block_netlist(FILE *fd, int i)  /*20081223 */
     fclose(fd);
     my_snprintf(netl2, S(netl2), "netlist {%s} noshow {%s.tdx}", netl3, netl3);
     tcleval(netl2);
-    if(debug_var==0) unlink(netl);
+    if(debug_var==0) xunlink(netl);
   }
 }
 

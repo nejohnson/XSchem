@@ -303,7 +303,7 @@ void global_vhdl_netlist(int global)  /* netlister driver */
    fclose(fd);
    my_snprintf(netl2, S(netl2), "netlist {%s} noshow {%s.vhdl}", netl3, netl3);
    tcleval(netl2);
-   if(debug_var==0) unlink(netl);
+   if(debug_var==0) xunlink(netl);
  }
  netlist_count++;
 
@@ -359,7 +359,7 @@ void global_vhdl_netlist(int global)  /* netlister driver */
     my_snprintf(netl2, S(netl2), "netlist {%s} noshow {%s.vhdl}", netl3, netl3);
     tcleval(netl2); /* 20081202 */
    }
-   if(!debug_var) unlink(netl);
+   if(!debug_var) xunlink(netl);
  }
 }
 
@@ -562,7 +562,7 @@ void  vhdl_block_netlist(FILE *fd, int i)  /*20081204 */
        fclose(fd);
        my_snprintf(netl2, S(netl2), "netlist {%s} noshow {%s.vhdl}", netl3, netl3);
        tcleval(netl2);
-       if(debug_var==0) unlink(netl);
+       if(debug_var==0) xunlink(netl);
      }
      netlist_count++;
 } 

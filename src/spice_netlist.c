@@ -143,7 +143,7 @@ void global_spice_netlist(int global)  /* netlister driver */
    fclose(fd);
    my_snprintf(netl2, S(netl2), "netlist {%s} noshow {%s.spice}", netl3, netl3);
    tcleval(netl2);
-   if(debug_var==0) unlink(netl);
+   if(debug_var==0) xunlink(netl);
  }
 
  /* preserve current level instance flags before descending hierarchy for netlisting, restore later */
@@ -239,7 +239,7 @@ void global_spice_netlist(int global)  /* netlister driver */
     my_snprintf(netl2, S(netl2), "netlist {%s} noshow {%s.spice}", netl3, netl3);
     tcleval(netl2);
    }
-   if(!debug_var) unlink(netl);
+   if(!debug_var) xunlink(netl);
  }
 
 }
@@ -305,7 +305,7 @@ void spice_block_netlist(FILE *fd, int i)  /*20081223 */
        fclose(fd);
        my_snprintf(netl2, S(netl2), "netlist {%s} noshow {%s.spice}", netl3, netl3);
        tcleval(netl2);
-       if(debug_var==0) unlink(netl);
+       if(debug_var==0) xunlink(netl);
      }
 
 }

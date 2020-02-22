@@ -92,7 +92,7 @@ void merge_box(FILE *fd)
 void merge_arc(FILE *fd)
 {
     int i,c;
-    Arc *ptr;
+    xArc *ptr;
 
     fscanf(fd, "%d",&c);
     if(c>=cadlayers) {
@@ -116,7 +116,7 @@ void merge_arc(FILE *fd)
 void merge_polygon(FILE *fd)
 {
     int i,c, j, points;
-    Polygon *ptr;
+    xPolygon *ptr;
 
     fscanf(fd, "%d %d",&c, &points);
     if(c>=cadlayers) {

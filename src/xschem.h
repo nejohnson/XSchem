@@ -41,7 +41,11 @@
 /*  approximate PI definition */
 #define XSCH_PI 3.14159265358979323846264338327950288419716939937
 
+#ifdef __linux__
 /* #include "../config.h" */
+#else
+#include "../XSchemWin/config.h"
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -53,10 +57,16 @@
 #define PATH_MAX 4096
 #endif
 
+#ifdef __linux__
 #include <unistd.h>
+#include <regex.h>
+#else
+#include <windows.h>
+#include "tkWin.h"
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <regex.h>
+
 
 #include <fcntl.h>
 #include <time.h>
@@ -64,13 +74,30 @@
   
 /* #include <sys/time.h>  for gettimeofday(). use time() instead */
 #include <signal.h>
-
+#ifdef __linux__
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/keysymdef.h>
 #include <X11/keysym.h>
 #include <X11/Xatom.h>
 #include <X11/xpm.h>
+#define xunlink unlink
+
+#else
+#define XK_Return 65293
+#define XK_Escape 65307
+#define XK_Delete 65535
+#define XK_Right 65363
+#define XK_Left 65361
+#define XK_Down 65364
+#define XK_Up 65362
+#define XK_BackSpace 65288
+#define XK_Insert 65379
+#define xunlink _unlink
+#define MOUSE_WHEEL_UP 38
+extern void xSetClipRectangles(Display* display, GC gc, int clip_x_origin, int clip_y_origin, XRectangle* rectangles);
+#include <tkWinInt.h>
+#endif
 
 #include <tcl.h>
 #include <tk.h>
@@ -161,10 +188,10 @@
 
 
 #define WIRE 1              /*  types of defined objects */
-#define RECT  2
+#define xRECT  2
 #define LINE 4
 #define ELEMENT 8
-#define TEXT 16
+#define xTEXT 16
 #define POLYGON 32 /*  20171115 */
 #define ARC 64
 
@@ -302,7 +329,7 @@ typedef struct /*  20171115 */
   unsigned short sel;
   char *prop_ptr;
   int fill; /*  20180914 */
-} Polygon; 
+} xPolygon; 
 
 typedef struct /* 20181012 */
 {
@@ -313,7 +340,7 @@ typedef struct /* 20181012 */
   double b; /* arc angle */
   unsigned short sel;
   char *prop_ptr;
-} Arc;
+} xArc;
 
 typedef struct
 {
@@ -338,8 +365,8 @@ typedef struct
    double maxy;
    Line **lineptr;  /*  array of [cadlayers] pointers to Line */
    Box  **boxptr;
-   Polygon **polygonptr; /* 20171115 */
-   Arc **arcptr; /* 20181012 */
+   xPolygon **polygonptr; /* 20171115 */
+   xArc **arcptr; /* 20181012 */
    Text  *txtptr;
    int *lines;     /*  array of [cadlayers] integers */
    int *rects;
@@ -499,8 +526,8 @@ extern unsigned int button;
 extern unsigned int state; /*  status of shift,ctrl etc.. */
 extern Wire *wire;
 extern Box  **rect;
-extern Polygon **polygon; /*  20171115 */
-extern Arc **arc; /*  20181012 */
+extern xPolygon **polygon; /*  20171115 */
+extern xArc **arc; /*  20181012 */
 extern Line **line;
 extern XPoint *gridpoint;
 extern XRectangle *rectangle;

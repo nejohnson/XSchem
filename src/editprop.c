@@ -397,7 +397,7 @@ void edit_rect_property(void)
     push_undo();
     set_modify(1);
     for(i=0; i<lastselected; i++) {
-      if(selectedgroup[i].type != RECT) continue;
+      if(selectedgroup[i].type != xRECT) continue;
 
       if(preserve == 1) {
         set_different_token(&rect[selectedgroup[i].col][selectedgroup[i].n].prop_ptr, 
@@ -627,7 +627,7 @@ void edit_text_property(int x)
      bbox(BEGIN,0.0,0.0,0.0,0.0);
      for(k=0;k<lastselected;k++)
      {
-       if(selectedgroup[k].type!=TEXT) continue;
+       if(selectedgroup[k].type!=xTEXT) continue;
        sel=selectedgroup[k].n;
 
        rot = textelement[sel].rot;      /* calculate bbox, some cleanup needed here */
@@ -1035,7 +1035,7 @@ void change_elem_order(void)
       inst_ptr[selectedgroup[0].n]=tmpinst;
       if(debug_var>=1) fprintf(errfp, "change_elem_order(): selected element %d\n", selectedgroup[0].n);
      }
-     else if(selectedgroup[0].type==RECT)
+     else if(selectedgroup[0].type==xRECT)
      {
       c=selectedgroup[0].col;
       if(new_n>=lastrect[c]) new_n=lastrect[c]-1;
@@ -1162,7 +1162,7 @@ void edit_property(int x)
    }
    break;
 
-  case RECT:
+  case xRECT:
    edit_rect_property();
    break;
   case WIRE:
@@ -1174,7 +1174,7 @@ void edit_property(int x)
   case LINE:
    edit_line_property();
    break;
-  case TEXT:
+  case xTEXT:
    edit_text_property(x);
    break;             
  }

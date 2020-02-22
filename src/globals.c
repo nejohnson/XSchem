@@ -218,9 +218,9 @@ Instdef *instdef;            /* Pointer to element definition */
 int lastinstdef = 0;
 Box  **rect;
 int *lastrect;
-Polygon **polygon; /* 20171115 */
+xPolygon **polygon; /* 20171115 */
 int *lastpolygon; /* 20171115 */
-Arc **arc;
+xArc **arc;
 int *lastarc;
 Line **line;
 int *lastline;

@@ -686,7 +686,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
    }
  } else if(!strcmp(argv[1],"instance_net")) { /* 20171029 */
    int no_of_pins, i, p, mult;
-   const char *str_ptr;
+   const char *str_ptr=NULL;
 
    if( argc <4) {
      Tcl_AppendResult(interp, "xschem instance_net needs 2 additional arguments", NULL);
@@ -818,7 +818,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
      ORDER(x1,y1,x2,y2);
      pos=-1;
      if(argc==7) pos=atol(argv[6]);
-     storeobject(pos, x1,y1,x2,y2,RECT,rectcolor,0,NULL);
+     storeobject(pos, x1,y1,x2,y2,xRECT,rectcolor,0,NULL);
      save = draw_window; draw_window = 1;
      drawrect(rectcolor,NOW, x1,y1,x2,y2);
      draw_window = save;

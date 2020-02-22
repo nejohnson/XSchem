@@ -21,7 +21,9 @@
  */
 
 #include "xschem.h"
+#ifdef __linux__
 #include <sys/wait.h>
+#endif
 
 void sig_handler(int s){
   #ifndef IN_MEMORY_UNDO
@@ -58,7 +60,9 @@ void sig_handler(int s){
 void child_handler(int signum) 
 { 
     /* fprintf(errfp, "SIGCHLD received\n"); */
+#ifdef __linux__
     wait(NULL); 
+#endif
 } 
 
 int main(int argc, char **argv)
@@ -73,7 +77,9 @@ int main(int argc, char **argv)
 
   errfp=stderr; 
   /* 20181013 check for empty or non existing DISPLAY *before* calling Tk_Main or Tcl_Main */
+#ifdef __linux__
   if(!getenv("DISPLAY") || !getenv("DISPLAY")[0]) has_x=0;
+#endif
   process_options(argc, argv);
   if(debug_var>=1 && !has_x) 
     fprintf(errfp, "main(): no DISPLAY set, assuming no X available\n");

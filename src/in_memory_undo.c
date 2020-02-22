@@ -38,8 +38,8 @@ typedef struct
   int instances;
   Line     **lptr;
   Box      **bptr;
-  Polygon  **pptr;
-  Arc      **aptr;
+  xPolygon  **pptr;
+  xArc      **aptr;
   Wire     *wptr;
   Text     *tptr;
   Instance *iptr;
@@ -59,8 +59,8 @@ void init_undo()
     uslot[slot].polygons=my_calloc(168, cadlayers, sizeof(int));
     uslot[slot].lptr=my_calloc(169, cadlayers, sizeof(Line *));
     uslot[slot].bptr=my_calloc(170, cadlayers, sizeof(Box *));
-    uslot[slot].aptr=my_calloc(171, cadlayers, sizeof(Arc *));
-    uslot[slot].pptr=my_calloc(172, cadlayers, sizeof(Polygon *));
+    uslot[slot].aptr=my_calloc(171, cadlayers, sizeof(xArc *));
+    uslot[slot].pptr=my_calloc(172, cadlayers, sizeof(xPolygon *));
   }
 }
 
@@ -223,8 +223,8 @@ void push_undo(void)
     uslot[slot].polygons[c] = lastpolygon[c];
     uslot[slot].lptr[c] = my_calloc(177, lastline[c], sizeof(Line));
     uslot[slot].bptr[c] = my_calloc(178, lastrect[c], sizeof(Box));
-    uslot[slot].pptr[c] = my_calloc(179, lastpolygon[c], sizeof(Polygon));
-    uslot[slot].aptr[c] = my_calloc(180, lastarc[c], sizeof(Arc));
+    uslot[slot].pptr[c] = my_calloc(179, lastpolygon[c], sizeof(xPolygon));
+    uslot[slot].aptr[c] = my_calloc(180, lastarc[c], sizeof(xArc));
   }
   uslot[slot].wptr = my_calloc(181, lastwire, sizeof(Wire));
   uslot[slot].tptr = my_calloc(182, lasttext, sizeof(Text));
@@ -353,7 +353,7 @@ void pop_undo(int redo)
     }
     /* arcs */
     max_arcs[c] = lastarc[c] = uslot[slot].arcs[c];
-    arc[c] = my_calloc(206, lastarc[c], sizeof(Arc));
+    arc[c] = my_calloc(206, lastarc[c], sizeof(xArc));
     for(i=0;i<lastarc[c];i++) {
       arc[c][i] = uslot[slot].aptr[c][i];
       arc[c][i].prop_ptr=NULL;
@@ -361,7 +361,7 @@ void pop_undo(int redo)
     }
     /* polygons */
     max_polygons[c] = lastpolygon[c] = uslot[slot].polygons[c];
-    polygon[c] = my_calloc(208, lastpolygon[c], sizeof(Polygon));
+    polygon[c] = my_calloc(208, lastpolygon[c], sizeof(xPolygon));
     for(i=0;i<lastpolygon[c];i++) {
       int points = uslot[slot].pptr[c][i].points;
       polygon[c][i] = uslot[slot].pptr[c][i];

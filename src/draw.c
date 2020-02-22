@@ -80,11 +80,16 @@ void print_image()
   areay1 = -2*lw;
   areaw = areax2-areax1;
   areah = areay2-areay1;
+#ifdef __linux__
   XFreePixmap(display,save_pixmap);
   /* save_pixmap = XCreatePixmap(display,window,areaw,areah,depth); */
   save_pixmap = XCreatePixmap(display,window,w,h,depth); /* 20161119 pixmap should be exact size of  */
                                                          /* cliprectangle to avoid random borders */
   XSetTile(display,gctiled, save_pixmap);
+#else
+  Tk_FreePixmap(display, save_pixmap);
+  save_pixmap = Tk_GetPixmap(display, window, w, h, depth);
+#endif
 
   #ifdef HAS_CAIRO
   cairo_destroy(save_ctx);
@@ -111,21 +116,30 @@ void print_image()
        CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
   cairo_set_font_size (save_ctx, 20);
   #endif /*HAS_CAIRO */
-
+#ifdef __linux__
   for(tmp=0;tmp<cadlayers;tmp++)
   {
     XSetClipRectangles(display, gc[tmp], 0,0, xrect, 1, Unsorted);
     XSetClipRectangles(display, gcstipple[tmp], 0,0, xrect, 1, Unsorted);
   }
   XSetClipRectangles(display, gctiled, 0,0, xrect, 1, Unsorted);
+#else
+  for (tmp = 0; tmp < cadlayers; tmp++)
+  {
+    xSetClipRectangles(display, gc[tmp], 0, 0, xrect);
+    xSetClipRectangles(display, gcstipple[tmp], 0, 0, xrect);
+  }
+  xSetClipRectangles(display, gctiled, 0, 0, xrect);
+#endif
 
   save_draw_grid = draw_grid;
   draw_grid=0;
   draw_pixmap=1;
   /* zoom_full(0, 0); */
   draw();
-
+#ifdef __linux__
   XpmWriteFileFromPixmap(display, "plot.xpm", save_pixmap,0, NULL ); /* .gz ???? */
+#endif
   if(debug_var>=1) fprintf(errfp, "print_image(): Window image saved\n");
 
   if(plotfile[0]) {
@@ -147,9 +161,14 @@ void print_image()
   areay1 = -2*lw;
   areaw = areax2-areax1;
   areah = areay2-areay1;
+#ifdef __linux__
   XFreePixmap(display,save_pixmap);
   save_pixmap = XCreatePixmap(display,window,areaw,areah,depth);
   XSetTile(display,gctiled, save_pixmap);
+#else
+  Tk_FreePixmap(display, save_pixmap);
+  save_pixmap = Tk_GetPixmap(display, window, areaw, areah, depth);
+#endif
 
 
 #ifdef HAS_CAIRO
@@ -408,8 +427,8 @@ void draw_symbol(int what,int c, int n,int layer,int tmp_flip, int rot,
   int flip;
   Line line;
   Box box;
-  Arc arc;
-  Polygon polygon; /* 20171115 */
+  xArc arc;
+  xPolygon polygon; /* 20171115 */
   Text text;
   register Instdef *symptr; /*20150408 */
   int textlayer;
@@ -550,9 +569,9 @@ void draw_temp_symbol(int what, GC gc, int n,int layer,int tmp_flip, int rot,
  double x0,y0,x1,y1,x2,y2;
  int flip;
  Line line;
- Polygon polygon;
+ xPolygon polygon;
  Box box;
- Arc arc;
+ xArc arc;
  Text text;
  register Instdef *symptr; /*20150408 */
  double angle;
@@ -709,7 +728,10 @@ void drawgrid()
 
 void drawline(int c, int what, double linex1, double liney1, double linex2, double liney2)
 {
- static int i=0;
+  static int i = 0;
+#ifndef __linux__
+  int j = 0;
+#endif
  static XSegment r[CADDRAWBUFFERSIZE];
  double x1,y1,x2,y2;
  register XSegment *rr;
@@ -720,9 +742,18 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
  {
   if(i>=CADDRAWBUFFERSIZE)
   {
+#ifdef __linux__
    if(draw_window) XDrawSegments(display, window, gc[c], rr,i);
    if(draw_pixmap)
      XDrawSegments(display, save_pixmap, gc[c], rr,i);
+#else
+    for (j = 0; j < i; ++j) {
+      if (draw_window)
+        XDrawLine(display, window, gc[c], rr[j].x1, rr[j].y1, rr[j].x2, rr[j].y2);
+      if (draw_pixmap)
+        XDrawLine(display, save_pixmap, gc[c], rr[j].x1, rr[j].y1, rr[j].x2, rr[j].y2);
+    }
+#endif
    i=0;
   }
   x1=X_TO_SCREEN(linex1);
@@ -772,15 +803,27 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
  else if(what & BEGIN) i=0;
  else if((what & END) && i)
  {
+#ifdef __linux__
   if(draw_window) XDrawSegments(display, window, gc[c], rr,i);
   if(draw_pixmap) XDrawSegments(display, save_pixmap, gc[c], rr,i);
+#else
+   for (j = 0; j < i; ++j) {
+     if (draw_window)
+       XDrawLine(display, window, gc[c], rr[j].x1, rr[j].y1, rr[j].x2, rr[j].y2);
+     if (draw_pixmap)
+       XDrawLine(display, save_pixmap, gc[c], rr[j].x1, rr[j].y1, rr[j].x2, rr[j].y2);
+   }
+#endif
   i=0;
  }
 }
 
 void drawtempline(GC gc, int what, double linex1,double liney1,double linex2,double liney2)
 {
- static int i=0;
+  static int i = 0;
+#ifndef __linux__
+ int j = 0;
+#endif
  static XSegment r[CADDRAWBUFFERSIZE];
  double x1,y1,x2,y2;
 
@@ -789,7 +832,13 @@ void drawtempline(GC gc, int what, double linex1,double liney1,double linex2,dou
  {
   if(i>=CADDRAWBUFFERSIZE)
   {
+#ifdef __linux__
    XDrawSegments(display, window, gc, r,i);
+#else
+    for (j = 0; j < i; ++j) {
+        XDrawLine(display, window, gc, r[j].x1, r[j].y1, r[j].x2, r[j].y2);
+    }
+#endif
    i=0;
   }
   x1=X_TO_SCREEN(linex1);
@@ -837,7 +886,13 @@ void drawtempline(GC gc, int what, double linex1,double liney1,double linex2,dou
  else if(what & BEGIN) i=0;
  else if((what & END) && i)
  {
+#ifdef __linux__
   XDrawSegments(display, window, gc, r,i);
+#else
+   for (j = 0; j < i; ++j) {
+     XDrawLine(display, window, gc, r[j].x1, r[j].y1, r[j].x2, r[j].y2);
+   }
+#endif
   i=0;
  }
 }
@@ -1571,4 +1626,27 @@ void draw(void)
 
     if(debug_var>=1) fprintf(errfp, "draw(): lw=%d\n",lw);
  } /* if(has_x) */
+}
+
+void xSetClipRectangles(Display *display, GC gc, int clip_x_origin, int clip_y_origin, XRectangle* rectangles)
+{
+  Pixmap pm = Tk_GetPixmap(display, window, rectangles->width, rectangles->height, depth);
+  XGCValues gcvalues;
+  gcvalues.clip_mask = pm;
+  gcvalues.clip_x_origin = clip_x_origin;
+  gcvalues.clip_y_origin = clip_y_origin;
+  XChangeGC(display, gc, GCClipMask|GCClipXOrigin|GCClipYOrigin, &gcvalues);
+  Tk_FreePixmap(display, pm); 
+    /*
+  TkpClipMask mask1;
+  TkRegion region = TkCreateRegion();
+  TkClipBox(region, xrect);
+  mask1.type = TKP_CLIP_REGION; mask1.value.region = region;
+  XGCValues gcvalues;
+  gcvalues.clip_mask = &mask1;
+  XChangeGC(display, gc, GCClipMask, &gcvalues);
+  //gc->clip_mask = mask1;
+  //XSetClipMask(display, gc, &mask1);
+  TkDestroyRegion(region);
+  */
 }

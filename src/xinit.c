@@ -21,7 +21,9 @@
  */
 
 #include "xschem.h"
+#ifdef __linux__
 #include <pwd.h> /* getpwuid */
+#endif
 
 static int init_done=0; /* 20150409 to avoid double call by Xwindows close and TclExitHandler */
 static Window save_window;
@@ -171,6 +173,7 @@ void windowid()
     if(debug_var>=1) fprintf(errfp,"framewin child 0=%x\n", (unsigned int) framewin_child_ptr[0]);
 
     /* here I create the icon pixmap,to be used when iconified,  */
+#ifdef __linux__
     if(!cad_icon_pixmap) {
       i=XpmCreatePixmapFromData(display,framewin, cad_icon,&cad_icon_pixmap, NULL, NULL);
       if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): creating icon pixmap returned: %d\n",i);
@@ -180,6 +183,7 @@ void windowid()
       XSetWMHints(display, parent_of_topwindow, hints_ptr);
       XFree(hints_ptr);
     }
+#endif
     Tcl_SetResult(interp,"",TCL_STATIC);
 }
 
@@ -203,8 +207,13 @@ void xwin_exit(void)
     cairo_surface_destroy(sfc);
     cairo_surface_destroy(save_sfc);
     #endif
+#ifdef __linux__
     XFreePixmap(display,save_pixmap);
     for(i=0;i<cadlayers;i++)XFreePixmap(display,pixmap[i]);
+#else
+    Tk_FreePixmap(display, save_pixmap);
+    for (i = 0; i < cadlayers; i++)Tk_FreePixmap(display, pixmap[i]);
+#endif
     if(debug_var>=1) fprintf(errfp, "xwin_exit(): Releasing pixmaps\n");
     for(i=0;i<cadlayers;i++) 
     {
@@ -214,7 +223,11 @@ void xwin_exit(void)
     XFreeGC(display,gctiled);
     if(debug_var>=1) fprintf(errfp, "xwin_exit(): destroying tk windows and releasing X11 stuff\n");
     Tk_DestroyWindow(mainwindow);
+#ifdef __linux__
     if(cad_icon_pixmap) XFreePixmap(display, cad_icon_pixmap);
+#else
+    if (cad_icon_pixmap) Tk_FreePixmap(display, cad_icon_pixmap);
+#endif
  }
  if(debug_var>=1) fprintf(errfp, "xwin_exit(): clearing drawing data structures\n"); 
  clear_drawing();
@@ -296,9 +309,11 @@ int err(Display *display, XErrorEvent *xev)
 {
  char s[1024];  /* overflow safe 20161122 */
  int l=250;
+#ifdef __linux__
  XGetErrorText(display, xev->error_code, s,l);
  if(debug_var>=1) fprintf(errfp, "err(): Err %d :%s maj=%d min=%d\n", xev->error_code, s, xev->request_code,
           xev->minor_code);
+#endif
  return 0;
 }
 
@@ -308,12 +323,22 @@ unsigned int  find_best_color(char colorname[])
  double distance=10000000000.0, dist, r, g, b, red, green, blue;
  double deltar,deltag,deltab;
  unsigned int index;
-
+#ifdef __linux__
  if( XAllocNamedColor(display, colormap, colorname, &xcolor_exact, &xcolor) ==0 )
+#else
+ Tk_Window mainwindow = Tk_MainWindow(interp);
+ XColor* xc = Tk_GetColor(interp, mainwindow, colorname);
+ if (XAllocColor(display, colormap, xc) == 0)
+#endif
  {
   for(i=0;i<=255;i++) {
     xcolor_array[i].pixel=i;
+#ifdef __linux__
     XQueryColor(display, colormap, xcolor_array+i);
+#else
+    xcolor = *xc;
+    XQueryColors(display, colormap, xc, i);
+#endif
   }
   /* debug ... */
   if(debug_var>=2) fprintf(errfp, 
@@ -336,7 +361,11 @@ unsigned int  find_best_color(char colorname[])
  else
  {
   /*XLookupColor(display, colormap, colorname, &xcolor_exact, &xcolor); */
+#ifdef __linux__
   index = xcolor.pixel;
+#else
+  index = xc->pixel;
+#endif
  }
 
  return index;
@@ -381,7 +410,11 @@ void init_color_array(double dim)
 
 void set_fill(int n) 
 {
+#ifdef __linux__
      XFreePixmap(display,pixmap[rectcolor]);
+#else
+     Tk_FreePixmap(display, pixmap[rectcolor]);
+#endif
      pixmap[rectcolor] = XCreateBitmapFromData(display, window, (char*)(pixdata[n]),16,16);
      XSetStipple(display,gcstipple[rectcolor],pixmap[rectcolor]);
 }
@@ -446,12 +479,12 @@ void alloc_data()
      fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
    }
 
-   instdef[i].polygonptr=my_calloc(612, cadlayers, sizeof(Polygon *));
+   instdef[i].polygonptr=my_calloc(612, cadlayers, sizeof(xPolygon *));
    if(instdef[i].polygonptr==NULL){
      fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
    }
 
-   instdef[i].arcptr=my_calloc(613, cadlayers, sizeof(Arc *));
+   instdef[i].arcptr=my_calloc(613, cadlayers, sizeof(xArc *));
    if(instdef[i].arcptr==NULL){
      fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
    }
@@ -523,12 +556,12 @@ void alloc_data()
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
- polygon=my_calloc(626, cadlayers, sizeof(Polygon *));
+ polygon=my_calloc(626, cadlayers, sizeof(xPolygon *));
  if(polygon==NULL){
    fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
  }
 
- arc=my_calloc(627, cadlayers, sizeof(Arc *));
+ arc=my_calloc(627, cadlayers, sizeof(xArc *));
  if(arc==NULL){
    fprintf(errfp, "Tcl_AppInit(): arc calloc error\n");tcleval( "exit");
  }
@@ -540,12 +573,12 @@ void alloc_data()
     fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
   }
 
-  arc[i]=my_calloc(629, max_arcs[i],sizeof(Arc));
+  arc[i]=my_calloc(629, max_arcs[i],sizeof(xArc));
   if(arc[i]==NULL){
     fprintf(errfp, "Tcl_AppInit(): arc[] calloc error\n");tcleval( "exit");
   }
 
-  polygon[i]=my_calloc(630, max_polygons[i],sizeof(Polygon));
+  polygon[i]=my_calloc(630, max_polygons[i],sizeof(xPolygon));
   if(polygon[i]==NULL){
     fprintf(errfp, "Tcl_AppInit(): calloc error\n");tcleval( "exit");
   }
@@ -776,6 +809,27 @@ void preview_window(const char *what, const char *tk_win_path, const char *filen
   }
 }
 
+#ifndef __linux__
+/* Source: https://www.tcl.tk/man/tcl8.7/TclCmd/glob.htm */
+/* backslash character has a special meaning to glob command, so glob patterns containing Windows 
+style path separators need special care.  
+The pattern "C : \\foo\\* " is interpreted as "C : \foo\* " where "\f" will match the single character "f" 
+and "\* " will match the single character "*" and will not be interpreted as a wildcard character.
+One solution to this problem is to use the Unix style forward slash as a path separator.
+Windows style paths can be converted to Unix style paths with the command "file join $path" or "file normalize $path".*/
+static void change_to_unix_fn(char* fn)
+{
+  int len, i, ii;
+  len = strlen(fn);
+  ii = 0;
+  for (i = 0; i < len; ++i) {
+    if (fn[i]!='\\') fn[ii++] = fn[i];
+    else { fn[ii++] = '/'; if (fn[i + 1] == '\\') ++i; }
+  }
+
+}
+#endif
+
 int Tcl_AppInit(Tcl_Interp *inter)
 {
  char name[PATH_MAX]; /* overflow safe 20161122 */
@@ -794,9 +848,15 @@ int Tcl_AppInit(Tcl_Interp *inter)
  if(!getcwd(pwd_dir, PATH_MAX)) {
    fprintf(errfp, "Tcl_AppInit(): getcwd() failed\n");
  }
+#ifdef __linux__
  if ((home_buff = getenv("HOME")) == NULL) {
    home_buff = getpwuid(getuid())->pw_dir;
  }
+#else
+  change_to_unix_fn(pwd_dir);
+  home_buff = getenv("USERPROFILE");
+  change_to_unix_fn(home_buff);
+#endif
  my_strncpy(home_dir, home_buff, S(home_dir));
 
  for(i=0;i<CADMAXHIER;i++) sch_prefix[i]=NULL;
@@ -810,7 +870,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
  if(!has_x)  tclsetvar("no_x","1");
 
  Tcl_CreateExitHandler(tclexit, 0);
-
+#ifdef __linux__
  my_snprintf(tmp, S(tmp),"regsub -all {~/} {.:%s} {%s/}", XSCHEM_LIBRARY_PATH, home_dir);
  tcleval(tmp);
  tclsetvar("XSCHEM_LIBRARY_PATH", Tcl_GetStringResult(interp));
@@ -829,6 +889,20 @@ int Tcl_AppInit(Tcl_Interp *inter)
  tcleval(tmp);
  my_snprintf(user_conf_dir, S(user_conf_dir), "%s", Tcl_GetStringResult(interp));
  tclsetvar("USER_CONF_DIR", user_conf_dir);
+#else
+ /* for debugging purposes, reference everything from the build directory*/
+ tclsetvar("XSCHEM_SHAREDIR", pwd_dir); /* for testing xschem builds in src dir*/
+ char* dir = tclgetvar("XSCHEM_SHAREDIR");
+ my_snprintf(tmp, S(tmp), "subst .:[file normalize \"%s/../xschem_library/devices\"]", pwd_dir);
+ tcleval(tmp);
+ tclsetvar("XSCHEM_LIBRARY_PATH", Tcl_GetStringResult(interp));
+
+ /* create user conf dir */
+ my_snprintf(user_conf_dir, S(user_conf_dir), "%s/.xschem/%s", home_dir, USER_CONF_DIR);
+ tclsetvar("USER_CONF_DIR", user_conf_dir);
+#endif
+
+ 
 
  /* create USER_CONF_DIR if it was not installed */
  if(stat(user_conf_dir, &buf)) {
@@ -1117,8 +1191,12 @@ int Tcl_AppInit(Tcl_Interp *inter)
     if(build_colors(0.0)) exit(-1);
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done step e of xinit()\n");
     /* save_pixmap must be created as resetwin() frees it before recreating with new size. */
+#ifdef __linux__
     save_pixmap = XCreatePixmap(display,window,CADWIDTH,CADHEIGHT,depth);
     XSetTile(display,gctiled,save_pixmap);
+#else
+    save_pixmap = Tk_GetPixmap(display, window, CADWIDTH, CADHEIGHT, depth);
+#endif
     XSetFillStyle(display,gctiled,FillTiled);
     #ifdef HAS_CAIRO /* 20171105 */
     {
@@ -1189,8 +1267,12 @@ int Tcl_AppInit(Tcl_Interp *inter)
     
     /* 20121111 */
     tcleval("xschem line_width $line_width");
+#ifdef __linux__
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): xserver max request size: %d\n", 
                              (int)XMaxRequestSize(display));
+#else
+    if (debug_var >= 1) fprintf(errfp, "Tcl_AppInit(): xserver max request size:\n");
+#endif
 
     set_snap(0); /* set default value specified in xschemrc as 'snap' else CADSNAP */
     set_grid(0); /* set default value specified in xschemrc as 'grid' else CADGRID */

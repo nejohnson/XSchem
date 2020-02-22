@@ -60,12 +60,12 @@ void check_symbol_storage(void)
   max_symbols=(1 + lastinstdef / ELEMDEF) * ELEMDEF;
   my_realloc(395, &instdef, sizeof(Instdef)*max_symbols);
   for(i=lastinstdef;i<max_symbols;i++) {
-    instdef[i].polygonptr=my_calloc(68, cadlayers, sizeof(Polygon *));
+    instdef[i].polygonptr=my_calloc(68, cadlayers, sizeof(xPolygon *));
     if(instdef[i].polygonptr==NULL){
        fprintf(errfp, "check_symbol_storage(): calloc error\n");tcleval( "exit");
     }
   
-    instdef[i].arcptr=my_calloc(396, cadlayers, sizeof(Arc *));
+    instdef[i].arcptr=my_calloc(396, cadlayers, sizeof(xArc *));
     if(instdef[i].arcptr==NULL){
        fprintf(errfp, "check_symbol_storage(): calloc error\n");tcleval( "exit");
     }
@@ -116,7 +116,7 @@ void check_arc_storage(int c)
  if(lastarc[c] >= max_arcs[c])
  {
   max_arcs[c]=(1 + lastarc[c] / CADMAXOBJECTS) * CADMAXOBJECTS;
-  my_realloc(403, &arc[c], sizeof(Arc)*max_arcs[c]);
+  my_realloc(403, &arc[c], sizeof(xArc)*max_arcs[c]);
  }
 }
 
@@ -143,7 +143,7 @@ void check_polygon_storage(int c) /*20171115 */
  if(lastpolygon[c] >= max_polygons[c])
  {
   max_polygons[c]=(1 + lastpolygon[c] / CADMAXOBJECTS) * CADMAXOBJECTS;
-  my_realloc(406, &polygon[c], sizeof(Polygon)*max_polygons[c]);
+  my_realloc(406, &polygon[c], sizeof(xPolygon)*max_polygons[c]);
  }
 }
 
@@ -243,7 +243,7 @@ void storeobject(int pos, double x1,double y1,double x2,double y2,
      lastline[rectcolor]++;
      set_modify(1);
     }
-    if(type == RECT)
+    if(type == xRECT)
     {
      check_box_storage(rectcolor);
      if(pos==-1) n=lastrect[rectcolor];

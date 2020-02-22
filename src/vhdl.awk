@@ -142,10 +142,19 @@ primitive==1{primitive_line=primitive_line " " $0; next  } # 20071217
 					    # avoid indexes (to/downto)
   xx=s_i($1)
   split(xx,xxx,":")
-  if( (xxx[1]+0 > xxx[2]+0) || ( xxx[2]~/[01]/ && xxx[1]!~/^0$/) )
-    $4=$4 "_vector(" xxx[1] " downto " xxx[2] ")"
+
+  ## don't add _vector if user defined type
+  if($4 ~ /^(boolean|bit|real|std_logic|integer)$/)
+    vector_type=$4 "_vector ("
   else
-    $4=$4 "_vector(" xxx[1] " to " xxx[2] ")"
+    vector_type=$4 " ("
+
+
+
+  if( (xxx[1]+0 > xxx[2]+0) || ( xxx[2]~/[01]/ && xxx[1]!~/^0$/) )
+    $4=vector_type xxx[1] " downto " xxx[2] ")"
+  else
+    $4=vector_type xxx[1] " to " xxx[2] ")"
   $1=s_b($1) 
   print "  " $0
  }
@@ -173,10 +182,16 @@ primitive==1{primitive_line=primitive_line " " $0; next  } # 20071217
   xx=s_i($1)
   split(xx,xxx,":")
 
-  if( (xxx[1]+0 > xxx[2]+0) || (xxx[2]~/[01]/ && xxx[1] !~ /^0$/) )
-    $4=$4 "_vector(" xxx[1] " downto " xxx[2] ")"
+  ## don't add _vector if user defined type
+  if($4 ~ /^(boolean|bit|real|std_logic|integer)$/)
+    vector_type=$4 "_vector ("
   else
-    $4=$4 "_vector(" xxx[1] " to " xxx[2] ")"
+    vector_type=$4 " ("
+
+  if( (xxx[1]+0 > xxx[2]+0) || (xxx[2]~/[01]/ && xxx[1] !~ /^0$/) )
+    $4=vector_type xxx[1] " downto " xxx[2] ")"
+  else
+    $4=vector_type xxx[1] " to " xxx[2] ")"
   $1=s_b($1)
   print "  " $0
  }
@@ -268,11 +283,11 @@ primitive==1{primitive_line=primitive_line " " $0; next  } # 20071217
    for(i in arch_signal_dir)
     if(arch_signal_class[i]==ttt[tt])
     {
-     ## 04062002 dont add _vector if user defined type
-     # if(arch_sig_type_array[i] ~ /^(bit|real|std_logic|integer)$/) 
+     ## 04062002 don't add _vector if user defined type
+     if(arch_sig_type_array[i] ~ /^(boolean|bit|real|std_logic|integer)$/) 
        vector_type=arch_sig_type_array[i] "_vector ("
-     # else
-     #   vector_type=arch_sig_type_array[i] " ("
+     else
+       vector_type=arch_sig_type_array[i] " ("
 
      n=split(arch_index_array[i],tmp,",")
      hsort(tmp, n)
@@ -283,13 +298,11 @@ primitive==1{primitive_line=primitive_line " " $0; next  } # 20071217
        if(arch_signal_dir[i] == " downto ")
        {
         arch_sig_name[entity_name, i "[" tmp[1] ":" tmp[n] "]"]=i 
-     #  printf arch_signal_class[i] " " i " : " arch_sig_type_array[i] "_vector (" tmp[1] " downto " tmp[n] ")"
         printf "%s",arch_signal_class[i] " " i " : " vector_type tmp[1] " downto " tmp[n] ")"  #04062002
        }
        else
        {
         arch_sig_name[entity_name, i "[" tmp[n] ":" tmp[1] "]"]=i 
-     #  printf arch_signal_class[i] " " i " : " arch_sig_type_array[i] "_vector (" tmp[n] " to " tmp[1] ")"
         printf "%s",arch_signal_class[i] " " i " : " vector_type tmp[n] " to " tmp[1] ")" #04062002
        }
       }
@@ -311,7 +324,6 @@ primitive==1{primitive_line=primitive_line " " $0; next  } # 20071217
            else
              sub(/:/, " downto ", range)
            range= range ")"
-        #  printf arch_signal_class[i] " " basename " : " arch_sig_type_array[i] "_vector" range
            printf "%s",arch_signal_class[i] " " basename " : " vector_type range #04062002
           }
           else continue

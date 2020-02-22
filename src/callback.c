@@ -112,7 +112,7 @@ int callback(int event, int mx, int my, KeySym key,
       mousex_snap = 490;
       mousey_snap = -340;
       merge_file(1, ".sch");
-      unlink(sel_or_clip);
+      xunlink(sel_or_clip);
     }
     break;
 
@@ -125,7 +125,12 @@ int callback(int event, int mx, int my, KeySym key,
       xr[0].width=button;
       xr[0].height=aux;
       /* redraw selection on expose, needed if no backing store available on the server 20171112 */
+#ifdef __linux__
       XSetClipRectangles(display, gc[SELLAYER], 0,0, xr, 1, Unsorted);
+#else
+      xSetClipRectangles(display, gc[SELLAYER], 0, 0, xr);
+      // draw();
+#endif
       rebuild_selected_array();
       draw_selection(gc[SELLAYER],0);
       XSetClipMask(display, gc[SELLAYER], None);
@@ -144,7 +149,12 @@ int callback(int event, int mx, int my, KeySym key,
       #ifdef TURBOX_FIX
       /* fix Exceed TurboX bugs when drawing with pixmap tiled fill pattern */
       /* *NOT* a solution but at least makes the program useable. 20171130 */
+#ifdef __linux__
       XSetClipRectangles(display, gctiled, 0,0, xrect, 1, Unsorted);
+#else
+      xSetClipRectangles(display, gctiled, 0, 0, xrect);
+      //draw();
+#endif
       #endif
       if(ui_state & SELECTION) rebuild_selected_array(); /* 20171129 */
       my_snprintf(str, S(str), "mouse = %.16g %.16g - selected: %d w=%.16g h=%.16g", 
@@ -570,7 +580,7 @@ int callback(int event, int mx, int my, KeySym key,
    {
     unselect_all();
     storeobject(-1, mousex_snap-2.5, mousey_snap-2.5, mousex_snap+2.5, mousey_snap+2.5, 
-                RECT, PINLAYER, SELECTED, "name=XXX\ndir=inout");
+                xRECT, PINLAYER, SELECTED, "name=XXX\ndir=inout");
     need_rebuild_selected_array=1;
     rebuild_selected_array();
     move_objects(BEGIN,0,0,0);
@@ -1660,6 +1670,13 @@ int callback(int event, int mx, int my, KeySym key,
        new_polygon(SET);
      }
    }
+#ifndef __linux__
+  case MOUSE_WHEEL_UP:  /* windows do not use button4 and button5 like X */
+  {
+    xorigin += -CADMOVESTEP * zoom / 2.;
+    draw();
+  }
+#endif
 /*
  * else if(button==Button3) {
  *   if(state==0 || state == ShiftMask) {

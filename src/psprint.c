@@ -255,8 +255,8 @@ static void ps_draw_symbol(int n,int layer,int tmp_flip, int rot,
  Line line;
  Box box;
  Text text;
- Arc arc;
- Polygon polygon;
+ xArc arc;
+ xPolygon polygon;
 
 
   if(layer==0)

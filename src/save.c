@@ -21,7 +21,9 @@
  */
 
 #include "xschem.h"
+#ifdef __linux__
 #include <sys/wait.h>  /* waitpid */
+#endif
 
 /* skip one line of text from file, stopping at first '\n' or EOF */
 /* return NULL if eof encountered */
@@ -187,7 +189,7 @@ void save_embedded_symbol(Instdef *s, FILE *fd, int brackets)
   }
   for(c=0;c<cadlayers;c++)
   {
-   Arc *ptr;
+   xArc *ptr;
    ptr=s->arcptr[c];
    for(i=0;i<s->arcs[c];i++)
    {
@@ -211,7 +213,7 @@ void save_embedded_symbol(Instdef *s, FILE *fd, int brackets)
   }
   for(c=0;c<cadlayers;c++)
   {
-   Polygon *ptr;
+   xPolygon *ptr;
    ptr=s->polygonptr[c];
    for(i=0;i<s->polygons[c];i++)
    {
@@ -292,7 +294,7 @@ void save_text(FILE *fd)
 void save_polygon(FILE *fd)
 {
     int c, i, j;
-    Polygon *ptr;
+    xPolygon *ptr;
     for(c=0;c<cadlayers;c++)
     {
      ptr=polygon[c];
@@ -311,7 +313,7 @@ void save_polygon(FILE *fd)
 void save_arc(FILE *fd)
 {
     int c, i;
-    Arc *ptr;
+    xArc *ptr;
     for(c=0;c<cadlayers;c++)
     {
      ptr=arc[c];
@@ -497,7 +499,7 @@ static void load_inst(int k, FILE *fd)
 static void load_polygon(FILE *fd)
 {
     int i,c, j, points;
-    Polygon *ptr;
+    xPolygon *ptr;
 
     if(debug_var>=3) fprintf(errfp, "load_polygon(): start\n");
     if(fscanf(fd, "%d %d",&c, &points)<2) {
@@ -545,7 +547,7 @@ static void load_polygon(FILE *fd)
 static void load_arc(FILE *fd)
 {
     int i,c;
-    Arc *ptr;
+    xArc *ptr;
 
     if(debug_var>=3) fprintf(errfp, "load_arc(): start\n");
     fscanf(fd, "%d",&c);
@@ -577,7 +579,7 @@ static void load_box(FILE *fd)
     if(debug_var>=3) fprintf(errfp, "load_box(): start\n");
     fscanf(fd, "%d",&c);
     if(c<0 || c>=cadlayers) {
-      fprintf(errfp,"WARNING: wrong layer number for RECT object, ignoring.\n"); 
+      fprintf(errfp,"WARNING: wrong layer number for xRECT object, ignoring.\n"); 
       read_line(fd);
       return;
     }
@@ -586,7 +588,7 @@ static void load_box(FILE *fd)
     ptr=rect[c];
     if(fscanf(fd, "%lf %lf %lf %lf ",&ptr[i].x1, &ptr[i].y1, 
        &ptr[i].x2, &ptr[i].y2) < 4) {
-      fprintf(errfp,"WARNING:  missing fields for RECT object, ignoring\n");
+      fprintf(errfp,"WARNING:  missing fields for xRECT object, ignoring\n");
       read_line(fd);
       return;
     }
@@ -702,7 +704,7 @@ void read_xschem_file(FILE *fd) /* 20180912 */
          if(strcmp(name_embedded, instdef[i].name) == 0)
          {
           my_strdup(325, &instdef[i].name, inst_ptr[lastinst-1].name);
-          unlink(name_embedded);
+          xunlink(name_embedded);
           found=1;break;
          }
         }
@@ -945,7 +947,7 @@ void delete_undo(void)  /* 20150327 */
 
   for(i=0; i<max_undo; i++) {
     my_snprintf(diff_name, S(diff_name), "%s/undo%d",undo_dirname, i);
-    unlink(diff_name);
+    xunlink(diff_name);
   }
   rmdir(undo_dirname);
   my_free(&undo_dirname);
@@ -1150,8 +1152,8 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
   int *lasta = my_malloc(336, cadlayers * sizeof(int));
   Line **ll = my_malloc(337, cadlayers * sizeof(Line *));
   Box **bb = my_malloc(338, cadlayers * sizeof(Box *));
-  Arc **aa = my_malloc(339, cadlayers * sizeof(Arc *));
-  Polygon **pp = my_malloc(340, cadlayers * sizeof(Polygon *));
+  xArc **aa = my_malloc(339, cadlayers * sizeof(xArc *));
+  xPolygon **pp = my_malloc(340, cadlayers * sizeof(xPolygon *));
   int lastt; /* 20171115 lastp */
   Text *tt;
   int endfile;
@@ -1171,7 +1173,11 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
     {
       if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): Symbol not found: %s\n",name3);
       /*return -1; */
+#ifdef __linux__
       my_snprintf(name2, S(name2), "%s/%s.sym", tclgetvar("XSCHEM_SHAREDIR"), "systemlib/missing");
+#else
+      my_snprintf(name2, S(name2), "%s/../src/%s.sym", tclgetvar("XSCHEM_SHAREDIR"), "systemlib/missing");
+#endif
       if((fd=fopen(name2, "r"))==NULL) 
       { 
        fprintf(errfp, "load_symbol_definition(): systemlib/missing.sym missing, I give up\n");
@@ -1258,7 +1264,7 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
         continue;
       } /* 20150408 */
       i=lastp[c];
-      my_realloc(344, &pp[c],(i+1)*sizeof(Polygon));
+      my_realloc(344, &pp[c],(i+1)*sizeof(xPolygon));
       pp[c][i].x = my_calloc(345, poly_points, sizeof(double));
       pp[c][i].y = my_calloc(346, poly_points, sizeof(double));
       pp[c][i].selected_point = my_calloc(347, poly_points, sizeof(unsigned short));
@@ -1287,7 +1293,7 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
         continue;
       }
       i=lasta[c];
-      my_realloc(348, &aa[c],(i+1)*sizeof(Arc));
+      my_realloc(348, &aa[c],(i+1)*sizeof(xArc));
       if( fscanf(fd, "%lf %lf %lf %lf %lf ",&aa[c][i].x, &aa[c][i].y,
          &aa[c][i].r, &aa[c][i].a, &aa[c][i].b) < 5 ) {
         fprintf(errfp,"WARNING: missing fields for ARC object, ignoring\n");
@@ -1643,12 +1649,12 @@ void round_schematic_to_grid(double cadsnap)
    c = selectedgroup[i].col; n = selectedgroup[i].n;
    switch(selectedgroup[i].type)
    {
-     case TEXT:
+     case xTEXT:
        SNAP_TO_GRID(textelement[n].x0);
        SNAP_TO_GRID(textelement[n].y0);
      break;
 
-     case RECT:
+     case xRECT:
        if(c == PINLAYER) {
          double midx, midx_round, deltax;
          double midy, midy_round, deltay;
@@ -1739,7 +1745,7 @@ void save_selection(int what)
    c = selectedgroup[i].col;n = selectedgroup[i].n;
    switch(selectedgroup[i].type)
    {
-     case TEXT:
+     case xTEXT:
       fprintf(fd, "T ");
       save_ascii_string(textelement[n].txt_ptr,fd);
       fprintf(fd, " %.16g %.16g %d %d %.16g %.16g ",
@@ -1756,7 +1762,7 @@ void save_selection(int what)
       fputc('\n' ,fd);
      break;
 
-     case RECT:
+     case xRECT:
       fprintf(fd, "B %d %.16g %.16g %.16g %.16g ", c,rect[c][n].x1, rect[c][n].y1,rect[c][n].x2,
        rect[c][n].y2);
       save_ascii_string(rect[c][n].prop_ptr,fd);

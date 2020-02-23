@@ -1255,7 +1255,11 @@ proc select_netlist_dir { force {dir {} }} {
      if { $netlist_dir ne {} }  { 
        set initdir $netlist_dir
      } else {
-       set initdir  $env(PWD) 
+       if {$::OS == "Windows"} {
+         set initdir  $env(windir)
+       } else {
+         set initdir  $env(PWD) 
+       }
      }
      # 20140409 do not change netlist_dir if user Cancels action
      set new_dir [tk_chooseDirectory -initialdir $initdir -parent . -title {Select netlist DIR} -mustexist false]
@@ -2177,7 +2181,11 @@ proc viewdata {data {ro {}}} {
 
    if { $ro eq {} } {
      button $viewdata_w.buttons.saveas -text {Save As} -command  {
-       set fff [tk_getSaveFile -initialdir $env(PWD) ]
+       if {$::OS == "Windows"} {
+         set fff [tk_getSaveFile -initialdir $env(windir) ]
+       } else {
+         set fff [tk_getSaveFile -initialdir $env(PWD) ]
+       }
        if { $fff != "" } {
          set fileid [open $fff "w"]
          puts -nonewline $fileid [$viewdata_w.text get 1.0 {end - 1 chars}]
@@ -2387,6 +2395,7 @@ proc get_file_path {ff} {
 ###   MAIN PROGRAM
 ###
 
+set OS [lindex $tcl_platform(os) 0]
 
 # tcl variable XSCHEM_LIBRARY_PATH  should already be set in xschemrc
 set pathlist {}
@@ -2410,7 +2419,11 @@ if { [xschem get help ]} {
   exit
 }
 
-set_ne XSCHEM_TMP_DIR {/tmp}
+if {$::OS == "Windows"} {
+  set_ne XSCHEM_TMP_DIR {D:/tmp}
+} else {
+  set_ne XSCHEM_TMP_DIR {/tmp}
+}
 
 # used in C code
 set_ne xschem_libs {}
@@ -2586,8 +2599,13 @@ set_ne preserve_unchanged_attrs 0
 set search_select 0
 
 # 20111106 these vars are overwritten by caller with mktemp file names
-set filetmp1 $env(PWD)/.tmp1
-set filetmp2 $env(PWD)/.tmp2
+if {$::OS == "Windows"} {
+  set filetmp1 $env(windir)/.tmp1
+  set filetmp2 $env(windir)/.tmp2
+} else {
+  set filetmp1 $env(PWD)/.tmp1
+  set filetmp2 $env(PWD)/.tmp2
+}
 # /20111106
 
 # flag bound to a checkbutton in symbol editprop form
@@ -2639,7 +2657,7 @@ xschem set disable_unique_names $disable_unique_names
 ###
 ### build Tk widgets
 ###
-if { [string length   [lindex [array get env DISPLAY] 1] ] > 0 
+if { ( $::OS== "Windows" || [string length [lindex [array get env DISPLAY] 1] ] > 0 )
      && ![info exists no_x]} {
 
 # for hyperlink in about dialog
@@ -3074,6 +3092,17 @@ font configure Underline-Font -underline true -size 24
    bind .drw <Expose> {xschem callback %T %x %y 0 %w %h %s}
    bind .drw <Configure> {xschem windowid; xschem callback %T %x %y 0 %w %h 0}
    bind .drw <ButtonPress> {xschem callback %T %x %y 0 %b 0 %s}
+
+   if {$::OS == "Windows"} {
+     bind .drw <MouseWheel> {
+       if {%D<0} {
+         xschem callback 4 %x %y 0 5 0 %s
+       } else {
+         xschem callback 4 %x %y 0 4 0 %s
+       }
+     }
+   }
+
    bind .drw <ButtonRelease> {xschem callback %T %x %y 0 %b 0 %s}
    bind .drw <KeyPress> {xschem callback %T %x %y %N 0 0 %s}
    bind .drw <KeyRelease> {xschem callback %T %x %y %N 0 0 %s} ;# 20161118

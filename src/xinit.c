@@ -21,7 +21,7 @@
  */
 
 #include "xschem.h"
-#ifdef __linux__
+#ifdef __unix__
 #include <pwd.h> /* getpwuid */
 #endif
 
@@ -173,7 +173,7 @@ void windowid()
     if(debug_var>=1) fprintf(errfp,"framewin child 0=%x\n", (unsigned int) framewin_child_ptr[0]);
 
     /* here I create the icon pixmap,to be used when iconified,  */
-#ifdef __linux__
+#ifdef __unix__
     if(!cad_icon_pixmap) {
       i=XpmCreatePixmapFromData(display,framewin, cad_icon,&cad_icon_pixmap, NULL, NULL);
       if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): creating icon pixmap returned: %d\n",i);
@@ -207,7 +207,7 @@ void xwin_exit(void)
     cairo_surface_destroy(sfc);
     cairo_surface_destroy(save_sfc);
     #endif
-#ifdef __linux__
+#ifdef __unix__
     XFreePixmap(display,save_pixmap);
     for(i=0;i<cadlayers;i++)XFreePixmap(display,pixmap[i]);
 #else
@@ -223,7 +223,7 @@ void xwin_exit(void)
     XFreeGC(display,gctiled);
     if(debug_var>=1) fprintf(errfp, "xwin_exit(): destroying tk windows and releasing X11 stuff\n");
     Tk_DestroyWindow(mainwindow);
-#ifdef __linux__
+#ifdef __unix__
     if(cad_icon_pixmap) XFreePixmap(display, cad_icon_pixmap);
 #else
     if (cad_icon_pixmap) Tk_FreePixmap(display, cad_icon_pixmap);
@@ -309,7 +309,7 @@ int err(Display *display, XErrorEvent *xev)
 {
  char s[1024];  /* overflow safe 20161122 */
  int l=250;
-#ifdef __linux__
+#ifdef __unix__
  XGetErrorText(display, xev->error_code, s,l);
  if(debug_var>=1) fprintf(errfp, "err(): Err %d :%s maj=%d min=%d\n", xev->error_code, s, xev->request_code,
           xev->minor_code);
@@ -323,7 +323,7 @@ unsigned int  find_best_color(char colorname[])
  double distance=10000000000.0, dist, r, g, b, red, green, blue;
  double deltar,deltag,deltab;
  unsigned int index;
-#ifdef __linux__
+#ifdef __unix__
  if( XAllocNamedColor(display, colormap, colorname, &xcolor_exact, &xcolor) ==0 )
 #else
  Tk_Window mainwindow = Tk_MainWindow(interp);
@@ -333,7 +333,7 @@ unsigned int  find_best_color(char colorname[])
  {
   for(i=0;i<=255;i++) {
     xcolor_array[i].pixel=i;
-#ifdef __linux__
+#ifdef __unix__
     XQueryColor(display, colormap, xcolor_array+i);
 #else
     xcolor = *xc;
@@ -361,7 +361,7 @@ unsigned int  find_best_color(char colorname[])
  else
  {
   /*XLookupColor(display, colormap, colorname, &xcolor_exact, &xcolor); */
-#ifdef __linux__
+#ifdef __unix__
   index = xcolor.pixel;
 #else
   index = xc->pixel;
@@ -410,7 +410,7 @@ void init_color_array(double dim)
 
 void set_fill(int n) 
 {
-#ifdef __linux__
+#ifdef __unix__
      XFreePixmap(display,pixmap[rectcolor]);
 #else
      Tk_FreePixmap(display, pixmap[rectcolor]);
@@ -809,15 +809,11 @@ void preview_window(const char *what, const char *tk_win_path, const char *filen
   }
 }
 
-#ifndef __linux__
+#ifndef __unix__
 /* Source: https://www.tcl.tk/man/tcl8.7/TclCmd/glob.htm */
-/* backslash character has a special meaning to glob command, so glob patterns containing Windows 
-style path separators need special care.  
-The pattern "C : \\foo\\* " is interpreted as "C : \foo\* " where "\f" will match the single character "f" 
-and "\* " will match the single character "*" and will not be interpreted as a wildcard character.
-One solution to this problem is to use the Unix style forward slash as a path separator.
-Windows style paths can be converted to Unix style paths with the command "file join $path" or "file normalize $path".*/
-static void change_to_unix_fn(char* fn)
+/* backslash character has a special meaning to glob command, 
+so glob patterns containing Windows style path separators need special care.*/
+void change_to_unix_fn(char* fn)
 {
   int len, i, ii;
   len = strlen(fn);
@@ -848,7 +844,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
  if(!getcwd(pwd_dir, PATH_MAX)) {
    fprintf(errfp, "Tcl_AppInit(): getcwd() failed\n");
  }
-#ifdef __linux__
+#ifdef __unix__
  if ((home_buff = getenv("HOME")) == NULL) {
    home_buff = getpwuid(getuid())->pw_dir;
  }
@@ -870,7 +866,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
  if(!has_x)  tclsetvar("no_x","1");
 
  Tcl_CreateExitHandler(tclexit, 0);
-#ifdef __linux__
+#ifdef __unix__
  my_snprintf(tmp, S(tmp),"regsub -all {~/} {.:%s} {%s/}", XSCHEM_LIBRARY_PATH, home_dir);
  tcleval(tmp);
  tclsetvar("XSCHEM_LIBRARY_PATH", Tcl_GetStringResult(interp));
@@ -890,13 +886,20 @@ int Tcl_AppInit(Tcl_Interp *inter)
  my_snprintf(user_conf_dir, S(user_conf_dir), "%s", Tcl_GetStringResult(interp));
  tclsetvar("USER_CONF_DIR", user_conf_dir);
 #else
- /* for debugging purposes, reference everything from the build directory*/
- tclsetvar("XSCHEM_SHAREDIR", pwd_dir); /* for testing xschem builds in src dir*/
- char* dir = tclgetvar("XSCHEM_SHAREDIR");
- my_snprintf(tmp, S(tmp), "subst .:[file normalize \"%s/../xschem_library/devices\"]", pwd_dir);
- tcleval(tmp);
- tclsetvar("XSCHEM_LIBRARY_PATH", Tcl_GetStringResult(interp));
-
+ char* gxschem_library = NULL;
+ if (!stat("../src/xschem.tcl", &buf) && !stat("../src/systemlib", &buf) && !stat("../src/xschem", &buf)) {
+   my_snprintf(tmp, S(tmp), "%s/../src", pwd_dir);
+   tclsetvar("XSCHEM_SHAREDIR", tmp); /* for testing xschem builds in src dir*/
+   my_snprintf(tmp, S(tmp), "subst .:[file normalize \"%s/../xschem_library/devices\"]", pwd_dir);
+   tcleval(tmp);
+   tclsetvar("XSCHEM_LIBRARY_PATH", Tcl_GetStringResult(interp));
+ }
+ else if ((gxschem_library=getenv("XSCHEM_LIBRARY"))!=NULL) {
+   if (!stat(gxschem_library, &buf)) {  /* 20180918 */
+     tclsetvar("XSCHEM_SHAREDIR", gxschem_library);
+     /* ... else give up searching, may set later after loading xschemrc */
+   }
+ }
  /* create user conf dir */
  my_snprintf(user_conf_dir, S(user_conf_dir), "%s/.xschem/%s", home_dir, USER_CONF_DIR);
  tclsetvar("USER_CONF_DIR", user_conf_dir);
@@ -993,7 +996,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
  /*                                */
  /*  EXECUTE xschem.tcl            */
  /*                                */
-#ifdef __linux__
+#ifdef __unix__
  my_snprintf(name, S(name), "%s/%s", tclgetvar("XSCHEM_SHAREDIR"), "xschem.tcl");
 #else
  my_snprintf(name, S(name), "%s/../src/%s", tclgetvar("XSCHEM_SHAREDIR"), "xschem.tcl");
@@ -1195,7 +1198,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
     if(build_colors(0.0)) exit(-1);
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done step e of xinit()\n");
     /* save_pixmap must be created as resetwin() frees it before recreating with new size. */
-#ifdef __linux__
+#ifdef __unix__
     save_pixmap = XCreatePixmap(display,window,CADWIDTH,CADHEIGHT,depth);
     XSetTile(display,gctiled,save_pixmap);
 #else
@@ -1271,7 +1274,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
     
     /* 20121111 */
     tcleval("xschem line_width $line_width");
-#ifdef __linux__
+#ifdef __unix__
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): xserver max request size: %d\n", 
                              (int)XMaxRequestSize(display));
 #else

@@ -38,10 +38,15 @@
 
 #define TCL_WIDE_INT_TYPE long
 
+
+#if (defined(__APPLE__) && defined(__MACH__))
+#define __unix__
+#endif
+
 /*  approximate PI definition */
 #define XSCH_PI 3.14159265358979323846264338327950288419716939937
 
-#ifdef __linux__
+#ifdef __unix__
 /* #include "../config.h" */
 #else
 #include "../XSchemWin/config.h"
@@ -57,7 +62,7 @@
 #define PATH_MAX 4096
 #endif
 
-#ifdef __linux__
+#ifdef __unix__
 #include <unistd.h>
 #include <regex.h>
 #else
@@ -74,7 +79,7 @@
   
 /* #include <sys/time.h>  for gettimeofday(). use time() instead */
 #include <signal.h>
-#ifdef __linux__
+#ifdef __unix__
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/keysymdef.h>
@@ -84,19 +89,12 @@
 #define xunlink unlink
 
 #else
-#define XK_Return 65293
-#define XK_Escape 65307
-#define XK_Delete 65535
-#define XK_Right 65363
-#define XK_Left 65361
-#define XK_Down 65364
-#define XK_Up 65362
-#define XK_BackSpace 65288
-#define XK_Insert 65379
+#include <tkWinInt.h>
 #define xunlink _unlink
 #define MOUSE_WHEEL_UP 38
 extern void xSetClipRectangles(Display* display, GC gc, int clip_x_origin, int clip_y_origin, XRectangle* rectangles);
-#include <tkWinInt.h>
+extern void change_to_unix_fn(char* fn);
+extern char win_temp_dir[PATH_MAX];
 #endif
 
 #include <tcl.h>

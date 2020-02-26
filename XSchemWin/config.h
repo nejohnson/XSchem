@@ -14,7 +14,6 @@
 
 /* Define to 1 if popen(3) is available */
 #define HAS_POPEN 0
-#define PREFIX               "C:/.xschem/tmp"
 #define USER_CONF_DIR        "userConf"
 
 /* Extra includes required by the detected libs (may be empty): */

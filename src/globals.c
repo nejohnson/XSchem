@@ -39,6 +39,9 @@ char *filename=NULL; /* filename given on cmdline */
 char user_conf_dir[PATH_MAX];
 char home_dir[PATH_MAX]; /* home dir obtained via getpwuid */
 char pwd_dir[PATH_MAX];  /* obtained via getcwd() */
+#ifndef __unix__
+char win_temp_dir[PATH_MAX]="";
+#endif
 int load_initfile=1;
 char plotfile[PATH_MAX] = {'\0'};
 char rcfile[PATH_MAX] = {'\0'};

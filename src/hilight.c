@@ -310,7 +310,7 @@ void search(const char *tok, const char *val, int sub, int sel, int what)
  int has_token;
  const char empty_string[] = "";
  static char *tmpname=NULL;
-#ifdef __linux__
+#ifdef __unix__
  regex_t re;
 #endif
 
@@ -320,7 +320,7 @@ void search(const char *tok, const char *val, int sub, int sel, int what)
  }
  save_draw = draw_window;
  draw_window=1;
-#ifdef __linux__
+#ifdef __unix__
  if(regcomp(&re, val , REG_EXTENDED)) return;
 #endif
  if(debug_var>=1) fprintf(errfp, "search():val=%s\n", val);
@@ -365,7 +365,7 @@ void search(const char *tok, const char *val, int sub, int sel, int what)
        str=expandlabel(str,&tmp);
       }
       if(str && has_token) {
-#ifdef __linux__
+#ifdef __unix__
         if( (!regexec(&re, str,0 , NULL, 0) && !sub) ||           /* 20071120 regex instead of strcmp */
             (!strcmp(str,val) && sub) ) 
 #else
@@ -405,7 +405,7 @@ void search(const char *tok, const char *val, int sub, int sel, int what)
     for(i=0;i<lastwire;i++) {
       str = get_tok_value(wire[i].prop_ptr, tok,0);
       if(get_tok_size ) {
-#ifdef __linux__
+#ifdef __unix__
         if(   (!regexec(&re, str,0 , NULL, 0) && !sub )  ||       /* 20071120 regex instead of strcmp */
               ( !strcmp(str, val) &&  sub )
 #else
@@ -448,7 +448,7 @@ void search(const char *tok, const char *val, int sub, int sel, int what)
     if(sel) for(c = 0; c < cadlayers; c++) for(i=0;i<lastline[c];i++) {
       str = get_tok_value(line[c][i].prop_ptr, tok,0);
       if(get_tok_size) {
-#ifdef __linux__
+#ifdef __unix__
         if( (!regexec(&re, str,0 , NULL, 0) && !sub ) ||
             ( !strcmp(str, val) &&  sub )
 #else
@@ -472,7 +472,7 @@ void search(const char *tok, const char *val, int sub, int sel, int what)
     if(sel) for(c = 0; c < cadlayers; c++) for(i=0;i<lastrect[c];i++) {
       str = get_tok_value(rect[c][i].prop_ptr, tok,0);
       if(get_tok_size) {
-#ifdef __linux__
+#ifdef __unix__
         if( (!regexec(&re, str,0 , NULL, 0) && !sub ) ||
             ( !strcmp(str, val) &&  sub )
 #else
@@ -500,7 +500,7 @@ void search(const char *tok, const char *val, int sub, int sel, int what)
    drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
    drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
  }
-#ifdef __linux__
+#ifdef __unix__
  regfree(&re);
 #endif
  draw_window = save_draw;

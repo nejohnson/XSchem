@@ -80,7 +80,7 @@ void print_image()
   areay1 = -2*lw;
   areaw = areax2-areax1;
   areah = areay2-areay1;
-#ifdef __linux__
+#ifdef __unix__
   XFreePixmap(display,save_pixmap);
   /* save_pixmap = XCreatePixmap(display,window,areaw,areah,depth); */
   save_pixmap = XCreatePixmap(display,window,w,h,depth); /* 20161119 pixmap should be exact size of  */
@@ -116,7 +116,7 @@ void print_image()
        CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
   cairo_set_font_size (save_ctx, 20);
   #endif /*HAS_CAIRO */
-#ifdef __linux__
+#ifdef __unix__
   for(tmp=0;tmp<cadlayers;tmp++)
   {
     XSetClipRectangles(display, gc[tmp], 0,0, xrect, 1, Unsorted);
@@ -137,7 +137,7 @@ void print_image()
   draw_pixmap=1;
   /* zoom_full(0, 0); */
   draw();
-#ifdef __linux__
+#ifdef __unix__
   XpmWriteFileFromPixmap(display, "plot.xpm", save_pixmap,0, NULL ); /* .gz ???? */
 #endif
   if(debug_var>=1) fprintf(errfp, "print_image(): Window image saved\n");
@@ -161,7 +161,7 @@ void print_image()
   areay1 = -2*lw;
   areaw = areax2-areax1;
   areah = areay2-areay1;
-#ifdef __linux__
+#ifdef __unix__
   XFreePixmap(display,save_pixmap);
   save_pixmap = XCreatePixmap(display,window,areaw,areah,depth);
   XSetTile(display,gctiled, save_pixmap);
@@ -729,7 +729,7 @@ void drawgrid()
 void drawline(int c, int what, double linex1, double liney1, double linex2, double liney2)
 {
   static int i = 0;
-#ifndef __linux__
+#ifndef __unix__
   int j = 0;
 #endif
  static XSegment r[CADDRAWBUFFERSIZE];
@@ -742,7 +742,7 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
  {
   if(i>=CADDRAWBUFFERSIZE)
   {
-#ifdef __linux__
+#ifdef __unix__
    if(draw_window) XDrawSegments(display, window, gc[c], rr,i);
    if(draw_pixmap)
      XDrawSegments(display, save_pixmap, gc[c], rr,i);
@@ -803,7 +803,7 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
  else if(what & BEGIN) i=0;
  else if((what & END) && i)
  {
-#ifdef __linux__
+#ifdef __unix__
   if(draw_window) XDrawSegments(display, window, gc[c], rr,i);
   if(draw_pixmap) XDrawSegments(display, save_pixmap, gc[c], rr,i);
 #else
@@ -821,7 +821,7 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
 void drawtempline(GC gc, int what, double linex1,double liney1,double linex2,double liney2)
 {
   static int i = 0;
-#ifndef __linux__
+#ifndef __unix__
  int j = 0;
 #endif
  static XSegment r[CADDRAWBUFFERSIZE];
@@ -832,7 +832,7 @@ void drawtempline(GC gc, int what, double linex1,double liney1,double linex2,dou
  {
   if(i>=CADDRAWBUFFERSIZE)
   {
-#ifdef __linux__
+#ifdef __unix__
    XDrawSegments(display, window, gc, r,i);
 #else
     for (j = 0; j < i; ++j) {
@@ -886,7 +886,7 @@ void drawtempline(GC gc, int what, double linex1,double liney1,double linex2,dou
  else if(what & BEGIN) i=0;
  else if((what & END) && i)
  {
-#ifdef __linux__
+#ifdef __unix__
   XDrawSegments(display, window, gc, r,i);
 #else
    for (j = 0; j < i; ++j) {

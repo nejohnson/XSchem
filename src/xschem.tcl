@@ -2420,7 +2420,7 @@ if { [xschem get help ]} {
 }
 
 if {$::OS == "Windows"} {
-  set_ne XSCHEM_TMP_DIR {D:/tmp}
+  set_ne XSCHEM_TMP_DIR [xschem get temp_dir]
 } else {
   set_ne XSCHEM_TMP_DIR {/tmp}
 }

@@ -993,7 +993,11 @@ int Tcl_AppInit(Tcl_Interp *inter)
  /*                                */
  /*  EXECUTE xschem.tcl            */
  /*                                */
+#ifdef __linux__
  my_snprintf(name, S(name), "%s/%s", tclgetvar("XSCHEM_SHAREDIR"), "xschem.tcl");
+#else
+ my_snprintf(name, S(name), "%s/../src/%s", tclgetvar("XSCHEM_SHAREDIR"), "xschem.tcl");
+#endif
  if(stat(name, &buf) ) {
    fprintf(errfp, "Tcl_AppInit() err 4: cannot find %s\n", name);
    if(has_x) {

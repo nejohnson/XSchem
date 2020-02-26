@@ -17,8 +17,8 @@ END  { endfile(_filename_) }
 BEGIN{
 }
 
-/Copyright \(C\) 1998-2019/{
- sub(/Copyright \(C\) 1998-2019/, "Copyright (C) 1998-2020")
+/__linux__/{
+ sub(/__linux__/, "__unix__")
  found = 1
 }
 

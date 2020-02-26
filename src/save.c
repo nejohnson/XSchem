@@ -21,7 +21,7 @@
  */
 
 #include "xschem.h"
-#ifdef __linux__
+#ifdef __unix__
 #include <sys/wait.h>  /* waitpid */
 #endif
 
@@ -1173,7 +1173,7 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
     {
       if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): Symbol not found: %s\n",name3);
       /*return -1; */
-#ifdef __linux__
+#ifdef __unix__
       my_snprintf(name2, S(name2), "%s/%s.sym", tclgetvar("XSCHEM_SHAREDIR"), "systemlib/missing");
 #else
       my_snprintf(name2, S(name2), "%s/../src/%s.sym", tclgetvar("XSCHEM_SHAREDIR"), "systemlib/missing");

@@ -1012,6 +1012,10 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
   printf("      xschem debug  n\n");
   printf("                   set debug level to n: 1, 2, 3 for C Program \n");
   printf("                                        -1,-2,-3 for Tcl frontend\n");
+#ifndef __unix__
+  printf("      xschem temp_dir\n");
+  printf("                   get a valid temp folder path\n");
+#endif
  }
 
  else if(!strcmp(argv[1],"netlist") ) {
@@ -1576,6 +1580,36 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
         my_snprintf(s, S(s), "XSCHEM V%s",XSCHEM_VERSION);
         Tcl_AppendResult(interp, s,NULL);
   }
+#ifndef __unix__
+  else if (!strcmp(argv[2], "temp_dir")) {
+    if (win_temp_dir[0] != '\0') Tcl_AppendResult(interp, win_temp_dir, NULL);
+    else {
+      TCHAR tmp_buffer_path[MAX_PATH];
+      DWORD ret_val = GetTempPath(MAX_PATH, tmp_buffer_path);
+      if (ret_val > MAX_PATH || (ret_val == 0)) {
+        Tcl_AppendResult(interp, "xschem get temp_dir failed\n", NULL);
+        fprintf(errfp, "xschem get temp_dir: path error\n");
+        tcleval("exit");
+      }
+      else {
+        char s[MAX_PATH];
+        size_t num_char_converted;
+        int err = wcstombs_s(&num_char_converted, s, MAX_PATH, tmp_buffer_path, MAX_PATH); /*unicode TBD*/
+        if (err != 0) {
+          Tcl_AppendResult(interp, "xschem get temp_dir conversion failed\n", NULL);
+          fprintf(errfp, "xschem get temp_dir: conversion error\n");
+          tcleval("exit");
+        }
+        else {
+          change_to_unix_fn(s);
+          strcpy(win_temp_dir, s);
+          if (debug_var >= 2) fprintf(errfp, "win_temp_dir is %s\n", win_temp_dir);
+          Tcl_AppendResult(interp, s, NULL);
+        }
+      }
+    }
+ }
+#endif
   else {
     fprintf(errfp, "xschem get %s: invalid command.\n", argv[2]);
   }

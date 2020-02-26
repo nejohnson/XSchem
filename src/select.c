@@ -414,7 +414,7 @@ void bbox(int what,double x1,double y1, double x2, double y2)
    xrect[0].y = bby1-lw;
    xrect[0].width = bbx2-bbx1+2*lw;
    xrect[0].height = bby2-bby1+2*lw;
-#ifdef __linux__
+#ifdef __unix__
    for(i=0;i<cadlayers;i++)
    {
      XSetClipRectangles(display, gc[i], 0,0, xrect, 1, Unsorted);

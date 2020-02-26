@@ -28,7 +28,7 @@ void compile_font(void)
  char name[PATH_MAX];
 
  currentsch = 0;
-#ifdef __linux__
+#ifdef __unix__
  my_snprintf(name, S(name), "%s/systemlib/font.sch", tclgetvar("XSCHEM_SHAREDIR"));
 #else
  my_snprintf(name, S(name), "%s/../src/systemlib/font.sch", tclgetvar("XSCHEM_SHAREDIR"));

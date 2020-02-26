@@ -21,7 +21,7 @@
  */
 
 #include "xschem.h"
-#ifdef __linux__
+#ifdef __unix__
 #include <sys/wait.h>  /* waitpid */
 #endif
 
@@ -199,7 +199,7 @@ void resetwin(void)
   int i;
   XWindowAttributes wattr;
   if(has_x) {
-#ifdef __linux__
+#ifdef __unix__
     i = XGetWindowAttributes(display, window, &wattr); /*  should call only when resized */
                                               /*  to avoid server roundtrip replies */
     if(!i) { /*  20171105 */
@@ -363,7 +363,7 @@ void toggle_fullscreen()
     pending_fullzoom=1;
 }
 
-#ifdef __linux__
+#ifdef __unix__
 void new_window(const char *cell, int symbol)
 {
      
@@ -421,7 +421,6 @@ void new_window(const char *cell, int symbol)
 
 void new_window(const char* cell, int symbol)
 {
-  char f[PATH_MAX]; /*  overflow safe 20161122 */
   struct stat buf;
   if (debug_var >= 1) fprintf(errfp, "new_window(): executable: %s, cell=%s, symbol=%d\n", xschem_executable, cell, symbol);
   if (stat(xschem_executable, &buf)) { /*  20121110 */

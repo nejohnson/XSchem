@@ -125,7 +125,7 @@ int callback(int event, int mx, int my, KeySym key,
       xr[0].width=button;
       xr[0].height=aux;
       /* redraw selection on expose, needed if no backing store available on the server 20171112 */
-#ifdef __linux__
+#ifdef __unix__
       XSetClipRectangles(display, gc[SELLAYER], 0,0, xr, 1, Unsorted);
 #else
       xSetClipRectangles(display, gc[SELLAYER], 0, 0, xr);
@@ -149,7 +149,7 @@ int callback(int event, int mx, int my, KeySym key,
       #ifdef TURBOX_FIX
       /* fix Exceed TurboX bugs when drawing with pixmap tiled fill pattern */
       /* *NOT* a solution but at least makes the program useable. 20171130 */
-#ifdef __linux__
+#ifdef __unix__
       XSetClipRectangles(display, gctiled, 0,0, xrect, 1, Unsorted);
 #else
       xSetClipRectangles(display, gctiled, 0, 0, xrect);
@@ -1670,7 +1670,7 @@ int callback(int event, int mx, int my, KeySym key,
        new_polygon(SET);
      }
    }
-#ifndef __linux__
+#ifndef __unix__
   case MOUSE_WHEEL_UP:  /* windows do not use button4 and button5 like X */
   {
     xorigin += -CADMOVESTEP * zoom / 2.;

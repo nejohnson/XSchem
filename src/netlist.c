@@ -1214,9 +1214,9 @@ int sym_vs_sch_pins()
           /* fprintf(errfp, "  unmatched sch / sym pin: %s\n", lab); */
           my_snprintf(str, S(str), "Symbol %s: symbol pin: %s not in schematic", instdef[i].name, pin_name);
           statusmsg(str,2);
-          for(j = 0; j < lastinst; j++) {
-            if(!strcmp(inst_ptr[j].name, instdef[i].name)) {
-              inst_ptr[j].flags |=4;
+          for(k = 0; k < lastinst; k++) {
+            if(!strcmp(inst_ptr[k].name, instdef[i].name)) {
+              inst_ptr[k].flags |=4;
               hilight_nets=1;
             }
           }

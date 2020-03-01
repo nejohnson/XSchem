@@ -1012,7 +1012,9 @@ void prepare_netlist_structs(int for_netlist)
 
 int sym_vs_sch_pins()
 {
-  int i, j, symbol, n_syms, rects, pin_cnt=0, pin_match;
+  char **lab_array =NULL;
+  int lab_array_size = 0;
+  int i, j, k, symbol, n_syms, rects, pin_cnt=0, pin_match;
   struct stat buf;
   char name[PATH_MAX];
   char *type = NULL;
@@ -1118,8 +1120,14 @@ int sym_vs_sch_pins()
               symbol = match_symbol(name);
               my_strdup(276, &type, instdef[symbol].type);
               if(type && (!strcmp(type, "ipin") || !strcmp(type, "opin") || !strcmp(type, "iopin"))) { 
-                pin_cnt++;
                 my_strdup(292, &lab, get_tok_value(tmp, "lab", 0));
+                if(pin_cnt >= lab_array_size) {
+                  lab_array_size += CADCHUNKALLOC;
+                  my_realloc(154, &lab_array, lab_array_size * sizeof(char *));
+                }
+                lab_array[pin_cnt] = NULL;
+                my_strdup(155, &(lab_array[pin_cnt]), lab); 
+                pin_cnt++;
                 pin_match = 0;
                 for(j=0; j < rects; j++) {
                   my_strdup(293, &pin_name, get_tok_value(instdef[i].boxptr[PINLAYER][j].prop_ptr, "name", 0));
@@ -1150,7 +1158,7 @@ int sym_vs_sch_pins()
                 if(!pin_match) {
                   char str[2048];
                   /* fprintf(errfp, "  unmatched sch / sym pin: %s\n", lab); */
-                  my_snprintf(str, S(str), "Symbol %s: Unmatched subcircuit schematic pin: %s", instdef[i].name, lab);
+                  my_snprintf(str, S(str), "Symbol %s: schematic pin: %s not in symbol", instdef[i].name, lab);
                   statusmsg(str,2);
                   for(j = 0; j < lastinst; j++) {
                     if(!strcmp(inst_ptr[j].name, instdef[i].name)) {
@@ -1177,7 +1185,7 @@ int sym_vs_sch_pins()
             my_snprintf(file_version, S(file_version), "1.0");
             if(debug_var >= 1) fprintf(errfp, "sym_vs_sch_pins(): no file_version, assuming file_version=%s\n", file_version);
           }
-        }
+        } /* while(!endfile) */
         fclose(fd);
       }
       if(pin_cnt != rects) {
@@ -1191,13 +1199,50 @@ int sym_vs_sch_pins()
           }
         }
       }
-    }
+
+      for(j=0; j < rects; j++) {
+        my_strdup(293, &pin_name, get_tok_value(instdef[i].boxptr[PINLAYER][j].prop_ptr, "name", 0));
+        pin_match = 0;
+        for(k=0; k<pin_cnt; k++) {
+          if(!strcmp(lab_array[k], pin_name)) {
+            pin_match++; 
+            break;
+          }
+        }
+        if(!pin_match) {
+          char str[2048];
+          /* fprintf(errfp, "  unmatched sch / sym pin: %s\n", lab); */
+          my_snprintf(str, S(str), "Symbol %s: symbol pin: %s not in schematic", instdef[i].name, pin_name);
+          statusmsg(str,2);
+          for(j = 0; j < lastinst; j++) {
+            if(!strcmp(inst_ptr[j].name, instdef[i].name)) {
+              inst_ptr[j].flags |=4;
+              hilight_nets=1;
+            }
+          }
+        }
+      }
+
+      if(lab_array_size) {
+        for(k=0;k<pin_cnt;k++) {
+          my_free( &(lab_array[k]));
+        }
+        my_free(&lab_array);
+        lab_array_size = 0;
+      }
+
+
+
+    } /* if( ... "subcircuit"... ) */
+
+
     my_free(&type);
     my_free(&tmp);
     my_free(&lab);
     my_free(&pin_name);
     my_free(&pin_dir);
-  }
+  } /* for(i=0;i<n_syms;i++) */
+
   while(lastinstdef > n_syms) remove_symbol();
   return 0;
 }

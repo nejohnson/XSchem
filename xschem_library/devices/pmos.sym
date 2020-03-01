@@ -1,6 +1,6 @@
-v {xschem version=2.9.5_RC6 file_version=1.1}
+v {xschem version=2.9.5 file_version=1.1}
 G {type=pmos
-format="@spiceprefix@name @pinlist @model m=@m"
+format="@spiceprefix@name @pinlist @model @extra m=@m"
 verilog_format="@symname #@del @name ( @@d , @@s , @@g );"
 tedax_format="footprint @name @footprint
 value @name @value

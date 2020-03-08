@@ -89,6 +89,7 @@ void print_image()
 #else
   Tk_FreePixmap(display, save_pixmap);
   save_pixmap = Tk_GetPixmap(display, window, w, h, depth);
+  xSetTile(display, gctiled, save_pixmap);
 #endif
 
   #ifdef HAS_CAIRO
@@ -168,6 +169,7 @@ void print_image()
 #else
   Tk_FreePixmap(display, save_pixmap);
   save_pixmap = Tk_GetPixmap(display, window, areaw, areah, depth);
+  xSetTile(display, gctiled, save_pixmap);
 #endif
 
 
@@ -1628,16 +1630,20 @@ void draw(void)
  } /* if(has_x) */
 }
 
-void xSetClipRectangles(Display *display, GC gc, int clip_x_origin, int clip_y_origin, XRectangle* rectangles)
+#ifndef __unix__
+/* place holder for Windows.  Do not do anything */
+void xSetClipRectangles(Display* display, GC gc, int clip_x_origin, int clip_y_origin, XRectangle* rectangles)
 {
+  /*
   Pixmap pm = Tk_GetPixmap(display, window, rectangles->width, rectangles->height, depth);
   XGCValues gcvalues;
   gcvalues.clip_mask = pm;
   gcvalues.clip_x_origin = clip_x_origin;
   gcvalues.clip_y_origin = clip_y_origin;
   XChangeGC(display, gc, GCClipMask|GCClipXOrigin|GCClipYOrigin, &gcvalues);
-  Tk_FreePixmap(display, pm); 
-    /*
+  Tk_FreePixmap(display, pm);
+  */
+  /*
   TkpClipMask mask1;
   TkRegion region = TkCreateRegion();
   TkClipBox(region, xrect);
@@ -1650,3 +1656,7 @@ void xSetClipRectangles(Display *display, GC gc, int clip_x_origin, int clip_y_o
   TkDestroyRegion(region);
   */
 }
+void xSetTile(Display *display, GC gc, Pixmap save_pixmap)
+{
+}
+#endif

@@ -159,18 +159,22 @@ void windowid()
   unsigned int ww;
   Window framewin, rootwindow;
   Window *framewin_child_ptr;
-  unsigned int framweindow_nchildren;
+  unsigned int framewindow_nchildren;
  
+  framewindow_nchildren =0;
     mainwindow=Tk_MainWindow(interp);
     display = Tk_Display(mainwindow);
     tcleval( "winfo id .");
     sscanf(Tcl_GetStringResult(interp), "0x%x", (unsigned int *) &ww);
     framewin = ww;
-    XQueryTree(display, framewin, &rootwindow, &parent_of_topwindow, &framewin_child_ptr, &framweindow_nchildren);
+    XQueryTree(display, framewin, &rootwindow, &parent_of_topwindow, &framewin_child_ptr, &framewindow_nchildren);
     if(debug_var>=1) fprintf(errfp,"framewinID=%x\n", (unsigned int) framewin);
-    if(debug_var>=1) fprintf(errfp,"framewin nchilds=%d\n", (unsigned int) framweindow_nchildren);
+    if(debug_var>=1) fprintf(errfp,"framewin nchilds=%d\n", (unsigned int)framewindow_nchildren);
     if(debug_var>=1) fprintf(errfp,"framewin parentID=%x\n", (unsigned int) parent_of_topwindow);
-    if(debug_var>=1) fprintf(errfp,"framewin child 0=%x\n", (unsigned int) framewin_child_ptr[0]);
+    if (debug_var>=1) {
+      if (framewindow_nchildren==0) fprintf(errfp, "no framewin child\n");
+      else fprintf(errfp, "framewin child 0=%x\n", (unsigned int)framewin_child_ptr[0]);
+    }
 
     /* here I create the icon pixmap,to be used when iconified,  */
 #ifdef __unix__
@@ -886,22 +890,57 @@ int Tcl_AppInit(Tcl_Interp *inter)
  my_snprintf(user_conf_dir, S(user_conf_dir), "%s", Tcl_GetStringResult(interp));
  tclsetvar("USER_CONF_DIR", user_conf_dir);
 #else
- char* gxschem_library = NULL;
- if (!stat("../src/xschem.tcl", &buf) && !stat("../src/systemlib", &buf) && !stat("../src/xschem", &buf)) {
-   my_snprintf(tmp, S(tmp), "%s/../src", pwd_dir);
-   tclsetvar("XSCHEM_SHAREDIR", tmp); /* for testing xschem builds in src dir*/
-   my_snprintf(tmp, S(tmp), "subst .:[file normalize \"%s/../xschem_library/devices\"]", pwd_dir);
+   char install_dir[MAX_PATH];
+   GetModuleFileNameA(NULL, install_dir, MAX_PATH);
+   change_to_unix_fn(install_dir);
+   int dir_len=strlen(install_dir);
+   if (dir_len>11)
+     install_dir[dir_len-11] = '\0'; /* 11 = remove /xschem.exe */
+   my_snprintf(tmp, S(tmp), "regexp {bin$} \"%s\"", install_dir); /* debugging in Visual Studio will not have bin */
    tcleval(tmp);
-   tclsetvar("XSCHEM_LIBRARY_PATH", Tcl_GetStringResult(interp));
- }
- else if ((gxschem_library=getenv("XSCHEM_LIBRARY"))!=NULL) {
-   if (!stat(gxschem_library, &buf)) {  /* 20180918 */
-     tclsetvar("XSCHEM_SHAREDIR", gxschem_library);
-     /* ... else give up searching, may set later after loading xschemrc */
+   int not_visual_studio = atoi(Tcl_GetStringResult(interp));
+ char* gxschem_library=NULL, *xschem_sharedir=NULL;
+ if ((gxschem_library = getenv("XSCHEM_LIBRARY")) != NULL) {
+   if (!stat(gxschem_library, &buf)) {
+     tclsetvar("XSCHEM_LIBRARY", gxschem_library);
    }
  }
+ else {
+   if (not_visual_studio==1) {
+     my_snprintf(tmp, S(tmp), "subst .:[file normalize \"%s/../xschem_library/devices\"]", install_dir);
+   }
+   else {
+     my_snprintf(tmp, S(tmp), "subst .:[file normalize \"%s/../xschem_library/devices\"]", pwd_dir); 
+   }
+    tcleval(tmp);
+    tclsetvar("XSCHEM_LIBRARY_PATH", Tcl_GetStringResult(interp));
+ }
+ if ((xschem_sharedir=getenv("XSCHEM_SHAREDIR")) != NULL) {
+   if (!stat(xschem_sharedir, &buf)) {
+     tclsetvar("XSCHEM_SHAREDIR", xschem_sharedir);
+   }
+ }
+ else {
+   if (not_visual_studio==1) {
+     my_snprintf(tmp, S(tmp), "%s/../share", install_dir);
+   }
+   else {
+     my_snprintf(tmp, S(tmp), "%s/../src", pwd_dir);
+   }
+   tclsetvar("XSCHEM_SHAREDIR", tmp);
+ }
  /* create user conf dir */
- my_snprintf(user_conf_dir, S(user_conf_dir), "%s/.xschem/%s", home_dir, USER_CONF_DIR);
+ my_snprintf(user_conf_dir, S(user_conf_dir), "%s/xschem", home_dir); /* create user_conf root directory first */
+ if (stat(user_conf_dir, &buf)) {
+   if (!mkdir(user_conf_dir, 0700)) {
+     if (debug_var >= 1) fprintf(errfp, "Tcl_AppInit(): created root directory to setup and create for user conf dir: %s\n", user_conf_dir);
+   }
+   else {
+     fprintf(errfp, "Tcl_AppInit(): failure creating %s\n", user_conf_dir);
+     Tcl_Exit(EXIT_FAILURE);
+   }
+ }
+ my_snprintf(user_conf_dir, S(user_conf_dir), "%s/xschem/%s", home_dir, USER_CONF_DIR);
  tclsetvar("USER_CONF_DIR", user_conf_dir);
 #endif
 
@@ -1203,6 +1242,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
     XSetTile(display,gctiled,save_pixmap);
 #else
     save_pixmap = Tk_GetPixmap(display, window, CADWIDTH, CADHEIGHT, depth);
+    xSetTile(display, gctiled, save_pixmap);
 #endif
     XSetFillStyle(display,gctiled,FillTiled);
     #ifdef HAS_CAIRO /* 20171105 */

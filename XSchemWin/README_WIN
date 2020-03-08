@@ -32,6 +32,7 @@ INSTRUCTIONS TO ADD XSCHEM TO VISUAL STUDIO 2019
       (http://gnuwin32.sourceforge.net/packages/bison.htm, Complete package, except sources (bison-2.4.1-setup.exe))
     - flex (Remember executabled directory for step h)
       (http://gnuwin32.sourceforge.net/packages/flex.htm, Complete package, except sources (flex-2.5.4a-1.exe))
+    - For deployment: Wix Toolset v3.11 and Visual Studio 2019 Extension
 
 2. Create new XSchemWin project on Visual Studio 2019 
 

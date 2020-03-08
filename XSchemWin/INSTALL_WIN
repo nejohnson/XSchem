@@ -1,17 +1,14 @@
 1. requirements
 
-    - Microsoft Visual Studio 2019
-    - ActiveState tcl/tk 8.6 (Remember install directory where includes files are, see step h)
-      32-bit, 64-bit ActiveState need to match XSchem x86, x64, respectively.
-    - bison (Remember executabled directory for step h) 
-      (http://gnuwin32.sourceforge.net/packages/bison.htm, Complete package, except sources (bison-2.4.1-setup.exe))
-    - flex (Remember executabled directory for step h)
-      (http://gnuwin32.sourceforge.net/packages/flex.htm, Complete package, except sources (flex-2.5.4a-1.exe))
+    - Windows 10
+    - ActiveState TCL/TK 8.69 x64 (https://www.activestate.com/products/tcl/)
 
 2. Install Tree
-${prefix}/bin                          - Binaries (executable files).
-${prefix}/share                        - default share directory (can be overriden with XSCHEM_SHARE_DIR)
-${prefix}/src                          - default xschem.tcl and xschemrc
-${prefix}/src/systemlib/               - font.sch, missing.sym
-${prefix}/doc                          - Various documentation.
-${prefix}/xschem_library/              - XSchem library consisting of .sch and .sym
+C:/Program Files/XSchem/bin                          - Binaries (executable files).
+C:/Program Files/XSchem/doc                          - Various documentation.
+C:/Program Files/XSchem/share                        - default share directory (can be overriden with XSCHEM_SHARE_DIR)
+C:/Program Files/XSchem/src                          - default xschem.tcl, xschemrc, xschem.help, systemlib/font.sch, systemlib/missing.sym
+C:/Program Files/XSchem/xschem_library               - XSchem library consisting of .sch and .sym
+C:/Users/<YourUserName>/xschem                       - User configuration directory
+
+It's important to maintain this Install tree for XSchem to work correctly

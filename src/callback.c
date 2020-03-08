@@ -1603,9 +1603,15 @@ int callback(int event, int mx, int my, KeySym key,
        my_double_save=mousey_snap; /* 20070322 */
        if( !(state & ShiftMask) && !(state & Mod1Mask) ) {
          unselect_all();
+#ifndef __unix__
+         XCopyArea(display, save_pixmap, window, gctiled, xrect[0].x, xrect[0].y,
+           xrect[0].width, xrect[0].height, xrect[0].x, xrect[0].y);
+#endif
        }
        sel = select_object(mousex, mousey, SELECTED, 0);
- 
+#ifndef __unix__
+       draw_selection(gc[SELLAYER], 0); /* 20181009 moved outside of cadlayers loop */
+#endif
        if(sel && state == ControlMask) { /* 20170416 */
          launcher();
        }

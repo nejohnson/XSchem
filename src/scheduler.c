@@ -1602,6 +1602,8 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
         }
         else {
           change_to_unix_fn(s);
+          int slen = strlen(s);
+          if (s[slen - 1] == '/') s[slen - 1] = '\0';
           strcpy(win_temp_dir, s);
           if (debug_var >= 2) fprintf(errfp, "win_temp_dir is %s\n", win_temp_dir);
           Tcl_AppendResult(interp, s, NULL);

@@ -47,7 +47,7 @@
 #define XSCH_PI 3.14159265358979323846264338327950288419716939937
 
 #ifdef __unix__
-#include "../config.h"
+/* #include "../config.h" */
 #else
 #include "../XSchemWin/config.h"
 #endif

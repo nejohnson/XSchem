@@ -264,7 +264,7 @@ void resetwin(void)
         xrect[0].height = xschem_h;
         Tk_FreePixmap(display, save_pixmap);
         save_pixmap = Tk_GetPixmap(display, window, xschem_w, xschem_h, depth); /*  20171111 */
-        xSetTile(display, gctiled, save_pixmap);
+        XSetTile(display, gctiled, save_pixmap);
       }
 #endif
       #ifdef HAS_CAIRO

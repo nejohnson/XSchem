@@ -125,12 +125,7 @@ int callback(int event, int mx, int my, KeySym key,
       xr[0].width=button;
       xr[0].height=aux;
       /* redraw selection on expose, needed if no backing store available on the server 20171112 */
-#ifdef __unix__
       XSetClipRectangles(display, gc[SELLAYER], 0,0, xr, 1, Unsorted);
-#else
-      xSetClipRectangles(display, gc[SELLAYER], 0, 0, xr);
-      // draw();
-#endif
       rebuild_selected_array();
       draw_selection(gc[SELLAYER],0);
       XSetClipMask(display, gc[SELLAYER], None);
@@ -144,17 +139,20 @@ int callback(int event, int mx, int my, KeySym key,
 
   case MotionNotify:
     if(semaphore >= 2) break;
+#ifndef __unix__
+    if ((ui_state & STARTWIRE) || (ui_state & STARTARC) || (ui_state & STARTLINE) || (ui_state & STARTMOVE) ||
+      (ui_state & STARTCOPY) || (ui_state & STARTRECT) || (ui_state & STARTPOLYGON) ||
+      (ui_state & STARTPAN2) || (ui_state & STARTPAN) || (ui_state & STARTSELECT)) {
+      XCopyArea(display, save_pixmap, window, gctiled, xrect[0].x, xrect[0].y,
+        xrect[0].width, xrect[0].height, xrect[0].x, xrect[0].y);
+    }
+#endif
     if(ui_state & STARTPAN2)   pan2(RUBBER, mx, my); /* 20121123 -  20160425 moved up */
     if(ui_state) {
       #ifdef TURBOX_FIX
       /* fix Exceed TurboX bugs when drawing with pixmap tiled fill pattern */
       /* *NOT* a solution but at least makes the program useable. 20171130 */
-#ifdef __unix__
       XSetClipRectangles(display, gctiled, 0,0, xrect, 1, Unsorted);
-#else
-      xSetClipRectangles(display, gctiled, 0, 0, xrect);
-      //draw();
-#endif
       #endif
       if(ui_state & SELECTION) rebuild_selected_array(); /* 20171129 */
       my_snprintf(str, S(str), "mouse = %.16g %.16g - selected: %d w=%.16g h=%.16g", 

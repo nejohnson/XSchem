@@ -1239,11 +1239,10 @@ int Tcl_AppInit(Tcl_Interp *inter)
     /* save_pixmap must be created as resetwin() frees it before recreating with new size. */
 #ifdef __unix__
     save_pixmap = XCreatePixmap(display,window,CADWIDTH,CADHEIGHT,depth);
-    XSetTile(display,gctiled,save_pixmap);
 #else
     save_pixmap = Tk_GetPixmap(display, window, CADWIDTH, CADHEIGHT, depth);
-    xSetTile(display, gctiled, save_pixmap);
 #endif
+    XSetTile(display, gctiled, save_pixmap);
     XSetFillStyle(display,gctiled,FillTiled);
     #ifdef HAS_CAIRO /* 20171105 */
     {
@@ -1349,7 +1348,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
     char s[PATH_MAX+100];
     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): filename %s given, removing symbols\n", filename);
     remove_symbols();
-    my_snprintf(s, S(s), "file normalize %s", filename);
+    my_snprintf(s, S(s), "file normalize \"%s\"", filename);
     tcleval(s);
     load_schematic(1, abs_sym_path(Tcl_GetStringResult(interp), ""), 1); /* 20180925.1 */
  }

@@ -85,12 +85,11 @@ void print_image()
   /* save_pixmap = XCreatePixmap(display,window,areaw,areah,depth); */
   save_pixmap = XCreatePixmap(display,window,w,h,depth); /* 20161119 pixmap should be exact size of  */
                                                          /* cliprectangle to avoid random borders */
-  XSetTile(display,gctiled, save_pixmap);
 #else
   Tk_FreePixmap(display, save_pixmap);
   save_pixmap = Tk_GetPixmap(display, window, w, h, depth);
-  xSetTile(display, gctiled, save_pixmap);
 #endif
+  XSetTile(display, gctiled, save_pixmap);
 
   #ifdef HAS_CAIRO
   cairo_destroy(save_ctx);
@@ -117,22 +116,12 @@ void print_image()
        CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
   cairo_set_font_size (save_ctx, 20);
   #endif /*HAS_CAIRO */
-#ifdef __unix__
   for(tmp=0;tmp<cadlayers;tmp++)
   {
     XSetClipRectangles(display, gc[tmp], 0,0, xrect, 1, Unsorted);
     XSetClipRectangles(display, gcstipple[tmp], 0,0, xrect, 1, Unsorted);
   }
   XSetClipRectangles(display, gctiled, 0,0, xrect, 1, Unsorted);
-#else
-  for (tmp = 0; tmp < cadlayers; tmp++)
-  {
-    xSetClipRectangles(display, gc[tmp], 0, 0, xrect);
-    xSetClipRectangles(display, gcstipple[tmp], 0, 0, xrect);
-  }
-  xSetClipRectangles(display, gctiled, 0, 0, xrect);
-#endif
-
   save_draw_grid = draw_grid;
   draw_grid=0;
   draw_pixmap=1;
@@ -165,12 +154,11 @@ void print_image()
 #ifdef __unix__
   XFreePixmap(display,save_pixmap);
   save_pixmap = XCreatePixmap(display,window,areaw,areah,depth);
-  XSetTile(display,gctiled, save_pixmap);
 #else
   Tk_FreePixmap(display, save_pixmap);
   save_pixmap = Tk_GetPixmap(display, window, areaw, areah, depth);
-  xSetTile(display, gctiled, save_pixmap);
 #endif
+  XSetTile(display, gctiled, save_pixmap);
 
 
 #ifdef HAS_CAIRO
@@ -1631,32 +1619,13 @@ void draw(void)
 }
 
 #ifndef __unix__
-/* place holder for Windows.  Do not do anything */
-void xSetClipRectangles(Display* display, GC gc, int clip_x_origin, int clip_y_origin, XRectangle* rectangles)
+/* place holder for Windows to show that these XLib functions are not supported in Windows. */
+int XSetClipRectangles(register Display* dpy, GC gc, int clip_x_origin, int clip_y_origin, XRectangle* rectangles, int n, int ordering)
 {
-  /*
-  Pixmap pm = Tk_GetPixmap(display, window, rectangles->width, rectangles->height, depth);
-  XGCValues gcvalues;
-  gcvalues.clip_mask = pm;
-  gcvalues.clip_x_origin = clip_x_origin;
-  gcvalues.clip_y_origin = clip_y_origin;
-  XChangeGC(display, gc, GCClipMask|GCClipXOrigin|GCClipYOrigin, &gcvalues);
-  Tk_FreePixmap(display, pm);
-  */
-  /*
-  TkpClipMask mask1;
-  TkRegion region = TkCreateRegion();
-  TkClipBox(region, xrect);
-  mask1.type = TKP_CLIP_REGION; mask1.value.region = region;
-  XGCValues gcvalues;
-  gcvalues.clip_mask = &mask1;
-  XChangeGC(display, gc, GCClipMask, &gcvalues);
-  //gc->clip_mask = mask1;
-  //XSetClipMask(display, gc, &mask1);
-  TkDestroyRegion(region);
-  */
+  return 0;
 }
-void xSetTile(Display *display, GC gc, Pixmap save_pixmap)
+int XSetTile(Display* display, GC gc, Pixmap save_pixmap)
 {
+  return 0;
 }
 #endif

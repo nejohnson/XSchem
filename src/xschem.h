@@ -47,7 +47,7 @@
 #define XSCH_PI 3.14159265358979323846264338327950288419716939937
 
 #ifdef __unix__
-/* #include "../config.h" */
+#include "../config.h"
 #else
 #include "../XSchemWin/config.h"
 #endif
@@ -92,8 +92,8 @@
 #include <tkWinInt.h>
 #define xunlink _unlink
 #define MOUSE_WHEEL_UP 38
-extern void xSetClipRectangles(Display* display, GC gc, int clip_x_origin, int clip_y_origin, XRectangle* rectangles);
-extern void xSetTile(Display* display, GC gctiled, Pixmap save_pixmap);
+extern int XSetClipRectangles(register Display* dpy, GC gc, int clip_x_origin, int clip_y_origin, XRectangle* rectangles, int n, int ordering);
+extern int XSetTile(Display* display, GC gctiled, Pixmap save_pixmap);
 extern void change_to_unix_fn(char* fn);
 extern char win_temp_dir[PATH_MAX];
 #endif

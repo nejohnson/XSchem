@@ -270,7 +270,7 @@ proc edit_file {filename} {
 proc save_sim_defaults {f} {
   global sim 
   
-  set a [catch "open $f w" fd]
+  set a [catch "open \"$f\" w" fd]
   if { $a } {
     puts "save_sim_defaults: error opening file $f: $fd"
     return
@@ -704,7 +704,7 @@ proc save_file_dialog { msg ext global_initdir {initialfile {}} {overwrt 1} } {
 
 proc is_xschem_file {f} {
   set fd [open $f r]
-  set a [catch "open $f r" fd]
+  set a [catch "open \"$f\" r" fd]
   set ret 0
   set score 0
   set instances 0
@@ -966,7 +966,19 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
       } elseif { $dir2 eq {.} } {
         set d  $myload_dir1
       } else {
-        set d "$myload_dir1/$dir2"
+        if {$::OS == "Windows"} {
+          if {[regexp {^[A-Za-z]\:/$} $myload_dir1]} {
+            set d "$myload_dir1$dir2"
+          } else {
+            set d "$myload_dir1/$dir2"
+          }
+        } else {
+          if {$myload_dir1 eq "/"} {
+            set d "$myload_dir1$dir2"
+          } else {
+            set d "$myload_dir1/$dir2"
+          }
+        }
       }
       if { [file isdirectory $d]} {
         bind .dialog.l.paneright.pre <Expose> {}
@@ -2246,7 +2258,15 @@ proc rel_sym_path {symbol} {
 # given a library/symbol return its absolute path
 proc abs_sym_path {fname {ext {} } } {
   global pathlist current_dirname
-
+  if {$::OS == "Windows"} {
+    if { [regexp {^[A-Za-z]\:/$} $fname ] } {
+      return $fname;
+    } 
+  } else {
+    if { $fname eq "/"} {
+      return $fname;
+    }
+  }
   # add extension for 1.0 file format compatibility
   if { $ext ne {} } { 
     set fname [file rootname $fname]$ext

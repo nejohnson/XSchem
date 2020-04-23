@@ -395,12 +395,20 @@ void netlist_options(int i)
     bus_replacement_char[1] = str[1];
     /* tclsetvar("bus_replacement_char", str); */
   }
-
-  top_subckt = 0;
   /* fprintf(errfp, "netlist_options(): bus_replacement_char=%s\n", str); */
+
   str = get_tok_value(inst_ptr[i].prop_ptr, "top_subckt", 0);
-  /* fprintf(errfp, "netlist_options(): prop_ptr=%s\n", inst_ptr[i].prop_ptr); */
-  if(!strcmp(str, "true")) top_subckt = 1;
+  if(str[0]) {
+    top_subckt = 0;
+    /* fprintf(errfp, "netlist_options(): prop_ptr=%s\n", inst_ptr[i].prop_ptr); */
+    if(!strcmp(str, "true")) top_subckt = 1;
+  }
+  str = get_tok_value(inst_ptr[i].prop_ptr, "spiceprefix", 0);
+  if(str[0]) {
+    spiceprefix = 1;
+    /* fprintf(errfp, "netlist_options(): prop_ptr=%s\n", inst_ptr[i].prop_ptr); */
+    if(!strcmp(str, "false")) spiceprefix = 0;
+  }
 }
 
 /* used only for debug */

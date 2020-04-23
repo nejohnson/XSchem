@@ -49,6 +49,7 @@ void global_spice_netlist(int global)  /* netlister driver */
  statusmsg("",2);  /* clear infowindow */
  record_global_node(2, NULL, NULL); /* delete list of global nodes */
  top_subckt = 0;
+ spiceprefix=1;
  bus_replacement_char[0] = bus_replacement_char[1] = '\0';
  str_tmp = tclgetvar("bus_replacement_char");
  if(str_tmp && str_tmp[0] && str_tmp[1]) {
@@ -71,6 +72,7 @@ void global_spice_netlist(int global)  /* netlister driver */
    }
  }
  if(!strcmp(tclgetvar("top_subckt"), "1")) top_subckt = 1;
+ if(!strcmp(tclgetvar("spiceprefix"), "0")) spiceprefix = 0;
 
  if(!top_subckt) fprintf(fd,"**");
  fprintf(fd,".subckt %s", skip_dir( schematic[currentsch]) );

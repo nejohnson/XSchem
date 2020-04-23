@@ -1386,7 +1386,7 @@ void print_spice_element(FILE *fd, int inst)
    token[token_pos]='\0'; 
    token_pos=0;
 
-   if(top_subckt && !strcmp(token, "@spiceprefix")) { 
+   if(!spiceprefix && !strcmp(token, "@spiceprefix")) { 
      value=NULL;
    } else {
      if(debug_var >=1) fprintf(errfp, "print_spice_element(): token: |%s|\n", token);

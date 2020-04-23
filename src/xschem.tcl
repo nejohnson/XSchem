@@ -436,8 +436,8 @@ proc simconf {} {
   frame .sim.bottom
   pack .sim.topf.f.scrl.top -fill x 
   pack .sim.topf.f.scrl.center -fill both -expand yes
-  set bg(0) {#44eeee}
-  set bg(1) {#44aaaa}
+  set bg(0) {#dddddd}
+  set bg(1) {#aaaaaa}
   set toggle 0
   foreach tool $sim(tool_list) {
     frame .sim.topf.f.scrl.center.$tool
@@ -2472,6 +2472,7 @@ set_ne netlist_dir "$USER_CONF_DIR/simulations"
 set_ne bus_replacement_char {} ;# use {<>} to replace [] with <> in bussed signals
 set_ne hspice_netlist 0
 set_ne top_subckt 0
+set_ne spiceprefix 1
 set_ne verilog_2001 1
 set_ne split_files 0
 set_ne flat_netlist 0
@@ -2802,7 +2803,6 @@ font configure Underline-Font -underline true -size 24
         input_number "Enter two characters to replace default bus \[\] delimiters:" "set tmp_bus_char"
         if { [info exists tmp_bus_char] && [string length $tmp_bus_char] >=2} { set bus_replacement_char $tmp_bus_char } 
       }
-   .menubar.option.menu add checkbutton -label "LVS netlist: Top level is a .subckt" -variable top_subckt 
    .menubar.option.menu add checkbutton -label "Verilog 2001 netlist variant" -variable verilog_2001 \
    
    .menubar.option.menu add checkbutton -label "Draw grid" -variable draw_grid \
@@ -3047,6 +3047,9 @@ font configure Underline-Font -underline true -size 24
          }
        }
    .menubar.simulation.menu add command -label {Edit Netlist} -command {edit_netlist [file tail [xschem get schname]]}
+   .menubar.simulation.menu add separator
+   .menubar.simulation.menu add checkbutton -label "LVS netlist: Top level is a .subckt" -variable top_subckt 
+   .menubar.simulation.menu add checkbutton -label "Use 'spiceprefix' attribute" -variable spiceprefix 
 
    pack .menubar.file -side left
    pack .menubar.edit -side left

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-	<Product Id="*" Name="XSchem" Language="1033" Version="1.0.0.0" Manufacturer="XSchem" UpgradeCode="0deb9c17-cbbd-491c-be3e-24446b27ccd5">
+	<Product Id="*" Name="XSchem" Language="1033" Version="1.0.0.3" Manufacturer="XSchem" UpgradeCode="0deb9c17-cbbd-491c-be3e-24446b27ccd5">
 		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 
 		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
@@ -85,6 +85,90 @@
         <Component Id="CMPSRCXSCHEMRC">
           <File Id="XSCHEMRC" KeyPath="yes" Source="../../src/xschemrc" />
         </Component>
+        <Component Id="CMPBREAKAWK">
+          <File Id="BREAKAWK" KeyPath="yes" Source="../../src/break.awk" />
+        </Component>
+        <Component Id="CMPCHANGEREFAWK">
+          <File Id="CHANGEREFAWK" KeyPath="yes" Source="../../src/change_ref.awk" />
+        </Component>
+        <Component Id="CMPEXPAWK">
+          <File Id="EXPAWK" KeyPath="yes" Source="../../src/convert_to_verilog2001.awk" />
+        </Component>
+        <Component Id="CMPFLATTENAWK">
+          <File Id="FLATTENAWK" KeyPath="yes" Source="../../src/flatten.awk" />
+        </Component>
+        <Component Id="CMPGSCHEMTOXSCHEMAWK">
+          <File Id="GSCHEMTOXSCHEMAWK" KeyPath="yes" Source="../../src/gschemtoxschem.awk" />
+        </Component>
+        <Component Id="CMPHERCULESTOSPICEAWK">
+          <File Id="HERCULESTOSPICEAWK" KeyPath="yes" Source="../../src/herculestospice.awk" />
+        </Component>
+        <Component Id="CMPIMPORTOPUSSYMBOLSAWK">
+          <File Id="IMPORTOPUSSYMBOLSAWK" KeyPath="yes" Source="../../src/import_opus_symbols.awk" />
+        </Component>
+        <Component Id="CMPLABELCOMPACTORAWK">
+          <File Id="LABELCOMPACTORAWK" KeyPath="yes" Source="../../src/label_compactor.awk" />
+        </Component>
+        <Component Id="CMPMAKEEDITAWK">
+          <File Id="MAKEEDITAWK" KeyPath="yes" Source="../../src/make_edif.awk" />
+        </Component>
+        <Component Id="CMPMAKESCHFROMCADENCEPINAWK">
+          <File Id="MAKESCHFROMCADENCEPINAWK" KeyPath="yes" Source="../../src/make_sch_from_cadence_pin.awk" />
+        </Component>
+        <Component Id="CMPMAKESCHFROMSPICEAWK">
+          <File Id="MAKESCHFROMSPICEAWK" KeyPath="yes" Source="../../src/make_sch_from_spice.awk" />
+        </Component>
+        <Component Id="CMPMAKESCHFROMVHDLAWK">
+          <File Id="MAKESCHFROMVHDLAWK" KeyPath="yes" Source="../../src/make_sch_from_vhdl.awk" />
+        </Component>
+        <Component Id="CMPMAKESYMAWK">
+          <File Id="MAKESYMAWK" KeyPath="yes" Source="../../src/make_sym.awk" />
+        </Component>
+        <Component Id="CMPMAKEVHDLFROMSPICEAWK">
+          <File Id="MAKEVHDLFROMSPICEAWK" KeyPath="yes" Source="../../src/make_vhdl_from_spice.awk" />
+        </Component>
+        <Component Id="CMPNETLISTCOMPACTORAWK">
+          <File Id="NETLISTCOMPACTORAWK" KeyPath="yes" Source="../../src/netlist_compactor.awk" />
+        </Component>
+        <Component Id="CMPORDERLABELSAWK">
+          <File Id="ORDERLABELSAWK" KeyPath="yes" Source="../../src/order_labels.awk" />
+        </Component>
+        <Component Id="CMPPARSESYNOPSYSVHDLAWK">
+          <File Id="PARSESYNOPSYSVHDLAWK" KeyPath="yes" Source="../../src/parse_synopsys_vhdl.awk" />
+        </Component>
+        <Component Id="CMPREDUCEEVENODDARRAYLABELSAWK">
+          <File Id="REDUCEEVENODDARRAYLABELSAWK" KeyPath="yes" Source="../../src/reduce_even_odd_array_labels.awk" />
+        </Component>
+        <Component Id="CMPRESCALEAWK">
+          <File Id="RESCALEAWK" KeyPath="yes" Source="../../src/rescale.awk" />
+        </Component>
+        <Component Id="CMPSORTLABELSAWK">
+          <File Id="SORTLABELSAWK" KeyPath="yes" Source="../../src/sort_labels.awk" />
+        </Component>
+        <Component Id="CMPSPICEAWK">
+          <File Id="SPICEAWK" KeyPath="yes" Source="../../src/spice.awk" />
+        </Component>
+        <Component Id="CMPSUPERGREPAWK">
+          <File Id="SUPERGREPAWK" KeyPath="yes" Source="../../src/supergrep.awk" />
+        </Component>
+        <Component Id="CMPSYMGENAWK">
+          <File Id="SYMGENAWK" KeyPath="yes" Source="../../src/symgen.awk" />
+        </Component>
+        <Component Id="CMPTEDAXAWK">
+          <File Id="TEDAXAWK" KeyPath="yes" Source="../../src/tedax.awk" />
+        </Component>
+        <Component Id="CMPTRACKMEMORYAWK">
+          <File Id="TRACKMEMORYAWK" KeyPath="yes" Source="../../src/track_memory.awk" />
+        </Component>
+        <Component Id="CMPTRADUCIAWK">
+          <File Id="TRADUCIAWK" KeyPath="yes" Source="../../src/traduci.awk" />
+        </Component>
+        <Component Id="CMPVERILOGAWK">
+          <File Id="VERILOGAWK" KeyPath="yes" Source="../../src/verilog.awk" />
+        </Component>
+        <Component Id="CMPVHDLAWK">
+            <File Id="VHDLAWK" KeyPath="yes" Source="../../src/vhdl.awk" />
+        </Component>      
       </Directory>
     </DirectoryRef>
   </Fragment>
@@ -98,6 +182,34 @@
     </ComponentGroup>
     <ComponentGroup Id="share">
       <ComponentRef Id="CMPSRCXSCHEMRC" />
+      <ComponentRef Id="CMPBREAKAWK" />
+      <ComponentRef Id="CMPCHANGEREFAWK" />
+      <ComponentRef Id="CMPEXPAWK" />
+      <ComponentRef Id="CMPFLATTENAWK" />
+      <ComponentRef Id="CMPGSCHEMTOXSCHEMAWK" />
+      <ComponentRef Id="CMPHERCULESTOSPICEAWK" />
+      <ComponentRef Id="CMPIMPORTOPUSSYMBOLSAWK" />
+      <ComponentRef Id="CMPLABELCOMPACTORAWK" />
+      <ComponentRef Id="CMPMAKEEDITAWK" />
+      <ComponentRef Id="CMPMAKESCHFROMCADENCEPINAWK" />
+      <ComponentRef Id="CMPMAKESCHFROMSPICEAWK" />
+      <ComponentRef Id="CMPMAKESCHFROMVHDLAWK" />
+      <ComponentRef Id="CMPMAKESYMAWK" />
+      <ComponentRef Id="CMPMAKEVHDLFROMSPICEAWK" />
+      <ComponentRef Id="CMPNETLISTCOMPACTORAWK" />
+      <ComponentRef Id="CMPORDERLABELSAWK" />
+      <ComponentRef Id="CMPPARSESYNOPSYSVHDLAWK" />
+      <ComponentRef Id="CMPREDUCEEVENODDARRAYLABELSAWK" />
+      <ComponentRef Id="CMPRESCALEAWK" />
+      <ComponentRef Id="CMPSORTLABELSAWK" />
+      <ComponentRef Id="CMPSPICEAWK" />
+      <ComponentRef Id="CMPSUPERGREPAWK" />
+      <ComponentRef Id="CMPSYMGENAWK" />
+      <ComponentRef Id="CMPTEDAXAWK" />
+      <ComponentRef Id="CMPTRACKMEMORYAWK" />
+      <ComponentRef Id="CMPTRADUCIAWK" />
+      <ComponentRef Id="CMPVERILOGAWK" />
+      <ComponentRef Id="CMPVHDLAWK" />        
     </ComponentGroup>
   </Fragment>
 

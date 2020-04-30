@@ -315,7 +315,11 @@ proc set_sim_defaults {} {
     } else {
       # no simrc, set a reasonable default
       set sim(tool_list) {spice spicewave verilog verilogwave vhdl vhdlwave}
-      set_ne sim(spice,0,cmd) {$terminal -e 'ngspice -i "$N" -a || sh'}
+      if {$::OS == "Windows"} {
+        set_ne sim(spice,0,cmd) {ngspice -i "$N" -a}
+      } else {
+        set_ne sim(spice,0,cmd) {$terminal -e 'ngspice -i "$N" -a || sh'}
+      }
       set_ne sim(spice,0,name) {Ngspice}
       set_ne sim(spice,0,fg) 0
       set_ne sim(spice,0,st) 0
@@ -578,9 +582,12 @@ proc simulate {{callback {}}} {
       set fg {execute}
     }
     set cmd [subst -nocommands $sim($tool,$def,cmd)]
-   
-    set id [$fg $st sh -c "cd $netlist_dir; $cmd"]
-    set execute_callback($id) $callback
+    if {$::OS == "Windows"} {
+      eval exec $cmd # $cmd cannot be surrounded by {} as exec will change forward slash to backward slash
+    } else {
+      set id [$fg $st sh -c "cd $netlist_dir; $cmd"]
+      set execute_callback($id) $callback
+    }
   }
 }
 

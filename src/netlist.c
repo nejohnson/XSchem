@@ -1140,7 +1140,7 @@ int sym_vs_sch_pins()
                 for(j=0; j < rects; j++) {
                   my_strdup(293, &pin_name, get_tok_value(instdef[i].boxptr[PINLAYER][j].prop_ptr, "name", 0));
                   my_strdup(294, &pin_dir, get_tok_value(instdef[i].boxptr[PINLAYER][j].prop_ptr, "dir", 0));
-                  if( !strcmp(pin_name, lab)) {
+                  if( pin_name && !strcmp(pin_name, lab)) {
                     if(!(
                           ( !strcmp(type, "ipin") && !strcmp(pin_dir, "in") ) ||
                           ( !strcmp(type, "opin") && !strcmp(pin_dir, "out") ) ||
@@ -1212,7 +1212,7 @@ int sym_vs_sch_pins()
         my_strdup(293, &pin_name, get_tok_value(instdef[i].boxptr[PINLAYER][j].prop_ptr, "name", 0));
         pin_match = 0;
         for(k=0; k<pin_cnt; k++) {
-          if(!strcmp(lab_array[k], pin_name)) {
+          if(pin_name && !strcmp(lab_array[k], pin_name)) {
             pin_match++; 
             break;
           }
@@ -1220,7 +1220,7 @@ int sym_vs_sch_pins()
         if(!pin_match) {
           char str[2048];
           /* fprintf(errfp, "  unmatched sch / sym pin: %s\n", lab); */
-          my_snprintf(str, S(str), "Symbol %s: symbol pin: %s not in schematic", instdef[i].name, pin_name);
+          my_snprintf(str, S(str), "Symbol %s: symbol pin: %s not in schematic", instdef[i].name, pin_name ? pin_name : "<NULL>");
           statusmsg(str,2);
           for(k = 0; k < lastinst; k++) {
             if(!strcmp(inst_ptr[k].name, instdef[i].name)) {

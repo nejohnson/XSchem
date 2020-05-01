@@ -38,6 +38,7 @@
 BEGIN{
  # topcell=toupper(ARGV[2])
  # ARGC=2
+ first_subckt = 1
  pathsep="_"
  nodes["M"]=4; nodes["R"]=2; nodes["D"]=2; nodes["V"]=2
  nodes["I"]=2; nodes["C"]=2; nodes["L"]=2; nodes["Q"]=3
@@ -46,11 +47,12 @@ BEGIN{
 
 {
  if( ($0 !~/^\.include/) && ($0 !~/^\.INCLUDE/) ) $0=toupper($0)
- if($0 ~ /\*\*\.SUBCKT/) {
+ if($0 ~ /^\**\.SUBCKT/ && first_subckt) {
    topcell=$2
    sub(/^\*\*/,"",$0)
  }
- if($0 ~ /\*\*\.ENDS/) {
+ if($0 ~ /^\**\.ENDS/ && first_subckt) {
+   first_subckt = 0 
    sub(/^\*\*/,"",$0)
  }
  if($0 ~/^\+/) 				# join folded lines

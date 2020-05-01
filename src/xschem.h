@@ -493,6 +493,7 @@ extern char pwd_dir[PATH_MAX]; /* obtained via getcwd() */
 extern int load_initfile;
 extern char rcfile[PATH_MAX];
 extern char *tcl_command;
+extern char tcl_script[PATH_MAX];
 extern char plotfile[PATH_MAX];
 extern int persistent_command;
 extern int disable_unique_names;

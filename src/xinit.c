@@ -1332,6 +1332,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
  /*                                */
  /*  START PROCESSING USER OPTIONS */
  /*                                */
+ 
  if(event_reporting) {
    tcleval("set tcl_prompt1 {}");
    tcleval("set tcl_prompt2 {}");
@@ -1414,6 +1415,10 @@ int Tcl_AppInit(Tcl_Interp *inter)
 
  if(quit) {
    tcleval( "after 1000 exit");
+ }
+
+ if(tcl_script[0]) {
+   Tcl_VarEval(interp, "source ", tcl_script, NULL);
  }
 
  /* */

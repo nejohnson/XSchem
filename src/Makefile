@@ -138,21 +138,21 @@ install: xschem rawtovcd
 	cp change_index.tcl "$(prefix)"/share/xschem
 	cp -r ../doc/* "$(prefix)"/share/doc/xschem/
 	cp ./utile/* "$(prefix)"/share/xschem/utile
-	cp -ru ../xschem_library/devices/* "$(system_library_dir)"
-	cp -ru ../xschem_library/binto7seg "$(prefix)"/share/doc/xschem/
-	cp -ru ../xschem_library/examples "$(prefix)"/share/doc/xschem/
-	cp -ru ../xschem_library/xTAG "$(prefix)"/share/doc/xschem/
-	cp -ru ../xschem_library/rulz-r8c33 "$(prefix)"/share/doc/xschem/
-	cp -ru ../xschem_library/ngspice "$(prefix)"/share/doc/xschem/
-	cp -ru ../xschem_library/rom8k "$(prefix)"/share/doc/xschem/
-	cp -ru ../xschem_library/pcb "$(prefix)"/share/doc/xschem/
-	cp -ru ../xschem_library/logic "$(prefix)"/share/doc/xschem/
+	cp -r ../xschem_library/devices/* "$(system_library_dir)"
+	cp -r ../xschem_library/binto7seg "$(prefix)"/share/doc/xschem/
+	cp -r ../xschem_library/examples "$(prefix)"/share/doc/xschem/
+	cp -r ../xschem_library/xTAG "$(prefix)"/share/doc/xschem/
+	cp -r ../xschem_library/rulz-r8c33 "$(prefix)"/share/doc/xschem/
+	cp -r ../xschem_library/ngspice "$(prefix)"/share/doc/xschem/
+	cp -r ../xschem_library/rom8k "$(prefix)"/share/doc/xschem/
+	cp -r ../xschem_library/pcb "$(prefix)"/share/doc/xschem/
+	cp -r ../xschem_library/logic "$(prefix)"/share/doc/xschem/
 	mkdir -p "$(prefix)"/share/doc/xschem/symgen
-	cp -ru ../xschem_library/symgen/*.symdef "$(prefix)"/share/doc/xschem/symgen
+	cp -r ../xschem_library/symgen/*.symdef "$(prefix)"/share/doc/xschem/symgen
 	mkdir -p "$(prefix)"/share/doc/xschem/gschem_import/sym
-	cp -u ../xschem_library/gschem_import/*.sym "$(prefix)"/share/doc/xschem/gschem_import
-	cp -u ../xschem_library/gschem_import/*.sch "$(prefix)"/share/doc/xschem/gschem_import
-	cp -u ../xschem_library/gschem_import/sym/*.sym "$(prefix)"/share/doc/xschem/gschem_import/sym
+	cp ../xschem_library/gschem_import/*.sym "$(prefix)"/share/doc/xschem/gschem_import
+	cp ../xschem_library/gschem_import/*.sch "$(prefix)"/share/doc/xschem/gschem_import
+	cp ../xschem_library/gschem_import/sym/*.sym "$(prefix)"/share/doc/xschem/gschem_import/sym
 
 .PHONY: uninstall
 uninstall:

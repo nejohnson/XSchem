@@ -23,6 +23,8 @@
 
 %option never-interactive
 %option noyywrap
+%option noinput
+%option nounput
 %{
 #include <stdio.h>
 #include <stdlib.h>

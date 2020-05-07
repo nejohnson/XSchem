@@ -2191,7 +2191,7 @@ proc viewdata {data {ro {}}} {
    set viewdata_w .view$viewdata_wcounter
    set rcode {}
    toplevel $viewdata_w
-   wm title $viewdata_w {Wiew data}
+   wm title $viewdata_w {View data}
    frame $viewdata_w.buttons
    pack $viewdata_w.buttons -side bottom -fill x -pady 2m
 

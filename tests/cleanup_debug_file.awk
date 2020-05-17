@@ -25,11 +25,9 @@ function replace_pattern(old, new)
   }
 }
 
-
-###### end  user code  ########################
-
-
 {
+  ## sample code to delete a line in file.
+  # if($0 ~ /pattern_to_delete/) {found = 1; next}
   replace_pattern("drawing window ID.*$", "drawing window ID ***Removed***")
   replace_pattern("top window ID.*$", "top window ID ***Removed***")
   replace_pattern("created dir.*$", "created dir ***Removed***")
@@ -37,8 +35,10 @@ function replace_pattern(old, new)
   replace_pattern("framewinID.*$", "framewinID ***Removed***")
   replace_pattern("resetwin.*$", "resetwin ***Removed***")
   replace_pattern("read_xschem_file.*$", "read_xschem_file ***Removed***")
- __a[__lines++] = $0
+  __a[__lines++] = $0
 }
+
+###### end  user code  ########################
 
 function beginfile(f)
 {

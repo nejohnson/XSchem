@@ -44,7 +44,7 @@ proc open_close {dir fn} {
     set fn_debug [join [list $output_dir , [regsub {\.} $fn {_}] "_debug.txt"] ""]
     set output [join [list $testname / results / $fn_debug] ""]
     puts "Output: $fn_debug"
-    if {[catch {eval exec {xschem $fpath -q -d 1 2> $output}} msg]} {
+    if {[catch {eval exec {xschem $fpath -q -x -r -d 1 2> $output}} msg]} {
       puts "Something seems to have gone wrong with $fpath, but we will ignore it: $msg"
     } else {
       lappend pathlist $fn_debug

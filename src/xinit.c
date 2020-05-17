@@ -1413,12 +1413,12 @@ int Tcl_AppInit(Tcl_Interp *inter)
    tcleval( "waves [file tail \"[xschem get schname]\"]");
  }
 
- if(quit) {
-   tcleval( "after 1000 exit");
- }
-
  if(tcl_script[0]) {
    Tcl_VarEval(interp, "source ", tcl_script, NULL);
+ }
+
+ if(quit) {
+   tcleval( "exit");
  }
 
  /* */

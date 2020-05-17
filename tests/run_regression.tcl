@@ -20,8 +20,7 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-set wcases [list "open_close"]
-set tcases [list "create_save"]
+set tcases [list "create_save" "open_close"]
 set log_fn "results.txt"
 
 proc summarize_all {fn fd} {
@@ -49,12 +48,6 @@ foreach tc $tcases {
     eval exec {tclsh ${tc}.tcl}
     summarize_all ${tc}.log $fd
     puts "Finish source ${tc}.tcl"
-  }
-  foreach wc $wcases {
-    puts "Start wish ${wc}.tcl"
-    eval exec {wish ${wc}.tcl}
-    summarize_all ${wc}.log $fd
-    puts "Finish wish ${wc}.tcl"
   }
   close $fd
 } else {

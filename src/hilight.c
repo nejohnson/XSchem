@@ -809,7 +809,7 @@ void draw_hilight_net(int on_window)
       drawline(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0);
       drawrect(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0);
       filledrect(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0);
-      drawarc(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
+      drawarc(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0, 0);
       /* 20160414 from draw() */
       symptr = (inst_ptr[i].ptr+instdef);
       if( c==0 || /*draw_symbol call is needed on layer 0 to avoid redundant work (outside check) */
@@ -821,7 +821,7 @@ void draw_hilight_net(int on_window)
         draw_symbol(ADD, inst_color[i], i,c,0,0,0.0,0.0);
       }
       filledrect(inst_color[i], END, 0.0, 0.0, 0.0, 0.0);
-      drawarc(inst_color[i], END, 0.0, 0.0, 0.0, 0.0, 0.0);
+      drawarc(inst_color[i], END, 0.0, 0.0, 0.0, 0.0, 0.0, 0);
       drawrect(inst_color[i], END, 0.0, 0.0, 0.0, 0.0);
       drawline(inst_color[i], END, 0.0, 0.0, 0.0, 0.0);
      }

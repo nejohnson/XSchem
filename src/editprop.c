@@ -509,6 +509,54 @@ void edit_wire_property(void)
   my_free(&oldprop);
 }
 
+void edit_arc_property(void)
+{
+  int old_fill; /* 20180914 */
+  double x1, y1, x2, y2;
+  int c, i, ii;
+  char *oldprop = NULL;
+  int preserve;
+
+  if(arc[selectedgroup[0].col][selectedgroup[0].n].prop_ptr!=NULL) {
+    my_strdup(98, &oldprop, arc[selectedgroup[0].col][selectedgroup[0].n].prop_ptr);
+    tclsetvar("retval", oldprop);
+  } else { /* 20161208 */
+    tclsetvar("retval","");
+  }
+  tcleval("text_line {Input property:} 0 normal");
+  preserve = atoi(tclgetvar("preserve_unchanged_attrs"));
+  if(strcmp(tclgetvar("rcode"),"") )
+  {
+
+   set_modify(1); push_undo(); /* 20150327 */
+   for(ii=0; ii<lastselected; ii++) {
+     if(selectedgroup[ii].type != ARC) continue;
+   
+     i = selectedgroup[ii].n;
+     c = selectedgroup[ii].col;
+
+     if(preserve == 1) {
+        set_different_token(&arc[c][i].prop_ptr, (char *) tclgetvar("retval"), oldprop, 0, 0);
+
+     } else {
+        my_strdup(156, &arc[c][i].prop_ptr, (char *) tclgetvar("retval"));
+     }
+     old_fill = arc[c][i].fill;
+     if( !strcmp(get_tok_value(arc[c][i].prop_ptr,"fill",0),"true") )
+       arc[c][i].fill =1;
+     else 
+       arc[c][i].fill =0;
+     if(old_fill != arc[c][i].fill) {
+       bbox(BEGIN,0.0,0.0,0.0,0.0);
+       arc_bbox(arc[c][i].x, arc[c][i].y, arc[c][i].r, 0, 360, &x1,&y1,&x2,&y2);
+       bbox(ADD, x1, y1, x2, y2);
+       bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
+       draw();
+       bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
+     }
+   }
+  }
+}
 
 void edit_polygon_property(void)
 {
@@ -1147,21 +1195,8 @@ void edit_property(int x)
    edit_symbol_property(x);
    break;
   case ARC:
-   if(debug_var>=1) fprintf(errfp, "edit_property(), modified=%d\n", modified);
-   if(arc[selectedgroup[0].col][selectedgroup[0].n].prop_ptr!=NULL) {
-     tclsetvar("retval",arc[selectedgroup[0].col][selectedgroup[0].n].prop_ptr);
-   } else { /* 20161208 */
-     tclsetvar("retval","");
-   }
-   tcleval("text_line {Input property:} 0");
-   if(strcmp(tclgetvar("rcode"),"") )
-   {
-    set_modify(1); push_undo(); /* 20150327 */
-    my_strdup(98, &arc[selectedgroup[0].col][selectedgroup[0].n].prop_ptr,
-     (char *) tclgetvar("retval"));
-   }
+   edit_arc_property();
    break;
-
   case xRECT:
    edit_rect_property();
    break;

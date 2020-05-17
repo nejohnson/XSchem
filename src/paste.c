@@ -107,6 +107,10 @@ void merge_arc(FILE *fd)
     ptr[i].prop_ptr=NULL;
     ptr[i].sel=0;
     load_ascii_string(&ptr[i].prop_ptr, fd);
+    if( !strcmp(get_tok_value(ptr[i].prop_ptr,"fill",0),"true") ) /* 20181011 */
+      ptr[i].fill =1;
+    else
+      ptr[i].fill =0;
     select_arc(c,i, SELECTED, 1);
     lastarc[c]++;
     set_modify(1);

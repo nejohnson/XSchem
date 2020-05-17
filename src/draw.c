@@ -498,7 +498,7 @@ void draw_symbol(int what,int c, int n,int layer,int tmp_flip, int rot,
     angle = fmod(angle, 360.);
     if(angle<0.) angle+=360.;
     ROTATION(0.0,0.0,arc.x,arc.y,x1,y1);
-    drawarc(c,what, x0+x1, y0+y1, arc.r, angle, arc.b);
+    drawarc(c,what, x0+x1, y0+y1, arc.r, angle, arc.b, arc.fill);
   }
 
   if( (layer != PINLAYER || enable_layer[layer]) ) for(j=0;j< symptr->rects[layer];j++)
@@ -1044,12 +1044,15 @@ void filledarc(int c, int what, double x, double y, double r, double a, double b
 }
 
 
-void drawarc(int c, int what, double x, double y, double r, double a, double b)
+void drawarc(int c, int what, double x, double y, double r, double a, double b, int arc_fill)
 {
  static int i=0;
  static XArc arc[CADDRAWBUFFERSIZE];
  double x1, y1, x2, y2; /* arc bbox */
  double xx1, yy1, xx2, yy2; /* complete circle bbox in screen coords */
+
+
+ if(arc_fill) what = NOW;
 
  if(!has_x) return;
  if(what & ADD)
@@ -1093,8 +1096,24 @@ void drawarc(int c, int what, double x, double y, double r, double a, double b)
   y2=Y_TO_SCREEN(y2);
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
-   if(draw_window) XDrawArc(display, window, gc[c], xx1, yy1, xx2-xx1, yy2-yy1, a*64, b*64);
-   if(draw_pixmap) XDrawArc(display, save_pixmap, gc[c], xx1, yy1, xx2-xx1, yy2-yy1, a*64, b*64);
+   if(draw_window) {
+     XDrawArc(display, window, gc[c], xx1, yy1, xx2-xx1, yy2-yy1, a*64, b*64);
+   }
+   if(draw_pixmap) {
+     XDrawArc(display, save_pixmap, gc[c], xx1, yy1, xx2-xx1, yy2-yy1, a*64, b*64);
+   }
+
+   if(fill && fill_type[c]){
+     if(arc_fill) {
+       if(draw_window) 
+         XFillArc(display, window, gcstipple[c], xx1, yy1, xx2-xx1, yy2-yy1, a*64, b*64);
+       if(draw_pixmap)
+         XFillArc(display, save_pixmap, gcstipple[c], xx1, yy1, xx2-xx1, yy2-yy1, a*64, b*64);
+     }
+   }
+
+
+
   }
  }
  else if(what & BEGIN) i=0;
@@ -1444,7 +1463,7 @@ void draw(void)
           if(draw_single_layer!=-1 && c != draw_single_layer) continue; /* 20151117 */
           drawline(c, BEGIN, 0.0, 0.0, 0.0, 0.0);
           drawrect(c, BEGIN, 0.0, 0.0, 0.0, 0.0);
-          drawarc(c, BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
+          drawarc(c, BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0, 0);
           filledrect(c, BEGIN, 0.0, 0.0, 0.0, 0.0);
         
           for(i=0;i<lastline[c];i++) 
@@ -1456,7 +1475,7 @@ void draw(void)
           }
           for(i=0;i<lastarc[c];i++) 
           {
-            drawarc(c, ADD, arc[c][i].x, arc[c][i].y, arc[c][i].r, arc[c][i].a, arc[c][i].b);
+            drawarc(c, ADD, arc[c][i].x, arc[c][i].y, arc[c][i].r, arc[c][i].a, arc[c][i].b, arc[c][i].fill);
           }
           for(i=0;i<lastpolygon[c];i++) {
             /* 20180914 added fill */
@@ -1536,7 +1555,7 @@ void draw(void)
           }
         
           filledrect(c, END, 0.0, 0.0, 0.0, 0.0);
-          drawarc(c, END, 0.0, 0.0, 0.0, 0.0, 0.0);
+          drawarc(c, END, 0.0, 0.0, 0.0, 0.0, 0.0, 0);
           drawrect(c, END, 0.0, 0.0, 0.0, 0.0);
           drawline(c, END, 0.0, 0.0, 0.0, 0.0);
         }

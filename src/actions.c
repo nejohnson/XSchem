@@ -1767,7 +1767,7 @@ void new_arc(int what, double sweep)
       if(sweep_angle==360.) b=360.;
       if(r>0.) {
         push_undo();
-        drawarc(rectcolor, NOW, x, y, r, a, b);
+        drawarc(rectcolor, NOW, x, y, r, a, b, 0);
         store_arc(-1, x, y, r, a, b, rectcolor, 0, NULL);
       }
       ui_state &= ~STARTARC;

@@ -568,6 +568,10 @@ static void load_arc(FILE *fd)
     ptr[i].prop_ptr=NULL;
     ptr[i].sel=0;
     load_ascii_string(&ptr[i].prop_ptr, fd);
+    if( !strcmp(get_tok_value(ptr[i].prop_ptr,"fill",0),"true") )
+      ptr[i].fill =1;
+    else
+      ptr[i].fill =0;
     lastarc[c]++;
 }
 
@@ -1303,6 +1307,11 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
 
       aa[c][i].prop_ptr=NULL;
       load_ascii_string( &aa[c][i].prop_ptr, fd);
+      if( !strcmp(get_tok_value(aa[c][i].prop_ptr,"fill",0),"true") )
+        aa[c][i].fill =1;
+      else
+        aa[c][i].fill =0;
+
       if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): loaded arc: ptr=%lx\n", (unsigned long)aa[c]);
       lasta[c]++;
       break;

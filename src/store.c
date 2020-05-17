@@ -170,6 +170,10 @@ void store_arc(int pos, double x, double y, double r, double a, double b,
   my_strdup(407, &arc[rectcolor][n].prop_ptr, prop_ptr);
   arc[rectcolor][n].sel = sel;
   lastarc[rectcolor]++;
+  if( !strcmp(get_tok_value(arc[rectcolor][n].prop_ptr,"fill",0),"true") )
+    arc[rectcolor][n].fill =1;
+  else
+    arc[rectcolor][n].fill =0;
   set_modify(1);
 }
 

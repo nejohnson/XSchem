@@ -38,6 +38,26 @@ If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
 
+2.9.6
+- filled arcs/circles in svg and pdf exports
+- fix segfault when selecting polygon on layer x close to circle on layer y: incorrectly returning polygon on layer y
+- fill=true attribute for arc/circles, same as for polygons
+- add "--script <tcl_file>" to allow executing a tcl script from cmdline
+- allow flat netlist with LVS flag set
+- fix crashing bug: check for missing "name=" attribute on symbol pins in sym_vs_sch_pins()
+- separate "spiceprefix" and "toplevel is a subcircuit" options, move under Simulation menu
+- In load_file_dialog(), when the LHS panel is root, going down on the RHS panel should not
+  add an extra / for the new directory name (applicable to both Linux and Windows)
+- catch open filename should be within quote to handle window's filename with spaces; 
+- @spiceprefix added in front of @name in nmos4.sym, pmos4.sym, pmos.sym and nmos.sym in devices/
+- fix clash in loop variable in sym_vs_sch_pins()
+- better erc check: sch_vs_sym pin check in addition to sym_vs_sch
+- merge-in windows changes into xschem.tcl
+- vhdl postprocessor: add _vector on bussed nets only if boolean, integer, real, bit or std_logic type. 
+  Do not add for any other user defined type
+- vhdl netlister: do not declare record field signals (signal mysig.myfield), print component declaration
+  for symbols with type=primitive
+
 2.9.5
 - Avoid printing erc violations (open net and such) for global nodes, as they are resolved outside current schematic scope
 - @spiceprefix can be added in front of @name in symbol format string to change prefix for device spice simulations.

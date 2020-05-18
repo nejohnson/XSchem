@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC6 file_version=1.1}
+v {xschem version=2.9.5 file_version=1.1}
 G {}
 V {}
 S {}
@@ -36,7 +36,8 @@ C {capa.sym} 420 -240 0 1 {name=C1 m=1 value=\{cr\} footprint=1206 device="ceram
 C {gnd.sym} 420 -130 0 0 {name=l6 lab=0}
 C {title.sym} 160 -30 0 0 {name=l7 author="Stefan Schippers"}
 C {lab_pin.sym} 620 -440 0 1 {name=l8 sig_type=std_logic lab=VCC}
-C {code_shown.sym} 50 -210 0 0 {name=CONTROL place=end value=".params l0=20u cr=89p 
+C {code_shown.sym} 50 -210 0 0 {name=CONTROL place=end value=".option savecurrents
+.params l0=20u cr=89p 
 .options method=gear reltol=1m
 .tran 1ns 20us 10us 1ns
 "}

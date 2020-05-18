@@ -51,7 +51,7 @@ void find_closest_polygon(double mx,double my)
 /* if there are lines and distance < CADWIREMINDIST */
 {
  double tmp;
- int i, c, j, l=-1, col;
+ int i, c, j, l=-1, col=0;
  double x1, y1, x2, y2;
  double threshold = CADWIREMINDIST * CADWIREMINDIST * cadgrid * cadgrid / 400;
  for(c=0;c<cadlayers;c++)
@@ -85,7 +85,7 @@ void find_closest_line(double mx,double my)
 /* if there are lines and distance < CADWIREMINDIST */
 {
  double tmp;
- int i,c,l=-1, col;
+ int i,c,l=-1, col=0;
  double threshold = CADWIREMINDIST * CADWIREMINDIST * cadgrid * cadgrid / 400;
  for(c=0;c<cadlayers;c++)
  {

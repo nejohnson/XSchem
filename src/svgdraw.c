@@ -154,8 +154,12 @@ static void svg_drawarc(int gc, int fillarc, double x,double y,double r,double a
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
     if(b == 360.) {
-      fprintf(fd, "<circle cx=\"%g\" cy=\"%g\" r=\"%g\" stroke=\"rgb(%d,%d,%d)\" fill=\"none\" stroke-width=\"%g\"/>\n",
-         xx, yy, rr, svg_stroke.red, svg_stroke.green, svg_stroke.blue, svg_linew);
+      if(fillarc) 
+        fprintf(fd, "<circle cx=\"%g\" cy=\"%g\" r=\"%g\" class=\"l%d\" stroke=\"rgb(%d,%d,%d)\" stroke-width=\"%g\"/>\n",
+           xx, yy, rr, gc, svg_stroke.red, svg_stroke.green, svg_stroke.blue, svg_linew);
+      else
+        fprintf(fd, "<circle cx=\"%g\" cy=\"%g\" r=\"%g\" stroke=\"rgb(%d,%d,%d)\" fill=\"none\" stroke-width=\"%g\"/>\n",
+           xx, yy, rr, svg_stroke.red, svg_stroke.green, svg_stroke.blue, svg_linew);
     } else {
       xx1 = rr * cos(a * XSCH_PI / 180.) + xx;
       yy1 = -rr * sin(a * XSCH_PI / 180.) + yy;
@@ -163,7 +167,11 @@ static void svg_drawarc(int gc, int fillarc, double x,double y,double r,double a
       yy2 = -rr * sin((a + b) * XSCH_PI / 180.) + yy;
       fa = b > 180 ? 1 : 0;
       fs = b > 0 ? 0 : 1;
-      fprintf(fd,"<path class=\"l%d\" style=\"fill:none\" d=\"", gc);
+     
+      if(fillarc) 
+        fprintf(fd,"<path class=\"l%d\" d=\"", gc);
+      else
+        fprintf(fd,"<path class=\"l%d\" style=\"fill:none\" d=\"", gc);
       fprintf(fd, "M%g %g A%g %g 0 %d %d %g %g\"/>\n", xx1, yy1, rr, rr, fa, fs, xx2, yy2);
     }
   }
@@ -342,7 +350,7 @@ static void svg_draw_symbol(int n,int layer,int tmp_flip, int rot,
      angle = fmod(angle, 360.);
      if(angle<0.) angle+=360.;
      ROTATION(0.0,0.0,arc.x,arc.y,x1,y1);
-     svg_drawarc(layer, 0, x0+x1, y0+y1, arc.r, angle, arc.b);
+     svg_drawarc(layer, arc.fill, x0+x1, y0+y1, arc.r, angle, arc.b);
    }
 
    for(j=0;j< (inst_ptr[n].ptr+instdef)->rects[layer];j++)
@@ -496,7 +504,7 @@ void svg_draw(void)
     }
     for(i=0;i<lastarc[c];i++)
     {
-      svg_drawarc(c, 0, arc[c][i].x, arc[c][i].y, arc[c][i].r, arc[c][i].a, arc[c][i].b);
+      svg_drawarc(c, arc[c][i].fill, arc[c][i].x, arc[c][i].y, arc[c][i].r, arc[c][i].a, arc[c][i].b);
     }
     for(i=0;i<lastpolygon[c];i++) {
       svg_drawpolygon(c, NOW, polygon[c][i].x, polygon[c][i].y, polygon[c][i].points);

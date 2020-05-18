@@ -324,7 +324,7 @@ static void ps_draw_symbol(int n,int layer,int tmp_flip, int rot,
      angle = fmod(angle, 360.);
      if(angle<0.) angle+=360.;
      ROTATION(0.0,0.0,arc.x,arc.y,x1,y1);
-     ps_drawarc(layer, 0, x0+x1, y0+y1, arc.r, angle, arc.b);
+     ps_drawarc(layer, arc.fill, x0+x1, y0+y1, arc.r, angle, arc.b);
    }
    for(j=0;j< (inst_ptr[n].ptr+instdef)->rects[layer];j++)
    {
@@ -488,7 +488,7 @@ void ps_draw(void)
   }
   for(i=0;i<lastarc[c];i++)
   {
-    ps_drawarc(c, 0, arc[c][i].x, arc[c][i].y, arc[c][i].r, arc[c][i].a, arc[c][i].b);
+    ps_drawarc(c, arc[c][i].fill, arc[c][i].x, arc[c][i].y, arc[c][i].r, arc[c][i].a, arc[c][i].b);
   }
   for(i=0;i<lastpolygon[c];i++) {
     ps_drawpolygon(c, NOW, polygon[c][i].x, polygon[c][i].y, polygon[c][i].points, polygon[c][i].fill);

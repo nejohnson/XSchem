@@ -141,8 +141,13 @@ static void del_rect_line_arc_poly(void)
    if(arc[c][i].sel == SELECTED)
    {
     j++;
-    arc_bbox(arc[c][i].x, arc[c][i].y, arc[c][i].r, arc[c][i].a, arc[c][i].b,
-             &tmp.x1, &tmp.y1, &tmp.x2, &tmp.y2);
+   
+    if(arc[c][i].fill) 
+      arc_bbox(arc[c][i].x, arc[c][i].y, arc[c][i].r, 0, 360,
+               &tmp.x1, &tmp.y1, &tmp.x2, &tmp.y2);
+    else
+      arc_bbox(arc[c][i].x, arc[c][i].y, arc[c][i].r, arc[c][i].a, arc[c][i].b,
+               &tmp.x1, &tmp.y1, &tmp.x2, &tmp.y2);
     bbox(ADD, tmp.x1, tmp.y1, tmp.x2, tmp.y2);
     my_free(&arc[c][i].prop_ptr);
     set_modify(1);

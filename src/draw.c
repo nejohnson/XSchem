@@ -1089,7 +1089,10 @@ void drawarc(int c, int what, double x, double y, double r, double a, double b, 
   yy1=Y_TO_SCREEN(y-r);
   xx2=X_TO_SCREEN(x+r);
   yy2=Y_TO_SCREEN(y+r);
-  arc_bbox(x, y, r, a, b, &x1,&y1,&x2,&y2);
+  if(arc_fill)
+    arc_bbox(x, y, r, 0, 360, &x1,&y1,&x2,&y2);
+  else
+    arc_bbox(x, y, r, a, b, &x1,&y1,&x2,&y2);
   x1=X_TO_SCREEN(x1);
   y1=Y_TO_SCREEN(y1);
   x2=X_TO_SCREEN(x2);

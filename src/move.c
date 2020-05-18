@@ -1019,8 +1019,12 @@ void move_objects(int what, int merge, double dx, double dy)
 
      case ARC:
       if(c!=k) break;
-      arc_bbox(arc[c][n].x, arc[c][n].y, arc[c][n].r, arc[c][n].a, arc[c][n].b,
-               &tmp.x1, &tmp.y1, &tmp.x2, &tmp.y2);
+      if(arc[c][n].fill) 
+        arc_bbox(arc[c][n].x, arc[c][n].y, arc[c][n].r, 0, 360,
+                 &tmp.x1, &tmp.y1, &tmp.x2, &tmp.y2); 
+      else
+        arc_bbox(arc[c][n].x, arc[c][n].y, arc[c][n].r, arc[c][n].a, arc[c][n].b,
+                 &tmp.x1, &tmp.y1, &tmp.x2, &tmp.y2); 
       if(debug_var>=1) fprintf(errfp, "move_objects(): arc_bbox: %g %g %g %g\n", tmp.x1, tmp.y1, tmp.x2, tmp.y2);
       bbox(ADD, tmp.x1, tmp.y1, tmp.x2, tmp.y2);
 

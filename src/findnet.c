@@ -51,7 +51,7 @@ void find_closest_polygon(double mx,double my)
 /* if there are lines and distance < CADWIREMINDIST */
 {
  double tmp;
- int i, c, j, l=-1;
+ int i, c, j, l=-1, col;
  double x1, y1, x2, y2;
  double threshold = CADWIREMINDIST * CADWIREMINDIST * cadgrid * cadgrid / 400;
  for(c=0;c<cadlayers;c++)
@@ -67,7 +67,7 @@ void find_closest_polygon(double mx,double my)
       ORDER(x1,y1,x2,y2);
       if( (tmp = dist(x1, y1, x2, y2, mx, my)) < distance )
       {
-       l = i; distance = tmp;sel.col = c;
+       l = i; distance = tmp;col = c;
        if(debug_var>=1) fprintf(errfp, "find_closest_polygon(): distance=%.16g  n=%d\n", distance, i);
       }
     }
@@ -75,7 +75,7 @@ void find_closest_polygon(double mx,double my)
  } /* end for c */
  if( distance <= threshold && l!=-1)
  {
-  sel.n = l; sel.type = POLYGON;
+  sel.n = l; sel.type = POLYGON; sel.col = col;
  }
 }
 
@@ -85,7 +85,7 @@ void find_closest_line(double mx,double my)
 /* if there are lines and distance < CADWIREMINDIST */
 {
  double tmp;
- int i,c,l=-1;
+ int i,c,l=-1, col;
  double threshold = CADWIREMINDIST * CADWIREMINDIST * cadgrid * cadgrid / 400;
  for(c=0;c<cadlayers;c++)
  {
@@ -94,14 +94,14 @@ void find_closest_line(double mx,double my)
    if( (tmp = dist(line[c][i].x1,line[c][i].y1,line[c][i].x2,line[c][i].y2,mx,my)) 
          < distance )
    {
-    l = i; distance = tmp;sel.col = c;
+    l = i; distance = tmp;col = c;
     if(debug_var>=1) fprintf(errfp, "find_closest_line(): distance=%.16g  n=%d\n", distance, i);
    }
   } /* end for i */
  } /* end for c */
  if( distance <= threshold && l!=-1)
  {
-  sel.n = l; sel.type = LINE; 
+  sel.n = l; sel.type = LINE; sel.col = col;
  }
 }
 
@@ -172,7 +172,7 @@ void find_closest_arc(double mx,double my)
 {
  double thres = 0.2*cadgrid*cadgrid/400;
  double dist, angle, angle1, angle2;
- int i,c,r=-1;
+ int i,c,r=-1, col;
  int match;
 
  for(c=0;c<cadlayers;c++)
@@ -205,13 +205,13 @@ void find_closest_arc(double mx,double my)
       if(debug_var>=1) fprintf(errfp, "find_closest_arc(): i = %d\n", i);
       r = i; 
       distance = dist;
-      sel.col = c;
+      col = c;
     }
   } /* end for i */
  } /* end for c */
- if( r!=-1 && distance <= thres* pow(arc[sel.col][r].r,2))
+ if( r!=-1 && distance <= thres* pow(arc[col][r].r,2))
  {
-  sel.n = r; sel.type = ARC;
+  sel.n = r; sel.type = ARC; sel.col = col;
  }
 }
 
@@ -219,7 +219,7 @@ void find_closest_arc(double mx,double my)
 void find_closest_box(double mx,double my)
 {
  double tmp;
- int i,c,r=-1;
+ int i,c,r=-1, col;
  for(c=0;c<cadlayers;c++)
  {
   for(i=0;i<lastrect[c];i++)
@@ -230,7 +230,7 @@ void find_closest_box(double mx,double my)
                                   rect[c][i].x2,rect[c][i].y2);
     if(tmp < distance)
     {
-     r = i; distance = tmp;sel.col = c;
+     r = i; distance = tmp;col = c;
     }
    }
   } /* end for i */
@@ -238,7 +238,7 @@ void find_closest_box(double mx,double my)
  if(debug_var>=1) fprintf(errfp, "find_closest_box(): distance=%.16g\n", distance);
  if( r!=-1)
  {
-  sel.n = r; sel.type = xRECT;
+  sel.n = r; sel.type = xRECT; sel.col = col;
  }
 }
 
@@ -305,8 +305,10 @@ Selected find_closest_obj(double mx,double my)
  distance = DBL_MAX;
  find_closest_line(mx,my);
  find_closest_polygon(mx,my);
+ /* if(debug_var>=0) fprintf(errfp, "1 find_closest_obj(): sel.n=%d, sel.col=%d, sel.type=%d\n", sel.n, sel.col, sel.type); */
  find_closest_box(mx,my);
  find_closest_arc(mx,my);
+ /* if(debug_var>=0) fprintf(errfp, "2 find_closest_obj(): sel.n=%d, sel.col=%d, sel.type=%d\n", sel.n, sel.col, sel.type); */
  find_closest_text(mx,my);
  find_closest_net(mx,my);
  find_closest_element(mx,my);

@@ -830,6 +830,7 @@ unsigned short select_object(double mousex,double mousey, unsigned short select_
    drawtemparc(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
    drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
    drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
+   if(debug_var>=1) fprintf(errfp, "select_object(): sel.n=%d, sel.col=%d, sel.type=%d\n", sel.n, sel.col, sel.type);
 
    switch(sel.type)
    {

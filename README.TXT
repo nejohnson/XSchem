@@ -57,6 +57,7 @@ CHANGELOG
   Do not add for any other user defined type
 - vhdl netlister: do not declare record field signals (signal mysig.myfield), print component declaration
   for symbols with type=primitive
+- Windows porting code added.
 
 2.9.5
 - Avoid printing erc violations (open net and such) for global nodes, as they are resolved outside current schematic scope

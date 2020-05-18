@@ -2,6 +2,8 @@
 # Exclude all compiler-generated object and executable files
 *.o
 *.exe
+src/rawtovcd
+src/xschem
 
 # Exclude output of bison
 src/expandlabel.c
@@ -11,4 +13,6 @@ src/expandlabel.h
 src/parselabel.c
 src/parselabel.h
 
+# Exclude tool-related config files
+.project
 

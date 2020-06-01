@@ -58,7 +58,7 @@ void free_hilight_hash(void) /* remove the whole hash table  */
 {
  int i;
 
-  if(debug_var>=2) fprintf(errfp, "free_hilight_hash(): removing hash table\n");
+ if(debug_var>=2) fprintf(errfp, "free_hilight_hash(): removing hash table\n");
  for(i=0;i<HASHSIZE;i++)
  {
   table[i] = free_hilight_entry( table[i] );
@@ -67,20 +67,30 @@ void free_hilight_hash(void) /* remove the whole hash table  */
  nelements=0; /* 20161221 */
 }
 
-
+/* print all highlight signals which are not ports (in/out/inout). */
 void print_all_hilights()
 {
   int i;
   struct hilight_hashentry *entry;
+  struct node_hashentry *node_entry;
+  char *tok;
 
+  fprintf(errfp, "\n");
   for(i=0;i<HASHSIZE;i++)
   {
     entry = table[i];
     while(entry) {
-      if(!strcmp(entry->path, ".") )
-        fprintf(errfp, "%s\n", entry->token);
-      else
-        fprintf(errfp, "%s%s\n", (entry->path)+1, entry->token);
+
+      tok = entry->token;
+      node_entry = bus_hash_lookup(tok, "",2, 0, "", "", "", "");
+      if(tok[0] == '#') tok++;
+
+      if(node_entry && !strcmp(sch_prefix[currentsch], entry->path) && node_entry->d.port == 0) {
+        if(!strcmp(entry->path, ".") )
+          fprintf(errfp, "%s\n", tok);
+        else
+          fprintf(errfp, "%s%s\n", (entry->path)+1, tok);
+      }
       entry = entry->next;
     }
   }
@@ -407,11 +417,11 @@ void search(const char *tok, const char *val, int sub, int sel, int what)
       if(get_tok_size ) {
 #ifdef __unix__
         if(   (!regexec(&re, str,0 , NULL, 0) && !sub )  ||       /* 20071120 regex instead of strcmp */
-              ( !strcmp(str, val) &&  sub )
+              ( !strcmp(str, val) &&  sub ) )
 #else
-        if (!strcmp(str, val) && sub
+        if (!strcmp(str, val) && sub)
 #endif
-          ) {
+        {
             if(debug_var>=2) fprintf(errfp, "search(): wire=%d, tok=%s, val=%s \n", i,tok, wire[i].node);
             if(!sel) {
               bus_hilight_lookup(wire[i].node, col, 0);
@@ -450,11 +460,11 @@ void search(const char *tok, const char *val, int sub, int sel, int what)
       if(get_tok_size) {
 #ifdef __unix__
         if( (!regexec(&re, str,0 , NULL, 0) && !sub ) ||
-            ( !strcmp(str, val) &&  sub )
+            ( !strcmp(str, val) &&  sub ))
 #else
-        if ((!strcmp(str, val) && sub)
+        if ((!strcmp(str, val) && sub))
 #endif
-          ) {
+        {
             if(sel==1) {
               select_line(c, i,SELECTED, 1);
               ui_state|=SELECTION;
@@ -474,11 +484,11 @@ void search(const char *tok, const char *val, int sub, int sel, int what)
       if(get_tok_size) {
 #ifdef __unix__
         if( (!regexec(&re, str,0 , NULL, 0) && !sub ) ||
-            ( !strcmp(str, val) &&  sub )
+            ( !strcmp(str, val) &&  sub ))
 #else
-        if ((!strcmp(str, val) && sub)
+        if ((!strcmp(str, val) && sub))
 #endif
-          ) {
+        {
             if(sel==1) {
               select_box(c, i,SELECTED, 1);
               ui_state|=SELECTION;

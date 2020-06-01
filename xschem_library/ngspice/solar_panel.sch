@@ -1,4 +1,4 @@
-v {xschem version=2.9.5 file_version=1.1}
+v {xschem version=2.9.6 file_version=1.1}
 G {}
 V {}
 S {}
@@ -162,7 +162,7 @@ C {lab_pin.sym} 325 -310 0 0 {name=l11 sig_type=std_logic lab=0}
 C {launcher.sym} 655 -105 0 0 {name=h2 
 descr="Simulate" 
 tclcommand="xschem netlist; xschem simulate"}
-C {isource_table.sym} 1140 -320 0 0 {name=G2[9..0] CTRL="V(LED)" TABLE="
+C {isource_table.sym} 1140 -320 0 0 {name=G2[9:0] CTRL="V(LED)" TABLE="
 + (0, 0)
 + (4.8, 5m)
 + (5.2, 15m)

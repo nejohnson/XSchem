@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC7 file_version=1.1}
+v {xschem version=2.9.6 file_version=1.1}
 G {process
 begin
 A<='0';
@@ -122,7 +122,7 @@ C {lab_wire.sym} 830 -360 0 1 {name=l5 lab=Y_NAND}
 C {nd2.sym} 740 -360 0 0 {name=a3 delay="120 ps" del=120}
 C {dac_bridge.sym} 1010 -360 0 0 {name=a4 }
 C {lab_pin.sym} 1090 -360 2 0 {name=p1 lab=Y_NAND_A}
-C {netlist_options.sym} 30 -510 0 0 {bus_replacement_char="[]"}
+C {netlist_options.sym} 30 -510 0 0 {bus_replacement_char="xx"}
 C {lab_pin.sym} 670 -520 2 1 {name=p13 lab=A}
 C {lab_pin.sym} 670 -480 2 1 {name=p14 lab=~B,~Y_NAND}
 C {lab_wire.sym} 870 -500 0 1 {name=l15 lab=Y_NOR}

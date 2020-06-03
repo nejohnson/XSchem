@@ -3054,7 +3054,7 @@ font configure Underline-Font -underline true -size 24
          }
        }
    .menubar.simulation.menu add command -label {Edit Netlist} -command {edit_netlist [file tail [xschem get schname]]}
-   .menubar.simulation.menu add command -label {Create Ngspice 'xplot' probe file} -command {xschem create_ngspice_plot_cmd}
+   .menubar.simulation.menu add command -label {Create Ngspice 'xplot' file} -command {xschem create_ngspice_plot_cmd} -accelerator Shift+J
    .menubar.simulation.menu add separator
    .menubar.simulation.menu add checkbutton -label "LVS netlist: Top level is a .subckt" -variable top_subckt 
    .menubar.simulation.menu add checkbutton -label "Use 'spiceprefix' attribute" -variable spiceprefix 

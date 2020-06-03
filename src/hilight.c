@@ -67,15 +67,54 @@ void free_hilight_hash(void) /* remove the whole hash table  */
  nelements=0; /* 20161221 */
 }
 
-/* print all highlight signals which are not ports (in/out/inout). */
-void print_all_hilights()
+
+int get_color(int value) 
 {
-  int i;
+  int x;
+
+  x = value%(n_active_layers);
+  return active_layer[x];
+}
+
+/* print all highlight signals which are not ports (in/out/inout). */
+void create_ngspice_plot_cmd()
+{
+  int i, c, idx, first;
   struct hilight_hashentry *entry;
   struct node_hashentry *node_entry;
   char *tok;
+  char plotfile[PATH_MAX];
+  FILE *fd;
 
-  fprintf(errfp, "\n");
+
+  my_snprintf(plotfile, S(plotfile), "%s/xplot", netlist_dir);
+  if(!(fd = fopen(plotfile, "w"))) {
+    fprintf(errfp, "print_all_hilights(): error opening xplot file for writing\n");
+    return;
+  }
+  fprintf(fd, "*ngspice plot file\n.control\n");
+
+
+
+  idx = 1;
+  for(i=0;i<HASHSIZE;i++) /* set ngspice colors */
+  {
+    entry = table[i];
+    while(entry) {
+      tok = entry->token;
+      node_entry = bus_hash_lookup(tok, "",2, 0, "", "", "", "");
+      if(node_entry && !strcmp(sch_prefix[currentsch], entry->path) && node_entry->d.port == 0) {
+        c = get_color(entry->value);
+        idx++;
+        if(idx > 22) idx = 2;
+        fprintf(fd, "set color%d=rgb:%02x/%02x/%02x\n", idx, xcolor_array[c].red>>8, xcolor_array[c].green>>8, xcolor_array[c].blue>>8);
+      }
+      entry = entry->next;
+    }
+  }
+
+  /* plot signals */
+  first = 1;
   for(i=0;i<HASHSIZE;i++)
   {
     entry = table[i];
@@ -86,15 +125,20 @@ void print_all_hilights()
       if(tok[0] == '#') tok++;
 
       if(node_entry && !strcmp(sch_prefix[currentsch], entry->path) && node_entry->d.port == 0) {
+        if(first) {
+          fprintf(fd, "plot ");
+          first = 0;
+        }
         if(!strcmp(entry->path, ".") )
-          fprintf(errfp, "%s\n", tok);
+          fprintf(fd, "%s ", tok);
         else
-          fprintf(errfp, "%s%s\n", (entry->path)+1, tok);
+          fprintf(fd, "%s%s ", (entry->path)+1, tok);
       }
       entry = entry->next;
     }
   }
-
+  fprintf(fd, "\n.endc\n");
+  fclose(fd);
 }
 
 struct hilight_hashentry *hilight_lookup(char *token, int value, int remove)
@@ -301,15 +345,6 @@ int bus_search(const char*s)
  }
  return bus;
 }
-
-int get_color(int value) 
-{
-  int x;
-
-  x = value%(n_active_layers);
-  return active_layer[x];
-}
-
 
 void search(const char *tok, const char *val, int sub, int sel, int what)
 {

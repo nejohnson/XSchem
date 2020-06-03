@@ -392,7 +392,7 @@ int callback(int event, int mx, int my, KeySym key,
      break;
    }
    if(key == 'J' && state==ShiftMask) { /* testmode */
-    print_all_hilights();
+    create_ngspice_plot_cmd();
     break;
    }
    if(key == '$'  && ( state == ShiftMask) )            /* toggle pixmap  saving */

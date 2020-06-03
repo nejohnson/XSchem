@@ -619,7 +619,7 @@ extern int spiceprefix;
 extern int quit;
 extern int show_erc;
 extern int hilight_nets;
-extern void print_all_hilights();
+extern void create_ngspice_plot_cmd();
 extern char *sch_prefix[];
 extern int modified;
 extern int color_ps;

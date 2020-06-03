@@ -1037,6 +1037,10 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
    }
  }
 
+ else if(!strcmp(argv[1],"create_ngspice_plot_cmd") ) {
+   create_ngspice_plot_cmd();
+ }
+
  else if(!strcmp(argv[1],"fill_symbol_editprop_form") ) {
    fill_symbol_editprop_form(0);
  }

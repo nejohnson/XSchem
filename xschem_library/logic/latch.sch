@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC5 file_version=1.1}
+v {xschem version=2.9.6 file_version=1.1}
 G {
 
 a: process( G , D, RST )
@@ -40,3 +40,4 @@ library ieee;
 C {ipin.sym} 120 -440 0 0 {name=p14 lab=RST}
 C {opin.sym} 280 -440 0 0 {name=p1 lab=QN}
 C {title.sym} 160 -30 0 0 {name=l17}
+C {ipin.sym} 120 -380 0 0 {name=p3 lab=D}

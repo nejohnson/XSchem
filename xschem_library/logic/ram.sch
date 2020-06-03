@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC5 file_version=1.1}
+v {xschem version=2.9.6 file_version=1.1}
 G {
 
     process(data, CEN, OEN) begin
@@ -29,29 +29,43 @@ reg [width-1:0] idata;
 wire [width-1:0] iidata;
 
 
-// initial begin
-//   $display("filling code ram");
-//   if(hex==1) $readmemh(datafile, mem);
-//   else       $readmemb(datafile, mem);
-// end
-
-always @(posedge CK) begin : writeread
-  reg [width-1:0] tmp;
-  if(!CEN && !WEN) begin
-    tmp = (DIN & ~M) | (mem[ADD] & M);
-    mem[ADD] <= tmp;
-    idata <= tmp; //write thru option
-    $display("%s write: addr=%h data=%h time=%t",modulename, ADD,tmp, $time);
-  end
-  if(!CEN && WEN) begin
-      idata <= mem[ADD];
-      $display("%s read: addr=%h, data=%h, time=%t", modulename, ADD, mem[ADD], $time);
+initial begin
+  if(hex >=0) begin
+    $display("filling code ram");
+    // hex data, file looks like:
+    // 11cc
+    // ffaa
+    // 3e1b
+    // ...
+    if(hex==1) $readmemh(datafile, mem); // hex data 
+    //  binary data, file looks like:
+    // 0001000111001100
+    // 1111111110101010
+    // 0011111000011011
+    // ...
+    else       $readmemb(datafile, mem);
   end
 end
 
-assign iidata = idata;
+always @(posedge CK) begin : writeread
+  reg [width-1:0] tmp;
+  if(!CEN) begin
+    if(!WEN) begin
+      tmp = (DIN & ~M) | (mem[ADD] & M);
+      mem[ADD] <= tmp;
+      idata <= tmp; //write thru option
+      $display("%s write: addr=%h data=%h time=%t",modulename, ADD,tmp, $time);
+    end
+    else begin
+      idata <= mem[ADD];
+      $display("%s read: addr=%h, data=%h, time=%t", modulename, ADD, mem[ADD], $time);
+    end
+  end
+end
 
-assign #3000 DOUT = OEN ? 'bz: iidata;
+assign #access_delay iidata = idata;
+
+assign #oe_delay DOUT = OEN ? 'bz: iidata;
 //always@(DOUT) $display("code ram2 read: addr=%h, data=%h, time=%t", ADD, DOUT, $time);
 
 
@@ -126,7 +140,7 @@ C {ipin.sym} 200 -170 0 0 {name=p4 lab=CEN}
 C {ipin.sym} 200 -240 0 0 {name=p5 lab=M[width-1:0]}
 C {verilog_timescale.sym} 710 -197.5 0 0 {name=s1 timestep="1ps" precision="1ps" }
 C {title.sym} 160 -30 0 0 {name=l2}
-C {use.sym} 360 -120 0 0 {------------------------------------------------
+C {use.sym} 360 -130 0 0 {------------------------------------------------
 library ieee;
         use ieee.std_logic_1164.all;
         use ieee.numeric_std.all;}

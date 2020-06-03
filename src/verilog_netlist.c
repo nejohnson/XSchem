@@ -35,7 +35,6 @@ void global_verilog_netlist(int global)  /* netlister driver */
  char netl2[PATH_MAX]; /* 20081203  overflow safe 20161122 */
  char netl3[PATH_MAX]; /* 20081203  overflow safe 20161122 */
  static char *type=NULL;
- int first=0;
 
  if(current_type==SYMBOL) {
    tcleval("alert_ {This is a symbol, no netlisting can be done.\n"
@@ -233,7 +232,7 @@ void global_verilog_netlist(int global)  /* netlister driver */
  if(debug_var>=1) fprintf(errfp, "global_verilog_netlist(): netlisting  top level\n");
  verilog_netlist(fd, 0);
  netlist_count++;
- first = 0;
+ fprintf(fd,"---- begin user architecture code\n");
  /* 20180124 */
  for(i=0;i<lastinst;i++) {
    if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"verilog_ignore",0),"true")==0 ) continue; /* 20140416 */
@@ -243,19 +242,15 @@ void global_verilog_netlist(int global)  /* netlister driver */
    }
    my_strdup(561, &type,(inst_ptr[i].ptr+instdef)->type);
    if(type && !strcmp(type,"netlist_commands")) {
-     if(first == 0 ) fprintf(fd,"---- begin user architecture code\n");
      fprintf(fd, "%s\n", get_tok_value(inst_ptr[i].prop_ptr,"value",2)); /* 20180124 */
-     first++;
    }
  }
 
 
  if(schverilogprop && schverilogprop[0]) {
-   if(first == 0 ) fprintf(fd,"---- begin user architecture code\n");
    fprintf(fd, "%s\n", schverilogprop); 
-   first++;
  }
- if(first) fprintf(fd,"---- end user architecture code\n");
+ fprintf(fd,"---- end user architecture code\n");
  fprintf(fd, "endmodule\n");
 
  if(split_files) { /* 20081205 */
@@ -339,7 +334,6 @@ void verilog_block_netlist(FILE *fd, int i)  /*20081205 */
  char netl2[PATH_MAX];  /* 20081202 */
  char netl3[PATH_MAX];  /* 20081202 */
  char *str_tmp;
- int first = 0;
 
      if(!strcmp( get_tok_value(instdef[i].prop_ptr,"verilog_stop",0),"true") ) 
         verilog_stop=1;
@@ -442,9 +436,7 @@ void verilog_block_netlist(FILE *fd, int i)  /*20081205 */
      if(debug_var>=1) fprintf(errfp, "verilog_block_netlist():       netlisting %s\n", skip_dir( schematic[currentsch]));
      verilog_netlist(fd, verilog_stop);
      netlist_count++;
-
-     /* 20180124 */
-     first = 0;
+     fprintf(fd,"---- begin user architecture code\n");
      for(l=0;l<lastinst;l++) {
        if( strcmp(get_tok_value(inst_ptr[l].prop_ptr,"verilog_ignore",0),"true")==0 ) continue; /* 20140416 */
        if(inst_ptr[l].ptr<0) continue;
@@ -456,18 +448,14 @@ void verilog_block_netlist(FILE *fd, int i)  /*20081205 */
 
        my_strdup(569, &type,(inst_ptr[l].ptr+instdef)->type);
        if(type && !strcmp(type,"netlist_commands")) {
-         if(first == 0) fprintf(fd,"---- begin user architecture code\n");
          fprintf(fd, "%s\n", get_tok_value(inst_ptr[l].prop_ptr,"value",2)); /* 20180124 */
-         first++;
        }
      }
 
      if(schverilogprop && schverilogprop[0]) {
-       if(first == 0) fprintf(fd,"---- begin user architecture code\n");
        fprintf(fd, "%s\n", schverilogprop);
-       first++;
      }
-     if(first) fprintf(fd,"---- end user architecture code\n");
+     fprintf(fd,"---- end user architecture code\n");
      fprintf(fd, "endmodule\n");
      if(split_files) { /* 20081204 */
        fclose(fd);

@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC6 file_version=1.1}
+v {xschem version=2.9.6 file_version=1.1}
 G {process
 begin
 A<='0';
@@ -106,7 +106,7 @@ end
 
 always begin
   if(n ==0 ) CK = 0;
-  if(n == 16) $finish;
+  if(n == 23) $finish;
   n = n + 1;
   #5000;
   CK = !CK;
@@ -114,23 +114,41 @@ end
 
 initial begin
 #2000;
+M ='h00; // we do not use mask bits
+
+// reads
+WEN=1;
+CEN=0;
+OEN=0;
+
+ADD=0;
+#10000;
+ADD=1;
+#10000;
+ADD=2;
+#10000;
+ADD=3;
+#10000;
+
+// writes
 WEN=0;
 CEN=0;
 OEN=1;
-M ='h00;
 
 ADD=0;
-DIN='h11;
-#10000;
-ADD=1;
-DIN='h22;
-#10000;
-ADD=2;
 DIN='h33;
 #10000;
-ADD=3;
+ADD=1;
 DIN='h44;
 #10000;
+ADD=2;
+DIN='h55;
+#10000;
+ADD=3;
+DIN='h66;
+#10000;
+
+// reads
 WEN=1;
 OEN=0;
 
@@ -198,15 +216,15 @@ C {use.sym} 40 -670 0 0 {------------------------------------------------
 library ieee;
         use ieee.std_logic_1164.all;
         use ieee.numeric_std.all;}
-C {ram.sym} 840 -670 0 0 {name=xcoderam   dim=5 width=8 hex=0 datafile=ram.list}
-C {lab_pin.sym} 950 -750 0 1 {name=p25 lab=DOUT[7:0]}
-C {lab_pin.sym} 730 -710 0 0 {name=p26 lab=ADD[4:0]}
-C {lab_pin.sym} 730 -750 0 0 {name=p27 lab=DIN[7:0]}
-C {lab_pin.sym} 730 -670 0 0 {name=p28 lab=WEN}
-C {lab_pin.sym} 730 -650 0 0 {name=p29 lab=OEN}
-C {lab_pin.sym} 730 -630 0 0 {name=p30 lab=CK}
-C {lab_pin.sym} 730 -690 0 0 {name=p31 lab=CEN}
-C {lab_pin.sym} 730 -730 0 0 {name=p32 lab=M[7:0]}
+C {ram.sym} 840 -670 0 0 {name=xcoderam   dim=5 width=8 hex=1 datafile=ram.list}
+C {lab_pin.sym} 990 -730 0 1 {name=p25 lab=DOUT[7:0]}
+C {lab_pin.sym} 690 -730 0 0 {name=p26 lab=ADD[4:0]}
+C {lab_pin.sym} 690 -690 0 0 {name=p27 lab=DIN[7:0]}
+C {lab_pin.sym} 690 -670 0 0 {name=p28 lab=WEN}
+C {lab_pin.sym} 690 -630 0 0 {name=p29 lab=OEN}
+C {lab_pin.sym} 690 -610 0 0 {name=p30 lab=CK}
+C {lab_pin.sym} 690 -650 0 0 {name=p31 lab=CEN}
+C {lab_pin.sym} 690 -710 0 0 {name=p32 lab=M[7:0]}
 C {lab_pin.sym} 220 -280 0 1 {name=p34 lab=ADD[4:0] verilog_type=reg}
 C {lab_pin.sym} 220 -320 0 1 {name=p35 lab=DIN[7:0] verilog_type=reg}
 C {lab_pin.sym} 220 -240 0 1 {name=p36 lab=WEN verilog_type=reg}
@@ -218,7 +236,7 @@ C {sync_reg.sym} 840 -850 0 0 {name=x8 width=8}
 C {lab_pin.sym} 740 -880 0 0 {name=p33 lab=DIN[7:0]}
 C {lab_pin.sym} 740 -820 0 0 {name=p41 lab=CK}
 C {lab_pin.sym} 740 -840 0 0 {name=p42 lab=BN}
-C {lab_pin.sym} 740 -860 2 1 {name=p43 lab=A}
+C {lab_pin.sym} 740 -860 0 0 {name=p43 lab=A}
 C {lab_pin.sym} 940 -880 0 1 {name=p44 lab=DATA_OUT[7:0]}
 C {iv.sym} 850 -90 0 0 {name=x9 }
 C {lab_pin.sym} 780 -90 2 1 {name=p45 lab=B}

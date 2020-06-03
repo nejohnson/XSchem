@@ -46,6 +46,7 @@ function beginfile(f)
 {
  sym=name=f
  sub(/^.*\//,"",name)
+ name_ext=name
  sub(/\.sch.*$/,"",name)
  sub(/\.sch.*$/,".sym",sym)
  print "**** symbol-izing: " sym "  ****"
@@ -74,7 +75,7 @@ function beginfile(f)
   printf "%s", "}\n"  >sym
  } 
  else print template >sym
- print "T {@symname}" ,-length(name)/2*titlesize*30, -text_voffset*titlesize,0,0,
+ print "T {@symname}" ,-length(name_ext)/2*titlesize*30, -text_voffset*titlesize,0,0,
        titlesize, titlesize, "{}" >sym
  
 

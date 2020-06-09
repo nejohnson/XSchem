@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC8 file_version=1.1}
+v {xschem version=2.9.6 file_version=1.1}
 G {process
 begin
   if now = 0 ns then

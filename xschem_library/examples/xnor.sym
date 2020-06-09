@@ -1,9 +1,9 @@
-v {xschem version=2.9.5_RC7 file_version=1.1}
+v {xschem version=2.9.6 file_version=1.1}
 G {type=subcircuit
-verilog_format="xnor #(1 , 1 ) @name ( @#0 , @#1 , @#2 );"
+verilog_format="xnor #(@risedel , @falldel ) @name ( @#0 , @#1 , @#2 );"
 vhdl_format = "@@Z <= @@A xnor @@B after 0.1 ns;"
 format="@name @pinlist @symname"
-template="name=x1"
+template="name=x1 risedel=400 falldel=300"
 verilog_primitive=true
 vhdl_primitive=true
 }

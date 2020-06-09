@@ -821,10 +821,15 @@ proc myload_set_home {dir} {
     .dialog.l.paneleft.list selection set 0
   }
 }
+proc setglob {dir} {
+      global globfilter myload_files2
+      set myload_files2 [lsort [glob -nocomplain -directory $dir -tails -type d \{.*,*\}]]
+      set myload_files2 ${myload_files2}\ [lsort [glob -nocomplain -directory $dir -tails -type {f l} \{.*,$globfilter\}]]
+}
 
 proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
   global myload_index1 myload_files2 myload_files1 myload_retval myload_dir1 pathlist
-  global myload_default_geometry myload_sash_pos myload_yview tcl_version
+  global myload_default_geometry myload_sash_pos myload_yview tcl_version globfilter myload_dirs2
   upvar #0 $global_initdir initdir
   toplevel .dialog -class dialog
   wm title .dialog $msg
@@ -838,8 +843,6 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
   # return value
   set myload_retval {} 
 
-  # set files [lsort [glob -directory . -tails \{.*,*\}]]
-  
   panedwindow  .dialog.l -orient horizontal
 
   frame .dialog.l.paneleft
@@ -859,7 +862,7 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
     if { $sel ne {} } {
       set myload_dir1 [abs_sym_path [.dialog.l.paneleft.list get $sel]]
       set myload_index1 $sel
-      set myload_files2 [lsort [glob -directory $myload_dir1 -tails \{.*,*\}]]
+      setglob $myload_dir1
       myload_set_colors
     }
   }
@@ -891,20 +894,23 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
     .dialog.l.paneleft.list xview moveto 1
     set myload_index1 0
     set myload_dir1 [abs_sym_path [.dialog.l.paneleft.list get $myload_index1]]
-    set myload_files2 [lsort [glob -directory $myload_dir1 -tails \{.*,*\}]]
+    setglob $myload_dir1
     myload_set_colors
     .dialog.buttons.entry delete 0 end
     .dialog.l.paneleft.list selection set $myload_index1
   }
   label .dialog.buttons.label  -text {File:}
   entry .dialog.buttons.entry
+  radiobutton .dialog.buttons.all -text All -variable globfilter -value {*} -command { setglob $myload_dir1 }
+  radiobutton .dialog.buttons.sym -text .sym -variable globfilter -value {*.sym} -command { setglob $myload_dir1 }
+  radiobutton .dialog.buttons.sch -text .sch -variable globfilter -value {*.sch} -command { setglob $myload_dir1 }
   button .dialog.buttons.up -text UP -command {
     bind .dialog.l.paneright.pre <Expose> {}
     .dialog.l.paneright.pre configure -background white
     set d [file dirname $myload_dir1]
     if { [file isdirectory $d]} {
       myload_set_home $d
-      set myload_files2 [lsort [glob -directory $d -tails \{.*,*\}]]
+      setglob $d
       myload_set_colors
       set myload_dir1 $d
       .dialog.buttons.entry delete 0 end
@@ -913,6 +919,7 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
   pack .dialog.buttons.ok .dialog.buttons.up .dialog.buttons.cancel \
        .dialog.buttons.home .dialog.buttons.label -side left
   pack .dialog.buttons.entry -side left -fill x -expand true
+  pack .dialog.buttons.all .dialog.buttons.sym .dialog.buttons.sch -side left
   pack .dialog.l -expand true -fill both
   pack .dialog.buttons -side top -fill x
   if { [info exists myload_default_geometry]} {
@@ -956,7 +963,7 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
 
   xschem preview_window create .dialog.l.paneright.pre {}
   set myload_dir1 [abs_sym_path [.dialog.l.paneleft.list get $myload_index1]]
-  set myload_files2 [lsort [glob -directory $myload_dir1 -tails \{.*,*\}]]
+  setglob $myload_dir1
   myload_set_colors
 
   bind .dialog.l.paneright.list <ButtonPress> { 
@@ -991,7 +998,7 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
         bind .dialog.l.paneright.pre <Expose> {}
         .dialog.l.paneright.pre configure -background white
         myload_set_home $d
-        set myload_files2 [lsort [glob -directory $d -tails \{.*,*\}]]
+        setglob $d
         myload_set_colors
         set myload_dir1 $d
         .dialog.buttons.entry delete 0 end
@@ -1555,7 +1562,7 @@ proc property_search {} {
         destroy .dialog 
   }
   button .dialog.but.cancel -text Cancel -command { destroy .dialog }
-  checkbutton .dialog.but.sub -text Exact_search -variable search_exact
+  checkbutton .dialog.but.sub -text Exact_search -variable search_exact 
   radiobutton .dialog.but.nosel -text {Highlight} -variable search_select -value 0
   radiobutton .dialog.but.sel -text {Select} -variable search_select -value 1
   # 20171211 added unselect
@@ -2474,6 +2481,7 @@ set tclcmd_txt {}
 ###
 
 ## list of tcl procedures to load at end of xschem.tcl
+set_ne globfilter {*}
 set_ne tcl_files {}
 set_ne netlist_dir "$USER_CONF_DIR/simulations"
 set_ne bus_replacement_char {} ;# use {<>} to replace [] with <> in bussed signals

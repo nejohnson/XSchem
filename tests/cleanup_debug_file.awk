@@ -28,6 +28,7 @@ function replace_pattern(old, new)
 {
   ## sample code to delete a line in file.
   # if($0 ~ /pattern_to_delete/) {found = 1; next}
+  replace_pattern("v {xschem version=.* file_version=.*}", "v {xschem version=2.9.5 file_version=1.1}")
   replace_pattern("drawing window ID.*$", "drawing window ID ***Removed***")
   replace_pattern("top window ID.*$", "top window ID ***Removed***")
   replace_pattern("created dir.*$", "created dir ***Removed***")

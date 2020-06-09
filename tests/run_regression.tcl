@@ -21,7 +21,7 @@
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 set tcases [list "create_save" "open_close"]
-set log_fn "results.txt"
+set log_fn "results.log"
 
 proc summarize_all {fn fd} {
   puts $fd "$fn"

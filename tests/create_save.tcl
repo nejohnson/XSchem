@@ -52,6 +52,7 @@ proc create_save {} {
             lappend pathlist $output
             lappend pathlist "${filename}.sch"
             cleanup_debug_file ${results_dir}/$output
+            cleanup_debug_file ${results_dir}/$fn_sch
           } 
         }
       }

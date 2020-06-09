@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-	<Product Id="*" Name="XSchem" Language="1033" Version="1.0.0.3" Manufacturer="XSchem" UpgradeCode="0deb9c17-cbbd-491c-be3e-24446b27ccd5">
+	<Product Id="*" Name="XSchem" Language="1033" Version="1.0.0.5" Manufacturer="XSchem" UpgradeCode="0deb9c17-cbbd-491c-be3e-24446b27ccd5">
 		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 
 		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
@@ -244,9 +244,6 @@
           <File Id="fil37BE7BCA7A85A0925FD5FF27969FB16E" KeyPath="yes" Source="../../doc\xschem2.png" />
         </Component>
         <Directory Id="dirA9D7CA2B2CD372A99196DCD641250960" Name="manpages">
-          <Component Id="cmpBAB4CC9A6C85E6B97768E25FB3BC6486" Guid="{FA67E887-1C6D-447E-874D-9E2C1C327B5B}">
-            <File Id="fil47D641FB3D09E856FC2604236895F07B" KeyPath="yes" Source="../../doc\manpages\xschem.1" />
-          </Component>
           <Component Id="cmpA21A9B20603B778043BCC5AA8B0DEE1B" Guid="{F7463856-5636-4514-8C33-7ACB9F02A474}">
             <File Id="fil3A7A3954F8D43AEE1D7608DEC3D7501C" KeyPath="yes" Source="../../doc\manpages\xschem.1.in" />
           </Component>
@@ -951,7 +948,6 @@
       <ComponentRef Id="cmpADF017DC5A8C25C785082A4B6A64A6CD" />
       <ComponentRef Id="cmp07723D32C869DCF2F6CB922ED4D6887E" />
       <ComponentRef Id="cmp04D20EA6341F61D37AD0BEF941E69D65" />
-      <ComponentRef Id="cmpBAB4CC9A6C85E6B97768E25FB3BC6486" />
       <ComponentRef Id="cmpA21A9B20603B778043BCC5AA8B0DEE1B" />
       <ComponentRef Id="cmpAF85B9172E3134E6416F88FB01ACE974" />
       <ComponentRef Id="cmp9844DBD8965D7FE435D40CDD2AE53D03" />
@@ -5773,6 +5769,9 @@
           <Component Id="cmp444D31DE75A68317537A3C935CE7C0F4" Guid="{01A24607-D577-4A4F-A41F-CF95C4EA5C41}">
             <File Id="fil56FED91CA4C8B33D175CEF0A68C1B232" KeyPath="yes" Source="../../xschem_library\logic\ram.sym" />
           </Component>
+          <Component Id="cmp514533F7FE0D1AF440200B5833C04B68" Guid="{78F8C899-209F-44F7-84F1-0B6780654248}">
+            <File Id="filF52AF6563E2B15E009636AEE9504FC27" KeyPath="yes" Source="../../xschem_library\logic\ram_tb.sch" />
+          </Component>
           <Component Id="cmpF7D601B1185DBB27F803B075A353E98F" Guid="{8C178D41-9FA6-4D80-B8D7-F86099A827D1}">
             <File Id="fil7C4FBF07E30304A1BFE4087A62F36AFB" KeyPath="yes" Source="../../xschem_library\logic\stimuli.test_ngspice" />
           </Component>
@@ -7664,6 +7663,7 @@
       <ComponentRef Id="cmpD88E0C90C57792AC8E3FF7F9E677E259" />
       <ComponentRef Id="cmp8D028ECB5BAD1C4FDA2CBC9ED771D313" />
       <ComponentRef Id="cmp444D31DE75A68317537A3C935CE7C0F4" />
+      <ComponentRef Id="cmp514533F7FE0D1AF440200B5833C04B68" />
       <ComponentRef Id="cmpF7D601B1185DBB27F803B075A353E98F" />
       <ComponentRef Id="cmpFE18B5581B5BE962361AB30BF71104CB" />
       <ComponentRef Id="cmp39D4D9E491A77BA9BBE67EF24CB3C7E4" />

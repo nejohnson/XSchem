@@ -782,13 +782,38 @@ proc list_dirs {pathlist } {
   return $list_dirs_selected_dir
 }
 
-proc myload_set_colors {} {
-  global myload_index1 myload_files2
-  #### update
+
+proc myload_set_colors1 {} {
+  global myload_files1 dircolor
+  for {set i 0} { $i< [.dialog.l.paneleft.list index end] } { incr i} {
+    set name "[lindex $myload_files1 $i]"
+    .dialog.l.paneleft.list itemconfigure $i -foreground black -selectforeground black
+    foreach j [array names dircolor] {
+      set pattern $j
+      set color $dircolor($j)
+      if { [regexp $pattern $name] } {
+        .dialog.l.paneleft.list itemconfigure $i -foreground $color -selectforeground $color
+      }
+    }
+  }
+}
+
+
+proc myload_set_colors2 {} {
+  global myload_index1 myload_files2 dircolor
   set dir1 [abs_sym_path [.dialog.l.paneleft.list get $myload_index1]]
   for {set i 0} { $i< [.dialog.l.paneright.list index end] } { incr i} {
-    if {[ file isdirectory "$dir1/[lindex $myload_files2 $i]"]} {
+    set name "$dir1/[lindex $myload_files2 $i]"
+    if {[ file isdirectory $name]} {
       .dialog.l.paneright.list itemconfigure $i -foreground blue
+      foreach j [array names dircolor] {
+        set pattern $j 
+        set color $dircolor($j)
+        if { [regexp $pattern $name] } {
+          .dialog.l.paneright.list itemconfigure $i -foreground $color -selectforeground $color
+        }
+      }
+
     } else {
       .dialog.l.paneright.list itemconfigure $i -foreground black
     }
@@ -810,12 +835,14 @@ proc myload_set_home {dir} {
   if { $i>=0 } {
     set myload_files1 $pathlist
     update
+    myload_set_colors1
     .dialog.l.paneleft.list xview moveto 1
     set myload_index1 $i
     .dialog.l.paneleft.list selection set $myload_index1
   } else {
     set myload_files1 [list $dir]
     update
+    myload_set_colors1
     .dialog.l.paneleft.list xview moveto 1
     set myload_index1 0
     .dialog.l.paneleft.list selection set 0
@@ -850,6 +877,7 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
   eval [subst {listbox .dialog.l.paneleft.list -listvariable myload_files1 -width 20 -height 18 $just \
     -yscrollcommand ".dialog.l.paneleft.yscroll set" -selectmode browse \
     -xscrollcommand ".dialog.l.paneleft.xscroll set"}]
+  myload_set_colors1
   scrollbar .dialog.l.paneleft.yscroll -command ".dialog.l.paneleft.list yview" 
   scrollbar .dialog.l.paneleft.xscroll -command ".dialog.l.paneleft.list xview" -orient horiz
   pack  .dialog.l.paneleft.yscroll -side right -fill y
@@ -863,7 +891,7 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
       set myload_dir1 [abs_sym_path [.dialog.l.paneleft.list get $sel]]
       set myload_index1 $sel
       setglob $myload_dir1
-      myload_set_colors
+      myload_set_colors2
     }
   }
 
@@ -891,11 +919,12 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
     .dialog.l.paneright.pre configure -background white
     set myload_files1 $pathlist
     update
+    myload_set_colors1
     .dialog.l.paneleft.list xview moveto 1
     set myload_index1 0
     set myload_dir1 [abs_sym_path [.dialog.l.paneleft.list get $myload_index1]]
     setglob $myload_dir1
-    myload_set_colors
+    myload_set_colors2
     .dialog.buttons.entry delete 0 end
     .dialog.l.paneleft.list selection set $myload_index1
   }
@@ -911,7 +940,7 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
     if { [file isdirectory $d]} {
       myload_set_home $d
       setglob $d
-      myload_set_colors
+      myload_set_colors2
       set myload_dir1 $d
       .dialog.buttons.entry delete 0 end
     }
@@ -964,7 +993,7 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
   xschem preview_window create .dialog.l.paneright.pre {}
   set myload_dir1 [abs_sym_path [.dialog.l.paneleft.list get $myload_index1]]
   setglob $myload_dir1
-  myload_set_colors
+  myload_set_colors2
 
   bind .dialog.l.paneright.list <ButtonPress> { 
     set myload_yview [.dialog.l.paneright.list yview]
@@ -999,7 +1028,7 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
         .dialog.l.paneright.pre configure -background white
         myload_set_home $d
         setglob $d
-        myload_set_colors
+        myload_set_colors2
         set myload_dir1 $d
         .dialog.buttons.entry delete 0 end
       } else {
@@ -2480,8 +2509,11 @@ set tclcmd_txt {}
 ### user preferences: set default values
 ###
 
-## list of tcl procedures to load at end of xschem.tcl
+set_ne dircolor(/share/xschem/) red
+set_ne dircolor(/share/doc/xschem/) {#338844}
+
 set_ne globfilter {*}
+## list of tcl procedures to load at end of xschem.tcl
 set_ne tcl_files {}
 set_ne netlist_dir "$USER_CONF_DIR/simulations"
 set_ne bus_replacement_char {} ;# use {<>} to replace [] with <> in bussed signals

@@ -8,7 +8,7 @@
 
 
 ###########################################################################
-# xschem installation directory XSCHEM_SHAREDIR
+## xschem installation directory XSCHEM_SHAREDIR
 ###########################################################################
 
 # normally there is no reason to set this variable if using standard
@@ -18,7 +18,7 @@
 # set XSCHEM_SHAREDIR $env(HOME)/share/xschem
 
 ###########################################################################
-# xschem system-wide design library paths XSCHEM_LIBRARY_PATH
+## xschem system-wide design library paths XSCHEM_LIBRARY_PATH
 ###########################################################################
 
 # If unset xschem starts with the default set compile time, typically:
@@ -46,9 +46,19 @@
 # append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/gschem_import
 # append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/gschem_import/sym
 
+###########################################################################
+## set custom colors for xschem libraries matching certain patterns
+## each line contains a pattern followed by a color
+## color can be an ordinary name (grey, brown, blue) or a hex code {#77aaff}
+## hex code must be enclosed in braces
+## don't forget backslash at end of line
+###########################################################################
+
+# set dircolor(/share/xschem/) red
+# set dircolor(/share/doc/xschem/) {#00aa00}
 
 ###########################################################################
-# Window to open on startup XSCHEM_START_WINDOW
+## Window to open on startup XSCHEM_START_WINDOW
 ###########################################################################
 
 # Start without a design:
@@ -63,7 +73,7 @@
 
 
 ###########################################################################
-# Directory where simulations, netlist and simulator outputs are placed
+## Directory where simulations, netlist and simulator outputs are placed
 ###########################################################################
 # If unset $USER_CONF_DIR/simulations is assumed (normally ~/.xschem/simulations) 
 #
@@ -71,8 +81,8 @@
 
 
 ###########################################################################
-# change default [] with some other characters for bussed signals 
-# in spice netlists (example: DATA[7] --> DATA<7>) 
+## change default [] with some other characters for bussed signals 
+## in spice netlists (example: DATA[7] --> DATA<7>) 
 ###########################################################################
 
 # set bus_replacement_char {<>}
@@ -82,7 +92,7 @@
 
 
 ###########################################################################
-# some default behavior
+## some default behavior
 ###########################################################################
 
 set netlist_type spice ;# allowed : spice, verilog, vhdl, tedax
@@ -109,14 +119,14 @@ set disable_unique_names 0
 # set enable_layer(5) 0 ;# example to disable pin red boxes
 
 ###########################################################################
-# custom grid / snap value settings
+## custom grid / snap value settings
 ###########################################################################
 
 # set grid 100
 # set snap 50
 
 ###########################################################################
-# Custom colors  may be defined here
+## Custom colors  may be defined here
 ###########################################################################
 
 #  set cadlayers 22
@@ -135,7 +145,7 @@ set disable_unique_names 0
 #   "#ef6158" "#fdb200" }
 
 ###########################################################################
-# CAIRO STUFF
+## CAIRO STUFF
 ###########################################################################
 
 #### Scale all fonts by this number
@@ -159,7 +169,7 @@ set cairo_font_name {Monospace Regular}
 # set nocairo_vert_correct 0
 
 ###########################################################################
-# KEYBINDINGS
+## KEYBINDINGS
 ###########################################################################
 
 #### General format for specifying a replacement for a keybind
@@ -197,6 +207,7 @@ set to_png {gm convert}
 set utile_gui_path ${XSCHEM_SHAREDIR}/utile/utile3
 set utile_cmd_path ${XSCHEM_SHAREDIR}/utile/utile
 
+#### list of tcl files to preload.
 # lappend tcl_files ${XSCHEM_SHAREDIR}/change_index.tcl
 # lappend tcl_files ${XSCHEM_SHAREDIR}/hspice_backannotate.tcl
 # lappend tcl_files ${XSCHEM_SHAREDIR}/ngspice_backannotate.tcl

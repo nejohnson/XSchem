@@ -203,6 +203,9 @@ set to_png {gm convert}
 #### LSF BSUB
 # set computerfarm {bsub -Is}
 
+#### set gaw address for socket connection: {host port}
+set gaw_tcp_address {localhost 2020}
+
 #### utile (stefan's spice stimuli editor)
 set utile_gui_path ${XSCHEM_SHAREDIR}/utile/utile3
 set utile_cmd_path ${XSCHEM_SHAREDIR}/utile/utile

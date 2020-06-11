@@ -1038,8 +1038,16 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
    }
  }
 
- else if(!strcmp(argv[1],"create_ngspice_plot_cmd") ) {
-   create_ngspice_plot_cmd();
+ else if(!strcmp(argv[1],"create_plot_cmd") ) {
+   if(argc>2) {
+     if(!strcmp(argv[2], "gaw")) {
+       create_plot_cmd(GAW); 
+     } else {
+       create_plot_cmd(NGSPICE);
+     }
+   } else {
+     create_plot_cmd(NGSPICE);
+   }
  }
 
  else if(!strcmp(argv[1],"fill_symbol_editprop_form") ) {
@@ -1274,14 +1282,38 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
  }
  else if(!strcmp(argv[1],"unhilight"))
  {
+    Box boundbox;
+    enable_drill=0;
+    calc_drawing_bbox(&boundbox, 2);
+    delete_hilight_net();
+    /* undraw_hilight_net(1); */
+    bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0);
+    bbox(ADD, boundbox.x1, boundbox.y1, boundbox.x2, boundbox.y2);
+    bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
+    draw();
+    bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
+
+    /*
+    enable_drill = 0;
     unhilight_net();
     draw();
     Tcl_ResetResult(interp);
+    */
  }
 
  else if(!strcmp(argv[1],"hilight"))
  {
-   hilight_net();
+   enable_drill = 0;
+   hilight_net(0);
+   /* draw_hilight_net(1); */
+   redraw_hilights();
+   Tcl_ResetResult(interp);
+ }
+
+ else if(!strcmp(argv[1],"send_to_gaw"))
+ {
+   enable_drill = 0;
+   hilight_net(GAW);
    /* draw_hilight_net(1); */
    redraw_hilights();
    Tcl_ResetResult(interp);

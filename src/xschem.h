@@ -200,6 +200,10 @@ extern char win_temp_dir[PATH_MAX];
 
 #define MAX_UNDO 80
 
+/* viewers xschem can generate plot commands for */
+#define NGSPICE 1
+#define GAW 2
+
 /*    some useful primes */
 /*    109, 163, 251, 367, 557, 823, 1237, 1861, 2777, 4177, 6247, 9371, 14057 */
 /*    21089, 31627, 47431, 71143, 106721, 160073, 240101, 360163, 540217, 810343 */
@@ -619,7 +623,7 @@ extern int spiceprefix;
 extern int quit;
 extern int show_erc;
 extern int hilight_nets;
-extern void create_ngspice_plot_cmd();
+extern void create_plot_cmd(int viewer);
 extern char *sch_prefix[];
 extern int modified;
 extern int color_ps;
@@ -865,6 +869,8 @@ extern void my_strndup(int id, char **dest, const char *src, int n);
 extern size_t my_strdup2(int id, char **dest, const char *src);
 extern char *my_strtok_r(char *str, const char *delim, char **saveptr);
 extern int my_strncpy(char *d, const char *s, int n);
+extern char* strtolower(char* s);
+extern char* strtoupper(char* s);
 extern void *my_malloc(int id, size_t size);
 extern void my_realloc(int id, void *ptr,size_t size);
 extern void *my_calloc(int id, size_t nmemb, size_t size);
@@ -918,7 +924,7 @@ extern void print_vhdl_signals(FILE *fd);
 extern void print_verilog_signals(FILE *fd);
 extern void print_generic(FILE *fd, char *ent_or_comp, int symbol);
 extern void print_verilog_param(FILE *fd, int symbol);
-extern void hilight_net();
+extern void hilight_net(int to_waveform);
 extern void unhilight_net();
 extern void draw_hilight_net(int on_window);
 extern void redraw_hilights(void);

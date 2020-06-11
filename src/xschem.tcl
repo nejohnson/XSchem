@@ -590,7 +590,26 @@ proc simulate {{callback {}}} {
     }
   }
 }
+proc gaw_echoline {} {
+  global gawfd
+  gets $gawfd line
+  if {[eof $gawfd]} {
+     puts "finishing connection from gaw"
+     close $gawfd
+     unset gawfd
+  }
+  puts "gaw -> $line"
+}
 
+proc setup_gaw_tcp {} {
+  global gawfd gaw_tcp_address netlist_dir
+  set s [file tail [file rootname [xschem get schname]]]
+
+  set gawfd [eval socket $gaw_tcp_address]
+  chan configure $gawfd -blocking 0 -buffering line -encoding binary -translation binary
+  fileevent $gawfd readable gaw_echoline
+  puts $gawfd "table_set $s.raw"
+}
 
 proc waves {} { 
   ## $N : netlist file full path (/home/schippes/simulations/opamp.spice) 
@@ -598,7 +617,7 @@ proc waves {} {
   ## $s : schematic name (opamp)
   ## $d : netlist directory
 
-  global netlist_dir netlist_type computerfarm terminal current_dirname sim
+  global netlist_dir netlist_type computerfarm terminal current_dirname sim gawfd
 
   set_sim_defaults
   
@@ -623,8 +642,10 @@ proc waves {} {
       set fg {execute}
     }
     set cmd [subst -nocommands $sim($tool,$def,cmd)]
-   
     $fg $st sh -c "cd $netlist_dir; $cmd"
+    if {[regexp {^gaw } $cmd]} {
+      after 3000 setup_gaw_tcp
+    }
   }
 }
 # ============================================================
@@ -2566,6 +2587,9 @@ set_ne terminal xterm
 # set_ne analog_viewer waveview
 set_ne computerfarm {} ;# 20151007
 
+# gaw tcp {host port} 
+set_ne gaw_tcp_address {localhost 2020}
+
 ## utile
 set_ne utile_gui_path "${XSCHEM_SHAREDIR}/utile/utile3"
 set_ne utile_cmd_path "${XSCHEM_SHAREDIR}/utile/utile"
@@ -3064,6 +3088,7 @@ font configure Underline-Font -underline true -size 24
    .menubar.hilight.menu add command -label {Highlight duplicate instance names} -command "xschem check_unique_names 0" -accelerator {#} 
    .menubar.hilight.menu add command -label {Rename duplicate instance names} -command "xschem check_unique_names 1" -accelerator {Ctrl+#}
    .menubar.hilight.menu add command -label {Highlight selected net/pins} -command "xschem hilight" -accelerator K
+   .menubar.hilight.menu add command -label {Send selected net/pins to GAW} -command "xschem send_to_gaw" -accelerator Alt+G
    .menubar.hilight.menu add command -label {Select connected nets / pins} -command "xschem select_connected_nets" -accelerator Alt+K
    .menubar.hilight.menu add command -label {Un-highlight all net/pins} \
         -command "xschem clear_hilights" -accelerator Shift+K
@@ -3094,7 +3119,8 @@ font configure Underline-Font -underline true -size 24
          }
        }
    .menubar.simulation.menu add command -label {Edit Netlist} -command {edit_netlist [file tail [xschem get schname]]}
-   .menubar.simulation.menu add command -label {Create Ngspice 'xplot' file} -command {xschem create_ngspice_plot_cmd} -accelerator Shift+J
+   .menubar.simulation.menu add command -label {Send highlighted nets to GAW} -command {xschem create_plot_cmd gaw}
+   .menubar.simulation.menu add command -label {Create Ngspice 'xplot' file} -command {xschem create_plot_cmd ngspice} -accelerator Shift+J
    .menubar.simulation.menu add separator
    .menubar.simulation.menu add checkbutton -label "LVS netlist: Top level is a .subckt" -variable top_subckt 
    .menubar.simulation.menu add checkbutton -label "Use 'spiceprefix' attribute" -variable spiceprefix 

@@ -360,6 +360,17 @@ int my_strncpy(char *d, const char *s, int n)
   return i;
 }
 
+char *strtolower(char* s) {
+  char *p;
+  for(p=s; *p; p++) *p=tolower(*p);
+  return s;
+}
+char *strtoupper(char* s) {
+  char *p;
+  for(p=s; *p; p++) *p=toupper(*p);
+  return s;
+}
+
 
 void set_inst_prop(int i)
 {

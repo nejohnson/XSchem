@@ -77,7 +77,7 @@ int get_color(int value)
 }
 
 /* print all highlight signals which are not ports (in/out/inout). */
-void create_ngspice_plot_cmd()
+void create_plot_cmd(int viewer)
 {
   int i, c, idx, first;
   struct hilight_hashentry *entry;
@@ -89,11 +89,10 @@ void create_ngspice_plot_cmd()
 
   my_snprintf(plotfile, S(plotfile), "%s/xplot", netlist_dir);
   if(!(fd = fopen(plotfile, "w"))) {
-    fprintf(errfp, "create_ngspice_plot_cmd(): error opening xplot file for writing\n");
+    fprintf(errfp, "create_plot_cmd(): error opening xplot file for writing\n");
     return;
   }
-  fprintf(fd, "*ngspice plot file\n.control\n");
-
+  if(viewer == NGSPICE) fprintf(fd, "*ngspice plot file\n.control\n");
   idx = 1;
   first = 1;
   for(i=0;i<HASHSIZE;i++) /* set ngspice colors */
@@ -107,38 +106,61 @@ void create_ngspice_plot_cmd()
          (node_entry->d.port == 0 || !strcmp(entry->path, ".") )) {
         c = get_color(entry->value);
         idx++;
-        if(idx > 9) {
-          idx = 2;
-          fprintf(fd, str);
-          fprintf(fd, "\n");
-          first = 1;
-          my_free(&str);
-        }
-        fprintf(fd, "set color%d=rgb:%02x/%02x/%02x\n", idx, xcolor_array[c].red>>8, xcolor_array[c].green>>8, xcolor_array[c].blue>>8);
-        if(first) {
-          my_strcat(1, &str, "plot ");
-          first = 0;
-        }
-        if(!strcmp(entry->path, ".") ) {
-          /* fprintf(fd, "\"%s\" ", tok); */
-          my_strcat(1, &str, "\"");
-          my_strcat(1, &str, tok);
-          my_strcat(1, &str, "\" ");
-        } else {
-          /* fprintf(fd, "\"%s%s\" ", (entry->path)+1, tok); */
-          my_strcat(1, &str, "\"");
-          my_strcat(1, &str, (entry->path)+1);
-          my_strcat(1, &str, tok);
-          my_strcat(1, &str, "\" ");
+        if(viewer == NGSPICE) {
+          if(idx > 9) {
+            idx = 2;
+            fprintf(fd, str);
+            fprintf(fd, "\n");
+            first = 1;
+            my_free(&str);
+          }
+
+          fprintf(fd, "set color%d=rgb:%02x/%02x/%02x\n",
+                  idx, xcolor_array[c].red>>8, xcolor_array[c].green>>8, xcolor_array[c].blue>>8);
+          if(first) {
+            my_strcat(164, &str, "plot ");
+            first = 0;
+          }
+          if(!strcmp(entry->path, ".") ) {
+            my_strcat(157, &str, "\"");
+            my_strcat(158, &str, tok);
+            my_strcat(159, &str, "\" ");
+          } else {
+            my_strcat(160, &str, "\"");
+            my_strcat(161, &str, (entry->path)+1);
+            my_strcat(162, &str, tok);
+            my_strcat(163, &str, "\" ");
+          }
+        } else { /* gaw */
+          char *t=NULL, *p=NULL;
+          my_strdup(241, &t, tok);
+          if(!strcmp(entry->path, ".") ) {
+            fprintf(fd, "puts $gawfd {copyvar v(%s) p0 #%02x%02x%02x}\n", strtolower(t),
+                    xcolor_array[c].red>>8, xcolor_array[c].green>>8, xcolor_array[c].blue>>8
+                   );
+          } else {
+            my_strdup(245, &p, (entry->path)+1);
+            fprintf(fd, "puts $gawfd {copyvar v(%s%s) p0 #%02x%02x%02x}\n", strtolower(p), strtolower(t),
+                    xcolor_array[c].red>>8, xcolor_array[c].green>>8, xcolor_array[c].blue>>8
+                   );
+            my_free(&p);
+          }
+          my_free(&t);
         }
       }
       entry = entry->next;
     }
   }
-  fprintf(fd, str);
-  fprintf(fd, "\n.endc\n");
-  my_free(&str);
+  if(viewer == NGSPICE) {
+    fprintf(fd, str);
+    fprintf(fd, "\n.endc\n");
+    my_free(&str);
+  }
   fclose(fd);
+  if(viewer == GAW) {
+     Tcl_VarEval(interp, "source ", plotfile, NULL);
+  }
+
 }
 
 struct hilight_hashentry *hilight_lookup(char *token, int value, int remove)
@@ -604,7 +626,7 @@ void drill_hilight(void)
 }
 
 
-void hilight_net(void)
+void hilight_net(int to_waveform)
 {
   int i, n;
   char *type;
@@ -618,17 +640,53 @@ void hilight_net(void)
    switch(selectedgroup[i].type)
    {
     case WIRE: 
-        if(event_reporting) {
-          char s[PATH_MAX];
-          printf("xschem search exact %d lab %s\n", 0, escape_chars(s, wire[n].node, PATH_MAX));
-          fflush(stdout);
-        }
-        hilight_nets=1;
-        if(!bus_hilight_lookup(wire[n].node, hilight_color,0)) {
-          if(incr_hilight) hilight_color++;
-        }
-     break;
+      if(event_reporting) {
+        char s[PATH_MAX];
+        printf("xschem search exact %d lab %s\n", 0, escape_chars(s, wire[n].node, PATH_MAX));
+        fflush(stdout);
+      }
+      hilight_nets=1;
+      if(!bus_hilight_lookup(wire[n].node, hilight_color,0)) {
+        tcleval("info exists gawfd");
+        if(to_waveform == GAW && Tcl_GetStringResult(interp)[0] == '1') {
+          int c;
+          struct node_hashentry *node_entry;
+          char * tok;
+          char plotfile[PATH_MAX];
+          FILE *fd;
+          
+          my_snprintf(plotfile, S(plotfile), "%s/xplot", netlist_dir);
+          if(!(fd = fopen(plotfile, "w"))) {
+            fprintf(errfp, "hilight_net(): error opening xplot file for writing\n");
+            return;
+          }
+          tok = wire[n].node;
+          node_entry = bus_hash_lookup(tok, "",2, 0, "", "", "", "");
+          if(tok[0] == '#') tok++;
+          if(node_entry  && (node_entry->d.port == 0 || !strcmp(sch_prefix[currentsch], ".") )) {
+            char *t=NULL, *p=NULL;
+            c = get_color(hilight_color);
+            my_strdup(241, &t, tok);
+            if(!strcmp(sch_prefix[currentsch], ".") ) {
+              fprintf(fd, "puts $gawfd {copyvar v(%s) p0 #%02x%02x%02x}\n", strtolower(t),
+                      xcolor_array[c].red>>8, xcolor_array[c].green>>8, xcolor_array[c].blue>>8
+                     );
+            } else {
+              my_strdup(245, &p, sch_prefix[currentsch]+1);
+              fprintf(fd, "puts $gawfd {copyvar v(%s%s) p0 #%02x%02x%02x}\n", strtolower(p), strtolower(t),
+                      xcolor_array[c].red>>8, xcolor_array[c].green>>8, xcolor_array[c].blue>>8
+                     );
+              my_free(&p);
+            }
+            my_free(&t);
+          }
+          fclose(fd);
+          Tcl_VarEval(interp, "source ", plotfile, NULL);
+        } /* if(to_waveform == GAW) */
 
+        if(incr_hilight) hilight_color++;
+      }
+      break;
     case ELEMENT:
      type = (inst_ptr[n].ptr+instdef)->type;
      if( type &&

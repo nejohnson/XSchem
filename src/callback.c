@@ -392,7 +392,7 @@ int callback(int event, int mx, int my, KeySym key,
      break;
    }
    if(key == 'J' && state==ShiftMask) { /* testmode */
-    create_ngspice_plot_cmd();
+    create_plot_cmd(NGSPICE);
     break;
    }
    if(key == '$'  && ( state == ShiftMask) )            /* toggle pixmap  saving */
@@ -932,7 +932,7 @@ int callback(int event, int mx, int my, KeySym key,
    {
     if(semaphore >= 2) break;
     enable_drill=1;
-    hilight_net();
+    hilight_net(0);
     redraw_hilights();
     /* draw_hilight_net(1); */
     break;
@@ -941,7 +941,7 @@ int callback(int event, int mx, int my, KeySym key,
    {
     if(semaphore >= 2) break;
     enable_drill=0;
-    hilight_net();
+    hilight_net(0);
     redraw_hilights();
     /* draw_hilight_net(1); */
     break;
@@ -960,6 +960,13 @@ int callback(int event, int mx, int my, KeySym key,
     draw();
     bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
     break;
+   }
+   if(key=='g' && state==Mod1Mask) { /* highlight net and send to gaw viewer */
+     if(semaphore >= 2) break;
+     enable_drill=0;
+     hilight_net(GAW);
+     redraw_hilights();
+     break;
    }
    if(key=='g' && state==0)                         /* half snap factor */
    {
@@ -1627,7 +1634,7 @@ int callback(int event, int mx, int my, KeySym key,
          }
        }
        if(auto_hilight) { /* 20160413 */
-         hilight_net();
+         hilight_net(0);
          if(lastselected) {
            redraw_hilights();
            /* draw_hilight_net(1); */

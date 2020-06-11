@@ -2475,6 +2475,33 @@ proc get_file_path {ff} {
   return $ff
 }
 
+###
+### ToolBar
+###
+
+source $XSCHEM_SHAREDIR/resources.tcl
+
+proc toolbar_create {} {
+	frame .toolbar -relief raised -bd 1 -bg white
+}
+
+proc toolbar_addtool {pos name img cmd} {
+	button .toolbar.$name -image $img -relief flat -bd 3 -bg white -fg white -command $cmd
+	pack .toolbar.$name -side $pos
+}
+
+proc toolbar_addseparator {} {
+	# todo
+}
+
+proc toolbar_show {} {
+	pack .toolbar -fill x -before .drw
+}
+
+proc toolbar_hide {} {
+	pack forget .toolbar
+}
+
 ### 
 ###   MAIN PROGRAM
 ###
@@ -2553,6 +2580,7 @@ set_ne fullscreen 0
 set_ne unzoom_nodrift 1
 set_ne change_lw 0
 set_ne draw_window 0
+set_ne toolbar_visible 1
 set_ne line_width 0
 set_ne incr_hilight 1
 set_ne enable_stretch 0
@@ -2771,44 +2799,26 @@ font configure Underline-Font -underline true -size 24
    infowindow
    #proc unknown  {comm args} { puts "unknown command-> \<$comm\> $args" }
    frame .menubar -relief raised -bd 2 
-   
+   toolbar_create
+
+# FILE menu
    menubutton .menubar.file -text "File" -menu .menubar.file.menu
    menu .menubar.file.menu -tearoff 0
-   menubutton .menubar.edit -text "Edit" -menu .menubar.edit.menu
-   menu .menubar.edit.menu -tearoff 0
-   menubutton .menubar.option -text "Options" -menu .menubar.option.menu
-   menu .menubar.option.menu -tearoff 0
-   menubutton .menubar.zoom -text "View" -menu .menubar.zoom.menu
-   menu .menubar.zoom.menu -tearoff 0
-   menubutton .menubar.prop -text "Properties" -menu .menubar.prop.menu
-   menu .menubar.prop.menu -tearoff 0
-   menubutton .menubar.layers -text "Layers" -menu .menubar.layers.menu \
-    -background [lindex $colors 4]
-   menu .menubar.layers.menu -tearoff 0
-   menubutton .menubar.tools -text "Tools" -menu .menubar.tools.menu
-   menu .menubar.tools.menu -tearoff 0
-   menubutton .menubar.sym -text "Symbol" -menu .menubar.sym.menu
-   menu .menubar.sym.menu -tearoff 0
-   menubutton .menubar.hilight -text "Highlight" -menu .menubar.hilight.menu
-   menu .menubar.hilight.menu -tearoff 0
-   menubutton .menubar.simulation -text "Simulation" -menu .menubar.simulation.menu
-   menu .menubar.simulation.menu -tearoff 0
-   menubutton .menubar.help -text "Help" -menu .menubar.help.menu
-   menu .menubar.help.menu -tearoff 0
-   .menubar.help.menu add command -label "Help" -command "textwindow \"${XSCHEM_SHAREDIR}/xschem.help\" ro" \
-        -accelerator {?}
-   .menubar.help.menu add command -label "Keys" -command "textwindow \"${XSCHEM_SHAREDIR}/keys.help\" ro"
-   .menubar.help.menu add command -label "About XSCHEM" -command "about"
-   
+
    .menubar.file.menu add command -label "New Schematic"  -accelerator Ctrl+N\
      -command {
        xschem clear SCHEMATIC
      }
+	toolbar_addtool left filenew img_filenew {xschem clear SCHEMATIC}
+	
    .menubar.file.menu add command -label "New Symbol" -accelerator Ctrl+Shift+N \
      -command {
        xschem clear SYMBOL
      }
+	 
    .menubar.file.menu add command -label "Open" -command "xschem load" -accelerator {Ctrl+O}
+   toolbar_addtool left fileopen img_fileopen "xschem load"   
+   
    .menubar.file.menu add command -label "Save" -command "xschem save" -accelerator {Ctrl+S}
    .menubar.file.menu add command -label "Merge" -command "xschem merge" -accelerator B
    .menubar.file.menu add command -label "Reload" -accelerator {Alt+S} \
@@ -2826,6 +2836,36 @@ font configure Underline-Font -underline true -size 24
    .menubar.file.menu add command -label "SVG Export" -command "xschem print svg" -accelerator {Alt+*}
    .menubar.file.menu add separator
    .menubar.file.menu add command -label "Exit" -command {xschem exit} -accelerator {Ctrl+Q}
+
+# EDIT menu
+   menubutton .menubar.edit -text "Edit" -menu .menubar.edit.menu
+   menu .menubar.edit.menu -tearoff 0
+
+   .menubar.edit.menu add command -label "Undo" -command "xschem undo; xschem redraw" -accelerator U
+   .menubar.edit.menu add command -label "Redo" -command "xschem redo; xschem redraw" -accelerator {Shift+U}
+   .menubar.edit.menu add command -label "Copy" -command "xschem copy" -accelerator Ctrl+C
+   .menubar.edit.menu add command -label "Cut" -command "xschem cut"   -accelerator Ctrl+X
+   .menubar.edit.menu add command -label "Paste" -command "xschem paste" -accelerator Ctrl+V
+   .menubar.edit.menu add command -label "Delete" -command "xschem delete" -accelerator Del
+   .menubar.edit.menu add command -label "Select all" -command "xschem select_all" -accelerator Ctrl+A
+   .menubar.edit.menu add command -label "Edit selected schematic in new window" \
+       -command "xschem schematic_in_new_window" -accelerator Alt+E
+   .menubar.edit.menu add command -label "Edit selected symbol in new window" \
+       -command "xschem symbol_in_new_window" -accelerator Alt+I
+   .menubar.edit.menu add command -label "Duplicate objects" -command "xschem copy_objects" -accelerator C
+   .menubar.edit.menu add command -label "Move objects" -command "xschem move_objects" -accelerator M
+   .menubar.edit.menu add checkbutton -label "Constrained Horizontal move" -variable horizontal_move \
+      -command "xschem set horizontal_move" -accelerator H
+   .menubar.edit.menu add checkbutton -label "Constrained Vertical move" -variable vertical_move \
+      -command "xschem set vertical_move" -accelerator V
+   # added collapse/join/break wires menu command  (& key) 20171022
+   .menubar.edit.menu add command -label "Push schematic" -command "xschem descend" -accelerator E
+   .menubar.edit.menu add command -label "Push symbol" -command "xschem descend_symbol" -accelerator I
+   .menubar.edit.menu add command -label "Pop" -command "xschem go_back" -accelerator Ctrl+E
+
+# OPTIONS menu
+   menubutton .menubar.option -text "Options" -menu .menubar.option.menu
+   menu .menubar.option.menu -tearoff 0
    
    .menubar.option.menu add checkbutton -label "Show info win" -variable show_infowindow \
      -command {
@@ -2922,79 +2962,11 @@ font configure Underline-Font -underline true -size 24
    .menubar.option.menu add radiobutton -label "tEDAx netlist" -variable netlist_type -value tedax \
         -accelerator {Shift+V} \
         -command "xschem netlist_type tedax"
-   .menubar.edit.menu add command -label "Undo" -command "xschem undo; xschem redraw" -accelerator U
-   .menubar.edit.menu add command -label "Redo" -command "xschem redo; xschem redraw" -accelerator {Shift+U}
-   .menubar.edit.menu add command -label "Copy" -command "xschem copy" -accelerator Ctrl+C
-   .menubar.edit.menu add command -label "Cut" -command "xschem cut"   -accelerator Ctrl+X
-   .menubar.edit.menu add command -label "Paste" -command "xschem paste" -accelerator Ctrl+V
-   .menubar.edit.menu add command -label "Delete" -command "xschem delete" -accelerator Del
-   .menubar.edit.menu add command -label "Select all" -command "xschem select_all" -accelerator Ctrl+A
-   .menubar.edit.menu add command -label "Edit selected schematic in new window" \
-       -command "xschem schematic_in_new_window" -accelerator Alt+E
-   .menubar.edit.menu add command -label "Edit selected symbol in new window" \
-       -command "xschem symbol_in_new_window" -accelerator Alt+I
-   .menubar.edit.menu add command -label "Duplicate objects" -command "xschem copy_objects" -accelerator C
-   .menubar.edit.menu add command -label "Move objects" -command "xschem move_objects" -accelerator M
-   .menubar.edit.menu add checkbutton -label "Constrained Horizontal move" -variable horizontal_move \
-      -command "xschem set horizontal_move" -accelerator H
-   .menubar.edit.menu add checkbutton -label "Constrained Vertical move" -variable vertical_move \
-      -command "xschem set vertical_move" -accelerator V
-   # added collapse/join/break wires menu command  (& key) 20171022
-   .menubar.edit.menu add command -label "Push schematic" -command "xschem descend" -accelerator E
-   .menubar.edit.menu add command -label "Push symbol" -command "xschem descend_symbol" -accelerator I
-   .menubar.edit.menu add command -label "Pop" -command "xschem go_back" -accelerator Ctrl+E
-   button .menubar.waves -text "Waves"  -activebackground red  -takefocus 0\
-     -command {
-       waves
-      }
-   button .menubar.simulate -text "Simulate"  -activebackground red  -takefocus 0\
-     -command {
-       if { ![info exists simulate_oldbg] } {
-         set simulate_oldbg [.menubar.simulate cget -bg]
-         .menubar.simulate configure -bg red
-         simulate {.menubar.simulate configure -bg $::simulate_oldbg; unset ::simulate_oldbg}
-       }
-      }
-   button .menubar.netlist -text "Netlist"  -activebackground red  -takefocus 0\
-     -command {
-       xschem netlist
-      }
    
-   if { $dark_colorscheme == 1 } { set txt_color black} else { set txt_color white} 
-   set j 0
-   foreach i $colors {
-     ## 20121121
-     if {  $j == [xschem get pinlayer] } { 
-       set laylab [format %2d $j]-PIN
-       set layfg $txt_color
-     } elseif { $j == [xschem get wirelayer] } { 
-       set laylab [format %2d $j]-WIRE
-       set layfg $txt_color
-     } elseif { $j == [xschem get textlayer] } { ;# 20161206
-       set laylab [format %2d $j]-TEXT
-       set layfg $txt_color
-     } elseif { $j == [xschem get backlayer] } { ;# 20161206
-       set laylab [format %2d $j]-BG
-       if { $dark_colorscheme == 1 } {
-         set layfg white
-       } else {
-         set layfg black
-       }
-     } elseif { $j == [xschem get gridlayer] } { ;# 20161206
-       set laylab [format %2d $j]-GRID
-       set layfg $txt_color
-     } else {
-       set laylab "[format %2d $j]        "
-       set layfg $txt_color
-     }
-
-     .menubar.layers.menu add command -label $laylab  -activeforeground $layfg \
-        -foreground $layfg -background $i -activebackground $i \
-        -command "xschem set rectcolor $j; reconfigure_layers_button"
-     if { [expr $j%10] == 0 } { .menubar.layers.menu entryconfigure $j -columnbreak 1 }
-     incr j
-     
-   }
+# VIEW menu
+   menubutton .menubar.zoom -text "View" -menu .menubar.zoom.menu
+   menu .menubar.zoom.menu -tearoff 0
+   
    .menubar.zoom.menu add command -label "Redraw" -command "xschem redraw" -accelerator Esc
    .menubar.zoom.menu add checkbutton -label "Fullscreen" -variable fullscreen \
       -accelerator {Alt+Shift+F} -command {
@@ -3042,27 +3014,65 @@ font configure Underline-Font -underline true -size 24
           -command {
            if { $draw_window == 1} { xschem set draw_window 1} else { xschem set draw_window 0}
         }
+	.menubar.zoom.menu add checkbutton -label "Show Toolbar" -variable toolbar_visible \
+			-command {
+				if { $toolbar_visible == 1 } { toolbar_show } else { toolbar_hide }
+			}
+   
+# PROPERTIES menu   
+   menubutton .menubar.prop -text "Properties" -menu .menubar.prop.menu
+   menu .menubar.prop.menu -tearoff 0
+
    .menubar.prop.menu add command -label "Edit" -command "xschem edit_prop" -accelerator Q
    .menubar.prop.menu add command -label "Edit with editor" -command "xschem edit_vi_prop" -accelerator Shift+Q
    .menubar.prop.menu add command -label "View" -command "xschem view_prop" -accelerator Ctrl+Q
    .menubar.prop.menu add command -background red -label "Edit file (danger!)" -command "xschem edit_file" -accelerator Alt+Q
 
-   .menubar.sym.menu add command -label "Make symbol from schematic" -command "xschem make_symbol" -accelerator A
-   .menubar.sym.menu add command -label "Make schematic from symbol" -command "xschem make_sch" -accelerator Ctrl+L
-   .menubar.sym.menu add command -label "Attach pins to component instance" -command "xschem attach_pins" -accelerator Shift+H
-   .menubar.sym.menu add command -label "Create symbol pins from selected schematic pins" \
-           -command "schpins_to_sympins" -accelerator Alt+H
-   .menubar.sym.menu add command -label "Print list of highlight nets" \
-           -command "xschem print_hilight_net 1" -accelerator J
-   .menubar.sym.menu add command -label "Print list of highlight nets, with buses expanded" \
-           -command "xschem print_hilight_net 3" -accelerator Alt-Ctrl-J
-   .menubar.sym.menu add command -label "Create labels from highlight nets" \
-           -command "xschem print_hilight_net 4" -accelerator Alt-J
-   .menubar.sym.menu add command -label "Create labels from highlight nets with 'i' prefix" \
-           -command "xschem print_hilight_net 2" -accelerator Alt-Shift-J
-   .menubar.sym.menu add command -label "Create pins from highlight nets" \
-           -command "xschem print_hilight_net 0" -accelerator Ctrl-J
+# LAYERS menu
+   menubutton .menubar.layers -text "Layers" -menu .menubar.layers.menu \
+    -background [lindex $colors 4]
+   menu .menubar.layers.menu -tearoff 0
+   
+   if { $dark_colorscheme == 1 } { set txt_color black} else { set txt_color white} 
+   set j 0
+   foreach i $colors {
+     ## 20121121
+     if {  $j == [xschem get pinlayer] } { 
+       set laylab [format %2d $j]-PIN
+       set layfg $txt_color
+     } elseif { $j == [xschem get wirelayer] } { 
+       set laylab [format %2d $j]-WIRE
+       set layfg $txt_color
+     } elseif { $j == [xschem get textlayer] } { ;# 20161206
+       set laylab [format %2d $j]-TEXT
+       set layfg $txt_color
+     } elseif { $j == [xschem get backlayer] } { ;# 20161206
+       set laylab [format %2d $j]-BG
+       if { $dark_colorscheme == 1 } {
+         set layfg white
+       } else {
+         set layfg black
+       }
+     } elseif { $j == [xschem get gridlayer] } { ;# 20161206
+       set laylab [format %2d $j]-GRID
+       set layfg $txt_color
+     } else {
+       set laylab "[format %2d $j]        "
+       set layfg $txt_color
+     }
 
+     .menubar.layers.menu add command -label $laylab  -activeforeground $layfg \
+        -foreground $layfg -background $i -activebackground $i \
+        -command "xschem set rectcolor $j; reconfigure_layers_button"
+     if { [expr $j%10] == 0 } { .menubar.layers.menu entryconfigure $j -columnbreak 1 }
+     incr j
+     
+   }
+   
+# TOOLS menu
+   menubutton .menubar.tools -text "Tools" -menu .menubar.tools.menu
+   menu .menubar.tools.menu -tearoff 0
+   
    .menubar.tools.menu add checkbutton -label "Remember last command" -variable persistent_command \
       -accelerator {} \
       -command {
@@ -3084,7 +3094,31 @@ font configure Underline-Font -underline true -size 24
       -command "xschem collapse_wires" -accelerator {&}
    .menubar.tools.menu add command -label "Break wires" \
       -command "xschem break_wires" -accelerator {!}
-
+   
+# SYMBOL menu
+   menubutton .menubar.sym -text "Symbol" -menu .menubar.sym.menu
+   menu .menubar.sym.menu -tearoff 0
+   
+   .menubar.sym.menu add command -label "Make symbol from schematic" -command "xschem make_symbol" -accelerator A
+   .menubar.sym.menu add command -label "Make schematic from symbol" -command "xschem make_sch" -accelerator Ctrl+L
+   .menubar.sym.menu add command -label "Attach pins to component instance" -command "xschem attach_pins" -accelerator Shift+H
+   .menubar.sym.menu add command -label "Create symbol pins from selected schematic pins" \
+           -command "schpins_to_sympins" -accelerator Alt+H
+   .menubar.sym.menu add command -label "Print list of highlight nets" \
+           -command "xschem print_hilight_net 1" -accelerator J
+   .menubar.sym.menu add command -label "Print list of highlight nets, with buses expanded" \
+           -command "xschem print_hilight_net 3" -accelerator Alt-Ctrl-J
+   .menubar.sym.menu add command -label "Create labels from highlight nets" \
+           -command "xschem print_hilight_net 4" -accelerator Alt-J
+   .menubar.sym.menu add command -label "Create labels from highlight nets with 'i' prefix" \
+           -command "xschem print_hilight_net 2" -accelerator Alt-Shift-J
+   .menubar.sym.menu add command -label "Create pins from highlight nets" \
+           -command "xschem print_hilight_net 0" -accelerator Ctrl-J
+   
+# HIGHLIGHT menu
+   menubutton .menubar.hilight -text "Highlight" -menu .menubar.hilight.menu
+   menu .menubar.hilight.menu -tearoff 0
+   
    .menubar.hilight.menu add command -label {Highlight duplicate instance names} -command "xschem check_unique_names 0" -accelerator {#} 
    .menubar.hilight.menu add command -label {Rename duplicate instance names} -command "xschem check_unique_names 1" -accelerator {Ctrl+#}
    .menubar.hilight.menu add command -label {Highlight selected net/pins} -command "xschem hilight" -accelerator K
@@ -3103,7 +3137,11 @@ font configure Underline-Font -underline true -size 24
           xschem set auto_hilight 0
         }
       }
-
+   
+# SIMULATION menu
+   menubutton .menubar.simulation -text "Simulation" -menu .menubar.simulation.menu
+   menu .menubar.simulation.menu -tearoff 0
+   
    .menubar.simulation.menu add command -label "Set netlist Dir" \
      -command {
            select_netlist_dir 1
@@ -3125,6 +3163,45 @@ font configure Underline-Font -underline true -size 24
    .menubar.simulation.menu add checkbutton -label "LVS netlist: Top level is a .subckt" -variable top_subckt 
    .menubar.simulation.menu add checkbutton -label "Use 'spiceprefix' attribute" -variable spiceprefix 
 
+# HELP menu
+   menubutton .menubar.help -text "Help" -menu .menubar.help.menu
+   menu .menubar.help.menu -tearoff 0
+   .menubar.help.menu add command -label "Help" -command "textwindow \"${XSCHEM_SHAREDIR}/xschem.help\" ro" \
+        -accelerator {?}
+   .menubar.help.menu add command -label "Keys" -command "textwindow \"${XSCHEM_SHAREDIR}/keys.help\" ro"
+   .menubar.help.menu add command -label "About XSCHEM" -command "about"
+   
+# Action buttons   
+   button .menubar.waves -text "Waves"  -activebackground red  -takefocus 0\
+     -command {
+       waves
+      }
+   button .menubar.simulate -text "Simulate"  -activebackground red  -takefocus 0\
+     -command {
+       if { ![info exists simulate_oldbg] } {
+         set simulate_oldbg [.menubar.simulate cget -bg]
+         .menubar.simulate configure -bg red
+         simulate {.menubar.simulate configure -bg $::simulate_oldbg; unset ::simulate_oldbg}
+       }
+      }
+	  
+   button .menubar.netlist -text "Netlist"  -activebackground red  -takefocus 0\
+     -command {
+       xschem netlist
+      }
+	
+	toolbar_addtool right waves img_waves { waves }
+	toolbar_addtool right simulate img_simulate {
+       if { ![info exists simulate_oldbg] } {
+         set simulate_oldbg [.menubar.simulate cget -bg]
+         .menubar.simulate configure -bg red
+         simulate {.menubar.simulate configure -bg $::simulate_oldbg; unset ::simulate_oldbg}
+       }
+      }
+	toolbar_addtool right netlist img_netlist { xschem netlist }
+
+   
+# Pack it in
    pack .menubar.file -side left
    pack .menubar.edit -side left
    pack .menubar.option -side left
@@ -3136,9 +3213,9 @@ font configure Underline-Font -underline true -size 24
    pack .menubar.hilight -side left
    pack .menubar.simulation -side left
    pack .menubar.help -side right
-   pack .menubar.netlist -side right
-   pack .menubar.simulate -side right
    pack .menubar.waves -side right
+   pack .menubar.simulate -side right
+   pack .menubar.netlist -side right
 
    frame .drw -background {} -takefocus 1
 
@@ -3170,6 +3247,7 @@ font configure Underline-Font -underline true -size 24
    pack .statusbar.1 -side left -fill x
    pack .drw -anchor n -side top -fill both -expand true
    pack .menubar -anchor n -side top -fill x  -before .drw
+   toolbar_show
    pack .statusbar -after .drw -anchor sw  -fill x 
    bind .statusbar.5 <Leave> { xschem set cadgrid $grid; focus .drw}
    bind .statusbar.3 <Leave> { xschem set cadsnap $snap; focus .drw}

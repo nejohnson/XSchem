@@ -210,6 +210,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
  else if(!strcmp(argv[1],"go_back"))
  {
     go_back(1);
+    Tcl_ResetResult(interp);
  }
 
  else if(!strcmp(argv[1],"zoom_full"))

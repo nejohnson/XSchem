@@ -2480,6 +2480,7 @@ proc get_file_path {ff} {
 ###
 
 source $XSCHEM_SHAREDIR/resources.tcl
+set sepn 0
 
 proc toolbar_create {} {
 	frame .toolbar -relief raised -bd 1 -bg white
@@ -2490,8 +2491,11 @@ proc toolbar_addtool {pos name img cmd} {
 	pack .toolbar.$name -side $pos
 }
 
-proc toolbar_addseparator {} {
-	# todo
+proc toolbar_addseparator {pos} {
+	global sepn
+	frame .toolbar.sep$sepn -bg lightgrey -width 2
+	pack .toolbar.sep$sepn -side $pos -padx 1 -pady 1 -fill y
+	incr sepn
 }
 
 proc toolbar_show {} {
@@ -2820,6 +2824,8 @@ font configure Underline-Font -underline true -size 24
    toolbar_addtool left fileopen img_fileopen "xschem load"   
    
    .menubar.file.menu add command -label "Save" -command "xschem save" -accelerator {Ctrl+S}
+   toolbar_addtool left filesave img_filesave "xschem save"
+   
    .menubar.file.menu add command -label "Merge" -command "xschem merge" -accelerator B
    .menubar.file.menu add command -label "Reload" -accelerator {Alt+S} \
      -command {
@@ -2836,13 +2842,20 @@ font configure Underline-Font -underline true -size 24
    .menubar.file.menu add command -label "SVG Export" -command "xschem print svg" -accelerator {Alt+*}
    .menubar.file.menu add separator
    .menubar.file.menu add command -label "Exit" -command {xschem exit} -accelerator {Ctrl+Q}
+   
+   toolbar_addseparator left
 
 # EDIT menu
    menubutton .menubar.edit -text "Edit" -menu .menubar.edit.menu
    menu .menubar.edit.menu -tearoff 0
 
    .menubar.edit.menu add command -label "Undo" -command "xschem undo; xschem redraw" -accelerator U
+   toolbar_addtool left editundo img_editundo "xschem undo; xschem redraw"
+   
    .menubar.edit.menu add command -label "Redo" -command "xschem redo; xschem redraw" -accelerator {Shift+U}
+   toolbar_addtool left editredo img_editredo "xschem redo; xschem redraw"
+   
+   
    .menubar.edit.menu add command -label "Copy" -command "xschem copy" -accelerator Ctrl+C
    .menubar.edit.menu add command -label "Cut" -command "xschem cut"   -accelerator Ctrl+X
    .menubar.edit.menu add command -label "Paste" -command "xschem paste" -accelerator Ctrl+V
@@ -2862,6 +2875,8 @@ font configure Underline-Font -underline true -size 24
    .menubar.edit.menu add command -label "Push schematic" -command "xschem descend" -accelerator E
    .menubar.edit.menu add command -label "Push symbol" -command "xschem descend_symbol" -accelerator I
    .menubar.edit.menu add command -label "Pop" -command "xschem go_back" -accelerator Ctrl+E
+   
+   toolbar_addseparator left
 
 # OPTIONS menu
    menubutton .menubar.option -text "Options" -menu .menubar.option.menu

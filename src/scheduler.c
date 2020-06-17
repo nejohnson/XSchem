@@ -379,8 +379,8 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
        current_type=SYMBOL;
      } else {
        for(i=0;;i++) {
-         if(i == 0) my_snprintf(name, S(name), "%s.sym", "untitled");
-         else my_snprintf(name, S(name), "%s-%d.sym", "untitled", i);
+         if(i == 0) my_snprintf(name, S(name), "%s.sch", "untitled");
+         else my_snprintf(name, S(name), "%s-%d.sch", "untitled", i);
          if(stat(name, &buf)) break;
        }
        my_strncpy(schematic[currentsch], name, S(schematic[currentsch]));

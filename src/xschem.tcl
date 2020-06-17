@@ -2490,11 +2490,42 @@ set_ne toolbar_list {
 	"---"
 	EditUndo
 	EditRedo
+	EditCut
+	EditCopy
+	EditPaste
+	EditDelete
 }
+
+proc balloon {w help} {
+    bind $w <Any-Enter> "after 1000 [list balloon_show %W [list $help]]"
+    bind $w <Any-Leave> "destroy %W.balloon"
+}
+
+proc balloon_show {w arg} {
+    if {[eval winfo containing  [winfo pointerxy .]]!=$w} {return}
+    set top $w.balloon
+    catch {destroy $top}
+    toplevel $top -bd 1 -bg black
+    wm overrideredirect $top 1
+    if {[string equal [tk windowingsystem] aqua]}  {
+        ::tk::unsupported::MacWindowStyle style $top help none
+    }   
+    pack [message $top.txt -aspect 10000 -bg lightyellow \
+        -font fixed -text $arg]
+    set wmx [winfo rootx $w]
+    set wmy [expr [winfo rooty $w]+[winfo height $w]]
+    wm geometry $top [winfo reqwidth $top.txt]x[
+        winfo reqheight $top.txt]+$wmx+$wmy
+    raise $top
+}
+
+
 #
 # Pull in the toolbar graphics resources
 #
 source $XSCHEM_SHAREDIR/resources.tcl
+#
+# Separation bar counter
 #
 set toolbar_sepn 0
 #
@@ -2506,8 +2537,9 @@ proc toolbar_toolbar {} {
 #
 # Create a tool button which may be displayed
 #
-proc toolbar_create {name cmd} {
+proc toolbar_create {name cmd { help "" } } {
 	button .toolbar.b$name -image img$name -relief flat -bd 3 -bg white -fg white -command $cmd
+	if { $help == "" } { balloon .toolbar.b$name $name } else { balloon .toolbar.b$name $help }
 }
 #
 # Show or hide the toolbar in horizontal or vertical position
@@ -2871,7 +2903,7 @@ font configure Underline-Font -underline true -size 24
      -command {
        xschem clear SCHEMATIC
      }
-	toolbar_create FileNew {xschem clear SCHEMATIC}
+	toolbar_create FileNew {xschem clear SCHEMATIC} "New Schematic"
 	
    .menubar.file.menu add command -label "New Symbol" -accelerator Ctrl+Shift+N \
      -command {
@@ -2879,10 +2911,10 @@ font configure Underline-Font -underline true -size 24
      }
 	 
    .menubar.file.menu add command -label "Open" -command "xschem load" -accelerator {Ctrl+O}
-   toolbar_create FileOpen "xschem load"   
+   toolbar_create FileOpen "xschem load" "Open File"
    
    .menubar.file.menu add command -label "Save" -command "xschem save" -accelerator {Ctrl+S}
-   toolbar_create FileSave "xschem save"
+   toolbar_create FileSave "xschem save" "Save File"
    
    .menubar.file.menu add command -label "Merge" -command "xschem merge" -accelerator B
    .menubar.file.menu add command -label "Reload" -accelerator {Alt+S} \
@@ -2906,15 +2938,23 @@ font configure Underline-Font -underline true -size 24
    menu .menubar.edit.menu -tearoff 0
 
    .menubar.edit.menu add command -label "Undo" -command "xschem undo; xschem redraw" -accelerator U
-   toolbar_create EditUndo "xschem undo; xschem redraw"
+   toolbar_create EditUndo "xschem undo; xschem redraw" "Undo"
    
    .menubar.edit.menu add command -label "Redo" -command "xschem redo; xschem redraw" -accelerator {Shift+U}
-   toolbar_create EditRedo "xschem redo; xschem redraw"
+   toolbar_create EditRedo "xschem redo; xschem redraw" "Redo"
    
    .menubar.edit.menu add command -label "Copy" -command "xschem copy" -accelerator Ctrl+C
+   toolbar_create EditCopy "xschem copy" "Copy"
+   
    .menubar.edit.menu add command -label "Cut" -command "xschem cut"   -accelerator Ctrl+X
+   toolbar_create EditCut "xschem cut" "Cut"
+   
    .menubar.edit.menu add command -label "Paste" -command "xschem paste" -accelerator Ctrl+V
+   toolbar_create EditPaste "xschem paste" "Paste"
+   
    .menubar.edit.menu add command -label "Delete" -command "xschem delete" -accelerator Del
+   toolbar_create EditDelete "xschem delete" "Delete"
+   
    .menubar.edit.menu add command -label "Select all" -command "xschem select_all" -accelerator Ctrl+A
    .menubar.edit.menu add command -label "Edit selected schematic in new window" \
        -command "xschem schematic_in_new_window" -accelerator Alt+E
@@ -3267,15 +3307,15 @@ font configure Underline-Font -underline true -size 24
        xschem netlist
       }
 	
-	toolbar_create Waves { waves }
+	toolbar_create Waves { waves } "View results"
 	toolbar_create Simulate {
        if { ![info exists simulate_oldbg] } {
          set simulate_oldbg [.menubar.simulate cget -bg]
          .menubar.simulate configure -bg red
          simulate {.menubar.simulate configure -bg $::simulate_oldbg; unset ::simulate_oldbg}
        }
-      }
-	toolbar_create Netlist { xschem netlist }
+      } "Run simulation"
+	toolbar_create Netlist { xschem netlist } "Create netlist"
 
    
 # Pack it in

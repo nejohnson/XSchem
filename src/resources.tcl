@@ -9,7 +9,10 @@
 ## Colours inverted, and then converted from SVG to base64-encoded GIF
 ##
 
-image create photo img_filenew -data "
+
+## FILE
+
+image create photo imgFileNew -data "
 R0lGODlhGAAYAPUgAAAAAAQEBAgICAkJCQsLCxISEhsbG0BAQEFBQV5eXl9fX2BgYGFhYWlpaWpq
 amtra3h4eJOTk5aWlp6enp+fn7+/v8HBwcTExMXFxdvb2+Pj4+Tk5O/v7/n5+fr6+v39/f///wAA
 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
@@ -20,7 +23,7 @@ rX+BDwABwwEAD76awMLExsivgbe6u72zv3mxzrWwpqmqrNXJnJ6g4M+PkZOV2UKkg4aHieXagdjy
 7Glrb29xc7RCFAM8CQQwgIIZDAukWFmIgIGWLUSSSDyypEkQADs=
 "
 
-image create photo img_fileopen -data "
+image create photo imgFileOpen -data "
 R0lGODlhGAAYAPYAAAAAAAEBAQMDAwQEBAUFBQcHBwgICAkJCQsLCw0NDRISEhMTExcXFxkZGRwc
 HB0dHR4eHiEhISYmJisrKywsLDAwMDExMTIyMjY2Njc3Nzk5OUREREVFRUZGRk5OTlRUVFlZWVpa
 Wl1dXV5eXmBgYGhoaGlpaW1tbW5ubm9vb3BwcHl5eXp6en19fYGBgYKCgouLi5OTk5SUlJWVlZ2d
@@ -34,7 +37,7 @@ Jyri4+Tl4ygqLAoEt+3umQQLDwXv9ZoGEBYJ9vYJFxwK+NVT0AEEA4HvGIQ44QChOwcoXERw2C7C
 CxkSKN6SMMPGBI2lKNzQUQGkJgs7hmAwmQkDkSQbWALYkOQJjROOHuncydNEiRM0nlAaSnRoIAA7
 "
 
-image create photo img_filesave -data "
+image create photo imgFileSave -data "
 R0lGODlhGAAYAPYAAAAAAAEBAQICAgQEBAYGBgcHBwgICAkJCQoKCgsLCw4ODhAQEBISEhMTExQU
 FBUVFRYWFhgYGBoaGiAgICEhISYmJioqKiwsLC0tLTAwMDExMTIyMjQ0NDU1NTo6Oj09PT4+PkFB
 QUREREhISExMTE9PT1JSUldXV1tbW11dXWNjY2dnZ2hoaGlpaWxsbHJycnNzc3R0dHZ2dnd3d3t7
@@ -50,7 +53,9 @@ mii5AEGHIkM5HlxYEmVDAxxPC+FosCGKmA8AYGQl9ALABzFoSgAosSWNmrc5cOO+TaNFbQk0a1oo
 WLABhN+/gAFvWKCgxRo2SDrgxNkBCRs3YIa4YPGosuXLLFwMCeNmrOfPhgIBADs=
 "
 
-image create photo img_editundo -data "
+## EDIT
+
+image create photo imgEditUndo -data "
 R0lGODlhGAAYAPYAAAAAAAEBAQICAgMDAwUFBQcHBw0NDQ4ODg8PDxAQEBERERMTExQUFBUVFRcX
 FxgYGBkZGRsbGxwcHB0dHR4eHiAgICIiIioqKiwsLENDQ0REREtLS1NTU1RUVFxcXGFhYWdnZ2ho
 aGlpaWpqamxsbHJycnR0dHV1dXd3d3h4eHx8fICAgISEhIWFhYaGhoqKipCQkJGRkZSUlJWVlZqa
@@ -65,7 +70,7 @@ jxgeInTocQhUhVGHsDBxoaFFFUNZoqRwMAKRFiw2WAhBhimKiheKpPjQkQWREiWLoiShWUoQlm9F
 kyq9FAgAOw==
 "
 
-image create photo img_editredo -data "
+image create photo imgEditRedo -data "
 R0lGODlhGAAYAPYAAAAAAAEBAQICAgUFBQcHBw0NDQ4ODhAQEBERERISEhUVFRcXFxgYGBoaGhwc
 HB0dHR4eHiAgICEhISMjIyoqKkNDQ0REREtLS1NTU1ZWVl1dXWBgYGdnZ2hoaGlpaWpqamtra2xs
 bG1tbXJycnNzc3R0dHV1dXZ2dnd3d3h4eHt7e3x8fH9/f4KCgoODg4SEhIWFhYeHh4qKipCQkJGR
@@ -80,15 +85,38 @@ IVQCHJhAUijKCwsxmHQyBCrCiCaFrAR5gaNKNUIfFqRwMnJQlR0+LCaSscLJyyu8nCxSoiSRFH2m
 kipdmjQQADs=
 "
 
+## OPTION
+
+
+## VIEW
+
+
+## PROPERTIES
+
+
+## LAYERS
+
+
+## TOOLS
+
+
+## SYMBOL
+
+
+## HIGHLIGHT
+
+
+## SIMULATE
+
+
+## HELP
 
 
 
 
+## ACTION BUTTONS
 
-
-
-
-image create photo img_simulate -data "
+image create photo imgSimulate -data "
 R0lGODlhGAAYAPUAAAAAAAEBAQQEBAkJCQ8PDxoaGhsbGx4eHi8vLzY2Njw8PD09PUVFRUxMTE1N
 TVVVVV5eXnZ2dnp6ep2dnaCgoKGhoaioqL6+vsHBwcLCwtDQ0NHR0dbW1tfX19ra2tzc3OPj4+Tk
 5OXl5ejo6Onp6e/v7/Hx8fj4+Pn5+fr6+vv7+/7+/v///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
@@ -98,7 +126,7 @@ AwwVH29JgoMABRGAimiMaY6QSItyhRSISph8EhiWkXJ0dniSa22JTV5gYmRcIwsOWVtcLCkbHVO3
 vb6/wFRBADs=
 "
 
-image create photo img_netlist -data "
+image create photo imgNetlist -data "
 R0lGODlhGAAYAPZcAAAAAAEBAQICAgQEBAUFBQcHBwgICAsLCwwMDA0NDQ4ODhERERoaGh4eHh8f
 HyAgICEhISIiIiUlJSgoKCkpKSsrKy0tLS4uLi8vLzc3Nzw8PD4+Pj8/P0BAQEFBQUZGRkdHR0hI
 SExMTFJSUlRUVFZWVlhYWFxcXGBgYGVlZWZmZmhoaHV1dXZ2dnd3d3l5eX5+fn9/f4KCgoaGhoeH
@@ -114,7 +142,7 @@ HDi4pilABR5crki9wqWHhQC4DDzwsIBYAQocNojdwIFCAWILPKhgQKyt20wiDFTowPC2riYMOqLA
 AMEhkt+/gCNxAAEjCjtEiBMrPgQuEAA7
 "
 
-image create photo img_waves -data "
+image create photo imgWaves -data "
 R0lGODlhGAAYAPcAAAAAAAEBAQICAgMDAwQEBAUFBQYGBgcHBwgICAkJCQoKCgsLCwwMDA0NDQ4O
 Dg8PDxAQEBMTExQUFBUVFRYWFhcXFxoaGhwcHB0dHR8fHyEhISIiIiMjIyUlJScnJykpKSoqKi0t
 LTAwMDExMTIyMjMzMzQ0ND09PT8/P0BAQEFBQUREREZGRkdHR0hISElJSUpKSktLS1RUVFVVVVZW

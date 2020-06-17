@@ -2478,31 +2478,90 @@ proc get_file_path {ff} {
 ###
 ### ToolBar
 ###
-
+#
+# Public variables that we allow to be overridden
+#
+set_ne toolbar_visible 0
+set_ne toolbar_horiz   1
+set_ne toolbar_list { 
+	FileNew 
+	FileOpen 
+	FileSave
+	"---"
+	EditUndo
+	EditRedo
+}
+#
+# Pull in the toolbar graphics resources
+#
 source $XSCHEM_SHAREDIR/resources.tcl
-set sepn 0
-
-proc toolbar_create {} {
+#
+set toolbar_sepn 0
+#
+# Toolbar constructor
+#
+proc toolbar_toolbar {} {
 	frame .toolbar -relief raised -bd 1 -bg white
 }
-
-proc toolbar_addtool {pos name img cmd} {
-	button .toolbar.$name -image $img -relief flat -bd 3 -bg white -fg white -command $cmd
-	pack .toolbar.$name -side $pos
+#
+# Create a tool button which may be displayed
+#
+proc toolbar_create {name cmd} {
+	button .toolbar.b$name -image img$name -relief flat -bd 3 -bg white -fg white -command $cmd
 }
-
-proc toolbar_addseparator {pos} {
-	global sepn
-	frame .toolbar.sep$sepn -bg lightgrey -width 2
-	pack .toolbar.sep$sepn -side $pos -padx 1 -pady 1 -fill y
-	incr sepn
-}
-
+#
+# Show or hide the toolbar in horizontal or vertical position
+#
 proc toolbar_show {} {
-	pack .toolbar -fill x -before .drw
-}
+	global toolbar_horiz
+	global toolbar_list
+	global toolbar_sepn
 
+	if { $toolbar_horiz } { 
+		pack .toolbar -fill x -before .drw
+	} else {
+		pack .toolbar -side left -anchor w -fill y -before .drw
+	}
+	
+	set pos "top"
+	if { $toolbar_horiz } {
+		set pos "left"
+	}
+	
+	foreach b $toolbar_list {
+		if { $b == "---" } {
+			if { $toolbar_horiz } {
+				frame .toolbar.sep$toolbar_sepn -bg lightgrey -width 2
+				pack .toolbar.sep$toolbar_sepn -side $pos -padx 1 -pady 1 -fill y
+			} else {
+				frame .toolbar.sep$toolbar_sepn -bg lightgrey -height 2
+				pack .toolbar.sep$toolbar_sepn -side $pos -padx 1 -pady 1 -fill x
+			}
+			incr toolbar_sepn
+		} else {
+			pack .toolbar.b$b -side $pos
+		}
+	}
+
+	set pos "bottom"
+	if { $toolbar_horiz } {
+		set pos "right"
+	}
+	foreach b { Waves Simulate Netlist } {
+		pack .toolbar.b$b -side $pos
+	}
+}
+#
+# Hide the toolbar and unpack the buttons
+#
 proc toolbar_hide {} {
+	
+	set tlist [ winfo children .toolbar ]
+		
+	foreach b $tlist {
+		pack forget $b
+	}
+	
 	pack forget .toolbar
 }
 
@@ -2584,7 +2643,6 @@ set_ne fullscreen 0
 set_ne unzoom_nodrift 1
 set_ne change_lw 0
 set_ne draw_window 0
-set_ne toolbar_visible 1
 set_ne line_width 0
 set_ne incr_hilight 1
 set_ne enable_stretch 0
@@ -2803,7 +2861,7 @@ font configure Underline-Font -underline true -size 24
    infowindow
    #proc unknown  {comm args} { puts "unknown command-> \<$comm\> $args" }
    frame .menubar -relief raised -bd 2 
-   toolbar_create
+   toolbar_toolbar
 
 # FILE menu
    menubutton .menubar.file -text "File" -menu .menubar.file.menu
@@ -2813,7 +2871,7 @@ font configure Underline-Font -underline true -size 24
      -command {
        xschem clear SCHEMATIC
      }
-	toolbar_addtool left filenew img_filenew {xschem clear SCHEMATIC}
+	toolbar_create FileNew {xschem clear SCHEMATIC}
 	
    .menubar.file.menu add command -label "New Symbol" -accelerator Ctrl+Shift+N \
      -command {
@@ -2821,10 +2879,10 @@ font configure Underline-Font -underline true -size 24
      }
 	 
    .menubar.file.menu add command -label "Open" -command "xschem load" -accelerator {Ctrl+O}
-   toolbar_addtool left fileopen img_fileopen "xschem load"   
+   toolbar_create FileOpen "xschem load"   
    
    .menubar.file.menu add command -label "Save" -command "xschem save" -accelerator {Ctrl+S}
-   toolbar_addtool left filesave img_filesave "xschem save"
+   toolbar_create FileSave "xschem save"
    
    .menubar.file.menu add command -label "Merge" -command "xschem merge" -accelerator B
    .menubar.file.menu add command -label "Reload" -accelerator {Alt+S} \
@@ -2843,18 +2901,15 @@ font configure Underline-Font -underline true -size 24
    .menubar.file.menu add separator
    .menubar.file.menu add command -label "Exit" -command {xschem exit} -accelerator {Ctrl+Q}
    
-   toolbar_addseparator left
-
 # EDIT menu
    menubutton .menubar.edit -text "Edit" -menu .menubar.edit.menu
    menu .menubar.edit.menu -tearoff 0
 
    .menubar.edit.menu add command -label "Undo" -command "xschem undo; xschem redraw" -accelerator U
-   toolbar_addtool left editundo img_editundo "xschem undo; xschem redraw"
+   toolbar_create EditUndo "xschem undo; xschem redraw"
    
    .menubar.edit.menu add command -label "Redo" -command "xschem redo; xschem redraw" -accelerator {Shift+U}
-   toolbar_addtool left editredo img_editredo "xschem redo; xschem redraw"
-   
+   toolbar_create EditRedo "xschem redo; xschem redraw"
    
    .menubar.edit.menu add command -label "Copy" -command "xschem copy" -accelerator Ctrl+C
    .menubar.edit.menu add command -label "Cut" -command "xschem cut"   -accelerator Ctrl+X
@@ -2875,8 +2930,6 @@ font configure Underline-Font -underline true -size 24
    .menubar.edit.menu add command -label "Push schematic" -command "xschem descend" -accelerator E
    .menubar.edit.menu add command -label "Push symbol" -command "xschem descend_symbol" -accelerator I
    .menubar.edit.menu add command -label "Pop" -command "xschem go_back" -accelerator Ctrl+E
-   
-   toolbar_addseparator left
 
 # OPTIONS menu
    menubutton .menubar.option -text "Options" -menu .menubar.option.menu
@@ -3031,9 +3084,18 @@ font configure Underline-Font -underline true -size 24
         }
 	.menubar.zoom.menu add checkbutton -label "Show Toolbar" -variable toolbar_visible \
 			-command {
-				if { $toolbar_visible == 1 } { toolbar_show } else { toolbar_hide }
+				if { $toolbar_visible } { toolbar_show } else { toolbar_hide }
 			}
-   
+			
+	.menubar.zoom.menu add checkbutton -label "Horizontal Toolbar" -variable toolbar_horiz \
+			-command { 
+				if { $toolbar_visible } {
+					toolbar_hide
+					toolbar_show
+				}
+			}
+			
+			
 # PROPERTIES menu   
    menubutton .menubar.prop -text "Properties" -menu .menubar.prop.menu
    menu .menubar.prop.menu -tearoff 0
@@ -3205,15 +3267,15 @@ font configure Underline-Font -underline true -size 24
        xschem netlist
       }
 	
-	toolbar_addtool right waves img_waves { waves }
-	toolbar_addtool right simulate img_simulate {
+	toolbar_create Waves { waves }
+	toolbar_create Simulate {
        if { ![info exists simulate_oldbg] } {
          set simulate_oldbg [.menubar.simulate cget -bg]
          .menubar.simulate configure -bg red
          simulate {.menubar.simulate configure -bg $::simulate_oldbg; unset ::simulate_oldbg}
        }
       }
-	toolbar_addtool right netlist img_netlist { xschem netlist }
+	toolbar_create Netlist { xschem netlist }
 
    
 # Pack it in
@@ -3262,7 +3324,7 @@ font configure Underline-Font -underline true -size 24
    pack .statusbar.1 -side left -fill x
    pack .drw -anchor n -side top -fill both -expand true
    pack .menubar -anchor n -side top -fill x  -before .drw
-   toolbar_show
+   if { $toolbar_visible } { toolbar_show }
    pack .statusbar -after .drw -anchor sw  -fill x 
    bind .statusbar.5 <Leave> { xschem set cadgrid $grid; focus .drw}
    bind .statusbar.3 <Leave> { xschem set cadsnap $snap; focus .drw}

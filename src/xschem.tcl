@@ -2504,6 +2504,26 @@ set_ne toolbar_list {
     EditPushSch
     EditPushSym
     EditPop
+    "---"
+    ViewRedraw
+    ViewZoomIn
+    ViewZoomOut
+    ViewZoomBox
+    ViewToggleColors
+    "---"
+    ToolInsertSymbol
+    ToolInsertText
+    ToolInsertWire
+    ToolInsertLine
+    ToolInsertRect
+    ToolInsertPolygon
+    ToolInsertArc
+    ToolInsertCircle
+    "---"
+    ToolSearch
+    "---"
+    ToolJoinTrim
+    ToolBreak
 }
 #
 # Balloon help system, from https://wiki.tcl-lang.org/page/balloon+help
@@ -3159,14 +3179,18 @@ font configure Underline-Font -underline true -size 24
      
    }
    .menubar.zoom.menu add command -label "Redraw" -command "xschem redraw" -accelerator Esc
+   toolbar_create ViewRedraw "xschem redraw" "Redraw"
    .menubar.zoom.menu add checkbutton -label "Fullscreen" -variable fullscreen \
       -accelerator {Alt+Shift+F} -command {
          xschem fullscreen
       }
    .menubar.zoom.menu add command -label "Zoom Full" -command "xschem zoom_full" -accelerator F
    .menubar.zoom.menu add command -label "Zoom In" -command "xschem zoom_in" -accelerator Shift+Z
+   toolbar_create ViewZoomIn "xschem zoom_in" "Zoom In"
    .menubar.zoom.menu add command -label "Zoom Out" -command "xschem zoom_out" -accelerator Ctrl+Z
+   toolbar_create ViewZoomOut "xschem zoom_out" "Zoom Out"
    .menubar.zoom.menu add command -label "Zoom box" -command "xschem zoom_box" -accelerator Z
+   toolbar_create ViewZoomBox "xschem zoom_box" "Zoom Box"
    .menubar.zoom.menu add command -label "Half Snap Threshold" -accelerator G -command {
           xschem set cadsnap [expr [xschem get cadsnap] / 2.0 ]
         }
@@ -3189,6 +3213,10 @@ font configure Underline-Font -underline true -size 24
            xschem toggle_colorscheme
            xschem change_colors
         }
+    toolbar_create ViewToggleColors {
+           xschem toggle_colorscheme
+           xschem change_colors
+        } "Toggle Color Scheme"
    .menubar.zoom.menu add command -label "Dim colors"  -accelerator {} -command {
            color_dim
            xschem color_dim
@@ -3243,21 +3271,32 @@ font configure Underline-Font -underline true -size 24
         if { $persistent_command == 1} { xschem set persistent_command 1} else { xschem set persistent_command 0}
       }
    .menubar.tools.menu add command -label "Insert symbol" -command "xschem place_symbol" -accelerator Ins
+   toolbar_create ToolInsertSymbol "xschem place_symbol" "Insert Symbol"
    .menubar.tools.menu add command -label "Insert text" -command "xschem place_text" -accelerator T
+   toolbar_create ToolInsertText "xschem place_text" "Insert Text"
    .menubar.tools.menu add command -label "Insert wire" -command "xschem wire" -accelerator W
+   toolbar_create ToolInsertWire "xschem wire" "Insert Wire"
    .menubar.tools.menu add command -label "Insert snap wire" -command "xschem snap_wire" -accelerator Shift+W
    .menubar.tools.menu add command -label "Insert line" -command "xschem line" -accelerator L
+   toolbar_create ToolInsertLine "xschem line" "Insert Line"
    .menubar.tools.menu add command -label "Insert rect" -command "xschem rect" -accelerator R
+   toolbar_create ToolInsertRect "xschem rect" "Insert Rectangle"
    .menubar.tools.menu add command -label "Insert polygon" -command "xschem polygon" -accelerator Ctrl+W
+   toolbar_create ToolInsertPolygon "xschem polygon" "Insert Polygon"
    .menubar.tools.menu add command -label "Insert arc" -command "xschem arc" -accelerator Shift+C
+   toolbar_create ToolInsertArc "xschem arc" "Insert Arc"
    .menubar.tools.menu add command -label "Insert circle" -command "xschem circle" -accelerator Ctrl+Shift+C
+   toolbar_create ToolInsertCircle "xschem circle" "Insert Circle"
    .menubar.tools.menu add command -label "Search" -accelerator Ctrl+F -command  property_search
+   toolbar_create ToolSearch property_search "Search"
    .menubar.tools.menu add command -label "Align to Grid" -accelerator Alt+U -command  "xschem align"
    .menubar.tools.menu add command -label "Execute TCL command" -command  "tclcmd"
    .menubar.tools.menu add command -label "Join/Trim wires" \
       -command "xschem collapse_wires" -accelerator {&}
+    toolbar_create ToolJoinTrim "xschem collapse_wires" "Join/Trim Wires"
    .menubar.tools.menu add command -label "Break wires" \
       -command "xschem break_wires" -accelerator {!}
+    toolbar_create ToolBreak "xschem break_wires" "Break Wires"
 
    .menubar.hilight.menu add command -label {Highlight duplicate instance names} -command "xschem check_unique_names 0" -accelerator {#} 
    .menubar.hilight.menu add command -label {Rename duplicate instance names} -command "xschem check_unique_names 1" -accelerator {Ctrl+#}

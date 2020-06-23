@@ -1032,6 +1032,15 @@ int Tcl_AppInit(Tcl_Interp *inter)
    tcleval(tcl_command);
  }
  
+
+ /* set tcp port given in cmdline if any */
+ if(tcp_port > 0) {
+   if(tcp_port < 1024) fprintf(errfp, "please use port numbers >=1024 on command line\n");
+   else {
+     my_snprintf(name, S(name), "set xschem_listen_port %d", tcp_port);
+     tcleval(name);
+   }
+ }
  /*                                */
  /*  EXECUTE xschem.tcl            */
  /*                                */

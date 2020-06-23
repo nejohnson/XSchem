@@ -47,44 +47,45 @@ user:~$ xschem .../xschem_library/examples/0_examples_top.sch
 
 usage: xschem [options] [schematic | symbol ]
 Options:
-  -h  --help           print this help
-  -n  --netlist        do a netlist of the given schematic cell
-  -v  --version        print version information and exit.
-  -V  --vhdl           set netlist type to VHDL
-  -S  --simulate       run a simulation of the current schematc file 
+  -h  --help           Print this help
+  -n  --netlist        Do a netlist of the given schematic cell
+  -v  --version        Print version information and exit.
+  -V  --vhdl           Set netlist type to VHDL
+  -S  --simulate       Run a simulation of the current schematc file 
                        (spice/Verilog/VHDL, depending on the netlist 
                        type chosen).
-  -w  --verilog        set netlist type to Verilog
-      --tcl            execute specified tcl instructions before any other action.
+  -w  --verilog        Set netlist type to Verilog
+  --tcl &lt;tcl_script&gt;   Execute specified tcl instructions before any other action.
                        this can be used to change xschemrc variables.
-      --script         execute specified tcl file as a command script (perhaps with xschem  commands)
-  -i  --no_rcload      do not load any xschemrc file
-  -o  --netlist_path   set output for netlist
-  -t  --tedax          set netlist type to tEDAx
-  -s  --spice          set netlist type to SPICE
-  -3  --a3page         set page size for pdf export to A3
-  -x  --no_x           dont use X (only command mode)
+  --script &lt;file&gt;      Execute specified tcl file as a command script (perhaps with xschem  commands)
+  --tcp_port &lt;number&gt;  Listen to specified tcp port for client connections. (number &gt;=1024)
+  -i  --no_rcload      Do not load any xschemrc file
+  -o  --netlist_path   Set output for netlist
+  -t  --tedax          Set netlist type to tEDAx
+  -s  --spice          Set netlist type to SPICE
+  -3  --a3page         Set page size for pdf export to A3
+  -x  --no_x           Do'nt use X (only command mode)
       --events         Do not use tclreadline, empty tcl shell prompt, dump
                        activity on stdout for remote controlling other software
-  -z  --rainbow        use a raibow-looking layer color table
-  -W  --waves          show simulation waveforms
-  -f  --flat_netlist   set flat netlist (for spice format only)
-  -r  --no_readline    start without the tclreadline package ( this is
+  -z  --rainbow        Use a raibow-looking layer color table
+  -W  --waves          Show simulation waveforms
+  -f  --flat_netlist   Set flat netlist (for spice format only)
+  -r  --no_readline    Start without the tclreadline package ( this is
                        necessary if stdin and stdout are to be redirected
                        for example to /dev/null).
-  -c  --color_ps       set color postscript
-  --plotfile &lt;file&gt;    use &lt;file&gt; as output for plot (png, svg, ps)
-  --rcfile &lt;file&gt;      use &lt;file&gt; as a rc file for startup instead of the
+  -c  --color_ps       Set color postscript
+  --plotfile &lt;file&gt;    Use &lt;file&gt; as output for plot (png, svg, ps)
+  --rcfile &lt;file&gt;      Use &lt;file&gt; as a rc file for startup instead of the
                        default xschemrc.
   -p  --postscript
-      --pdf            export pdf schematic
-      --png            export png schematic
-      --svg            export svg schematic
-  -q  --quit           quit after doing things (no interactive mode)
+      --pdf            Export pdf schematic
+      --png            Export png schematic
+      --svg            Export svg schematic
+  -q  --quit           Quit after doing things (no interactive mode)
   -l &lt;file&gt;
-  --log &lt;file&gt;         set a log file
+  --log &lt;file&gt;         Set a log file
   -d &lt;n&gt;
-  --debug &lt;n&gt;          set debug level:  1,  2,  3,..  C program debug
+  --debug &lt;n&gt;          Set debug level:  1,  2,  3,..  C program debug
                                        -1, -2, -3...  TCL frontend debug
 
 xschem: interactive schematic capture program

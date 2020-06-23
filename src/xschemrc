@@ -206,6 +206,9 @@ set to_png {gm convert}
 #### set gaw address for socket connection: {host port}
 set gaw_tcp_address {localhost 2020}
 
+#### set xschem listening port
+# set xschem_listen_port 2021
+
 #### utile (stefan's spice stimuli editor)
 set utile_gui_path ${XSCHEM_SHAREDIR}/utile/utile3
 set utile_cmd_path ${XSCHEM_SHAREDIR}/utile/utile

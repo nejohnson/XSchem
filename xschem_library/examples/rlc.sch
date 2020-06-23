@@ -1,4 +1,4 @@
-v {xschem version=2.9.5 file_version=1.1}
+v {xschem version=2.9.6 file_version=1.1}
 G {}
 V {}
 S {}
@@ -19,7 +19,7 @@ only_toplevel=true
 tclcommand="xschem edit_vi_prop"
 value="
 
-.tran 10n 2000u uic
+.tran 10n 800u uic
 .save all
 "}
 C {capa.sym} 280 -550 0 0 {name=C1 m=1 value=50nF footprint=1206 device="ceramic capacitor"}
@@ -27,7 +27,6 @@ C {lab_pin.sym} 280 -330 2 1 {name=l2 sig_type=std_logic lab=C}
 C {lab_pin.sym} 280 -450 2 1 {name=l3 sig_type=std_logic lab=B}
 C {lab_pin.sym} 480 -580 2 0 {name=l4 sig_type=std_logic lab=A}
 C {lab_pin.sym} 480 -240 2 0 {name=l5 sig_type=std_logic lab=0}
-C {vsource_arith.sym} 280 -270 0 0 {name=E1 VOL="'3*cos(time*time*time*1e11)'"
-}
 C {res.sym} 480 -490 0 0 {name=R1 m=1 value=1k footprint=1206 device=resistor}
 C {ind.sym} 280 -390 0 0 {name=L1 value=10mH}
+C {vsource.sym} 280 -270 0 0 {name=V1 value="pwl 0 0 100u 0 101u 3"}

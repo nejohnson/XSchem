@@ -233,6 +233,11 @@ extern char win_temp_dir[PATH_MAX];
 #define FONTDESCENT 15
 #define FONTWHITESPACE 10
 
+/* hash operations */
+#define INSERT 0
+#define LOOKUP 1
+#define DELETE 2
+
 #define S(a) (sizeof(a)/sizeof(char))
 #define BUS_WIDTH 4
 #define POINTINSIDE(xa,ya,x1,y1,x2,y2)  \
@@ -503,6 +508,7 @@ extern char plotfile[PATH_MAX];
 extern int persistent_command;
 extern int disable_unique_names;
 
+extern int tcp_port;
 extern int debug_var; 
 extern char **color_array;
 extern Colormap colormap;
@@ -664,7 +670,7 @@ extern const char *get_file_path(char *f);
 extern int save(int confirm);
 extern struct hilight_hashentry *bus_hilight_lookup(const char *token, int value, int remove) ;
 extern int  name_strcmp(char *s, char *d) ;
-extern void search(const char *tok, const char *val, int sub, int sel, int what);
+extern int search(const char *tok, const char *val, int sub, int sel, int what);
 extern int process_options(int argc, char **argv);
 extern void calc_drawing_bbox(Box *boundbox, int selected);
 extern void ps_draw(void);

@@ -226,13 +226,13 @@ struct node_hashentry *node_hash_lookup(char *token, char *dir,int remove,int po
        char *sig_type, char *verilog_type, char *value, char *class, char *orig_tok)
 /*    token        dir      remove    ... what ... */
 /* -------------------------------------------------------------------------- */
-/* "whatever"     "in"/"out"    0       insert in hash table if not in and return NULL */
-/*                                      if already present just return entry address  */
-/*                                      and update in/out fields sum up port field */
-/*                                      return NULL otherwise */
+/* "whatever"     "in"/"out"    0,INSERT  insert in hash table if not in and return NULL */
+/*                                        if already present just return entry address  */
+/*                                        and update in/out fields sum up port field */
+/*                                        return NULL otherwise */
 /* */
-/* "whatever"     whatever      1       delete entry if found return NULL */
-/* "whatever"     whatever      2       only look up element, dont insert */
+/* "whatever"     whatever      1,DELETE  delete entry if found return NULL */
+/* "whatever"     whatever      2,LOOKUP  only look up element, dont insert */
 {
  unsigned int hashcode, index;
  struct node_hashentry *entry, *saveptr, **preventry;
@@ -256,7 +256,7 @@ struct node_hashentry *node_hash_lookup(char *token, char *dir,int remove,int po
  {
   if( !entry )                  /* empty slot */
   {
-   if( remove==0 )              /* insert data */
+   if( remove==INSERT )              /* insert data */
    {
     s=sizeof( struct node_hashentry );
     ptr= my_malloc(281, s );
@@ -285,7 +285,7 @@ struct node_hashentry *node_hash_lookup(char *token, char *dir,int remove,int po
   }
   if( entry -> hash==hashcode && strcmp(token,entry->token)==0 ) /* found matching tok */
   {
-   if(remove==1)                /* remove token from the hash table ... */
+   if(remove==DELETE)                /* remove token from the hash table ... */
    {
     saveptr=entry->next;
     if(entry->token) my_free(& entry->token);
@@ -336,35 +336,35 @@ void traverse_node_hash()
      if(entry->d.out + entry->d.inout + entry->d.in == 1)
      {
        my_snprintf(str, S(str), "open net: %s", entry->token);
-       if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color,0);
+       if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color, INSERT);
        if(incr_hilight) hilight_color++;
        statusmsg(str,2);
      }
      else if(entry->d.out ==0  && entry->d.inout == 0) 
      {
        my_snprintf(str, S(str), "undriven node: %s", entry->token);
-       if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color,0);
+       if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color, INSERT);
        if(incr_hilight) hilight_color++;
        statusmsg(str,2);
      }
      else if(entry->d.out >=2 && entry->d.port>=0)  /*  era d.port>=2   03102001 */
      {
        my_snprintf(str, S(str), "shorted output node: %s", entry->token);
-       if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color,0);
+       if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color, INSERT);
        if(incr_hilight) hilight_color++;
        statusmsg(str,2);
      }
      else if(entry->d.in ==0 && entry->d.inout == 0) 
      {
        my_snprintf(str, S(str), "node: %s goes nowhere", entry->token);
-       if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color,0);
+       if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color, INSERT);
        if(incr_hilight) hilight_color++;
        statusmsg(str,2);
      }
      else if(entry->d.out >=2 && entry->d.inout == 0 && entry->d.port>=0)  /*  era d.port>=2   03102001 */
      {
        my_snprintf(str, S(str), "shorted output node: %s", entry->token);
-       if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color,0);
+       if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color, INSERT);
        if(incr_hilight) hilight_color++;
        statusmsg(str,2);
      }

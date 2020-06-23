@@ -71,10 +71,10 @@ int name_strcmp(char *s, char *d) /* compare strings up to '\0' or'[' */
 
 /* 20180926 added token_size */
 /* remove:
- * 0: lookup and insert in hash table (return NULL if token was not found)
+ * 0,INSERT : lookup and insert in hash table (return NULL if token was not found)
  *    if token was found update value
- * 1: lookup only 
- * 2: delete token entry, return NULL
+ * 1,DELETE : delete token entry, return NULL
+ * 2,LOOKUP : lookup only 
  */
 static struct hashentry *hash_lookup(char *token, int value, int remove, size_t token_size)
 {
@@ -90,7 +90,7 @@ static struct hashentry *hash_lookup(char *token, int value, int remove, size_t 
   preventry=&table[index];
   while(1) {
     if( !entry ) {                         /* empty slot */
-      if(remove == 0) {            /* insert data */
+      if(remove == INSERT) {            /* insert data */
         s=sizeof( struct hashentry );
         entry=(struct hashentry *) my_malloc(425, s);
         *preventry=entry;
@@ -104,13 +104,13 @@ static struct hashentry *hash_lookup(char *token, int value, int remove, size_t 
       return NULL; /* token was not in hash */
     }
     if( entry->hash==hashcode && !strcmp(token,entry->token) ) { /* found a matching token */
-      if(remove == 2) {              /* remove token from the hash table ... */
+      if(remove == DELETE) {              /* remove token from the hash table ... */
         saveptr=entry->next;
         my_free(&entry->token);
         my_free(&entry);
         *preventry=saveptr;
         return NULL;
-      } else if(remove == 0) {
+      } else if(remove == INSERT) {
         entry->value = value;
       }
       /* if(debug_var>=1) fprintf(errfp, "hash_lookup: returning: %s , %d\n", entry->token, entry->value); */
@@ -129,7 +129,7 @@ void hash_all_names(int n)
   free_hash();
   for(i=0; i<lastinst; i++) {
     /* if(i == n) continue; */
-    hash_lookup(inst_ptr[i].instname, i, 0, strlen(inst_ptr[i].instname));
+    hash_lookup(inst_ptr[i].instname, i, INSERT, strlen(inst_ptr[i].instname));
   }
 }
 
@@ -206,7 +206,7 @@ void check_unique_names(int rename)
         comma_pos = strchr(start, ',');
         if(comma_pos) *comma_pos = '\0';
         if(debug_var>=1) fprintf(errfp, "check_unique_names: checking %s\n", start);
-        if( (entry = hash_lookup(start, i, 0, strlen(start)) ) && entry->value != i) {
+        if( (entry = hash_lookup(start, i, INSERT, strlen(start)) ) && entry->value != i) {
           inst_ptr[i].flags |=4;
           hilight_nets=1;
           if(rename == 1) {
@@ -230,7 +230,7 @@ void check_unique_names(int rename)
         my_strdup(511, &tmp, inst_ptr[i].prop_ptr);
         new_prop_string(i, tmp, newpropcnt++, !rename);
         my_strdup2(512, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); /* 20150409 */
-        hash_lookup(inst_ptr[i].instname, i, 0, strlen(inst_ptr[i].instname));
+        hash_lookup(inst_ptr[i].instname, i, INSERT, strlen(inst_ptr[i].instname));
         symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1, &inst_ptr[i].x2, &inst_ptr[i].y2);
         bbox(ADD, inst_ptr[i].x1, inst_ptr[i].y1, inst_ptr[i].x2, inst_ptr[i].y2);
         my_free(&tmp);
@@ -663,9 +663,9 @@ void new_prop_string(int i, const char *old_prop, int fast, int disable_unique_n
  }
  prefix=old_name[0];
  /* don't change old_prop if name does not conflict. */
- if(disable_unique_names || (entry = hash_lookup(old_name, i, 1, old_name_len)) == NULL || entry->value == i)
+ if(disable_unique_names || (entry = hash_lookup(old_name, i, LOOKUP, old_name_len)) == NULL || entry->value == i)
  {
-  hash_lookup(old_name, i, 0, old_name_len);
+  hash_lookup(old_name, i, INSERT, old_name_len);
   my_strdup(447, &inst_ptr[i].prop_ptr, old_prop);
   return;
  }
@@ -681,7 +681,7 @@ void new_prop_string(int i, const char *old_prop, int fast, int disable_unique_n
    } else {
      new_name_len = my_snprintf(new_name, old_name_len + 40, "%c%d%s", prefix,q, tmp); /* added new_name_len 20180926 */
    }
-   if((entry = hash_lookup(new_name, i, 1, new_name_len)) == NULL || entry->value == i) 
+   if((entry = hash_lookup(new_name, i, LOOKUP, new_name_len)) == NULL || entry->value == i) 
    {
     last[(int)prefix]=q+1;
     break;
@@ -692,7 +692,7 @@ void new_prop_string(int i, const char *old_prop, int fast, int disable_unique_n
  if(strcmp(tmp2, old_prop) ) {
    my_strdup(449, &inst_ptr[i].prop_ptr, tmp2);
  }
- hash_lookup(new_name, i, 0, new_name_len); /* reinsert in hash */
+ hash_lookup(new_name, i, INSERT, new_name_len); /* reinsert in hash */
 }
 
 char *subst_token(const char *s, const char *tok, const char *new_val)

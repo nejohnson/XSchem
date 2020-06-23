@@ -1,4 +1,4 @@
-v {xschem version=2.9.5 file_version=1.1}
+v {xschem version=2.9.6 file_version=1.1}
 G {}
 V {}
 S {
@@ -187,7 +187,7 @@ rload out 0 4
 .include \\"models_poweramp.txt\\"
 .dc vplus '-1.5' '1.5' 0.1
 .save all
-*.op
+* .op
 *.probe dc v(plus,vdc)
 "}
 C {lab_wire.sym} 990 -760 0 0 {name=l1 lab=GA}
@@ -239,8 +239,8 @@ C {ammeter.sym} 690 -680 0 0 {name=v5 current=0.006271}
 C {ammeter.sym} 180 -870 0 1 {name=v6 current=0.01955}
 C {ammeter.sym} 840 -890 0 0 {name=v7 current=0.0195}
 C {spice_probe.sym} 1010 -440 0 0 {name=p36 analysis=tran voltage=-46.31}
-C {spice_probe_vdiff.sym} 930 -410 0 0 {name=p37 analysis=tran voltage=3.6891e+00}
-C {spice_probe_vdiff.sym} 930 -730 0 0 {name=p38 analysis=tran voltage=3.6907e+00}
+C {spice_probe_vdiff.sym} 930 -410 0 0 {name=p37 analysis=tran voltage=3.689}
+C {spice_probe_vdiff.sym} 930 -730 0 0 {name=p38 analysis=tran voltage=3.691}
 C {spice_probe.sym} 1010 -760 0 0 {name=p39 analysis=tran voltage=3.814}
 C {spice_probe.sym} 1220 -590 0 0 {name=p40 analysis=tran voltage=0.1231}
 C {spice_probe.sym} 380 -530 0 0 {name=p41 analysis=tran voltage=21.3}

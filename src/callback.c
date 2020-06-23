@@ -489,7 +489,7 @@ int callback(int event, int mx, int my, KeySym key,
          if(debug_var>=1) fprintf(errfp, "i=%d labname=%s explabname = %s  net = %s\n", i, labname, lab, netname);
          if(netname && strcmp(lab, netname)) { 
            if(debug_var>=1) fprintf(errfp, "hilight: %s\n", netname);
-           bus_hilight_lookup(netname, hilight_color,0);
+           bus_hilight_lookup(netname, hilight_color, INSERT);
            if(incr_hilight) hilight_color++;
          }
        }

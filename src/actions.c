@@ -51,7 +51,7 @@ void set_modify(int mod)
 void print_version()
 {
   printf("XSCHEM V%s\n", XSCHEM_VERSION);
-  printf("Copyright 1998-2019 Stefan Schippers\n");
+  printf("Copyright 1998-2020 Stefan Schippers\n");
   printf("\n");
   printf("This is free software; see the source for copying conditions.  There is NO\n");
   printf("warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n");
@@ -1311,7 +1311,7 @@ void calc_drawing_bbox(Box *boundbox, int selected)
    if(selected == 2) {
      char *str;
      str = get_tok_value(wire[i].prop_ptr, "lab",0);
-     if(!str[0] || !bus_hilight_lookup(str, 0,2)) continue;
+     if(!str[0] || !bus_hilight_lookup(str, 0,LOOKUP)) continue;
    }
    tmp.x1=wire[i].x1;
    tmp.x2=wire[i].x2;
@@ -1354,7 +1354,7 @@ void calc_drawing_bbox(Box *boundbox, int selected)
       prepare_netlist_structs(0);
       for(j=0;j<rects;j++) {
         if( inst_ptr[i].node && inst_ptr[i].node[j]) {
-          entry=bus_hilight_lookup(inst_ptr[i].node[j], 0, 2);
+          entry=bus_hilight_lookup(inst_ptr[i].node[j], 0, LOOKUP);
           if(entry) {
             found = 1;
             break;
@@ -1363,7 +1363,7 @@ void calc_drawing_bbox(Box *boundbox, int selected)
       }
     }
     else if( type && !(strcmp(type,"label") && strcmp(type,"ipin") && strcmp(type,"iopin") && strcmp(type,"opin") )) {
-      entry=bus_hilight_lookup( get_tok_value(inst_ptr[i].prop_ptr,"lab",0) , 0, 2 );
+      entry=bus_hilight_lookup( get_tok_value(inst_ptr[i].prop_ptr,"lab",0) , 0, LOOKUP );
       if(entry) found = 1;
     }
     else if( (inst_ptr[i].flags & 4) ) {

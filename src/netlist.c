@@ -448,9 +448,9 @@ static void signal_short( char *n1, char *n2)
    if(debug_var>=1) fprintf(errfp, "signal_short(): signal_short: shorted: %s - %s", n1, n2);
    statusmsg(str,2);
    if(!netlist_count) {
-      bus_hilight_lookup(n1, hilight_color,0);
+      bus_hilight_lookup(n1, hilight_color, INSERT);
       if(incr_hilight) hilight_color++;
-      bus_hilight_lookup(n2, hilight_color,0);
+      bus_hilight_lookup(n2, hilight_color, INSERT);
       if(incr_hilight) hilight_color++;
    }
  }
@@ -727,7 +727,7 @@ void prepare_netlist_structs(int for_netlist)
    
    /* do not count multiple labels/pins with same name */
    bus_hash_lookup(inst_ptr[i].node[0],    /* insert node in hash table */
-       dir, 0,port, sig_type, verilog_type, value, class);
+       dir, INSERT, port, sig_type, verilog_type, value, class);
 
    if(debug_var>=2) fprintf(errfp, "prepare_netlist_structs(): name=%s\n",
       get_tok_value( inst_ptr[i].prop_ptr, "lab",0 ) );
@@ -775,7 +775,7 @@ void prepare_netlist_structs(int for_netlist)
    my_strdup(265, &wire[i].node , tmp_str);
    my_strdup(266, &wire[i].prop_ptr, 
      subst_token(wire[i].prop_ptr, "lab", wire[i].node));
-   bus_hash_lookup(wire[i].node,"",0,0,"","","","");   /* insert unnamed wire name in hash table */
+   bus_hash_lookup(wire[i].node,"", INSERT, 0,"","","","");   /* insert unnamed wire name in hash table */
 
    wirecheck(i);
   }
@@ -840,7 +840,7 @@ void prepare_netlist_structs(int for_netlist)
            if(!for_netlist) {
              my_strdup(270, &sig_type,"");
              bus_hash_lookup(inst_ptr[iptr->n].node[iptr->pin],"none",
-               0,1, sig_type,"", "","");
+               INSERT, 1, sig_type,"", "","");
            } else {
              my_strdup(271, &sig_type,get_tok_value(
                (inst_ptr[i].ptr+instdef)->boxptr[GENERICLAYER][j-rects].prop_ptr, "sig_type",0));
@@ -851,7 +851,7 @@ void prepare_netlist_structs(int for_netlist)
              bus_hash_lookup(inst_ptr[iptr->n].node[iptr->pin],
                get_tok_value( 
                  (inst_ptr[i].ptr+instdef)->boxptr[GENERICLAYER][j-rects].prop_ptr, "dir",0),
-               0,1, sig_type,"", "","");
+               INSERT, 1, sig_type,"", "","");
            }
          
 
@@ -917,7 +917,7 @@ void prepare_netlist_structs(int for_netlist)
         my_strdup(273,  &inst_ptr[i].node[j], wire[wptr->n].node );
         bus_hash_lookup(inst_ptr[i].node[j],
            get_tok_value( (inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][j].prop_ptr, "dir",0),
-           0,0,"","","","");
+           INSERT, 0,"","","","");
  
         if(wire[wptr->n].node[0]=='#')  /* unnamed node, update its multiplicity */
         {
@@ -956,11 +956,11 @@ void prepare_netlist_structs(int for_netlist)
            my_strdup(274,  &inst_ptr[i].node[j], inst_ptr[iptr->n].node[iptr->pin] );
            if(!for_netlist) {
              bus_hash_lookup(inst_ptr[i].node[j],
-                "none", 0,0,"","","","");
+                "none", INSERT, 0,"","","","");
            } else {
              bus_hash_lookup(inst_ptr[i].node[j],
                 get_tok_value( (inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][j].prop_ptr, "dir",0),
-                0,0,"","","","");
+                INSERT, 0,"","","","");
            }
            if( (inst_ptr[i].node[j])[0] == '#')
            {
@@ -998,11 +998,11 @@ void prepare_netlist_structs(int for_netlist)
         my_strdup(275,  &inst_ptr[i].node[j], tmp_str );
         if(!for_netlist) {
           bus_hash_lookup(inst_ptr[i].node[j],
-             "none", 0,0,"","","","");
+             "none", INSERT, 0,"","","","");
         } else {
           bus_hash_lookup(inst_ptr[i].node[j],
              get_tok_value( (inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][j].prop_ptr, "dir",0),
-             0,0,"","","","");
+             INSERT, 0,"","","","");
         }
       }
      }

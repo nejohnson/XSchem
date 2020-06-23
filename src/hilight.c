@@ -22,7 +22,7 @@
 
 #include "xschem.h"
 
-static struct hilight_hashentry *table[HASHSIZE];
+static struct hilight_hashentry *hilight_table[HASHSIZE];
 static int nelements=0; /* 20161221 */
 
 static int *inst_color=NULL;
@@ -61,7 +61,7 @@ void free_hilight_hash(void) /* remove the whole hash table  */
  if(debug_var>=2) fprintf(errfp, "free_hilight_hash(): removing hash table\n");
  for(i=0;i<HASHSIZE;i++)
  {
-  table[i] = free_hilight_entry( table[i] );
+  hilight_table[i] = free_hilight_entry( hilight_table[i] );
  }
  if(debug_var>=2) fprintf(errfp, "free_hilight_hash(): : nelements=%d\n", nelements);
  nelements=0; /* 20161221 */
@@ -97,7 +97,7 @@ void create_plot_cmd(int viewer)
   first = 1;
   for(i=0;i<HASHSIZE;i++) /* set ngspice colors */
   {
-    entry = table[i];
+    entry = hilight_table[i];
     while(entry) {
       tok = entry->token;
       node_entry = bus_hash_lookup(tok, "", LOOKUP, 0, "", "", "", "");
@@ -182,8 +182,8 @@ struct hilight_hashentry *hilight_lookup(char *token, int value, int remove)
  if(token==NULL) return NULL;
  hashcode=hash(token);
  index=hashcode % HASHSIZE;
- entry=table[index];
- preventry=&table[index];
+ entry=hilight_table[index];
+ preventry=&hilight_table[index];
  depth=0; /* 20161221 */
  while(1)
  {
@@ -999,7 +999,7 @@ void print_hilight_net(int show)
  my_snprintf(cmd2, S(cmd2), "%s %s > %s", cmd, filetmp1, filetmp2);
  my_snprintf(cmd3, S(cmd3), "\"%s/sort_labels.awk\" %s", tclgetvar("XSCHEM_SHAREDIR"), filetmp1);
  for(i=0;i<HASHSIZE;i++) {
-   entry=table[i];
+   entry=hilight_table[i];
    while(entry) {
      /* 20111116 */
      node_entry = bus_hash_lookup(entry->token, "", LOOKUP, 0, "", "", "", "");

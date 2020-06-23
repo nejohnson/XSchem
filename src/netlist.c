@@ -75,8 +75,8 @@ void del_inst_table(void)
 }
 
 /* what: 
- * 1 : add to hash
- * 0 : remove from hash
+ * 0, INSERT : add to hash
+ * 1, DELETE : remove from hash
  */
 void hash_inst(int what, int n) /* 20171203 insert object bbox in spatial hash table */
 {
@@ -113,7 +113,7 @@ void hash_inst(int what, int n) /* 20171203 insert object bbox in spatial hash t
     countj++;
     tmpj=j%NBOXES; if(tmpj<0) tmpj+=NBOXES;
     /* insert object_ptr[n] in region [tmpi, tmpj] */
-    if(what) instinsert(n, tmpi, tmpj); /* 20171203  */
+    if(what == INSERT) instinsert(n, tmpi, tmpj); /* 20171203  */
     else instdelete(n, tmpi, tmpj);
    }
   }
@@ -125,7 +125,7 @@ void hash_instances(void) /* 20171203 insert object bbox in spatial hash table *
  if(prepared_hash_instances) return; 
  del_inst_table();
  for(n=0; n<lastinst; n++) {
-   hash_inst(1, n);
+   hash_inst(INSERT, n);
  }
  prepared_hash_instances=1;
 } 
@@ -254,8 +254,8 @@ void get_square(double x, double y, int *xx, int *yy)
 }
 
 /* what: 
- * 1 : add to hash
- * 0 : remove from hash
+ * 0, INSERT : add to hash
+ * 1, DELETE : remove from hash
  */
 void hash_inst_pin(int what, int i, int j)
 /*                           inst   pin */
@@ -301,13 +301,13 @@ void hash_inst_pin(int what, int i, int j)
   x0=inst_ptr[i].x0+rx1;
   y0=inst_ptr[i].y0+ry1;
   get_square(x0, y0, &sqx, &sqy);
-  if( what ) instpininsert(i, j, x0, y0, sqx, sqy);
-  else       instpindelete(i, j, sqx, sqy);
+  if( what == INSERT ) instpininsert(i, j, x0, y0, sqx, sqy);
+  else                 instpindelete(i, j, sqx, sqy);
 }
 
 /* what: 
- * 1 : add to hash
- * 0 : remove from hash
+ * 0, INSERT : add to hash
+ * 1, DELETE : remove from hash
  */
 void hash_wire(int what, int n)
 {
@@ -349,7 +349,7 @@ void hash_wire(int what, int n)
     countj++;
     tmpj=j%NBOXES; if(tmpj<0) tmpj+=NBOXES;
     /* insert wire[n] in region [tmpi, tmpj] */
-    if(what==1) wireinsert(n, tmpi, tmpj);
+    if(what==INSERT) wireinsert(n, tmpi, tmpj);
     else  wiredelete(n, tmpi, tmpj);
    }
   }
@@ -361,7 +361,7 @@ void hash_wires(void)
 
  if(prepared_hash_wires) return; 
  del_wire_table();
- for(n=0; n<lastwire; n++) hash_wire(1, n);
+ for(n=0; n<lastwire; n++) hash_wire(INSERT, n);
  prepared_hash_wires=1;
 } 
 
@@ -652,7 +652,7 @@ void prepare_netlist_structs(int for_netlist)
     for(j=0;j<rects;j++)
     {
       inst_ptr[i].node[j]=NULL;
-      hash_inst_pin(1, i, j);
+      hash_inst_pin(INSERT, i, j);
     }
   }
  }

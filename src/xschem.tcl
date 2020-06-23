@@ -507,7 +507,7 @@ To reset to default just delete the ~/.xschem/simrc file manually.
     save_sim_defaults ${USER_CONF_DIR}/simrc
     # puts "saving simrc"
   }
-  button .sim.bottom.close -text Close -command {
+  button .sim.bottom.close -text {Accept and Close} -command {
     set_sim_defaults
     destroy .sim
   }

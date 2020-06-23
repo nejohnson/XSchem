@@ -325,7 +325,6 @@ typedef struct
    char *prop_ptr;
 } Box;
 
-
 typedef struct /*  20171115 */
 {
   /*  last point coincident to first, added by program if needed. */
@@ -426,7 +425,14 @@ struct drivers {
                 int inout;
                 int port;
                };
-       
+
+/* instance name (refdes) hash table, for unique name checking */
+struct hashentry {
+                  struct hashentry *next;
+                  unsigned int hash;
+                  char *token;
+                  char *value;
+                 };
 
 struct int_hashentry { /*  20180104 */
                   struct int_hashentry *next;
@@ -857,7 +863,12 @@ extern struct instentry *inst_iterator_next();
 extern void init_wire_iterator(double x1, double y1, double x2, double y2);
 extern struct wireentry *wire_iterator_next();
 extern void check_unique_names(int rename);
-extern void free_hash(void);
+
+extern void clear_instance_hash();
+
+extern void free_hash(struct hashentry **table);
+extern struct hashentry *hash_lookup(struct hashentry **table, char *token, char *value, int what);
+
 extern char *find_nth(char *str, char sep, int n);
 extern int isonlydigit(const char *s);
 extern char *translate(int inst, char* s);

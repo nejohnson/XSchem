@@ -27,16 +27,18 @@
 /* 20150317 */
 #define SPACE2(c) ( SPACE(c) || c=='\'' || c== '"')
 
-enum status {XBEGIN, XTOKEN, XSEPARATOR, XVALUE, XEND, XENDTOK};
-
-struct hashentry {
-                  struct hashentry *next;
+/* instance name (refdes) hash table, for unique name checking */
+struct inst_hashentry {
+                  struct inst_hashentry *next;
                   unsigned int hash;
                   char *token;
                   int value;
                  };
 
-static struct hashentry *table[HASHSIZE];
+
+static struct inst_hashentry *table[HASHSIZE];
+
+enum status {XBEGIN, XTOKEN, XSEPARATOR, XVALUE, XEND, XENDTOK};
 
 /* calculate the hash function relative to string s */
 static unsigned int hash(char *tok)
@@ -76,11 +78,11 @@ int name_strcmp(char *s, char *d) /* compare strings up to '\0' or'[' */
  * 1,DELETE : delete token entry, return NULL
  * 2,LOOKUP : lookup only 
  */
-static struct hashentry *hash_lookup(char *token, int value, int remove, size_t token_size)
+static struct inst_hashentry *inst_hash_lookup(struct inst_hashentry **table, char *token, int value, int remove, size_t token_size)
 {
   unsigned int hashcode; 
   unsigned int index;
-  struct hashentry *entry, *saveptr, **preventry;
+  struct inst_hashentry *entry, *saveptr, **preventry;
   int s;
  
   if(token==NULL) return NULL;
@@ -91,8 +93,8 @@ static struct hashentry *hash_lookup(char *token, int value, int remove, size_t 
   while(1) {
     if( !entry ) {                         /* empty slot */
       if(remove == INSERT) {            /* insert data */
-        s=sizeof( struct hashentry );
-        entry=(struct hashentry *) my_malloc(425, s);
+        s=sizeof( struct inst_hashentry );
+        entry=(struct inst_hashentry *) my_malloc(425, s);
         *preventry=entry;
         entry->next=NULL;
         entry->hash=hashcode;
@@ -113,7 +115,7 @@ static struct hashentry *hash_lookup(char *token, int value, int remove, size_t 
       } else if(remove == INSERT) {
         entry->value = value;
       }
-      /* if(debug_var>=1) fprintf(errfp, "hash_lookup: returning: %s , %d\n", entry->token, entry->value); */
+      /* if(debug_var>=1) fprintf(errfp, "inst_hash_lookup: returning: %s , %d\n", entry->token, entry->value); */
       return entry;        /* found matching entry, return the address */
     } 
     preventry=&entry->next; /* descend into the list. */
@@ -121,53 +123,43 @@ static struct hashentry *hash_lookup(char *token, int value, int remove, size_t 
   }
 }
 
-static  int collisions, max_collisions=0, n_elements=0;
-
-void hash_all_names(int n)
+static struct inst_hashentry *inst_free_hash_entry(struct inst_hashentry *entry)
 {
-  int i;
-  free_hash();
-  for(i=0; i<lastinst; i++) {
-    /* if(i == n) continue; */
-    hash_lookup(inst_ptr[i].instname, i, INSERT, strlen(inst_ptr[i].instname));
-  }
-}
-
-
-static struct hashentry *free_hash_entry(struct hashentry *entry)
-{
-  struct hashentry *tmp;
+  struct inst_hashentry *tmp;
   while( entry ) {
     tmp = entry -> next;
     my_free(&(entry->token));
-    n_elements++;
-    collisions++;
-    if(debug_var>=3) fprintf(errfp, "free_hash_entry(): removing entry %lu\n", (unsigned long)entry);
-    /* entry->token and entry->value dont need to be freed since */
-    /* entry struct allocated with token and value included */
+    if(debug_var>=3) fprintf(errfp, "inst_free_hash_entry(): removing entry %lu\n", (unsigned long)entry);
     my_free(&entry);
     entry = tmp;
   }
   return NULL;
 }
 
-
-void free_hash(void) /* remove the whole hash table  */
+static void inst_free_hash(struct inst_hashentry **table) /* remove the whole hash table  */
 {
  int i;
   
- if(debug_var>=1) fprintf(errfp, "free_hash(): removing hash table\n");
- n_elements=0;
+ if(debug_var>=1) fprintf(errfp, "inst_free_hash(): removing hash table\n");
  for(i=0;i<HASHSIZE;i++)
  {
-  collisions=0;
-  table[i] = free_hash_entry( table[i] );
-  if(collisions>max_collisions) max_collisions=collisions;
-
+   table[i] = inst_free_hash_entry( table[i] );
  }
- if(debug_var>=1) fprintf(errfp, "# free_hash(): max_collisions=%d n_elements=%d hashsize=%d\n", 
-                   max_collisions, n_elements, HASHSIZE);
- max_collisions=0;
+}
+
+void hash_all_names(int n)
+{
+  int i;
+  inst_free_hash(table);
+  for(i=0; i<lastinst; i++) {
+    /* if(i == n) continue; */
+    inst_hash_lookup(table, inst_ptr[i].instname, i, INSERT, strlen(inst_ptr[i].instname));
+  }
+}
+
+void clear_instance_hash()
+{
+  inst_free_hash(table);
 }
 
 void check_unique_names(int rename)
@@ -179,7 +171,7 @@ void check_unique_names(int rename)
   char *start;
   char *comma_pos;
   char *expanded_instname = NULL;
-  struct hashentry *entry;
+  struct inst_hashentry *entry;
   /* int save_draw; */
 
   if(hilight_nets) {
@@ -194,7 +186,7 @@ void check_unique_names(int rename)
     draw();
     bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
   }
-  free_hash();
+  inst_free_hash(table);
   first = 1;
   for(i=0;i<lastinst;i++) {
     if(inst_ptr[i].instname && inst_ptr[i].instname[0]) {
@@ -206,7 +198,7 @@ void check_unique_names(int rename)
         comma_pos = strchr(start, ',');
         if(comma_pos) *comma_pos = '\0';
         if(debug_var>=1) fprintf(errfp, "check_unique_names: checking %s\n", start);
-        if( (entry = hash_lookup(start, i, INSERT, strlen(start)) ) && entry->value != i) {
+        if( (entry = inst_hash_lookup(table, start, i, INSERT, strlen(start)) ) && entry->value != i) {
           inst_ptr[i].flags |=4;
           hilight_nets=1;
           if(rename == 1) {
@@ -230,7 +222,7 @@ void check_unique_names(int rename)
         my_strdup(511, &tmp, inst_ptr[i].prop_ptr);
         new_prop_string(i, tmp, newpropcnt++, !rename);
         my_strdup2(512, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); /* 20150409 */
-        hash_lookup(inst_ptr[i].instname, i, INSERT, strlen(inst_ptr[i].instname));
+        inst_hash_lookup(table, inst_ptr[i].instname, i, INSERT, strlen(inst_ptr[i].instname));
         symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1, &inst_ptr[i].x2, &inst_ptr[i].y2);
         bbox(ADD, inst_ptr[i].x1, inst_ptr[i].y1, inst_ptr[i].x2, inst_ptr[i].y2);
         my_free(&tmp);
@@ -643,7 +635,7 @@ void new_prop_string(int i, const char *old_prop, int fast, int disable_unique_n
  int new_name_len;
  int n;
  char *old_name_base = NULL;
- struct hashentry *entry;
+ struct inst_hashentry *entry;
  
  if(debug_var>=1) fprintf(errfp, "new_prop_string(): i=%d, old_prop=%s, fast=%d\n", i, old_prop, fast);
  if(!fast) { /* on 1st invocation of new_prop_string */
@@ -663,9 +655,9 @@ void new_prop_string(int i, const char *old_prop, int fast, int disable_unique_n
  }
  prefix=old_name[0];
  /* don't change old_prop if name does not conflict. */
- if(disable_unique_names || (entry = hash_lookup(old_name, i, LOOKUP, old_name_len)) == NULL || entry->value == i)
+ if(disable_unique_names || (entry = inst_hash_lookup(table, old_name, i, LOOKUP, old_name_len)) == NULL || entry->value == i)
  {
-  hash_lookup(old_name, i, INSERT, old_name_len);
+  inst_hash_lookup(table, old_name, i, INSERT, old_name_len);
   my_strdup(447, &inst_ptr[i].prop_ptr, old_prop);
   return;
  }
@@ -681,7 +673,7 @@ void new_prop_string(int i, const char *old_prop, int fast, int disable_unique_n
    } else {
      new_name_len = my_snprintf(new_name, old_name_len + 40, "%c%d%s", prefix,q, tmp); /* added new_name_len 20180926 */
    }
-   if((entry = hash_lookup(new_name, i, LOOKUP, new_name_len)) == NULL || entry->value == i) 
+   if((entry = inst_hash_lookup(table, new_name, i, LOOKUP, new_name_len)) == NULL || entry->value == i) 
    {
     last[(int)prefix]=q+1;
     break;
@@ -692,7 +684,7 @@ void new_prop_string(int i, const char *old_prop, int fast, int disable_unique_n
  if(strcmp(tmp2, old_prop) ) {
    my_strdup(449, &inst_ptr[i].prop_ptr, tmp2);
  }
- hash_lookup(new_name, i, INSERT, new_name_len); /* reinsert in hash */
+ inst_hash_lookup(table, new_name, i, INSERT, new_name_len); /* reinsert in hash */
 }
 
 char *subst_token(const char *s, const char *tok, const char *new_val)
@@ -1336,7 +1328,7 @@ void print_spice_element(FILE *fd, int inst)
  int token_pos=0, escape=0;
  int no_of_pins=0;
  int quote=0; /* 20171029 */
- /* struct hashentry *ptr; */
+ /* struct inst_hashentry *ptr; */
 
  my_strdup(483, &template,
      (inst_ptr[inst].ptr+instdef)->templ); /* 20150409 */
@@ -1497,7 +1489,7 @@ void print_tedax_element(FILE *fd, int inst)
  int token_pos=0, escape=0;
  int no_of_pins=0;
  int quote=0; /* 20171029 */
- /* struct hashentry *ptr; */
+ /* struct inst_hashentry *ptr; */
 
 
  my_strdup(489, &extra, get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"extra",2));
@@ -1928,7 +1920,7 @@ void print_vhdl_primitive(FILE *fd, int inst) /* netlist  primitives, 20071217 *
  int token_pos=0, escape=0;
  int no_of_pins=0;
  int quote=0; /* 20171029 */
- /* struct hashentry *ptr; */
+ /* struct inst_hashentry *ptr; */
 
  my_strdup(513, &template,
      /* get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"template",2)); */
@@ -2090,7 +2082,7 @@ void print_verilog_primitive(FILE *fd, int inst) /* netlist switch level primiti
  int token_pos=0, escape=0;
  int no_of_pins=0;
  int quote=0; /* 20171029 */
- /* struct hashentry *ptr; */
+ /* struct inst_hashentry *ptr; */
 
  my_strdup(519, &template,
      (inst_ptr[inst].ptr+instdef)->templ); /* 20150409 */
@@ -2286,7 +2278,7 @@ char *translate(int inst, char* s)
  const char *tmp_sym_name;
  int sizetok=0;
  int result_pos=0, token_pos=0;
- /* struct hashentry *ptr; */
+ /* struct inst_hashentry *ptr; */
  struct stat time_buf;
  struct tm *tm;
  char file_name[PATH_MAX];

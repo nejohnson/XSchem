@@ -22,7 +22,7 @@
 
 #include "xschem.h"
 
-static struct node_hashentry *table[HASHSIZE];
+static struct node_hashentry *node_table[HASHSIZE];
 
 static unsigned int hash(char *tok)
 {
@@ -37,7 +37,7 @@ static unsigned int hash(char *tok)
 
 struct node_hashentry **get_node_table_ptr(void)
 {
- return table;
+ return node_table;
 }
 
 void print_vhdl_signals(FILE *fd)
@@ -50,7 +50,7 @@ void print_vhdl_signals(FILE *fd)
  found=0;
  for(i=0;i<HASHSIZE;i++)
  {
-  ptr = table[i];
+  ptr = node_table[i];
   while(ptr)
   {
    if(strstr(ptr->token, ".")) {
@@ -124,7 +124,7 @@ void print_verilog_signals(FILE *fd)
  found=0;
  for(i=0;i<HASHSIZE;i++)
  {
-  ptr = table[i];
+  ptr = node_table[i];
   while(ptr)
   {
    if(ptr->d.port == 0 )
@@ -250,8 +250,8 @@ struct node_hashentry *node_hash_lookup(char *token, char *dir,int remove,int po
  d.port=port;
  hashcode=hash(token); 
  index=hashcode % HASHSIZE; 
- entry=table[index];
- preventry=&table[index];
+ entry=node_table[index];
+ preventry=&node_table[index];
  while(1)
  {
   if( !entry )                  /* empty slot */
@@ -329,7 +329,7 @@ void traverse_node_hash()
  if(!show_erc)return;
  for(i=0;i<HASHSIZE;i++)
  {
-  entry = table[i];
+  entry = node_table[i];
   while(entry)
   {
    if( !record_global_node(3, NULL, entry->token)) {
@@ -407,7 +407,7 @@ void free_node_hash(void) /* remove the whole hash table  */
  for(i=0;i<HASHSIZE;i++)
  {
   collisions=0;
-  table[i] = free_hash_entry( table[i] );
+  node_table[i] = free_hash_entry( node_table[i] );
   if(collisions>max_collisions) max_collisions=collisions;
  }
  if(debug_var>=1) fprintf(errfp, "# free_node_hash(): max_collisions=%d n_elements=%d hashsize=%d\n",

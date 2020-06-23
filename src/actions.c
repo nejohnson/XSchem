@@ -667,7 +667,7 @@ void clear_drawing(void)
   lastpolygon[i] = 0;/*  20171115 */
  }
  if(debug_var>=1) fprintf(errfp, "clear drawing(): deleted data structures, now deleting hash\n");
- free_hash();
+ clear_instance_hash();
 }
 
 void enable_layers(void)

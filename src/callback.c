@@ -1032,10 +1032,10 @@ int callback(int event, int mx, int my, KeySym key,
      printf("screen: %g %g %g %g\n", x1, y1, x2, y2);
      rebuild_selected_array();
      for(i=0;i<lastselected; i++) if(selectedgroup[i].type==WIRE) {
-       hash_wire(0, selectedgroup[i].n);
+       hash_wire(DELETE, selectedgroup[i].n);
      }
      for(i=0;i<lastselected; i++) if(selectedgroup[i].type==ELEMENT) {
-       hash_inst(0, selectedgroup[i].n);
+       hash_inst(DELETE, selectedgroup[i].n);
      }
      unselect_all();
 

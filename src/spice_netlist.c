@@ -22,6 +22,9 @@
 
 #include "xschem.h"
 
+static struct hashentry *model_table[HASHSIZE];
+static struct hashentry *model_entry;
+
 void global_spice_netlist(int global)  /* netlister driver */
 {
  int first;
@@ -46,6 +49,7 @@ void global_spice_netlist(int global)  /* netlister driver */
    save_ok = save_schematic(schematic[currentsch]);
    if(save_ok == -1) return;
  }
+ free_hash(model_table);
  statusmsg("",2);  /* clear infowindow */
  record_global_node(2, NULL, NULL); /* delete list of global nodes */
  top_subckt = 0;
@@ -195,8 +199,8 @@ void global_spice_netlist(int global)  /* netlister driver */
  record_global_node(0,fd,NULL);
 
  /* =================================== 20121223 */
+ first = 0;
  if(!split_files) {
-   first = 0;
    for(i=0;i<lastinst;i++) /* print netlist_commands of top level cell with 'place=end' property */
    {
     if( strcmp(get_tok_value(inst_ptr[i].prop_ptr,"spice_ignore",0),"true")==0 ) continue; /* 20140416 */
@@ -221,9 +225,20 @@ void global_spice_netlist(int global)  /* netlister driver */
      }
     } /* netlist_commands */
    }
-   if(first) fprintf(fd,"**** end user architecture code\n");
+
  }
- /* =================================== /20121223 */
+ /* print device_model attributes */
+ for(i=0;i<HASHSIZE; i++) {
+   model_entry=model_table[i];
+   while(model_entry) {
+     if(first == 0) fprintf(fd,"**** begin user architecture code\n");
+     first++;
+     fprintf(fd, "%s\n",  model_entry->value);
+     model_entry = model_entry->next;
+   }
+ }
+ if(first) fprintf(fd,"**** end user architecture code\n");
+
 
  /* 20150922 added split_files check */
  if(!split_files) fprintf(fd, ".end\n"); /* 20081202 */
@@ -246,6 +261,22 @@ void global_spice_netlist(int global)  /* netlister driver */
 
 }
 
+char *model_name(char *m)
+{
+  char *m_lower = NULL;
+  static char *prefix = NULL;
+  char *modelname = NULL;
+
+  my_strdup(1, &m_lower, m);
+  strtolower(m_lower);
+  my_realloc(1, &modelname, strlen(m) + 1);
+  my_realloc(1, &prefix, strlen(m) + 1);
+  sscanf(m_lower, " %s %s", prefix, modelname);
+  my_strcat(1, &prefix, modelname);
+  my_free(&modelname);
+  my_free(&m_lower);
+  return prefix;
+}
 
 void spice_block_netlist(FILE *fd, int i)  /*20081223 */
 {
@@ -355,7 +386,15 @@ void spice_netlist(FILE *fd, int spice_stop )
         print_spice_element(fd, i) ;  /* this is the element line  */
         fprintf(fd,"**** end user architecture code\n");
       } else {
+        char *m;
         print_spice_element(fd, i) ;  /* this is the element line  */
+        /* hash device_model attribute if any */
+        m = get_tok_value(inst_ptr[i].prop_ptr, "device_model", 2);
+        if(m[0]) hash_lookup(model_table, model_name(m), m, INSERT);
+        else {
+          m = get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "device_model", 2);
+          if(m[0]) hash_lookup(model_table, model_name(m), m, INSERT);
+        }
       }
     }
    }
@@ -363,4 +402,100 @@ void spice_netlist(FILE *fd, int spice_stop )
  if(!netlist_count) redraw_hilights(); /* draw_hilight_net(1); */
 }
 
+/* calculate the hash function relative to string s */
+static unsigned int hash(char *tok)
+{
+  unsigned int hash = 0;
+  int c;
 
+  while ( (c = *tok++) )
+      hash = c + (hash << 6) + (hash << 16) - hash;
+  return hash;
+}
+
+
+/* GENERIC PURPOSE HASH TABLE */
+
+
+/*    token        value      what    ... what ...
+ * --------------------------------------------------------------------------
+ * "whatever"    "whatever"  INSERT     insert in hash table if not in.
+ *                                      if already present update value if not NULL, 
+ *                                      return entry address.
+ *                                      return NULL if not found.
+ * "whatever"    "whatever"  LOOKUP     lookup in hash table,return entry addr.
+ *                                      return NULL if not found
+ * "whatever"    "whatever"  DELETE     delete entry if found,return NULL
+ */
+struct hashentry *hash_lookup(struct hashentry **table, char *token, char *value, int what)
+{
+  unsigned int hashcode, index;
+  struct hashentry *entry, *saveptr, **preventry;
+  int s ;
+ 
+  if(token==NULL) return NULL;
+  hashcode=hash(token);
+  index=hashcode % HASHSIZE;
+  entry=table[index];
+  preventry=&table[index];
+  while(1)
+  {
+    if( !entry )          /* empty slot */
+    {
+      if(what==INSERT)            /* insert data */
+      {
+        s=sizeof( struct hashentry );
+        entry=(struct hashentry *)my_malloc(1, s);
+        entry->next=NULL;
+        entry->token=NULL;
+        entry->value=NULL;
+        my_strdup(1, &entry->token, token);
+        my_strdup(1, &entry->value, value);
+        entry->hash=hashcode;
+        *preventry=entry;
+      }
+      return NULL; /* if element inserted return NULL since it was not in table */
+    }
+    if( entry -> hash==hashcode && strcmp(token,entry->token)==0 ) /* found a matching token */
+    {
+      if(what==DELETE)             /* remove token from the hash table ... */
+      {
+        saveptr=entry->next;
+        my_free(&entry->token);
+        my_free(&entry->value);
+        my_free(&entry);
+        *preventry=saveptr;
+      }
+      else if(value && what == INSERT ) {
+        my_strdup(1, &entry->value, value);
+      }
+      return entry;   /* found matching entry, return the address */
+    }
+    preventry=&entry->next; /* descend into the list. */
+    entry = entry->next;
+  }
+}
+
+static struct hashentry *free_hash_entry(struct hashentry *entry)
+{
+  struct hashentry *tmp;
+  while( entry ) {
+    tmp = entry -> next;
+    my_free(&(entry->token));
+    my_free(&(entry->value));
+    my_free(&entry);
+    entry = tmp;
+  }
+  return NULL;
+}
+
+
+void free_hash(struct hashentry **table)
+{
+  int i;
+
+  for(i=0;i<HASHSIZE;i++)
+  {
+    table[i] = free_hash_entry( table[i] );
+  }
+}

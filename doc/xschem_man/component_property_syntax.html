@@ -159,6 +159,14 @@ name="mchanged_name" model=\"nmos\" w="20u" l="3u" m="10"
   <li><kbd>class</kbd></li>
   <p>The <kbd>class</kbd> attribute is used to declare the class of a VHDL signal, most used classes are
     <kbd>signal</kbd> and <kbd>constant</kbd>. Default if missing is <kbd>signal</kbd>.</p>
+  <li><kbd>device_model</kbd></li>
+  <p>
+   This attribute contains a SPICE .model specification (<kbd>device_model=".model D1N4148 D ...."</kbd>)
+   that will be printed at end of netlist only once for the specified component (D1N4148 in the example).
+   <kbd>device_model</kbd> attributes defined at instance level override the <kbd>device_model</kbd> set
+   in the symbol if any.
+  </p>
+
   <li><kbd>attribute(name)</kbd></li>
   <p> This will override at instance level the value of attribute <kbd>pinnumber</kbd> of pin <kbd>name</kbd> of the symbol.
       This is mainly used for tedax, where by back annotation a connection to a symbol must be changed.</p>

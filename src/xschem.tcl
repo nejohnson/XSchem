@@ -2519,6 +2519,159 @@ proc get_file_path {ff} {
   return $ff
 }
 
+###
+### ToolBar
+###
+#
+# Public variables that we allow to be overridden
+#
+set_ne toolbar_visible 0
+set_ne toolbar_horiz   1
+set_ne toolbar_list { 
+    FileNew
+    FileNewSym
+    FileOpen
+    FileSave
+    FileMerge
+    FileReload
+    "---"
+    EditUndo
+    EditRedo
+    EditCut
+    EditCopy
+    EditPaste
+    EditDelete
+    "---"
+    EditDuplicate
+    EditMove
+    "---"
+    EditPushSch
+    EditPushSym
+    EditPop
+    "---"
+    ViewRedraw
+    ViewZoomIn
+    ViewZoomOut
+    ViewZoomBox
+    ViewToggleColors
+    "---"
+    ToolInsertSymbol
+    ToolInsertText
+    ToolInsertWire
+    ToolInsertLine
+    ToolInsertRect
+    ToolInsertPolygon
+    ToolInsertArc
+    ToolInsertCircle
+    "---"
+    ToolSearch
+    "---"
+    ToolJoinTrim
+    ToolBreak
+}
+#
+# Balloon help system, from https://wiki.tcl-lang.org/page/balloon+help
+#
+proc balloon {w help} {
+    bind $w <Any-Enter> "after 1000 [list balloon_show %W [list $help]]"
+    bind $w <Any-Leave> "destroy %W.balloon"
+}
+
+proc balloon_show {w arg} {
+    if {[eval winfo containing  [winfo pointerxy .]]!=$w} {return}
+    set top $w.balloon
+    catch {destroy $top}
+    toplevel $top -bd 1 -bg black
+    wm overrideredirect $top 1
+    if {[string equal [tk windowingsystem] aqua]}  {
+        ::tk::unsupported::MacWindowStyle style $top help none
+    }   
+    pack [message $top.txt -aspect 10000 -bg lightyellow \
+        -font fixed -text $arg]
+    set wmx [winfo rootx $w]
+    set wmy [expr [winfo rooty $w]+[winfo height $w]]
+    wm geometry $top [winfo reqwidth $top.txt]x[
+        winfo reqheight $top.txt]+$wmx+$wmy
+    raise $top
+}
+#
+# Pull in the toolbar graphics resources
+#
+source $XSCHEM_SHAREDIR/resources.tcl
+#
+# Separation bar counter
+#
+set toolbar_sepn 0
+#
+# Toolbar constructor
+#
+proc toolbar_toolbar {} {
+    frame .toolbar -relief raised -bd 1 -bg white
+}
+#
+# Create a tool button which may be displayed
+#
+proc toolbar_create {name cmd { help "" } } {
+    button .toolbar.b$name -image img$name -relief flat -bd 3 -bg white -fg white -command $cmd
+    if { $help == "" } { balloon .toolbar.b$name $name } else { balloon .toolbar.b$name $help }
+}
+#
+# Show the toolbar in horizontal or vertical position, parsing the toolbar list and 
+# adding any separators as needed.
+#
+proc toolbar_show {} {
+    global toolbar_horiz toolbar_list toolbar_sepn toolbar_visible
+    if { ! $toolbar_visible } { return }
+    if { $toolbar_horiz } { 
+        pack .toolbar -fill x -before .drw
+    } else {
+        pack .toolbar -side left -anchor w -fill y -before .drw
+    }
+    set pos "top"
+    if { $toolbar_horiz } { set pos "left" }
+    set tlist [ winfo children .toolbar ]
+    foreach b $toolbar_list {
+        if { $b == "---" } {
+            if { $toolbar_horiz } {
+                frame .toolbar.sep$toolbar_sepn -bg lightgrey -width 2
+                pack .toolbar.sep$toolbar_sepn -side $pos -padx 1 -pady 1 -fill y
+            } else {
+                frame .toolbar.sep$toolbar_sepn -bg lightgrey -height 2
+                pack .toolbar.sep$toolbar_sepn -side $pos -padx 1 -pady 1 -fill x
+            }
+            incr toolbar_sepn
+        } else {
+            if { [ lsearch -exact $tlist ".toolbar.b$b" ] != -1 } {
+                pack .toolbar.b$b -side $pos
+            } else {
+                puts "Error: unknown toolbar item \"$b\""
+            }
+        }
+    }
+    set pos "bottom"
+    if { $toolbar_horiz } { set pos "right" }
+    foreach b { Waves Simulate Netlist } {
+        pack .toolbar.b$b -side $pos
+    }
+    set $toolbar_visible 1
+}
+#
+# Hide the toolbar, unpack the buttons, and remove any separators
+#
+proc toolbar_hide {} {
+    global toolbar_sepn toolbar_visible
+    set tlist [ winfo children .toolbar ]
+    foreach b $tlist {
+        pack forget $b
+        if { [ string match ".toolbar.sep*" $b ] == 1 } { 
+            destroy $b
+        }
+    }
+    set toolbar_sepn 0
+    pack forget .toolbar
+    set $toolbar_visible 0
+}
+
 ### 
 ###   MAIN PROGRAM
 ###
@@ -2819,7 +2972,8 @@ font configure Underline-Font -underline true -size 24
    infowindow
    #proc unknown  {comm args} { puts "unknown command-> \<$comm\> $args" }
    frame .menubar -relief raised -bd 2 
-   
+   toolbar_toolbar
+
    menubutton .menubar.file -text "File" -menu .menubar.file.menu
    menu .menubar.file.menu -tearoff 0
    menubutton .menubar.edit -text "Edit" -menu .menubar.edit.menu
@@ -2852,19 +3006,29 @@ font configure Underline-Font -underline true -size 24
      -command {
        xschem clear SCHEMATIC
      }
+   toolbar_create FileNew {xschem clear SCHEMATIC} "New Schematic"
    .menubar.file.menu add command -label "New Symbol" -accelerator Ctrl+Shift+N \
      -command {
        xschem clear SYMBOL
      }
+   toolbar_create FileNewSym {xschem clear SYMBOL} "New Symbol"
    .menubar.file.menu add command -label "Open" -command "xschem load" -accelerator {Ctrl+O}
+   toolbar_create FileOpen "xschem load" "Open File"
    .menubar.file.menu add command -label "Save" -command "xschem save" -accelerator {Ctrl+S}
+   toolbar_create FileSave "xschem save" "Save File"
    .menubar.file.menu add command -label "Merge" -command "xschem merge" -accelerator B
+   toolbar_create FileMerge "xschem merge" "Merge File"
    .menubar.file.menu add command -label "Reload" -accelerator {Alt+S} \
      -command {
       if { [string compare [tk_messageBox -type okcancel -message {sure wanna reload?}] ok]==0 } {
               xschem reload
          }
      }
+   toolbar_create FileReload {
+      if { [string compare [tk_messageBox -type okcancel -message {sure wanna reload?}] ok]==0 } {
+              xschem reload
+         }
+     } "Reload File"
    .menubar.file.menu add command -label "Save as" -command "xschem saveas" -accelerator {Ctrl+Shift+S}
    .menubar.file.menu add command -label "Save as symbol" \
       -command "xschem set current_type SYMBOL; xschem saveas" -accelerator {Ctrl+Alt+S}
@@ -2971,26 +3135,37 @@ font configure Underline-Font -underline true -size 24
         -accelerator {Shift+V} \
         -command "xschem netlist_type tedax"
    .menubar.edit.menu add command -label "Undo" -command "xschem undo; xschem redraw" -accelerator U
+   toolbar_create EditUndo "xschem undo; xschem redraw" "Undo"
    .menubar.edit.menu add command -label "Redo" -command "xschem redo; xschem redraw" -accelerator {Shift+U}
+   toolbar_create EditRedo "xschem redo; xschem redraw" "Redo"
    .menubar.edit.menu add command -label "Copy" -command "xschem copy" -accelerator Ctrl+C
+   toolbar_create EditCopy "xschem copy" "Copy"
    .menubar.edit.menu add command -label "Cut" -command "xschem cut"   -accelerator Ctrl+X
+   toolbar_create EditCut "xschem cut" "Cut"
    .menubar.edit.menu add command -label "Paste" -command "xschem paste" -accelerator Ctrl+V
+   toolbar_create EditPaste "xschem paste" "Paste"
    .menubar.edit.menu add command -label "Delete" -command "xschem delete" -accelerator Del
+   toolbar_create EditDelete "xschem delete" "Delete"
    .menubar.edit.menu add command -label "Select all" -command "xschem select_all" -accelerator Ctrl+A
    .menubar.edit.menu add command -label "Edit selected schematic in new window" \
        -command "xschem schematic_in_new_window" -accelerator Alt+E
    .menubar.edit.menu add command -label "Edit selected symbol in new window" \
        -command "xschem symbol_in_new_window" -accelerator Alt+I
    .menubar.edit.menu add command -label "Duplicate objects" -command "xschem copy_objects" -accelerator C
+   toolbar_create EditDuplicate "xschem copy_objects" "Duplicate objects"
    .menubar.edit.menu add command -label "Move objects" -command "xschem move_objects" -accelerator M
+   toolbar_create EditMove "xschem move_objects" "Move objects"
    .menubar.edit.menu add checkbutton -label "Constrained Horizontal move" -variable horizontal_move \
       -command "xschem set horizontal_move" -accelerator H
    .menubar.edit.menu add checkbutton -label "Constrained Vertical move" -variable vertical_move \
       -command "xschem set vertical_move" -accelerator V
    # added collapse/join/break wires menu command  (& key) 20171022
    .menubar.edit.menu add command -label "Push schematic" -command "xschem descend" -accelerator E
+   toolbar_create EditPushSch "xschem move_objects" "Push schematic"
    .menubar.edit.menu add command -label "Push symbol" -command "xschem descend_symbol" -accelerator I
+   toolbar_create EditPushSym "xschem descend_symbol" "Push symbol"
    .menubar.edit.menu add command -label "Pop" -command "xschem go_back" -accelerator Ctrl+E
+   toolbar_create EditPop "xschem go_back" "Pop"
    button .menubar.waves -text "Waves"  -activebackground red  -takefocus 0\
      -command {
        waves
@@ -3007,7 +3182,15 @@ font configure Underline-Font -underline true -size 24
      -command {
        xschem netlist
       }
-   
+   toolbar_create Waves { waves } "View results"
+   toolbar_create Simulate {
+      if { ![info exists simulate_oldbg] } {
+         set simulate_oldbg [.menubar.simulate cget -bg]
+         .menubar.simulate configure -bg red
+         simulate {.menubar.simulate configure -bg $::simulate_oldbg; unset ::simulate_oldbg}
+      }
+   } "Run simulation"
+   toolbar_create Netlist { xschem netlist } "Create netlist"
    if { $dark_colorscheme == 1 } { set txt_color black} else { set txt_color white} 
    set j 0
    foreach i $colors {
@@ -3044,14 +3227,18 @@ font configure Underline-Font -underline true -size 24
      
    }
    .menubar.zoom.menu add command -label "Redraw" -command "xschem redraw" -accelerator Esc
+   toolbar_create ViewRedraw "xschem redraw" "Redraw"
    .menubar.zoom.menu add checkbutton -label "Fullscreen" -variable fullscreen \
       -accelerator {Alt+Shift+F} -command {
          xschem fullscreen
       }
    .menubar.zoom.menu add command -label "Zoom Full" -command "xschem zoom_full" -accelerator F
    .menubar.zoom.menu add command -label "Zoom In" -command "xschem zoom_in" -accelerator Shift+Z
+   toolbar_create ViewZoomIn "xschem zoom_in" "Zoom In"
    .menubar.zoom.menu add command -label "Zoom Out" -command "xschem zoom_out" -accelerator Ctrl+Z
+   toolbar_create ViewZoomOut "xschem zoom_out" "Zoom Out"
    .menubar.zoom.menu add command -label "Zoom box" -command "xschem zoom_box" -accelerator Z
+   toolbar_create ViewZoomBox "xschem zoom_box" "Zoom Box"
    .menubar.zoom.menu add command -label "Half Snap Threshold" -accelerator G -command {
           xschem set cadsnap [expr [xschem get cadsnap] / 2.0 ]
         }
@@ -3074,6 +3261,10 @@ font configure Underline-Font -underline true -size 24
            xschem toggle_colorscheme
            xschem change_colors
         }
+    toolbar_create ViewToggleColors {
+           xschem toggle_colorscheme
+           xschem change_colors
+        } "Toggle Color Scheme"
    .menubar.zoom.menu add command -label "Dim colors"  -accelerator {} -command {
            color_dim
            xschem color_dim
@@ -3090,6 +3281,17 @@ font configure Underline-Font -underline true -size 24
           -command {
            if { $draw_window == 1} { xschem set draw_window 1} else { xschem set draw_window 0}
         }
+   .menubar.zoom.menu add checkbutton -label "Show Toolbar" -variable toolbar_visible \
+      -command {
+         if { $toolbar_visible } { toolbar_show } else { toolbar_hide }
+      }
+   .menubar.zoom.menu add checkbutton -label "Horizontal Toolbar" -variable toolbar_horiz \
+      -command { 
+         if { $toolbar_visible } {
+            toolbar_hide
+            toolbar_show
+         }
+      }
    .menubar.prop.menu add command -label "Edit" -command "xschem edit_prop" -accelerator Q
    .menubar.prop.menu add command -label "Edit with editor" -command "xschem edit_vi_prop" -accelerator Shift+Q
    .menubar.prop.menu add command -label "View" -command "xschem view_prop" -accelerator Ctrl+Q
@@ -3117,21 +3319,32 @@ font configure Underline-Font -underline true -size 24
         if { $persistent_command == 1} { xschem set persistent_command 1} else { xschem set persistent_command 0}
       }
    .menubar.tools.menu add command -label "Insert symbol" -command "xschem place_symbol" -accelerator Ins
+   toolbar_create ToolInsertSymbol "xschem place_symbol" "Insert Symbol"
    .menubar.tools.menu add command -label "Insert text" -command "xschem place_text" -accelerator T
+   toolbar_create ToolInsertText "xschem place_text" "Insert Text"
    .menubar.tools.menu add command -label "Insert wire" -command "xschem wire" -accelerator W
+   toolbar_create ToolInsertWire "xschem wire" "Insert Wire"
    .menubar.tools.menu add command -label "Insert snap wire" -command "xschem snap_wire" -accelerator Shift+W
    .menubar.tools.menu add command -label "Insert line" -command "xschem line" -accelerator L
+   toolbar_create ToolInsertLine "xschem line" "Insert Line"
    .menubar.tools.menu add command -label "Insert rect" -command "xschem rect" -accelerator R
+   toolbar_create ToolInsertRect "xschem rect" "Insert Rectangle"
    .menubar.tools.menu add command -label "Insert polygon" -command "xschem polygon" -accelerator Ctrl+W
+   toolbar_create ToolInsertPolygon "xschem polygon" "Insert Polygon"
    .menubar.tools.menu add command -label "Insert arc" -command "xschem arc" -accelerator Shift+C
+   toolbar_create ToolInsertArc "xschem arc" "Insert Arc"
    .menubar.tools.menu add command -label "Insert circle" -command "xschem circle" -accelerator Ctrl+Shift+C
+   toolbar_create ToolInsertCircle "xschem circle" "Insert Circle"
    .menubar.tools.menu add command -label "Search" -accelerator Ctrl+F -command  property_search
+   toolbar_create ToolSearch property_search "Search"
    .menubar.tools.menu add command -label "Align to Grid" -accelerator Alt+U -command  "xschem align"
    .menubar.tools.menu add command -label "Execute TCL command" -command  "tclcmd"
    .menubar.tools.menu add command -label "Join/Trim wires" \
       -command "xschem collapse_wires" -accelerator {&}
+    toolbar_create ToolJoinTrim "xschem collapse_wires" "Join/Trim Wires"
    .menubar.tools.menu add command -label "Break wires" \
       -command "xschem break_wires" -accelerator {!}
+    toolbar_create ToolBreak "xschem break_wires" "Break Wires"
 
    .menubar.hilight.menu add command -label {Highlight duplicate instance names} -command "xschem check_unique_names 0" -accelerator {#} 
    .menubar.hilight.menu add command -label {Rename duplicate instance names} -command "xschem check_unique_names 1" -accelerator {Ctrl+#}
@@ -3184,9 +3397,9 @@ font configure Underline-Font -underline true -size 24
    pack .menubar.hilight -side left
    pack .menubar.simulation -side left
    pack .menubar.help -side right
-   pack .menubar.netlist -side right
-   pack .menubar.simulate -side right
    pack .menubar.waves -side right
+   pack .menubar.simulate -side right
+   pack .menubar.netlist -side right
 
    frame .drw -background {} -takefocus 1
 
@@ -3218,6 +3431,7 @@ font configure Underline-Font -underline true -size 24
    pack .statusbar.1 -side left -fill x
    pack .drw -anchor n -side top -fill both -expand true
    pack .menubar -anchor n -side top -fill x  -before .drw
+   toolbar_show
    pack .statusbar -after .drw -anchor sw  -fill x 
    bind .statusbar.5 <Leave> { xschem set cadgrid $grid; focus .drw}
    bind .statusbar.3 <Leave> { xschem set cadsnap $snap; focus .drw}

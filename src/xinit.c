@@ -977,18 +977,19 @@ int Tcl_AppInit(Tcl_Interp *inter)
      if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): sourcing %s\n", name);
      source_tcl_file(name);
    } else {
-     /* ... else look for (user_conf_dir)/xschemrc ... */
-     my_snprintf(name, S(name), "%s/xschemrc", user_conf_dir);
-     if(!stat(name, &buf)) {
-       if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): sourcing %s\n", name);
-       source_tcl_file(name);
-     } else if(tclgetvar("XSCHEM_SHAREDIR")) {
-       /* ... else get systemwide xschemrc */
+     /* ... else get systemwide xschemrc */
+     if(tclgetvar("XSCHEM_SHAREDIR")) {
        my_snprintf(name, S(name), "%s/xschemrc",tclgetvar("XSCHEM_SHAREDIR"));
        if(!stat(name, &buf)) {
          if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): sourcing %s\n", name);
          source_tcl_file(name);
        }
+     }
+     /* ... and then look for (user_conf_dir)/xschemrc ... */
+     my_snprintf(name, S(name), "%s/xschemrc", user_conf_dir);
+     if(!stat(name, &buf)) {
+       if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): sourcing %s\n", name);
+       source_tcl_file(name);
      }
    }
  }

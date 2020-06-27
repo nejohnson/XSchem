@@ -1,0 +1,22 @@
+v {xschem version=2.9.6 file_version=1.1}
+G {type=diode
+format="@name @pinlist BZX84C6V2L "
+template="name=D1"
+device_model="
+.model BZX84C6V2L D(Is=1.5n Rs=.5 Cjo=185p nbv=3 bv=6.2 Ibv=1m Vpk=6.2)
+"
+}
+V {}
+S {}
+E {}
+L 3 0 0 20 0 {}
+L 3 40 0 60 0 {}
+L 4 20 -10 20 10 {}
+L 4 20 -10 40 0 {}
+L 4 20 10 40 0 {}
+L 4 40 -10 40 10 {}
+L 4 35 -10 40 -10 {}
+B 5 -2.5 -2.5 2.5 2.5 {pinnumber=1 pinseq=1 name=1 dir=inout}
+B 5 57.5 -2.5 62.5 2.5 {pinnumber=2 pinseq=2 name=2 dir=inout}
+T {@name} 10 -20 2 1 0.333333 0.333333 {}
+T {BZX84C6V2L} 10 30 2 1 0.266667 0.266667 {}

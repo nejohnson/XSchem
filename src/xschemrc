@@ -47,6 +47,12 @@
 # append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/gschem_import/sym
 
 ###########################################################################
+## Pull in spice libraries
+###########################################################################
+
+append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/xschem_library/devices/spice
+
+###########################################################################
 ## set custom colors for xschem libraries matching certain patterns
 ## each line contains a pattern followed by a color
 ## color can be an ordinary name (grey, brown, blue) or a hex code {#77aaff}
@@ -143,6 +149,55 @@ set disable_unique_names 0
 #   "#ff00ff" "#00ff00" "#0000cc" "#aaaa00" "#aaccaa"
 #   "#ff7777" "#bfff81" "#00ffcc" "#ce0097" "#d2d46b"
 #   "#ef6158" "#fdb200" }
+
+###########################################################################
+## Toolbar configuration
+###########################################################################
+
+# set toolbar_visible 0
+# set toolbar_horiz   1
+# set toolbar_list { 
+#    FileNew
+#    FileNewSym
+#    FileOpen
+#    FileSave
+#    FileMerge
+#    FileReload
+#    "---"
+#    EditUndo
+#    EditRedo
+#    EditCut
+#    EditCopy
+#    EditPaste
+#    EditDelete
+#    "---"
+#    EditDuplicate
+#    EditMove
+#    "---"
+#    EditPushSch
+#    EditPushSym
+#    EditPop
+#    "---"
+#    ViewRedraw
+#    ViewZoomIn
+#    ViewZoomOut
+#    ViewZoomBox
+#    ViewToggleColors
+#    "---"
+#    ToolInsertSymbol
+#    ToolInsertText
+#    ToolInsertWire
+#    ToolInsertLine
+#    ToolInsertRect
+#    ToolInsertPolygon
+#    ToolInsertArc
+#    ToolInsertCircle
+#    "---"
+#    ToolSearch
+#    "---"
+#    ToolJoinTrim
+#    ToolBreak
+#  }
 
 ###########################################################################
 ## CAIRO STUFF

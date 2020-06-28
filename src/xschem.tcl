@@ -591,7 +591,10 @@ proc probe_net {net} {
     xschem search exact 1 name $inst
     xschem descend
   }
-  xschem search exact 0 lab $net
+  set err [catch {xschem search exact 0 lab $net}]
+  if {$err && [regexp {^net[0-9]+$} $net]} {
+    xschem search exact 0 lab \#$net
+  }
   xschem set no_draw 0
   xschem redraw
 

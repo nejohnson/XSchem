@@ -73,10 +73,10 @@ int name_strcmp(char *s, char *d) /* compare strings up to '\0' or'[' */
 
 /* 20180926 added token_size */
 /* remove:
- * 0,INSERT : lookup and insert in hash table (return NULL if token was not found)
+ * 0,XINSERT : lookup and insert in hash table (return NULL if token was not found)
  *    if token was found update value
- * 1,DELETE : delete token entry, return NULL
- * 2,LOOKUP : lookup only 
+ * 1,XDELETE : delete token entry, return NULL
+ * 2,XLOOKUP : lookup only 
  */
 static struct inst_hashentry *inst_hash_lookup(struct inst_hashentry **table, char *token, int value, int remove, size_t token_size)
 {
@@ -92,7 +92,7 @@ static struct inst_hashentry *inst_hash_lookup(struct inst_hashentry **table, ch
   preventry=&table[index];
   while(1) {
     if( !entry ) {                         /* empty slot */
-      if(remove == INSERT) {            /* insert data */
+      if(remove == XINSERT) {            /* insert data */
         s=sizeof( struct inst_hashentry );
         entry=(struct inst_hashentry *) my_malloc(425, s);
         *preventry=entry;
@@ -106,13 +106,13 @@ static struct inst_hashentry *inst_hash_lookup(struct inst_hashentry **table, ch
       return NULL; /* token was not in hash */
     }
     if( entry->hash==hashcode && !strcmp(token,entry->token) ) { /* found a matching token */
-      if(remove == DELETE) {              /* remove token from the hash table ... */
+      if(remove == XDELETE) {              /* remove token from the hash table ... */
         saveptr=entry->next;
         my_free(&entry->token);
         my_free(&entry);
         *preventry=saveptr;
         return NULL;
-      } else if(remove == INSERT) {
+      } else if(remove == XINSERT) {
         entry->value = value;
       }
       /* if(debug_var>=1) fprintf(errfp, "inst_hash_lookup: returning: %s , %d\n", entry->token, entry->value); */
@@ -153,7 +153,7 @@ void hash_all_names(int n)
   inst_free_hash(table);
   for(i=0; i<lastinst; i++) {
     /* if(i == n) continue; */
-    inst_hash_lookup(table, inst_ptr[i].instname, i, INSERT, strlen(inst_ptr[i].instname));
+    inst_hash_lookup(table, inst_ptr[i].instname, i, XINSERT, strlen(inst_ptr[i].instname));
   }
 }
 
@@ -198,7 +198,7 @@ void check_unique_names(int rename)
         comma_pos = strchr(start, ',');
         if(comma_pos) *comma_pos = '\0';
         if(debug_var>=1) fprintf(errfp, "check_unique_names: checking %s\n", start);
-        if( (entry = inst_hash_lookup(table, start, i, INSERT, strlen(start)) ) && entry->value != i) {
+        if( (entry = inst_hash_lookup(table, start, i, XINSERT, strlen(start)) ) && entry->value != i) {
           inst_ptr[i].flags |=4;
           hilight_nets=1;
           if(rename == 1) {
@@ -222,7 +222,7 @@ void check_unique_names(int rename)
         my_strdup(511, &tmp, inst_ptr[i].prop_ptr);
         new_prop_string(i, tmp, newpropcnt++, !rename);
         my_strdup2(512, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); /* 20150409 */
-        inst_hash_lookup(table, inst_ptr[i].instname, i, INSERT, strlen(inst_ptr[i].instname));
+        inst_hash_lookup(table, inst_ptr[i].instname, i, XINSERT, strlen(inst_ptr[i].instname));
         symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1, &inst_ptr[i].x2, &inst_ptr[i].y2);
         bbox(ADD, inst_ptr[i].x1, inst_ptr[i].y1, inst_ptr[i].x2, inst_ptr[i].y2);
         my_free(&tmp);
@@ -655,9 +655,9 @@ void new_prop_string(int i, const char *old_prop, int fast, int disable_unique_n
  }
  prefix=old_name[0];
  /* don't change old_prop if name does not conflict. */
- if(disable_unique_names || (entry = inst_hash_lookup(table, old_name, i, LOOKUP, old_name_len)) == NULL || entry->value == i)
+ if(disable_unique_names || (entry = inst_hash_lookup(table, old_name, i, XLOOKUP, old_name_len)) == NULL || entry->value == i)
  {
-  inst_hash_lookup(table, old_name, i, INSERT, old_name_len);
+  inst_hash_lookup(table, old_name, i, XINSERT, old_name_len);
   my_strdup(447, &inst_ptr[i].prop_ptr, old_prop);
   return;
  }
@@ -673,7 +673,7 @@ void new_prop_string(int i, const char *old_prop, int fast, int disable_unique_n
    } else {
      new_name_len = my_snprintf(new_name, old_name_len + 40, "%c%d%s", prefix,q, tmp); /* added new_name_len 20180926 */
    }
-   if((entry = inst_hash_lookup(table, new_name, i, LOOKUP, new_name_len)) == NULL || entry->value == i) 
+   if((entry = inst_hash_lookup(table, new_name, i, XLOOKUP, new_name_len)) == NULL || entry->value == i) 
    {
     last[(int)prefix]=q+1;
     break;
@@ -684,7 +684,7 @@ void new_prop_string(int i, const char *old_prop, int fast, int disable_unique_n
  if(strcmp(tmp2, old_prop) ) {
    my_strdup(449, &inst_ptr[i].prop_ptr, tmp2);
  }
- inst_hash_lookup(table, new_name, i, INSERT, new_name_len); /* reinsert in hash */
+ inst_hash_lookup(table, new_name, i, XINSERT, new_name_len); /* reinsert in hash */
 }
 
 char *subst_token(const char *s, const char *tok, const char *new_val)
@@ -1318,153 +1318,150 @@ void print_spice_subckt(FILE *fd, int symbol)
 
 void print_spice_element(FILE *fd, int inst)
 {
- int i=0, mult, tmp;
- const char *str_ptr=NULL; 
- register int c, state=XBEGIN, space;
- static char *template=NULL,*format=NULL,*s, *value=NULL, *name=NULL,  *token=NULL;
- const char *lab;
- int pin_number; /* 20180911 */
- int sizetok=0;
- int token_pos=0, escape=0;
- int no_of_pins=0;
- int quote=0; /* 20171029 */
- /* struct inst_hashentry *ptr; */
+  int i=0, mult, tmp;
+  const char *str_ptr=NULL; 
+  register int c, state=XBEGIN, space;
+  static char *template=NULL,*format=NULL,*s, *value=NULL, *name=NULL,  *token=NULL;
+  const char *lab;
+  int pin_number; /* 20180911 */
+  int sizetok=0;
+  int token_pos=0, escape=0;
+  int no_of_pins=0;
+  int quote=0; /* 20171029 */
+  /* struct inst_hashentry *ptr; */
 
- my_strdup(483, &template,
-     (inst_ptr[inst].ptr+instdef)->templ); /* 20150409 */
+  my_strdup(483, &template,
+    (inst_ptr[inst].ptr+instdef)->templ); /* 20150409 */
 
- my_strdup(484, &name,inst_ptr[inst].instname); /* 20161210 */
- /* my_strdup(485, &name,get_tok_value(inst_ptr[inst].prop_ptr,"name",0)); */
- if(!name) my_strdup(43, &name, get_tok_value(template, "name", 0));
+  my_strdup(484, &name,inst_ptr[inst].instname); /* 20161210 */
+    /* my_strdup(485, &name,get_tok_value(inst_ptr[inst].prop_ptr,"name",0)); */
+  if (!name) my_strdup(43, &name, get_tok_value(template, "name", 0));
 
- my_strdup(486, &format,
-     get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"format",2));
- if((name==NULL) || (format==NULL) ) return; /* do no netlist unwanted insts(no format) */
- no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
- s=format;
- if(debug_var>=1) fprintf(errfp, "print_spice_element: name=%s, format=%s netlist_count=%d\n",name,format, netlist_count);
+  my_strdup(486, &format,
+    get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"format",2));
+  if ((name==NULL) || (format==NULL)) return; /* do no netlist unwanted insts(no format) */
+  no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
+  s=format;
+  if (debug_var>=1) fprintf(errfp, "print_spice_element: name=%s, format=%s netlist_count=%d\n",name,format, netlist_count);
 
- /* begin parsing format string */
- while(1)
- {
-  c=*s++; 
-  if(c=='"' && !escape) { 
-    quote=!quote; /* 20171029 */
-    c = *s++;
-  }
-  if(c=='\n' && escape ) c=*s++; /* 20171030 eat escaped newlines */
-  /* 20150317 use SPACE2() instead of SPACE() */
-  space=SPACE2(c);
-                              /* 20151028 */
-  if( state==XBEGIN && c=='@' && !escape) state=XTOKEN;
-
-  /* 20171029 added !escape, !quote */
-  else if( state==XTOKEN && (space || c == '@' || c == '\\')  && token_pos > 1 && !escape && !quote) {
-    if(debug_var >= 1 ) fprintf(errfp, "print_spice_element: c=%c, space=%d, escape=%d, quote=%d\n", c, space, escape, quote);
-    state=XSEPARATOR;
-  }
-
-  if(token_pos>=sizetok)
+  /* begin parsing format string */
+  while(1)
   {
-   sizetok+=CADCHUNKALLOC;
-   my_realloc(487, &token,sizetok);
-  }
+    c=*s++; 
+    if(c=='"' && !escape) { 
+      quote=!quote; /* 20171029 */
+      c = *s++;
+    }
+    if (c=='\n' && escape) c=*s++; /* 20171030 eat escaped newlines */
+    /* 20150317 use SPACE2() instead of SPACE() */
+    space=SPACE2(c);
+                                /* 20151028 */
+    if (state==XBEGIN && c=='@' && !escape) state=XTOKEN;
 
-  if(state==XTOKEN) {
-    if(c!='\\' || escape) token[token_pos++]=c; /* 20171029 remove escaping backslashes */
-  }
-  else if(state==XSEPARATOR)                    /* got a token */
-  {
-   token[token_pos]='\0'; 
-   token_pos=0;
+    /* 20171029 added !escape, !quote */
+    else if (state==XTOKEN && (space || c == '@' || c == '\\')  && token_pos > 1 && !escape && !quote) {
+      if(debug_var >= 1 ) fprintf(errfp, "print_spice_element: c=%c, space=%d, escape=%d, quote=%d\n", c, space, escape, quote);
+      state=XSEPARATOR;
+    }
 
-   if(!spiceprefix && !strcmp(token, "@spiceprefix")) { 
-     value=NULL;
-   } else {
-     if(debug_var >=1) fprintf(errfp, "print_spice_element(): token: |%s|\n", token);
-     value = get_tok_value(inst_ptr[inst].prop_ptr, token+1, 2);
-     if(value[0] == '\0')
-     value=get_tok_value(template, token+1, 0);
-   }
-   if(value && value[0]!='\0')
-   {  /* instance names (name) and node labels (lab) go thru the expandlabel function. */
-      /*if something else must be parsed, put an if here! */
-
-    if(!(strcmp(token+1,"name") && strcmp(token+1,"lab"))  /* expand name/labels */
-                && ((lab = expandlabel(value, &tmp)) != NULL) )
-      fputs(lab,fd);
-    else fputs(value,fd);
-   }
-   else if(strcmp(token,"@symname")==0) /* of course symname must not be present  */
-                                        /* in hash table */
-   {
-    fputs(skip_dir(inst_ptr[inst].name),fd);
-   }
-   else if(strcmp(token,"@schname")==0) /* of course schname must not be present  */
-                                        /* in hash table */
-   {
-     /* fputs(schematic[currentsch],fd); */
-     fputs(current_name, fd); /* 20190519 */
-   }
-   else if(strcmp(token,"@pinlist")==0) /* of course pinlist must not be present  */
-                                        /* in hash table. print multiplicity */
-   {                                    /* and node number: m1 n1 m2 n2 .... */
-    for(i=0;i<no_of_pins;i++)
+    if (token_pos>=sizetok)
     {
-      str_ptr =  pin_node(inst,i, &mult, 0);
-      /* fprintf(errfp, "inst: %s  --> %s\n", name, str_ptr); */
-      fprintf(fd, "@%d %s ", mult, str_ptr);
+      sizetok+=CADCHUNKALLOC;
+      my_realloc(487, &token,sizetok);
     }
-   }
-   else if(token[0]=='@' && token[1]=='@') {    /* recognize single pins 15112003 */
-    for(i=0;i<no_of_pins;i++) {
-     if(!strcmp(
-          get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"name",0),
-          token+2
-         )
-       ) {
-       str_ptr =  pin_node(inst,i, &mult, 0);
-       fprintf(fd, "@%d %s", mult, str_ptr);
-       break; /* 20171029 */
-     }
-    }
-   }
-   /* reference by pin number instead of pin name, allows faster lookup of the attached net name 20180911 */
-   else if(token[0]=='@' && token[1]=='#') {
-       pin_number = atoi(token+2); 
-       if(pin_number < no_of_pins) {
-         str_ptr =  pin_node(inst,pin_number, &mult, 0);
-         fprintf(fd, "@%d %s ", mult, str_ptr);
-       }
-   }
-   else if(!strncmp(token,"@tcleval", 8)) { /* 20171029 */
-     /* char tclcmd[strlen(token)+100]; */
-     size_t s;
-     char *tclcmd=NULL;
-     s = token_pos + strlen(name) + strlen(inst_ptr[inst].name) + 100;
-     tclcmd = my_malloc(488, s);
-     Tcl_ResetResult(interp);
-     my_snprintf(tclcmd, s, "tclpropeval {%s} {%s} {%s}", token, name, inst_ptr[inst].name);
-     if(debug_var>=1) fprintf(errfp, "tclpropeval {%s} {%s} {%s}", token, name, inst_ptr[inst].name);
-     tcleval(tclcmd);
-     fprintf(fd, "%s", Tcl_GetStringResult(interp));
-     my_free(&tclcmd);
-   } /* /20171029 */
-                 /* 20151028 dont print escaping backslashes */
-   if(c != '@' && c!='\0' && (c!='\\'  || escape) ) fputc(c,fd);
-   if(c == '@') s--;
-   state=XBEGIN;
-  }
-                 /* 20151028 dont print escaping backslashes */
-  else if(state==XBEGIN && c!='\0' && (c!='\\' || escape))  fputc(c,fd);
-  if(c=='\0') 
-  {
-   fputc('\n',fd);
-   return ;
-  }
-  if(c=='\\')  escape=1;  else escape=0;
 
- }
+    if(state==XTOKEN) {
+      if (c!='\\' || escape) token[token_pos++]=c; /* 20171029 remove escaping backslashes */
+    }
+    else if (state==XSEPARATOR)                    /* got a token */
+    {
+      token[token_pos]='\0'; 
+      token_pos=0;
+
+      if (!spiceprefix && !strcmp(token, "@spiceprefix")) { 
+        value=NULL;
+      } else {
+        if (debug_var >=1) fprintf(errfp, "print_spice_element(): token: |%s|\n", token);
+        value = get_tok_value(inst_ptr[inst].prop_ptr, token+1, 2);
+        if (value[0] == '\0')
+        value=get_tok_value(template, token+1, 0);
+      }
+      if (value && value[0]!='\0')
+      {  /* instance names (name) and node labels (lab) go thru the expandlabel function. */
+        /*if something else must be parsed, put an if here! */
+  
+        if (!(strcmp(token+1,"name") && strcmp(token+1,"lab"))  /* expand name/labels */
+              && ((lab = expandlabel(value, &tmp)) != NULL))
+          fputs(lab,fd);
+        else fputs(value,fd);
+      }
+      else if (strcmp(token,"@symname")==0) /* of course symname must not be present  */
+                                           /* in hash table */
+      {
+        fputs(skip_dir(inst_ptr[inst].name),fd);
+      }
+      else if(strcmp(token,"@schname")==0) /* of course schname must not be present  */
+                                           /* in hash table */
+      {
+        /* fputs(schematic[currentsch],fd); */
+        fputs(current_name, fd); /* 20190519 */
+      }
+      else if(strcmp(token,"@pinlist")==0) /* of course pinlist must not be present  */
+                                           /* in hash table. print multiplicity */
+      {                                    /* and node number: m1 n1 m2 n2 .... */
+        for(i=0;i<no_of_pins;i++)
+        {
+          str_ptr =  pin_node(inst,i, &mult, 0);
+          /* fprintf(errfp, "inst: %s  --> %s\n", name, str_ptr); */
+          fprintf(fd, "@%d %s ", mult, str_ptr);
+        }
+      }
+      else if(token[0]=='@' && token[1]=='@') {    /* recognize single pins 15112003 */
+        for(i=0;i<no_of_pins;i++) {
+          if (!strcmp(
+            get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"name",0),
+            token+2)) {
+            str_ptr =  pin_node(inst,i, &mult, 0);
+            fprintf(fd, "@%d %s", mult, str_ptr);
+            break; /* 20171029 */
+          }
+        }
+      }
+      /* reference by pin number instead of pin name, allows faster lookup of the attached net name 20180911 */
+      else if (token[0]=='@' && token[1]=='#') {
+        pin_number = atoi(token+2); 
+        if (pin_number < no_of_pins) {
+          str_ptr =  pin_node(inst,pin_number, &mult, 0);
+          fprintf(fd, "@%d %s ", mult, str_ptr);
+        }
+      }
+      else if (!strncmp(token,"@tcleval", 8)) { /* 20171029 */
+        /* char tclcmd[strlen(token)+100]; */
+        size_t s;
+        char *tclcmd=NULL;
+        s = token_pos + strlen(name) + strlen(inst_ptr[inst].name) + 100;
+        tclcmd = my_malloc(488, s);
+        Tcl_ResetResult(interp);
+        my_snprintf(tclcmd, s, "tclpropeval {%s} {%s} {%s}", token, name, inst_ptr[inst].name);
+        if(debug_var>=1) fprintf(errfp, "tclpropeval {%s} {%s} {%s}", token, name, inst_ptr[inst].name);
+        tcleval(tclcmd);
+        fprintf(fd, "%s", Tcl_GetStringResult(interp));
+        my_free(&tclcmd);
+      } /* /20171029 */
+                    /* 20151028 dont print escaping backslashes */
+      if (c != '@' && c!='\0' && (c!='\\'  || escape)) fputc(c,fd);
+      if (c == '@') s--;
+      state=XBEGIN;
+    }
+                   /* 20151028 dont print escaping backslashes */
+    else if(state==XBEGIN && c!='\0' && (c!='\\' || escape))  fputc(c,fd);
+    if(c=='\0') 
+    {
+      fputc('\n',fd);
+      return;
+    }
+    if (c=='\\') escape=1; else escape=0;
+  }
 }
 
 

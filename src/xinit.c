@@ -837,6 +837,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
  int i;
  struct stat buf;
  const char *home_buff;
+ int running_in_src_dir;
  /* XVisualInfo vinfo; */
 
  #if HAS_XCB==1
@@ -875,7 +876,10 @@ int Tcl_AppInit(Tcl_Interp *inter)
  tcleval(tmp);
  tclsetvar("XSCHEM_LIBRARY_PATH", Tcl_GetStringResult(interp));
  
+ running_in_src_dir = 0;
+ /* test if running xschem in src/ dir (usually for testing) */
  if( !stat("./xschem.tcl", &buf) && !stat("./systemlib", &buf) && !stat("./xschem", &buf)) {
+   running_in_src_dir = 1;
    tclsetvar("XSCHEM_SHAREDIR",pwd_dir); /* for testing xschem builds in src dir*/
    my_snprintf(tmp, S(tmp), "subst .:[file normalize \"%s/../xschem_library/devices\"]", pwd_dir);
    tcleval(tmp);
@@ -960,6 +964,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
  /*    SOURCE xschemrc file */
  /*                         */
  if(load_initfile) {
+   /* get xschemrc given om cmdline, in this case do *not* source any other xschemrc*/
    if(rcfile[0]) {
      my_snprintf(name, S(name), rcfile);
      if(stat(name, &buf) ) {
@@ -969,15 +974,13 @@ int Tcl_AppInit(Tcl_Interp *inter)
        Tcl_Exit(EXIT_FAILURE);
        return TCL_ERROR; /* 20121110 */
      }
-   } else { /* look in current dir */
-     my_snprintf(name, S(name), "%s/xschemrc",pwd_dir);
-   }
-   /* source command-line given rcfile or xschemrc in present directory if existing ... */
-   if(!stat(name, &buf)) {
-     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): sourcing %s\n", name);
-     source_tcl_file(name);
-   } else {
-     /* ... else get systemwide xschemrc */
+     else {
+       if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): sourcing %s\n", name);
+       source_tcl_file(name);
+     }
+   } 
+   else {
+     /* get systemwide xschemrc ... */
      if(tclgetvar("XSCHEM_SHAREDIR")) {
        my_snprintf(name, S(name), "%s/xschemrc",tclgetvar("XSCHEM_SHAREDIR"));
        if(!stat(name, &buf)) {
@@ -985,11 +988,20 @@ int Tcl_AppInit(Tcl_Interp *inter)
          source_tcl_file(name);
        }
      }
-     /* ... and then look for (user_conf_dir)/xschemrc ... */
-     my_snprintf(name, S(name), "%s/xschemrc", user_conf_dir);
-     if(!stat(name, &buf)) {
-       if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): sourcing %s\n", name);
-       source_tcl_file(name);
+     /* ... then source xschemrc in present directory if existing ... */
+     if(!running_in_src_dir) {
+       my_snprintf(name, S(name), "%s/xschemrc",pwd_dir);
+       if(!stat(name, &buf)) {
+         if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): sourcing %s\n", name);
+         source_tcl_file(name);
+       } else {
+         /* ... or look for (user_conf_dir)/xschemrc */
+         my_snprintf(name, S(name), "%s/xschemrc", user_conf_dir);
+         if(!stat(name, &buf)) {
+           if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): sourcing %s\n", name);
+           source_tcl_file(name);
+         }
+       }
      }
    }
  }

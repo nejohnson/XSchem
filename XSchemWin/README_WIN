@@ -26,13 +26,14 @@ INSTRUCTIONS TO ADD XSCHEM TO VISUAL STUDIO 2019
 1. requirements
 
     - Microsoft Visual Studio 2019
+    - Wix Toolset Visual Studio 2019 Extension (Download through Microsoft Extensions on VS 2019)
+    - Wix Toolset Build Tools v3.11 (Download online from wixtoolset)
     - ActiveState tcl/tk 8.6 (Remember install directory where includes files are, see step h)
       32-bit, 64-bit ActiveState need to match XSchem x86, x64, respectively.
-    - bison (Remember executabled directory for step h) 
+    - bison (Remember executabled directory for step h, preferably don't have spaces in the directory path (ie., don't use Program Files)) 
       (http://gnuwin32.sourceforge.net/packages/bison.htm, Complete package, except sources (bison-2.4.1-setup.exe))
-    - flex (Remember executabled directory for step h)
+    - flex (Remember executabled directory for step h, see bison note)
       (http://gnuwin32.sourceforge.net/packages/flex.htm, Complete package, except sources (flex-2.5.4a-1.exe))
-    - For deployment: Wix Toolset v3.11 and Visual Studio 2019 Extension
 
 2. Create new XSchemWin project on Visual Studio 2019 
 
@@ -64,7 +65,7 @@ INSTRUCTIONS TO ADD XSCHEM TO VISUAL STUDIO 2019
           Command Line: flex -l -oparselabel.c ..\src\parselabel.l
           Outputs: parselabel.c
     k. Right click expandlabel.y
-          Property Pages > Item type, change from "Does not pa  rticipate in build" to "Custom Build Tool"
+          Property Pages > Item type, change from "Does not participate in build" to "Custom Build Tool"
           Command Line: bison -d -o expandlabel.c ..\src\expandlabel.y 
           Outputs: expandlabel.c
 

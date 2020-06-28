@@ -23,7 +23,7 @@
 #ifndef CADGLOBALS
 #define CADGLOBALS
 
-#define XSCHEM_VERSION "2.9.6"
+#define XSCHEM_VERSION "2.9.7"
 #define XSCHEM_FILE_VERSION "1.1"
 
 #if HAS_PIPE == 1
@@ -234,9 +234,9 @@ extern char win_temp_dir[PATH_MAX];
 #define FONTWHITESPACE 10
 
 /* hash operations */
-#define INSERT 0
-#define LOOKUP 1
-#define DELETE 2
+#define XINSERT 0
+#define XLOOKUP 1
+#define XDELETE 2
 
 #define S(a) (sizeof(a)/sizeof(char))
 #define BUS_WIDTH 4

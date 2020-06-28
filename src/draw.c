@@ -1508,7 +1508,7 @@ void draw(void)
                        (
                         (
                           !(strcmp(type,"label") && strcmp(type,"ipin") && strcmp(type,"iopin") && strcmp(type,"opin")) &&
-                          bus_hilight_lookup( get_tok_value(inst_ptr[i].prop_ptr,"lab",0) , 0, LOOKUP )
+                          bus_hilight_lookup( get_tok_value(inst_ptr[i].prop_ptr,"lab",0) , 0, XLOOKUP )
                         ) ||
                         (
                           (strcmp(type,"label") && strcmp(type,"ipin") && strcmp(type,"iopin") && strcmp(type,"opin")) && 
@@ -1542,7 +1542,7 @@ void draw(void)
                      (
                       (
                         !(strcmp(type,"label") && strcmp(type,"ipin") && strcmp(type,"iopin") && strcmp(type,"opin")) &&
-                        bus_hilight_lookup( get_tok_value(inst_ptr[i].prop_ptr,"lab",0) , 0, LOOKUP )
+                        bus_hilight_lookup( get_tok_value(inst_ptr[i].prop_ptr,"lab",0) , 0, XLOOKUP )
                       ) ||
                       (
                         (strcmp(type,"label") && strcmp(type,"ipin") && strcmp(type,"iopin") && strcmp(type,"opin")) && 

@@ -489,7 +489,7 @@ int callback(int event, int mx, int my, KeySym key,
          if(debug_var>=1) fprintf(errfp, "i=%d labname=%s explabname = %s  net = %s\n", i, labname, lab, netname);
          if(netname && strcmp(lab, netname)) { 
            if(debug_var>=1) fprintf(errfp, "hilight: %s\n", netname);
-           bus_hilight_lookup(netname, hilight_color, INSERT);
+           bus_hilight_lookup(netname, hilight_color, XINSERT);
            if(incr_hilight) hilight_color++;
          }
        }
@@ -1032,10 +1032,10 @@ int callback(int event, int mx, int my, KeySym key,
      printf("screen: %g %g %g %g\n", x1, y1, x2, y2);
      rebuild_selected_array();
      for(i=0;i<lastselected; i++) if(selectedgroup[i].type==WIRE) {
-       hash_wire(DELETE, selectedgroup[i].n);
+       hash_wire(XDELETE, selectedgroup[i].n);
      }
      for(i=0;i<lastselected; i++) if(selectedgroup[i].type==ELEMENT) {
-       hash_inst(DELETE, selectedgroup[i].n);
+       hash_inst(XDELETE, selectedgroup[i].n);
      }
      unselect_all();
 

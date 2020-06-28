@@ -37,6 +37,24 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.9.7
+- "device_model" attribute set in symbol or symbol instance may be set to a SPICE .model 
+  specification (device_model=".model D1N4148 D ...").
+  This model will be printed only once per component at end of netlist.
+- "xschem clear SCHEMATIC" incorrectly sets untitled.sym file name. Thanks to Neil Johnson for pointing out the issue
+- add --tcp_port command line option
+- added (optional) tcp server that can be used to accept commands from other applications (backannotation, cross-probing)
+- added video tutorial on cross-probing into GAW
+- added "Simulation->Send highlighted nets to GAW (Alt-G)" to probe xschem nets into an open gaw window
+  using gaw ttg socket commands.
+- dircolor variable (associative array) in xschemrc to set custom user defined colors for xschem 
+  component/schematic libraries: "set dircolor(path_regex) color"
+- glob filter (all, .sym, .sch) in file open dialog.
+- created command "Simulation->Create ngspice xplot probe file", this creates a xplot script 
+  for ngspice with waveforms of same color as highlighted xschem signals.
+  Fix a problem in verilog_netlist.c not writing "---- begin/end user architecture code" 
+  blocks if empty user architecture. This confuses verilog.awk post processor.
+  added logic/ram_tb.sch verilog example.
 
 2.9.6
 - filled arcs/circles in svg and pdf exports

@@ -17,8 +17,10 @@ END  { endfile(_filename_) }
 BEGIN{
 }
 
-/__linux__/{
- sub(/__linux__/, "__unix__")
+/\<DELETE\>|\<LOOKUP\>|\<INSERT\>/{
+ gsub(/\<DELETE\>/, "XDELETE")
+ gsub(/\<LOOKUP\>/, "XLOOKUP")
+ gsub(/\<INSERT\>/, "XINSERT")
  found = 1
 }
 

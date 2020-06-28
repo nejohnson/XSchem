@@ -342,7 +342,7 @@ void break_wires_at_pins(void)
               else
                 wire[lastwire].bus=0;
               wire[lastwire].node=NULL;
-              hash_wire(INSERT, lastwire);
+              hash_wire(XINSERT, lastwire);
               my_strdup(32, &wire[lastwire].node, wire[i].node);
               need_rebuild_selected_array=1;
               lastwire++;
@@ -399,7 +399,7 @@ void break_wires_at_pins(void)
             else
               wire[lastwire].bus=0;
             wire[lastwire].node=NULL;
-            hash_wire(INSERT, lastwire);
+            hash_wire(XINSERT, lastwire);
             need_rebuild_selected_array=1;
             lastwire++;
             wire[i].x1 = x0;

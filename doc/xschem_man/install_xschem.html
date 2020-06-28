@@ -150,23 +150,23 @@ set initial_geometry {800x600}
    into the user directory and make the necessary changes.
  </p><br><br>
 
- <h2> Detailed XSCHEM startup sequence </h2>
+ <h2> -Technical information - Detailed XSCHEM startup sequence </h2>
  <p class="important"> Information here under is not meant to be executed by the user </p><br>
  <ol>
+ <li>If <kbd>--rcfile=&lt;rcfile&gt;</kbd> is given then source the specified rcfile. Do not load any other rcfile.</li>
  <li>If <kbd>../src/xchem.tcl</kbd> with respect to current dir is existing and
      <kbd>../xschem_library</kbd> is also existing then we are starting
      from a build directory, set <kbd>XSCHEM_SHAREDIR</kbd> to <kbd>&lt;current dir&gt;</kbd> and
-     also set <br><kbd>XSCHEM_LIBRARY_PATH</kbd> to <kbd>.:/../xschem_library/devices</kbd>.
- <li> else use compile-time (generated from configure script) provided <kbd>XSCHEM_SHAREDIR</kbd>.
- <li> if in current dir there is a <kbd>xschemrc</kbd> file source it.</li>
- <li>else if there is a <kbd>USER_CONF_DIR/xschemrc</kbd> file source it.</li>
- <li>else if there is a <kbd>XSCHEM_SHAREDIR/xschemrc</kbd> file then source it<br>
+     also set <br><kbd>XSCHEM_LIBRARY_PATH</kbd> to <kbd>.:/../xschem_library/devices</kbd>.</li>
+ <li>Else use compile-time (generated from configure script) provided <kbd>XSCHEM_SHAREDIR</kbd>.
+ <li>Source system-wide xschemrc if existing: <kbd>XSCHEM_SHAREDIR/xschemrc</kbd></li>
+ <li>If in current dir there is a <kbd>xschemrc</kbd> file source it.</li>
+ <li>Else if there is a <kbd>USER_CONF_DIR/xschemrc</kbd> file source it.
      <kbd>XSCHEM_SHAREDIR</kbd>  and <kbd>USER_CONF_DIR</kbd> are preprocessor macros
      passed at compile time by the configure script.
-     The first one will be overridden only if executing from a build directory, see point 1.</li>
- <li>if <kbd>XSCHEM_SHAREDIR</kbd> not defined --&gt; error and quit.</li>
- <li>source <kbd>$XSCHEM_SHAREDIR/xschem.tcl</kbd>.</li>
- <li>start loading user provided schematic file or start with empty window  (or filename
+     The first one will be overridden only if executing from a build directory, see item 2.</li>
+ <li>If <kbd>XSCHEM_SHAREDIR</kbd> not defined --&gt; error and quit.</li>
+ <li>Start loading user provided schematic file or start with empty window  (or filename
      specified in <kbd>XSCHEM_START_WINDOW</kbd> tcl variable).</li>
  </ol>
 

@@ -100,7 +100,7 @@ void create_plot_cmd(int viewer)
     entry = hilight_table[i];
     while(entry) {
       tok = entry->token;
-      node_entry = bus_hash_lookup(tok, "", LOOKUP, 0, "", "", "", "");
+      node_entry = bus_hash_lookup(tok, "", XLOOKUP, 0, "", "", "", "");
       if(tok[0] == '#') tok++;
       if(node_entry && !strcmp(sch_prefix[currentsch], entry->path) && 
          (node_entry->d.port == 0 || !strcmp(entry->path, ".") )) {
@@ -166,12 +166,12 @@ void create_plot_cmd(int viewer)
 struct hilight_hashentry *hilight_lookup(char *token, int value, int remove)
 /*    token           remove    ... what ... */
 /* -------------------------------------------------------------------------- */
-/* "whatever"         0,INSERT insert in hash table if not in and return NULL */
+/* "whatever"         0,XINSERT insert in hash table if not in and return NULL */
 /*                             if already present just return entry address  */
 /*                             return NULL otherwise */
 /* */
-/* "whatever"         1,DELETE delete entry if found return NULL */
-/* "whatever"         2,LOOKUP only look up element, dont insert */
+/* "whatever"         1,XDELETE delete entry if found return NULL */
+/* "whatever"         2,XLOOKUP only look up element, dont insert */
 {
  unsigned int hashcode, index;
  struct hilight_hashentry *entry, *saveptr, **preventry;
@@ -189,7 +189,7 @@ struct hilight_hashentry *hilight_lookup(char *token, int value, int remove)
  {
   if( !entry )                  /* empty slot */
   {
-   if( remove==INSERT )              /* insert data */
+   if( remove==XINSERT )              /* insert data */
    {
     s=sizeof( struct hilight_hashentry );
     ptr= my_malloc(137, s ); 
@@ -210,7 +210,7 @@ struct hilight_hashentry *hilight_lookup(char *token, int value, int remove)
   if( entry -> hash==hashcode && !strcmp(token,entry->token) &&
       !strcmp(sch_prefix[currentsch], entry->path)  ) /* found matching tok */
   {
-   if(remove==DELETE)                /* remove token from the hash table ... */
+   if(remove==XDELETE)                /* remove token from the hash table ... */
    {
     saveptr=entry->next;
     my_free(&entry->token);
@@ -310,16 +310,16 @@ void hilight_parent_pins(void)
  for(j=0;j<rects;j++)
  {
   pin_node=get_tok_value((inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][j].prop_ptr,"name",0);
-  if( (entry = bus_hilight_lookup(pin_node,0, LOOKUP)) )
+  if( (entry = bus_hilight_lookup(pin_node,0, XLOOKUP)) )
   {
     currentsch=save_currentsch;
-    bus_hilight_lookup(inst_ptr[i].node[j], entry->value, INSERT);
+    bus_hilight_lookup(inst_ptr[i].node[j], entry->value, XINSERT);
     currentsch=save_currentsch+1;
   }
   else
   {
     currentsch=save_currentsch;
-    bus_hilight_lookup(inst_ptr[i].node[j], 0, DELETE);
+    bus_hilight_lookup(inst_ptr[i].node[j], 0, XDELETE);
     currentsch=save_currentsch+1;
   }
  }
@@ -343,15 +343,15 @@ void hilight_child_pins(int i)
  {
   currentsch=save_currentsch;
   pin_node=get_tok_value((inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][j].prop_ptr,"name",0);
-  if( (entry = bus_hilight_lookup(inst_ptr[i].node[j], 0, LOOKUP)) )
+  if( (entry = bus_hilight_lookup(inst_ptr[i].node[j], 0, XLOOKUP)) )
   {
     currentsch++;
-    bus_hilight_lookup(pin_node, entry->value, INSERT); 
+    bus_hilight_lookup(pin_node, entry->value, XINSERT); 
   }
   else
   {
     currentsch++;
-    bus_hilight_lookup(pin_node, 0, DELETE); 
+    bus_hilight_lookup(pin_node, 0, XDELETE); 
   }
  }
  currentsch=save_currentsch;
@@ -446,7 +446,7 @@ int search(const char *tok, const char *val, int sub, int sel, int what)
                 !(strcmp(type,"label") && strcmp(type,"ipin") &&
                   strcmp(type,"iopin") && strcmp(type,"opin")) 
               ) {
-              if(!bus_hilight_lookup(inst_ptr[i].node[0], col, INSERT)) hilight_nets = 1;
+              if(!bus_hilight_lookup(inst_ptr[i].node[0], col, XINSERT)) hilight_nets = 1;
               if(what==NOW) for(c=0;c<cadlayers;c++)
                 draw_symbol(NOW, hilight_layer, i,c,0,0,0.0,0.0);
             }
@@ -483,7 +483,7 @@ int search(const char *tok, const char *val, int sub, int sel, int what)
         {
             if(debug_var>=2) fprintf(errfp, "search(): wire=%d, tok=%s, val=%s \n", i,tok, wire[i].node);
             if(!sel) {
-              bus_hilight_lookup(wire[i].node, col, INSERT);
+              bus_hilight_lookup(wire[i].node, col, XINSERT);
               if(what == NOW) {
                 if(wire[i].bus) /* 20171201 */
                   drawline(hilight_layer, THICK,
@@ -617,10 +617,10 @@ void drill_hilight(void)
       for(j=0; j<npin;j++) {
         my_strdup(143, &netname, pin_node(i, j, &mult, 1));
         propagate_str=get_tok_value(rect[j].prop_ptr, "propagate_to", 0);
-        if(propagate_str[0] && (entry=bus_hilight_lookup(netname, 0, LOOKUP))) {
+        if(propagate_str[0] && (entry=bus_hilight_lookup(netname, 0, XLOOKUP))) {
           propagate = atoi(propagate_str);
           my_strdup(144, &propagated_net, pin_node(i, propagate, &mult, 1)); /* get net to propagate highlight to... */
-          propag_entry = bus_hilight_lookup(propagated_net, entry->value, INSERT); /* add net to highlight list */
+          propag_entry = bus_hilight_lookup(propagated_net, entry->value, XINSERT); /* add net to highlight list */
           if(!propag_entry) {
             /* fprintf(errfp, "inst %s: j=%d  count=%d propagate=%d --> net %s, propagate to --> %s color %d\n",  */
             /*   inst_ptr[i].instname, j, count, propagate, netname, pin_node(i, propagate, &mult, 1), entry->value); */
@@ -649,18 +649,18 @@ void send_net_to_gaw(int to_waveform, char *node)
       return;
     }
     tok = node;
-    node_entry = bus_hash_lookup(tok, "", LOOKUP, 0, "", "", "", "");
+    node_entry = bus_hash_lookup(tok, "", XLOOKUP, 0, "", "", "", "");
     if(tok[0] == '#') tok++;
     if(node_entry  && (node_entry->d.port == 0 || !strcmp(sch_prefix[currentsch], ".") )) {
       char *t=NULL, *p=NULL;
       c = get_color(hilight_color);
-      my_strdup(241, &t, tok);
+      my_strdup(246, &t, tok);
       if(!strcmp(sch_prefix[currentsch], ".") ) {
         fprintf(fd, "puts $gaw_fd {copyvar v(%s) p0 #%02x%02x%02x}\n", strtolower(t),
                 xcolor_array[c].red>>8, xcolor_array[c].green>>8, xcolor_array[c].blue>>8
                );
       } else {
-        my_strdup(245, &p, sch_prefix[currentsch]+1);
+        my_strdup(254, &p, sch_prefix[currentsch]+1);
         fprintf(fd, "puts $gaw_fd {copyvar v(%s%s) p0 #%02x%02x%02x}\n", strtolower(p), strtolower(t),
                 xcolor_array[c].red>>8, xcolor_array[c].green>>8, xcolor_array[c].blue>>8
                );
@@ -693,7 +693,7 @@ void hilight_net(int to_waveform)
         fflush(stdout);
       }
       hilight_nets=1;
-      if(!bus_hilight_lookup(wire[n].node, hilight_color, INSERT)) {
+      if(!bus_hilight_lookup(wire[n].node, hilight_color, XINSERT)) {
         send_net_to_gaw(to_waveform, wire[n].node);
         if(incr_hilight) hilight_color++;
       }
@@ -711,7 +711,7 @@ void hilight_net(int to_waveform)
          printf("xschem search exact %d lab %s\n", 0, escape_chars(s, inst_ptr[n].node[0], PATH_MAX));
          fflush(stdout);
        }
-       if(!bus_hilight_lookup(inst_ptr[n].node[0], hilight_color, INSERT)) {
+       if(!bus_hilight_lookup(inst_ptr[n].node[0], hilight_color, XINSERT)) {
          send_net_to_gaw(to_waveform, inst_ptr[n].node[0]);
          hilight_nets=1;
          if(incr_hilight) hilight_color++;
@@ -758,7 +758,7 @@ void unhilight_net(void)
         printf("xschem unhilight\n");
         fflush(stdout);
       }
-      bus_hilight_lookup(wire[n].node, hilight_color, DELETE);
+      bus_hilight_lookup(wire[n].node, hilight_color, XDELETE);
      break;
     case ELEMENT:
      type = (inst_ptr[n].ptr+instdef)->type;
@@ -772,7 +772,7 @@ void unhilight_net(void)
         printf("xschem unhilight\n");
         fflush(stdout);
       }
-      bus_hilight_lookup(inst_ptr[n].node[0], hilight_color, DELETE);
+      bus_hilight_lookup(inst_ptr[n].node[0], hilight_color, XDELETE);
      } else {
       if(event_reporting) {
         char s[PATH_MAX];
@@ -828,7 +828,7 @@ void draw_hilight_net(int on_window)
  }
  if(!use_hash) for(i=0;i<lastwire;i++)
  {
-      if( (entry = bus_hilight_lookup(wire[i].node, 0, LOOKUP)) ) {
+      if( (entry = bus_hilight_lookup(wire[i].node, 0, XLOOKUP)) ) {
         if(wire[i].bus) /* 20171201 */
           drawline(get_color(entry->value), THICK,
              wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
@@ -846,7 +846,7 @@ void draw_hilight_net(int on_window)
       }
  } else for(init_wire_iterator(x1, y1, x2, y2); ( wireptr = wire_iterator_next() ) ;) {
     i = wireptr->n;
-      if( (entry = bus_hilight_lookup(wire[i].node, 0, LOOKUP)) ) {
+      if( (entry = bus_hilight_lookup(wire[i].node, 0, XLOOKUP)) ) {
         if(wire[i].bus) /* 20171201 */
           drawline(get_color(entry->value), THICK,
              wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
@@ -888,7 +888,7 @@ void draw_hilight_net(int on_window)
     if( (rects = (inst_ptr[i].ptr+instdef)->rects[PINLAYER]) > 0 ) {
       for(j=0;j<rects;j++) {
         if( inst_ptr[i].node && inst_ptr[i].node[j]) {
-          entry=bus_hilight_lookup(inst_ptr[i].node[j], 0, LOOKUP);
+          entry=bus_hilight_lookup(inst_ptr[i].node[j], 0, XLOOKUP);
           if(entry) {
             inst_color[i]=get_color(entry->value);
             break;
@@ -901,7 +901,7 @@ void draw_hilight_net(int on_window)
         strcmp(type,"iopin") && strcmp(type,"opin") )
     )
   {
-   entry=bus_hilight_lookup( get_tok_value(inst_ptr[i].prop_ptr,"lab",0) , 0, LOOKUP);
+   entry=bus_hilight_lookup( get_tok_value(inst_ptr[i].prop_ptr,"lab",0) , 0, XLOOKUP);
    if(entry) inst_color[i]=get_color(entry->value);
   }
  }
@@ -1002,7 +1002,7 @@ void print_hilight_net(int show)
    entry=hilight_table[i];
    while(entry) {
      /* 20111116 */
-     node_entry = bus_hash_lookup(entry->token, "", LOOKUP, 0, "", "", "", "");
+     node_entry = bus_hash_lookup(entry->token, "", XLOOKUP, 0, "", "", "", "");
 
      /* 20170926 test for not null node_entry, this may happen if a hilighted net name has been changed */
      /* before invoking this function, in this case --> skip */

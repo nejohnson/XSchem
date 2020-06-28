@@ -387,7 +387,7 @@ function print_header()
        "device @name @device\n" \
        "@comptag\"\n"
   }
-  print "v {xschem version=2.9.6 file_version=1.1}"
+  print "v {xschem version=2.9.7 file_version=1.1}"
   template_attrs = "template=\"" template_attrs "\"\n"
 
   if(FILENAME ~/\.sym$/) {

@@ -25,7 +25,7 @@
 void global_verilog_netlist(int global)  /* netlister driver */
 {
  FILE *fd;
- char *str_tmp;
+ const char *str_tmp;
  static char *sig_type = NULL;
  static char *port_value = NULL;
  static char *tmp_string=NULL;
@@ -35,6 +35,7 @@ void global_verilog_netlist(int global)  /* netlister driver */
  char netl2[PATH_MAX]; /* 20081203  overflow safe 20161122 */
  char netl3[PATH_MAX]; /* 20081203  overflow safe 20161122 */
  static char *type=NULL;
+ struct stat buf;
 
  if(current_type==SYMBOL) {
    tcleval("alert_ {This is a symbol, no netlisting can be done.\n"
@@ -152,9 +153,12 @@ void global_verilog_netlist(int global)  /* netlister driver */
  fprintf(fd,"\n);\n");
 
  /* 20071006 print top level params if defined in symbol */
- load_symbol_definition( schematic[currentsch], NULL );
- print_verilog_param(fd,lastinstdef-1);  /* added print top level params */
- remove_symbol();
+ str_tmp = add_ext(schematic[currentsch], ".sym");
+ if(!stat(str_tmp, &buf)) {
+   load_symbol_definition(str_tmp, NULL );
+   print_verilog_param(fd,lastinstdef-1);  /* added print top level params */
+   remove_symbol();
+ }
  /* 20071006 end */
 
 
@@ -294,6 +298,7 @@ void global_verilog_netlist(int global)  /* netlister driver */
    unselect_all();
    /* remove_symbols(); */
    load_schematic(1,schematic[currentsch], 0);
+   prepare_netlist_structs(1); /* so 'lab=...' attributes for unnamed nets are set */
    /* symbol vs schematic pin check, we do it here since now we have ALL symbols loaded */
    sym_vs_sch_pins();
 

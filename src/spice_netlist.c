@@ -185,6 +185,7 @@ void global_spice_netlist(int global)  /* netlister driver */
    unselect_all();
    /* remove_symbols(); */
    load_schematic(1, schematic[currentsch], 0); /* 20180927 */
+   prepare_netlist_structs(1); /* so 'lab=...' attributes for unnamed nets are set */
    /* symbol vs schematic pin check, we do it here since now we have ALL symbols loaded */
    sym_vs_sch_pins();
 
@@ -267,12 +268,12 @@ char *model_name(char *m)
   static char *prefix = NULL;
   char *modelname = NULL;
 
-  my_strdup(1, &m_lower, m);
+  my_strdup(255, &m_lower, m);
   strtolower(m_lower);
-  my_realloc(1, &modelname, strlen(m) + 1);
-  my_realloc(1, &prefix, strlen(m) + 1);
+  my_realloc(256, &modelname, strlen(m) + 1);
+  my_realloc(257, &prefix, strlen(m) + 1);
   sscanf(m_lower, " %s %s", prefix, modelname);
-  my_strcat(1, &prefix, modelname);
+  my_strcat(296, &prefix, modelname);
   my_free(&modelname);
   my_free(&m_lower);
   return prefix;
@@ -390,10 +391,10 @@ void spice_netlist(FILE *fd, int spice_stop )
         print_spice_element(fd, i) ;  /* this is the element line  */
         /* hash device_model attribute if any */
         m = get_tok_value(inst_ptr[i].prop_ptr, "device_model", 2);
-        if(m[0]) hash_lookup(model_table, model_name(m), m, INSERT);
+        if(m[0]) hash_lookup(model_table, model_name(m), m, XINSERT);
         else {
           m = get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "device_model", 2);
-          if(m[0]) hash_lookup(model_table, model_name(m), m, INSERT);
+          if(m[0]) hash_lookup(model_table, model_name(m), m, XINSERT);
         }
       }
     }
@@ -419,13 +420,13 @@ static unsigned int hash(char *tok)
 
 /*    token        value      what    ... what ...
  * --------------------------------------------------------------------------
- * "whatever"    "whatever"  INSERT     insert in hash table if not in.
+ * "whatever"    "whatever"  XINSERT     insert in hash table if not in.
  *                                      if already present update value if not NULL, 
  *                                      return entry address.
  *                                      return NULL if not found.
- * "whatever"    "whatever"  LOOKUP     lookup in hash table,return entry addr.
+ * "whatever"    "whatever"  XLOOKUP     lookup in hash table,return entry addr.
  *                                      return NULL if not found
- * "whatever"    "whatever"  DELETE     delete entry if found,return NULL
+ * "whatever"    "whatever"  XDELETE     delete entry if found,return NULL
  */
 struct hashentry *hash_lookup(struct hashentry **table, char *token, char *value, int what)
 {
@@ -442,15 +443,15 @@ struct hashentry *hash_lookup(struct hashentry **table, char *token, char *value
   {
     if( !entry )          /* empty slot */
     {
-      if(what==INSERT)            /* insert data */
+      if(what==XINSERT)            /* insert data */
       {
         s=sizeof( struct hashentry );
-        entry=(struct hashentry *)my_malloc(1, s);
+        entry=(struct hashentry *)my_malloc(313, s);
         entry->next=NULL;
         entry->token=NULL;
         entry->value=NULL;
-        my_strdup(1, &entry->token, token);
-        my_strdup(1, &entry->value, value);
+        my_strdup(297, &entry->token, token);
+        my_strdup(307, &entry->value, value);
         entry->hash=hashcode;
         *preventry=entry;
       }
@@ -458,7 +459,7 @@ struct hashentry *hash_lookup(struct hashentry **table, char *token, char *value
     }
     if( entry -> hash==hashcode && strcmp(token,entry->token)==0 ) /* found a matching token */
     {
-      if(what==DELETE)             /* remove token from the hash table ... */
+      if(what==XDELETE)             /* remove token from the hash table ... */
       {
         saveptr=entry->next;
         my_free(&entry->token);
@@ -466,8 +467,8 @@ struct hashentry *hash_lookup(struct hashentry **table, char *token, char *value
         my_free(&entry);
         *preventry=saveptr;
       }
-      else if(value && what == INSERT ) {
-        my_strdup(1, &entry->value, value);
+      else if(value && what == XINSERT ) {
+        my_strdup(308, &entry->value, value);
       }
       return entry;   /* found matching entry, return the address */
     }

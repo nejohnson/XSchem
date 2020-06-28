@@ -339,6 +339,7 @@ void global_vhdl_netlist(int global)  /* netlister driver */
    unselect_all();
    /* remove_symbols(); */
    load_schematic(1, schematic[currentsch], 0); /* 20180927 */
+   prepare_netlist_structs(1); /* so 'lab=...' attributes for unnamed nets are set */
    /* symbol vs schematic pin check, we do it here since now we have ALL symbols loaded */
    sym_vs_sch_pins();
 

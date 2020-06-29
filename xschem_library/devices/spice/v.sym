@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC5 file_version=1.1}
+v {xschem version=2.9.7 file_version=1.1}
 G {type=vsource
 format="@name @pinlist @value"
 template="name=V1 value=0V"
@@ -6,13 +6,13 @@ template="name=V1 value=0V"
 V {}
 S {}
 E {}
-A 4 0 0 15 0 360 {}
-L 4 0 30 0 15 {}
-L 4 0 -15 0 -30 {}
-L 4 -2.5 10 2.5 10 {}
-L 4 0 -7.5 0 -12.5 {}
-L 4 -2.5 -10 2.5 -10 {}
-B 5 -2.5 -32.5 2.5 -27.5 {name=p dir=inout}
-B 5 -2.5 27.5 2.5 32.5 {name=m dir=inout}
-T {@value} 20 0 0 0 0.2 0.2 {}
-T {@name} 20 -17.5 0 0 0.2 0.2 {}
+L 4 0 45 0 60 {}
+L 4 0 0 0 15 {}
+L 4 -2.5 40 2.5 40 {}
+L 4 0 17.5 0 22.5 {}
+L 4 -2.5 20 2.5 20 {}
+B 5 -2.5 -2.5 2.5 2.5 {name=p dir=inout}
+B 5 -2.5 57.5 2.5 62.5 {name=m dir=inout}
+A 4 0 30 15 0 360 {}
+T {@value} 20 30 0 0 0.2 0.2 {}
+T {@name} 20 12.5 0 0 0.2 0.2 {}

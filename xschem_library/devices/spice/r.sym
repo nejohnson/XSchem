@@ -1,4 +1,4 @@
-v {xschem version=2.9.5 file_version=1.1}
+v {xschem version=2.9.7 file_version=1.1}
 G {type=resistor
 format="@name @pinlist @value"
 template="name=R1 value=1k"
@@ -6,10 +6,13 @@ template="name=R1 value=1k"
 V {}
 S {}
 E {}
-L 4 0 20 0 30 {}
-L 4 0 -30 0 -20 {}
-P 4 5 7 -20 -7 -20 -7 20 7 20 7 -20 {}
-B 5 -2.5 -32.5 2.5 -27.5 {name=0 pinnumber=0 dir=inout}
-B 5 -2.5 27.5 2.5 32.5   {name=1 pinnumber=1 dir=inout}
-T {@name} 15 -13.75 0 0 0.2 0.2 {}
-T {@value} 15 1.25 0 0 0.2 0.2 {}
+L 4 0 50 0 60 {}
+L 4 0 0 0 10 {}
+L 4 5 5 10 5 {}
+L 4 7.5 2.5 7.5 7.5 {}
+L 4 5 55 10 55 {}
+B 5 -2.5 -2.5 2.5 2.5 {name=0 pinnumber=0 dir=inout}
+B 5 -2.5 57.5 2.5 62.5 {name=1 pinnumber=1 dir=inout}
+P 4 5 7 10 -7 10 -7 50 7 50 7 10 {}
+T {@name} 15 16.25 0 0 0.2 0.2 {}
+T {@value} 15 31.25 0 0 0.2 0.2 {}

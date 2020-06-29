@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC6 file_version=1.1}
+v {xschem version=2.9.7 file_version=1.1}
 G {type=capacitor
 format="@name @pinlist @value"
 template="name=C1 value=1p"
@@ -6,11 +6,14 @@ template="name=C1 value=1p"
 V {}
 S {}
 E {}
-L 4 0 3 0 20 {}
-L 4 0 -20 0 -3 {}
-P 4 5 -10 -3 10 -3 10 -2 -10 -2 -10 -3 {fill=true}
-P 4 5 -10  3 10  3 10  2 -10  2 -10  3 {fill=true}
-B 5 -2.5 -22.5 2.5 -17.5 {name=0 dir=inout pinnumber=0}
-B 5 -2.5 17.5 2.5 22.5 {name=1 dir=inout pinnumber=1}
-T {@value} 15 0 0 0 0.25 0.2 {}
-T {@name} 15 -13.75 0 0 0.2 0.2 {}
+L 4 0 23 0 40 {}
+L 4 0 0 0 17 {}
+L 4 5 7.5 10 7.5 {}
+L 4 7.5 5 7.5 10 {}
+L 4 5 32.5 10 32.5 {}
+B 5 -2.5 -2.5 2.5 2.5 {name=0 dir=inout pinnumber=0}
+B 5 -2.5 37.5 2.5 42.5 {name=1 dir=inout pinnumber=1}
+P 4 5 -10 17 10 17 10 18 -10 18 -10 17 {fill=true}
+P 4 5 -10 23 10 23 10 22 -10 22 -10 23 {fill=true}
+T {@value} 15 20 0 0 0.25 0.2 {}
+T {@name} 15 6.25 0 0 0.2 0.2 {}

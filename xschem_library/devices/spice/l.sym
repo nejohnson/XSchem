@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC6 file_version=1.1}
+v {xschem version=2.9.7 file_version=1.1}
 G {type=inductor
 format="@name @pinlist @value"
 template="name=L1 value=1n"
@@ -6,13 +6,14 @@ template="name=L1 value=1n"
 V {}
 S {}
 E {}
-L 4 0 30 0 20 {}
-A 4 0 15 5 -90 180 {}
-A 4 0 5 5 -90 180 {}
-A 4 0 -5 5 -90 180 {}
-A 4 0 -15 5 -90 180 {}
-L 4 0 -20 0 -30 {}
-B 5 -2.5 -32.5 2.5 -27.5 {name=0 dir=inout pinnumber=0}
-B 5 -2.5 27.5 2.5 32.5 {name=1 dir=inout pinnumber=1}
-T {@value} 15 0 0 0 0.25 0.2 {}
-T {@name} 15 -17.5 0 0 0.2 0.2 {}
+L 4 0 50 0 60 {}
+L 4 0 0 0 10 {}
+B 5 -2.5 -2.5 2.5 2.5 {name=0 dir=inout pinnumber=0}
+B 5 -2.5 57.5 2.5 62.5 {name=1 dir=inout pinnumber=1}
+A 4 0 45 5 270 180 {}
+A 4 0 35 5 270 180 {}
+A 4 0 25 5 270 180 {}
+A 4 0 15 5 270 180 {}
+A 4 10 5 2 0 360 {fill=true}
+T {@value} 15 30 0 0 0.25 0.2 {}
+T {@name} 15 12.5 0 0 0.2 0.2 {}

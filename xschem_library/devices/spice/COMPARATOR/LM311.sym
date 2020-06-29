@@ -1,0 +1,63 @@
+v {xschem version=2.9.7 file_version=1.1}
+G {type=comparator
+format="X@name @pinlist LM311 "
+template="name=U1"
+device_model="
+* LM311 VOLTAGE COMPARATOR MACROMODEL SUBCIRCUIT
+* CREATED USING PARTS VERSION 4.03 ON 03/07/90 AT 08:15
+* REV (N/A)
+* CONNECTIONS:   NON-INVERTING INPUT
+*                | INVERTING INPUT
+*                | | POSITIVE POWER SUPPLY
+*                | | | NEGATIVE POWER SUPPLY
+*                | | | | OPEN COLLECTOR OUTPUT
+*                | | | | | OUTPUT GROUND
+*                | | | | | |
+.SUBCKT LM311    1 2 3 4 5 6
+*
+  F1    9  3 V1 1
+  IEE   3  7 DC 100.0E-6
+  VI1  21  1 DC .45
+  VI2  22  2 DC .45
+  Q1    9 21  7 QIN
+  Q2    8 22  7 QIN
+  Q3    9  8  4 QMO
+  Q4    8  8  4 QMI
+.MODEL QIN PNP(IS=800.0E-18 BF=500)
+.MODEL QMI NPN(IS=800.0E-18 BF=1002)
+.MODEL QMO NPN(IS=800.0E-18 BF=1000 CJC=1E-15 TR=102.5E-9)
+  E1   10  6  9  4  1
+  V1   10 11 DC 0
+  Q5    5 11  6 QOC
+.MODEL QOC NPN(IS=800.0E-18 BF=103.5E3 CJC=1E-15 TF=11.60E-12 TR=48.19E-9)
+  DP    4  3 DX
+  RP    3  4 6.667E3
+.MODEL DX  D(IS=800.0E-18)
+*
+.ENDS"
+}
+V {}
+S {}
+E {}
+L 3 70 26.5 70 40 {}
+L 3 0 0 20 0 {}
+L 3 0 40 20 40 {}
+L 3 50 40 50 60 {}
+L 3 80 20 100 20 {}
+L 3 50 -20 50 0 {}
+L 4 30 -5 30 5 {}
+L 4 25 0 35 0 {}
+L 4 25 40 35 40 {}
+L 4 55 45 65 45 {}
+L 4 55 -5 65 -5 {}
+L 4 60 -10 60 0 {}
+T {G} 75 38 2 1 0.2 0.2 {}
+P 4 4 20 -20 20 60 80 20 20 -20 {}
+B 5 67.5 37.5 72.5 42.5 {pinnumber=1 pinseq=1 name=1 dir=inout}
+B 5 -2.5 -2.5 2.5 2.5 {pinnumber=2 pinseq=2 name=2 dir=inout}
+B 5 -2.5 37.5 2.5 42.5 {pinnumber=3 pinseq=3 name=3 dir=inout}
+B 5 47.5 57.5 52.5 62.5 {pinnumber=4 pinseq=4 name=4 dir=inout}
+B 5 97.5 17.5 102.5 22.5 {pinnumber=5 pinseq=5 name=5 dir=inout}
+B 5 47.5 -22.5 52.5 -17.5 {pinnumber=6 pinseq=6 name=6 dir=inout}
+T {LM311} 25 28 2 1 0.266667 0.266667 {}
+T {@name} 20 -30 2 1 0.333333 0.333333 {}

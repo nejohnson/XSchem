@@ -1,0 +1,23 @@
+v {xschem version=2.9.7 file_version=1.1}
+G {type=npn
+format="@name @pinlist 2N3906 "
+template="name=Q?"
+device_model=".model 2N3906 PNP(IS=1E-14 VAF=100 BF=200 IKF=0.4 XTB=1.5 BR=4 CJC=4.5E-12 CJE=10E-12 RB=20 RC=0.1 RE=0.1 TR=250E-9 TF=350E-12 ITF=1 VTF=2 XTF=3 )"
+}
+V {}
+S {}
+E {}
+L 4 60 -50 60 -30 {}
+L 4 0 0 18.4 0 {}
+L 4 60 30 60 50 {}
+L 4 40 10 60 30 {}
+L 4 40 -10 60 -30 {}
+L 4 40 -20 40 20 {}
+L 4 18.4 0 40 0 {}
+B 5 57.5 -52.5 62.5 -47.5 {pinnumber=C pinseq=1 name=C dir=inout}
+B 5 -2.5 -2.5 2.5 2.5 {pinnumber=B pinseq=2 name=B dir=inout}
+B 5 57.5 47.5 62.5 52.5 {pinnumber=E pinseq=3 name=E dir=inout}
+A 4 50 -0.1000000000000014 31.6 0 360 {}
+P 4 5 51 16 41.9 12 46.5 21.5 48.5 18.5 51 16 {fill=true}
+T {@name} 90 0 2 1 0.333333 0.333333 {}
+T {2N3906} 95 18 2 1 0.266667 0.266667 {}

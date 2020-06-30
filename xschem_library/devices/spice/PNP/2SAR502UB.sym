@@ -1,0 +1,23 @@
+v {xschem version=2.9.7 file_version=1.1}
+G {type=npn
+format="@name @pinlist 2SAR502UB "
+template="name=Q?"
+device_model=".model 2SAR502UB PNP(Is=100f Bf=505.1 Vaf=32.26 Ikf=363.3m Ise=100.1f Ne=2 Br=136.3 Var=17.82 Ikr=10.01m Isc=267p Nc=1.974 Nk=610.4m Re=10m Rb=11.14 Rc=513.8m Cje=30.3p Vje=1.031 Mje=471.8m Cjc=16.79p Vjc=1.151 Mjc=577.3m Tf=267.5p Xtf=7.249 Vtf=11.66 Itf=1.506 Tr=4.206n Xtb=1.2 Tre1=40m )"
+}
+V {}
+S {}
+E {}
+L 4 60 -50 60 -30 {}
+L 4 0 0 18.4 0 {}
+L 4 60 30 60 50 {}
+L 4 40 10 60 30 {}
+L 4 40 -10 60 -30 {}
+L 4 40 -20 40 20 {}
+L 4 18.4 0 40 0 {}
+B 5 57.5 -52.5 62.5 -47.5 {pinnumber=C pinseq=1 name=C dir=inout}
+B 5 -2.5 -2.5 2.5 2.5 {pinnumber=B pinseq=2 name=B dir=inout}
+B 5 57.5 47.5 62.5 52.5 {pinnumber=E pinseq=3 name=E dir=inout}
+A 4 50 -0.1000000000000014 31.6 0 360 {}
+P 4 5 51 16 41.9 12 46.5 21.5 48.5 18.5 51 16 {fill=true}
+T {@name} 90 0 2 1 0.333333 0.333333 {}
+T {2SAR502UB} 95 18 2 1 0.266667 0.266667 {}

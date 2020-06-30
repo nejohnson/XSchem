@@ -1,0 +1,23 @@
+v {xschem version=2.9.7 file_version=1.1}
+G {type=npn
+format="@name @pinlist LS310 "
+template="name=Q?"
+device_model=".model LS310 NPN(Is=5.78f Xti=3.63 Eg=1.17 Vaf=145 Bf=466 Ne=1.44 Ise=0.87f Nr=1 Ikf=64m Xtb=1.36 Br=1.37 Ikr=10m Var=8.35 Isc=0.2f Nc=2 Nf=1 Rb=100 Re=0.36 Rc=10 Cjc=2.2p Cje=3.16p Mjc=129m Mje=236m Vjc=400m Vje=665m Tf=0.31n Tr=10n Vtf=14 Xtf=9 Rbm=10 Irb=10u Ptf=20 Fc=0.98 Itf=48m )"
+}
+V {}
+S {}
+E {}
+L 4 60 -50 60 -30 {}
+L 4 0 0 18.4 0 {}
+L 4 60 30 60 50 {}
+L 4 40 10 60 30 {}
+L 4 40 -10 60 -30 {}
+L 4 40 -20 40 20 {}
+L 4 18.4 0 40 0 {}
+B 5 57.5 -52.5 62.5 -47.5 {pinnumber=C pinseq=1 name=C dir=inout}
+B 5 -2.5 -2.5 2.5 2.5 {pinnumber=B pinseq=2 name=B dir=inout}
+B 5 57.5 47.5 62.5 52.5 {pinnumber=E pinseq=3 name=E dir=inout}
+A 4 50 -0.1000000000000014 31.6 0 360 {}
+P 4 5 51 26 60.1 30 55.5 20.5 53.5 23.5 51 26 {fill=true}
+T {@name} 90 0 2 1 0.333333 0.333333 {}
+T {LS310} 95 18 2 1 0.266667 0.266667 {}

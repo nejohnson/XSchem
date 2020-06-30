@@ -1,0 +1,23 @@
+v {xschem version=2.9.7 file_version=1.1}
+G {type=npn
+format="@name @pinlist LS3550B "
+template="name=Q?"
+device_model=".model LS3550B PNP(Is=9.04f Xti=3.65 Eg=1.17 Vaf=28.2 Bf=202 Ne=2 Ise=0.003f Nr=1 Ikf=45m Xtb=2.30 Br=6.87 Ikr=500u Var=20 Isc=0.41p Nc=1.8 Nf=1 Rb=100 Re=0.06 Rc=30 Cjc=6.02p Cje=5.48p Mjc=280m Mje=285.48m Vjc=538m Vje=622m Tf=0.26n Tr=10n Vtf=5 Xtf=0.1 Rbm=10 Irb=10u Ptf=20 Fc=0.97 Itf=40m )"
+}
+V {}
+S {}
+E {}
+L 4 60 -50 60 -30 {}
+L 4 0 0 18.4 0 {}
+L 4 60 30 60 50 {}
+L 4 40 10 60 30 {}
+L 4 40 -10 60 -30 {}
+L 4 40 -20 40 20 {}
+L 4 18.4 0 40 0 {}
+B 5 57.5 -52.5 62.5 -47.5 {pinnumber=C pinseq=1 name=C dir=inout}
+B 5 -2.5 -2.5 2.5 2.5 {pinnumber=B pinseq=2 name=B dir=inout}
+B 5 57.5 47.5 62.5 52.5 {pinnumber=E pinseq=3 name=E dir=inout}
+A 4 50 -0.1000000000000014 31.6 0 360 {}
+P 4 5 51 16 41.9 12 46.5 21.5 48.5 18.5 51 16 {fill=true}
+T {@name} 90 0 2 1 0.333333 0.333333 {}
+T {LS3550B} 95 18 2 1 0.266667 0.266667 {}

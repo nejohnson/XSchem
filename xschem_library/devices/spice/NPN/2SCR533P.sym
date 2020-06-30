@@ -1,0 +1,23 @@
+v {xschem version=2.9.7 file_version=1.1}
+G {type=npn
+format="@name @pinlist 2SCR533P "
+template="name=Q?"
+device_model=".model 2SCR533P NPN(Is=420.00E-15 Bf=307.28 Vaf=140 Ikf=5 Ise=420.00E-15 Ne=1.5998 Br=128.39 Var=30 Ikr=4.2658 Isc=420.91E-15 Nc=1.2171 Nk=.7604 Re=20.000E-3 Rb=1.7158 Rc=89.720E-3 Cje=283.62E-12 Vje=.7243 Mje=.35199 Cjc=44.087E-12 Vjc=.54497 Mjc=.40197 Tf=450.93E-12 Xtf=66.611 Vtf=32.273 Itf=29.362 Tr=11.200E-9 Xtb=1.5000 )"
+}
+V {}
+S {}
+E {}
+L 4 60 -50 60 -30 {}
+L 4 0 0 18.4 0 {}
+L 4 60 30 60 50 {}
+L 4 40 10 60 30 {}
+L 4 40 -10 60 -30 {}
+L 4 40 -20 40 20 {}
+L 4 18.4 0 40 0 {}
+B 5 57.5 -52.5 62.5 -47.5 {pinnumber=C pinseq=1 name=C dir=inout}
+B 5 -2.5 -2.5 2.5 2.5 {pinnumber=B pinseq=2 name=B dir=inout}
+B 5 57.5 47.5 62.5 52.5 {pinnumber=E pinseq=3 name=E dir=inout}
+A 4 50 -0.1000000000000014 31.6 0 360 {}
+P 4 5 51 26 60.1 30 55.5 20.5 53.5 23.5 51 26 {fill=true}
+T {@name} 90 0 2 1 0.333333 0.333333 {}
+T {2SCR533P} 95 18 2 1 0.266667 0.266667 {}

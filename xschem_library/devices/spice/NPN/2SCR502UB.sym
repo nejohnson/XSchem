@@ -1,0 +1,23 @@
+v {xschem version=2.9.7 file_version=1.1}
+G {type=npn
+format="@name @pinlist 2SCR502UB "
+template="name=Q?"
+device_model=".model 2SCR502UB NPN(Is=100f Bf=403.9 Vaf=68.84 Ikf=1.66 Ise=100f Ne=2 Br=55.22 Var=29.24 Ikr=186.6m Isc=34.52p Nc=1.707 Nk=1.054 Re=50m Rb=8.646 Rc=257.5m Cje=31.45p Vje=701.1m Mje=352.8m Cjc=7.889p Vjc=505.3m Mjc=280.3m Tf=408.6p Xtf=5.307 Vtf=58.05 Itf=830.7m Tr=6.933n Xtb=900m Tre1=10m )"
+}
+V {}
+S {}
+E {}
+L 4 60 -50 60 -30 {}
+L 4 0 0 18.4 0 {}
+L 4 60 30 60 50 {}
+L 4 40 10 60 30 {}
+L 4 40 -10 60 -30 {}
+L 4 40 -20 40 20 {}
+L 4 18.4 0 40 0 {}
+B 5 57.5 -52.5 62.5 -47.5 {pinnumber=C pinseq=1 name=C dir=inout}
+B 5 -2.5 -2.5 2.5 2.5 {pinnumber=B pinseq=2 name=B dir=inout}
+B 5 57.5 47.5 62.5 52.5 {pinnumber=E pinseq=3 name=E dir=inout}
+A 4 50 -0.1000000000000014 31.6 0 360 {}
+P 4 5 51 26 60.1 30 55.5 20.5 53.5 23.5 51 26 {fill=true}
+T {@name} 90 0 2 1 0.333333 0.333333 {}
+T {2SCR502UB} 95 18 2 1 0.266667 0.266667 {}

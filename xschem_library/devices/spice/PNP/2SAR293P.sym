@@ -1,0 +1,23 @@
+v {xschem version=2.9.7 file_version=1.1}
+G {type=npn
+format="@name @pinlist 2SAR293P "
+template="name=Q?"
+device_model=".model 2SAR293P PNP(Is=500.00E-15 Bf=444.31 Vaf=24.600 Ikf=2.3829 Ise=500.00E-15 Ne=1.6482 Br=4.9950E3 Var=7.7000 Ikr=15.229 Isc=75.178E-12 Nc=1.5444 Nk=.86085 Re=80.000E-3 Rb=2.3056 Rc=.4924 Cje=83.703E-12 Vje=1.0522 Mje=.49837 Cjc=23.220E-12 Vjc=.80782 Mjc=.46231 Tf=451.11E-12 Xtf=108.26 Vtf=53.372 Itf=49.404 Tr=2.0000E-9 Xtb=1.5000 )"
+}
+V {}
+S {}
+E {}
+L 4 60 -50 60 -30 {}
+L 4 0 0 18.4 0 {}
+L 4 60 30 60 50 {}
+L 4 40 10 60 30 {}
+L 4 40 -10 60 -30 {}
+L 4 40 -20 40 20 {}
+L 4 18.4 0 40 0 {}
+B 5 57.5 -52.5 62.5 -47.5 {pinnumber=C pinseq=1 name=C dir=inout}
+B 5 -2.5 -2.5 2.5 2.5 {pinnumber=B pinseq=2 name=B dir=inout}
+B 5 57.5 47.5 62.5 52.5 {pinnumber=E pinseq=3 name=E dir=inout}
+A 4 50 -0.1000000000000014 31.6 0 360 {}
+P 4 5 51 16 41.9 12 46.5 21.5 48.5 18.5 51 16 {fill=true}
+T {@name} 90 0 2 1 0.333333 0.333333 {}
+T {2SAR293P} 95 18 2 1 0.266667 0.266667 {}

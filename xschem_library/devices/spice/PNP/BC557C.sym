@@ -1,0 +1,23 @@
+v {xschem version=2.9.7 file_version=1.1}
+G {type=npn
+format="@name @pinlist BC557C "
+template="name=Q?"
+device_model=".model BC557C PNP(IS=5.83E-14 NF=1.009 ISE=3.88E-15 NE=1.408 BF=516.7 IKF=0.08039 VAF=26.03 NR=1.006 ISC=4.01E-14 NC=1.313 BR=12.45 IKR=0.07238 VAR=6.717 RB=1 IRB=1.00E-06 RBM=1 RE=0.5685 RC=0.6257 XTB=0 EG=1.11 XTI=3 CJE=1.26E-11 VJE=0.3809 MJE=0.3545 TF=5.23E-10 XTF=4.339 VTF=5.425 ITF=0.1896 PTF=0 CJC=7.80E-12 VJC=0.5897 MJC=0.4569 XCJC=0.6288 TR=1.00E-32 CJS=0 VJS=0.75 MJS=0.333 FC=0.5729 )"
+}
+V {}
+S {}
+E {}
+L 4 60 -50 60 -30 {}
+L 4 0 0 18.4 0 {}
+L 4 60 30 60 50 {}
+L 4 40 10 60 30 {}
+L 4 40 -10 60 -30 {}
+L 4 40 -20 40 20 {}
+L 4 18.4 0 40 0 {}
+B 5 57.5 -52.5 62.5 -47.5 {pinnumber=C pinseq=1 name=C dir=inout}
+B 5 -2.5 -2.5 2.5 2.5 {pinnumber=B pinseq=2 name=B dir=inout}
+B 5 57.5 47.5 62.5 52.5 {pinnumber=E pinseq=3 name=E dir=inout}
+A 4 50 -0.1000000000000014 31.6 0 360 {}
+P 4 5 51 16 41.9 12 46.5 21.5 48.5 18.5 51 16 {fill=true}
+T {@name} 90 0 2 1 0.333333 0.333333 {}
+T {BC557C} 95 18 2 1 0.266667 0.266667 {}

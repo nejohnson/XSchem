@@ -1,0 +1,23 @@
+v {xschem version=2.9.7 file_version=1.1}
+G {type=npn
+format="@name @pinlist 2SAR554P "
+template="name=Q?"
+device_model=".model 2SAR554P PNP(Is=400.00E-15 Bf=222.84 Vaf=30.600 Ikf=5.0617 Ise=400.03E-15 Ne=1.6004 Br=10.181 Var=20.600 Ikr=6.6435 Isc=1.0067E-12 Nc=1.2721 Nk=.99646 Re=40.000E-3 Rb=1.7344 Rc=.27337 Cje=188.26E-12 Vje=.98456 Mje=.46391 Cjc=50.752E-12 Vjc=.7732 Mjc=.47558 Tf=413.28E-12 Xtf=6.8712 Vtf=5.9615 Itf=2.6873 Tr=52.300E-9 Xtb=1.5000 )"
+}
+V {}
+S {}
+E {}
+L 4 60 -50 60 -30 {}
+L 4 0 0 18.4 0 {}
+L 4 60 30 60 50 {}
+L 4 40 10 60 30 {}
+L 4 40 -10 60 -30 {}
+L 4 40 -20 40 20 {}
+L 4 18.4 0 40 0 {}
+B 5 57.5 -52.5 62.5 -47.5 {pinnumber=C pinseq=1 name=C dir=inout}
+B 5 -2.5 -2.5 2.5 2.5 {pinnumber=B pinseq=2 name=B dir=inout}
+B 5 57.5 47.5 62.5 52.5 {pinnumber=E pinseq=3 name=E dir=inout}
+A 4 50 -0.1000000000000014 31.6 0 360 {}
+P 4 5 51 16 41.9 12 46.5 21.5 48.5 18.5 51 16 {fill=true}
+T {@name} 90 0 2 1 0.333333 0.333333 {}
+T {2SAR554P} 95 18 2 1 0.266667 0.266667 {}

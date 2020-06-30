@@ -1,0 +1,23 @@
+v {xschem version=2.9.7 file_version=1.1}
+G {type=npn
+format="@name @pinlist SST4403 "
+template="name=Q?"
+device_model=".model SST4403 PNP(Is=80.000E-15 Bf=148.59 Vaf=19 Ikf=1.4062 Ise=12.409E-12 Ne=1.8629 Br=8.2898 Var=5.1000 Ikr=28.654E-3 Isc=44.995E-12 Nc=1.5887 Nk=.95413 Re=50.000E-3 Rb=4.1286 Rc=.27878 Cje=31.612E-12 Vje=.51401 Mje=.29441 Cjc=22.050E-12 Vjc=.55911 Mjc=.44294 Tf=426.74E-12 Xtf=1.1468 Vtf=479.32 Itf=.31201 Tr=58.204E-9 Xtb=1.5000 )"
+}
+V {}
+S {}
+E {}
+L 4 60 -50 60 -30 {}
+L 4 0 0 18.4 0 {}
+L 4 60 30 60 50 {}
+L 4 40 10 60 30 {}
+L 4 40 -10 60 -30 {}
+L 4 40 -20 40 20 {}
+L 4 18.4 0 40 0 {}
+B 5 57.5 -52.5 62.5 -47.5 {pinnumber=C pinseq=1 name=C dir=inout}
+B 5 -2.5 -2.5 2.5 2.5 {pinnumber=B pinseq=2 name=B dir=inout}
+B 5 57.5 47.5 62.5 52.5 {pinnumber=E pinseq=3 name=E dir=inout}
+A 4 50 -0.1000000000000014 31.6 0 360 {}
+P 4 5 51 16 41.9 12 46.5 21.5 48.5 18.5 51 16 {fill=true}
+T {@name} 90 0 2 1 0.333333 0.333333 {}
+T {SST4403} 95 18 2 1 0.266667 0.266667 {}

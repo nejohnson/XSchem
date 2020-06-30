@@ -1,0 +1,23 @@
+v {xschem version=2.9.7 file_version=1.1}
+G {type=npn
+format="@name @pinlist 2SA2088 "
+template="name=Q?"
+device_model=".model 2SA2088 PNP(Is=65.000E-15 Bf=249.50 Vaf=100 Ikf=.69106 Ise=65.001E-15 Ne=1.4594 Br=10.162 Var=100 Ikr=11.394 Isc=5.0270E-12 Nc=1.3515 Nk=.79748 Re=.5 Rb=.81834 Rc=.20879 Cje=96.030E-12 Mje=.77026 Cjc=32.647E-12 Mjc=.57832 Tf=304.61E-12 Xtf=11.555 Vtf=13.588 Itf=8.1887 Tr=35.022E-9 Xtb=1.5000 )"
+}
+V {}
+S {}
+E {}
+L 4 60 -50 60 -30 {}
+L 4 0 0 18.4 0 {}
+L 4 60 30 60 50 {}
+L 4 40 10 60 30 {}
+L 4 40 -10 60 -30 {}
+L 4 40 -20 40 20 {}
+L 4 18.4 0 40 0 {}
+B 5 57.5 -52.5 62.5 -47.5 {pinnumber=C pinseq=1 name=C dir=inout}
+B 5 -2.5 -2.5 2.5 2.5 {pinnumber=B pinseq=2 name=B dir=inout}
+B 5 57.5 47.5 62.5 52.5 {pinnumber=E pinseq=3 name=E dir=inout}
+A 4 50 -0.1000000000000014 31.6 0 360 {}
+P 4 5 51 16 41.9 12 46.5 21.5 48.5 18.5 51 16 {fill=true}
+T {@name} 90 0 2 1 0.333333 0.333333 {}
+T {2SA2088} 95 18 2 1 0.266667 0.266667 {}

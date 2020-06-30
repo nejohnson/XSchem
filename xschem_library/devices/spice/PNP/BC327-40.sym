@@ -1,0 +1,23 @@
+v {xschem version=2.9.7 file_version=1.1}
+G {type=npn
+format="@name @pinlist BC327-40 "
+template="name=Q?"
+device_model=".model BC327-40 PNP(IS=2.077E-13 NF=1.005 ISE=1.411E-14 NE=1.3 BF=449.8 IKF=0.36 VAF=29 NR=1.002 ISC=2.963E-13 NC=1.25 BR=20.92 IKR=0.104 VAR=10 RB=40 IRB=1.00E-05 RBM=5.3 RE=0.14 RC=0.32 XTB=0 EG=1.11 XTI=3 CJE=5E-11 VJE=0.9296 MJE=0.456 TF=7E-10 XTF=3.25 VTF=2.5 ITF=0.79 PTF=80 CJC=2.675E-11 VJC=0.8956 MJC=0.4638 XCJC=0.459 TR=3.50E-08 CJS=0 VJS=0.75 MJS=0.333 FC=0.935 )"
+}
+V {}
+S {}
+E {}
+L 4 60 -50 60 -30 {}
+L 4 0 0 18.4 0 {}
+L 4 60 30 60 50 {}
+L 4 40 10 60 30 {}
+L 4 40 -10 60 -30 {}
+L 4 40 -20 40 20 {}
+L 4 18.4 0 40 0 {}
+B 5 57.5 -52.5 62.5 -47.5 {pinnumber=C pinseq=1 name=C dir=inout}
+B 5 -2.5 -2.5 2.5 2.5 {pinnumber=B pinseq=2 name=B dir=inout}
+B 5 57.5 47.5 62.5 52.5 {pinnumber=E pinseq=3 name=E dir=inout}
+A 4 50 -0.1000000000000014 31.6 0 360 {}
+P 4 5 51 16 41.9 12 46.5 21.5 48.5 18.5 51 16 {fill=true}
+T {@name} 90 0 2 1 0.333333 0.333333 {}
+T {BC327-40} 95 18 2 1 0.266667 0.266667 {}

@@ -1,0 +1,23 @@
+v {xschem version=2.9.7 file_version=1.1}
+G {type=npn
+format="@name @pinlist BC847A "
+template="name=Q?"
+device_model=".model BC847A NPN(IS=9.677E-15 NF=0.9922 ISE=5.44E-15 NE=2 BF=182.1 IKF=0.14 VAF=143.8 NR=0.9935 ISC=5.236E-12 NC=1.53 BR=7.004 IKR=0.06 VAR=31.15 RB=10 IRB=5.00E-06 RBM=4 RE=0.78 RC=0.656 XTB=0 EG=1.11 XTI=3 CJE=1.443E-11 VJE=0.733 MJE=0.3514 TF=6.04E-10 XTF=8.94 VTF=3.78 ITF=0.2711 PTF=0 CJC=3.287E-12 VJC=0.5444 MJC=0.3954 XCJC=0.6193 TR=0.00000011 CJS=0 VJS=0.75 MJS=0.333 FC=0.789 )"
+}
+V {}
+S {}
+E {}
+L 4 60 -50 60 -30 {}
+L 4 0 0 18.4 0 {}
+L 4 60 30 60 50 {}
+L 4 40 10 60 30 {}
+L 4 40 -10 60 -30 {}
+L 4 40 -20 40 20 {}
+L 4 18.4 0 40 0 {}
+B 5 57.5 -52.5 62.5 -47.5 {pinnumber=C pinseq=1 name=C dir=inout}
+B 5 -2.5 -2.5 2.5 2.5 {pinnumber=B pinseq=2 name=B dir=inout}
+B 5 57.5 47.5 62.5 52.5 {pinnumber=E pinseq=3 name=E dir=inout}
+A 4 50 -0.1000000000000014 31.6 0 360 {}
+P 4 5 51 26 60.1 30 55.5 20.5 53.5 23.5 51 26 {fill=true}
+T {@name} 90 0 2 1 0.333333 0.333333 {}
+T {BC847A} 95 18 2 1 0.266667 0.266667 {}

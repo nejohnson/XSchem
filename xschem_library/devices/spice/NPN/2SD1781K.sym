@@ -1,7 +1,7 @@
 v {xschem version=2.9.7 file_version=1.1}
 G {type=npn
 format="@name @pinlist 2SD1781K "
-template="name=Q?"
+template="name=Q1"
 device_model=".model 2SD1781K NPN(Is=180f Bf=237 Vaf=100 Ikf=2.736 Ise=180f Ne=1.558 Br=18.77 Var=100 Ikr=396.1m Isc=287.2f Nc=4.096 Nk=912.3m Re=170m Rb=378.2m Rc=7.653m Cje=115.9p Mje=365.9m Cjc=31.79p Mjc=434.3m Tf=768.6p Xtf=176.9 Vtf=66.73 Itf=7.964 Tr=48.6n Xtb=1.5 )"
 }
 V {}

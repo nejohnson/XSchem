@@ -1,7 +1,7 @@
 v {xschem version=2.9.7 file_version=1.1}
 G {type=npn
 format="@name @pinlist BCW68F "
-template="name=Q?"
+template="name=Q1"
 device_model=".model BCW68F PNP(Is=40f VAF=100 Bf=175 IKF=2 Br=6 RC=.5 RE=0.1 RB=0.2 CJC=13p CJE=60p TR=12n TF=600p )"
 }
 V {}

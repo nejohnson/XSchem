@@ -1,7 +1,7 @@
 v {xschem version=2.9.7 file_version=1.1}
 G {type=npn
 format="@name @pinlist SST3904 "
-template="name=Q?"
+template="name=Q1"
 device_model=".model SST3904 NPN(Is=7.8000E-15 Bf=418.50 Vaf=210 Ikf=.11777 Ise=107.33E-15 Ne=1.4561 Br=1.4445 Var=16 Ikr=14.562 Isc=71.780E-12 Nc=1.5919 Nk=.73861 Rb=7.1334 Rc=.86215 Cje=6.3252E-12 Vje=.62919 Mje=.35786 Cjc=3.1745E-12 Vjc=.77077 Mjc=.19463 Tf=281.52E-12 Xtf=1.6571E3 Vtf=945.94 Itf=10.142 Tr=121.92E-9 Xtb=1.5000 )"
 }
 V {}

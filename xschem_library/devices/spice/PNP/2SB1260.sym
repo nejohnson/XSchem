@@ -1,7 +1,7 @@
 v {xschem version=2.9.7 file_version=1.1}
 G {type=npn
 format="@name @pinlist 2SB1260 "
-template="name=Q?"
+template="name=Q1"
 device_model=".model 2SB1260 PNP(Is=220.00E-15 Bf=140.43 Vaf=23.200 Ikf=7.9366 Ise=220.00E-15 Ne=1.6291 Br=30.282 Var=100 Ikr=13.783 Isc=274.44E-12 Nc=1.5976 Nk=.83042 Re=50.000E-3 Rb=.6938 Rc=.149 Cje=311.85E-12 Mje=.35932 Cjc=89.315E-12 Mjc=.50953 Tf=714.69E-12 Xtf=11.729 Vtf=22.370 Itf=7.7977 Tr=101.04E-9 Xtb=1.5000 )"
 }
 V {}

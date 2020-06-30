@@ -1,7 +1,7 @@
 v {xschem version=2.9.7 file_version=1.1}
 G {type=npn
 format="@name @pinlist BCX19 "
-template="name=Q?"
+template="name=Q1"
 device_model=".model BCX19 NPN(Is=43.522E-15 Bf=212.62 Vaf=100 Ikf=1.1384 Ise=43.554E-15 Ne=1.4099 Br=10.166 Var=100 Ikr=71.304E-3 Isc=19.105E-12 Nc=1.8086 Nk=.87081 Re=.1 Rb=3.7985 Rc=.12522 Cje=40.045E-12 Mje=.34085 Cjc=13.820E-12 Mjc=.38184 Tf=192.81E-12 Xtf=140.05 Vtf=32.781 Itf=.79171 Tr=99.284E-9 Xtb=1.5000 )"
 }
 V {}

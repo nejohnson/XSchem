@@ -1,7 +1,7 @@
 v {xschem version=2.9.7 file_version=1.1}
 G {type=npn
 format="@name @pinlist 2SC3906K "
-template="name=Q?"
+template="name=Q1"
 device_model=".model 2SC3906K NPN(Is=63f Bf=380.6 Vaf=100 Ikf=149.6m Ise=63f Ne=1.591 Br=8.832 Var=100 Ikr=3.541 Isc=122.1p Nc=1.707 Nk=882m Rb=15.57 Rc=862.8m Cje=19.49p Mje=390.3m Cjc=6.279p Mjc=317m Tf=432p Xtf=12.43 Vtf=17.64 Itf=1.462 Tr=29.73n Xtb=1.5 )"
 }
 V {}

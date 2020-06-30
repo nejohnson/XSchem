@@ -1,7 +1,7 @@
 v {xschem version=2.9.7 file_version=1.1}
 G {type=npn
 format="@name @pinlist BCW60A "
-template="name=Q?"
+template="name=Q1"
 device_model=".model BCW60A NPN(IS=20f VAF=100 BF=120 IKF=0.8 XTB=1.5 BR=5 CJC=20p CJE=8p TR=100n TF=600p RB=10 RC=3 RE=1 )"
 }
 V {}

@@ -1,7 +1,7 @@
 v {xschem version=2.9.7 file_version=1.1}
 G {type=npn
 format="@name @pinlist SST4401 "
-template="name=Q?"
+template="name=Q1"
 device_model=".model SST4401 NPN(Is=27.000E-15 Bf=389.37 Vaf=68 Ikf=1.0897 Ise=27.019E-15 Ne=1.2394 Br=3.7134 Var=37 Ikr=.12973 Isc=65.318E-12 Nc=1.5315 Nk=.80478 Re=40.000E-3 Rb=2.5421 Rc=.37477 Cje=31.822E-12 Vje=.56719 Mje=.3632 Cjc=15.123E-12 Vjc=.7312 Mjc=.6022 Tf=370.77E-12 Xtf=523.38 Vtf=330.48 Itf=32.287 Tr=107.39E-9 Xtb=1.5000 )"
 }
 V {}

@@ -1,7 +1,7 @@
 v {xschem version=2.9.7 file_version=1.1}
 G {type=npn
 format="@name @pinlist LS3550C "
-template="name=Q?"
+template="name=Q1"
 device_model=".model LS3550C PNP(Is=10.35f Xti=3.5 Eg=1.17 Vaf=43.80 Bf=214 Ne=1.98 Ise=62.3f Nr=1 Ikf=34m Xtb=2.08 Br=6.3 Ikr=420u Var=20 Isc=1.65p Nc=1.8 Nf=1 Rb=100 Re=0.06 Rc=30 Cjc=4.47p Cje=5.57p Mjc=189m Mje=321m Vjc=422.6m Vje=717m Tf=0.48n Tr=10n Vtf=5 Xtf=1 Rbm=10 Irb=10u Ptf=20 Fc=0.97 Itf=40m )"
 }
 V {}

@@ -1,7 +1,7 @@
 v {xschem version=2.9.7 file_version=1.1}
 G {type=npn
 format="@name @pinlist 2SAR553P "
-template="name=Q?"
+template="name=Q1"
 device_model=".model 2SAR553P PNP(Is=380.00E-15 Bf=292.25 Vaf=34.200 Ikf=5.8054 Ise=380.00E-15 Ne=1.6438 Br=15.006 Var=18.200 Ikr=.99968 Isc=588.69E-15 Nc=2.3881 Nk=.9836 Re=30.000E-3 Rb=1.4634 Rc=.20116 Cje=254.26E-12 Vje=.92645 Mje=.44177 Cjc=78.299E-12 Vjc=1.0229 Mjc=.5476 Tf=383.08E-12 Xtf=2.0291 Vtf=10.898 Itf=.99144 Tr=27.600E-9 Xtb=1.5000 )"
 }
 V {}

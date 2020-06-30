@@ -1,7 +1,7 @@
 v {xschem version=2.9.7 file_version=1.1}
 G {type=npn
 format="@name @pinlist BC848B "
-template="name=Q?"
+template="name=Q1"
 device_model=".model BC848B NPN(Is=70.000E-15 Bf=277.08 Vaf=114.03 Ikf=1 Ise=70.000E-15 Ne=1.8934 Br=11.565 Var=100 Ikr=.11266 Isc=1.0228E-12 Nc=1.3260 Nk=.71869 Re=.2 Rb=13.897 Rc=1.2190 Cje=11.342E-12 Mje=.38289 Cjc=4.0230E-12 Mjc=.34629 Tf=338.92E-12 Xtf=4.0449 Vtf=167.36 Itf=.85959 Tr=110.25E-9 Xtb=1.5000 )"
 }
 V {}

@@ -1,7 +1,7 @@
 v {xschem version=2.9.7 file_version=1.1}
 G {type=npn
 format="@name @pinlist 2SA1514K "
-template="name=Q?"
+template="name=Q1"
 device_model=".model 2SA1514K PNP(Is=60f Bf=410.2 Vaf=58.37 Ikf=248.5m Ise=60f Ne=1.672 Br=995.6m Var=100 Ikr=515.3m Isc=26.59p Nc=1.678 Nk=946.7m Rb=19.29 Rc=2.015 Cje=24.18p Mje=645m Cjc=11.93p Mjc=471.4m Tf=381.1p Xtf=3.996 Vtf=6.207 Itf=110.4m Tr=790.2n Xtb=1.5 )"
 }
 V {}

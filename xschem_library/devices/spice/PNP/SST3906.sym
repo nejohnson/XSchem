@@ -1,7 +1,7 @@
 v {xschem version=2.9.7 file_version=1.1}
 G {type=npn
 format="@name @pinlist SST3906 "
-template="name=Q?"
+template="name=Q1"
 device_model=".model SST3906 PNP(Is=10.000E-15 Bf=214.10 Vaf=39 Ikf=.36736 Ise=6.2628E-12 Ne=1.9555 Br=14.872 Var=5.4000 Ikr=2.3066E-3 Isc=1.2518E-9 Nc=2.4667 Nk=.78931 Re=.3 Rb=2.1776 Rc=.38693 Cje=7.4001E-12 Vje=.73481 Mje=.32446 Cjc=5.4100E-12 Vjc=.55262 Mjc=.35478 Tf=352.19E-12 Xtf=4.0704 Vtf=1.2425E3 Itf=.18254 Tr=10.101E-9 Xtb=1.5000 )"
 }
 V {}

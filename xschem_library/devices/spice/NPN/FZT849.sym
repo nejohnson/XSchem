@@ -1,7 +1,7 @@
 v {xschem version=2.9.7 file_version=1.1}
 G {type=npn
 format="@name @pinlist FZT849 "
-template="name=Q?"
+template="name=Q1"
 device_model=".model FZT849 NPN(IS=5.8591E-13 NF=0.9919 BF=230 IKF=18 VAF=90 ISE=2.0067E-13 NE=1.4 NR=0.9908 BR=180 IKR=6.8 VAR=20 ISC=5.3E-13 NC=1.46 RB=0.023 RE=0.0223 RC=0.015 CJC=200E-12 MJC=0.3006 VJC=0.3532 CJE=1.21E-9 TF=1.07E-9 TR=9.3E-9 ) 1993 ZETEX PLC, Last revision 14"
 }
 V {}

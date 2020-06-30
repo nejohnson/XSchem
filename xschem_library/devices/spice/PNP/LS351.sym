@@ -1,7 +1,7 @@
 v {xschem version=2.9.7 file_version=1.1}
 G {type=npn
 format="@name @pinlist LS351 "
-template="name=Q?"
+template="name=Q1"
 device_model=".model LS351 PNP(Is=1.95f Xti=3.41 Eg=1.17 Vaf=66.94 Bf=274 Ne=1.36 Ise=1.2f Nr=1 Ikf=14m Xtb=1.71 Br=449m Ikr=421u Var=20 Isc=12.15p Nc=1.9 Nf=1 Rb=200 Re=0.91 Rc=231 Cjc=2.79p Cje=2.16p Mjc=252m Mje=194.29m Vjc=763m Vje=562m Tf=0.81n Tr=10n Vtf=5 Xtf=1.49 Rbm=10 Irb=10u Ptf=20 Fc=0.97 Itf=11m )"
 }
 V {}

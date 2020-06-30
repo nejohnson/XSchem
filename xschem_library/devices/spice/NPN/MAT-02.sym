@@ -1,7 +1,7 @@
 v {xschem version=2.9.7 file_version=1.1}
 G {type=npn
 format="@name @pinlist MAT-02 "
-template="name=Q?"
+template="name=Q1"
 device_model=".model MAT-02 NPN(Is=.6p Bf=500 Vaf=150 BR=0.5 Var=7 Rb=13 Rc=10 Re=.3 Cje=82p Vje=.7 Mje=.4 TF=.3n TR=5n Cjc=33p Vjc=.55 Mjc=.5 IKF=.3 PTF=25 )"
 }
 V {}

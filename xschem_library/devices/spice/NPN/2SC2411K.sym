@@ -1,7 +1,7 @@
 v {xschem version=2.9.7 file_version=1.1}
 G {type=npn
 format="@name @pinlist 2SC2411K "
-template="name=Q?"
+template="name=Q1"
 device_model=".model 2SC2411K NPN(Is=5p Bf=207.4 Vaf=29.45 Ikf=2.217 Ise=5p Ne=1.594 Br=10.47 Var=100 Ikr=257.1m Isc=10.57p Nc=1.251 Nk=944.5m Re=80m Rb=3.396 Rc=377.3m Cje=46.39p Mje=438.2m Cjc=40.04p Mjc=706.6m Tf=514.3p Xtf=16.73 Vtf=40.64 Itf=549.4 Tr=86.44n Xtb=1.5 )"
 }
 V {}

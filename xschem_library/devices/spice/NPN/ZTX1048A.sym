@@ -1,7 +1,7 @@
 v {xschem version=2.9.7 file_version=1.1}
 G {type=npn
 format="@name @pinlist ZTX1048A "
-template="name=Q?"
+template="name=Q1"
 device_model=".model ZTX1048A NPN(IS=13.73E-13 NF=1.0 BF=550 IKF=8.0 VAF=120 ISE=2.6E-13 NE=1.38 NR=1.0 BR=300 IKR=6 VAR=15 ISC=1.6E-12 NC=1.4 RB=0.1 RE=0.022 RC=0.010 CJC=136E-12 CJE=559.1E-12 MJC=0.267 MJE=0.299 VJC=0.420 VJE=0.533 TF=600E-12 TR=3E-9 ) 1994 ZETEX PLC, Last revision 20"
 }
 V {}

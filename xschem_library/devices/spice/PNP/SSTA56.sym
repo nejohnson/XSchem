@@ -1,7 +1,7 @@
 v {xschem version=2.9.7 file_version=1.1}
 G {type=npn
 format="@name @pinlist SSTA56 "
-template="name=Q?"
+template="name=Q1"
 device_model=".model SSTA56 PNP(Is=150.00E-15 Bf=203.04 Vaf=18.361 Ikf=5 Ise=971.59E-15 Ne=1.9289 Br=7.0110 Var=36.400 Ikr=.67756 Isc=16.920E-12 Nc=1.5725 Nk=1.5787 Re=.12 Rb=2.3408 Rc=95.332E-3 Cje=136.96E-12 Vje=.638 Mje=.37877 Cjc=37.879E-12 Vjc=.56971 Mjc=.42396 Tf=658.37E-12 Xtf=17.348 Vtf=27.994 Itf=6.7271 Tr=200.38E-9 Xtb=1.5000 Tre1=0.005 )"
 }
 V {}

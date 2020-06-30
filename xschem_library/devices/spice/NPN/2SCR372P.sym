@@ -1,7 +1,7 @@
 v {xschem version=2.9.7 file_version=1.1}
 G {type=npn
 format="@name @pinlist 2SCR372P "
-template="name=Q?"
+template="name=Q1"
 device_model=".model 2SCR372P NPN(Is=210.00E-15 Bf=252.16 Vaf=127 Ikf=1.2622 Ise=210.00E-15 Ne=1.4631 Br=96.802 Var=34.900 Ikr=.35608 Isc=16.104E-12 Nc=1.4132 Nk=.81181 Rb=2.3517 Rc=.10552 Cje=252.06E-12 Vje=.75202 Mje=.35934 Cjc=26.852E-12 Vjc=.5121 Mjc=.40073 Tf=631.13E-12 Xtf=3.6863 Vtf=98.578 Itf=4.0741 Tr=101.00E-9 Xtb=1.5000 )"
 }
 V {}

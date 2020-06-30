@@ -1,7 +1,7 @@
 v {xschem version=2.9.7 file_version=1.1}
 G {type=npn
 format="@name @pinlist 2SB1198K "
-template="name=Q?"
+template="name=Q1"
 device_model=".model 2SB1198K PNP(Is=270f Bf=202.5 Vaf=25 Ikf=4.999 Ise=270f Ne=1.598 Br=6.447 Var=100 Ikr=718m Isc=8.777p Nc=1.532 Nk=1.294 Re=150m Rb=1.505 Rc=126.7m Cje=153.1p Mje=502.6m Cjc=41.58p Mjc=466.8m Tf=678.3p Xtf=25.77 Vtf=53.41 Itf=10 Tr=134.1n Xtb=1.5 )"
 }
 V {}

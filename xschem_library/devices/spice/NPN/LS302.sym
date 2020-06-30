@@ -1,7 +1,7 @@
 v {xschem version=2.9.7 file_version=1.1}
 G {type=npn
 format="@name @pinlist LS302 "
-template="name=Q?"
+template="name=Q1"
 device_model=".model LS302 NPN(Is=18.04p Xti=3.7 Eg=1.17 Vaf=23.6 Bf=1495 Ne=1.34 Ise=0.66f Nr=1 Ikf=16.7m Xtb=1.56 Br=5.89 Ikr=26.3m Var=8.35 Isc=0.001n Nc=1.72 Nf=1 Rb=1194 Re=0.94 Rc=203 Cjc=2.46p Cje=2.36p Mjc=135m Mje=219m Vjc=400m Vje=648m Tf=0.24n Tr=10n Vtf=5 Xtf=1 Rbm=11.6 Irb=10u Ptf=20 Fc=0.9 Itf=50m Tikf1=-5.38m Tvaf1=-364u Trc1=3.3m Level=1 )"
 }
 V {}

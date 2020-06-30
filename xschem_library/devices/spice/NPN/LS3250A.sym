@@ -1,7 +1,7 @@
 v {xschem version=2.9.7 file_version=1.1}
 G {type=npn
 format="@name @pinlist LS3250A "
-template="name=Q?"
+template="name=Q1"
 device_model=".model LS3250A NPN(Is=10f Xti=4.53 Eg=1.17 Vaf=251 Bf=458 Ne=1.18 Ise=0.16f Nr=1 Ikf=18m Xtb=1.41 Br=5.9 Ikr=26m Var=8.35 Isc=4.38p Nc=1.47 Nf=1 Rb=100 Re=6.5 Rc=21 Cjc=3.62p Cje=6.4p Mjc=200m Mje=304m Vjc=414m Vje=685m Tf=0.2n Tr=10n Vtf=5 Xtf=1 Rbm=12 Irb=10u Ptf=20 Fc=0.98 Itf=70m )"
 }
 V {}

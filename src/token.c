@@ -242,7 +242,7 @@ void check_unique_names(int rename)
 
 
 
-int match_symbol(char *name)  /* never returns -1, if symbol not found load systemlib/missing.sym */
+int match_symbol(const char *name)  /* never returns -1, if symbol not found load systemlib/missing.sym */
 {
  int i,found;
 
@@ -259,7 +259,7 @@ int match_symbol(char *name)  /* never returns -1, if symbol not found load syst
  if(!found)
  {
   if(debug_var>=1) fprintf(errfp, "match_symbol(): matching symbol not found:%s, loading\n",name);
-  if(load_symbol_definition(name, NULL)==-1) return -1;
+  load_symbol_definition(name, NULL); /* append another symbol to the instdef[] array */
  }
  if(debug_var>=2) fprintf(errfp, "match_symbol(): returning %d\n",i);
  return i;
@@ -2524,4 +2524,106 @@ char *translate(int inst, char* s)
  return result;
 }
 
+char* translate2(char *prop_ptr, char* s)
+{
+  static char *result = NULL;
+  int size = 0, tmp;
+  register int c, state = XBEGIN, space;
+  static char *token = NULL;
+  const char *tmp_sym_name;
+  int sizetok = 0;
+  int result_pos = 0, token_pos = 0;
+  static char *value; /* 20100401 */
+  int escape = 0; /* 20161210 */
+  char *inst_name = get_tok_value(prop_ptr, "name", 2);
+  if (inst_name==NULL) return result;
 
+  size = CADCHUNKALLOC;
+  if (result == NULL) result = my_malloc(660, size);
+  else my_realloc(661, &result, size);
+  result[0] = '\0';
+
+  while (s)
+  {
+    c = *s++;
+    /* 20161210 */
+    if (c == '\\')
+    {
+      escape = 1;
+      c = *s++;
+    }
+    else
+      escape = 0;
+    /* /20161210 */
+
+    space = SPACE2(c);
+    if (state == XBEGIN && c == '@' && !escape) state = XTOKEN; /* 20161210 escape */
+    else if (state == XTOKEN && (
+      (space && !escape) ||
+      c == '@' ||
+      (!space && escape)
+      )
+      && token_pos > 1) state = XSEPARATOR;
+
+    if (result_pos >= size)
+    {
+      size += CADCHUNKALLOC;
+      my_realloc(662, &result, size);
+    }
+
+    if (token_pos >= sizetok)
+    {
+      sizetok += CADCHUNKALLOC;
+      my_realloc(663, &token, sizetok);
+    }
+
+    if (state == XTOKEN) token[token_pos++] = c;
+    else if (state == XSEPARATOR)
+    {
+      token[token_pos] = '\0';
+      if (debug_var >= 2) fprintf(errfp, "translate(): token=%s\n", token);
+      token_pos = 0;
+
+      value = get_tok_value(prop_ptr, token + 1, 2);
+      if (!get_tok_size) value = get_tok_value(prop_ptr, token + 1, 2); /* 20190310 2 instead of 0 */
+
+      if (get_tok_size) {
+        tmp = get_tok_value_size;  /* strlen(value); */  /* 20180926 */
+        if (result_pos + tmp >= size) {
+          size = (1 + (result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
+          my_realloc(664, &result, size);
+        }
+        memcpy(result + result_pos, value, tmp + 1); /* 20180923 */
+        result_pos += tmp;
+      }
+      else if (strcmp(token, "@symname") == 0) {
+        tmp_sym_name = get_cell_w_ext(inst_name, 0);
+        tmp = strlen(tmp_sym_name);
+        if (result_pos + tmp >= size) {
+          size = (1 + (result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
+          my_realloc(665, &result, size);
+        }
+        memcpy(result + result_pos, tmp_sym_name, tmp + 1); /* 20180923 */
+        result_pos += tmp;
+      }
+      else if (token[0] == '@' && token[1] == '#') {  /* 20180911 */
+        char* pin_attr = my_malloc(666, sizetok * sizeof(char));
+        char* pin_num_or_name = my_malloc(667, sizetok * sizeof(char));
+
+        pin_num_or_name[0] = '\0';
+        pin_attr[0] = '\0';
+        sscanf(token + 2, "%[^:]:%[^:]", pin_num_or_name, pin_attr);
+      }
+      if (c == '@') s--;
+      else result[result_pos++] = c;
+      state = XBEGIN;
+    }
+    else if (state == XBEGIN) result[result_pos++] = c;
+    if (c == '\0')
+    {
+      result[result_pos] = '\0';
+      return result;
+    }
+  }
+  return result;
+}

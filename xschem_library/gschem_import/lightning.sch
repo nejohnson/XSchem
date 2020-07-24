@@ -1,166 +1,166 @@
-v {xschem version=2.9.5_RC6 file_version=1.1}
+v {xschem version=2.9.7 file_version=1.1}
 G {}
 V {}
 S {}
 E {}
-T {LIGHTNING DETECTOR} 5740 -5900 2 1 0.333333 0.333333 {}
-T {techman@dingoblue.net.au} 6110 -5830 2 1 0.4 0.4 {}
-T {1.00} 6100 -5860 2 1 0.333333 0.333333 {}
-T {lightning.sch} 5720 -5860 2 1 0.333333 0.333333 {}
+T {Lightning detector} 5910 -5943.33 0 0 0.533333 0.533333 {}
+T {techman@dingoblue.net.au} 6100 -5830 2 1 0.266667 0.266667 {}
+T {1.00} 6100 -5860 2 1 0.266667 0.266667 {}
+T {lightning.sch} 5710 -5860 2 1 0.266667 0.266667 {}
 
 
 
 
 
 
-C {inductor-1.sym} 5310 -6060 3 0 {name=L1
+C {inductor-1.sym} 5340 -6060 3 0 {name=L1
 value=10mH
 device=INDUCTOR
 symversion=0.1
 }
-C {inductor-1.sym} 5310 -6310 3 0 {name=L2
+C {inductor-1.sym} 5340 -6310 3 0 {name=L2
 value=10mH
 device=INDUCTOR
 symversion=0.1
 }
 C {title-A4.sym} 5250 -5820 0 0 {}
-C {capacitor-2.sym} 5350 -6140 0 0 {name=C2
+C {capacitor-2.sym} 5380 -6140 0 0 {name=C2
 value=0.01uF
 device=POLARIZED_CAPACITOR
 symversion=0.1
 }
-C {capacitor-2.sym} 5330 -6110 1 0 {name=C1
+C {capacitor-2.sym} 5360 -6110 1 0 {name=C1
 value=680pf
 device=POLARIZED_CAPACITOR
 symversion=0.1
 }
-C {capacitor-2.sym} 5560 -6280 0 0 {name=C3
+C {capacitor-2.sym} 5590 -6280 0 0 {name=C3
 value=.01uF
 device=POLARIZED_CAPACITOR
 symversion=0.1
 }
-C {capacitor-2.sym} 5780 -6210 1 0 {name=C4
+C {capacitor-2.sym} 5810 -6210 1 0 {name=C4
 value=100uF
 device=POLARIZED_CAPACITOR
 symversion=0.1
 }
-C {capacitor-2.sym} 5920 -6210 1 0 {name=C5
+C {capacitor-2.sym} 5950 -6210 1 0 {name=C5
 value=.005uF
 device=POLARIZED_CAPACITOR
 symversion=0.1
 }
-C {resistor-1.sym} 5430 -6330 1 0 {name=R1
+C {resistor-1.sym} 5460 -6330 1 0 {name=R1
 value=180k
 device=RESISTOR
 }
-C {resistor-1.sym} 5510 -6480 1 0 {name=R2
+C {resistor-1.sym} 5540 -6480 1 0 {name=R2
 value=3.9k
 device=RESISTOR
 }
-C {resistor-1.sym} 6160 -6490 3 0 {name=R7
+C {resistor-1.sym} 6190 -6490 3 0 {name=R7
 value=47R
 device=RESISTOR
 }
-C {resistor-1.sym} 5660 -6160 3 0 {name=R3
+C {resistor-1.sym} 5690 -6160 3 0 {name=R3
 value=22k
 device=RESISTOR
 }
-C {resistor-1.sym} 5820 -6240 0 0 {name=R5
+C {resistor-1.sym} 5850 -6240 0 0 {name=R5
 value=2.2K
 device=RESISTOR
 }
-C {resistor-1.sym} 6030 -6000 3 0 {name=R6
+C {resistor-1.sym} 6060 -6000 3 0 {name=R6
 value=2.7k
 device=RESISTOR
 }
-C {resistor-variable-1.sym} 5660 -6360 3 0 {name=R4
+C {resistor-variable-1.sym} 5690 -6360 3 0 {name=R4
 value=20k
 device=VARIABLE_RESISTOR
 }
-C {out-1.sym} 6190 -6290 0 0 {name=lamp(1)
+C {out-1.sym} 6220 -6290 0 0 {name=lamp(1)
 lab=lamp(1)
 device=OUTPUT
 }
-C {out-1.sym} 6190 -6190 0 0 {name=lamp(2)
+C {out-1.sym} 6220 -6190 0 0 {name=lamp(2)
 lab=lamp(2)
 device=OUTPUT
 }
-C {in-1.sym} 6260 -6610 2 0 {name=bat(+3v)
+C {in-1.sym} 6290 -6610 2 0 {name=bat(+3v)
 lab=bat(+3v)
 device=INPUT
 }
-C {in-1.sym} 6260 -6010 2 0 {name=bat(0v)
+C {in-1.sym} 6290 -6010 2 0 {name=bat(0v)
 lab=bat(0v)
 device=INPUT
 }
-C {in-1.sym} 5290 -6530 1 0 {name=A1
+C {in-1.sym} 5320 -6530 1 0 {name=A1
 lab=A1
 device=INPUT
 }
-C {capacitor-2.sym} 6060 -6410 1 0 {name=C6
+C {capacitor-2.sym} 6090 -6410 1 0 {name=C6
 value=1uF
 device=POLARIZED_CAPACITOR
 symversion=0.1
 }
-C {diode-1.sym} 5730 -6470 1 0 {name=D1
+C {diode-1.sym} 5760 -6470 1 0 {name=D1
 value=1N914
 device=DIODE
 }
-C {2N4401.sym} 5450 -6110 0 0 {name=Q1
+C {2N4401.sym} 5480 -6110 0 0 {name=Q1
 value=2N4401
 }
-C {2N4403.sym} 5680 -6350 2 1 {name=Q2
+C {2N4403.sym} 5710 -6350 2 1 {name=Q2
 value=2N4403
 }
-C {2N4401.sym} 5950 -6200 0 0 {name=Q3
+C {2N4401.sym} 5980 -6200 0 0 {name=Q3
 value=2N4401
 }
-C {2N4401.sym} 6100 -6050 0 0 {name=Q4
+C {2N4401.sym} 6130 -6050 0 0 {name=Q4
 value=2N4401
 }
 
-N 5300 -6310 5300 -6150 {}
-N 5300 -6060 5300 -6000 {}
-N 5350 -6110 5350 -6160 {}
-N 5350 -6020 5350 -6000 {}
-N 5350 -6160 5300 -6160 {}
-N 5440 -6160 5450 -6160 {}
-N 5520 -6390 5520 -6210 {}
-N 5300 -6470 5300 -6400 {}
-N 6200 -6000 5300 -6000 {}
-N 5520 -6110 5520 -6000 {}
-N 5520 -6000 6020 -6000 {}
-N 5440 -6350 5440 -6330 {}
-N 5440 -6240 5440 -6160 {}
-N 6170 -6050 6170 -6000 {}
-N 6200 -6600 5520 -6600 {}
-N 5520 -6600 5520 -6480 {}
-N 6150 -6580 6150 -6600 {}
-N 6150 -6300 6150 -6490 {}
-N 6150 -6300 6190 -6300 {}
-N 5440 -6350 5520 -6350 {}
-N 6100 -6100 5650 -6100 {}
-N 5650 -6100 5650 -6160 {}
-N 6020 -6090 6020 -6100 {}
-N 6020 -6200 6020 -6100 {}
-N 6020 -6300 6020 -6480 {}
-N 5520 -6300 5560 -6300 {}
-N 5650 -6250 5650 -6360 {}
-N 5600 -6410 5600 -6480 {}
-N 5600 -6480 6150 -6480 {}
-N 5820 -6250 5750 -6250 {}
-N 6190 -6200 6170 -6200 {}
-N 6170 -6200 6170 -6150 {}
-N 5940 -6250 5940 -6210 {}
-N 5940 -6120 5940 -6100 {}
-N 5750 -6350 5800 -6350 {}
-N 5800 -6350 5800 -6210 {}
-N 5800 -6120 5800 -6100 {}
-N 6080 -6410 6080 -6600 {}
-N 6080 -6320 6080 -6000 {}
-N 5910 -6250 5950 -6250 {}
-N 5650 -6300 5680 -6300 {}
-N 5650 -6450 5650 -6480 {}
-N 5750 -6470 5750 -6480 {}
-N 5750 -6350 5750 -6380 {}
+N 5330 -6310 5330 -6150 {}
+N 5330 -6060 5330 -6000 {}
+N 5380 -6110 5380 -6160 {}
+N 5380 -6020 5380 -6000 {}
+N 5380 -6160 5330 -6160 {}
+N 5470 -6160 5480 -6160 {}
+N 5550 -6390 5550 -6210 {}
+N 5330 -6470 5330 -6400 {}
+N 6230 -6000 5330 -6000 {}
+N 5550 -6110 5550 -6000 {}
+N 5550 -6000 6050 -6000 {}
+N 5470 -6350 5470 -6330 {}
+N 5470 -6240 5470 -6160 {}
+N 6200 -6050 6200 -6000 {}
+N 6230 -6600 5550 -6600 {}
+N 5550 -6600 5550 -6480 {}
+N 6180 -6580 6180 -6600 {}
+N 6180 -6300 6180 -6490 {}
+N 6180 -6300 6220 -6300 {}
+N 5470 -6350 5550 -6350 {}
+N 6130 -6100 5680 -6100 {}
+N 5680 -6100 5680 -6160 {}
+N 6050 -6090 6050 -6100 {}
+N 6050 -6200 6050 -6100 {}
+N 6050 -6300 6050 -6480 {}
+N 5550 -6300 5590 -6300 {}
+N 5680 -6250 5680 -6360 {}
+N 5630 -6410 5630 -6480 {}
+N 5630 -6480 6180 -6480 {}
+N 5850 -6250 5780 -6250 {}
+N 6220 -6200 6200 -6200 {}
+N 6200 -6200 6200 -6150 {}
+N 5970 -6250 5970 -6210 {}
+N 5970 -6120 5970 -6100 {}
+N 5780 -6350 5830 -6350 {}
+N 5830 -6350 5830 -6210 {}
+N 5830 -6120 5830 -6100 {}
+N 6110 -6410 6110 -6600 {}
+N 6110 -6320 6110 -6000 {}
+N 5940 -6250 5980 -6250 {}
+N 5680 -6300 5710 -6300 {}
+N 5680 -6450 5680 -6480 {}
+N 5780 -6470 5780 -6480 {}
+N 5780 -6350 5780 -6380 {}
 

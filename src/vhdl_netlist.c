@@ -22,7 +22,7 @@
 
 #include "xschem.h"
 
-
+static struct hashentry *subckt_table[HASHSIZE];
 void global_vhdl_netlist(int global)  /* netlister driver */
 {
  FILE *fd;
@@ -37,6 +37,7 @@ void global_vhdl_netlist(int global)  /* netlister driver */
  char netl3[PATH_MAX];  /* 20081202 overflow safe 20161122 */
  static char *type=NULL;
  struct stat buf;
+ char *subckt_name;
 
  statusmsg("",2);  /* clear infowindow */
  /* top sch properties used for library use declarations and type definitions */
@@ -53,6 +54,7 @@ void global_vhdl_netlist(int global)  /* netlister driver */
    if(save_ok == -1) return;
  }
  netlist_count=0;
+ free_hash(subckt_table);
  my_snprintf(netl, S(netl), "%s/%s", netlist_dir, skip_dir(schematic[currentsch]) );
  fd=fopen(netl, "w"); 
  my_snprintf(netl3, S(netl3), "%s", skip_dir(schematic[currentsch]));
@@ -238,6 +240,7 @@ void global_vhdl_netlist(int global)  /* netlister driver */
 
  if(debug_var>=1) fprintf(errfp, "global_vhdl_netlist(): printing top level used components\n");
  /* print all components */
+ subckt_name=NULL;
  for(j=0;j<lastinstdef;j++)
  { 
   if( strcmp(get_tok_value(instdef[j].prop_ptr,"vhdl_primitive",0),"true")==0 ) continue;
@@ -250,33 +253,40 @@ void global_vhdl_netlist(int global)  /* netlister driver */
      ) && check_lib(instdef[j].name)
     ) 
   {
-   /* component generics */
-   print_generic(fd,"component", j);
-
-   /* component ports */
-   tmp=0;
-   for(i=0;i<instdef[j].rects[PINLAYER];i++)
-   {
-     my_strdup(587, &sig_type,get_tok_value(
-               instdef[j].boxptr[PINLAYER][i].prop_ptr,"sig_type",0));
-     my_strdup(588, &port_value, get_tok_value(
-               instdef[j].boxptr[PINLAYER][i].prop_ptr,"value",2) );
-     if(!sig_type || sig_type[0]=='\0') my_strdup(589, &sig_type,"std_logic");
-     my_strdup(590, &dir_tmp, get_tok_value(instdef[j].boxptr[PINLAYER][i].prop_ptr,"dir",0) );
-     str_tmp = get_tok_value(instdef[j].boxptr[PINLAYER][i].prop_ptr,"name",0);
-     if(!tmp) fprintf(fd, "port (\n");
-     if(tmp) fprintf(fd, " ;\n");
-     fprintf(fd,"  %s : %s %s",str_tmp ? str_tmp : "<NULL>", 
-                          dir_tmp ? dir_tmp : "<NULL>", sig_type);
-     my_free(&dir_tmp);
-     if(port_value &&port_value[0])
-       fprintf(fd," := %s", port_value);
-     tmp=1;
+   /* instdef can be SCH or SYM, use hash to avoid writing duplicate subckt */
+   my_strdup(317, &subckt_name, get_cell(instdef[j].name, 0));
+   if (hash_lookup(subckt_table, subckt_name, "", XLOOKUP)==NULL) {
+     hash_lookup(subckt_table, subckt_name, "", XINSERT);
+     /* component generics */
+     print_generic(fd,"component", j);
+  
+     /* component ports */
+     tmp=0;
+     for(i=0;i<instdef[j].rects[PINLAYER];i++)
+     {
+       my_strdup(587, &sig_type,get_tok_value(
+                 instdef[j].boxptr[PINLAYER][i].prop_ptr,"sig_type",0));
+       my_strdup(588, &port_value, get_tok_value(
+                 instdef[j].boxptr[PINLAYER][i].prop_ptr,"value",2) );
+       if(!sig_type || sig_type[0]=='\0') my_strdup(589, &sig_type,"std_logic");
+       my_strdup(590, &dir_tmp, get_tok_value(instdef[j].boxptr[PINLAYER][i].prop_ptr,"dir",0) );
+       str_tmp = get_tok_value(instdef[j].boxptr[PINLAYER][i].prop_ptr,"name",0);
+       if(!tmp) fprintf(fd, "port (\n");
+       if(tmp) fprintf(fd, " ;\n");
+       fprintf(fd,"  %s : %s %s",str_tmp ? str_tmp : "<NULL>", 
+                            dir_tmp ? dir_tmp : "<NULL>", sig_type);
+       my_free(&dir_tmp);
+       if(port_value &&port_value[0])
+         fprintf(fd," := %s", port_value);
+       tmp=1;
+     }
+     if(tmp) fprintf(fd, "\n);\n");
+     fprintf(fd, "end component ;\n\n");
    }
-   if(tmp) fprintf(fd, "\n);\n");
-   fprintf(fd, "end component ;\n\n");
   }
  }
+ free_hash(subckt_table);
+ my_free(&subckt_name);
  
  if(debug_var>=1) fprintf(errfp, "global_vhdl_netlist(): netlisting  top level\n");
  vhdl_netlist(fd, 0);
@@ -319,21 +329,30 @@ void global_vhdl_netlist(int global)  /* netlister driver */
 
    currentsch++;
     if(debug_var>=2) fprintf(errfp, "global_vhdl_netlist(): last defined symbol=%d\n",lastinstdef);
+   subckt_name=NULL;
    for(i=0;i<lastinstdef;i++)
    {
     if( strcmp(get_tok_value(instdef[i].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; /* 20070726 */
     if(!instdef[i].type) continue;
     if(strcmp(instdef[i].type,"subcircuit")==0 && check_lib(instdef[i].name))
     {
-      if( split_files && strcmp(get_tok_value(instdef[i].prop_ptr,"verilog_netlist",0),"true")==0 )
-        verilog_block_netlist(fd, i); /* 20081209 */
-      else if( split_files && strcmp(get_tok_value(instdef[i].prop_ptr,"spice_netlist",0),"true")==0 )
-        spice_block_netlist(fd, i); /* 20081209 */
-      else
-        if( strcmp(get_tok_value(instdef[i].prop_ptr,"vhdl_primitive",0),"true"))
-          vhdl_block_netlist(fd, i);  /* 20081205 */
+      /* instdef can be SCH or SYM, use hash to avoid writing duplicate subckt */
+      my_strdup(327, &subckt_name, get_cell(instdef[i].name, 0));
+      if (hash_lookup(subckt_table, subckt_name, "", XLOOKUP)==NULL)
+      {
+        hash_lookup(subckt_table, subckt_name, "", XINSERT);
+        if( split_files && strcmp(get_tok_value(instdef[i].prop_ptr,"verilog_netlist",0),"true")==0 )
+          verilog_block_netlist(fd, i); /* 20081209 */
+        else if( split_files && strcmp(get_tok_value(instdef[i].prop_ptr,"spice_netlist",0),"true")==0 )
+          spice_block_netlist(fd, i); /* 20081209 */
+        else
+          if( strcmp(get_tok_value(instdef[i].prop_ptr,"vhdl_primitive",0),"true"))
+            vhdl_block_netlist(fd, i);  /* 20081205 */
+      }
     }
    }
+   free_hash(subckt_table);
+   my_free(&subckt_name);
    my_strncpy(schematic[currentsch] , "", S(schematic[currentsch]));
    currentsch--;
    unselect_all();

@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC8 file_version=1.1}
+v {xschem version=2.9.5_RC6 file_version=1.1}
 G {}
 V {}
 S {}
@@ -1290,7 +1290,3 @@ C {zener-1.sym} 48000 84000 0 0 {}
 C {zener-2.sym} 50000 84000 0 0 {}
 C {zener-3.sym} 52000 84000 0 0 {}
 C {zener-4.sym} 54000 84000 0 0 {}
-C {4002-1.sym} 10190 1980 0 0 {name=UX:1}
-C {4002-1.sym} 10190 2140 0 0 {name=UX:2}
-C {smda05-1.sym} 10230 75860 0 0 {name=U1:1}
-C {smda05-1.sym} 10190 75990 0 0 {name=U1:2}

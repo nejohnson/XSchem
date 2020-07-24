@@ -794,11 +794,13 @@ void edit_symbol_property(int x)
    char *result=NULL;
 
    i=selectedgroup[0].n;
-   netlist_commands =  !strcmp(         /* 20070318 */
-                         /* get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr,"type",0), */
-                         (inst_ptr[i].ptr+instdef)->type,
-                         "netlist_commands"
-                       );
+   netlist_commands = 0;
+   if ((inst_ptr[i].ptr + instdef)->type!=NULL)
+     netlist_commands =  !strcmp(         /* 20070318 */
+                           /* get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr,"type",0), */
+                           (inst_ptr[i].ptr+instdef)->type,
+                           "netlist_commands"
+                         );
 
    fill_symbol_editprop_form( x);
 

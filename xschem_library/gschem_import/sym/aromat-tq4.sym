@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC6 file_version=1.1}
+v {xschem version=2.9.7 file_version=1.1}
 G {type=AROMAT-TQ4
 template="device=AROMAT-TQ4
 name=K?

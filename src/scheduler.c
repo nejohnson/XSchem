@@ -273,6 +273,9 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
      change_linewidth(-1.);
      draw();
    }
+   else {
+     ui_state |=MENUSTARTZOOM;
+   }
    Tcl_ResetResult(interp);
  }
 

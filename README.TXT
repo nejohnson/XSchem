@@ -38,6 +38,18 @@ If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
 2.9.7
+- store symbol wires (if any) as Instdef lines on layer WIRELAYER (1) so they are visible when instances are placed.
+- spice netlister: if ".param m=10 n=5" is given and "R1[m:n]" instance name is present resolve parameters
+  and replace instance name with R1[10],R1[9],...,R1[5].
+- Fix: zoom_box function called from menu was broken
+- tcl proc probe_net: if <path>.netxxx is given where xxx=number then try first probe netxxx, if no net is found try #netxxx
+- load system-wide xschemrc first, then $PWD/xschemrc or ~/.xschem/xschemrc; user xschemrc appends to
+  system-wide xschemrc instead of replacing it.
+- verilog_netlist: use name "top_schematic.sym" from "top_schematic.sch" before calling
+  load_symbol_definition for verilog parameter netlisting
+- fix to avoid name chashes between auto-named nets (#net<number>) vs user set net names (net<number>)
+- device_model attribute: allow escaped quotes in text
+- allow .subckt as well as .model in device_model attribute, even with identical model/subckt name
 - "device_model" attribute set in symbol or symbol instance may be set to a SPICE .model 
   specification (device_model=".model D1N4148 D ...").
   This model will be printed only once per component at end of netlist.

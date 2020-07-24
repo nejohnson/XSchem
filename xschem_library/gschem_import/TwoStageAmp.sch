@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC6 file_version=1.1}
+v {xschem version=2.9.7 file_version=1.1}
 G {}
 V {}
 S {}
@@ -104,14 +104,13 @@ model-name=2N3904
 file=./models/2N3904.mod
 device=model
 }
-C {spice-include-1.sym} 2650 -5460 0 0 {name=A2
+C {spice-include-1.sym} 2650 -5440 0 0 {name=A2
 file=./Simulation.cmd
 device=include
 }
-C {spice-directive-1.sym} 2650 -5370 0 0 {name=A3
+C {spice-directive-1.sym} 2650 -5300 0 0 {name=A3
 value=.options\\ TEMP=25
 device=directive
-file=unknown
 }
 C {capacitor-1.sym} 2940 -4950 0 0 {name=C1
 value=2.2uF
@@ -159,10 +158,10 @@ device=CAPACITOR
 symversion=0.1
 }
 C {lab_wire.sym} 3860 -5410 0 0 {lab=VColl2 }
-C {lab_wire.sym} 4130 -5410 0 0 {lab=Vout }
-C {lab_wire.sym} 2700 -4970 0 1 {lab=Vin }
-C {lab_wire.sym} 3100 -4970 0 0 {lab=Vbase1 }
-C {lab_wire.sym} 3840 -5100 0 0 {lab=Vem2 }
+C {lab_wire.sym} 4075 -5410 0 0 {lab=Vout }
+C {lab_wire.sym} 2705 -4970 0 0 {lab=Vin }
+C {lab_wire.sym} 3090 -4970 0 0 {lab=Vbase1 }
+C {lab_wire.sym} 3845 -5100 0 0 {lab=Vem2 }
 C {lab_wire.sym} 3300 -4910 0 0 {lab=Vem1 }
 C {lab_wire.sym} 3660 -5310 0 0 {lab=Vbase2 }
-C {lab_wire.sym} 3310 -5310 0 0 {lab=Vcoll1 }
+C {lab_wire.sym} 3300 -5310 0 0 {lab=Vcoll1 }

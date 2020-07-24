@@ -817,7 +817,7 @@ extern int place_symbol(int pos, const char *symbol_name, double x, double y, in
                          const char *inst_props, int draw_sym, int first_call);
 extern void attach_labels_to_inst(void);
 extern int sym_vs_sch_pins(void);
-extern int match_symbol(char name[]);
+extern int match_symbol(const char name[]);
 extern int save_schematic(char *); /*  20171020 added return value */
 extern void push_undo(void);
 extern void pop_undo(int redo);
@@ -872,6 +872,7 @@ extern struct hashentry *hash_lookup(struct hashentry **table, char *token, char
 extern char *find_nth(char *str, char sep, int n);
 extern int isonlydigit(const char *s);
 extern char *translate(int inst, char* s);
+extern char* translate2(char *prop_str, char* s);
 extern void print_tedax_element(FILE *fd, int inst);
 extern void print_spice_element(FILE *fd, int inst);
 extern void print_spice_subckt(FILE *fd, int symbol);

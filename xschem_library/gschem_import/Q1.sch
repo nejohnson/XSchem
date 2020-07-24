@@ -1,10 +1,10 @@
-v {xschem version=2.9.5_RC6 file_version=1.1}
+v {xschem version=2.9.7 file_version=1.1}
 G {}
 V {}
 S {}
 E {}
-T {Spice .SUBCKT for Q1_MSA26F} 6870 -4870 2 1 0.666667 0.666667 {}
-T {SDB -- 3.31.2003} 7250 -4810 2 1 0.333333 0.333333 {}
+T {Spice .SUBCKT for Q1_MSA26F} 6870 -4896.67 0 0 0.666667 0.666667 {}
+T {SDB -- 3.31.2003} 7250 -4808.33 0 0 0.333333 0.333333 {}
 T {This is part of the model for the MSA-2643} 6790 -5080 2 1 0.333333 0.333333 {}
 T {-- a silicon bipolar amp from Agilent.} 6790 -5050 2 1 0.333333 0.333333 {}
 T {The model is detailed in Agilent's app note 5980-2396E} 6790 -5020 2 1 0.333333 0.333333 {}
@@ -53,13 +53,13 @@ C {resistor-1.sym} 6610 -4980 3 0 {name=Re
 value=2.158
 device=RESISTOR
 }
-C {spice-subcircuit-IO-1.sym} 6630 -5720 3 0 {name=P3
+C {spice-subcircuit-IO-1.sym} 6630 -5740 3 0 {name=P3
 device=spice-IO
 }
-C {spice-subcircuit-IO-1.sym} 6050 -5280 2 0 {name=P2
+C {spice-subcircuit-IO-1.sym} 6030 -5280 2 0 {name=P2
 device=spice-IO
 }
-C {spice-subcircuit-IO-1.sym} 6570 -4920 1 0 {name=P1
+C {spice-subcircuit-IO-1.sym} 6570 -4900 1 0 {name=P1
 device=spice-IO
 }
 C {spice-subcircuit-LL-1.sym} 6810 -5530 0 0 {name=A1

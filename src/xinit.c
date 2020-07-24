@@ -902,7 +902,9 @@ int Tcl_AppInit(Tcl_Interp *inter)
      install_dir[dir_len-11] = '\0'; /* 11 = remove /xschem.exe */
    my_snprintf(tmp, S(tmp), "regexp {bin$} \"%s\"", install_dir); /* debugging in Visual Studio will not have bin */
    tcleval(tmp);
-   int not_visual_studio = atoi(Tcl_GetStringResult(interp));
+   running_in_src_dir = 0;
+   if (atoi(Tcl_GetStringResult(interp)) == 0)
+     running_in_src_dir = 1; /* no bin, so it's running in Visual studio source directory*/
  char* gxschem_library=NULL, *xschem_sharedir=NULL;
  if ((gxschem_library = getenv("XSCHEM_LIBRARY")) != NULL) {
    if (!stat(gxschem_library, &buf)) {
@@ -910,11 +912,12 @@ int Tcl_AppInit(Tcl_Interp *inter)
    }
  }
  else {
-   if (not_visual_studio==1) {
-     my_snprintf(tmp, S(tmp), "subst .:[file normalize \"%s/../xschem_library/devices\"]", install_dir);
+   if (running_in_src_dir==1) {
+     my_snprintf(tmp, S(tmp), "subst .:[file normalize \"%s/../xschem_library/devices\"]", pwd_dir);
    }
    else {
-     my_snprintf(tmp, S(tmp), "subst .:[file normalize \"%s/../xschem_library/devices\"]", pwd_dir); 
+     my_snprintf(tmp, S(tmp), "subst .:[file normalize \"%s/../xschem_library/devices\"]", install_dir);
+     
    }
     tcleval(tmp);
     tclsetvar("XSCHEM_LIBRARY_PATH", Tcl_GetStringResult(interp));
@@ -925,11 +928,12 @@ int Tcl_AppInit(Tcl_Interp *inter)
    }
  }
  else {
-   if (not_visual_studio==1) {
-     my_snprintf(tmp, S(tmp), "%s/../share", install_dir);
+   if (running_in_src_dir ==1) {
+     my_snprintf(tmp, S(tmp), "%s/../src", pwd_dir);
    }
    else {
-     my_snprintf(tmp, S(tmp), "%s/../src", pwd_dir);
+     my_snprintf(tmp, S(tmp), "%s/../share", install_dir);
+     
    }
    tclsetvar("XSCHEM_SHAREDIR", tmp);
  }

@@ -24,6 +24,7 @@
 
 static struct hashentry *model_table[HASHSIZE];
 static struct hashentry *model_entry;
+static struct hashentry *subckt_table[HASHSIZE];
 
 void global_spice_netlist(int global)  /* netlister driver */
 {
@@ -38,7 +39,8 @@ void global_spice_netlist(int global)  /* netlister driver */
  char netl[PATH_MAX]; /* overflow safe 20161122 */
  char netl2[PATH_MAX]; /* 20081211 overflow safe 20161122 */
  char netl3[PATH_MAX]; /* 20081211 overflow safe 20161122 */
-
+ char *subckt_name;
+ 
  if(current_type==SYMBOL) {
    tcleval("alert_ {This is a symbol, no netlisting can be done.\n"
            "If this is a schematic delete any 'type=...'\n"
@@ -49,6 +51,7 @@ void global_spice_netlist(int global)  /* netlister driver */
    save_ok = save_schematic(schematic[currentsch]);
    if(save_ok == -1) return;
  }
+ free_hash(subckt_table);
  free_hash(model_table);
  statusmsg("",2);  /* clear infowindow */
  record_global_node(2, NULL, NULL); /* delete list of global nodes */
@@ -164,21 +167,30 @@ void global_spice_netlist(int global)  /* netlister driver */
 
    currentsch++;
     if(debug_var>=1) fprintf(errfp, "global_spice_netlist(): last defined symbol=%d\n",lastinstdef);
+   subckt_name=NULL; 
    for(i=0;i<lastinstdef;i++)
    {
     if( strcmp(get_tok_value(instdef[i].prop_ptr,"spice_ignore",0),"true")==0 ) continue; /* 20070726 */
     if(!instdef[i].type) continue;
     if(strcmp(instdef[i].type,"subcircuit")==0 && check_lib(instdef[i].name)) /* 20150409 */
     {
-      if( split_files && strcmp(get_tok_value(instdef[i].prop_ptr,"vhdl_netlist",0),"true")==0 )
-        vhdl_block_netlist(fd, i); /* 20081209 */
-      else if(split_files && strcmp(get_tok_value(instdef[i].prop_ptr,"verilog_netlist",0),"true")==0 )
-        verilog_block_netlist(fd, i); /* 20081209 */
-      else
-        if( strcmp(get_tok_value(instdef[i].prop_ptr,"spice_primitive",0),"true") )
-          spice_block_netlist(fd, i); /* 20081205 */
+      /* instdef can be SCH or SYM, use hash to avoid writing duplicate subckt */
+      my_strdup(391, &subckt_name, get_cell(instdef[i].name, 0));
+      if (hash_lookup(subckt_table, subckt_name, "", XLOOKUP)==NULL)
+      { 
+        hash_lookup(subckt_table, subckt_name, "", XINSERT);
+        if( split_files && strcmp(get_tok_value(instdef[i].prop_ptr,"vhdl_netlist",0),"true")==0 )
+          vhdl_block_netlist(fd, i); /* 20081209 */
+        else if(split_files && strcmp(get_tok_value(instdef[i].prop_ptr,"verilog_netlist",0),"true")==0 )
+          verilog_block_netlist(fd, i); /* 20081209 */
+        else
+          if( strcmp(get_tok_value(instdef[i].prop_ptr,"spice_primitive",0),"true") )
+            spice_block_netlist(fd, i); /* 20081205 */
+      }
     }
    }
+   free_hash(subckt_table);
+   my_free(&subckt_name);
    /*clear_drawing(); */
    my_strncpy(schematic[currentsch] , "", S(schematic[currentsch]));
    currentsch--;

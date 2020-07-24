@@ -23,6 +23,7 @@
 
 
 BEGIN{
+ lines = 0;
  first=1
  user_code=0 #20180129
  # 20081209 hspice syntax variants
@@ -49,13 +50,77 @@ BEGIN{
       first=0
       next
     }
-    process()
+    line[lines++] = $0
   }
 }
 
 END{
   $0=yy
-  process()
+  line[lines++] = $0
+
+
+  ## place to insert processing awk hooks
+
+  ## resolve parametric instance name vector multiplicity
+  substitute_instance_param()
+
+  ## /place to insert processing awk hooks
+  
+  for(i=0; i<lines; i++) {
+    $0 = line[i]
+    process()
+  }
+}
+
+## if .param m=10 n=5 is defined and R1[m:n] instance name is present in netlist --> R1[10],R1[9],...,R1[5]
+## before further processing netlist.
+function substitute_instance_param(    i, j, name, first, last)
+{
+  IGNORECASE=1
+  for(i = 0;i < lines; i++) {
+    $0 = line[i]
+    if($0 ~/^\.param/) {
+      gsub(/ *= */, "=")
+      for(j = 2; j <= NF; j++) {
+        param = value = $j
+        sub(/=.*/, "", param)
+        sub(/.*=/,"", value)
+        par[param] = value
+        # print "*** " param " = " value
+      }
+    }
+  }
+  for(i = 0;i < lines; i++) {
+    $0 = line[i]
+    if($1 ~ /^[a-zA-Z][^\[\]:]+\[[a-zA-Z_][a-zA-Z0-9_]*:[a-zA-Z_][a-zA-Z0-9_]*\]$/) {
+      name = first = last = $1
+      sub(/\[.*/, "", name)
+      sub(/^.*\[/, "", first)
+      sub(/:.*/,"", first)
+      sub(/^.*:/,"", last)
+      sub(/\]/,"", last)
+      if(first in par) first = par[first]
+      if(last in par) last = par[last]
+
+      n=""
+      for(j= first;;) {
+        if(j!=first) n = n ","
+        n = n  name "[" j "]"
+        if(j == last) break
+        j+= sign(last - first)
+      }
+      # print "*** " n
+      $1 = n
+      line[i] = $0
+    }
+  }
+  IGNORECASE=0
+}
+
+
+function sign(x) 
+{
+  return x<0 ? -1 : x>0 ? 1 : 0
 }
 
 function process(        i, iprefix)

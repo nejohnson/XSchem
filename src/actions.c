@@ -522,6 +522,7 @@ void remove_symbol(void)
 {
   int i,c,j;
   j = lastinstdef-1;
+  if(debug_var>=1) fprintf(errfp, "remove_symbol(): removing symbol %d\n", j);
   if(instdef[j].prop_ptr != NULL) {
     my_free(&instdef[j].prop_ptr);
   }

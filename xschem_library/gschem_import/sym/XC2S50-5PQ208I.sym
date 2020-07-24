@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC6 file_version=1.1}
+v {xschem version=2.9.7 file_version=1.1}
 G {type=XC2S50-5PQ208I
 template="device=XC2S50-5PQ208I
 name=U?

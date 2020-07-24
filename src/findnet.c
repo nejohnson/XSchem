@@ -248,9 +248,12 @@ void find_closest_element(double mx,double my)
  int i,r=-1;
  for(i=0;i<lastinst;i++)
  {
+  if(debug_var>=2) fprintf(errfp, "find_closest_element(): %s: %g %g %g %g\n", 
+                           inst_ptr[i].instname, inst_ptr[i].x1,inst_ptr[i].y1,inst_ptr[i].x2,inst_ptr[i].y2);
   if( POINTINSIDE(mx,my,inst_ptr[i].x1,inst_ptr[i].y1,inst_ptr[i].x2,inst_ptr[i].y2) )
   {
-   tmp=pow(mx-inst_ptr[i].x0, 2)+pow(my-inst_ptr[i].y0, 2);
+   /* tmp=pow(mx-inst_ptr[i].x0, 2)+pow(my-inst_ptr[i].y0, 2); */
+   tmp=pow(mx-(inst_ptr[i].x1 + inst_ptr[i].x2)/2, 2)+pow(my-(inst_ptr[i].y1 + inst_ptr[i].y2)/2, 2);
    if(tmp*.1 < distance)
    {
     r = i; distance = tmp;

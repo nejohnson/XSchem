@@ -329,6 +329,9 @@ void merge_file(int selection_load, const char ext[])
        case 'S':
         load_ascii_string(&aux_ptr, fd);
         break;
+       case 'K':
+        load_ascii_string(&aux_ptr, fd);
+        break;
        case 'G':
         load_ascii_string(&aux_ptr, fd);
         if(selection_load) 

@@ -1102,11 +1102,13 @@ int Tcl_AppInit(Tcl_Interp *inter)
   if(!strcmp(tclgetvar("netlist_type"),"vhdl") ) netlist_type=CAD_VHDL_NETLIST;
   else if(!strcmp(tclgetvar("netlist_type"),"verilog") ) netlist_type=CAD_VERILOG_NETLIST;
   else if(!strcmp(tclgetvar("netlist_type"),"tedax") ) netlist_type=CAD_TEDAX_NETLIST;
+  else if(!strcmp(tclgetvar("netlist_type"),"symbol") ) netlist_type=CAD_SYMBOL_ATTRS;
   else netlist_type=CAD_SPICE_NETLIST;
  } else {
   if(netlist_type==CAD_VHDL_NETLIST)  tclsetvar("netlist_type","vhdl");
   else if(netlist_type==CAD_VERILOG_NETLIST)  tclsetvar("netlist_type","verilog");
   else if(netlist_type==CAD_TEDAX_NETLIST)  tclsetvar("netlist_type","tedax");
+  else if(netlist_type==CAD_SYMBOL_ATTRS)  tclsetvar("netlist_type","symbol");
   else tclsetvar("netlist_type","spice");
  }
 
@@ -1171,7 +1173,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
  xrect[0].height = CADHEIGHT;
 
 
- my_strncpy(file_version, "1.1", S(file_version));
+ my_strncpy(file_version, XSCHEM_FILE_VERSION, S(file_version));
  compile_font();
  /* restore current dir after loading font */
  my_snprintf(tmp, S(tmp), "set current_dirname \"%s\"", pwd_dir);
@@ -1365,6 +1367,9 @@ int Tcl_AppInit(Tcl_Interp *inter)
  }
 
 
+ /* set tcl netlist_dir if netlist_dir given on cmdline */
+ if(netlist_dir && netlist_dir[0]) tclsetvar("netlist_dir", netlist_dir);
+   
  if(!set_netlist_dir(0, NULL)) {
    fprintf(errfp, "problems creating netlist directory %s\n", netlist_dir ? netlist_dir : "<NULL>");
  }

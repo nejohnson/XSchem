@@ -168,7 +168,24 @@ void check_collapsing_objects()
   }
 }
 
+void update_symbol_bboxes()
+{
+  int i, n, save_flip, save_rot;
 
+  for(i=0;i<lastsel;i++)
+  {
+    n = selectedgroup[i].n;
+    if(selectedgroup[i].type == ELEMENT) {
+      save_flip = inst_ptr[n].flip;
+      save_rot = inst_ptr[n].rot;
+      inst_ptr[n].flip = flip ^ inst_ptr[n].flip;
+      inst_ptr[n].rot = (inst_ptr[n].rot + ( flip && (inst_ptr[n].rot & 1) ) ? rot+2 : rot) &0x3;
+      symbol_bbox(n, &inst_ptr[n].x1, &inst_ptr[n].y1, &inst_ptr[n].x2, &inst_ptr[n].y2 );
+      inst_ptr[n].rot = save_rot;
+      inst_ptr[n].flip = save_flip;
+    }
+  }
+}
 void draw_selection(GC g, int interruptable)
 {
   int i, c, k, n;
@@ -457,6 +474,7 @@ void copy_objects(int what)
   my_strdup(225, &str, user_conf_dir);
   my_strcat(226, &str, "/.selection.sch");
   xunlink(str);
+  update_symbol_bboxes();
 
  }
  if(what & RUBBER)                              /* draw objects while moving */
@@ -472,11 +490,13 @@ void copy_objects(int what)
  if(what & ROTATE) {
   draw_selection(gctiled,0);
   rot= (rot+1) & 0x3;
+  update_symbol_bboxes();
  } 
  if(what & FLIP)
  {
   draw_selection(gctiled,0);
   flip = !flip;
+  update_symbol_bboxes();
  }
  if(what & END)                                 /* copy selected objects */
  {
@@ -842,6 +862,7 @@ void move_objects(int what, int merge, double dx, double dy)
   rot=flip=deltax=deltay=0;
   ui_state &= ~STARTMOVE;
   ui_state &= ~PLACE_SYMBOL;
+  update_symbol_bboxes();
  }
  if(what & RUBBER)                              /* abort operation */
  {
@@ -856,11 +877,13 @@ void move_objects(int what, int merge, double dx, double dy)
  if(what & ROTATE) {
   draw_selection(gctiled,0);
   rot= (rot+1) & 0x3;
+  update_symbol_bboxes();
  } 
  if(what & FLIP)
  {
   draw_selection(gctiled,0);
   flip = !flip;
+  update_symbol_bboxes();
  }
  if(what & END)                                 /* move selected objects */
  {

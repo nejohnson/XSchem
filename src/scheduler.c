@@ -200,6 +200,16 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
    create_sch_from_sym();
    Tcl_ResetResult(interp);
  }
+ else if(!strcmp(argv[1],"add_symbol_pin")) {
+    unselect_all();
+    storeobject(-1, mousex_snap-2.5, mousey_snap-2.5, mousex_snap+2.5, mousey_snap+2.5,
+                xRECT, PINLAYER, SELECTED, "name=XXX\ndir=inout");
+    need_rebuild_selected_array=1;
+    rebuild_selected_array();
+    move_objects(BEGIN,0,0,0);
+    ui_state |= START_SYMPIN;
+    Tcl_ResetResult(interp);
+ }
  else if(!strcmp(argv[1],"make_symbol"))
  {
    tcleval("tk_messageBox -type okcancel -message {do you want to make symbol view ?}");
@@ -1241,17 +1251,24 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
  {
   if(!strcmp(argv[2],"vhdl")) {
     netlist_type=CAD_VHDL_NETLIST;
+    tclsetvar("netlist_type",argv[2]);
   }
   else if(!strcmp(argv[2],"verilog")) {
     netlist_type=CAD_VERILOG_NETLIST;
+    tclsetvar("netlist_type",argv[2]);
   }
   else if(!strcmp(argv[2],"tedax")) {
     netlist_type=CAD_TEDAX_NETLIST;
+    tclsetvar("netlist_type",argv[2]);
   }
-  else {
+  else if(!strcmp(argv[2],"symbol")) {
+    netlist_type=CAD_SYMBOL_ATTRS;
+    tclsetvar("netlist_type",argv[2]);
+  }
+  else if(!strcmp(argv[2],"spice")){
     netlist_type=CAD_SPICE_NETLIST;
+    tclsetvar("netlist_type",argv[2]);
   }
-  tclsetvar("netlist_type",argv[2]);
  }
 
  else if(!strcmp(argv[1],"unselect_all"))
@@ -1372,7 +1389,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
    Tcl_ResetResult(interp);
  }
 
- else if(!strcmp(argv[1],"search"))
+ else if(!strcmp(argv[1],"search") || !strcmp(argv[1],"searchmenu")) 
  {
    /*   0      1         2        3       4   5      6(opt)   */
    /*                           select                        */
@@ -1395,10 +1412,14 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
     if( !strcmp(argv[2],"regex") )  r = search(argv[4],argv[5],0,select, what);
     else  r = search(argv[4],argv[5],1,select, what);
     Tcl_ResetResult(interp);
-    if(r == TCL_ERROR) {
-      Tcl_AppendResult(interp,"not found.", NULL);
+    if(r == 0) {
+      if(has_x && !strcmp(argv[1],"searchmenu")) tcleval("tk_messageBox -type ok -message {Not found.}");
+      Tcl_ResetResult(interp);
+      Tcl_AppendResult(interp,"0", NULL);
+    } else {
+      Tcl_AppendResult(interp,"1", NULL);
     }
-    return r;
+    return TCL_OK;
   }
  }
 

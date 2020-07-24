@@ -573,11 +573,16 @@ void draw_temp_symbol(int what, GC gc, int n,int layer,int tmp_flip, int rot,
  if(inst_ptr[n].ptr == -1) return;
  /* if(layer != PINLAYER && !enable_layer[layer] ) return; */
  if(!has_x) return;
+
+ flip = inst_ptr[n].flip;
+ if(tmp_flip) flip = !flip;
+ rot = (inst_ptr[n].rot + rot ) & 0x3;
+
  if(layer==0) { /* 20150424 */
    x1=X_TO_SCREEN(inst_ptr[n].x1+xoffset); /* 20150729 added xoffset, yoffset */
    x2=X_TO_SCREEN(inst_ptr[n].x2+xoffset);
    y1=Y_TO_SCREEN(inst_ptr[n].y1+yoffset);
-   y2=Y_TO_SCREEN(inst_ptr[n].y2+yoffset);
+   y2=Y_TO_SCREEN (inst_ptr[n].y2+yoffset);
    if(OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2))
    {
     inst_ptr[n].flags|=1;
@@ -591,10 +596,6 @@ void draw_temp_symbol(int what, GC gc, int n,int layer,int tmp_flip, int rot,
    if(debug_var>=2) fprintf(errfp, "draw_symbol(): skipping inst %d\n", n);
    return;
  } /* /20150424 */
-
- flip = inst_ptr[n].flip;
- if(tmp_flip) flip = !flip;
- rot = (inst_ptr[n].rot + rot ) & 0x3;
 
  x0=inst_ptr[n].x0 + xoffset;
  y0=inst_ptr[n].y0 + yoffset;

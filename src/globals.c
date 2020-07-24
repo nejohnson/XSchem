@@ -237,6 +237,7 @@ int currentsch = 0;
 char *schprop=NULL;  /* spice */
 char *schtedaxprop=NULL;  /* tEDAx */
 char *schvhdlprop=NULL; /* vhdl and symbol property string */
+char *schsymbolprop=NULL; /* vhdl and symbol property string */
 char *xschem_version_string=NULL; /* vhdl and symbol property string */
 char file_version[100];
 char *schverilogprop=NULL;/* verilog */

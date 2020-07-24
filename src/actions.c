@@ -617,6 +617,7 @@ void clear_drawing(void)
  del_inst_table(); /*  20180917 */
  del_wire_table();   /*  20180917 */
  my_free(&schtedaxprop);
+ my_free(&schsymbolprop);
  my_free(&schprop);
  my_free(&schvhdlprop);
  my_free(&xschem_version_string);

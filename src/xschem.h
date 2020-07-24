@@ -24,7 +24,7 @@
 #define CADGLOBALS
 
 #define XSCHEM_VERSION "2.9.7"
-#define XSCHEM_FILE_VERSION "1.1"
+#define XSCHEM_FILE_VERSION "1.2"
 
 #if HAS_PIPE == 1
 /* fdopen() */
@@ -47,7 +47,7 @@
 #define XSCH_PI 3.14159265358979323846264338327950288419716939937
 
 #ifdef __unix__
-/* #include "../config.h" */
+/* #include "../config.h" *.
 #else
 #include "../XSchemWin/config.h"
 #endif
@@ -154,6 +154,7 @@ extern char win_temp_dir[PATH_MAX];
 #define CAD_VHDL_NETLIST 2
 #define CAD_VERILOG_NETLIST 3
 #define CAD_TEDAX_NETLIST 4
+#define CAD_SYMBOL_ATTRS 5
 
 #define STARTWIRE 1         /*  possible states, encoded in global 'rubber' */
 #define STARTPAN  2
@@ -412,6 +413,17 @@ typedef struct
    char *instname; /*  20150409 instance name (example: I23)  */
 } Instance;
 
+struct Lcc { /* used for symbols containing schematics as instances (LCC, Local Custom Cell) */
+  double x0;
+  double y0;
+  int rot;
+  int flip;
+  FILE *fd;
+  char *prop_ptr;
+  char *symname;
+};
+
+
 typedef struct 
 {
   double x;
@@ -566,6 +578,7 @@ extern int currentsch;
 extern char *schtedaxprop; 
 extern char *schprop; 
 extern char *schvhdlprop; 
+extern char *schsymbolprop; 
 extern char *xschem_version_string; 
 extern char file_version[100];
 extern char *schverilogprop; 
@@ -872,7 +885,7 @@ extern struct hashentry *hash_lookup(struct hashentry **table, char *token, char
 extern char *find_nth(char *str, char sep, int n);
 extern int isonlydigit(const char *s);
 extern char *translate(int inst, char* s);
-extern char* translate2(char *prop_str, char* s);
+extern char* translate2(struct Lcc *lcc, int level, char* s);
 extern void print_tedax_element(FILE *fd, int inst);
 extern void print_spice_element(FILE *fd, int inst);
 extern void print_spice_subckt(FILE *fd, int symbol);

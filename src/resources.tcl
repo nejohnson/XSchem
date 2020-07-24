@@ -7,8 +7,11 @@
 ##
 ## Original artwork derived from http://www.entypo.com/
 ## Colours inverted, and then converted from SVG to base64-encoded GIF
+## Author: Neil Johnson
+## Released under the license CC BY-SA 4.0.
+## https://creativecommons.org/licenses/by-sa/4.0/
 ##
-
+##
 
 ## FILE
 

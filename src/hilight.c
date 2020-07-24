@@ -584,7 +584,7 @@ int search(const char *tok, const char *val, int sub, int sel, int what)
    printf("xschem search %s %d %s %s\n", (sub ? "exact" : "regex"), sel, tok, val);
    fflush(stdout);
  }
- if(found) return TCL_OK; else return TCL_ERROR;
+ if(found) return 1; else return 0;
 }
 
 

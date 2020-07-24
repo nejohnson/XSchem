@@ -118,10 +118,12 @@ p{padding: 15px  30px 10px;}
  </p>
  <ul>
   <li><kbd>v</kbd> : XSCHEM Version string
-  <li><kbd>S</kbd> : Global property associated the .sch/.sym file for SPICE netlisting</li>
-  <li><kbd>V</kbd> : Global property associated the .sch/.sym file for VERILOG netlisting</li>
-  <li><kbd>G</kbd> : Global property associated the .sch/.sym file for VHDL netlisting</li>
-  <li><kbd>E</kbd> : Global property associated the .sch/.sym file for tEDAx netlisting</li>
+  <li><kbd>S</kbd> : Global property associated to the .sch file for SPICE netlisting</li>
+  <li><kbd>V</kbd> : Global property associated to the .sch file for VERILOG netlisting</li>
+  <li><kbd>G</kbd> : Global property associated to the .sch file for VHDL netlisting OR
+                     Global property associated to the .sym file for netlisting</li>
+  <li><kbd>E</kbd> : Global property associated to the .sch file for tEDAx netlisting</li>
+  <li><kbd>K</kbd> : Global property associated to the .sch file for netlisting if schematic is instantiated as a component (file format 1.2 and newer) </li> 
   <li><kbd>L</kbd> : Line </li>
   <li><kbd>B</kbd> : Rectangle </li>
   <li><kbd>P</kbd> : Open / Closed polygon </li>
@@ -201,6 +203,9 @@ template="name=U1 footprint=TO220"}</kbd>
   Global properties define a property string bound to the parent schematic/symbol file,
   there is one global property record per netlisting mode, 
   currently SPICE, VHDL, Verilog, tEDAx.<br>
+  In addition (only in file_format 1.2 and newer) for schematics there is a global attribute ('K') 
+  that defines how to netlist the schematic if placed as a 
+  symbol into another parent schematic (should be set in the same way as the 'G' global attribute for symbols).
   Normally only 'G' type property strings are used for symbols and define attributes
   telling netlisters what to do with the symbol, while global property 
   strings in schematic files corresponding to the active netlisting mode of XSCHEM are

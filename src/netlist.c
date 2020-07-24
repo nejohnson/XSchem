@@ -1051,6 +1051,7 @@ int sym_vs_sch_pins()
             case 'E':
             case 'S':
             case 'V':
+            case 'K':
             case 'G':
               load_ascii_string(&tmp, fd);
               break;
@@ -1182,42 +1183,40 @@ int sym_vs_sch_pins()
           }
         } /* while(!endfile) */
         fclose(fd);
-      }
-      if(pin_cnt != rects) {
-        char str[2048];
-        my_snprintf(str, S(str), "Symbol %s has %d pins, its schematic has %d pins", instdef[i].name, rects, pin_cnt);
-        statusmsg(str,2);
-        for(j = 0; j < lastinst; j++) {
-          if(!strcmp(inst_ptr[j].name, instdef[i].name)) {
-            inst_ptr[j].flags |=4;
-            hilight_nets=1;
-          }
-        }
-      }
-
-      for(j=0; j < rects; j++) {
-        my_strdup(295, &pin_name, get_tok_value(instdef[i].boxptr[PINLAYER][j].prop_ptr, "name", 0));
-        pin_match = 0;
-        for(k=0; k<pin_cnt; k++) {
-          if(pin_name && !strcmp(lab_array[k], pin_name)) {
-            pin_match++; 
-            break;
-          }
-        }
-        if(!pin_match) {
+        if(pin_cnt != rects) {
           char str[2048];
-          /* fprintf(errfp, "  unmatched sch / sym pin: %s\n", lab); */
-          my_snprintf(str, S(str), "Symbol %s: symbol pin: %s not in schematic", instdef[i].name, pin_name ? pin_name : "<NULL>");
+          my_snprintf(str, S(str), "Symbol %s has %d pins, its schematic has %d pins", instdef[i].name, rects, pin_cnt);
           statusmsg(str,2);
-          for(k = 0; k < lastinst; k++) {
-            if(!strcmp(inst_ptr[k].name, instdef[i].name)) {
-              inst_ptr[k].flags |=4;
+          for(j = 0; j < lastinst; j++) {
+            if(!strcmp(inst_ptr[j].name, instdef[i].name)) {
+              inst_ptr[j].flags |=4;
               hilight_nets=1;
             }
           }
         }
+        for(j=0; j < rects; j++) {
+          my_strdup(295, &pin_name, get_tok_value(instdef[i].boxptr[PINLAYER][j].prop_ptr, "name", 0));
+          pin_match = 0;
+          for(k=0; k<pin_cnt; k++) {
+            if(pin_name && !strcmp(lab_array[k], pin_name)) {
+              pin_match++; 
+              break;
+            }
+          }
+          if(!pin_match) {
+            char str[2048];
+            /* fprintf(errfp, "  unmatched sch / sym pin: %s\n", lab); */
+            my_snprintf(str, S(str), "Symbol %s: symbol pin: %s not in schematic", instdef[i].name, pin_name ? pin_name : "<NULL>");
+            statusmsg(str,2);
+            for(k = 0; k < lastinst; k++) {
+              if(!strcmp(inst_ptr[k].name, instdef[i].name)) {
+                inst_ptr[k].flags |=4;
+                hilight_nets=1;
+              }
+            }
+          }
+        }
       }
-
       if(lab_array_size) {
         for(k=0;k<pin_cnt;k++) {
           my_free( &(lab_array[k]));

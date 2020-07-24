@@ -273,3 +273,7 @@ set utile_cmd_path ${XSCHEM_SHAREDIR}/utile/utile
 # lappend tcl_files ${XSCHEM_SHAREDIR}/hspice_backannotate.tcl
 # lappend tcl_files ${XSCHEM_SHAREDIR}/ngspice_backannotate.tcl
 
+#### toolbar
+# set toolbar_visible 1
+# set toolbar_horiz   1
+

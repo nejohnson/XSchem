@@ -28,6 +28,7 @@ typedef struct
   char     *gptr;
   char     *vptr;
   char     *sptr;
+  char     *kptr;
   char     *eptr;
   int *lines;
   int *boxes;
@@ -206,6 +207,7 @@ void push_undo(void)
   my_strdup(173, &uslot[slot].gptr, schvhdlprop);
   my_strdup(174, &uslot[slot].vptr, schverilogprop);
   my_strdup(175, &uslot[slot].sptr, schprop);
+  my_strdup(359, &uslot[slot].kptr, schsymbolprop);
   my_strdup(176, &uslot[slot].eptr, schtedaxprop);
 
   free_lines(slot);
@@ -333,6 +335,7 @@ void pop_undo(int redo)
   my_strdup(198, &schvhdlprop, uslot[slot].gptr);
   my_strdup(199, &schverilogprop, uslot[slot].vptr);
   my_strdup(200, &schprop, uslot[slot].sptr);
+  my_strdup(389, &schsymbolprop, uslot[slot].kptr);
   my_strdup(201, &schtedaxprop, uslot[slot].eptr);
   for(c=0;c<cadlayers;c++) {
     /* lines */

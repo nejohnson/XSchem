@@ -591,8 +591,8 @@ proc probe_net {net} {
     xschem search exact 1 name $inst
     xschem descend
   }
-  set err [catch {xschem search exact 0 lab $net}]
-  if {$err && [regexp {^net[0-9]+$} $net]} {
+  set res [xschem search exact 0 lab $net]
+  if {$res==0  && [regexp {^net[0-9]+$} $net]} {
     xschem search exact 0 lab \#$net
   }
   xschem set no_draw 0
@@ -1364,6 +1364,14 @@ proc make_symbol {name} {
 }
 
 proc select_netlist_dir { force {dir {} }} {
+#
+# force==0: force creation of $netlist_dir (if not empty)
+#           if netlist_dir empty and no dir given prompt user
+#           else set netlist_dir to dir
+#
+# force==1: if no dir given prompt user
+#           else set netlist_dir to dir
+#
    global netlist_dir env
 
    if { ( $force == 0 )  && ( $netlist_dir ne {} ) } {
@@ -1654,8 +1662,11 @@ proc property_search {} {
         set custom_token [.dialog.custom.e get]
         if $tcl_debug<=-1 then { puts stderr "|$custom_token|" }
         set token $custom_token
-        if { $search_exact==1 } { xschem search exact $search_select $token $search_value
-        } else { xschem search regex $search_select $token $search_value }
+        if { $search_exact==1 } {
+          xschem searchmenu exact $search_select $token $search_value
+        } else {
+          xschem searchmenu regex $search_select $token $search_value
+        }
         destroy .dialog 
   }
   button .dialog.but.cancel -text Cancel -command { destroy .dialog }
@@ -2528,6 +2539,7 @@ proc get_file_path {ff} {
 #
 # Public variables that we allow to be overridden
 #
+
 set_ne toolbar_visible 0
 set_ne toolbar_horiz   1
 set_ne toolbar_list { 
@@ -2600,7 +2612,7 @@ proc balloon_show {w arg} {
 #
 # Pull in the toolbar graphics resources
 #
-source $XSCHEM_SHAREDIR/resources.tcl
+if {![info exists no_x] } {source $XSCHEM_SHAREDIR/resources.tcl}
 #
 # Separation bar counter
 #
@@ -3137,6 +3149,9 @@ font configure Underline-Font -underline true -size 24
    .menubar.option.menu add radiobutton -label "tEDAx netlist" -variable netlist_type -value tedax \
         -accelerator {Shift+V} \
         -command "xschem netlist_type tedax"
+   .menubar.option.menu add radiobutton -label "Symbol global attrs" -variable netlist_type -value symbol \
+        -accelerator {Shift+V} \
+        -command "xschem netlist_type symbol"
    .menubar.edit.menu add command -label "Undo" -command "xschem undo; xschem redraw" -accelerator U
    toolbar_create EditUndo "xschem undo; xschem redraw" "Undo"
    .menubar.edit.menu add command -label "Redo" -command "xschem redo; xschem redraw" -accelerator {Shift+U}
@@ -3305,6 +3320,8 @@ font configure Underline-Font -underline true -size 24
    .menubar.sym.menu add command -label "Attach pins to component instance" -command "xschem attach_pins" -accelerator Shift+H
    .menubar.sym.menu add command -label "Create symbol pins from selected schematic pins" \
            -command "schpins_to_sympins" -accelerator Alt+H
+   .menubar.sym.menu add command -label "Place symbol pin" \
+           -command "xschem add_symbol_pin" -accelerator Alt+P
    .menubar.sym.menu add command -label "Print list of highlight nets" \
            -command "xschem print_hilight_net 1" -accelerator J
    .menubar.sym.menu add command -label "Print list of highlight nets, with buses expanded" \

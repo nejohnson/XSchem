@@ -521,7 +521,7 @@ char *get_sym_template(char *s,char *extra)
  l = strlen(s);
  if(l >= sizeres) {
    sizeres = l+1;
-   my_realloc(440, &result,sizeres);
+   my_realloc(330, &result,sizeres);
  }
  if(s==NULL){result[0]='\0'; return result;}
  while(1) {
@@ -2306,10 +2306,10 @@ char *translate(int inst, char* s)
   /* /20161210 */
 
   space=SPACE2(c);
-  if( state==XBEGIN && c=='@' && !escape  ) state=XTOKEN; /* 20161210 escape */
+  if( state==XBEGIN && (c=='@' || c=='\f' ) && !escape  ) state=XTOKEN; /* 20161210 escape */
   else if( state==XTOKEN && ( 
                               (space && !escape)  || 
-                               c =='@' ||
+                               (c =='@' || c == '\f') ||
                               (!space && escape)
                             ) 
                          && token_pos > 1 ) state=XSEPARATOR;
@@ -2325,17 +2325,26 @@ char *translate(int inst, char* s)
    sizetok+=CADCHUNKALLOC;
    my_realloc(529, &token,sizetok);
   }
-
   if(state==XTOKEN) token[token_pos++]=c;
   else if(state==XSEPARATOR) 
   {
    token[token_pos]='\0'; 
    if(debug_var >= 2) fprintf(errfp, "translate(): token=%s\n", token);
-   token_pos=0;
 
    value = get_tok_value(inst_ptr[inst].prop_ptr, token+1, 2);
    if(!get_tok_size) value=get_tok_value((inst_ptr[inst].ptr+instdef)->templ, token+1, 2); /* 20190310 2 instead of 0 */
 
+   if(!get_tok_size && token[0] =='\f') {
+    tmp=token_pos - 1; /* strlen(token+1), excluding leading '\f' */
+    if(result_pos + tmp>=size) {
+     size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
+     my_realloc(530, &result,size);
+    }
+    if(debug_var >= 2) fprintf(errfp, "translate(): token=%s, token_pos = %d\n", token, token_pos);
+    memcpy(result+result_pos, token + 1, tmp+1); /* 20180923 */
+    result_pos+=tmp;
+   }
+   token_pos = 0;
    if(get_tok_size) {
     tmp=get_tok_value_size;  /* strlen(value); */  /* 20180926 */
     if(result_pos + tmp>=size) {
@@ -2478,13 +2487,24 @@ char *translate(int inst, char* s)
      if(result_pos + tmp>=size)
      {
       size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
-      my_realloc(540, &result,size);
+      my_realloc(331, &result,size);
      }
      memcpy(result+result_pos,schprop, tmp+1); /* 20180923 */
      result_pos+=tmp;
    }
    /* /20100217 */
 
+   else if(strcmp(token,"@schsymbolprop")==0 && schsymbolprop)
+   {
+     tmp=strlen(schsymbolprop);
+     if(result_pos + tmp>=size)
+     {
+      size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
+      my_realloc(540, &result,size);
+     }
+     memcpy(result+result_pos,schsymbolprop, tmp+1); /* 20180923 */
+     result_pos+=tmp;
+   }
    else if(strcmp(token,"@schtedaxprop")==0 && schtedaxprop)
    {
      tmp=strlen(schtedaxprop);
@@ -2510,7 +2530,7 @@ char *translate(int inst, char* s)
      result_pos+=tmp;
    }
 
-   if(c=='@') s--;
+   if(c == '@' || c == '\f') s--;
    else result[result_pos++]=c;
    state=XBEGIN;
   }
@@ -2518,112 +2538,110 @@ char *translate(int inst, char* s)
   if(c=='\0') 
   {
    result[result_pos]='\0';
-   return result;
+   break;
   }
  }
+ if(debug_var >=2) fprintf(errfp, "translate(): returning %s\n", result);
  return result;
 }
 
-char* translate2(char *prop_ptr, char* s)
+char* translate2(struct Lcc *lcc, int level, char* s)
 {
   static char *result = NULL;
-  int size = 0, tmp;
+  int i, size = 0, tmp, save_tok_size, save_value_size;
   register int c, state = XBEGIN, space;
-  static char *token = NULL;
+  char *token = NULL;
   const char *tmp_sym_name;
   int sizetok = 0;
   int result_pos = 0, token_pos = 0;
-  static char *value; /* 20100401 */
-  int escape = 0; /* 20161210 */
-  char *inst_name = get_tok_value(prop_ptr, "name", 2);
-  if (inst_name==NULL) return result;
+  char *value1 = NULL;
+  char *value2 = NULL;
+  char *value = NULL;
+  int escape = 0;
 
   size = CADCHUNKALLOC;
   if (result == NULL) result = my_malloc(660, size);
   else my_realloc(661, &result, size);
   result[0] = '\0';
 
-  while (s)
-  {
+  while (s) {
     c = *s++;
-    /* 20161210 */
-    if (c == '\\')
-    {
+    if (c == '\\') {
       escape = 1;
-      c = *s++;
+      /* we keep backslashes as they should mark end of tokens as for example in: @token1\xxxx@token2
+         these backslashes will be 'eaten' at drawing time by translate() */
+      /* c = *s++; */
     }
-    else
-      escape = 0;
-    /* /20161210 */
-
+    else escape = 0;
     space = SPACE2(c);
-    if (state == XBEGIN && c == '@' && !escape) state = XTOKEN; /* 20161210 escape */
-    else if (state == XTOKEN && (
-      (space && !escape) ||
-      c == '@' ||
-      (!space && escape)
-      )
-      && token_pos > 1) state = XSEPARATOR;
-
-    if (result_pos >= size)
-    {
+    if (state == XBEGIN && c == '@' && !escape) state = XTOKEN;
+    else if (state == XTOKEN && ( (space && !escape) || c == '@' || (!space && escape)) && token_pos > 1) state = XSEPARATOR;
+    if (result_pos >= size) {
       size += CADCHUNKALLOC;
       my_realloc(662, &result, size);
     }
-
-    if (token_pos >= sizetok)
-    {
+    if (token_pos >= sizetok) {
       sizetok += CADCHUNKALLOC;
       my_realloc(663, &token, sizetok);
     }
-
     if (state == XTOKEN) token[token_pos++] = c;
-    else if (state == XSEPARATOR)
-    {
+    else if (state == XSEPARATOR) {
       token[token_pos] = '\0';
-      if (debug_var >= 2) fprintf(errfp, "translate(): token=%s\n", token);
       token_pos = 0;
-
-      value = get_tok_value(prop_ptr, token + 1, 2);
-      if (!get_tok_size) value = get_tok_value(prop_ptr, token + 1, 2); /* 20190310 2 instead of 0 */
-
-      if (get_tok_size) {
-        tmp = get_tok_value_size;  /* strlen(value); */  /* 20180926 */
-        if (result_pos + tmp >= size) {
-          size = (1 + (result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
+      my_strdup2(332, &value1, get_tok_value(lcc[level].prop_ptr, token + 1, 2));
+      
+      value = "";
+      if(get_tok_size) {
+        value = value1;
+        i = level;
+        /* recursive substitution of value using parent level prop_str attributes */
+        while(i > 1) {
+          save_tok_size = get_tok_size;
+          save_value_size = get_tok_value_size;
+          my_strdup2(440, &value2, get_tok_value(lcc[i-1].prop_ptr, value, 2));
+          if(get_tok_size && value2[0]) {
+            value = value2;
+          } else {
+            /* restore last successful get_tok_value() size parameters */
+            get_tok_size = save_tok_size;
+            get_tok_value_size = save_value_size;
+            break;
+          }
+          i--;
+        }
+        tmp = get_tok_value_size;  /* strlen(value); */
+        if (result_pos + tmp + 1 >= size) { /* +1 to add leading '\f' */
+          size = (1 + (result_pos + tmp + 1) / CADCHUNKALLOC) * CADCHUNKALLOC;
           my_realloc(664, &result, size);
         }
-        memcpy(result + result_pos, value, tmp + 1); /* 20180923 */
-        result_pos += tmp;
+        /* prefix substituted token with a form-feed so it will be recognized by translate() for last level translation with 
+           instance placement prop_ptr attributes  at drawing/netlisting time. */
+        memcpy(result + result_pos , "\f", 1);
+        memcpy(result + result_pos + 1 , value, tmp + 1);
+        result_pos += tmp + 1;
       }
       else if (strcmp(token, "@symname") == 0) {
-        tmp_sym_name = get_cell_w_ext(inst_name, 0);
+        tmp_sym_name = lcc[level].symname ? get_cell_w_ext(lcc[level].symname, 0) : "";
         tmp = strlen(tmp_sym_name);
         if (result_pos + tmp >= size) {
           size = (1 + (result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
           my_realloc(665, &result, size);
         }
-        memcpy(result + result_pos, tmp_sym_name, tmp + 1); /* 20180923 */
+        memcpy(result + result_pos, tmp_sym_name, tmp + 1);
         result_pos += tmp;
-      }
-      else if (token[0] == '@' && token[1] == '#') {  /* 20180911 */
-        char* pin_attr = my_malloc(666, sizetok * sizeof(char));
-        char* pin_num_or_name = my_malloc(667, sizetok * sizeof(char));
-
-        pin_num_or_name[0] = '\0';
-        pin_attr[0] = '\0';
-        sscanf(token + 2, "%[^:]:%[^:]", pin_num_or_name, pin_attr);
       }
       if (c == '@') s--;
       else result[result_pos++] = c;
       state = XBEGIN;
     }
     else if (state == XBEGIN) result[result_pos++] = c;
-    if (c == '\0')
-    {
+    if (c == '\0') {
       result[result_pos] = '\0';
-      return result;
+      break;
     }
   }
+  my_free(&token);
+  my_free(&value1);
+  my_free(&value2);
   return result;
 }

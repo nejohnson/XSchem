@@ -678,7 +678,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='V' && state == ShiftMask)                           /* toggle spice/vhdl netlist  */
    {
-    netlist_type++; if(netlist_type==5) netlist_type=1;
+    netlist_type++; if(netlist_type==6) netlist_type=1;
     if(netlist_type == CAD_VHDL_NETLIST)
     {
      tclsetvar("netlist_type","vhdl");
@@ -694,6 +694,10 @@ int callback(int event, int mx, int my, KeySym key,
     else if(netlist_type == CAD_TEDAX_NETLIST)
     {
      tclsetvar("netlist_type","tedax");
+    }
+    else if(netlist_type == CAD_SYMBOL_ATTRS)
+    {
+     tclsetvar("netlist_type","symbol");
     }
     break;
    }

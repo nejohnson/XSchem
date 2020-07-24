@@ -32,9 +32,9 @@ void global_verilog_netlist(int global)  /* netlister driver */
  static char *tmp_string=NULL;
  unsigned int *stored_flags;
  int i, tmp, save_ok;
- char netl[PATH_MAX];  /* overflow safe 20161122 */
- char netl2[PATH_MAX]; /* 20081203  overflow safe 20161122 */
- char netl3[PATH_MAX]; /* 20081203  overflow safe 20161122 */
+ char netl_filename[PATH_MAX];  /* overflow safe 20161122 */
+ char tcl_cmd_netlist[PATH_MAX + 100]; /* 20081203  overflow safe 20161122 */
+ char cellname[PATH_MAX]; /* 20081203  overflow safe 20161122 */
  static char *type=NULL;
  struct stat buf;
  char *subckt_name;
@@ -55,15 +55,20 @@ void global_verilog_netlist(int global)  /* netlister driver */
  /* top sch properties used for library use declarations and type definitions */
  /* to be printed before any entity declarations */
 
- my_snprintf(netl, S(netl), "%s/%s", netlist_dir, skip_dir(schematic[currentsch]) );
- fd=fopen(netl, "w");
- my_snprintf(netl3, S(netl3), "%s", skip_dir(schematic[currentsch]));
+ my_snprintf(netl_filename, S(netl_filename), "%s/.%s_%d", netlist_dir, skip_dir(schematic[currentsch]),getpid());
+ fd=fopen(netl_filename, "w");
+
+ if(user_top_netl_name[0]) {
+   my_snprintf(cellname, S(cellname), "%s", get_cell(user_top_netl_name, 0));
+ } else {
+   my_snprintf(cellname, S(cellname), "%s.v", skip_dir(schematic[currentsch]));
+ }
 
  if(fd==NULL){ 
    if(debug_var>=0) fprintf(errfp, "global_verilog_netlist(): problems opening netlist file\n");
    return;
  }
- if(debug_var>=1) fprintf(errfp, "global_verilog_netlist(): opening %s for writing\n",netl);
+ if(debug_var>=1) fprintf(errfp, "global_verilog_netlist(): opening %s for writing\n",netl_filename);
 
 
 
@@ -262,9 +267,9 @@ void global_verilog_netlist(int global)  /* netlister driver */
 
  if(split_files) { /* 20081205 */
    fclose(fd);
-   my_snprintf(netl2, S(netl2), "netlist {%s} noshow {%s.v}", netl3, netl3);
-   tcleval(netl2);
-   if(debug_var==0) xunlink(netl);
+   my_snprintf(tcl_cmd_netlist, S(tcl_cmd_netlist), "netlist {%s} noshow {%s}", netl_filename, cellname);
+   tcleval(tcl_cmd_netlist);
+   if(debug_var==0) xunlink(netl_filename);
  }
 
  /* preserve current level instance flags before descending hierarchy for netlisting, restore later */
@@ -323,14 +328,14 @@ void global_verilog_netlist(int global)  /* netlister driver */
  if(!split_files) {
    fclose(fd);
    if(netlist_show) {
-    my_snprintf(netl2, S(netl2), "netlist {%s} show {%s.v}", netl3, netl3);
-    tcleval(netl2);
+    my_snprintf(tcl_cmd_netlist, S(tcl_cmd_netlist), "netlist {%s} show {%s}", netl_filename, cellname);
+    tcleval(tcl_cmd_netlist);
    }
    else {
-    my_snprintf(netl2, S(netl2), "netlist {%s} noshow {%s.v}", netl3, netl3);
-    tcleval(netl2);
+    my_snprintf(tcl_cmd_netlist, S(tcl_cmd_netlist), "netlist {%s} noshow {%s}", netl_filename, cellname);
+    tcleval(tcl_cmd_netlist);
    }
-   if(debug_var == 0 ) xunlink(netl);
+   if(debug_var == 0 ) xunlink(netl_filename);
  }
 }
 
@@ -345,9 +350,9 @@ void verilog_block_netlist(FILE *fd, int i)  /*20081205 */
  static char *type = NULL; /* 20180124 */
  char filename[PATH_MAX];
  static char *tmp_string = NULL; /* 20190322 */
- char netl[PATH_MAX];
- char netl2[PATH_MAX];  /* 20081202 */
- char netl3[PATH_MAX];  /* 20081202 */
+ char netl_filename[PATH_MAX];
+ char tcl_cmd_netlist[PATH_MAX + 100];  /* 20081202 */
+ char cellname[PATH_MAX];  /* 20081202 */
  char *str_tmp;
 
      if(!strcmp( get_tok_value(instdef[i].prop_ptr,"verilog_stop",0),"true") ) 
@@ -357,10 +362,10 @@ void verilog_block_netlist(FILE *fd, int i)  /*20081205 */
 
 
      if(split_files) {          /* 20081203 */
-       my_snprintf(netl, S(netl), "%s/%s", netlist_dir,  skip_dir(instdef[i].name) );
-       if(debug_var>=1)  fprintf(errfp, "global_vhdl_netlist(): split_files: netl=%s\n", netl);
-       fd=fopen(netl, "w");
-       my_snprintf(netl3, S(netl3), "%s", skip_dir(instdef[i].name) );
+       my_snprintf(netl_filename, S(netl_filename), "%s/.%s_%d", netlist_dir,  skip_dir(instdef[i].name), getpid());
+       if(debug_var>=1)  fprintf(errfp, "global_vhdl_netlist(): split_files: netl_filename=%s\n", netl_filename);
+       fd=fopen(netl_filename, "w");
+       my_snprintf(cellname, S(cellname), "%s.v", skip_dir(instdef[i].name) );
 
      }
 
@@ -474,9 +479,9 @@ void verilog_block_netlist(FILE *fd, int i)  /*20081205 */
      fprintf(fd, "endmodule\n");
      if(split_files) { /* 20081204 */
        fclose(fd);
-       my_snprintf(netl2, S(netl2), "netlist {%s} noshow {%s.v}", netl3, netl3);
-       tcleval(netl2);
-       if(debug_var==0) xunlink(netl);
+       my_snprintf(tcl_cmd_netlist, S(tcl_cmd_netlist), "netlist {%s} noshow {%s}", netl_filename, cellname);
+       tcleval(tcl_cmd_netlist);
+       if(debug_var==0) xunlink(netl_filename);
      }
 
 

@@ -79,9 +79,34 @@
           <Component Id="CMPSYSTEMLIBMISSINGSYM">
             <File Id="MISSINGSYM" KeyPath="yes" Source="../../src/systemlib/missing.sym" />
           </Component>
+          <Component Id="CMPSYSTEMLIBIOPINLCCSYM">
+            <File Id="IOPINLCCSYM" KeyPath="yes" Source="../../src/systemlib/iopin_lcc.sym" />
+          </Component>
+        
+        <Component Id="CMPSYSTEMLIBIOPINLCCTOPSYM">
+            <File Id="IOPINLCCTOPSYM" KeyPath="yes" Source="../../src/systemlib/iopin_lcc_top.sym" />
+          </Component>
+          
+          <Component Id="CMPSYSTEMLIBIPINLCCSYM">
+            <File Id="IPINLCCSYM" KeyPath="yes" Source="../../src/systemlib/ipin_lcc.sym" />
+          </Component>
+          
+          <Component Id="CMPSYSTEMLIBIPINLCCTOPSYM">
+            <File Id="IPINLCCTOPSYM" KeyPath="yes" Source="../../src/systemlib/ipin_lcc_top.sym" />
+          </Component>
+          
+          <Component Id="CMPSYSTEMLIBOPINLCCSYM">
+            <File Id="OPINLCCSYM" KeyPath="yes" Source="../../src/systemlib/opin_lcc.sym" />
+          </Component>
+          <Component Id="CMPSYSTEMLIBOPINLCCTOPSYM">
+            <File Id="OPINLCCTOPSYM" KeyPath="yes" Source="../../src/systemlib/opin_lcc_top.sym" />
+          </Component>
         </Directory>
       </Directory>
       <Directory Id="SHAREFOLDER" Name="share">
+        <Component Id="CMPSRCRESOURCESTCL">
+          <File Id="RESOURCESTCL" KeyPath="yes" Source="../../src/resources.tcl" />
+        </Component>
         <Component Id="CMPSRCXSCHEMRC">
           <File Id="XSCHEMRC" KeyPath="yes" Source="../../src/xschemrc" />
         </Component>
@@ -179,8 +204,16 @@
       <ComponentRef Id="CMPSRCXSCHEMHELP" />
       <ComponentRef Id="CMPSYSTEMLIBFONTSCH" />
       <ComponentRef Id="CMPSYSTEMLIBMISSINGSYM" />
+      
+      <ComponentRef Id="CMPSYSTEMLIBIOPINLCCSYM" />
+      <ComponentRef Id="CMPSYSTEMLIBIOPINLCCTOPSYM" />
+      <ComponentRef Id="CMPSYSTEMLIBIPINLCCSYM" />
+      <ComponentRef Id="CMPSYSTEMLIBIPINLCCTOPSYM" />
+      <ComponentRef Id="CMPSYSTEMLIBOPINLCCSYM" />
+      <ComponentRef Id="CMPSYSTEMLIBOPINLCCTOPSYM" />  
     </ComponentGroup>
     <ComponentGroup Id="share">
+      <ComponentRef Id="CMPSRCRESOURCESTCL" />
       <ComponentRef Id="CMPSRCXSCHEMRC" />
       <ComponentRef Id="CMPBREAKAWK" />
       <ComponentRef Id="CMPCHANGEREFAWK" />

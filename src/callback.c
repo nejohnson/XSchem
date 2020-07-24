@@ -980,7 +980,7 @@ int callback(int event, int mx, int my, KeySym key,
    if(key=='g' && state==ControlMask)              /* set snap factor 20161212 */
    {
     my_snprintf(str, S(str),
-     "input_number \"Enter snap value (default: %.16g current: %.16g)\" \"xschem set cadsnap_noalert\"", 
+     "input_line \"Enter snap value (default: %.16g current: %.16g)\" \"xschem set cadsnap_noalert\"", 
      cadsnap, CADSNAP);
     tcleval(str);
     break;

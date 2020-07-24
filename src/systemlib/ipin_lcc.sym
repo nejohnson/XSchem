@@ -1,4 +1,4 @@
-v {xschem version=2.9.7 file_version=1.1}
+v {xschem version=2.9.7 file_version=1.2}
 G {type=lcc_ipin
 format="*.ipin @lab"
 template="name=p1 lab=xxx"
@@ -6,6 +6,7 @@ template="name=p1 lab=xxx"
 V {}
 S {}
 E {}
-B 5 -0.078125 -0.078125 0.078125 0.078125 {name=p dir=out}
-P 7 6 0 -2.5 3.75 -2.5 7.5 -0 3.75 2.5 -0 2.5 -0 -2.5 {fill=true}
+L 7 10 -2.5 12.5 0 {}
+L 7 10 2.5 12.5 0 {}
+B 7 -2.5 -2.5 2.5 2.5 {}
 T {@lab} 3.75 -16.25 0 0 0.2 0.2 {}

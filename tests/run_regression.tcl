@@ -20,7 +20,7 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
-set tcases [list "create_save" "open_close"]
+set tcases [list "create_save" "open_close" "netlisting"]
 set log_fn "results.log"
 
 proc summarize_all {fn fd} {
@@ -29,7 +29,7 @@ proc summarize_all {fn fd} {
   set num_fail 0
   if (!$b) {
     while {[gets $fdread line] >=0} {
-      if { [regexp {[FAIL]$} $line] || [regexp {[GOLD\?]$} $line]} { 
+      if { [regexp {[FAIL]$} $line] || [regexp {[GOLD\?]$} $line] || [regexp {^[FATAL]} $line]} { 
         puts $fd $line 
         incr num_fail
       } 
@@ -45,7 +45,9 @@ set a [catch "open \"$log_fn\" w" fd]
 if {!$a} {
 foreach tc $tcases {
     puts "Start source ${tc}.tcl"
-    eval exec {tclsh ${tc}.tcl}
+    if {[catch {eval exec {tclsh ${tc}.tcl} > ${tc}_output.txt} msg]} {
+      puts "Something seems to have gone wrong with $tc, but we will ignore it: $msg"
+    }
     summarize_all ${tc}.log $fd
     puts "Finish source ${tc}.tcl"
   }

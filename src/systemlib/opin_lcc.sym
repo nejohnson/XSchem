@@ -1,4 +1,4 @@
-v {xschem version=2.9.7 file_version=1.1}
+v {xschem version=2.9.7 file_version=1.2}
 G {type=lcc_opin
 format="*.opin @lab"
 template="name=p1 lab=xxx"
@@ -6,6 +6,7 @@ template="name=p1 lab=xxx"
 V {}
 S {}
 E {}
-B 5 -0.078125 -0.078125 0.078125 0.078125 {name=p dir=in}
-P 7 6 -7.5 -2.5 -3.75 -2.5 0 0 -3.75 2.5 -7.5 2.5 -7.5 -2.5 {fill=true}
+L 7 -12.5 -2.5 -10 0 {}
+L 7 -12.5 2.5 -10 0 {}
+B 7 -2.5 -2.5 2.5 2.5 {}
 T {@lab} -3.75 -16.25 0 1 0.2 0.2 {}

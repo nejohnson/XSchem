@@ -20,6 +20,13 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
+set OS [lindex $tcl_platform(os) 0]
+if {$::OS == "Windows"} {
+  set xschem_cmd "xschem"
+} else {
+  set xschem_cmd "../src/xschem"
+}
+
 # From Glenn Jackman (Stack Overflow answer)
 proc comp_file {file1 file2} {
   # optimization: check file size first
@@ -34,7 +41,7 @@ proc comp_file {file1 file2} {
   return $equal
 }
 
-proc print_results {testname pathlist} {
+proc print_results {testname pathlist num_fatals} {
   
   if {[file exists ${testname}/gold]} {
     set a [catch "open \"$testname.log\" w" fd]
@@ -47,9 +54,13 @@ proc print_results {testname pathlist} {
       foreach f $pathlist {
         incr i
         if {![file exists $testname/gold/$f]} {
-        puts $fd "$i. $f: GOLD?" 
-        incr num_gold
-        continue
+          puts $fd "$i. $f: GOLD?" 
+          incr num_gold
+          continue
+        }
+        if {![file exists $testname/results/$f]} {
+          puts $fd "$i. $f: RESULT?" 
+          continue
         }
         if ([comp_file $testname/gold/$f $testname/results/$f]) {
           puts $fd "$i. $f: PASS"
@@ -60,6 +71,9 @@ proc print_results {testname pathlist} {
       } 
       puts $fd "Summary:"
       puts $fd "Num failed: $num_fail      Num missing gold: $num_gold      Num passed: [expr $i-$num_fail-$num_gold]"
+      if {$num_fatals} { 
+        puts $fd "FATAL: $num_fatals.  Please search for FATAL in its output file for more detail"
+      }
       close $fd
     }
   } else {

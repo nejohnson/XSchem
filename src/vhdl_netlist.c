@@ -32,9 +32,9 @@ void global_vhdl_netlist(int global)  /* netlister driver */
  static char *port_value = NULL;
  int i,j, tmp, save_ok;
  unsigned int *stored_flags;
- char netl[PATH_MAX];   /* overflow safe 20161122 */
- char netl2[PATH_MAX];  /* 20081202 overflow safe 20161122 */
- char netl3[PATH_MAX];  /* 20081202 overflow safe 20161122 */
+ char netl_filename[PATH_MAX];   /* overflow safe 20161122 */
+ char tcl_cmd_netlist[PATH_MAX + 100];  /* 20081202 overflow safe 20161122 */
+ char cellname[PATH_MAX];  /* 20081202 overflow safe 20161122 */
  static char *type=NULL;
  struct stat buf;
  char *subckt_name;
@@ -55,15 +55,21 @@ void global_vhdl_netlist(int global)  /* netlister driver */
  }
  netlist_count=0;
  free_hash(subckt_table);
- my_snprintf(netl, S(netl), "%s/%s", netlist_dir, skip_dir(schematic[currentsch]) );
- fd=fopen(netl, "w"); 
- my_snprintf(netl3, S(netl3), "%s", skip_dir(schematic[currentsch]));
+ my_snprintf(netl_filename, S(netl_filename), "%s/.%s_%d", netlist_dir, skip_dir(schematic[currentsch]), getpid());
+ fd=fopen(netl_filename, "w"); 
+
+
+ if(user_top_netl_name[0]) {
+   my_snprintf(cellname, S(cellname), "%s", get_cell(user_top_netl_name, 0));
+ } else {
+   my_snprintf(cellname, S(cellname), "%s.vhdl", skip_dir(schematic[currentsch]));
+ }
 
  if(fd==NULL){ 
    if(debug_var>=0) fprintf(errfp, "global_vhdl_netlist(): problems opening netlist file\n");
    return;
  }
- if(debug_var>=1) fprintf(errfp, "global_vhdl_netlist(): opening %s for writing\n",netl);
+ if(debug_var>=1) fprintf(errfp, "global_vhdl_netlist(): opening %s for writing\n",netl_filename);
 
  if(debug_var>=1) fprintf(errfp, "global_vhdl_netlist(): printing top level packages\n");
   for(i=0;i<lastinst;i++)
@@ -246,7 +252,7 @@ void global_vhdl_netlist(int global)  /* netlister driver */
   if( strcmp(get_tok_value(instdef[j].prop_ptr,"vhdl_primitive",0),"true")==0 ) continue;
   if( strcmp(get_tok_value(instdef[j].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; /* 20070726 */
   /* if(get_tok_value(instdef[j].prop_ptr,"vhdl_format",2)[0] != '\0') continue; */
-  if(strcmp(instdef[j].type,"primitive")!=0 && strcmp(instdef[j].type,"subcircuit")!=0) continue; /*20080611 */
+  if(!instdef[j].type || (strcmp(instdef[j].type,"primitive")!=0 && strcmp(instdef[j].type,"subcircuit")!=0)) continue; /*20080611 */
   if((
       strcmp(instdef[j].type,"subcircuit")==0 ||
       strcmp(instdef[j].type,"primitive")==0 
@@ -311,9 +317,9 @@ void global_vhdl_netlist(int global)  /* netlister driver */
 
  if(split_files) { /* 20081204 */
    fclose(fd);
-   my_snprintf(netl2, S(netl2), "netlist {%s} noshow {%s.vhdl}", netl3, netl3);
-   tcleval(netl2);
-   if(debug_var==0) xunlink(netl);
+   my_snprintf(tcl_cmd_netlist, S(tcl_cmd_netlist), "netlist {%s} noshow {%s}", netl_filename, cellname);
+   tcleval(tcl_cmd_netlist);
+   if(debug_var==0) xunlink(netl_filename);
  }
  netlist_count++;
 
@@ -372,14 +378,14 @@ void global_vhdl_netlist(int global)  /* netlister driver */
  if(!split_files) {
    fclose(fd);
    if(netlist_show) {
-    my_snprintf(netl2, S(netl2), "netlist {%s} show {%s.vhdl}", netl3, netl3);
-    tcleval(netl2); /* 20081202 */
+    my_snprintf(tcl_cmd_netlist, S(tcl_cmd_netlist), "netlist {%s} show {%s}", netl_filename, cellname);
+    tcleval(tcl_cmd_netlist); /* 20081202 */
    }
    else {
-    my_snprintf(netl2, S(netl2), "netlist {%s} noshow {%s.vhdl}", netl3, netl3);
-    tcleval(netl2); /* 20081202 */
+    my_snprintf(tcl_cmd_netlist, S(tcl_cmd_netlist), "netlist {%s} noshow {%s}", netl_filename, cellname);
+    tcleval(tcl_cmd_netlist); /* 20081202 */
    }
-   if(!debug_var) xunlink(netl);
+   if(!debug_var) xunlink(netl_filename);
  }
 }
 
@@ -393,9 +399,9 @@ void  vhdl_block_netlist(FILE *fd, int i)  /*20081204 */
  static char *port_value = NULL;
  static char *type=NULL;
  char filename[PATH_MAX];
- char netl[PATH_MAX];
- char netl2[PATH_MAX];  /* 20081202 */
- char netl3[PATH_MAX];  /* 20081202 */
+ char netl_filename[PATH_MAX];
+ char tcl_cmd_netlist[PATH_MAX + 100];  /* 20081202 */
+ char cellname[PATH_MAX];  /* 20081202 */
  char *str_tmp;
 
      if(!strcmp( get_tok_value(instdef[i].prop_ptr,"vhdl_stop",0),"true") ) 
@@ -404,10 +410,10 @@ void  vhdl_block_netlist(FILE *fd, int i)  /*20081204 */
        vhdl_stop=0;
 
      if(split_files) { /* 20081202 */
-       my_snprintf(netl, S(netl), "%s/%s", netlist_dir,  skip_dir(instdef[i].name) );
-       if(debug_var>=1)  fprintf(errfp, "vhdl_block_netlist(): split_files: netl=%s\n", netl);
-       fd=fopen(netl, "w");
-       my_snprintf(netl3, S(netl3), "%s", skip_dir(instdef[i].name) );
+       my_snprintf(netl_filename, S(netl_filename), "%s/.%s_%d", netlist_dir, skip_dir(instdef[i].name), getpid());
+       if(debug_var>=1)  fprintf(errfp, "vhdl_block_netlist(): split_files: netl_filename=%s\n", netl_filename);
+       fd=fopen(netl_filename, "w");
+       my_snprintf(cellname, S(cellname), "%s.vhdl", skip_dir(instdef[i].name) );
      }
 
      if(debug_var>=1) fprintf(errfp, "vhdl_block_netlist(): expanding %s\n",  instdef[i].name);
@@ -426,6 +432,7 @@ void  vhdl_block_netlist(FILE *fd, int i)  /*20081204 */
      if(debug_var>=1) fprintf(errfp, "vhdl_block_netlist():       packages\n");
      for(l=0;l<lastinst;l++)
      {
+      if(!(inst_ptr[l].ptr+instdef)->type) continue;
       if( strcmp(get_tok_value(inst_ptr[l].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; /* 20140416 */
       if(inst_ptr[l].ptr<0) continue;
       if(!strcmp(get_tok_value( (inst_ptr[l].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
@@ -440,6 +447,7 @@ void  vhdl_block_netlist(FILE *fd, int i)  /*20081204 */
      {
       if( strcmp(get_tok_value(inst_ptr[l].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; /* 20140416 */
       if(inst_ptr[l].ptr<0) continue;
+      if(!(inst_ptr[l].ptr+instdef)->type) continue;
       if(!strcmp(get_tok_value( (inst_ptr[l].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
         continue;
       }
@@ -501,7 +509,7 @@ void  vhdl_block_netlist(FILE *fd, int i)  /*20081204 */
        for(j=0;j<lastinstdef;j++)
        {
         if( strcmp(get_tok_value(instdef[j].prop_ptr,"vhdl_primitive",0),"true")==0 ) continue;
-        if(strcmp(instdef[j].type,"primitive")!=0 && strcmp(instdef[j].type,"subcircuit")!=0) continue;
+        if(!instdef[j].type || (strcmp(instdef[j].type,"primitive")!=0 && strcmp(instdef[j].type,"subcircuit")!=0)) continue;
         if((
             strcmp(instdef[j].type,"subcircuit")==0 ||
             strcmp(instdef[j].type,"primitive")==0
@@ -580,9 +588,9 @@ void  vhdl_block_netlist(FILE *fd, int i)  /*20081204 */
      fprintf(fd, "end arch_%s ;\n\n", skip_dir( schematic[currentsch]) );
      if(split_files) { /* 20081204 */
        fclose(fd);
-       my_snprintf(netl2, S(netl2), "netlist {%s} noshow {%s.vhdl}", netl3, netl3);
-       tcleval(netl2);
-       if(debug_var==0) xunlink(netl);
+       my_snprintf(tcl_cmd_netlist, S(tcl_cmd_netlist), "netlist {%s} noshow {%s}", netl_filename, cellname);
+       tcleval(tcl_cmd_netlist);
+       if(debug_var==0) xunlink(netl_filename);
      }
      netlist_count++;
 } 
@@ -603,6 +611,7 @@ void vhdl_netlist(FILE *fd , int vhdl_stop)
  for(l=0;l<lastinst;l++)
  {
   if( strcmp(get_tok_value(inst_ptr[l].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue; /* 20140416 */
+  if(!(inst_ptr[l].ptr+instdef)->type) continue;
   if(inst_ptr[l].ptr<0) continue;
   if(!strcmp(get_tok_value( (inst_ptr[l].ptr+instdef)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
     continue;

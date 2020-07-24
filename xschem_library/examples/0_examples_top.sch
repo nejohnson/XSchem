@@ -1,4 +1,4 @@
-v {xschem version=2.9.6 file_version=1.1}
+v {xschem version=2.9.7 file_version=1.2}
 G {}
 V {}
 S {}
@@ -60,7 +60,7 @@ C {title.sym} 160 -30 0 0 {name=l1 author="Stefan Schippers"}
 C {cmos_example.sym} 160 -350 0 0 {name=x6}
 C {greycnt.sym} 160 -390 0 0 {name=x8}
 C {loading.sym} 160 -430 0 0 {name=x9}
-C {inv.sym} 930 -200 0 0 {name=E1 TABLE="1.4 3.0 1.6 0.0"}
+C {inv_bsource.sym} 930 -200 0 0 {name=B1 TABLE="1.4 3.0 1.6 0.0"}
 C {launcher.sym} 460 -210 0 0 {name=h1 
 descr="XSCHEM ON REPO.HU" 
 url="http://repo.hu/projects/xschem"
@@ -81,3 +81,4 @@ C {lab_pin.sym} 700 -530 0 1 {name=l2 sig_type=std_logic lab=BUS[4:0]}
 C {bus_connect.sym} 500 -530 0 0 {name=l3 lab=BUS[1]}
 C {bus_connect_nolab.sym} 400 -530 0 0 {name=r1}
 C {lab_pin.sym} 410 -600 3 1 {name=l4 sig_type=std_logic lab=BUS[2]}
+C {LCC_instances.sym} 160 -110 0 0 {name=x7}

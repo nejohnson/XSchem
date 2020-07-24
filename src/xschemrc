@@ -52,6 +52,11 @@
 
 append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/xschem_library/devices/spice
 
+# For Windows, use ; instead of :, and enclosed pathname with ""
+#append XSCHEM_LIBRARY_PATH ";."
+#append XSCHEM_LIBRARY_PATH ";${XSCHEM_SHAREDIR}/../xschem_library"
+#append XSCHEM_LIBRARY_PATH ";${XSCHEM_SHAREDIR}/../xschem_library/devices"
+
 ###########################################################################
 ## set custom colors for xschem libraries matching certain patterns
 ## each line contains a pattern followed by a color

@@ -824,7 +824,7 @@ void prepare_netlist_structs(int for_netlist)
             }
             if ((iptr->x0==x0) && (iptr->y0==y0))
             {
-              if (inst_ptr[iptr->n].node[iptr->pin] != NULL &&
+              if ((inst_ptr[iptr->n].ptr+instdef)->type && inst_ptr[iptr->n].node[iptr->pin] != NULL &&
                  !strcmp((inst_ptr[iptr->n].ptr+instdef)->type, "label")) /* 20150409 */
               {
                 if (debug_var>=2) fprintf(errfp, "prepare_netlist_structs(): naming generic %s\n", 
@@ -1223,6 +1223,7 @@ int sym_vs_sch_pins()
         }
         my_free(&lab_array);
         lab_array_size = 0;
+        pin_cnt=0;
       }
 
 

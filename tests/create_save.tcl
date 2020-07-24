@@ -23,12 +23,13 @@
 source test_utility.tcl
 set testname "create_save"
 set pathlist {}
+set num_fatals 0
 
 file delete -force $testname/results
 file mkdir $testname/results
 
 proc create_save {} {
-  global testname pathlist
+  global testname pathlist xschem_cmd num_fatals
   set results_dir ${testname}/results
   if {[file exists ${testname}/tests]} {
     set ff [lsort [glob -directory ${testname}/tests -tails \{.*,*\}]]
@@ -46,8 +47,9 @@ proc create_save {} {
           close $fd
           set filename [regsub {\.tcl$} $f {}]
           set output ${filename}_debug.txt
-          if {[catch {eval exec {xschem ${results_dir}/$fn_sch -d 1 --script ${testname}/tests/${f} 2> ${results_dir}/$output}} msg]} {
-            puts "Something seems to have gone wrong with $f, but we will ignore it: $msg"
+          if {[catch {eval exec {$xschem_cmd ${results_dir}/$fn_sch -d 1 --script ${testname}/tests/${f} 2> ${results_dir}/$output}} msg]} {
+            puts "FATAL: $msg"
+            incr num_fatals
           } else {
             lappend pathlist $output
             lappend pathlist "${filename}.sch"
@@ -61,4 +63,4 @@ proc create_save {} {
 }
 
 create_save
-print_results $testname $pathlist
+print_results $testname $pathlist $num_fatals

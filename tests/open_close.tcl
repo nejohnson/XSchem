@@ -23,6 +23,7 @@
 source test_utility.tcl
 set testname "open_close"
 set pathlist {}
+set num_fatals 0
 
 if {![file exists $testname]} {
   file mkdir $testname
@@ -34,18 +35,20 @@ file mkdir $testname/results
 set xschem_library_path "../xschem_library"
 
 proc open_close {dir fn} {
-  global xschem_library_path testname pathlist
+  global xschem_library_path testname pathlist xschem_cmd
   set fpath "$dir/$fn"
   if { [regexp {\.(sym|sch)$} $fn ] } {
     puts "Testing (open_close) $fpath"  
     set output_dir $dir
     regsub -all $xschem_library_path $output_dir {} output_dir
     regsub {^/} $output_dir {} output_dir
+    regsub {/} $output_dir {,} output_dir
     set fn_debug [join [list $output_dir , [regsub {\.} $fn {_}] "_debug.txt"] ""]
     set output [join [list $testname / results / $fn_debug] ""]
     puts "Output: $fn_debug"
-    if {[catch {eval exec {xschem $fpath -q -x -r -d 1 2> $output}} msg]} {
-      puts "Something seems to have gone wrong with $fpath, but we will ignore it: $msg"
+    if {[catch {eval exec {$xschem_cmd $fpath -q -x -r -d 1 2> $output}} msg]} {
+      puts "FATAL: $xschem_cmd $fpath -q -x -r -d 1 2> $output : $msg"
+      incr num_fatals
     } else {
       lappend pathlist $fn_debug
       cleanup_debug_file $output
@@ -69,4 +72,4 @@ proc open_close_dir {dir} {
 }
 
 open_close_dir $xschem_library_path
-print_results $testname $pathlist
+print_results $testname $pathlist $num_fatals

@@ -47,7 +47,7 @@
 #define XSCH_PI 3.14159265358979323846264338327950288419716939937
 
 #ifdef __unix__
-/* #include "../config.h" *.
+/* #include "../config.h" */
 #else
 #include "../XSchemWin/config.h"
 #endif
@@ -385,7 +385,7 @@ typedef struct
    char *prop_ptr;
    char *type; /*  20150409 */
    char *templ; /*  20150409 */
-   unsigned int flags;
+   unsigned int flags; /* currently only used for embedded symbols (EMBEDDED) */
 } Instdef;
 
 typedef struct
@@ -594,6 +594,7 @@ extern int *max_lines;
 extern int previous_instance[];
 extern int split_files;
 extern char *netlist_dir;
+extern char user_top_netl_name[PATH_MAX];
 extern char bus_replacement_char[];
 extern void set_modify(int mod);
 

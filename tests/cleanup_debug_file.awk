@@ -36,6 +36,12 @@ function replace_pattern(old, new)
   replace_pattern("framewinID.*$", "framewinID ***Removed***")
   replace_pattern("resetwin.*$", "resetwin ***Removed***")
   replace_pattern("read_xschem_file.*$", "read_xschem_file ***Removed***")
+  replace_pattern("EMERGENCY SAVE DIR dir.*$", "EMERGENCY SAVE DIR dir ***Removed***")
+  replace_pattern("tcleval[:(:][:):]: evaluation of script: netlist.*$", "tcleval(): evaluation of script: netlist ***Removed***")
+  replace_pattern("global_verilog_netlist[:(:][:):]: opening.*$", "global_verilog_netlist(): opening ***Removed***")
+  replace_pattern("global_vhdl_netlist[:(:][:):]: opening.*$", "global_vhdl_netlist(): opening ***Removed***")
+  replace_pattern("global_tedax_netlist[:(:][:):]: opening.*$", "global_tedax_netlist(): opening***Removed***")
+  replace_pattern("global_spice_netlist[:(:][:):]: opening.*$", "global_spice_netlist(): opening ***Removed***")
   __a[__lines++] = $0
 }
 

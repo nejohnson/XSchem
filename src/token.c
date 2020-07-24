@@ -831,11 +831,13 @@ const char *get_trailing_path(const char *str, int no_of_dir, int skip_ext)
   return s+(dir_pos<len ? dir_pos+1 : 0);
 }
 
+/* skip also extension */
 const char *skip_dir(const char *str)
 {
   return get_trailing_path(str, 0, 1);
 }
-    
+   
+/* no extension */ 
 const char *get_cell(const char *str, int no_of_dir)
 { 
   return get_trailing_path(str, no_of_dir, 1);
@@ -911,6 +913,7 @@ void print_vhdl_element(FILE *fd, int inst) /* 20071217 */
 
  while(1)
  {
+   if (s==NULL) break;
   c=*s++;
   if(c=='\\') {
     escape=1;
@@ -1758,6 +1761,7 @@ void print_verilog_element(FILE *fd, int inst)
  tmp=0;
  while(1)
  {
+   if (s==NULL) break;
   c=*s++;
   if(c=='\\')
   {

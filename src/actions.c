@@ -1002,6 +1002,7 @@ void schematic_in_new_window(void)
  else
  {
   if(                   /*  do not descend if not subcircuit */
+     (inst_ptr[selectedgroup[0].n].ptr+instdef)->type && 
      strcmp(
         (inst_ptr[selectedgroup[0].n].ptr+instdef)->type, /*  20150409 */
          "subcircuit"
@@ -1087,7 +1088,7 @@ void descend_schematic(void)
     if(save_ok==-1) return; /*  20171020 */
   }
 
-  if(debug_var>0) fprintf(errfp, "type of instance: %s\n", (inst_ptr[selectedgroup[0].n].ptr+instdef)->type);
+  if(debug_var>=1) fprintf(errfp, "type of instance: %s\n", (inst_ptr[selectedgroup[0].n].ptr+instdef)->type);
 
   if(                   /*  do not descend if not subcircuit */
      (inst_ptr[selectedgroup[0].n].ptr+instdef)->type && 

@@ -252,7 +252,8 @@ int hilight_color=0;
 Zoom zoom_array[CADMAXHIER];
 int pending_fullzoom=0;
 int split_files=0; /* split netlist files 20081202 */
-char *netlist_dir=NULL; /* 20081210 */
+char *netlist_dir=NULL; /* user set netlist directory via cmd-option or menu or xschemrc */
+char user_top_netl_name[PATH_MAX] = ""; /* user set netlist name via cmd option -N <name> */
 int horizontal_move=0; /* 20171023 */
 int vertical_move=0; /* 20171023 */
 XColor xcolor_array[256];/* 20171109 */

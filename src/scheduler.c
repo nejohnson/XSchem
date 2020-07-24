@@ -1240,13 +1240,6 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
    Tcl_ResetResult(interp);
  }
 
- else if(!strcmp(argv[1],"netlist_show"))
- {
-   if(!strcmp(argv[2],"yes")) netlist_show=1;
-   else netlist_show=0;
-   Tcl_ResetResult(interp);
- }
-
  else if(!strcmp(argv[1],"netlist_type"))
  {
   if(!strcmp(argv[2],"vhdl")) {
@@ -1778,6 +1771,9 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
      int s = atoi(argv[3]);
      no_draw=s;
    }
+   else if(!strcmp(argv[2],"user_top_netl_name"))  { /* 20171204 */
+     my_strncpy(user_top_netl_name, argv[3], S(user_top_netl_name));
+   }
    else if(!strcmp(argv[2],"dim"))  {
      double s = atof(argv[3]);
      build_colors(s);
@@ -1838,6 +1834,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
    }
    else if(!strcmp(argv[2],"netlist_show"))  {
          netlist_show=atoi(argv[3]);
+         tclsetvar("netlist_show", netlist_show ? "1" : "0");
    }
    else if(!strcmp(argv[2],"semaphore"))  {
          semaphore=atoi(argv[3]);

@@ -76,11 +76,11 @@ void check_opt(char *opt, char *optval, int type)
 
     } else if( (type == LONG && !strcmp("tcl", opt)) ) {
         if(debug_var>=1) fprintf(errfp, "process_options(): passing tcl command to interpreter: %s\n", optval);
-        my_strdup(110, &tcl_command, optval);
+        if(optval) my_strdup(110, &tcl_command, optval);
 
     } else if( (type == LONG && !strcmp("script", opt)) ) {
         if(debug_var>=1) fprintf(errfp, "process_options(): passing tcl script file  to interpreter: %s\n", optval);
-        my_strncpy(tcl_script, optval, S(tcl_script));
+        if(optval) my_strncpy(tcl_script, optval, S(tcl_script));
 
     } else if( (type == LONG && !strcmp("tcp_port", opt)) ) {
         if(debug_var>=1) fprintf(errfp, "process_options(): setting tcp port: %s\n", optval);
@@ -106,9 +106,11 @@ void check_opt(char *opt, char *optval, int type)
         if(optval) errfp = fopen(optval, "w");
 
     } else if( (type == SHORT && *opt == 'o') || (type == LONG && !strcmp("netlist_path", opt)) ) {
-        if(optval) {
-          my_strdup(48, &netlist_dir, optval);
-        }
+        if(optval) my_strdup(48, &netlist_dir, optval);
+
+    } else if( (type == SHORT && *opt == 'N') || (type == LONG && !strcmp("netlist_filename", opt)) ) {
+        if(debug_var>=1) fprintf(errfp, "process_options(): set netlist name to %s\n", optval);
+        if(optval) my_strncpy(user_top_netl_name, optval, S(user_top_netl_name));
 
     } else if( (type == SHORT && *opt == 's') || (type == LONG && !strcmp("spice", opt)) ) {
         if(debug_var>=1) fprintf(errfp, "process_options(): set netlist type to spice\n");
@@ -177,6 +179,9 @@ int process_options(int argc, char *argv[])
             else if(!strcmp("tcp_port", opt)) {
               optval = argv[++i];
             }
+            else if(!strcmp("netlist_filename", opt)) {
+              optval = argv[++i];
+            }
             else if(!strcmp("log", opt)) {
               optval = argv[++i];
             }
@@ -198,6 +203,9 @@ int process_options(int argc, char *argv[])
         while(*opt) {
           optval = NULL;
           /* options requiring arguments are listed here */
+          if(*opt == 'N') { /* output top netlist file name in netlist_dir */
+            optval = argv[++i];
+          }
           if(*opt == 'l') {
             optval = argv[++i];
           }

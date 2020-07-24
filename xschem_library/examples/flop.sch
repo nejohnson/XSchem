@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC5 file_version=1.1}
+v {xschem version=2.9.7 file_version=1.2}
 G {}
 V {}
 S {}
@@ -9,7 +9,7 @@ C {ipin.sym} 240 -160 0 0 {name=p0 lab=D}
 C {opin.sym} 540 -160 0 0 {name=p2 lab=Q}
 C {ipin.sym} 240 -110 0 0 {name=p4 lab=VSS}
 C {ipin.sym} 240 -140 0 0 {name=p1 lab=CK}
-C {inv.sym} 130 -320 0 0 {name=E5 TABLE="'VTH-0.1' VHI 'VTH+0.1' 0"}
+C {inv_bsource.sym} 130 -320 0 0 {name=B5 TABLE="'VTH-0.1' VHI 'VTH+0.1' 0"}
 C {lab_pin.sym} 130 -290 0 0 {name=p5 lab=VSS}
 C {lab_pin.sym} 220 -340 0 0 {name=p10 lab=D}
 C {dlatch.sym} 310 -330 0 0 {name=x5 VTH=VTH VHI=VHI}

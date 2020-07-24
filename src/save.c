@@ -1707,7 +1707,7 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
   if ((prop_ptr = strrchr(name4, '.')) && !strcmp(prop_ptr, ".sch")) {
     save = lastinstdef; /* save idx because match_symbol may call load_symbol_definition */
     current_sym = match_symbol(add_ext(name4, ".sym"));
-    if (strcmp(instdef[current_sym].type, "missing")) { /* To ensure SCH's BOX's PINLAYER matches SYM so netlisting will be corect */
+    if ( instdef[current_sym].type && strcmp(instdef[current_sym].type, "missing")) { /* To ensure SCH's BOX's PINLAYER matches SYM so netlisting will be corect */
       Gcurrent_sym = current_sym;
       qsort(instdef[save-1].boxptr[PINLAYER], instdef[save-1].rects[PINLAYER], sizeof(Box), CmpSchBbox);
     }

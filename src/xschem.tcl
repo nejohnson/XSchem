@@ -111,54 +111,51 @@ proc execute {status args} {
 
 proc netlist {source_file show netlist_file} {
  global XSCHEM_SHAREDIR flat_netlist hspice_netlist netlist_dir
- global verilog_2001
+ global verilog_2001 netlist_type
 
- if [regexp {\.spice} $netlist_file ] {
+ if {$netlist_type eq {spice}} {
    if { $hspice_netlist == 1 } {
      set hspice {-hspice}
    } else {
      set hspice {}
    }
    if {$flat_netlist==0} {
-     eval exec {awk -f ${XSCHEM_SHAREDIR}/spice.awk -- $hspice $netlist_dir/$source_file | \
+     eval exec {awk -f ${XSCHEM_SHAREDIR}/spice.awk -- $hspice $source_file | \
           awk -f ${XSCHEM_SHAREDIR}/break.awk > $netlist_dir/$netlist_file}
    } else {
-     eval exec {awk -f ${XSCHEM_SHAREDIR}/spice.awk -- $hspice $netlist_dir/$source_file | \
+     eval exec {awk -f ${XSCHEM_SHAREDIR}/spice.awk -- $hspice $source_file | \
           awk -f ${XSCHEM_SHAREDIR}/flatten.awk | awk -f ${XSCHEM_SHAREDIR}/break.awk > $netlist_dir/$netlist_file}
    }
    if ![string compare $show "show"] {
       textwindow $netlist_dir/$netlist_file
    }
  } 
- if [regexp {\.vhdl} $netlist_file ] {
-   eval exec {awk -f $XSCHEM_SHAREDIR/vhdl.awk $netlist_dir/$source_file > $netlist_dir/$netlist_file}
+ if {$netlist_type eq {vhdl}} {
+   eval exec {awk -f $XSCHEM_SHAREDIR/vhdl.awk $source_file > $netlist_dir/$netlist_file}
    if ![string compare $show "show"] {
      textwindow $netlist_dir/$netlist_file
    }
  }
- if [regexp {\.tdx$} $netlist_file ] {
-   eval exec {awk -f $XSCHEM_SHAREDIR/tedax.awk $netlist_dir/$source_file \
+ if {$netlist_type eq {tedax}} {
+   eval exec {awk -f $XSCHEM_SHAREDIR/tedax.awk $source_file \
               > $netlist_dir/$netlist_file}
    if ![string compare $show "show"] {
      textwindow $netlist_dir/$netlist_file
    }
  }
- if [regexp {\.v$} $netlist_file ] {
-   eval exec {awk -f ${XSCHEM_SHAREDIR}/verilog.awk $netlist_dir/$source_file \
+ if {$netlist_type eq {verilog}} {
+   eval exec {awk -f ${XSCHEM_SHAREDIR}/verilog.awk $source_file \
               > $netlist_dir/$netlist_file}
 
    # 20140409
    if { $verilog_2001==1 } { 
-     eval exec {awk -f ${XSCHEM_SHAREDIR}/convert_to_verilog2001.awk $netlist_dir/$netlist_file > $netlist_dir/${netlist_file}vv}
-     eval exec {mv $netlist_dir/${netlist_file}vv $netlist_dir/$netlist_file}
+     set vv [pid]
+     eval exec {awk -f ${XSCHEM_SHAREDIR}/convert_to_verilog2001.awk $netlist_dir/$netlist_file > $netlist_dir/${netlist_file}$vv}
+     eval exec {mv $netlist_dir/${netlist_file}$vv $netlist_dir/$netlist_file}
    }
    if ![string compare $show "show"] {
      textwindow "$netlist_dir/$netlist_file"
    }
- }
-
- if ![string compare $netlist_file "netlist"] {
-         textwindow "$netlist_dir/netlist"
  }
  return {}
 }
@@ -2447,31 +2444,36 @@ proc add_ext {fname ext} {
 }
  
 
-proc input_number {txt cmd} {
-          global xx
-          toplevel .dialog -class Dialog
-          wm title .dialog {Input number}
-          set X [expr [winfo pointerx .dialog] - 60]
-          set Y [expr [winfo pointery .dialog] - 35]
-          # 20100203
-          if { $::wm_fix } { tkwait visibility .dialog }
-          wm geometry .dialog "+$X+$Y"
-          set xx $cmd
-          frame .dialog.f1
-          label .dialog.f1.l -text $txt
-          entry .dialog.f1.e -width 12
-          pack .dialog.f1.l .dialog.f1.e -side left
-          frame .dialog.f2
-          button .dialog.f2.ok -text OK -command {  eval [subst -nocommands "$xx {[.dialog.f1.e get]}"] ; destroy .dialog }
-          button .dialog.f2.cancel -text Cancel -command { destroy .dialog }
-          pack .dialog.f2.ok  -anchor w -side left
-          pack .dialog.f2.cancel -anchor e
-          pack .dialog.f1
-          pack .dialog.f2 -expand yes -fill x
-          bind .dialog <Escape> {.dialog.f2.cancel invoke}
-          grab set .dialog
-          focus .dialog
-          tkwait window .dialog
+proc input_line {txt cmd {w 12}} {
+  global input_line_data
+  global input_line_cmd
+  toplevel .dialog -class Dialog
+  wm title .dialog {Input number}
+  set X [expr [winfo pointerx .dialog] - 60]
+  set Y [expr [winfo pointery .dialog] - 35]
+  # 20100203
+  if { $::wm_fix } { tkwait visibility .dialog }
+  wm geometry .dialog "+$X+$Y"
+  set input_line_cmd $cmd
+  frame .dialog.f1
+  label .dialog.f1.l -text $txt
+  entry .dialog.f1.e -width $w
+  pack .dialog.f1.l .dialog.f1.e -side left
+  frame .dialog.f2
+  button .dialog.f2.ok -text OK  -command {
+     set input_line_data [.dialog.f1.e get]
+     eval [subst -nocommands {$input_line_cmd [.dialog.f1.e get]}]
+     destroy .dialog
+   }
+  button .dialog.f2.cancel -text Cancel -command { destroy .dialog }
+  pack .dialog.f2.ok  -anchor w -side left
+  pack .dialog.f2.cancel -anchor e
+  pack .dialog.f1
+  pack .dialog.f2 -expand yes -fill x
+  bind .dialog <Escape> {.dialog.f2.cancel invoke}
+  grab set .dialog
+  focus .dialog
+  tkwait window .dialog
 }
 
 ## 20161102
@@ -2525,7 +2527,11 @@ proc reconfigure_layers_menu {} {
 proc get_file_path {ff} {
   global env
   if { [regexp {/} $ff] } { return $ff } 
-  set pathlist [split $env(PATH) :]
+  if {$::OS == "Windows"} {
+    set pathlist [split $env(PATH) \;]
+  } else {
+    set pathlist [split $env(PATH) :]
+  }
   foreach i $pathlist {
     set ii $i/$ff
     if { [file exists $ii]} {return $ii}
@@ -2696,7 +2702,11 @@ set OS [lindex $tcl_platform(os) 0]
 # tcl variable XSCHEM_LIBRARY_PATH  should already be set in xschemrc
 set pathlist {}
 if { [info exists XSCHEM_LIBRARY_PATH] } {
-  set pathlist_orig [split $XSCHEM_LIBRARY_PATH :]
+  if {$::OS == "Windows"} {
+    set pathlist_orig [split $XSCHEM_LIBRARY_PATH \;]
+  } else {
+    set pathlist_orig [split $XSCHEM_LIBRARY_PATH :]
+  }
   foreach i $pathlist_orig {
     regsub {^~} $i $env(HOME) i
     if { ![string compare $i .] } {
@@ -2749,6 +2759,7 @@ set_ne globfilter {*}
 ## list of tcl procedures to load at end of xschem.tcl
 set_ne tcl_files {}
 set_ne netlist_dir "$USER_CONF_DIR/simulations"
+set_ne user_top_netl_name {}
 set_ne bus_replacement_char {} ;# use {<>} to replace [] with <> in bussed signals
 set_ne hspice_netlist 0
 set_ne top_subckt 0
@@ -3098,7 +3109,7 @@ font configure Underline-Font -underline true -size 24
       }
    .menubar.option.menu add command -label "Replace \[ and \] for buses in SPICE netlist" \
       -command {
-        input_number "Enter two characters to replace default bus \[\] delimiters:" "set tmp_bus_char"
+        input_line "Enter two characters to replace default bus \[\] delimiters:" "set tmp_bus_char"
         if { [info exists tmp_bus_char] && [string length $tmp_bus_char] >=2} { set bus_replacement_char $tmp_bus_char } 
       }
    .menubar.option.menu add checkbutton -label "Verilog 2001 netlist variant" -variable verilog_2001 \
@@ -3125,11 +3136,11 @@ font configure Underline-Font -underline true -size 24
    
    .menubar.option.menu add command -label "Set line width" \
         -command {
-          input_number "Enter linewidth (float):" "xschem line_width"
+          input_line "Enter linewidth (float):" "xschem line_width"
         }
    .menubar.option.menu add command -label "Set symbol width" \
         -command {
-          input_number "Enter Symbol width ($symbol_width)" "set symbol_width"
+          input_line "Enter Symbol width ($symbol_width)" "set symbol_width"
         }
    .menubar.option.menu add checkbutton -label "Allow duplicated instance names (refdes)" \
        -variable disable_unique_names -command {
@@ -3265,12 +3276,12 @@ font configure Underline-Font -underline true -size 24
         }
    .menubar.zoom.menu add command -label "Set snap value" \
           -command {
-          input_number "Enter snap value ( default: [xschem get cadsnap_default] current: [xschem get cadsnap])" \
+          input_line "Enter snap value ( default: [xschem get cadsnap_default] current: [xschem get cadsnap])" \
           "xschem set cadsnap"
         }
    .menubar.zoom.menu add command -label "Set grid spacing" \
         -command {
-          input_number "Enter grid spacing (float):" "xschem set cadgrid"
+          input_line "Enter grid spacing (float):" "xschem set cadgrid"
         }
    .menubar.zoom.menu add checkbutton -label "View only Probes" -variable only_probes \
           -accelerator {5} \
@@ -3388,6 +3399,10 @@ font configure Underline-Font -underline true -size 24
    .menubar.simulation.menu add command -label "Set netlist Dir" \
      -command {
            select_netlist_dir 1
+     }
+   .menubar.simulation.menu add command -label "Set top level netlist name" \
+     -command {
+           input_line {Set netlist file name} {xschem set user_top_netl_name} 40
      }
    .menubar.simulation.menu add command -label {Configure simulators and tools} -command {simconf}
    .menubar.simulation.menu add command -label {Utile Stimuli Editor (GUI)} -command {utile_gui [file tail [xschem get schname]]}

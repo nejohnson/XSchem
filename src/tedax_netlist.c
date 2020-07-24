@@ -27,9 +27,9 @@ void global_tedax_netlist(int global)  /* netlister driver */
  FILE *fd;
  int i, save_ok;
  unsigned int *stored_flags;
- char netl[PATH_MAX]; /* overflow safe 20161122 */
- char netl2[PATH_MAX]; /* 20081211 overflow safe 20161122 */
- char netl3[PATH_MAX]; /* 20081211 overflow safe 20161122 */
+ char netl_filename[PATH_MAX]; /* overflow safe 20161122 */
+ char tcl_cmd_netlist[PATH_MAX + 100]; /* 20081211 overflow safe 20161122 */
+ char cellname[PATH_MAX]; /* 20081211 overflow safe 20161122 */
 
  if(current_type==SYMBOL) {
    tcleval("alert_ {This is a symbol, no netlisting can be done.\n"
@@ -45,15 +45,20 @@ void global_tedax_netlist(int global)  /* netlister driver */
  record_global_node(2, NULL, NULL); /* delete list of global nodes */
  netlist_count=0;
 
- my_snprintf(netl, S(netl), "%s/%s", netlist_dir, skip_dir(schematic[currentsch]) );
- fd=fopen(netl, "w");
- my_snprintf(netl3, S(netl3), "%s", skip_dir(schematic[currentsch]));
+ my_snprintf(netl_filename, S(netl_filename), "%s/.%s_%d", netlist_dir, skip_dir(schematic[currentsch]), getpid());
+ fd=fopen(netl_filename, "w");
+
+ if(user_top_netl_name[0]) {
+   my_snprintf(cellname, S(cellname), "%s", get_cell(user_top_netl_name, 0));
+ } else {
+   my_snprintf(cellname, S(cellname), "%s.tdx", skip_dir(schematic[currentsch]));
+ }
 
  if(fd==NULL){ 
    if(debug_var>=0) fprintf(errfp, "global_tedax_netlist(): problems opening netlist file\n");
    return;
  }
- if(debug_var>=1) fprintf(errfp, "global_tedax_netlist(): opening %s for writing\n",netl);
+ if(debug_var>=1) fprintf(errfp, "global_tedax_netlist(): opening %s for writing\n",netl_filename);
  fprintf(fd,"tEDAx v1\nbegin netlist v1 %s\n", skip_dir( schematic[currentsch]) );
 
  tedax_netlist(fd, 0);
@@ -113,14 +118,14 @@ void global_tedax_netlist(int global)  /* netlister driver */
 
  fclose(fd);
  if(netlist_show) {
-  my_snprintf(netl2, S(netl2), "netlist {%s} show {%s.tdx}", netl3, netl3);
-  tcleval(netl2);
+  my_snprintf(tcl_cmd_netlist, S(tcl_cmd_netlist), "netlist {%s} show {%s}", netl_filename, cellname);
+  tcleval(tcl_cmd_netlist);
  }
  else {
-  my_snprintf(netl2, S(netl2), "netlist {%s} noshow {%s.tdx}", netl3, netl3);
-  tcleval(netl2);
+  my_snprintf(tcl_cmd_netlist, S(tcl_cmd_netlist), "netlist {%s} noshow {%s}", netl_filename, cellname);
+  tcleval(tcl_cmd_netlist);
  }
- if(!debug_var) xunlink(netl);
+ if(!debug_var) xunlink(netl_filename);
 }
 
 
@@ -129,9 +134,9 @@ void tedax_block_netlist(FILE *fd, int i)  /*20081223 */
   int j;
   int tedax_stop=0; /* 20111113 */
   char filename[PATH_MAX];
-  char netl[PATH_MAX];
-  char netl2[PATH_MAX];  /* 20081202 */
-  char netl3[PATH_MAX];  /* 20081202 */
+  char netl_filename[PATH_MAX];
+  char tcl_cmd_netlist[PATH_MAX + 100];  /* 20081202 */
+  char cellname[PATH_MAX];  /* 20081202 */
   const char *str_tmp;
   int mult;
   static char *extra=NULL;
@@ -171,9 +176,9 @@ void tedax_block_netlist(FILE *fd, int i)  /*20081223 */
   fprintf(fd, ".ends\n\n");
   if(split_files) { /* 20081204 */
     fclose(fd);
-    my_snprintf(netl2, S(netl2), "netlist {%s} noshow {%s.tdx}", netl3, netl3);
-    tcleval(netl2);
-    if(debug_var==0) xunlink(netl);
+    my_snprintf(tcl_cmd_netlist, S(tcl_cmd_netlist), "netlist {%s} noshow {%s}", netl_filename, cellname);
+    tcleval(tcl_cmd_netlist);
+    if(debug_var==0) xunlink(netl_filename);
   }
 }
 

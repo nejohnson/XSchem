@@ -267,7 +267,7 @@ proc edit_file {filename} {
 proc save_sim_defaults {f} {
   global sim 
   
-  set a [catch "open \"$f\" w" fd]
+  set a [catch {open $f w} fd]
   if { $a } {
     puts "save_sim_defaults: error opening file $f: $fd"
     return
@@ -283,7 +283,7 @@ proc save_sim_defaults {f} {
     puts $fd "set sim($tool,default) $sim($tool,default) ;# default $tool tool to launch"
     puts $fd {}
     for {set i 0} {$i < $sim($tool,n)} { incr i} {
-      puts $fd "# specify tool command (cmd), name (name), and if tool must run in foreground"
+      puts $fd "# specify tool command (cmd), name (name), if tool must run in foreground and if exit status must be reported"
       puts $fd "set sim($tool,$i,cmd) {$sim($tool,$i,cmd)}"
       puts $fd "set sim($tool,$i,name) {$sim($tool,$i,name)}"
       puts $fd "set sim($tool,$i,fg) $sim($tool,$i,fg)"
@@ -295,103 +295,156 @@ proc save_sim_defaults {f} {
   close $fd
 }
 
+
+proc update_recent_file {f} {
+  global recentfile
+  set old $recentfile
+  set recentfile {}
+  lappend recentfile $f
+  foreach i $old {
+    if {[abs_sym_path $i] ne [abs_sym_path $f]} {
+      lappend recentfile [abs_sym_path $i]
+    }
+  }
+  set recentfile [lreplace $recentfile 10 10]
+  write_recent_file
+  setup_recent_menu
+}
+
+proc write_recent_file {} {
+  global recentfile USER_CONF_DIR
+ 
+  set a [catch {open $USER_CONF_DIR/recent_files w} fd]
+  if { $a } {
+    puts "write_recent_file: error opening file $f: $fd"
+    return
+  }
+  puts $fd "set recentfile {$recentfile}"
+  close $fd
+}
+
+proc setup_recent_menu {} {
+  global recentfile
+  .menubar.file.menu.recent delete 0 9
+  set i 0
+  if { [info exists recentfile] } {
+    foreach i $recentfile {
+      .menubar.file.menu.recent add command \
+        -command "xschem load {$i}" \
+        -label [file tail $i]
+    }
+  }
+}
+
+
+
 proc set_sim_defaults {} {
   ### spice 
   global sim terminal USER_CONF_DIR no_x
 
+  set failure 0
   if { ![info exists no_x] && [winfo exists .sim] } {
     foreach tool $sim(tool_list) {
       for {set i 0} {$i < $sim($tool,n)} { incr i} {
         set sim($tool,$i,cmd) [.sim.topf.f.scrl.center.$tool.r.$i.cmd get 1.0 {end - 1 chars}]
       }
     }
-  } elseif { ![info exists sim] } {
+  } 
+  if { ![info exists sim] } {
     if { [file exists ${USER_CONF_DIR}/simrc] } {
       # get conf from simrc
-      source ${USER_CONF_DIR}/simrc
-    } else {
-      # no simrc, set a reasonable default
-      set sim(tool_list) {spice spicewave verilog verilogwave vhdl vhdlwave}
-      if {$::OS == "Windows"} {
-        set_ne sim(spice,0,cmd) {ngspice -i "$N" -a}
-      } else {
-        set_ne sim(spice,0,cmd) {$terminal -e 'ngspice -i "$N" -a || sh'}
+      if { [catch {source ${USER_CONF_DIR}/simrc} err]} {
+        puts "Problems opening simrc file: $err"
+        if {![info exists no_x]} {
+          tk_messageBox -message  "Problems opening simrc file: $err" -icon warning -parent . -type ok
+        }
+        set failure 1
       }
-      set_ne sim(spice,0,name) {Ngspice}
-      set_ne sim(spice,0,fg) 0
-      set_ne sim(spice,0,st) 0
-      
-      set_ne sim(spice,1,cmd) {ngspice -b -r "$n.raw" -o "$n.out" "$N"}
-      set_ne sim(spice,1,name) {Ngspice batch}
-      set_ne sim(spice,1,fg) 0
-      set_ne sim(spice,1,st) 1
-      
-      set_ne sim(spice,2,cmd) {Xyce "$N" -r "$n.raw"}
-      set_ne sim(spice,2,name) {Xyce batch}
-      set_ne sim(spice,2,fg) 0
-      set_ne sim(spice,2,st) 1
-      
-      # number of configured spice simulators, and default one
-      set_ne sim(spice,n) 3
-      set_ne sim(spice,default) 0
-      
-      ### spice wave view
-      set_ne sim(spicewave,0,cmd) {gaw "$n.raw" } 
-      set_ne sim(spicewave,0,name) {Gaw viewer}
-      set_ne sim(spicewave,0,fg) 0
-      set_ne sim(spicewave,0,st) 0
-     
-      set_ne sim(spicewave,1,cmd) {echo load "$n.raw" > .spiceinit
+    }
+  } 
+  if {![info exists sim] || $failure} {
+    if {[info exists sim]} {unset sim}
+    # no simrc, set a reasonable default
+    set sim(tool_list) {spice spicewave verilog verilogwave vhdl vhdlwave}
+    if {$::OS == "Windows"} {
+      set_ne sim(spice,0,cmd) {ngspice -i "$N" -a}
+    } else {
+      set_ne sim(spice,0,cmd) {$terminal -e 'ngspice -i "$N" -a || sh'}
+    }
+    set_ne sim(spice,0,name) {Ngspice}
+    set_ne sim(spice,0,fg) 0
+    set_ne sim(spice,0,st) 0
+    
+    set_ne sim(spice,1,cmd) {ngspice -b -r "$n.raw" -o "$n.out" "$N"}
+    set_ne sim(spice,1,name) {Ngspice batch}
+    set_ne sim(spice,1,fg) 0
+    set_ne sim(spice,1,st) 1
+    
+    set_ne sim(spice,2,cmd) {Xyce "$N" -r "$n.raw"}
+    set_ne sim(spice,2,name) {Xyce batch}
+    set_ne sim(spice,2,fg) 0
+    set_ne sim(spice,2,st) 1
+    
+    # number of configured spice simulators, and default one
+    set_ne sim(spice,n) 3
+    set_ne sim(spice,default) 0
+    
+    ### spice wave view
+    set_ne sim(spicewave,0,cmd) {gaw "$n.raw" } 
+    set_ne sim(spicewave,0,name) {Gaw viewer}
+    set_ne sim(spicewave,0,fg) 0
+    set_ne sim(spicewave,0,st) 0
+   
+    set_ne sim(spicewave,1,cmd) {echo load "$n.raw" > .spiceinit
     $terminal -e ngspice
     rm .spiceinit} 
-      set_ne sim(spicewave,1,name) {Ngpice Viewer}
-      set_ne sim(spicewave,1,fg) 0
-      set_ne sim(spicewave,1,st) 0
-  
-      set_ne sim(spicewave,2,cmd) {rawtovcd -v 1.5 "$n.raw" > "$n.vcd" && gtkwave "$n.vcd" "$n.sav" 2>/dev/null} 
-      set_ne sim(spicewave,2,name) {Rawtovcd}
-      set_ne sim(spicewave,2,fg) 0
-      set_ne sim(spicewave,2,st) 0
-      # number of configured spice wave viewers, and default one
-      set_ne sim(spicewave,n) 3
-      set_ne sim(spicewave,default) 0
-      
-      ### verilog
-      set_ne sim(verilog,0,cmd) {iverilog -o .verilog_object -g2012 "$N" && vvp .verilog_object}
-      set_ne sim(verilog,0,name) {Icarus verilog}
-      set_ne sim(verilog,0,fg) 0
-      set_ne sim(verilog,0,st) 1
-      # number of configured verilog simulators, and default one
-      set_ne sim(verilog,n) 1
-      set_ne sim(verilog,default) 0
-      
-      ### verilog wave view
-      set_ne sim(verilogwave,0,cmd) {gtkwave dumpfile.vcd "$N.sav" 2>/dev/null}
-      set_ne sim(verilogwave,0,name) {Gtkwave}
-      set_ne sim(verilogwave,0,fg) 0
-      set_ne sim(verilogwave,0,st) 0
-      # number of configured verilog wave viewers, and default one
-      set_ne sim(verilogwave,n) 1
-      set_ne sim(verilogwave,default) 0
-      
-      ### vhdl
-      set_ne sim(vhdl,0,cmd) {ghdl -c --ieee=synopsys -fexplicit "$N" -r "$s" --wave="$n.ghw"}
-      set_ne sim(vhdl,0,name) {Ghdl}
-      set_ne sim(vhdl,0,fg) 0
-      set_ne sim(vhdl,0,st) 1
-      # number of configured vhdl simulators, and default one
-      set_ne sim(vhdl,n) 1
-      set_ne sim(vhdl,default) 0
-      
-      ### vhdl wave view
-      set_ne sim(vhdlwave,0,cmd) {gtkwave "$n.ghw" "$N.sav" 2>/dev/null}
-      set_ne sim(vhdlwave,0,name) {Gtkwave}
-      set_ne sim(vhdlwave,0,fg) 0
-      set_ne sim(vhdlwave,0,st) 0
-      # number of configured vhdl wave viewers, and default one
-      set_ne sim(vhdlwave,n) 1
-      set_ne sim(vhdlwave,default) 0
-    }
+    set_ne sim(spicewave,1,name) {Ngpice Viewer}
+    set_ne sim(spicewave,1,fg) 0
+    set_ne sim(spicewave,1,st) 0
+
+    set_ne sim(spicewave,2,cmd) {rawtovcd -v 1.5 "$n.raw" > "$n.vcd" && gtkwave "$n.vcd" "$n.sav" 2>/dev/null} 
+    set_ne sim(spicewave,2,name) {Rawtovcd}
+    set_ne sim(spicewave,2,fg) 0
+    set_ne sim(spicewave,2,st) 0
+    # number of configured spice wave viewers, and default one
+    set_ne sim(spicewave,n) 3
+    set_ne sim(spicewave,default) 0
+    
+    ### verilog
+    set_ne sim(verilog,0,cmd) {iverilog -o .verilog_object -g2012 "$N" && vvp .verilog_object}
+    set_ne sim(verilog,0,name) {Icarus verilog}
+    set_ne sim(verilog,0,fg) 0
+    set_ne sim(verilog,0,st) 1
+    # number of configured verilog simulators, and default one
+    set_ne sim(verilog,n) 1
+    set_ne sim(verilog,default) 0
+    
+    ### verilog wave view
+    set_ne sim(verilogwave,0,cmd) {gtkwave dumpfile.vcd "$N.sav" 2>/dev/null}
+    set_ne sim(verilogwave,0,name) {Gtkwave}
+    set_ne sim(verilogwave,0,fg) 0
+    set_ne sim(verilogwave,0,st) 0
+    # number of configured verilog wave viewers, and default one
+    set_ne sim(verilogwave,n) 1
+    set_ne sim(verilogwave,default) 0
+    
+    ### vhdl
+    set_ne sim(vhdl,0,cmd) {ghdl -c --ieee=synopsys -fexplicit "$N" -r "$s" --wave="$n.ghw"}
+    set_ne sim(vhdl,0,name) {Ghdl}
+    set_ne sim(vhdl,0,fg) 0
+    set_ne sim(vhdl,0,st) 1
+    # number of configured vhdl simulators, and default one
+    set_ne sim(vhdl,n) 1
+    set_ne sim(vhdl,default) 0
+    
+    ### vhdl wave view
+    set_ne sim(vhdlwave,0,cmd) {gtkwave "$n.ghw" "$N.sav" 2>/dev/null}
+    set_ne sim(vhdlwave,0,name) {Gtkwave}
+    set_ne sim(vhdlwave,0,fg) 0
+    set_ne sim(vhdlwave,0,st) 0
+    # number of configured vhdl wave viewers, and default one
+    set_ne sim(vhdlwave,n) 1
+    set_ne sim(vhdlwave,default) 0
   }
 } 
 
@@ -494,7 +547,7 @@ To reset to default just delete the ~/.xschem/simrc file manually.
     }
     viewdata $h ro
   }
-  button .sim.bottom.ok  -text {Save Configuration} -command {
+  button .sim.bottom.ok  -text {Accept and Save Configuration} -command {
     foreach tool $sim(tool_list) {
       for {set i 0} { $i < $sim($tool,n)} {incr i} {
         set sim($tool,$i,cmd) [.sim.topf.f.scrl.center.$tool.r.$i.cmd get 1.0 {end - 1 chars}]
@@ -646,10 +699,19 @@ proc gaw_echoline {} {
 }
 
 proc gaw_setup_tcp {} {
-  global gaw_fd gaw_tcp_address netlist_dir
+  global gaw_fd gaw_tcp_address netlist_dir no_x
   set s [file tail [file rootname [xschem get schname]]]
 
-  set gaw_fd [eval socket $gaw_tcp_address]
+  if { [catch {eval socket $gaw_tcp_address} gaw_fd] } {
+    puts "Problems opening socket to gaw on address $gaw_tcp_address"
+    if {![info exists no_x]} {
+      tk_messageBox -type ok -title {Tcp socket error} \
+       -message [concat "Problems opening socket to gaw on address $gaw_tcp_address. " \
+         "If you recently closed gaw the port may be in a TIME_WAIT state for a minute or so ." \
+         "Close gaw, wait a minute or two, then press Waves button again."]
+    }
+    return
+  }
   chan configure $gaw_fd -blocking 0 -buffering line -encoding binary -translation binary
   fileevent $gaw_fd readable gaw_echoline
   puts $gaw_fd "table_set $s.raw"
@@ -922,7 +984,10 @@ proc setglob {dir} {
 proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
   global myload_index1 myload_files2 myload_files1 myload_retval myload_dir1 pathlist
   global myload_default_geometry myload_sash_pos myload_yview tcl_version globfilter myload_dirs2
+  # return value
+  set myload_retval {} 
   upvar #0 $global_initdir initdir
+  if { [winfo exists .dialog] } return
   toplevel .dialog -class dialog
   wm title .dialog $msg
   set_ne myload_index1 0
@@ -932,8 +997,6 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
   }
   set_ne myload_files2 {}
 
-  # return value
-  set myload_retval {} 
 
   panedwindow  .dialog.l -orient horizontal
 
@@ -1029,6 +1092,7 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
   bind .dialog.l.paneright.list <Double-Button-1> {
     set myload_retval [.dialog.buttons.entry get]
     if {$myload_retval ne {} } {
+      bind .dialog.l.paneright.pre <Expose> {}
       destroy .dialog
     }
   }
@@ -1101,10 +1165,12 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
         .dialog.buttons.entry insert 0 $dir2
          set t [is_xschem_file $myload_dir1/$dir2]
          if { $t ne {0}  } {
-           .dialog.l.paneright.pre configure -background {}
 	   update
-           xschem preview_window draw .dialog.l.paneright.pre "$myload_dir1/$dir2"
-           bind .dialog.l.paneright.pre <Expose> {xschem preview_window draw .dialog.l.paneright.pre "$myload_dir1/$dir2"}
+           if { [winfo exists .dialog] } {
+             .dialog.l.paneright.pre configure -background {}
+             xschem preview_window draw .dialog.l.paneright.pre "$myload_dir1/$dir2"
+             bind .dialog.l.paneright.pre <Expose> {xschem preview_window draw .dialog.l.paneright.pre "$myload_dir1/$dir2"}
+           }
          } else {
            bind .dialog.l.paneright.pre <Expose> {}
            .dialog.l.paneright.pre configure -background white
@@ -1116,7 +1182,14 @@ proc load_file_dialog {{msg {}} {ext {}} {global_initdir {INITIALINSTDIR}}} {
   tkwait window .dialog
   xschem preview_window destroy {} {} 
   set initdir "$myload_dir1"
+
+
+
+
   if { $myload_retval ne {}} {
+    if {![file exists "$myload_dir1/$myload_retval"] } {
+      return "$myload_dir1/$myload_retval"
+    }
     set t [is_xschem_file "$myload_dir1/$myload_retval"]
     if { $t eq {0}  } {
       set answer [tk_messageBox -message  "$myload_dir1/$myload_retval does not seem to be an xschem file...\nContinue?" \
@@ -1636,6 +1709,7 @@ proc property_search {} {
   global search_select
   global custom_token
 
+  if { [winfo exists .dialog] } return
   toplevel .dialog -class Dialog
   wm title .dialog {Search}
   ## 
@@ -1710,8 +1784,9 @@ proc tclpropeval {s instname symname} {
 proc attach_labels_to_inst {} {
   global use_lab_wire use_label_prefix custom_label_prefix rcode do_all_inst rotated_text
 
-  toplevel .dialog -class Dialog
   set rcode {}
+  if { [winfo exists .dialog] } return
+  toplevel .dialog -class Dialog
   wm title .dialog {Add labels to instances}
 
   # 20100408
@@ -1762,6 +1837,8 @@ proc attach_labels_to_inst {} {
 
 proc ask_save { {ask {save file?}} } {
    global rcode
+   set rcode {}
+   if { [winfo exists .dialog] } return
    toplevel .dialog -class Dialog
    wm title .dialog {Ask Save}
 
@@ -1905,6 +1982,7 @@ proc edit_prop {txtlabel} {
    set rcode {}
    set editprop_semaphore 1
    if $tcl_debug<=-1 then {puts " edit_prop{}: retval=$retval"}
+   if { [winfo exists .dialog] } return
    toplevel .dialog  -class Dialog 
    wm title .dialog {Edit Properties}
    set X [expr [winfo pointerx .dialog] - 60]
@@ -2093,6 +2171,8 @@ proc text_line {txtlabel clear {preserve_disabled disabled} } {
    if $clear==1 then {set retval ""}
    if $tcl_debug<=-1 then {puts " text_line{}: clear=$clear"}
    if $tcl_debug<=-1 then {puts " text_line{}: retval=$retval"}
+   set rcode {}
+   if { [winfo exists .dialog] } return
    toplevel .dialog  -class Dialog
    wm title .dialog {Text input}
    set X [expr [winfo pointerx .dialog] - 60]
@@ -2176,7 +2256,7 @@ proc text_line {txtlabel clear {preserve_disabled disabled} } {
    return $rcode
 }
 
-proc alert_ {txtlabel {position +200+300}} {
+proc alert_ {txtlabel {position +200+300} {nowait {0}}} {
    toplevel .alert -class Dialog
    wm title .alert {Alert}
    set X [expr [winfo pointerx .alert] - 60]
@@ -2201,11 +2281,16 @@ proc alert_ {txtlabel {position +200+300}} {
    bind .alert <Escape> { destroy .alert }
    bind .alert <Visibility> {
      if { [winfo exists .alert] && [winfo ismapped .alert] && [winfo ismapped .] && [wm stackorder .alert isbelow . ]} {
-       raise .alert .drw
+       if { [winfo exists .drw] } {
+         raise .alert .drw
+       } else {
+         raise .alert
+       }
+       
      }
    }
 
-   tkwait window .alert  
+   if {!$nowait} {tkwait window .alert}
    return {}
 }
 
@@ -2447,6 +2532,7 @@ proc add_ext {fname ext} {
 proc input_line {txt cmd {w 12}} {
   global input_line_data
   global input_line_cmd
+  if { [winfo exists .dialog] } return
   toplevel .dialog -class Dialog
   wm title .dialog {Input number}
   set X [expr [winfo pointerx .dialog] - 60]
@@ -2936,6 +3022,17 @@ set_ne copy_cell 0
 regsub -all {\"} $colors  {} svg_colors
 regsub -all {#} $svg_colors  {0x} svg_colors
 
+# recent files
+set recentfile {}
+if { [file exists $USER_CONF_DIR/recent_files] } {
+  if {[catch { source $USER_CONF_DIR/recent_files } err] } {
+    puts "Problems opening recent_files: $err"
+    if {![info exists no_x]} {
+      tk_messageBox -message  "Problems opening recent_files: $err" -icon warning -parent . -type ok
+    }
+
+  }
+}
 
 # schematic to preload in new windows 20090708
 set_ne XSCHEM_START_WINDOW {}
@@ -3040,6 +3137,11 @@ font configure Underline-Font -underline true -size 24
    toolbar_create FileNewSym {xschem clear SYMBOL} "New Symbol"
    .menubar.file.menu add command -label "Open" -command "xschem load" -accelerator {Ctrl+O}
    toolbar_create FileOpen "xschem load" "Open File"
+
+   menu .menubar.file.menu.recent -tearoff 0
+   setup_recent_menu
+   .menubar.file.menu add cascade -label "Open Recent" -menu .menubar.file.menu.recent
+
    .menubar.file.menu add command -label "Save" -command "xschem save" -accelerator {Ctrl+S}
    toolbar_create FileSave "xschem save" "Save File"
    .menubar.file.menu add command -label "Merge" -command "xschem merge" -accelerator B

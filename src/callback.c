@@ -1221,6 +1221,9 @@ int callback(int event, int mx, int my, KeySym key,
         global_verilog_netlist(1);
       else if(netlist_type == CAD_TEDAX_NETLIST)
         global_tedax_netlist(1);
+      else
+        if(has_x) tcleval("tk_messageBox -type ok -message {Please Set netlisting mode (Options menu)}");
+
       if(debug_var>=1) fprintf(errfp, "callback(): -------------\n");
     }
     break;
@@ -1239,6 +1242,8 @@ int callback(int event, int mx, int my, KeySym key,
         global_verilog_netlist(0);
       else if(netlist_type == CAD_TEDAX_NETLIST)
         global_tedax_netlist(0);
+      else
+        if(has_x) tcleval("tk_messageBox -type ok -message {Please Set netlisting mode (Options menu)}");
       if(debug_var>=1) fprintf(errfp, "callback(): -------------\n");
     }
     break;

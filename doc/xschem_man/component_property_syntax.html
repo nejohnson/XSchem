@@ -58,19 +58,20 @@ name="mchanged_name" model=\"nmos\" w="20u" l="3u" m="10"
   of special attributes as we will see later.
  </p>
  <p class="important"> 
-  Important: a <kbd>name=&lt;inst_name&gt;</kbd> item is mandatory and must be placed before any other attributes 
-  in component property string. The <kbd>name</kbd> attribute is used by XSCHEM -among other things- for
-  fast indexing the component. If <kbd>&lt;inst_name&gt;</kbd> is already used in another component XSCHEM will
+  Important: a <kbd>name=&lt;inst_name&gt;</kbd> item is mandatory and must be placed  
+  in component property string to get a valid netlist, as this is the partname or so-called refdes (reference designator).
+  If <kbd>&lt;inst_name&gt;</kbd> is already used in another component XSCHEM will
   auto-rename it to a unique name preserving the first letter (which ts a device type indicator
   for SPICE like netlists).
  </p>
  <h3>PREDEFINED COMPONENT ATTRIBUTES</h3>
  <ul>
   <li><kbd>name</kbd></li>
-  <p> This defines the name of the instance. Must be the first <kbd>attribute=value</kbd> in the 
-    component property string. Names are unique, so if for example multiple MOS components are
+  <p> This defines the name of the instance. 
+    Names are unique, so if for example multiple MOS components are
     placed in the design one should be named <kbd>m1</kbd> and the second <kbd>m2</kbd> or anything 
-    else, provided the names are different. XSCHEM enforces this, if a name is given that already
+    else, provided the names are different. XSCHEM enforces this, 
+    unless <kbd>Options -&gt; allow duplicated instance names</kbd> is set. If a name is given that already
     exist in the current schematic it will be renamed. Normally the template string defines a default
     name for a given component, and expecially for SPICE compatibility, the first character must NOT 
     be changed. For example, the default name for a MOS transistor is <kbd>m1</kbd>, it can be renamed
@@ -161,16 +162,16 @@ name="mchanged_name" model=\"nmos\" w="20u" l="3u" m="10"
     <kbd>signal</kbd> and <kbd>constant</kbd>. Default if missing is <kbd>signal</kbd>.</p>
   <li><kbd>device_model</kbd></li>
   <p>
-   This attribute contains a SPICE .model specification (<kbd>device_model=".model D1N4148 D ...."</kbd>)
+   This attribute contains a SPICE .model or .subckt specification (<kbd>device_model=".model D1N4148 D ...."</kbd>)
    that will be printed at end of netlist only once for the specified component (D1N4148 in the example).
    <kbd>device_model</kbd> attributes defined at instance level override the <kbd>device_model</kbd> set
    in the symbol if any.
   </p>
 
-  <li><kbd>attribute(name)</kbd></li>
+  <li><kbd>pinnumber(name)</kbd></li>
   <p> This will override at instance level the value of attribute <kbd>pinnumber</kbd> of pin <kbd>name</kbd> of the symbol.
       This is mainly used for tedax, where by back annotation a connection to a symbol must be changed.</p>
-  <li><kbd>attribute(index)</kbd></li>
+  <li><kbd>pinnumber(index)</kbd></li>
   <p> This will override at instance level the value of attribute <kbd>pinnumber</kbd> of <kbd>index</kbd>th pin of the symbol.
       This is mainly used for tedax, where by back annotation a connection to a symbol must be changed.
       This notation is faster since xschem does not have to find a pin by string matching.</p>

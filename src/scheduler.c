@@ -212,8 +212,8 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
  }
  else if(!strcmp(argv[1],"make_symbol"))
  {
-   tcleval("tk_messageBox -type okcancel -message {do you want to make symbol view ?}");
-   if(strcmp(Tcl_GetStringResult(interp),"ok")==0) 
+   if(has_x) tcleval("tk_messageBox -type okcancel -message {do you want to make symbol view ?}");
+   if(!has_x || strcmp(Tcl_GetStringResult(interp),"ok")==0) 
       if(current_type==SCHEMATIC)
       {
        save_schematic(schematic[currentsch]);
@@ -371,7 +371,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
 
  else if(!strcmp(argv[1],"exit"))
  {
-   if(modified) {
+   if(modified && has_x) {
      tcleval("tk_messageBox -type okcancel -message {UNSAVED data: want to exit?}");
      if(strcmp(Tcl_GetStringResult(interp),"ok")==0) tcleval( "exit");
    }
@@ -1080,6 +1080,8 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
         global_verilog_netlist(1);
       else if(netlist_type == CAD_TEDAX_NETLIST)
         global_tedax_netlist(1);
+      else 
+        if(has_x) tcleval("tk_messageBox -type ok -message {Please Set netlisting mode (Options menu)}");
     }
  }
 
@@ -1168,6 +1170,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
       unselect_all(); /* 20180929 */
       remove_symbols();
       load_schematic(1, abs_sym_path(argv[2], ""), 1);
+      Tcl_VarEval(interp, "update_recent_file {", abs_sym_path(argv[2], ""), "}", NULL);
       my_strdup(375, &sch_prefix[currentsch],".");
       zoom_full(1, 0);
     }

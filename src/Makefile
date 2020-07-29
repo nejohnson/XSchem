@@ -9,15 +9,27 @@ sharedir=$(prefix)/share/xschem
 userconfdir=$(HOME)/.xschem
 
 ## specify user schematic/symbol libraries; 
-## you may redefine it later in .xschem or xschemrc startup files
+## you may redefine it later in .xschem/xschemrc startup file
 #user_library_dir=$(HOME)/xschem_library
 user_library_dir=$(userconfdir)/xschem_library
 
 ## specify system-wide symbol libraries;
-## you may redefine it later in .xschem or xschemrc startup files
-system_library_dir=${prefix}/share/xschem/xschem_library/devices
+## you may redefine it later in .xschem/xschemrc startup file
+system_library_dir=${sharedir}/xschem_library/devices
 
-xschem_library_path=$(user_library_dir):$(system_library_dir)
+
+## example library paths
+## you may redefine it later in .xschem or xschemrc startup files
+## $\ at end of line is a make trick to avoid spaces between lines.
+xschem_example_paths=$\
+${prefix}/share/doc/xschem/examples:$\
+${prefix}/share/doc/xschem/ngspice:$\
+${prefix}/share/doc/xschem/logic:$\
+${prefix}/share/doc/xschem/binto7seg:$\
+${prefix}/share/doc/xschem/pcb:$\
+${prefix}/share/doc/xschem/rom8k
+
+xschem_library_path=$(user_library_dir):$(system_library_dir):$(xschem_example_paths)
 
 OBJ = icon.o callback.o actions.o move.o check.o clip.o draw.o \
       globals.o main.o netlist.o hash_iterator.o in_memory_undo.o \

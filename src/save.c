@@ -1491,6 +1491,12 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
         continue;
       }
       load_ascii_string(&prop_ptr, lcc[level].fd);
+      if(level + 1 >=CADMAXHIER) {
+        fprintf(errfp, "Symbol recursively instantiating symbol: max depth reached, skipping\n");
+        if(has_x) tcleval("alert_ {Symbol recursively instantiating symbol: max depth reached, skipping} {} 1");
+        endfile = 1;
+        continue;
+      }
       lastinstdef++; /* do not allow match_symbol() to overwrite current symbol we are loading */
       save = lastinstdef;
       if ((recover_str = strrchr(symname, '.')) && !strcmp(recover_str, ".sch")) 

@@ -235,7 +235,9 @@ in this case only the verilog-related global property has some definition. This 
    must be escaped if present in the saved string. XSCHEM will automatically add the escapes where needed on save.</li>
    <li>X ad Y coordinates are saved and retrieved as double precision floating point numbers.</li>
    <li>Rotation and mirror are integers (range [0:3], [0:1] respectively) that define the orientation 
-   of objects as shown in below picture:
+   of text objects. Using rotation and mirror text can be aligned to any corner of its bounding box, so there are 4 different 
+   alignments for vertical text and 4 different alignments for horizontal text. Below picture shows how text is displayed
+   with respect to its anchor point.
    <img src="developer_info_03.png"></li>
    <li> text X and Y sizes are stored as floating point numbers.</li>
    <li> Finally a property string is stored with the same syntax as the displayed text field.</li>
@@ -281,10 +283,11 @@ in this case only the verilog-related global property has some definition. This 
  </p>
  <h3>COMPONENT INSTANCE</h3>
  <p>
-  Example: <kbd>C {pcb/capa} 890 -160 0 0 {name=C4 m=1 value=10u device="tantalium capacitor"}</kbd><br>
+  Example: <kbd>C {capa.sym} 890 -160 0 0 {name=C4 m=1 value=10u device="tantalium capacitor"}</kbd><br>
   Format: <kbd>C {&lt;symbol reference&gt;} &lt;X coord&gt; &lt;Y coord&gt; &lt;rotation&gt;
           &lt;flip&gt; {&lt;attributes&gt;}</kbd><br>
-  The component instance tag C is followed by a string specifying <kbd>library/symbol</kbd>,
+  The component instance tag C is followed by a string specifying <kbd>library/symbol</kbd> or only <kbd>symbol</kbd> 
+  (see <a href="tutorial_xschem_libraries.html">This tutorial about symbol references</a>)
   followed by the x,y coordinates, rotation (integer range [0:3]), 
   mirror (integer range [0:1]), and a property string defining various attributes
   including the mandatory <kbd>name=...</kbd> attribute.<br>
@@ -352,31 +355,31 @@ N 440 -460 680 -460 {lab=A}
 N 500 -420 680 -420 {lab=B}
 N 500 -420 500 -350 {lab=B}
 N 440 -350 500 -350 {lab=B}
-C {devices/title} 160 -30 0 0 {name=l2 author="Stefan"}
-C {pcb/74ls00} 340 -350 0 0 {name=U1:2  risedel=100 falldel=200}
-C {pcb/74ls00} 790 -440 0 0 {name=U1:1  risedel=100 falldel=200}
-C {devices/lab_pin} 890 -440 0 1 {name=p0 lab=OUTPUT_Y}
-C {pcb/capa} 590 -160 0 0 {name=C0 m=1 value=100u device="electrolitic capacitor"}
-C {pcb/74ls00} 340 -460 0 0 {name=U1:4 risedel=100 falldel=200 power=VCC5
-url="http://www.engrcs.com/components/74LS00.pdf"}
-C {pcb/7805} 730 -190 0 0 {name=U0 url="https://www.sparkfun.com/datasheets/Components/LM7805.pdf"}
-C {devices/lab_pin} 490 -190 0 0 {name=p20 lab=VCC12}
-C {devices/lab_pin} 940 -190 0 1 {name=p22 lab=VCC5}
-C {devices/lab_pin} 590 -110 0 0 {name=p23 lab=ANALOG_GND}
-C {pcb/capa} 890 -160 0 0 {name=C4 m=1 value=10u device="tantalium capacitor"}
-C {pcb/res} 520 -190 1 0 {name=R0 m=1 value=4.7 device="carbon resistor"}
-C {devices/lab_wire} 620 -460 0 0 {name=l3 lab=A}
-C {devices/lab_wire} 620 -420 0 0 {name=l0 lab=B}
-C {devices/lab_wire} 650 -190 0 0 {name=l1 lab=VCCFILT}
-C {pcb/connector} 230 -370 0 0 {name=CONN1 lab=INPUT_A verilog_type=reg}
-C {pcb/connector} 230 -330 0 0 {name=CONN2 lab=INPUT_B verilog_type=reg}
-C {pcb/connector} 240 -190 0 0 { name=CONN3 lab=OUTPUT_Y }
-C {pcb/connector} 230 -480 0 0 {name=CONN6 lab=INPUT_E verilog_type=reg}
-C {pcb/connector} 230 -440 0 0 {name=CONN8 lab=INPUT_F verilog_type=reg}
-C {pcb/connector} 240 -160 0 0 { name=CONN9 lab=VCC12 }
-C {pcb/connector} 240 -130 0 0 { name=CONN14 lab=ANALOG_GND  verilog_type=reg}
-C {pcb/connector} 240 -100 0 0 { name=CONN15 lab=GND  verilog_type=reg}
-C {devices/code} 1030 -280 0 0 {name=TESTBENCH_CODE only_toplevel=false value="initial begin
+C {title.sym} 160 -30 0 0 {name=l2 author="Stefan"}
+C {74ls00.sym} 340 -350 0 0 {name=U1:2  risedel=100 falldel=200}
+C {74ls00.sym} 790 -440 0 0 {name=U1:1  risedel=100 falldel=200}
+C {lab_pin.sym} 890 -440 0 1 {name=p0 lab=OUTPUT_Y}
+C {capa.sym} 590 -160 0 0 {name=C0 m=1 value=100u device="electrolitic capacitor"}
+C {74ls00.sym} 340 -460 0 0 {name=U1:4 risedel=100 falldel=200 power=VCC5
+url="http://www.engrcs.com/components/74LS00.pdf".sym}
+C {LM7805.pdf"}
+C {lab_pin.sym} 490 -190 0 0 {name=p20 lab=VCC12}
+C {lab_pin.sym} 940 -190 0 1 {name=p22 lab=VCC5}
+C {lab_pin.sym} 590 -110 0 0 {name=p23 lab=ANALOG_GND}
+C {capa.sym} 890 -160 0 0 {name=C4 m=1 value=10u device="tantalium capacitor"}
+C {res.sym} 520 -190 1 0 {name=R0 m=1 value=4.7 device="carbon resistor"}
+C {lab_wire.sym} 620 -460 0 0 {name=l3 lab=A}
+C {lab_wire.sym} 620 -420 0 0 {name=l0 lab=B}
+C {lab_wire.sym} 650 -190 0 0 {name=l1 lab=VCCFILT}
+C {connector.sym} 230 -370 0 0 {name=CONN1 lab=INPUT_A verilog_type=reg}
+C {connector.sym} 230 -330 0 0 {name=CONN2 lab=INPUT_B verilog_type=reg}
+C {connector.sym} 240 -190 0 0 { name=CONN3 lab=OUTPUT_Y }
+C {connector.sym} 230 -480 0 0 {name=CONN6 lab=INPUT_E verilog_type=reg}
+C {connector.sym} 230 -440 0 0 {name=CONN8 lab=INPUT_F verilog_type=reg}
+C {connector.sym} 240 -160 0 0 { name=CONN9 lab=VCC12 }
+C {connector.sym} 240 -130 0 0 { name=CONN14 lab=ANALOG_GND  verilog_type=reg}
+C {connector.sym} 240 -100 0 0 { name=CONN15 lab=GND  verilog_type=reg}
+C {code.sym} 1030 -280 0 0 {name=TESTBENCH_CODE only_toplevel=false value="initial begin
   $dumpfile(\\"dumpfile.vcd\\");
   $dumpvars;
   INPUT_E=0;
@@ -401,7 +404,7 @@ end
 assign VCC12=1;
 
 "}
-C {devices/verilog_timescale} 1050 -100 0 0 {name=s1 timestep="1ns" precision="1ns" }
+C {verilog_timescale.sym} 1050 -100 0 0 {name=s1 timestep="1ns" precision="1ns" }
  </pre>
  <img src="developer_info_06.png"><br>
  <br>

@@ -488,6 +488,8 @@ void saveas(const char *f) /*  changed name from ask_save_file to saveas 2012120
     if(!res[0]) return; /* 20071104 */
     if(debug_var >= 1) fprintf(errfp, "saveas(): res = %s\n", res);
     save_schematic(res);
+    Tcl_VarEval(interp, "update_recent_file {", res,"}",  NULL);
+
     my_strncpy(current_name, rel_sym_path(res), S(current_name)); /* 20190519 */
     return;
 }
@@ -511,6 +513,7 @@ void ask_new_file(void)
      unselect_all(); /* 20180929 */
      remove_symbols();
      load_schematic(1, fullname,1); /* 20180925.1 */
+     Tcl_VarEval(interp, "update_recent_file {", fullname, "}", NULL);
      my_strdup(1, &sch_prefix[currentsch],".");
      zoom_full(1, 0);
     }

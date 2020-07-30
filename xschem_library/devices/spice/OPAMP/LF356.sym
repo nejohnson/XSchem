@@ -1,0 +1,88 @@
+v {xschem version=2.9.7 file_version=1.1}
+G {type=opamp
+format="X@name @pinlist LF356 "
+template="name=U1"
+device_model="
+.SUBCKT LF356 3 2 7 4 6
+* INPUT
+VCM2 40 4 2
+RD1 40 80 1061
+RD2 40 90 1061
+J1 80 102 12 JM1
+J2 90 103 12 JM2
+CIN 2 3 4e-12
+RG1 2 102 2
+RG2 3 103 2
+** CM CLAMP
+* DCM1 107 103 DM4
+* DCM2 105 107 DM4
+* VCMC 105 4 4.0E+00
+* ECMP 106 4 103 4 1
+* RCMP 107 106 1E+04
+* DCM3 109 102 DM4
+* DCM4 105 109 DM4
+* ECMN 108 4 102 4 1
+* RCMN 109 108 1E+04
+** END CM CLAMP
+C1 80 90 1.5e-11
+ISS 7 12 0.00048
+GOSIT 7 12 90 80 0.00024
+* INTERMEDIATE
+GCM 0 8 12 0 9.4248e-9
+GA 8 0 80 90 9.4248E-04
+R2 8 0 100000
+C2 1 8 3e-11
+GB 1 0 8 0 28.609
+RO2 1 0 74
+* OUTPUT
+RSO 1 6 1
+ECL 18 0 1 6 20.69
+GCL 0 8 20 0 1
+RCL 20 0 1000
+D1 18 20 DM1
+D2 20 18 DM1
+D3A 131 70 DM3
+D3B 13 131 DM3
+GPL 0 8 70 7 1
+VC 13 6 3.1552
+RPLA 7 70 10000
+RPLB 7 131 100000
+D4A 60 141 DM3
+D4B 141 14 DM3
+GNL 0 8 60 4 1
+VE 6 14 3.1552
+RNLA 60 4 10000
+RNLB 141 4 100000
+*
+IP 7 4 0.00452
+DSUB 4 7 DM2
+.MODEL JM1 PJF(IS=3.15e-11 BETA=9.2528E-04 VTO=-1)
+.MODEL JM2 PJF(IS=2.85e-11 BETA=9.2528E-04 VTO=-0.997)
+.MODEL DM1 D(IS=1e-15)
+.MODEL DM2 D(IS=8e-16 BV=43.2)
+.MODEL DM3 D(IS=1e-16)
+.MODEL DM4 D(IS=1e-9)
+.ENDS LF356"
+}
+V {}
+S {}
+E {}
+L 4 80 20 100 20 {}
+L 4 0 40 20 40 {}
+L 4 0 0 20 0 {}
+L 4 50 40 50 60 {}
+L 4 50 -20 50 0 {}
+L 4 25 0 35 0 {}
+L 4 30 -5 30 5 {}
+L 4 25 40 35 40 {}
+L 4 55 45 65 45 {}
+L 4 55 -5 65 -5 {}
+L 4 60 -10 60 0 {}
+B 5 -2.5 -2.5 2.5 2.5 {pinseq=1 name=inp dir=in pinnumber=1}
+B 5 -2.5 37.5 2.5 42.5 {pinseq=2 name=inm dir=in pinnumber=2}
+B 5 47.5 -22.5 52.5 -17.5 {pinseq=3 name=vdd dir=inout pinnumber=3}
+B 5 47.5 57.5 52.5 62.5 {pinseq=4 name=vss dir=inout pinnumber=4}
+B 5 97.5 17.5 102.5 22.5 {pinseq=5 name=out dir=out pinnumber=5}
+P 4 4 20 -20 20 60 80 20 20 -20 {}
+T {LF356} 22.5 30 2 1 0.266667 0.266667 {}
+T {@name} 20 -30 2 1 0.333333 0.333333 {}

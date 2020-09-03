@@ -68,7 +68,7 @@ void find_closest_polygon(double mx,double my)
       if( (tmp = dist(x1, y1, x2, y2, mx, my)) < distance )
       {
        l = i; distance = tmp;col = c;
-       if(debug_var>=1) fprintf(errfp, "find_closest_polygon(): distance=%.16g  n=%d\n", distance, i);
+       dbg(1, "find_closest_polygon(): distance=%.16g  n=%d\n", distance, i);
       }
     }
   } /* end for i */
@@ -95,7 +95,7 @@ void find_closest_line(double mx,double my)
          < distance )
    {
     l = i; distance = tmp;col = c;
-    if(debug_var>=1) fprintf(errfp, "find_closest_line(): distance=%.16g  n=%d\n", distance, i);
+    dbg(1, "find_closest_line(): distance=%.16g  n=%d\n", distance, i);
    }
   } /* end for i */
  } /* end for c */
@@ -112,7 +112,7 @@ void find_closest_net_or_symbol_pin(double mx,double my, double *x, double *y)
   double x0, x1, x2, y0, y1, y2, xx, yy, dist, min_dist_x=0, min_dist_y=0;
   Box box;
   int rot, flip;
-  static char *type=NULL;
+  char *type=NULL;
 
   distance = DBL_MAX;
   for(i=0;i<lastinst;i++) {
@@ -166,6 +166,7 @@ void find_closest_net_or_symbol_pin(double mx,double my, double *x, double *y)
   }
   *x = min_dist_x;
   *y = min_dist_y;
+  my_free(752, &type);
 }
 
 void find_closest_arc(double mx,double my)
@@ -198,11 +199,11 @@ void find_closest_arc(double mx,double my)
         }
       }
     }
-    if(debug_var>=1) fprintf(errfp, "find_closest_arc(): dist = %g, angle = %g\n", dist, angle);
-    if(debug_var>=1) fprintf(errfp, "find_closest_arc(): center=%g,%g: mouse: %g:%g\n", 
+    dbg(1, "find_closest_arc(): dist = %g, angle = %g\n", dist, angle);
+    dbg(1, "find_closest_arc(): center=%g,%g: mouse: %g:%g\n", 
                              arc[c][i].x, arc[c][i].y, mx, my);
     if(match ) {
-      if(debug_var>=1) fprintf(errfp, "find_closest_arc(): i = %d\n", i);
+      dbg(1, "find_closest_arc(): i = %d\n", i);
       r = i; 
       distance = dist;
       col = c;
@@ -235,7 +236,7 @@ void find_closest_box(double mx,double my)
    }
   } /* end for i */
  } /* end for c */
- if(debug_var>=1) fprintf(errfp, "find_closest_box(): distance=%.16g\n", distance);
+ dbg(1, "find_closest_box(): distance=%.16g\n", distance);
  if( r!=-1)
  {
   sel.n = r; sel.type = xRECT; sel.col = col;
@@ -248,7 +249,7 @@ void find_closest_element(double mx,double my)
  int i,r=-1;
  for(i=0;i<lastinst;i++)
  {
-  if(debug_var>=2) fprintf(errfp, "find_closest_element(): %s: %g %g %g %g\n", 
+  dbg(2, "find_closest_element(): %s: %g %g %g %g\n", 
                            inst_ptr[i].instname, inst_ptr[i].x1,inst_ptr[i].y1,inst_ptr[i].x2,inst_ptr[i].y2);
   if( POINTINSIDE(mx,my,inst_ptr[i].x1,inst_ptr[i].y1,inst_ptr[i].x2,inst_ptr[i].y2) )
   {
@@ -258,7 +259,7 @@ void find_closest_element(double mx,double my)
    {
     r = i; distance = tmp;
    }
-    if(debug_var>=2) fprintf(errfp, "find_closest_element(): finding closest element, lastinst=%d, dist=%.16g\n",i,tmp);
+    dbg(2, "find_closest_element(): finding closest element, lastinst=%d, dist=%.16g\n",i,tmp);
   }
  } /* end for i */
  if( r!=-1 )
@@ -284,7 +285,7 @@ void find_closest_text(double mx,double my)
    customfont = set_text_custom_font(&textelement[i]);
    #endif
    text_bbox(textelement[i].txt_ptr, 
-             textelement[i].xscale, textelement[i].yscale, rot, flip,
+             textelement[i].xscale, textelement[i].yscale, rot, flip, textelement[i].hcenter, textelement[i].vcenter,
              textelement[i].x0, textelement[i].y0,
              &xx1,&yy1, &xx2,&yy2);
    #ifdef HAS_CAIRO
@@ -293,7 +294,7 @@ void find_closest_text(double mx,double my)
    if(POINTINSIDE(mx,my,xx1,yy1, xx2, yy2))
    {
     r = i; distance = 0;
-     if(debug_var>=2) fprintf(errfp, "find_closest_text(): finding closest text, lasttext=%d, dist=%.16g\n",i,distance);
+     dbg(2, "find_closest_text(): finding closest text, lasttext=%d, dist=%.16g\n",i,distance);
    }
   } /* end for i */
  if( distance <= threshold && r!=-1)
@@ -308,10 +309,10 @@ Selected find_closest_obj(double mx,double my)
  distance = DBL_MAX;
  find_closest_line(mx,my);
  find_closest_polygon(mx,my);
- /* if(debug_var>=0) fprintf(errfp, "1 find_closest_obj(): sel.n=%d, sel.col=%d, sel.type=%d\n", sel.n, sel.col, sel.type); */
+ /* dbg(1, "1 find_closest_obj(): sel.n=%d, sel.col=%d, sel.type=%d\n", sel.n, sel.col, sel.type); */
  find_closest_box(mx,my);
  find_closest_arc(mx,my);
- /* if(debug_var>=0) fprintf(errfp, "2 find_closest_obj(): sel.n=%d, sel.col=%d, sel.type=%d\n", sel.n, sel.col, sel.type); */
+ /* dbg(1, "2 find_closest_obj(): sel.n=%d, sel.col=%d, sel.type=%d\n", sel.n, sel.col, sel.type); */
  find_closest_text(mx,my);
  find_closest_net(mx,my);
  find_closest_element(mx,my);

@@ -46,14 +46,20 @@ static int idxsize=INITIALIDXSIZE;
 extern int yylex();
 extern FILE *errfp;
 extern void *my_malloc(int id, size_t size);
-extern void my_free(void *ptr);
+extern void my_free(int id, void *ptr);
 extern void my_realloc(int id, void *ptr,size_t size);
 extern void my_strdup(int id, char **dest, char *src);
 extern int debug_var;
+extern void dbg(int level, char *fmt, ...);
+extern int  my_snprintf(char *str, int size, const char *fmt, ...);
+extern int yyparse_error;
+
+
 
 static void yyerror (const char *s)  /* Called by yyparse on error */
 {
-  if(debug_var >=3) fprintf(errfp, "yyerror(): yyparse():%s\n", s);
+  if(yyparse_error == 0 ) yyparse_error = 1;
+  dbg(0, "yyerror(): yyparse():%s\n", s);
 }
 
 static char *expandlabel_strdup(char *src)
@@ -68,7 +74,7 @@ static char *expandlabel_strdup(char *src)
  {
   ptr=NULL;
   my_strdup(122, &ptr,src);
-  if(debug_var >=3) fprintf(errfp, "expandlabel_strdup: duplicated %lu string %s\n",(unsigned long)ptr,src);
+  dbg(3, "expandlabel_strdup: duplicated %lu string %s\n",(unsigned long)ptr,src);
   return ptr;
  }
 }
@@ -105,7 +111,7 @@ static char *my_strmult2(int n, char *s)
  register char *pos,*prev;
  char *str, *ss;
 
- if(debug_var >= 2 ) fprintf(errfp, "my_strmult2: n=%d s=%s\n", n, s);
+ dbg(3, "my_strmult2: n=%d s=%s\n", n, s);
  if(n==0) return expandlabel_strdup("");
  len=strlen(s);
  prev=s;
@@ -170,7 +176,7 @@ static char *my_strbus(char *s, int *n)
   memcpy(res+l,tmp, tmplen+1); /* 20180923 */
   l+=tmplen;
  }
- my_free(&tmp);
+ my_free(735, &tmp);
  sprintf(res+l, "%s[%d]", s, n[i]);
  return res;
 }
@@ -180,7 +186,7 @@ static void check_idx(int **ptr,int n)
  if(n>=idxsize) 
  {
   idxsize*=2;
-  if(debug_var >=3)  fprintf(errfp, "check_idx(): reallocating idx array: size=%d\n",idxsize);
+  dbg(3, "check_idx(): reallocating idx array: size=%d\n",idxsize);
   my_realloc(128, ptr, idxsize*sizeof(int));
  }
 }
@@ -201,7 +207,7 @@ static char *my_strbus_nobracket(char *s, int *n)
   memcpy(res+l,tmp, tmplen+1); /* 20180923 */
   l+=tmplen;
  }
- my_free(&tmp);
+ my_free(736, &tmp);
  sprintf(res+l, "%s%d", s, n[i]);
  return res;
 }
@@ -242,81 +248,92 @@ input:    /* empty string. allows ctrl-D as input */
 ;
 line:     list          {
                          my_strdup(129,  &(dest_string.str),$1.str); /*19102004 */
-                         my_free(&$1.str); /*19102004 */
+                         my_free(737, &$1.str); /*19102004 */
                          dest_string.m=$1.m;
                         }
+        | B_NUM         {
+                         char n[40];
+                         dbg(3, "yyparse(): B_NUM = %d\n", $1);
+                         sprintf(n, "%d", $1);
+                         my_strdup(158,  &(dest_string.str),n); /*19102004 */
+                         dest_string.m = 1;
+                        }
+          
 ;
 list:     B_NAME        { 
-                         if(debug_var>=3) fprintf(errfp, "yyparse(): B_NAME (%lu) \n", (unsigned long) $1);
+                         dbg(3, "yyparse(): B_NAME (%lu) \n", (unsigned long) $1);
+                         dbg(3, "yyparse(): B_NAME, $1=%s\n", $1);
                          $$.str = expandlabel_strdup($1); /* 19102004 prima era =$1 */
-                         my_free(&$1);  /*191020004 */
-                         $1=NULL; /*191020004 */
+                         my_free(738, &$1);  /*191020004 */
                          $$.m = 1;
                         }
         | B_LINE        {
-                         if(debug_var>=3) fprintf(errfp, "yyparse(): B_LINE\n");
+                         dbg(3, "yyparse(): B_LINE\n");
                          $$.str = expandlabel_strdup($1); /* 19102004 prima era =$1 */
-                         my_free(&$1);  /*191020004 */
-                         $1=NULL; /*191020004 */
+                         my_free(739, &$1);  /*191020004 */
                          $$.m = 1;
                         }
         | list '*' B_NUM{
-                         if(debug_var>=3) fprintf(errfp, "yyparse(): list * B_NUM\n");
-                         if(debug_var>=3) fprintf(errfp, "yyparse(): |%s| %d \n",$1.str,$3);
+                         dbg(3, "yyparse(): list * B_NUM\n");
+                         dbg(3, "yyparse(): |%s| %d \n",$1.str,$3);
                          $$.str=my_strmult2($3,$1.str);
-                         if(debug_var>=3) fprintf(errfp, "yyparse(): |%s|\n",$$.str);
+                         dbg(3, "yyparse(): |%s|\n",$$.str);
                          $$.m = $3 * $1.m;
-                                           my_free(&$1.str);
-                         $1.str=NULL;  /* 19102004 */
+                         my_free(740, &$1.str);
                         }
         | B_NUM '*' list{
-                         if(debug_var>=3) fprintf(errfp, "yyparse(): B_NUM * list\n");
+                         dbg(3, "yyparse(): B_NUM * list\n");
                          $$.str=my_strmult($1,$3.str);
                          $$.m = $1 * $3.m;
-                                           my_free(&$3.str);
-                         $3.str=NULL; /* 19102004 */
+                         my_free(741, &$3.str);
                         }
         | list ',' list { 
-                         if(debug_var>=3) fprintf(errfp, "yyparse(): list , list\n");
+                         dbg(3, "yyparse(): list , list\n");
                          $$.str=my_strcat2($1.str, ',', $3.str);
                          $$.m = $1.m + $3.m;
-                         my_free(&$1.str), my_free(&$3.str);
-                         $1.str=NULL; /* 19102004 */
-                         $3.str=NULL; /* 19102004 */
+                         my_free(742, &$1.str);
+                         my_free(743, &$3.str);
                         }
         | list B_CAR list
                         {
-                         if(debug_var>=3) fprintf(errfp, "yyparse(): list B_CAR list\n");
+                         dbg(3, "yyparse(): list B_CAR list\n");
                          $$.str=my_strcat2($1.str, $2, $3.str);
                          $$.m = $1.m + $3.m;
-                         my_free(&$1.str), my_free(&$3.str);
-                         $1.str=NULL; /* 19102004 */
-                         $3.str=NULL; /* 19102004 */
+                         my_free(744, &$1.str);
+                         my_free(745, &$3.str);
                         }
         | '(' list ')'  {
-                         if(debug_var>=3) fprintf(errfp, "yyparse(): ( list )\n");
+                         dbg(3, "yyparse(): ( list )\n");
                          $$=$2;
+                        }
+        | B_NAME  '[' B_NAME  ']' 
+                        {
+                         int size = strlen($1) + strlen($3) + 3;
+                         $$.str = my_malloc(81, size);
+                         $$.m=-1;
+                         my_snprintf($$.str, size, "%s[%s]", $1, $3);
+                         my_free(746, &$1);
+                         my_free(747, &$3);
                         }
         | B_NAME  '[' index  ']' 
                         {
-                         if(debug_var>=3) fprintf(errfp, "yyparse(): making bus: n=%d\n",$3[0]);
-                         $$.str=my_strbus($1,$3); my_free(&$1); 
-                         $1=NULL; /*19102004 */
-                         if(debug_var>=3) fprintf(errfp, "yyparse(): done making bus: n=%d\n",$3[0]);
+                         dbg(3, "yyparse(): making bus: n=%d\n",$3[0]);
+                         dbg(3, "yyparse(): B_NAME[ index ] , $1=%s $3=%d\n", $1, *$3);
+                         $$.str=my_strbus($1,$3);
+                         my_free(748, &$1); 
+                         dbg(3, "yyparse(): done making bus: n=%d\n",$3[0]);
                          $$.m=$3[0];
-                         my_free(&$3); /*19102004 */
-                         $3=NULL; /*19102004 */
+                         my_free(749, &$3); /*19102004 */
                          idxsize=INITIALIDXSIZE;
                         }
         | B_NAME  '[' index_nobracket  ']' 
                         {
-                         if(debug_var>=3) fprintf(errfp, "yyparse(): making nobracket bus: n=%d\n",$3[0]);
-                         $$.str=my_strbus_nobracket($1,$3); my_free(&$1);
-                         $1=NULL; /*19102004 */
-                         if(debug_var>=3) fprintf(errfp, "yyparse(): done making nobracket bus: n=%d\n",$3[0]);
+                         dbg(3, "yyparse(): making nobracket bus: n=%d\n",$3[0]);
+                         $$.str=my_strbus_nobracket($1,$3);
+                         my_free(750, &$1);
+                         dbg(3, "yyparse(): done making nobracket bus: n=%d\n",$3[0]);
                          $$.m=$3[0];
-                         my_free(&$3); /*19102004 */
-                         $3=NULL; /*19102004 */
+                         my_free(751, &$3); /*19102004 */
                          idxsize=INITIALIDXSIZE;
                         }
 ;
@@ -328,7 +345,7 @@ index:    B_IDXNUM ':' B_IDXNUM ':' B_IDXNUM
                          sign = SIGN($3-$1);
                          $$=my_malloc(130, INITIALIDXSIZE*sizeof(int));
                          $$[0]=0;
-                         if(debug_var>=3) fprintf(errfp, "yyparse(): parsing first idx range\n");
+                         dbg(3, "yyparse(): parsing first idx range\n");
                          for(i=$1;;i+=sign*$5)
                          {
                           check_idx(&$$,++$$[0]);
@@ -343,7 +360,7 @@ index:    B_IDXNUM ':' B_IDXNUM ':' B_IDXNUM
                          int i;
                          $$=my_malloc(131, INITIALIDXSIZE*sizeof(int));
                          $$[0]=0;
-                         if(debug_var>=3) fprintf(errfp, "yyparse(): parsing first idx range\n");
+                         dbg(3, "yyparse(): parsing first idx range\n");
                          for(i=$1;;i+=SIGN($3-$1))
                          {
                           check_idx(&$$,++$$[0]);
@@ -352,7 +369,7 @@ index:    B_IDXNUM ':' B_IDXNUM ':' B_IDXNUM
                          }
                         }
         | B_IDXNUM      { 
-                         if(debug_var>=3) fprintf(errfp, "yyparse(): parsing first idx item\n");
+                         dbg(3, "yyparse(): parsing first idx item\n");
                          $$=my_malloc(132, INITIALIDXSIZE*sizeof(int));
                          $$[0]=0;
                           check_idx(&$$, ++$$[0]);
@@ -364,7 +381,7 @@ index:    B_IDXNUM ':' B_IDXNUM ':' B_IDXNUM
                          int sign;
 
                          sign = SIGN($5-$3);
-                         if(debug_var>=3) fprintf(errfp, "yyparse(): parsing comma sep idx range\n");
+                         dbg(3, "yyparse(): parsing comma sep idx range\n");
                          for(i=$3;;i+=sign*$7)
                          {
                           check_idx(&$$, ++$$[0]);
@@ -376,7 +393,7 @@ index:    B_IDXNUM ':' B_IDXNUM ':' B_IDXNUM
         | index ',' B_IDXNUM ':' B_IDXNUM
                         {
                          int i;
-                         if(debug_var>=3) fprintf(errfp, "yyparse(): parsing comma sep idx range\n");
+                         dbg(3, "yyparse(): parsing comma sep idx range\n");
                          for(i=$3;;i+=SIGN($5-$3))
                          {
                           check_idx(&$$, ++$$[0]);
@@ -386,7 +403,7 @@ index:    B_IDXNUM ':' B_IDXNUM ':' B_IDXNUM
                         }
         | index ',' B_IDXNUM
                         {
-                         if(debug_var>=3) fprintf(errfp, "yyparse(): parsing comma sep idx list\n");
+                         dbg(3, "yyparse(): parsing comma sep idx list\n");
                           check_idx(&$$, ++$$[0]);
                          $$[$$[0]]=$3;
                         }
@@ -396,7 +413,7 @@ index_nobracket: B_IDXNUM B_DOUBLEDOT B_IDXNUM
                          int i;
                          $$=my_malloc(85, INITIALIDXSIZE*sizeof(int));
                          $$[0]=0;
-                         if(debug_var>=3) fprintf(errfp, "yyparse(): doubledot\n");
+                         dbg(3, "yyparse(): doubledot\n");
                          for(i=$1;;i+=SIGN($3-$1))
                          {
                           check_idx(&$$,++$$[0]);
@@ -412,7 +429,7 @@ index_nobracket: B_IDXNUM B_DOUBLEDOT B_IDXNUM
                          sign = SIGN($3-$1);
                          $$=my_malloc(109, INITIALIDXSIZE*sizeof(int));
                          $$[0]=0;
-                         if(debug_var>=3) fprintf(errfp, "yyparse(): parsing first idx range\n");
+                         dbg(3, "yyparse(): parsing first idx range\n");
                          for(i=$1;;i+=sign*$5)
                          {
                           check_idx(&$$,++$$[0]);

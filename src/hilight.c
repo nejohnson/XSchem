@@ -24,7 +24,6 @@
 
 static struct hilight_hashentry *hilight_table[HASHSIZE];
 static int nelements=0; /* 20161221 */
-
 static int *inst_color=NULL;
 
 static unsigned int hash(char *tok)
@@ -33,7 +32,7 @@ static unsigned int hash(char *tok)
   char *str;
   int c;
 
-  str=sch_prefix[currentsch];
+  str=sch_path[currentsch];
   while ( (c = *tok++) )
       hash = c + (hash << 6) + (hash << 16) - hash;
   while ( (c = *str++) )
@@ -46,24 +45,39 @@ static struct hilight_hashentry *free_hilight_entry(struct hilight_hashentry *en
   struct hilight_hashentry *tmp;
   while(entry) {
     tmp = entry->next;
-    my_free(&entry->token);
-    my_free(&entry->path);
-    my_free(&entry);
+    my_free(755, &entry->token);
+    my_free(756, &entry->path);
+    my_free(757, &entry);
     entry = tmp;
   }
   return NULL;
+}
+
+/* for debug only */
+void display_hilights()
+{
+  int i;
+  struct hilight_hashentry *entry;
+  fprintf(errfp, "-----------------\n");
+  for(i=0;i<HASHSIZE;i++) {
+    entry = hilight_table[i];
+    while(entry) {
+      fprintf(errfp, "\nhilight hash content: token=%s, path=%s, value=%d\n", entry->token, entry->path, entry->value);
+      entry = entry->next;
+    }
+  }
 }
 
 void free_hilight_hash(void) /* remove the whole hash table  */
 {
  int i;
 
- if(debug_var>=2) fprintf(errfp, "free_hilight_hash(): removing hash table\n");
+ dbg(2, "free_hilight_hash(): removing hash table\n");
  for(i=0;i<HASHSIZE;i++)
  {
   hilight_table[i] = free_hilight_entry( hilight_table[i] );
  }
- if(debug_var>=2) fprintf(errfp, "free_hilight_hash(): : nelements=%d\n", nelements);
+ dbg(2, "free_hilight_hash(): : nelements=%d\n", nelements);
  nelements=0; /* 20161221 */
 }
 
@@ -84,15 +98,19 @@ void create_plot_cmd(int viewer)
   struct node_hashentry *node_entry;
   char *tok;
   char plotfile[PATH_MAX];
-  FILE *fd;
+  char color_str[8];
+  FILE *fd = NULL;
   char *str = NULL;
 
   my_snprintf(plotfile, S(plotfile), "%s/xplot", netlist_dir);
-  if(!(fd = fopen(plotfile, "w"))) {
-    fprintf(errfp, "create_plot_cmd(): error opening xplot file for writing\n");
-    return;
+  if(viewer == NGSPICE) {
+    if(!(fd = fopen(plotfile, "w"))) {
+      fprintf(errfp, "create_plot_cmd(): error opening xplot file for writing\n");
+      return;
+    }
+    fprintf(fd, "*ngspice plot file\n.control\n");
   }
-  if(viewer == NGSPICE) fprintf(fd, "*ngspice plot file\n.control\n");
+  if(viewer == GAW) tcleval("if { ![info exists gaw_fd] } { gaw_setup_tcp }\n");
   idx = 1;
   first = 1;
   for(i=0;i<HASHSIZE;i++) /* set ngspice colors */
@@ -102,9 +120,10 @@ void create_plot_cmd(int viewer)
       tok = entry->token;
       node_entry = bus_hash_lookup(tok, "", XLOOKUP, 0, "", "", "", "");
       if(tok[0] == '#') tok++;
-      if(node_entry && !strcmp(sch_prefix[currentsch], entry->path) && 
+      if(node_entry && !strcmp(sch_path[currentsch], entry->path) && 
          (node_entry->d.port == 0 || !strcmp(entry->path, ".") )) {
         c = get_color(entry->value);
+        sprintf(color_str, "%02x%02x%02x", xcolor_array[c].red>>8, xcolor_array[c].green>>8, xcolor_array[c].blue>>8);
         idx++;
         if(viewer == NGSPICE) {
           if(idx > 9) {
@@ -112,40 +131,25 @@ void create_plot_cmd(int viewer)
             fprintf(fd, str);
             fprintf(fd, "\n");
             first = 1;
-            my_free(&str);
+            my_free(758, &str);
           }
-
-          fprintf(fd, "set color%d=rgb:%02x/%02x/%02x\n",
-                  idx, xcolor_array[c].red>>8, xcolor_array[c].green>>8, xcolor_array[c].blue>>8);
+          fprintf(fd, "set color%d=rgb:%s\n", idx, color_str);
           if(first) {
             my_strcat(164, &str, "plot ");
             first = 0;
           }
-          if(!strcmp(entry->path, ".") ) {
-            my_strcat(157, &str, "\"");
-            my_strcat(158, &str, tok);
-            my_strcat(159, &str, "\" ");
-          } else {
-            my_strcat(160, &str, "\"");
-            my_strcat(161, &str, (entry->path)+1);
-            my_strcat(162, &str, tok);
-            my_strcat(163, &str, "\" ");
-          }
-        } else { /* gaw */
+          my_strcat(160, &str, "\"");
+          my_strcat(161, &str, (entry->path)+1);
+          my_strcat(162, &str, tok);
+          my_strcat(163, &str, "\" ");
+        }
+        if(viewer == GAW) {
           char *t=NULL, *p=NULL;
           my_strdup(241, &t, tok);
-          if(!strcmp(entry->path, ".") ) {
-            fprintf(fd, "puts $gaw_fd {copyvar v(%s) p0 #%02x%02x%02x}\n", strtolower(t),
-                    xcolor_array[c].red>>8, xcolor_array[c].green>>8, xcolor_array[c].blue>>8
-                   );
-          } else {
-            my_strdup(245, &p, (entry->path)+1);
-            fprintf(fd, "puts $gaw_fd {copyvar v(%s%s) p0 #%02x%02x%02x}\n", strtolower(p), strtolower(t),
-                    xcolor_array[c].red>>8, xcolor_array[c].green>>8, xcolor_array[c].blue>>8
-                   );
-            my_free(&p);
-          }
-          my_free(&t);
+          my_strdup2(245, &p, (entry->path)+1);
+          Tcl_VarEval(interp, "puts $gaw_fd {copyvar v(", strtolower(p), strtolower(t), ") p0 #", color_str, "}\nvwait gaw_fd\n", NULL);
+          my_free(759, &p);
+          my_free(760, &t);
         }
       }
       entry = entry->next;
@@ -154,13 +158,12 @@ void create_plot_cmd(int viewer)
   if(viewer == NGSPICE) {
     fprintf(fd, str);
     fprintf(fd, "\n.endc\n");
-    my_free(&str);
+    my_free(761, &str);
+    fclose(fd);
   }
-  fclose(fd);
   if(viewer == GAW) {
-     Tcl_VarEval(interp, "source ", plotfile, NULL);
+     tcleval("vwait gaw_fd; close $gaw_fd; unset gaw_fd\n");
   }
-
 }
 
 struct hilight_hashentry *hilight_lookup(char *token, int value, int remove)
@@ -198,7 +201,7 @@ struct hilight_hashentry *hilight_lookup(char *token, int value, int remove)
     entry->token = NULL;
     my_strdup(138, &(entry->token),token);
     entry->path = NULL;
-    my_strdup(139, &(entry->path),sch_prefix[currentsch]);
+    my_strdup(139, &(entry->path),sch_path[currentsch]);
     entry->value=value;
     entry->hash=hashcode;
     *preventry=entry;
@@ -208,14 +211,14 @@ struct hilight_hashentry *hilight_lookup(char *token, int value, int remove)
    return NULL; /* whether inserted or not return NULL since it was not in */
   }
   if( entry -> hash==hashcode && !strcmp(token,entry->token) &&
-      !strcmp(sch_prefix[currentsch], entry->path)  ) /* found matching tok */
+      !strcmp(sch_path[currentsch], entry->path)  ) /* found matching tok */
   {
    if(remove==XDELETE)                /* remove token from the hash table ... */
    {
     saveptr=entry->next;
-    my_free(&entry->token);
-    my_free(&entry->path);
-    my_free(&entry);
+    my_free(762, &entry->token);
+    my_free(763, &entry->path);
+    my_free(764, &entry);
     *preventry=saveptr;
     return NULL;
    }
@@ -238,7 +241,7 @@ struct hilight_hashentry *hilight_lookup(char *token, int value, int remove)
 struct hilight_hashentry *bus_hilight_lookup(const char *token, int value, int remove)
 {
  char *start, *string_ptr, c;
- static char *string=NULL;
+ char *string=NULL;
  struct hilight_hashentry *ptr1=NULL, *ptr2=NULL;
  int mult;
 
@@ -250,7 +253,9 @@ struct hilight_hashentry *bus_hilight_lookup(const char *token, int value, int r
    my_strdup(141, &string, expandlabel(token,&mult));
  }
 
- if(string==NULL) return NULL;
+ if(string==NULL) {
+   return NULL;
+ }
  string_ptr = start = string;
  while(1) {
   c=(*string_ptr);
@@ -258,7 +263,7 @@ struct hilight_hashentry *bus_hilight_lookup(const char *token, int value, int r
   {
     *string_ptr='\0';  /* set end string at comma position.... */
     /* insert one bus element at a time in hash table */
-    if(debug_var>=2) fprintf(errfp, "bus_hilight_lookup: inserting: %s, value:%d\n", start,value);
+    dbg(2, "bus_hilight_lookup: inserting: %s, value:%d\n", start,value);
     ptr1=hilight_lookup(start, value, remove);
     if(ptr1 && !ptr2) {
       ptr2=ptr1; /*return first non null entry */
@@ -271,12 +276,14 @@ struct hilight_hashentry *bus_hilight_lookup(const char *token, int value, int r
   string_ptr++;
  }
  /* if something found return first pointer */
+ my_free(765, &string);
  return ptr2;
 }
 
 void delete_hilight_net(void)
 {
  int i;
+ if(!hilight_nets) return;
  free_hilight_hash();
  if(event_reporting) {
    printf("xschem clear_hilights\n");
@@ -287,74 +294,101 @@ void delete_hilight_net(void)
  for(i=0;i<lastinst;i++) {
    inst_ptr[i].flags &= ~4 ;
  }
- my_free(&inst_color);
+ dbg(1, "delete_hilight_net(): clearing\n");
+ my_free(766, &inst_color);
  hilight_color=0;
 }
 
 void hilight_parent_pins(void)
 {
- int rects, i,j;
- char *pin_node;
- int save_currentsch;
+ int rects, i, j, k;
  struct hilight_hashentry *entry;
+ const char *pin_name;
+ char *pin_node = NULL;
+ char *net_node=NULL;
+ int mult, net_mult, inst_number;
  
  if(!hilight_nets) return;
  prepare_netlist_structs(0);
- save_currentsch=currentsch;
  i=previous_instance[currentsch];
- if(debug_var>=1) fprintf(errfp, "hilight_parent_pins(): previous_instance=%d\n", previous_instance[currentsch]);
+ inst_number = sch_inst_number[currentsch+1];
+ dbg(1, "hilight_parent_pins(): previous_instance=%d\n", previous_instance[currentsch]);
+ dbg(1, "hilight_parent_pins(): inst_number=%d\n", inst_number);
 
  rects = (inst_ptr[i].ptr+instdef)->rects[PINLAYER];
 
- currentsch=save_currentsch+1;
  for(j=0;j<rects;j++)
  {
-  pin_node=get_tok_value((inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][j].prop_ptr,"name",0);
-  if( (entry = bus_hilight_lookup(pin_node,0, XLOOKUP)) )
-  {
-    currentsch=save_currentsch;
-    bus_hilight_lookup(inst_ptr[i].node[j], entry->value, XINSERT);
-    currentsch=save_currentsch+1;
-  }
-  else
-  {
-    currentsch=save_currentsch;
-    bus_hilight_lookup(inst_ptr[i].node[j], 0, XDELETE);
-    currentsch=save_currentsch+1;
-  }
+  if(!inst_ptr[i].node[j]) continue;
+  my_strdup(445, &net_node, expandlabel(inst_ptr[i].node[j], &net_mult));
+  dbg(1, "hilight_parent_pins(): net_node=%s\n", net_node);
+  pin_name = get_tok_value((inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][j].prop_ptr,"name",0);
+  if(!pin_name[0]) continue;
+  my_strdup(450, &pin_node, expandlabel(pin_name, &mult));
+  dbg(1, "hilight_parent_pins(): pin_node=%s\n", pin_node);
+
+  for(k = 1; k<=mult; k++) {
+    currentsch++;
+    entry = bus_hilight_lookup(find_nth(pin_node, ',', k), 0, XLOOKUP);
+    currentsch--;
+    if(entry)
+    {
+      bus_hilight_lookup(find_nth(net_node, ',', ((inst_number - 1) * mult + k - 1) % net_mult + 1), entry->value, XINSERT);
+    }
+    else
+    {
+      bus_hilight_lookup(find_nth(net_node, ',', ((inst_number - 1) * mult + k - 1) % net_mult + 1), 0, XDELETE);
+    }
+   }
  }
-
- currentsch=save_currentsch;
-
+ my_free(767, &pin_node);
+ my_free(768, &net_node);
 }
 
-void hilight_child_pins(int i)
+void hilight_child_pins(void)
 {
- int j,rects;
- char *pin_node;
+ int j, k, rects;
+ const char *pin_name;
+ char *pin_node = NULL;
+ char *net_node=NULL;
  struct hilight_hashentry *entry;
- int save_currentsch;
+ int mult, net_mult, i, inst_number;
 
+ i = previous_instance[currentsch-1];
  if(!hilight_nets) return;
- save_currentsch=currentsch;
  prepare_netlist_structs(0);
  rects = (inst_ptr[i].ptr+instdef)->rects[PINLAYER];
+ inst_number = sch_inst_number[currentsch];
  for(j=0;j<rects;j++)
  {
-  currentsch=save_currentsch;
-  pin_node=get_tok_value((inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][j].prop_ptr,"name",0);
-  if( (entry = bus_hilight_lookup(inst_ptr[i].node[j], 0, XLOOKUP)) )
-  {
+  dbg(1, "inst_number=%d\n", inst_number);
+
+  if(!inst_ptr[i].node[j]) continue;
+  my_strdup(508, &net_node, expandlabel(inst_ptr[i].node[j], &net_mult));
+  dbg(1, "hilight_child_pins(): net_node=%s\n", net_node);
+  pin_name = get_tok_value((inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][j].prop_ptr,"name",0);
+  if(!pin_name[0]) continue;
+  my_strdup(521, &pin_node, expandlabel(pin_name, &mult));
+  dbg(1, "hilight_child_pins(): pin_node=%s\n", pin_node);
+  for(k = 1; k<=mult; k++) {
+    dbg(1, "hilight_child_pins():looking nth net:%d, k=%d, inst_number=%d, mult=%d\n", 
+                               (inst_number-1)*mult+k, k, inst_number, mult);
+    dbg(1, "hilight_child_pins():looking net:%s\n",  find_nth(net_node, ',', ((inst_number - 1) * mult + k - 1) % net_mult + 1));
+    currentsch--;
+    entry = bus_hilight_lookup(find_nth(net_node, ',', ((inst_number - 1) * mult + k - 1) % net_mult + 1), 0, XLOOKUP);
     currentsch++;
-    bus_hilight_lookup(pin_node, entry->value, XINSERT); 
-  }
-  else
-  {
-    currentsch++;
-    bus_hilight_lookup(pin_node, 0, XDELETE); 
-  }
+    if(entry) {
+      bus_hilight_lookup(find_nth(pin_node, ',', k), entry->value, XINSERT); 
+      dbg(1, "hilight_child_pins(): inserting: %s\n", find_nth(pin_node, ',', k));
+    }
+    else {
+      bus_hilight_lookup(find_nth(pin_node, ',', k), 0, XDELETE); 
+      dbg(1, "hilight_child_pins(): deleting: %s\n", find_nth(pin_node, ',', k));
+    }
+  } /* for(k..) */
  }
- currentsch=save_currentsch;
+ my_free(769, &pin_node);
+ my_free(770, &net_node);
 }
 
 
@@ -376,7 +410,7 @@ int search(const char *tok, const char *val, int sub, int sel, int what)
  char *type; 
  int has_token;
  const char empty_string[] = "";
- static char *tmpname=NULL;
+ char *tmpname=NULL;
  int found = 0;
 #ifdef __unix__
  regex_t re;
@@ -391,12 +425,7 @@ int search(const char *tok, const char *val, int sub, int sel, int what)
 #ifdef __unix__
  if(regcomp(&re, val , REG_EXTENDED)) return TCL_ERROR;
 #endif
- if(debug_var>=1) fprintf(errfp, "search():val=%s\n", val);
- if(sel==1) {
-   drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
-   drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
-   drawtemparc(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
- }
+ dbg(1, "search():val=%s\n", val);
  if(what==ADD || what==NOW) {
    
     if(!sel) { /* 20190525 */
@@ -426,10 +455,10 @@ int search(const char *tok, const char *val, int sub, int sel, int what)
         str = get_tok_value(inst_ptr[i].prop_ptr, tok,0);
         has_token = get_tok_size;
       }
-      if(debug_var>=1) fprintf(errfp, "search(): inst=%d, tok=%s, val=%s \n", i,tok, str);
+      dbg(1, "search(): inst=%d, tok=%s, val=%s \n", i,tok, str);
      
       if(bus && sub) {
-       if(debug_var>=1) fprintf(errfp, "search(): doing substr search on bus sig:%s inst=%d tok=%s val=%s\n", str,i,tok,val);
+       dbg(1, "search(): doing substr search on bus sig:%s inst=%d tok=%s val=%s\n", str,i,tok,val);
        str=expandlabel(str,&tmp);
       }
       if(str && has_token) {
@@ -451,7 +480,7 @@ int search(const char *tok, const char *val, int sub, int sel, int what)
                 draw_symbol(NOW, hilight_layer, i,c,0,0,0.0,0.0);
             }
             else {
-              if(debug_var>=1) fprintf(errfp, "search(): setting hilight flag on inst %d\n",i);
+              dbg(1, "search(): setting hilight flag on inst %d\n",i);
               hilight_nets=1;
               inst_ptr[i].flags |= 4;
               if(what==NOW) for(c=0;c<cadlayers;c++)
@@ -481,16 +510,16 @@ int search(const char *tok, const char *val, int sub, int sel, int what)
         if (!strcmp(str, val) && sub)
 #endif
         {
-            if(debug_var>=2) fprintf(errfp, "search(): wire=%d, tok=%s, val=%s \n", i,tok, wire[i].node);
+            dbg(2, "search(): wire=%d, tok=%s, val=%s \n", i,tok, wire[i].node);
             if(!sel) {
               bus_hilight_lookup(wire[i].node, col, XINSERT);
               if(what == NOW) {
                 if(wire[i].bus) /* 20171201 */
                   drawline(hilight_layer, THICK,
-                     wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
+                     wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2, 0);
                 else
                   drawline(hilight_layer, NOW,
-                     wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
+                     wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2, 0);
                 if(cadhalfdotsize*mooz>=0.7) {
                   if( wire[i].end1 >1 ) {
                     filledarc(hilight_layer, NOW, wire[i].x1, wire[i].y1, cadhalfdotsize, 0, 360);
@@ -511,7 +540,7 @@ int search(const char *tok, const char *val, int sub, int sel, int what)
             found = 1;
         }
         else {
-          if(debug_var>=2) fprintf(errfp, "search():  not found wire=%d, tok=%s, val=%s search=%s\n", i,tok, str,val);
+          dbg(2, "search():  not found wire=%d, tok=%s, val=%s search=%s\n", i,tok, str,val);
         }
       }
     }
@@ -535,7 +564,7 @@ int search(const char *tok, const char *val, int sub, int sel, int what)
             found = 1;
         }
         else {
-          if(debug_var>=2) fprintf(errfp, "search(): not found line=%d col=%d, tok=%s, val=%s search=%s\n", 
+          dbg(2, "search(): not found line=%d col=%d, tok=%s, val=%s search=%s\n", 
                               i, c, tok, str, val);
         }
       }
@@ -560,7 +589,7 @@ int search(const char *tok, const char *val, int sub, int sel, int what)
             found = 1;
         }
         else {
-          if(debug_var>=2) fprintf(errfp, "search(): not found rect=%d col=%d, tok=%s, val=%s search=%s\n", 
+          dbg(2, "search(): not found rect=%d col=%d, tok=%s, val=%s search=%s\n", 
                               i, c, tok, str, val);
         }
       }
@@ -584,6 +613,7 @@ int search(const char *tok, const char *val, int sub, int sel, int what)
    printf("xschem search %s %d %s %s\n", (sub ? "exact" : "regex"), sel, tok, val);
    fflush(stdout);
  }
+ my_free(771, &tmpname);
  if(found) return 1; else return 0;
 }
 
@@ -594,13 +624,13 @@ int search(const char *tok, const char *val, int sub, int sel, int what)
 /* 'propagate_to' properties set on pins) */
 void drill_hilight(void)
 {
-  static char *netname=NULL, *propagated_net=NULL;
+  char *netname=NULL, *propagated_net=NULL;
   int mult=0;
   int found;
   Instdef *symbol;
   Box *rect;
   int i, j, npin;
-  char *propagate_str;
+  const char *propagate_str;
   int propagate;
   struct hilight_hashentry *entry, *propag_entry;
   int count;
@@ -632,45 +662,35 @@ void drill_hilight(void)
     } /* for(i...) */
     if(!found) break;
   } /* while(1) */
+  my_free(772, &netname);
+  my_free(773, &propagated_net);
 }
-void send_net_to_gaw(int to_waveform, char *node)
+
+void send_net_to_gaw(char *node)
 {
-  tcleval("info exists gaw_fd");
-  if(to_waveform == GAW && Tcl_GetStringResult(interp)[0] == '1') {
-    int c;
-    struct node_hashentry *node_entry;
-    char * tok;
-    char plotfile[PATH_MAX];
-    FILE *fd;
-    
-    my_snprintf(plotfile, S(plotfile), "%s/xplot", netlist_dir);
-    if(!(fd = fopen(plotfile, "w"))) {
-      fprintf(errfp, "hilight_net(): error opening xplot file for writing\n");
-      return;
+  int c, k, tok_mult;
+  struct node_hashentry *node_entry;
+  const char *expanded_tok;
+  char *tok, color_str[8];
+  
+  if(!node || !node[0]) return;
+  tok = node;
+  node_entry = bus_hash_lookup(tok, "", XLOOKUP, 0, "", "", "", "");
+  if(tok[0] == '#') tok++;
+  if(node_entry  && (node_entry->d.port == 0 || !strcmp(sch_path[currentsch], ".") )) {
+    char *t=NULL, *p=NULL;
+    c = get_color(hilight_color);
+    sprintf(color_str, "%02x%02x%02x", xcolor_array[c].red>>8, xcolor_array[c].green>>8, xcolor_array[c].blue>>8);
+    expanded_tok = expandlabel(tok, &tok_mult);
+    tcleval("if { ![info exists gaw_fd] } { gaw_setup_tcp }\n");
+    for(k=1; k<=tok_mult; k++) {
+      my_strdup(246, &t, find_nth(expanded_tok, ',', k));
+      my_strdup2(254, &p, sch_path[currentsch]+1);
+      Tcl_VarEval(interp, "puts $gaw_fd {copyvar v(", strtolower(p), strtolower(t), ") p0 #", color_str, "}\nvwait gaw_fd\n", NULL);
+      my_free(774, &p);
+      my_free(775, &t);
     }
-    tok = node;
-    node_entry = bus_hash_lookup(tok, "", XLOOKUP, 0, "", "", "", "");
-    if(tok[0] == '#') tok++;
-    if(node_entry  && (node_entry->d.port == 0 || !strcmp(sch_prefix[currentsch], ".") )) {
-      char *t=NULL, *p=NULL;
-      c = get_color(hilight_color);
-      my_strdup(246, &t, tok);
-      if(!strcmp(sch_prefix[currentsch], ".") ) {
-        fprintf(fd, "puts $gaw_fd {copyvar v(%s) p0 #%02x%02x%02x}\n", strtolower(t),
-                xcolor_array[c].red>>8, xcolor_array[c].green>>8, xcolor_array[c].blue>>8
-               );
-      } else {
-        my_strdup(254, &p, sch_prefix[currentsch]+1);
-        fprintf(fd, "puts $gaw_fd {copyvar v(%s%s) p0 #%02x%02x%02x}\n", strtolower(p), strtolower(t),
-                xcolor_array[c].red>>8, xcolor_array[c].green>>8, xcolor_array[c].blue>>8
-               );
-        my_free(&p);
-      }
-      my_free(&t);
-    }
-    fclose(fd);
-    Tcl_VarEval(interp, "source ", plotfile, NULL);
-  } /* if(to_waveform == GAW) */
+  }
 }
 
 void hilight_net(int to_waveform)
@@ -679,7 +699,7 @@ void hilight_net(int to_waveform)
   char *type;
 
   prepare_netlist_structs(0);
-  if(debug_var>=1) fprintf(errfp, "hilight_net(): entering\n");
+  dbg(1, "hilight_net(): entering\n");
   rebuild_selected_array();
   for(i=0;i<lastselected;i++)
   {
@@ -694,7 +714,7 @@ void hilight_net(int to_waveform)
       }
       hilight_nets=1;
       if(!bus_hilight_lookup(wire[n].node, hilight_color, XINSERT)) {
-        send_net_to_gaw(to_waveform, wire[n].node);
+        if(to_waveform == GAW) send_net_to_gaw(wire[n].node);
         if(incr_hilight) hilight_color++;
       }
       break;
@@ -712,7 +732,7 @@ void hilight_net(int to_waveform)
          fflush(stdout);
        }
        if(!bus_hilight_lookup(inst_ptr[n].node[0], hilight_color, XINSERT)) {
-         send_net_to_gaw(to_waveform, inst_ptr[n].node[0]);
+         if(to_waveform == GAW) send_net_to_gaw(inst_ptr[n].node[0]);
          hilight_nets=1;
          if(incr_hilight) hilight_color++;
        }
@@ -722,7 +742,7 @@ void hilight_net(int to_waveform)
          printf("xschem search exact %d name %s\n", 0, escape_chars(s, inst_ptr[n].instname, PATH_MAX));
          fflush(stdout);
        }
-       if(debug_var>=1) fprintf(errfp, "hilight_net(): setting hilight flag on inst %d\n",n);
+       dbg(1, "hilight_net(): setting hilight flag on inst %d\n",n);
        hilight_nets=1;
        inst_ptr[n].flags |= 4;
      }
@@ -736,6 +756,7 @@ void hilight_net(int to_waveform)
     drill_hilight();
     /*traverse_schematic(); */
   }
+  tcleval("if { [info exists gaw_fd] } {close $gaw_fd; unset gaw_fd}\n");
 }
 
 void unhilight_net(void)
@@ -744,7 +765,7 @@ void unhilight_net(void)
   char *type;
 
   prepare_netlist_structs(0);
-  if(debug_var>=1) fprintf(errfp, "unhilight_net(): entering\n");
+  dbg(1, "unhilight_net(): entering\n");
   rebuild_selected_array();
   for(i=0;i<lastselected;i++)
   {
@@ -831,10 +852,10 @@ void draw_hilight_net(int on_window)
       if( (entry = bus_hilight_lookup(wire[i].node, 0, XLOOKUP)) ) {
         if(wire[i].bus) /* 20171201 */
           drawline(get_color(entry->value), THICK,
-             wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
+             wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2, 0);
         else
           drawline(get_color(entry->value), NOW,
-             wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
+             wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2, 0);
         if(cadhalfdotsize*mooz>=0.7) {
           if( wire[i].end1 >1 ) { /* 20150331 draw_dots */
             filledarc(get_color(entry->value), NOW, wire[i].x1, wire[i].y1, cadhalfdotsize, 0, 360);
@@ -849,10 +870,10 @@ void draw_hilight_net(int on_window)
       if( (entry = bus_hilight_lookup(wire[i].node, 0, XLOOKUP)) ) {
         if(wire[i].bus) /* 20171201 */
           drawline(get_color(entry->value), THICK,
-             wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
+             wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2, 0);
         else
           drawline(get_color(entry->value), NOW,
-             wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
+             wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2, 0);
         if(cadhalfdotsize*mooz>=0.7) {
           if( wire[i].end1 >1 ) { /* 20150331 draw_dots */
             filledarc(get_color(entry->value), NOW, wire[i].x1, wire[i].y1, cadhalfdotsize, 0, 360);
@@ -863,6 +884,7 @@ void draw_hilight_net(int on_window)
         }
       }
  }
+ dbg(1, "draw_hilight_net() : allocating inst_color %d bytes \n", lastinst*sizeof(int));
  my_realloc(145, &inst_color,lastinst*sizeof(int)); 
  for(i=0;i<lastinst;i++)
  {
@@ -879,12 +901,12 @@ void draw_hilight_net(int on_window)
 
   hilight_connected_inst = !strcmp(get_tok_value((inst_ptr[i].ptr+instdef)->prop_ptr, "highlight", 0), "true");
   if( inst_ptr[i].flags & 4) {
-    if(debug_var>=1) fprintf(errfp, "draw_hilight_net(): instance %d flags &4 true\n", i);
+    dbg(1, "draw_hilight_net(): instance %d flags &4 true\n", i);
     inst_color[i]=PINLAYER;
   }
   else if(hilight_connected_inst) {
     int rects, j;
-    if(debug_var >= 2) fprintf(errfp, "draw_hilight_net(): hilight_connected_inst inst=%d, node=%s\n", i, inst_ptr[i].node[0]);
+    dbg(2, "draw_hilight_net(): hilight_connected_inst inst=%d, node=%s\n", i, inst_ptr[i].node[0]);
     if( (rects = (inst_ptr[i].ptr+instdef)->rects[PINLAYER]) > 0 ) {
       for(j=0;j<rects;j++) {
         if( inst_ptr[i].node && inst_ptr[i].node[j]) {
@@ -920,11 +942,7 @@ void draw_hilight_net(int on_window)
       y1=Y_TO_SCREEN(inst_ptr[i].y1);
       y2=Y_TO_SCREEN(inst_ptr[i].y2);
       if(OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2)) continue;
-      if(debug_var>=1) fprintf(errfp, "draw_hilight_net(): instance:%d\n",i);
-      drawline(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0);
-      drawrect(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0);
-      filledrect(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0);
-      drawarc(inst_color[i], BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0, 0);
+      dbg(1, "draw_hilight_net(): instance:%d\n",i);
       /* 20160414 from draw() */
       symptr = (inst_ptr[i].ptr+instdef);
       if( c==0 || /*draw_symbol call is needed on layer 0 to avoid redundant work (outside check) */
@@ -936,13 +954,14 @@ void draw_hilight_net(int on_window)
         draw_symbol(ADD, inst_color[i], i,c,0,0,0.0,0.0);
       }
       filledrect(inst_color[i], END, 0.0, 0.0, 0.0, 0.0);
-      drawarc(inst_color[i], END, 0.0, 0.0, 0.0, 0.0, 0.0, 0);
-      drawrect(inst_color[i], END, 0.0, 0.0, 0.0, 0.0);
-      drawline(inst_color[i], END, 0.0, 0.0, 0.0, 0.0);
+      drawarc(inst_color[i], END, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0);
+      drawrect(inst_color[i], END, 0.0, 0.0, 0.0, 0.0, 0);
+      drawline(inst_color[i], END, 0.0, 0.0, 0.0, 0.0, 0);
      }
    }
  }
  draw_window = save_draw;
+ /* display_hilights(); */
 }
 
 /* show == 0   ==> create pins from highlight nets */
@@ -958,8 +977,8 @@ void print_hilight_net(int show)
  char a[] = "create_pins";
  char b[] = "add_lab_prefix";
  char b1[] = "add_lab_no_prefix";
- static char *filetmp1 = NULL;
- static char *filetmp2 = NULL;
+ char *filetmp1 = NULL;
+ char *filetmp2 = NULL;
  char *filename_ptr;
 
 
@@ -975,7 +994,8 @@ void print_hilight_net(int show)
  my_strdup(147, &filetmp2, filename_ptr);
  fclose(fd);
  if(!(fd = open_tmpfile("hilight_", &filename_ptr))) {
-   fprintf(errfp, "print_hilight_net(): can not create tmpfile %s\n", filename_ptr);
+   fprintf(errfp, "print_hilight_net(): can not create tmpfile %s\n", filename_ptr); 
+   my_free(776, &filetmp2);
    return;
  }
  my_strdup(148, &filetmp1, filename_ptr);
@@ -988,12 +1008,16 @@ void print_hilight_net(int show)
  tclsetvar("filetmp1",filetmp1);
 
  if(  filetmp1[0] == 0 || filetmp2[0] == 0 ) {
-   if(debug_var>=1) fprintf(errfp, "print_hilight_net(): problems creating tmpfiles\n");
+   dbg(1, "print_hilight_net(): problems creating tmpfiles\n");
+   my_free(777, &filetmp1);
+   my_free(778, &filetmp2);
    return;
  }
  if(fd==NULL){ 
-    if(debug_var>=1) fprintf(errfp, "print_hilight_net(): problems opening netlist file\n");
-    return;
+   dbg(1, "print_hilight_net(): problems opening netlist file\n");
+   my_free(779, &filetmp1);
+   my_free(780, &filetmp2);
+   return;
  }
  my_snprintf(cmd, S(cmd), "\"%s/order_labels.awk\"", tclgetvar("XSCHEM_SHAREDIR"));
  my_snprintf(cmd2, S(cmd2), "%s %s > %s", cmd, filetmp1, filetmp2);
@@ -1006,7 +1030,7 @@ void print_hilight_net(int show)
 
      /* 20170926 test for not null node_entry, this may happen if a hilighted net name has been changed */
      /* before invoking this function, in this case --> skip */
-     if(node_entry && !strcmp(sch_prefix[currentsch], entry->path)) {
+     if(node_entry && !strcmp(sch_path[currentsch], entry->path)) {
        if(show==3) {
          
          fprintf(fd, "%s%s\n", !strcmp(entry->path, ".") ? "" : entry->path, entry->token); /* 20111106 */
@@ -1060,5 +1084,7 @@ void print_hilight_net(int show)
  prepared_hilight_structs=0; /* 20171212 */
  prepared_netlist_structs=0; /* 20171212 */
  /* delete_netlist_structs(); */
+ my_free(781, &filetmp1);
+ my_free(782, &filetmp2);
 }
 

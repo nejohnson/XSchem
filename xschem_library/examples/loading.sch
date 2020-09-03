@@ -1,4 +1,4 @@
-v {xschem version=2.9.5 file_version=1.1}
+v {xschem version=2.9.7 file_version=1.2}
 G {}
 V {// test}
 S {* test}
@@ -123,11 +123,11 @@ use work.rrreal.all;
 }
 C {pump.sym} 250 -680 0 0 {name=x4 conduct="1.0/20000.0" val=4.5}
 C {lab_pin.sym} 150 -680 0 0 {name=l4  lab=ING}
-C {switch_rreal.sym} 660 -670 0 0 {name=x5 del="2 ns"}
+C {switch_rreal.sch} 660 -670 0 0 {name=x5 del="2 ns"}
 C {lab_pin.sym} 510 -660 0 0 {name=l5  lab=SW}
 C {real_capa.sym} 450 -540 0 0 {name=x3 cap=30.0}
 C {real_capa.sym} 830 -540 0 0 {name=x1 cap=100.0}
-C {switch_rreal.sym} 1050 -670 0 0 {name=x2 del="2 ns"}
+C {switch_rreal.sch} 1050 -670 0 0 {name=x2 del="2 ns"}
 C {lab_pin.sym} 900 -660 0 0 {name=l2  lab=SW1}
 C {lab_pin.sym} 1240 -680 0 1 {name=l3  lab=SP sig_type=rrreal}
 C {real_capa.sym} 1230 -540 0 0 {name=x6 cap=20.0}

@@ -55,10 +55,10 @@ void global_tedax_netlist(int global)  /* netlister driver */
  }
 
  if(fd==NULL){ 
-   if(debug_var>=0) fprintf(errfp, "global_tedax_netlist(): problems opening netlist file\n");
+   dbg(0, "global_tedax_netlist(): problems opening netlist file\n");
    return;
  }
- if(debug_var>=1) fprintf(errfp, "global_tedax_netlist(): opening %s for writing\n",netl_filename);
+ dbg(1, "global_tedax_netlist(): opening %s for writing\n",netl_filename);
  fprintf(fd,"tEDAx v1\nbegin netlist v1 %s\n", skip_dir( schematic[currentsch]) );
 
  tedax_netlist(fd, 0);
@@ -83,7 +83,7 @@ void global_tedax_netlist(int global)  /* netlister driver */
    load_schematic(1, schematic[currentsch], 0); /* 20180927 */
 
    currentsch++;
-    if(debug_var>=2) fprintf(errfp, "global_tedax_netlist(): last defined symbol=%d\n",lastinstdef);
+    dbg(2, "global_tedax_netlist(): last defined symbol=%d\n",lastinstdef);
    for(i=0;i<lastinstdef;i++)
    {
     if( strcmp(get_tok_value(instdef[i].prop_ptr,"tedax_ignore",0),"true")==0 ) continue; /* 20070726 */
@@ -106,15 +106,15 @@ void global_tedax_netlist(int global)  /* netlister driver */
 
    /* restore hilight flags from errors found analyzing top level before descending hierarchy */
    for(i=0;i<lastinst; i++) inst_ptr[i].flags |= stored_flags[i];
-   my_free(&stored_flags);
 
    draw_hilight_net(1);
  }
+ my_free(965, &stored_flags);
 
  /* print globals nodes found in netlist 28032003 */
  record_global_node(0,fd,NULL);
 
- if(debug_var>=1) fprintf(errfp, "global_tedax_netlist(): starting awk on netlist!\n");
+ dbg(1, "global_tedax_netlist(): starting awk on netlist!\n");
 
  fclose(fd);
  if(netlist_show) {
@@ -139,7 +139,7 @@ void tedax_block_netlist(FILE *fd, int i)  /*20081223 */
   char cellname[PATH_MAX];  /* 20081202 */
   const char *str_tmp;
   int mult;
-  static char *extra=NULL;
+  char *extra=NULL;
   if(!strcmp( get_tok_value(instdef[i].prop_ptr,"tedax_stop",0),"true") )
      tedax_stop=1;
   else
@@ -160,6 +160,7 @@ void tedax_block_netlist(FILE *fd, int i)  /*20081223 */
   fprintf(fd, "%s ", extra ? extra : "" );
   /* 20081206 new get_sym_template does not return token=value pairs where token listed in extra */
   fprintf(fd, "%s", get_sym_template(instdef[i].templ, extra)); /* 20150409 */
+  my_free(966, &extra);
   fprintf(fd, "\n");
   /*clear_drawing(); */
   if((str_tmp = get_tok_value(instdef[i].prop_ptr, "schematic",0 ))[0]) {
@@ -185,7 +186,7 @@ void tedax_block_netlist(FILE *fd, int i)  /*20081223 */
 void tedax_netlist(FILE *fd, int tedax_stop )
 {
   int i;
-  static char *type=NULL;
+  char *type=NULL;
  
   prepared_netlist_structs = 0;
   prepare_netlist_structs(1);
@@ -223,6 +224,7 @@ void tedax_netlist(FILE *fd, int tedax_stop )
     }
   }
   if(!netlist_count) redraw_hilights(); /* draw_hilight_net(1); */
+  my_free(967, &type);
 }
 
 

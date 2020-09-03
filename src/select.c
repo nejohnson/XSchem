@@ -32,7 +32,7 @@ void symbol_bbox(int i, double *x1,double *y1, double *x2, double *y2)
 {
    int j;
    Text text;
-   char *tmp_txt;
+   const char *tmp_txt;
    int rot,flip;
    double x0, y0 ;
    double text_x0, text_y0;
@@ -58,7 +58,7 @@ void symbol_bbox(int i, double *x1,double *y1, double *x2, double *y2)
    inst_ptr[i].yy1 = *y1;               /* for easier select */
    inst_ptr[i].xx2 = *x2;
    inst_ptr[i].yy2 = *y2;
-    if(debug_var>=2) fprintf(errfp, "symbol_bbox(): instance=%d %.16g %.16g %.16g %.16g\n",i,*x1, *y1, *x2, *y2);
+    dbg(2, "symbol_bbox(): instance=%d %.16g %.16g %.16g %.16g\n",i,*x1, *y1, *x2, *y2);
    
    /* strings bbox */
    for(j=0;j< (inst_ptr[i].ptr+instdef)->texts;j++)
@@ -66,19 +66,19 @@ void symbol_bbox(int i, double *x1,double *y1, double *x2, double *y2)
     sym_flip = flip;
     sym_rot = rot;
     text = (inst_ptr[i].ptr+instdef)->txtptr[j];
-     if(debug_var>=2) fprintf(errfp, "symbol_bbox(): instance %d text n: %d text str=%s\n", 
+     dbg(2, "symbol_bbox(): instance %d text n: %d text str=%s\n", 
            i,j, text.txt_ptr? text.txt_ptr:"NULL");
 
      tmp_txt = translate(i, text.txt_ptr);
 
-      if(debug_var>=2) fprintf(errfp, "symbol_bbox(): translated text: %s\n", tmp_txt);
+      dbg(2, "symbol_bbox(): translated text: %s\n", tmp_txt);
      ROTATION(0.0,0.0,text.x0, text.y0,text_x0,text_y0);
      #ifdef HAS_CAIRO
      customfont=set_text_custom_font(&text);
      #endif
      text_bbox(tmp_txt, text.xscale, text.yscale, 
        (text.rot + ( (sym_flip && (text.rot & 1) ) ? sym_rot+2 : sym_rot)) &0x3,
-       sym_flip ^ text.flip,
+       sym_flip ^ text.flip, text.hcenter, text.vcenter,
        x0+text_x0,y0+text_y0, &xx1,&yy1,&xx2,&yy2);
      #ifdef HAS_CAIRO
      if(customfont) cairo_restore(ctx);
@@ -87,7 +87,7 @@ void symbol_bbox(int i, double *x1,double *y1, double *x2, double *y2)
      if(yy1<*y1) *y1=yy1;
      if(xx2>*x2) *x2=xx2;
      if(yy2>*y2) *y2=yy2;
-      if(debug_var>=2) fprintf(errfp, "symbol_bbox(): instance=%d text=%d %.16g %.16g %.16g %.16g\n",i,j, *x1, *y1, *x2, *y2);
+      dbg(2, "symbol_bbox(): instance=%d text=%d %.16g %.16g %.16g %.16g\n",i,j, *x1, *y1, *x2, *y2);
 
    }
 }
@@ -107,7 +107,7 @@ static void del_rect_line_arc_poly(void)
    {
     j++; 
     bbox(ADD, rect[c][i].x1, rect[c][i].y1, rect[c][i].x2, rect[c][i].y2);
-    my_free(&rect[c][i].prop_ptr);
+    my_free(928, &rect[c][i].prop_ptr);
     set_modify(1);
     continue;
    }
@@ -125,7 +125,7 @@ static void del_rect_line_arc_poly(void)
     j++;
     bbox(ADD, line[c][i].x1, line[c][i].y1, line[c][i].x2, line[c][i].y2);
     set_modify(1);
-    my_free(&line[c][i].prop_ptr);
+    my_free(929, &line[c][i].prop_ptr);
     continue;
    }
    if(j) 
@@ -149,7 +149,7 @@ static void del_rect_line_arc_poly(void)
       arc_bbox(arc[c][i].x, arc[c][i].y, arc[c][i].r, arc[c][i].a, arc[c][i].b,
                &tmp.x1, &tmp.y1, &tmp.x2, &tmp.y2);
     bbox(ADD, tmp.x1, tmp.y1, tmp.x2, tmp.y2);
-    my_free(&arc[c][i].prop_ptr);
+    my_free(930, &arc[c][i].prop_ptr);
     set_modify(1);
     continue;
    }
@@ -177,10 +177,10 @@ static void del_rect_line_arc_poly(void)
     }
     j++;
     bbox(ADD, x1, y1, x2, y2);
-    my_free(&polygon[c][i].prop_ptr);
-    my_free(&polygon[c][i].x);
-    my_free(&polygon[c][i].y);
-    my_free(&polygon[c][i].selected_point);
+    my_free(931, &polygon[c][i].prop_ptr);
+    my_free(932, &polygon[c][i].x);
+    my_free(933, &polygon[c][i].y);
+    my_free(934, &polygon[c][i].selected_point);
     /*fprintf(errfp, "bbox: %.16g %.16g %.16g %.16g\n", x1, y1, x2, y2); */
     set_modify(1);
     continue;
@@ -202,7 +202,7 @@ void delete(void)
  int customfont;
  #endif
 
- if(debug_var>=3) fprintf(errfp, "delete(): start\n");
+ dbg(3, "delete(): start\n");
  j = 0;
  bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0);
  rebuild_selected_array();
@@ -217,25 +217,25 @@ void delete(void)
    customfont = set_text_custom_font(&textelement[i]);
    #endif
    text_bbox(textelement[i].txt_ptr, textelement[i].xscale,
-             textelement[i].yscale, rot, flip,
+             textelement[i].yscale, rot, flip, textelement[i].hcenter, textelement[i].vcenter,
              textelement[i].x0, textelement[i].y0,
              &xx1,&yy1, &xx2,&yy2);
    #ifdef HAS_CAIRO
    if(customfont) cairo_restore(ctx);
    #endif
    bbox(ADD, xx1, yy1, xx2, yy2 );
-   my_free(&textelement[i].prop_ptr);
-   my_free(&textelement[i].font);
-   my_free(&textelement[i].txt_ptr);
+   my_free(935, &textelement[i].prop_ptr);
+   my_free(936, &textelement[i].font);
+   my_free(937, &textelement[i].txt_ptr);
    set_modify(1);
    j++;
    continue;
   }
   if(j)
   {
-   if(debug_var>=1) fprintf(errfp, "select(); deleting string %d\n",i-j);
+   dbg(1, "select(); deleting string %d\n",i-j);
    textelement[i-j] = textelement[i];
-   if(debug_var>=1) fprintf(errfp, "select(); new string %d = %s\n",i-j,textelement[i-j].txt_ptr);
+   dbg(1, "select(); new string %d = %s\n",i-j,textelement[i-j].txt_ptr);
   }
  }
  lasttext -= j;                
@@ -253,11 +253,11 @@ void delete(void)
    bbox(ADD, inst_ptr[i].x1, inst_ptr[i].y1, inst_ptr[i].x2, inst_ptr[i].y2);
    if(inst_ptr[i].prop_ptr != NULL) 
    {
-    my_free(&inst_ptr[i].prop_ptr);
+    my_free(938, &inst_ptr[i].prop_ptr);
    }
    delete_inst_node(i);
-   my_free(&inst_ptr[i].name);
-   my_free(&inst_ptr[i].instname); /* 20150409 */
+   my_free(939, &inst_ptr[i].name);
+   my_free(940, &inst_ptr[i].instname); /* 20150409 */
    j++;
    continue;
   }
@@ -287,8 +287,8 @@ void delete(void)
       else                        { y1 = wire[i].y1+ov; y2 = wire[i].y2-ov; }
       bbox(ADD, wire[i].x1-ov, y1 , wire[i].x2+ov , y2 );
     }
-    my_free(&wire[i].prop_ptr);
-    my_free(&wire[i].node);
+    my_free(941, &wire[i].prop_ptr);
+    my_free(942, &wire[i].node);
 
     set_modify(1);
     prepared_hash_wires=0;
@@ -425,7 +425,7 @@ void bbox(int what,double x1,double y1, double x2, double y2)
      XSetClipRectangles(display, gcstipple[i], 0,0, xrect, 1, Unsorted);
    }
    XSetClipRectangles(display, gctiled, 0,0, xrect, 1, Unsorted);
-   if(debug_var>=1) fprintf(errfp, "bbox(): bbox= %d %d %d %d\n",areax1,areay1,areax2,areay2);     
+   dbg(1, "bbox(): bbox= %d %d %d %d\n",areax1,areay1,areax2,areay2);     
    #ifdef HAS_CAIRO
    cairo_rectangle(ctx, xrect[0].x, xrect[0].y, xrect[0].width, xrect[0].height);
    cairo_clip(ctx);
@@ -453,10 +453,6 @@ void unselect_all(void)
  #endif
     ui_state = 0; 
     lastselected = 0;
-   
-    drawtemparc(gctiled,BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
-    drawtempline(gctiled,BEGIN, 0.0, 0.0, 0.0, 0.0);
-    drawtemprect(gctiled, BEGIN, 0.0, 0.0, 0.0, 0.0); 
    
      for(i=0;i<lastwire;i++)
      {
@@ -495,7 +491,7 @@ void unselect_all(void)
       customfont = set_text_custom_font(& textelement[i]); /* needed for bbox calculation */
       #endif
       draw_temp_string(gctiled,ADD, textelement[i].txt_ptr,
-       textelement[i].rot, textelement[i].flip,
+       textelement[i].rot, textelement[i].flip, textelement[i].hcenter, textelement[i].vcenter,
        textelement[i].x0, textelement[i].y0,
        textelement[i].xscale, textelement[i].yscale);
       #ifdef HAS_CAIRO
@@ -576,7 +572,7 @@ void select_wire(int i,unsigned short select_mode, int fast)
   else 
    wire[i].sel = select_mode;
   if(select_mode) {
-   if(debug_var>=1) fprintf(errfp, "select(): wire[%d].end1=%d, ,end2=%d\n", i, wire[i].end1, wire[i].end2);
+   dbg(1, "select(): wire[%d].end1=%d, ,end2=%d\n", i, wire[i].end1, wire[i].end2);
    if(wire[i].bus) /* 20171201 */
      drawtempline(gc[SELLAYER], THICK, wire[i].x1, wire[i].y1, wire[i].x2, wire[i].y2);
    else
@@ -666,12 +662,12 @@ void select_text(int i,unsigned short select_mode, int fast)
   #endif
   if(select_mode)
     draw_temp_string(gc[SELLAYER],ADD, textelement[i].txt_ptr,
-     textelement[i].rot, textelement[i].flip,
+     textelement[i].rot, textelement[i].flip, textelement[i].hcenter, textelement[i].vcenter,
      textelement[i].x0, textelement[i].y0,
      textelement[i].xscale, textelement[i].yscale);
   else
     draw_temp_string(gctiled,NOW, textelement[i].txt_ptr,
-     textelement[i].rot, textelement[i].flip,
+     textelement[i].rot, textelement[i].flip, textelement[i].hcenter, textelement[i].vcenter,
      textelement[i].x0, textelement[i].y0,
      textelement[i].xscale, textelement[i].yscale);
   #ifdef HAS_CAIRO
@@ -773,7 +769,7 @@ void select_connected_nets(void)
       break;
     }
   }
-  my_free(&str);
+  my_free(943, &str);
 }
 
 void select_polygon(int c, int i, unsigned short select_mode, int fast )
@@ -832,10 +828,7 @@ unsigned short select_object(double mousex,double mousey, unsigned short select_
    Selected sel;
    sel = find_closest_obj(mousex,mousey);
 
-   drawtemparc(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
-   drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
-   drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
-   if(debug_var>=1) fprintf(errfp, "select_object(): sel.n=%d, sel.col=%d, sel.type=%d\n", sel.n, sel.col, sel.type);
+   dbg(1, "select_object(): sel.n=%d, sel.col=%d, sel.type=%d\n", sel.n, sel.col, sel.type);
 
    switch(sel.type)
    {
@@ -880,9 +873,6 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) /* 201509
  #ifdef HAS_CAIRO
  int customfont;
  #endif
- drawtemparc(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
- drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0); 
- drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
 
  for(i=0;i<lastwire;i++)
  {
@@ -910,7 +900,7 @@ void select_inside(double x1,double y1, double x2, double y2, int sel) /* 201509
   customfont = set_text_custom_font(&textelement[i]);
   #endif
   text_bbox(textelement[i].txt_ptr, 
-             textelement[i].xscale, textelement[i].yscale, rot, flip,
+             textelement[i].xscale, textelement[i].yscale, rot, flip, textelement[i].hcenter, textelement[i].vcenter,
              textelement[i].x0, textelement[i].y0,
              &xx1,&yy1, &xx2,&yy2);
   #ifdef HAS_CAIRO
@@ -1050,9 +1040,6 @@ void select_all(void)
 {
  int c,i;
 
- drawtemparc(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
- drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
- drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0); 
  ui_state |= SELECTION;
  for(i=0;i<lastwire;i++)
  {

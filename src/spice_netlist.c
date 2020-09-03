@@ -34,8 +34,8 @@ void global_spice_netlist(int global)  /* netlister driver */
  int mult;
  unsigned int *stored_flags;
  int i, save_ok;
- static char *type=NULL;
- static char *place=NULL; /*20121223 */
+ char *type=NULL;
+ char *place=NULL; /*20121223 */
  char netl_filename[PATH_MAX]; /* overflow safe 20161122 */
  char tcl_cmd_netlist[PATH_MAX + 100]; /* 20081211 overflow safe 20161122 */
  char cellname[PATH_MAX]; /* 20081211 overflow safe 20161122 */
@@ -65,7 +65,7 @@ void global_spice_netlist(int global)  /* netlister driver */
  }
  netlist_count=0;
  my_snprintf(netl_filename, S(netl_filename), "%s/.%s_%d", netlist_dir, skip_dir(schematic[currentsch]), getpid());
- if(debug_var>=1) fprintf(errfp, "global_spice_netlist(): opening %s for writing\n",netl_filename);
+ dbg(1, "global_spice_netlist(): opening %s for writing\n",netl_filename);
  fd=fopen(netl_filename, "w");
 
  if(user_top_netl_name[0]) {
@@ -75,7 +75,7 @@ void global_spice_netlist(int global)  /* netlister driver */
  }
 
  if(fd==NULL) { 
-   if(debug_var>=0) fprintf(errfp, "global_spice_netlist(): problems opening netlist file\n");
+   dbg(0, "global_spice_netlist(): problems opening netlist file\n");
    return;
  }
  /* netlist_options */
@@ -99,14 +99,14 @@ void global_spice_netlist(int global)  /* netlister driver */
     continue;
   }
   my_strdup(380, &type,(inst_ptr[i].ptr+instdef)->type); /* 20150409 */
-  if(debug_var>=1) fprintf(errfp, "global_spice_netlist(): |%s|\n", type);
+  dbg(1, "global_spice_netlist(): |%s|\n", type);
   if( type && !strcmp(type,"netlist_options") ) {
     continue;
   }
   if( type && !(strcmp(type,"ipin")&&strcmp(type,"opin")&&strcmp(type,"iopin")) )
   {
    str_tmp = expandlabel ( get_tok_value(inst_ptr[i].prop_ptr,"lab",0) ,&mult);
-   if(debug_var>=1) fprintf(errfp, "global_spice_netlist(): |%s|\n", 
+   dbg(1, "global_spice_netlist(): |%s|\n", 
        get_tok_value(inst_ptr[i].prop_ptr,"lab",0));
    /*must handle  invalid node names */
    fprintf(fd, " %s", str_tmp ? str_tmp : "(NULL)" );
@@ -116,9 +116,6 @@ void global_spice_netlist(int global)  /* netlister driver */
 
  spice_netlist(fd, 0);
  
- /* 20100217 */
-
- /* 20150922 */
  first = 0;
  for(i=0;i<lastinst;i++) /* print netlist_commands of top level cell with no 'place=end' property */
  {
@@ -173,7 +170,7 @@ void global_spice_netlist(int global)  /* netlister driver */
    load_schematic(1, schematic[currentsch], 0); /* 20180927 */
 
    currentsch++;
-    if(debug_var>=1) fprintf(errfp, "global_spice_netlist(): last defined symbol=%d\n",lastinstdef);
+    dbg(1, "global_spice_netlist(): last defined symbol=%d\n",lastinstdef);
    subckt_name=NULL; 
    for(i=0;i<lastinstdef;i++)
    {
@@ -197,7 +194,7 @@ void global_spice_netlist(int global)  /* netlister driver */
     }
    }
    free_hash(subckt_table);
-   my_free(&subckt_name);
+   my_free(944, &subckt_name);
    /*clear_drawing(); */
    my_strncpy(schematic[currentsch] , "", S(schematic[currentsch]));
    currentsch--;
@@ -210,10 +207,10 @@ void global_spice_netlist(int global)  /* netlister driver */
 
    /* restore hilight flags from errors found analyzing top level before descending hierarchy */
    for(i=0;i<lastinst; i++) inst_ptr[i].flags |= stored_flags[i];
-   my_free(&stored_flags);
 
    draw_hilight_net(1);
  }
+ my_free(945, &stored_flags);
 
  /* print globals nodes found in netlist 28032003 */
  record_global_node(0,fd,NULL);
@@ -257,13 +254,14 @@ void global_spice_netlist(int global)  /* netlister driver */
      model_entry = model_entry->next;
    }
  }
+ free_hash(model_table);
  if(first) fprintf(fd,"**** end user architecture code\n");
 
 
  /* 20150922 added split_files check */
  if(!split_files) fprintf(fd, ".end\n"); /* 20081202 */
 
- if(debug_var>=1) fprintf(errfp, "global_spice_netlist(): starting awk on netlist!\n");
+ dbg(1, "global_spice_netlist(): starting awk on netlist!\n");
 
 
  if(!split_files) {
@@ -278,95 +276,96 @@ void global_spice_netlist(int global)  /* netlister driver */
    }
    if(!debug_var) xunlink(netl_filename);
  }
-
+ my_free(946, &type);
+ my_free(947, &place);
 }
 
-char *model_name(char *m)
+static char *model_name_result = NULL;
+
+static char *model_name(const char *m)
 {
   char *m_lower = NULL;
-  static char *prefix = NULL;
   char *modelname = NULL;
 
   my_strdup(255, &m_lower, m);
   strtolower(m_lower);
   my_realloc(256, &modelname, strlen(m) + 1);
-  my_realloc(257, &prefix, strlen(m) + 1);
-  sscanf(m_lower, " %s %s", prefix, modelname);
-  my_strcat(296, &prefix, modelname);
-  my_free(&modelname);
-  my_free(&m_lower);
-  return prefix;
+  my_realloc(257, &model_name_result, strlen(m) + 1);
+  sscanf(m_lower, " %s %s", model_name_result, modelname);
+  my_strcat(296, &model_name_result, modelname);
+  my_free(948, &modelname);
+  my_free(949, &m_lower);
+  return model_name_result;
 }
 
 void spice_block_netlist(FILE *fd, int i)  /*20081223 */
 {
- int spice_stop=0; /* 20111113 */
- char netl_filename[PATH_MAX];
- char tcl_cmd_netlist[PATH_MAX + 100];  /* 20081202 */
- char cellname[PATH_MAX];  /* 20081202 */
- char filename[PATH_MAX];
- const char *str_tmp;
- /* int j; */
- /* int mult; */
- static char *extra=NULL;
+  int spice_stop=0; /* 20111113 */
+  char netl_filename[PATH_MAX];
+  char tcl_cmd_netlist[PATH_MAX + 100];  /* 20081202 */
+  char cellname[PATH_MAX];  /* 20081202 */
+  char filename[PATH_MAX];
+  const char *str_tmp;
+  /* int j; */
+  /* int mult; */
+  char *extra=NULL;
+ 
+  if(!strcmp( get_tok_value(instdef[i].prop_ptr,"spice_stop",0),"true") )
+     spice_stop=1;
+  else
+     spice_stop=0;
 
-     /* 20111113 */
-     if(!strcmp( get_tok_value(instdef[i].prop_ptr,"spice_stop",0),"true") )
-        spice_stop=1;
-     else
-        spice_stop=0;
+  if(split_files) {
+    my_snprintf(netl_filename, S(netl_filename), "%s/.%s_%d", netlist_dir, skip_dir(instdef[i].name), getpid());
+    dbg(1, "spice_block_netlist(): split_files: netl_filename=%s\n", netl_filename);
+    fd=fopen(netl_filename, "w");
+    my_snprintf(cellname, S(cellname), "%s.spice", skip_dir(instdef[i].name));
+  }
 
-     if(split_files) {          /* 20081203 */
-       my_snprintf(netl_filename, S(netl_filename), "%s/.%s_%d", netlist_dir, skip_dir(instdef[i].name), getpid());
-       if(debug_var>=1)  fprintf(errfp, "spice_block_netlist(): split_files: netl_filename=%s\n", netl_filename);
-       fd=fopen(netl_filename, "w");
-       my_snprintf(cellname, S(cellname), "%s.spice", skip_dir(instdef[i].name));
-     }
-
-     fprintf(fd, "\n* expanding   symbol:  %s # of pins=%d\n\n", 
-           instdef[i].name,instdef[i].rects[PINLAYER] );
+  fprintf(fd, "\n* expanding   symbol:  %s # of pins=%d\n\n", 
+        instdef[i].name,instdef[i].rects[PINLAYER] );
   
-     fprintf(fd, ".subckt %s ",skip_dir(instdef[i].name));
-     print_spice_subckt(fd, i);
+  fprintf(fd, ".subckt %s ",skip_dir(instdef[i].name));
+  print_spice_subckt(fd, i);
 
-     my_strdup(387, &extra, get_tok_value(instdef[i].prop_ptr,"extra",0) ); /* 20081206 */
-     fprintf(fd, "%s ", extra ? extra : "" );
-     
-     /* 20081206 new get_sym_template does not return token=value pairs where token listed in extra */
-     fprintf(fd, "%s", get_sym_template(instdef[i].templ, extra)); /* 20150409 */
-     fprintf(fd, "\n");
+  my_strdup(387, &extra, get_tok_value(instdef[i].prop_ptr,"extra",0) ); /* 20081206 */
+  fprintf(fd, "%s ", extra ? extra : "" );
   
-     if((str_tmp = get_tok_value(instdef[i].prop_ptr, "schematic",0 ))[0]) {
-       my_strncpy(filename, abs_sym_path(str_tmp, ""), S(filename));
-       load_schematic(1,filename, 0);
-     } else {
-       load_schematic(1, add_ext(abs_sym_path(instdef[i].name, ""), ".sch") ,0); /* 20190518 */
-     }
-     spice_netlist(fd, spice_stop);  /* 20111113 added spice_stop */
-     netlist_count++;
+  /* 20081206 new get_sym_template does not return token=value pairs where token listed in extra */
+  fprintf(fd, "%s", get_sym_template(instdef[i].templ, extra)); /* 20150409 */
+  my_free(950, &extra);
+  fprintf(fd, "\n");
+  
+  if((str_tmp = get_tok_value(instdef[i].prop_ptr, "schematic",0 ))[0]) {
+    my_strncpy(filename, abs_sym_path(str_tmp, ""), S(filename));
+    load_schematic(1,filename, 0);
+  } else {
+    load_schematic(1, add_ext(abs_sym_path(instdef[i].name, ""), ".sch") ,0); /* 20190518 */
+  }
+  spice_netlist(fd, spice_stop);  /* 20111113 added spice_stop */
+  netlist_count++;
 
-     /* 20100217 */
-     if(schprop && schprop[0]) {
-       fprintf(fd,"**** begin user architecture code\n");
-       fprintf(fd, "%s\n", schprop);
-       fprintf(fd,"**** end user architecture code\n");
-     }
-     /* /20100217 */
+  /* 20100217 */
+  if(schprop && schprop[0]) {
+    fprintf(fd,"**** begin user architecture code\n");
+    fprintf(fd, "%s\n", schprop);
+    fprintf(fd,"**** end user architecture code\n");
+  }
+  /* /20100217 */
 
-     fprintf(fd, ".ends\n\n");
-     if(split_files) { /* 20081204 */
-       fclose(fd);
-       my_snprintf(tcl_cmd_netlist, S(tcl_cmd_netlist), "netlist {%s} noshow {%s}", netl_filename, cellname);
-       tcleval(tcl_cmd_netlist);
-       if(debug_var==0) xunlink(netl_filename);
-     }
-
+  fprintf(fd, ".ends\n\n");
+  if(split_files) { /* 20081204 */
+    fclose(fd);
+    my_snprintf(tcl_cmd_netlist, S(tcl_cmd_netlist), "netlist {%s} noshow {%s}", netl_filename, cellname);
+    tcleval(tcl_cmd_netlist);
+    if(debug_var==0) xunlink(netl_filename);
+  }
 }
 
 void spice_netlist(FILE *fd, int spice_stop )
 {
  int i;
- static char *type=NULL;
+ char *type=NULL;
 
  prepared_netlist_structs = 0;
  prepare_netlist_structs(1);
@@ -406,7 +405,7 @@ void spice_netlist(FILE *fd, int spice_stop )
         print_spice_element(fd, i) ;  /* this is the element line  */
         fprintf(fd,"**** end user architecture code\n");
       } else {
-        char *m;
+        const char *m;
         print_spice_element(fd, i) ;  /* this is the element line  */
         /* hash device_model attribute if any */
         m = get_tok_value(inst_ptr[i].prop_ptr, "device_model", 2);
@@ -415,15 +414,17 @@ void spice_netlist(FILE *fd, int spice_stop )
           m = get_tok_value( (inst_ptr[i].ptr+instdef)->prop_ptr, "device_model", 2);
           if(m[0]) hash_lookup(model_table, model_name(m), m, XINSERT);
         }
+        my_free(951, &model_name_result);
       }
     }
    }
  }
  if(!netlist_count) redraw_hilights(); /* draw_hilight_net(1); */
+ my_free(952, &type);
 }
 
 /* calculate the hash function relative to string s */
-static unsigned int hash(char *tok)
+static unsigned int hash(const char *tok)
 {
   unsigned int hash = 0;
   int c;
@@ -447,7 +448,7 @@ static unsigned int hash(char *tok)
  *                                      return NULL if not found
  * "whatever"    "whatever"  XDELETE     delete entry if found,return NULL
  */
-struct hashentry *hash_lookup(struct hashentry **table, char *token, char *value, int what)
+struct hashentry *hash_lookup(struct hashentry **table, const char *token, const char *value, int what)
 {
   unsigned int hashcode, index;
   struct hashentry *entry, *saveptr, **preventry;
@@ -481,9 +482,9 @@ struct hashentry *hash_lookup(struct hashentry **table, char *token, char *value
       if(what==XDELETE)             /* remove token from the hash table ... */
       {
         saveptr=entry->next;
-        my_free(&entry->token);
-        my_free(&entry->value);
-        my_free(&entry);
+        my_free(953, &entry->token);
+        my_free(954, &entry->value);
+        my_free(955, &entry);
         *preventry=saveptr;
       }
       else if(value && what == XINSERT ) {
@@ -501,9 +502,9 @@ static struct hashentry *free_hash_entry(struct hashentry *entry)
   struct hashentry *tmp;
   while( entry ) {
     tmp = entry -> next;
-    my_free(&(entry->token));
-    my_free(&(entry->value));
-    my_free(&entry);
+    my_free(956, &(entry->token));
+    my_free(957, &(entry->value));
+    my_free(958, &entry);
     entry = tmp;
   }
   return NULL;

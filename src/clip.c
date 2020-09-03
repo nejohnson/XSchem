@@ -97,9 +97,9 @@ double dist_from_rect(double mx, double my, double x1, double y1, double x2, dou
  tmp=y2-my;
  if(tmp < dist) dist=tmp;
 
- if(debug_var>=1) fprintf(errfp, "dist_from_rect(): x1,y1,x2,y2=%.16g,%.16g,%.16g,%.16g\n",x1,y1,x2,y2);
- if(debug_var>=1) fprintf(errfp, "dist_from_rect(): mx,my==%.16g,%.16g\n",mousex,mousey);
- if(debug_var>=1) fprintf(errfp, "dist_from_rect(): dist=%.16g\n",dist);
+ dbg(1, "dist_from_rect(): x1,y1,x2,y2=%.16g,%.16g,%.16g,%.16g\n",x1,y1,x2,y2);
+ dbg(1, "dist_from_rect(): mx,my==%.16g,%.16g\n",mousex,mousey);
+ dbg(1, "dist_from_rect(): dist=%.16g\n",dist);
  return dist*dist;
 }
 
@@ -124,7 +124,7 @@ double dist(double x1,double y1,double x2,double y2,double xa,double ya)
  xb = (b*b*xa - ab*ya - c*a) / denom;
  yb = (a*a*ya - ab*xa - c*b) / denom;
      /* debug ... */
-     if(debug_var>=1) fprintf(errfp, "dist(): dist1 = %.16g dist2 = %.16g\n",distance1,distance2);
+     dbg(1, "dist(): dist1 = %.16g dist2 = %.16g\n",distance1,distance2);
  if(x1<x2)
  {
   if(xb >x1 && xb < x2)
@@ -132,7 +132,7 @@ double dist(double x1,double y1,double x2,double y2,double xa,double ya)
    tmp = a*xa + b*ya + c;
    distance3 = tmp*tmp / denom;
      /* debug ... */
-     if(debug_var >=1) fprintf(errfp, "dist(); dist3 =  %.16g\n",distance3);
+     dbg(1, "dist(); dist3 =  %.16g\n",distance3);
    return distance3;
   }
   else
@@ -147,7 +147,7 @@ double dist(double x1,double y1,double x2,double y2,double xa,double ya)
   tmp = a*xa + b*ya + c;
   distance3 = tmp*tmp / denom;
     /* debug ... */
-    if(debug_var >=1) fprintf(errfp, "dist(): dist3 =  %.16g\n",distance3);
+    dbg(1, "dist(): dist3 =  %.16g\n",distance3);
   return distance3;
   }
   else
@@ -156,7 +156,7 @@ double dist(double x1,double y1,double x2,double y2,double xa,double ya)
   }
  }
     /* debug ... */
-    if(debug_var>=1) {fprintf(errfp, "dist(): Internal error, \n");exit(1);}
+    if(debug_var>=0) {fprintf(errfp, "dist(): Internal error, \n");exit(1);}
 }
 
 /*obsolete, will be removed */

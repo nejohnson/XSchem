@@ -1,13 +1,14 @@
 v {xschem version=2.9.7 file_version=1.2}
 G {}
 K {type=subcircuit
-format="@name @pinlist @symname WN=@WN WP=@WP LLN=@LLN LLP=@LLP"
-template="name=X1 WN=15u WP=45u LLN=3u LLP=3u"
+format="@name @pinlist @symname WN=@WN WP=@WP LLN=@LLN LLP=@LLP m=@m"
+template="name=X1 WN=15u WP=45u LLN=3u LLP=3u m=1"
 }
 V {}
 S {}
 E {}
-P 4 5 60 -390 60 -90 190 -90 190 -390 60 -390 {}
+A 15 90 -350 14.14213562373095 135 360 {dash=2}
+P 2 5 60 -390 190 -390 190 -90 60 -90 60 -390 {dash=5}
 T {@name} 60 -405 0 0 0.2 0.2 {}
 T {@symname} 63.75 -85 0 0 0.2 0.2 {}
 N 140 -260 140 -200 {lab=Z}

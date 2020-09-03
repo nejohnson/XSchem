@@ -34,7 +34,7 @@ BEGIN{
   sub(/.*\(/,"", id)
   sub(/,.*/,"",id)
   idx[$3] = id
-  if($3==0) { #malloc
+  if($3=="(nil)") { #malloc
     total+=$7
     address[$5] = $7
     idx[$5] = id

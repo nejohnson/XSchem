@@ -314,6 +314,7 @@ typedef struct
    double y2;
    unsigned short sel;
    char *prop_ptr;
+   int dash;
 } Line;
 
 typedef struct
@@ -324,6 +325,7 @@ typedef struct
    double y2;
    unsigned short sel;
    char *prop_ptr;
+   int dash;
 } Box;
 
 typedef struct /*  20171115 */
@@ -337,6 +339,7 @@ typedef struct /*  20171115 */
   unsigned short sel;
   char *prop_ptr;
   int fill; /*  20180914 */
+  int dash;
 } xPolygon; 
 
 typedef struct /* 20181012 */
@@ -349,6 +352,7 @@ typedef struct /* 20181012 */
   unsigned short sel;
   char *prop_ptr;
   int fill;
+  int dash;
 } xArc;
 
 typedef struct
@@ -362,6 +366,7 @@ typedef struct
   double yscale;
   char *prop_ptr;
   int layer; /*  20171201 for cairo  */
+  int hcenter, vcenter;
   char *font; /*  20171201 for cairo */
 } Text;
 
@@ -469,8 +474,8 @@ struct hilight_hashentry {
                   struct hilight_hashentry *next;
                   unsigned int hash;
                   char *token;
-                  char *path;
-                  int value;
+                  char *path; /* hierarchy path */
+                  int value;  /* hilight color */
                  };
 
 /*  for netlist.c */
@@ -609,6 +614,7 @@ extern int max_undo;
 extern int draw_dots;
 extern int draw_single_layer; /*  20151117 */
 extern int check_version; 
+extern int yyparse_error;
 extern void enable_layers(void);
 extern Window window;
 extern Window pre_window;
@@ -650,7 +656,8 @@ extern int quit;
 extern int show_erc;
 extern int hilight_nets;
 extern void create_plot_cmd(int viewer);
-extern char *sch_prefix[];
+extern char *sch_path[];
+extern int sch_inst_number[CADMAXHIER];
 extern int modified;
 extern int color_ps;
 extern int only_probes; /*  20110112 */
@@ -671,8 +678,9 @@ extern double mx_double_save, my_double_save; /*  20070322 */
 extern struct instentry *insttable[NBOXES][NBOXES];
 extern size_t get_tok_value_size;
 extern size_t get_tok_size;
-
+extern int batch_mode; /* no TCL console */
 /*  functions */
+extern void dbg(int level, char *fmt, ...);
 extern void here(void);
 extern void print_version(void);
 extern int set_netlist_dir(int force, char *dir);
@@ -703,7 +711,7 @@ extern const char *rel_sym_path(const char *s);
 extern const char *abs_sym_path(const char *s, const char *ext);
 extern const char *add_ext(const char *f, const char *ext);
 extern void make_symbol(void);
-extern char *get_sym_template(char *s, char *extra);
+extern const char *get_sym_template(char *s, char *extra);
 extern void zoom_full(int draw, int sel);
 extern void updatebbox(int count,Box *boundbox,Box *tmp);
 extern void draw_selection(GC g, int interruptable);
@@ -713,8 +721,8 @@ extern void polygon_bbox(double *x, double *y, int points, double *bx1, double *
 extern void arc_bbox(double x, double y, double r, double a, double b, double *bx1, double *by1, double *bx2, double *by2);
 extern void bbox(int what,double x1,double y1, double x2, double y2);
 extern int set_text_custom_font(Text *txt);
-extern int text_bbox(char * str,double xscale, double yscale,
-            int rot, int flip, double x1,double y1, double *rx1, double *ry1,
+extern int text_bbox(const char * str,double xscale, double yscale,
+            int rot, int flip, int hcenter, int vcenter, double x1,double y1, double *rx1, double *ry1,
             double *rx2, double *ry2);
 
 
@@ -729,8 +737,8 @@ extern struct int_hashentry *int_hash_lookup(struct int_hashentry **table, int t
 extern void free_int_hash(struct int_hashentry **table); /*  20180104 */
 
 #ifdef HAS_CAIRO
-extern int text_bbox_nocairo(char * str,double xscale, double yscale,
-            int rot, int flip, double x1,double y1, double *rx1, double *ry1,
+extern int text_bbox_nocairo(const char * str,double xscale, double yscale,
+            int rot, int flip, int hcenter, int vcenter, double x1,double y1, double *rx1, double *ry1,
             double *rx2, double *ry2);
 #endif
 
@@ -754,13 +762,13 @@ extern void find_closest_text(double mx,double my);
 extern Selected find_closest_obj(double mx,double my);
 extern void find_closest_net_or_symbol_pin(double mx,double my, double *x, double *y);
 
-extern void drawline(int c, int what, double x1,double y1,double x2,double y2);
-extern void draw_string(int layer,int what, char *str, int rot, int flip, 
+extern void drawline(int c, int what, double x1,double y1,double x2,double y2, int dash);
+extern void draw_string(int layer,int what, const char *str, int rot, int flip, int hcenter, int vcenter, 
        double x1, double y1, double xscale, double yscale);
 extern void draw_symbol(int what,int c, int n,int layer,
             int tmp_flip, int tmp_rot, double xoffset, double yoffset);
 extern void drawrect(int c, int what, double rectx1,double recty1,
-            double rectx2,double recty2);
+            double rectx2,double recty2, int dash);
 extern void filledrect(int c, int what, double rectx1,double recty1,
             double rectx2,double recty2);
 
@@ -770,13 +778,13 @@ extern void drawgrid(void);
 extern void drawtemprect(GC gc, int what, double rectx1,double recty1,
             double rectx2,double recty2);
 extern void drawtemparc(GC gc, int what, double x, double y, double r, double a, double b);
-extern void drawarc(int c, int what, double x, double y, double r, double a, double b, int arc_fill);
+extern void drawarc(int c, int what, double x, double y, double r, double a, double b, int arc_fill, int dash);
 extern void filledarc(int c, int what, double x, double y, double r, double a, double b);
 extern void drawtemppolygon(GC gc, int what, double *x, double *y, int points);
-extern void drawpolygon(int c, int what, double *x, double *y, int points, int poly_fill);
+extern void drawpolygon(int c, int what, double *x, double *y, int points, int poly_fill, int dash);
 extern void draw_temp_symbol(int what, GC gc, int n,int layer,
             int tmp_flip, int tmp_rot, double xoffset, double yoffset);
-extern void draw_temp_string(GC gc,int what, char *str, int rot, int flip, 
+extern void draw_temp_string(GC gc,int what, const char *str, int rot, int flip, int hcenter, int vcenter, 
        double x1, double y1, double xscale, double yscale);
 
 
@@ -823,16 +831,16 @@ extern void verilog_block_netlist(FILE *fd, int i);
 extern void spice_block_netlist(FILE *fd, int i);
 extern void tedax_block_netlist(FILE *fd, int i);
 extern void remove_symbols(void);
-extern void remove_symbol(void);
+extern void remove_symbol(int i);
 extern void clear_drawing(void);
-extern int load_symbol_definition(const char name[], FILE *embed_fd);
+extern int load_sym_def(const char name[], FILE *embed_fd);
 extern void descend_symbol(void);
 extern int place_symbol(int pos, const char *symbol_name, double x, double y, int rot, int flip, 
                          const char *inst_props, int draw_sym, int first_call);
 extern void attach_labels_to_inst(void);
 extern int sym_vs_sch_pins(void);
 extern int match_symbol(const char name[]);
-extern int save_schematic(char *); /*  20171020 added return value */
+extern int save_schematic(const char *); /*  20171020 added return value */
 extern void push_undo(void);
 extern void pop_undo(int redo);
 extern void delete_undo(void);
@@ -841,7 +849,8 @@ extern void load_schematic(int load_symbol, const char *abs_name, int reset_undo
 extern void link_symbols_to_instances(void);
 extern void load_ascii_string(char **ptr, FILE *fd);
 extern void read_xschem_file(FILE *fd); /*  20180912 */
-extern char *read_line(FILE *fp);
+extern char *read_line(FILE *fp, int dbg_level);
+extern void read_record(int firstchar, FILE *fp);
 extern void create_sch_from_sym(void);
 extern void descend_schematic(void);
 extern void go_back(int confirm);
@@ -868,6 +877,7 @@ extern void edit_property(int x);
 extern int xschem(ClientData clientdata, Tcl_Interp *interp, 
            int argc, const char * argv[]);
 extern void tcleval(const char str[]);
+extern const char *tclresult(void);
 extern const char *tclgetvar(const char *s);
 extern void tclsetvar(const char *s, const char *value);
 extern void statusmsg(char str[],int n);
@@ -881,12 +891,12 @@ extern void check_unique_names(int rename);
 extern void clear_instance_hash();
 
 extern void free_hash(struct hashentry **table);
-extern struct hashentry *hash_lookup(struct hashentry **table, char *token, char *value, int what);
+extern struct hashentry *hash_lookup(struct hashentry **table, const char *token, const char *value, int what);
 
-extern char *find_nth(char *str, char sep, int n);
+extern const char *find_nth(const char *str, char sep, int n);
 extern int isonlydigit(const char *s);
-extern char *translate(int inst, char* s);
-extern char* translate2(struct Lcc *lcc, int level, char* s);
+extern const char *translate(int inst, char* s);
+extern const char* translate2(struct Lcc *lcc, int level, char* s);
 extern void print_tedax_element(FILE *fd, int inst);
 extern void print_spice_element(FILE *fd, int inst);
 extern void print_spice_subckt(FILE *fd, int symbol);
@@ -894,7 +904,8 @@ extern void print_vhdl_element(FILE *fd, int inst);
 extern void print_verilog_element(FILE *fd, int inst);
 extern void print_verilog_primitive(FILE *fd, int inst);
 extern void print_vhdl_primitive(FILE *fd, int inst);
-extern char *get_tok_value(const char *s,const char *tok,int with_quotes);
+extern const char *get_tok_value(const char *s,const char *tok,int with_quotes);
+extern const char *list_tokens(const char *s, int with_quotes);
 extern int  my_snprintf(char *str, int size, const char *fmt, ...);
 extern size_t my_strdup(int id, char **dest, const char *src);
 extern void my_strndup(int id, char **dest, const char *src, int n);
@@ -906,9 +917,9 @@ extern char* strtoupper(char* s);
 extern void *my_malloc(int id, size_t size);
 extern void my_realloc(int id, void *ptr,size_t size);
 extern void *my_calloc(int id, size_t nmemb, size_t size);
-extern void my_free(void *ptr);
+extern void my_free(int id, void *ptr);
 extern size_t my_strcat(int id, char **, const char *);
-extern char *subst_token(const char *s, const char *tok, const char *new_val);
+extern const char *subst_token(const char *s, const char *tok, const char *new_val);
 extern void new_prop_string(int i, const char *old_prop,int fast, int disable_unique_names);
 extern void hash_name(char *token, int remove);
 extern void hash_all_names(int n);
@@ -928,6 +939,7 @@ extern void check_arc_storage(int c);
 extern void check_line_storage(int c);
 extern void check_polygon_storage(int c); /*  20171115 */
 extern const char *expandlabel(const char *s, int *m);
+extern void clear_expandlabel_data(void);
 extern void merge_inst(int k, FILE *fd);
 extern void merge_file(int selection_load, const char ext[]);
 extern void select_wire(int i, unsigned short select_mode, int fast);
@@ -943,11 +955,11 @@ extern int count_labels(char *s);
 extern int get_unnamed_node(int what, int mult, int node);
 extern void free_node_hash(void);
 extern struct node_hashentry 
-                *node_hash_lookup(char *token, char *dir,int remove, int port, char *sig_type, 
-                char *verilog_type, char *value, char *class, char *orig_tok);
+                *node_hash_lookup(const char *token, const char *dir,int remove, int port, char *sig_type, 
+                char *verilog_type, char *value, char *class, const char *orig_tok);
 extern void traverse_node_hash();
 extern struct node_hashentry 
-                *bus_hash_lookup(char *token, char *dir,int remove, int port, char *sig_type, 
+                *bus_hash_lookup(const char *token, const char *dir,int remove, int port, char *sig_type, 
                 char *verilog_type, char *value, char *class);
 /* extern void insert_missing_pin(); */
 extern void round_schematic_to_grid(double cadsnap);
@@ -964,11 +976,11 @@ extern void prepare_netlist_structs(int for_netlist);
 extern void delete_netlist_structs(void);
 extern void delete_inst_node(int i);
 extern void delete_hilight_net(void);
-extern void hilight_child_pins(int n);
+extern void hilight_child_pins(void);
 extern void hilight_parent_pins(void);
 extern struct node_hashentry **get_node_table_ptr(void);
 extern void change_elem_order(void);
-extern int set_different_token(char **s,char *new, char *old, int object, int n);
+extern int set_different_token(char **s,const char *new, const char *old, int object, int n);
 extern void print_hilight_net(int show);
 extern void change_layer();
 extern void launcher(); /*  20161102 */
@@ -977,7 +989,6 @@ extern void preview_window(const char *what, const char *tk_win_path, const char
 extern int window_state (Display *disp, Window win, char *arg);
 extern void toggle_fullscreen();
 extern void toggle_only_probes(); /*  20110112 */
-extern void fill_symbol_editprop_form(int x);
 extern void update_symbol(const char *result, int x);
 extern void tclexit(ClientData s);
 extern int build_colors(double dim); /*  reparse the TCL 'colors' list and reassign colors 20171113 */

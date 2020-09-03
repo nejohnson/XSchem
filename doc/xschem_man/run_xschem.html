@@ -47,6 +47,7 @@ user:~$ xschem .../xschem_library/examples/0_examples_top.sch
 usage: xschem [options] [schematic | symbol ]
 Options:
   -h  --help           Print this help.
+  -b  --batch          Detach Xschem from console.
   -n  --netlist        Do a netlist of the given schematic cell.
   -v  --version        Print version information and exit.
   -V  --vhdl           Set netlist type to VHDL.
@@ -113,11 +114,6 @@ the schematic file `counter.sch' will be loaded.
   After exiting XSCHEM you can load directly this schematic with the following commands, they are
   all equivalent.
  <pre class="code">
-# xschem defaults its search to the 
-# XSCHEM_LIBRARY_PATH root path
-# .sch may be omitted, it is added by default ...
-xschem test
-# or ...
 xschem /home/schippes/x/test.sch
 # or ...
 xschem ${HOME}/schippes/x/test

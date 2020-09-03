@@ -1,4 +1,4 @@
-v {xschem version=2.9.6 file_version=1.1}
+v {xschem version=2.9.7 file_version=1.2}
 G {process
 begin
 A<='0';

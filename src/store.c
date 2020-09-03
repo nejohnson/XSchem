@@ -55,7 +55,7 @@ void check_symbol_storage(void)
  int i;
  if(lastinstdef >= max_symbols)
  {
-  if(debug_var>=1) fprintf(errfp, "check_symbol_storage(): more than max_symbols, %s\n",
+  dbg(1, "check_symbol_storage(): more than max_symbols, %s\n",
         schematic[currentsch] );
   max_symbols=(1 + lastinstdef / ELEMDEF) * ELEMDEF;
   my_realloc(395, &instdef, sizeof(Instdef)*max_symbols);
@@ -151,6 +151,7 @@ void store_arc(int pos, double x, double y, double r, double a, double b,
                unsigned int rectcolor, unsigned short sel, char *prop_ptr)
 {
   int n, j;
+  const char *dash;
   check_arc_storage(rectcolor);
   if(pos==-1) n=lastarc[rectcolor];
   else
@@ -173,6 +174,13 @@ void store_arc(int pos, double x, double y, double r, double a, double b,
     arc[rectcolor][n].fill =1;
   else
     arc[rectcolor][n].fill =0;
+  dash = get_tok_value(arc[rectcolor][n].prop_ptr,"dash",0);
+  if( strcmp(dash, "") ) {
+    int d = atoi(dash);
+    arc[rectcolor][n].dash = d >= 0 ? d : 0;
+  } else
+    arc[rectcolor][n].dash = 0;
+
   lastarc[rectcolor]++;
   set_modify(1);
 }
@@ -180,6 +188,7 @@ void store_arc(int pos, double x, double y, double r, double a, double b,
 void store_polygon(int pos, double *x, double *y, int points, unsigned int rectcolor, unsigned short sel, char *prop_ptr)
 {
   int n, j;
+  const char *dash;
   check_polygon_storage(rectcolor);
   if(pos==-1) n=lastpolygon[rectcolor];
   else
@@ -190,7 +199,7 @@ void store_polygon(int pos, double *x, double *y, int points, unsigned int rectc
    }
    n=pos;
   }
-  if(debug_var>=2) fprintf(errfp, "store_polygon(): storing POLYGON %d\n",n);
+  dbg(2, "store_polygon(): storing POLYGON %d\n",n);
   
   polygon[rectcolor][n].x=NULL;
   polygon[rectcolor][n].y=NULL;
@@ -212,6 +221,12 @@ void store_polygon(int pos, double *x, double *y, int points, unsigned int rectc
     polygon[rectcolor][n].fill =1;
   else
     polygon[rectcolor][n].fill =0;
+  dash = get_tok_value(polygon[rectcolor][n].prop_ptr,"dash",0);
+  if( strcmp(dash, "") ) {
+    int d = atoi(dash);
+    polygon[rectcolor][n].dash = d >= 0 ? d : 0;
+  } else
+    polygon[rectcolor][n].dash = 0;
 
 
   lastpolygon[rectcolor]++;
@@ -223,6 +238,7 @@ void storeobject(int pos, double x1,double y1,double x2,double y2,
                  unsigned short sel, const char *prop_ptr)
 {
  int n, j;
+ const char * dash;
     if(type == LINE)
     {
      check_line_storage(rectcolor);
@@ -236,7 +252,7 @@ void storeobject(int pos, double x1,double y1,double x2,double y2,
       }
       n=pos;
      }
-     if(debug_var>=2) fprintf(errfp, "storeobject(): storing LINE %d\n",n);
+     dbg(2, "storeobject(): storing LINE %d\n",n);
      line[rectcolor][n].x1=x1;
      line[rectcolor][n].x2=x2;
      line[rectcolor][n].y1=y1;
@@ -244,6 +260,12 @@ void storeobject(int pos, double x1,double y1,double x2,double y2,
      line[rectcolor][n].prop_ptr=NULL;
      my_strdup(412, &line[rectcolor][n].prop_ptr, prop_ptr);
      line[rectcolor][n].sel=sel;
+     dash = get_tok_value(line[rectcolor][n].prop_ptr,"dash",0);
+     if( strcmp(dash, "") ) {
+       int d = atoi(dash);
+       line[rectcolor][n].dash = d >= 0 ? d : 0;
+     } else
+       line[rectcolor][n].dash = 0;
      lastline[rectcolor]++;
      set_modify(1);
     }
@@ -259,7 +281,7 @@ void storeobject(int pos, double x1,double y1,double x2,double y2,
       }
       n=pos;
      }
-     if(debug_var>=2) fprintf(errfp, "storeobject(): storing LINE %d\n",n);
+     dbg(2, "storeobject(): storing RECT %d\n",n);
      rect[rectcolor][n].x1=x1;
      rect[rectcolor][n].x2=x2;
      rect[rectcolor][n].y1=y1;
@@ -267,6 +289,12 @@ void storeobject(int pos, double x1,double y1,double x2,double y2,
      rect[rectcolor][n].prop_ptr=NULL;
      my_strdup(413, &rect[rectcolor][n].prop_ptr, prop_ptr);
      rect[rectcolor][n].sel=sel;
+     dash = get_tok_value(rect[rectcolor][n].prop_ptr,"dash",0);
+     if( strcmp(dash, "") ) {
+       int d = atoi(dash);
+       rect[rectcolor][n].dash = d >= 0 ? d : 0;
+     } else
+       rect[rectcolor][n].dash = 0;
      lastrect[rectcolor]++;
      set_modify(1);
     }
@@ -282,7 +310,7 @@ void storeobject(int pos, double x1,double y1,double x2,double y2,
       }
       n=pos;
      }
-     if(debug_var>=2) fprintf(errfp, "storeobject(): storing WIRE %d\n",n);
+     dbg(2, "storeobject(): storing WIRE %d\n",n);
      wire[n].x1=x1;
      wire[n].y1=y1;
      wire[n].x2=x2;
@@ -307,8 +335,8 @@ void storeobject(int pos, double x1,double y1,double x2,double y2,
 void freenet_nocheck(int i)
 {
  int j;
-  my_free(&wire[i].prop_ptr);
-  my_free(&wire[i].node);
+  my_free(959, &wire[i].prop_ptr);
+  my_free(960, &wire[i].node);
   for(j=i+1;j<lastwire;j++)
   {
     wire[j-1] = wire[j];

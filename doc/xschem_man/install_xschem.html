@@ -122,9 +122,9 @@ set initial_geometry {800x600}
   Note that the <kbd>xschemrc</kbd> is a TCL file, so use the TCL syntax for setting
   variables and accessing environment variables.
   The <kbd>XSCHEM_LIBRARY_PATH</kbd> contains a list of library directories separated by colons.
-  These directories contain all xschem symbols and schematics.
+  These directories are prepended to xschem symbol references to obtain the absolute path in the filesystem.
   All system-wide definitions can be overridden in user's 
-  <kbd>xschemrc</kbd> file, which is read instead of the system xschemrc if existing.
+  <kbd>xschemrc</kbd> file, which is read after the system xschemrc if existing.
   A sample user design library is provided and installed in the path 
   specified by the <kbd>Makefile</kbd>'s variable <kbd>user_library_prefix</kbd>, you can use it 
   as a starting point.<br>

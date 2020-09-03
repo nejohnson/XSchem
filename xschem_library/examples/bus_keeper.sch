@@ -2,11 +2,11 @@ v {xschem version=2.9.7 file_version=1.2}
 G {}
 K {type=subcircuit
 format="@name @pinlist @symname WN_FB=@WN_FB WP_FB=@WP_FB"
-template="name=X1 WN_FB=3u WP_FB=4u"}
+template="name=X1 WN_FB=1u WP_FB=2u"}
 V {}
 S {}
 E {}
-P 4 5 250 -880 250 -120 480 -120 480 -880 250 -880 {}
+P 2 5 250 -880 250 -120 480 -120 480 -880 250 -880 {dash=5}
 T {@name} 250 -915 0 0 0.5 0.5 {}
 T {@symname} 253.75 -115 0 0 0.5 0.5 {}
 N 250 -300 300 -300 {lab=A}

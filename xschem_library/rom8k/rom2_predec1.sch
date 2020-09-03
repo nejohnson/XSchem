@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC6 file_version=1.1}
+v {xschem version=2.9.7 file_version=1.2}
 G {}
 V {}
 S {}
@@ -49,7 +49,7 @@ N 250 -920 330 -920 {lab=LDA[1]}
 N 250 -620 330 -620 {lab=LDA[0]}
 N 1290 -300 1290 -180 {lab=LDZ[15:0]}
 N 1210 -300 1210 -180 {lab=#net9}
-N 1130 -300 1130 -180 {lab=#net10}
+N 1130 -300 1130 -180 {lab=LDZI[15:0]}
 N 1290 -530 1290 -410 {lab=LDZ[15:0]}
 N 1210 -530 1210 -410 {lab=#net9}
 N 1290 -400 1290 -300 {lab=LDZ[15:0]}
@@ -171,3 +171,4 @@ C {lvnot.sym} 1250 -410 0 0 {name=x21[15:0] m=1
 C {lvnot.sym} 1250 -530 0 0 {name=x22[15:0] m=1 
 + wn=30u lln=2.4u wp=60u lp=2.4u
 + VCCPIN=vcc VSSPIN=vss}
+C {lab_pin.sym} 1130 -300 0 0 {name=p26 lab=LDZI[15:0]}

@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC5 file_version=1.1}
+v {xschem version=2.9.7 file_version=1.2}
 G {type=subcircuit
 vhdl_stop=true
 verilog_stop=true
@@ -17,4 +17,3 @@ B 5 37.5 -2.5 42.5 2.5 {name=Y dir=out}
 B 5 -42.5 -2.5 -37.5 2.5 {name=A dir=in}
 T {@name} -23.75 -5 0 0 0.2 0.2 {}
 T {BF} 7.1875 -28.75 0 0 0.3 0.3 {}
-C {devices/title.sym} -180 110 0 0 {name=l2}

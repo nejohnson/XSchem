@@ -58,7 +58,6 @@ proc read_ngspice_raw {arr fp} {
 }
 
 proc get_voltage {arr n } {
-  global voltage
   upvar $arr var
   set m "v($n)"
   if { ! [info exists var([string tolower $m])] } {
@@ -73,7 +72,6 @@ proc get_voltage {arr n } {
 }
 
 proc get_diff_voltage {arr p m } {
-  global voltage
   upvar $arr var
   set pp "v($p)"
   set mm "v($m)"
@@ -90,7 +88,11 @@ proc get_diff_voltage {arr p m } {
 proc get_current {arr n } {
   global current_probe
   upvar $arr var
-  set n "i($n)"
+  if { [xschem get currentsch] > 0 } {
+    set n "i(v.$n)"
+  } else {
+    set n "i($n)"
+  }
   if {abs($var([string tolower $n])) <1e-3} {
     return [format %.4e $var([string tolower $n])]
   } else {
@@ -103,7 +105,7 @@ proc get_current {arr n } {
 
 
 proc annotate {} {
-  set rawfile "[xschem get netlist_dir]/[file rootname [file tail [xschem get schname]]].raw"
+  set rawfile "[xschem get netlist_dir]/[file rootname [file tail [xschem get schname 0]]].raw"
   if { ![file exists $rawfile] } {
     puts "no raw file found: $rawfile"
     return
@@ -127,23 +129,24 @@ proc annotate {} {
     xschem set no_undo 1
     xschem set no_draw 1
     set lastinst [xschem get lastinst]
+    set path [string range [xschem get sch_path] 1 end]
     for { set i 0 } { $i < $lastinst } {incr i } {
       set name [xschem getprop instance $i name]
       set type [xschem getprop instance $i cell::type]
       if { $type == "probe"  || $type == "devices/probe"} {
-        set net [xschem instance_net $i p]
+        set net $path[xschem instance_net $i p]
         if {[catch {xschem setprop $i voltage [get_voltage arr $net] fast} err]} {
           puts "1 error : $err net: $net"
         }
       }
       if { $type == "current_probe"  || $type == "devices/current_probe"} {
-        if {[catch {xschem setprop $i current [get_current arr $name] fast} err]} {
+        if {[catch {xschem setprop $i current [get_current arr $path$name] fast} err]} {
           puts "2 error : $err"
         }
       }
       if { $type == "differential_probe"  || $type == "devices/differential_probe"} {
-        set netp [xschem instance_net $i p]
-        set netm [xschem instance_net $i m]
+        set netp $path[xschem instance_net $i p]
+        set netm $path[xschem instance_net $i m]
         if {[catch {xschem setprop $i voltage [get_diff_voltage arr $netp $netm] fast} err]} {
           puts "3 error : $err"
         }

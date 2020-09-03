@@ -87,7 +87,7 @@ int window_state (Display *disp, Window win, char *arg) {/*{{{*/
 
     my_strdup(604, &arg_copy, arg);
 
-    if(debug_var>=1) fprintf(errfp,"window_state() , win=0x%x arg_copy=%s\n", 
+    dbg(1,"window_state() , win=0x%x arg_copy=%s\n", 
           (int)win,arg_copy);
     if (!arg_copy || strlen(arg_copy) == 0) {
         fputs(argerr, errfp);
@@ -165,12 +165,12 @@ void windowid()
     mainwindow=Tk_MainWindow(interp);
     display = Tk_Display(mainwindow);
     tcleval( "winfo id .");
-    sscanf(Tcl_GetStringResult(interp), "0x%x", (unsigned int *) &ww);
+    sscanf(tclresult(), "0x%x", (unsigned int *) &ww);
     framewin = ww;
     XQueryTree(display, framewin, &rootwindow, &parent_of_topwindow, &framewin_child_ptr, &framewindow_nchildren);
-    if(debug_var>=1) fprintf(errfp,"framewinID=%x\n", (unsigned int) framewin);
-    if(debug_var>=1) fprintf(errfp,"framewin nchilds=%d\n", (unsigned int)framewindow_nchildren);
-    if(debug_var>=1) fprintf(errfp,"framewin parentID=%x\n", (unsigned int) parent_of_topwindow);
+    dbg(1,"framewinID=%x\n", (unsigned int) framewin);
+    dbg(1,"framewin nchilds=%d\n", (unsigned int)framewindow_nchildren);
+    dbg(1,"framewin parentID=%x\n", (unsigned int) parent_of_topwindow);
     if (debug_var>=1) {
       if (framewindow_nchildren==0) fprintf(errfp, "no framewin child\n");
       else fprintf(errfp, "framewin child 0=%x\n", (unsigned int)framewin_child_ptr[0]);
@@ -180,7 +180,7 @@ void windowid()
 #ifdef __unix__
     if(!cad_icon_pixmap) {
       i=XpmCreatePixmapFromData(display,framewin, cad_icon,&cad_icon_pixmap, NULL, NULL);
-      if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): creating icon pixmap returned: %d\n",i);
+      dbg(1, "Tcl_AppInit(): creating icon pixmap returned: %d\n",i);
       hints_ptr = XAllocWMHints();
       hints_ptr->icon_pixmap = cad_icon_pixmap ;
       hints_ptr->flags = IconPixmapHint ;
@@ -197,7 +197,7 @@ void xwin_exit(void)
  int i;
   
  if(!init_done) {
-   if(debug_var>=1) fprintf(errfp, "xwin_exit() double call, doing nothing...\n");
+   dbg(1, "xwin_exit() double call, doing nothing...\n");
    return;  /* 20150409 */
  }
  delete_netlist_structs();
@@ -218,14 +218,14 @@ void xwin_exit(void)
     Tk_FreePixmap(display, save_pixmap);
     for (i = 0; i < cadlayers; i++)Tk_FreePixmap(display, pixmap[i]);
 #endif
-    if(debug_var>=1) fprintf(errfp, "xwin_exit(): Releasing pixmaps\n");
+    dbg(1, "xwin_exit(): Releasing pixmaps\n");
     for(i=0;i<cadlayers;i++) 
     {
      XFreeGC(display,gc[i]);
      XFreeGC(display,gcstipple[i]);
     }
     XFreeGC(display,gctiled);
-    if(debug_var>=1) fprintf(errfp, "xwin_exit(): destroying tk windows and releasing X11 stuff\n");
+    dbg(1, "xwin_exit(): destroying tk windows and releasing X11 stuff\n");
     Tk_DestroyWindow(mainwindow);
 #ifdef __unix__
     if(cad_icon_pixmap) XFreePixmap(display, cad_icon_pixmap);
@@ -233,75 +233,83 @@ void xwin_exit(void)
     if (cad_icon_pixmap) Tk_FreePixmap(display, cad_icon_pixmap);
 #endif
  }
- if(debug_var>=1) fprintf(errfp, "xwin_exit(): clearing drawing data structures\n"); 
+ dbg(1, "xwin_exit(): clearing drawing data structures\n"); 
  clear_drawing();
- if(debug_var>=1) fprintf(errfp, "xwin_exit(): freeing graphic primitive arrays\n"); 
- my_free(&wire);
- if(debug_var>=1) fprintf(errfp, "xwin_exit(): wire\n"); 
- my_free(&gridpoint);
- if(debug_var>=1) fprintf(errfp, "xwin_exit(): gridpoint\n"); 
- my_free(&textelement);
- if(debug_var>=1) fprintf(errfp, "xwin_exit(): textelement\n"); 
+ dbg(1, "xwin_exit(): freeing graphic primitive arrays\n"); 
+ my_free(1098, &wire);
+ dbg(1, "xwin_exit(): wire\n"); 
+ my_free(1099, &gridpoint);
+ dbg(1, "xwin_exit(): gridpoint\n"); 
+ my_free(1100, &textelement);
+ dbg(1, "xwin_exit(): textelement\n"); 
  for(i=0;i<cadlayers;i++) {
-      my_free(&color_array[i]);
-      my_free(&pixdata[i]);
-      my_free(&rect[i]);
-      my_free(&line[i]);
-      my_free(&polygon[i]);
-      my_free(&arc[i]);
+      my_free(1101, &color_array[i]);
+      my_free(1102, &pixdata[i]);
+      my_free(1103, &rect[i]);
+      my_free(1104, &line[i]);
+      my_free(1105, &polygon[i]);
+      my_free(1106, &arc[i]);
  }
- if(debug_var>=1) fprintf(errfp, "xwin_exit(): freeing instances\n");
- my_free(&inst_ptr);
- if(debug_var>=1) fprintf(errfp, "xwin_exit(): freeing selected group array\n");
-  my_free(&selectedgroup);
- if(debug_var>=1) fprintf(errfp, "xwin_exit(): removing symbols\n");
+ dbg(1, "xwin_exit(): freeing instances\n");
+ my_free(1107, &inst_ptr);
+ dbg(1, "xwin_exit(): freeing selected group array\n");
+  my_free(1108, &selectedgroup);
+ dbg(1, "xwin_exit(): removing symbols\n");
  remove_symbols();
  for(i=0;i<max_symbols;i++) {
-    my_free(&instdef[i].lineptr);
-    my_free(&instdef[i].boxptr);
-    my_free(&instdef[i].arcptr);
-    my_free(&instdef[i].polygonptr);
-    my_free(&instdef[i].lines);
-    my_free(&instdef[i].polygons); /* 20171115 */
-    my_free(&instdef[i].arcs); /* 20181012 */
-    my_free(&instdef[i].rects);
+    my_free(1109, &instdef[i].lineptr);
+    my_free(1110, &instdef[i].boxptr);
+    my_free(1111, &instdef[i].arcptr);
+    my_free(1112, &instdef[i].polygonptr);
+    my_free(1113, &instdef[i].lines);
+    my_free(1114, &instdef[i].polygons); /* 20171115 */
+    my_free(1115, &instdef[i].arcs); /* 20181012 */
+    my_free(1116, &instdef[i].rects);
  }
- my_free(&instdef);
- my_free(&rect);
- my_free(&line);
- my_free(&fill_type);
- my_free(&active_layer);
- my_free(&pixdata);
- my_free(&enable_layer);
- my_free(&lastrect);
- my_free(&polygon); /* 20171115 */
- my_free(&arc); /* 20171115 */
- my_free(&lastpolygon); /* 20171115 */
- my_free(&lastarc); /* 20171115 */
- my_free(&lastline);
- my_free(&max_rects);
- my_free(&max_polygons); /* 20171115 */
- my_free(&max_arcs); /* 20171115 */
- my_free(&max_lines);
- my_free(&pixmap);
- my_free(&gc);
- my_free(&gcstipple);
- my_free(&color_array);
- my_free(&tcl_command);
+ my_free(1117, &instdef);
+ my_free(1118, &rect);
+ my_free(1119, &line);
+ my_free(1120, &fill_type);
+ my_free(1121, &active_layer);
+ my_free(1122, &pixdata);
+ my_free(1123, &enable_layer);
+ my_free(1124, &lastrect);
+ my_free(1125, &polygon); /* 20171115 */
+ my_free(1126, &arc); /* 20171115 */
+ my_free(1127, &lastpolygon); /* 20171115 */
+ my_free(1128, &lastarc); /* 20171115 */
+ my_free(1129, &lastline);
+ my_free(1130, &max_rects);
+ my_free(1131, &max_polygons); /* 20171115 */
+ my_free(1132, &max_arcs); /* 20171115 */
+ my_free(1133, &max_lines);
+ my_free(1134, &pixmap);
+ my_free(1135, &gc);
+ my_free(1136, &gcstipple);
+ my_free(1137, &color_array);
+ my_free(1138, &tcl_command);
+ clear_expandlabel_data();
+ get_sym_template(NULL, NULL); /* clear static data in function */
+ get_tok_value(NULL, NULL, 0); /* clear static data in function */
+ list_tokens(NULL, 0); /* clear static data in function */
+ translate(0, NULL); /* clear static data in function */
+ translate2(NULL, 0, NULL); /* clear static data in function */
+ subst_token(NULL, NULL, NULL); /* clear static data in function */
+ find_nth(NULL, '\0', 0); /* clear static data in function */
 
- for(i=0;i<CADMAXHIER;i++) my_free(&sch_prefix[i]);
+ for(i=0;i<CADMAXHIER;i++) my_free(1139, &sch_path[i]);
 
- if(debug_var>=1) fprintf(errfp, "xwin_exit(): removing font\n");
- for(i=0;i<127;i++) my_free(&character[i]);
+ dbg(1, "xwin_exit(): removing font\n");
+ for(i=0;i<127;i++) my_free(1140, &character[i]);
 
- if(debug_var>=1) fprintf(errfp, "xwin_exit(): closed display\n");
- my_free(&filename);
+ dbg(1, "xwin_exit(): closed display\n");
+ my_free(1141, &filename);
  
  delete_undo(); /* 20150327 */
- my_free(&netlist_dir);
- my_free(&xschem_executable);
+ my_free(1142, &netlist_dir);
+ my_free(1143, &xschem_executable);
  record_global_node(2, NULL, NULL); /* delete global node array */
- if(debug_var>=1) fprintf(errfp, "xwin_exit(): deleted undo buffer\n");
+ dbg(1, "xwin_exit(): deleted undo buffer\n");
  if(errfp!=stderr) fclose(errfp);
  errfp=stderr;
  printf("\n");
@@ -315,7 +323,7 @@ int err(Display *display, XErrorEvent *xev)
  int l=250;
 #ifdef __unix__
  XGetErrorText(display, xev->error_code, s,l);
- if(debug_var>=1) fprintf(errfp, "err(): Err %d :%s maj=%d min=%d\n", xev->error_code, s, xev->request_code,
+ dbg(1, "err(): Err %d :%s maj=%d min=%d\n", xev->error_code, s, xev->request_code,
           xev->minor_code);
 #endif
  return 0;
@@ -345,7 +353,7 @@ unsigned int  find_best_color(char colorname[])
 #endif
   }
   /* debug ... */
-  if(debug_var>=2) fprintf(errfp, 
+  dbg(2, 
         "find_best_color(): Server failed to allocate requested color, finding substitute\n");
   XLookupColor(display, colormap, colorname, &xcolor_exact, &xcolor);
   red = xcolor.red; green = xcolor.green; blue = xcolor.blue;
@@ -385,9 +393,9 @@ void init_color_array(double dim)
  for(i=0;i<cadlayers;i++) {
    my_snprintf(s, S(s), "lindex $colors %d",i);
    tcleval(s);
-   if(debug_var>=2) fprintf(errfp, "init_color_array(): color:%s\n",Tcl_GetStringResult(interp));
+   dbg(2, "init_color_array(): color:%s\n",tclresult());
 
-   sscanf(Tcl_GetStringResult(interp), "#%02x%02x%02x", &r, &g, &b);/* 20171123 */
+   sscanf(tclresult(), "#%02x%02x%02x", &r, &g, &b);/* 20171123 */
    rr=r; gg=g; bb=b;
   
    if( (i!=BACKLAYER) ) {
@@ -664,19 +672,22 @@ int build_colors(double dim) /* 20171113 */
     int i;
     if(dark_colorscheme) {
       tcleval("llength $dark_colors");
-      if(atoi(Tcl_GetStringResult(interp))>=cadlayers){
+      if(atoi(tclresult())>=cadlayers){
         tcleval("set colors $dark_colors");
       }
     } else {
       tcleval("llength $light_colors");
-      if(atoi(Tcl_GetStringResult(interp)) >=cadlayers){
+      if(atoi(tclresult()) >=cadlayers){
         tcleval("set colors $light_colors");
       }
     }
     tcleval("llength $colors");
-    if(atoi(Tcl_GetStringResult(interp))<cadlayers){
+    if(atoi(tclresult())<cadlayers){
       fprintf(errfp,"Tcl var colors not set correctly\n");
       return -1; /* fail */
+    } else {
+      tcleval("regsub -all {\"} $colors {} svg_colors");
+      tcleval("regsub -all {#} $svg_colors {0x} svg_colors");
     }
     init_color_array(dim);
     for(i=0;i<cadlayers;i++)
@@ -685,6 +696,7 @@ int build_colors(double dim) /* 20171113 */
     }
     for(i=0;i<cadlayers;i++)
     {
+      XSetBackground(display, gc[i], color_index[0]); /* for dashed lines 'off' color */
       XSetForeground(display, gc[i], color_index[i]);
       XSetForeground(display, gcstipple[i], color_index[i]);
     }
@@ -699,7 +711,7 @@ int build_colors(double dim) /* 20171113 */
 
 void tclexit(ClientData s)
 {
-  if(debug_var>=1) fprintf(errfp, "tclexit() INVOKED\n");
+  dbg(1, "tclexit() INVOKED\n");
   if(init_done) xwin_exit();
 }
 
@@ -730,11 +742,11 @@ int source_tcl_file(char *s)
   char tmp[1024];
   if(Tcl_EvalFile(interp, s)==TCL_ERROR) { 
     fprintf(errfp, "Tcl_AppInit() error: can not execute %s, please fix:\n", s);
-    fprintf(errfp, "%s", Tcl_GetStringResult(interp));
+    fprintf(errfp, "%s", tclresult());
     fprintf(errfp, "\n");
     my_snprintf(tmp, S(tmp), "tk_messageBox -icon error -type ok -message \
        {Tcl_AppInit() err 1: can not execute %s, please fix:\n %s}",
-       s, Tcl_GetStringResult(interp));
+       s, tclresult());
     if(has_x) {
       tcleval( "wm withdraw ."); /* 20161217 */
       tcleval( tmp); /* 20161217 */
@@ -769,10 +781,10 @@ void preview_window(const char *what, const char *tk_win_path, const char *filen
     my_strncpy(save_name, current_name, S(save_name));
     my_strdup(117, &saveptr, tclgetvar("current_dirname"));
     push_undo();
-    my_strdup(114, &sch_prefix[currentsch+1], sch_prefix[currentsch]);
-    my_strcat(115, &sch_prefix[currentsch+1], "___preview___");
-    my_strcat(116, &sch_prefix[currentsch+1], ".");
-
+    my_strdup(114, &sch_path[currentsch+1], sch_path[currentsch]);
+    my_strcat(115, &sch_path[currentsch+1], "___preview___");
+    my_strcat(116, &sch_path[currentsch+1], ".");
+    sch_inst_number[currentsch+1] = 1;
     currentsch++;
     
     unselect_all();
@@ -789,7 +801,7 @@ void preview_window(const char *what, const char *tk_win_path, const char *filen
    
     /* restore context */
     tclsetvar("current_dirname", saveptr);
-    my_free(&saveptr);
+    my_free(1144, &saveptr);
     unselect_all();
     remove_symbols();
     my_strncpy(schematic[currentsch] , "", S(schematic[currentsch]));
@@ -860,9 +872,9 @@ int Tcl_AppInit(Tcl_Interp *inter)
 #endif
  my_strncpy(home_dir, home_buff, S(home_dir));
 
- for(i=0;i<CADMAXHIER;i++) sch_prefix[i]=NULL;
- my_strdup(643, &sch_prefix[0],".");
-
+ for(i=0;i<CADMAXHIER;i++) sch_path[i]=NULL;
+ my_strdup(643, &sch_path[0],".");
+ sch_inst_number[0] = 1;
  XSetErrorHandler(err);
 
  interp=inter;
@@ -874,7 +886,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
 #ifdef __unix__
  my_snprintf(tmp, S(tmp),"regsub -all {~/} {.:%s} {%s/}", XSCHEM_LIBRARY_PATH, home_dir);
  tcleval(tmp);
- tclsetvar("XSCHEM_LIBRARY_PATH", Tcl_GetStringResult(interp));
+ tclsetvar("XSCHEM_LIBRARY_PATH", tclresult());
  
  running_in_src_dir = 0;
  /* test if running xschem in src/ dir (usually for testing) */
@@ -883,7 +895,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
    tclsetvar("XSCHEM_SHAREDIR",pwd_dir); /* for testing xschem builds in src dir*/
    my_snprintf(tmp, S(tmp), "subst .:[file normalize \"%s/../xschem_library/devices\"]", pwd_dir);
    tcleval(tmp);
-   tclsetvar("XSCHEM_LIBRARY_PATH", Tcl_GetStringResult(interp));
+   tclsetvar("XSCHEM_LIBRARY_PATH", tclresult());
  } else if( !stat(XSCHEM_SHAREDIR, &buf) ) {  /* 20180918 */
    tclsetvar("XSCHEM_SHAREDIR",XSCHEM_SHAREDIR);
    /* ... else give up searching, may set later after loading xschemrc */
@@ -891,9 +903,12 @@ int Tcl_AppInit(Tcl_Interp *inter)
  /* create user conf dir , remove ~ if present */
  my_snprintf(tmp, S(tmp),"regsub {^~/} {%s} {%s/}", USER_CONF_DIR, home_dir);
  tcleval(tmp);
- my_snprintf(user_conf_dir, S(user_conf_dir), "%s", Tcl_GetStringResult(interp));
+ my_snprintf(user_conf_dir, S(user_conf_dir), "%s", tclresult());
  tclsetvar("USER_CONF_DIR", user_conf_dir);
 #else
+   my_snprintf(tmp, S(tmp),"regsub -all {~/} {.;%s} {%s/}", XSCHEM_LIBRARY_PATH, home_dir);
+   tcleval(tmp);
+   tclsetvar("XSCHEM_LIBRARY_PATH", tclresult());
    char install_dir[MAX_PATH];
    GetModuleFileNameA(NULL, install_dir, MAX_PATH);
    change_to_unix_fn(install_dir);
@@ -903,25 +918,9 @@ int Tcl_AppInit(Tcl_Interp *inter)
    my_snprintf(tmp, S(tmp), "regexp {bin$} \"%s\"", install_dir); /* debugging in Visual Studio will not have bin */
    tcleval(tmp);
    running_in_src_dir = 0;
-   if (atoi(Tcl_GetStringResult(interp)) == 0)
+   if (atoi(tclresult()) == 0)
      running_in_src_dir = 1; /* no bin, so it's running in Visual studio source directory*/
  char* gxschem_library=NULL, *xschem_sharedir=NULL;
- if ((gxschem_library = getenv("XSCHEM_LIBRARY")) != NULL) {
-   if (!stat(gxschem_library, &buf)) {
-     tclsetvar("XSCHEM_LIBRARY", gxschem_library);
-   }
- }
- else {
-   if (running_in_src_dir==1) {
-     my_snprintf(tmp, S(tmp), "subst .:[file normalize \"%s/../xschem_library/devices\"]", pwd_dir);
-   }
-   else {
-     my_snprintf(tmp, S(tmp), "subst .:[file normalize \"%s/../xschem_library/devices\"]", install_dir);
-     
-   }
-    tcleval(tmp);
-    tclsetvar("XSCHEM_LIBRARY_PATH", Tcl_GetStringResult(interp));
- }
  if ((xschem_sharedir=getenv("XSCHEM_SHAREDIR")) != NULL) {
    if (!stat(xschem_sharedir, &buf)) {
      tclsetvar("XSCHEM_SHAREDIR", xschem_sharedir);
@@ -933,7 +932,6 @@ int Tcl_AppInit(Tcl_Interp *inter)
    }
    else {
      my_snprintf(tmp, S(tmp), "%s/../share", install_dir);
-     
    }
    tclsetvar("XSCHEM_SHAREDIR", tmp);
  }
@@ -941,7 +939,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
  my_snprintf(user_conf_dir, S(user_conf_dir), "%s/xschem", home_dir); /* create user_conf root directory first */
  if (stat(user_conf_dir, &buf)) {
    if (!mkdir(user_conf_dir, 0700)) {
-     if (debug_var >= 1) fprintf(errfp, "Tcl_AppInit(): created root directory to setup and create for user conf dir: %s\n", user_conf_dir);
+     dbg(1, "Tcl_AppInit(): created root directory to setup and create for user conf dir: %s\n", user_conf_dir);
    }
    else {
      fprintf(errfp, "Tcl_AppInit(): failure creating %s\n", user_conf_dir);
@@ -957,7 +955,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
  /* create USER_CONF_DIR if it was not installed */
  if(stat(user_conf_dir, &buf)) {
    if(!mkdir(user_conf_dir, 0700)) {
-     if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): created %s dir\n", user_conf_dir);
+     dbg(1, "Tcl_AppInit(): created %s dir\n", user_conf_dir);
    } else {
     fprintf(errfp, "Tcl_AppInit(): failure creating %s\n", user_conf_dir);
     Tcl_Exit(EXIT_FAILURE);
@@ -979,7 +977,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
        return TCL_ERROR; /* 20121110 */
      }
      else {
-       if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): sourcing %s\n", name);
+       dbg(1, "Tcl_AppInit(): sourcing %s\n", name);
        source_tcl_file(name);
      }
    } 
@@ -988,7 +986,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
      if(tclgetvar("XSCHEM_SHAREDIR")) {
        my_snprintf(name, S(name), "%s/xschemrc",tclgetvar("XSCHEM_SHAREDIR"));
        if(!stat(name, &buf)) {
-         if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): sourcing %s\n", name);
+         dbg(1, "Tcl_AppInit(): sourcing %s\n", name);
          source_tcl_file(name);
        }
      }
@@ -996,13 +994,13 @@ int Tcl_AppInit(Tcl_Interp *inter)
      if(!running_in_src_dir) {
        my_snprintf(name, S(name), "%s/xschemrc",pwd_dir);
        if(!stat(name, &buf)) {
-         if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): sourcing %s\n", name);
+         dbg(1, "Tcl_AppInit(): sourcing %s\n", name);
          source_tcl_file(name);
        } else {
          /* ... or look for (user_conf_dir)/xschemrc */
          my_snprintf(name, S(name), "%s/xschemrc", user_conf_dir);
          if(!stat(name, &buf)) {
-           if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): sourcing %s\n", name);
+           dbg(1, "Tcl_AppInit(): sourcing %s\n", name);
            source_tcl_file(name);
          }
        }
@@ -1032,18 +1030,18 @@ int Tcl_AppInit(Tcl_Interp *inter)
  }
  /*  END LOOKING FOR xschem.tcl   */
 
- if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): XSCHEM_SHAREDIR=%s  XSCHEM_LIBRARY_PATH=%s\n",
+ dbg(1, "Tcl_AppInit(): XSCHEM_SHAREDIR=%s  XSCHEM_LIBRARY_PATH=%s\n",
        tclgetvar("XSCHEM_SHAREDIR"), 
        tclgetvar("XSCHEM_LIBRARY_PATH") ? tclgetvar("XSCHEM_LIBRARY_PATH") : "NULL"
  );
- if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done step a of xinit()\n");
+ dbg(1, "Tcl_AppInit(): done step a of xinit()\n");
 
  /*                                */
  /* CREATE XSCHEM 'xschem' COMMAND */
  /*                                */
  Tcl_CreateCommand(interp, "xschem",   (myproc *) xschem, NULL, NULL);
 
- if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done step a1 of xinit()\n");
+ dbg(1, "Tcl_AppInit(): done step a1 of xinit()\n");
  
  if(tcl_command) {
    tcleval(tcl_command);
@@ -1061,11 +1059,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
  /*                                */
  /*  EXECUTE xschem.tcl            */
  /*                                */
-#ifdef __unix__
  my_snprintf(name, S(name), "%s/%s", tclgetvar("XSCHEM_SHAREDIR"), "xschem.tcl");
-#else
- my_snprintf(name, S(name), "%s/../src/%s", tclgetvar("XSCHEM_SHAREDIR"), "xschem.tcl");
-#endif
  if(stat(name, &buf) ) {
    fprintf(errfp, "Tcl_AppInit() err 4: cannot find %s\n", name);
    if(has_x) {
@@ -1080,21 +1074,15 @@ int Tcl_AppInit(Tcl_Interp *inter)
    Tcl_Exit(EXIT_FAILURE);
    return TCL_ERROR; /* 20121110 */
  }
- if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): sourcing %s\n", name);
+ dbg(1, "Tcl_AppInit(): sourcing %s\n", name);
  source_tcl_file(name);
- if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done executing xschem.tcl\n");
+ dbg(1, "Tcl_AppInit(): done executing xschem.tcl\n");
  /*  END EXECUTE xschem.tcl */
 
  /* resolve absolute pathname of xschem (argv[0]) for future usage */
  my_strdup(44, &xschem_executable, get_file_path(xschem_executable));
- if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): resolved xschem_executable=%s\n", xschem_executable);
+ dbg(1, "Tcl_AppInit(): resolved xschem_executable=%s\n", xschem_executable);
 
- /* READ COLORS */
- my_snprintf(name, S(name), "%s/colors", user_conf_dir);
- if(!stat(name, &buf)) {
-   source_tcl_file(name);
- }
-   
  /* set global variables fetching data from tcl code 25122002 */
  if(tclgetvar("dark_colorscheme")[0] == '1') dark_colorscheme = 1; 
  else dark_colorscheme = 0;
@@ -1149,7 +1137,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
    fprintf(errfp, "xinit(): problems creating tmp undo dir\n");
    tcleval( "exit");
  }
- if(debug_var>=1) fprintf(errfp, "undo_dirname=%s\n", undo_dirname);
+ dbg(1, "undo_dirname=%s\n", undo_dirname);
  #endif
 
  init_pixdata();
@@ -1194,9 +1182,9 @@ int Tcl_AppInit(Tcl_Interp *inter)
     window = Tk_WindowId(tkwindow);
     topwindow = Tk_WindowId(mainwindow);
 
-    if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): drawing window ID=0x%lx\n",window);
-    if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): top window ID=0x%lx\n",topwindow);
-    if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done tkinit()\n");                  
+    dbg(1, "Tcl_AppInit(): drawing window ID=0x%lx\n",window);
+    dbg(1, "Tcl_AppInit(): top window ID=0x%lx\n",topwindow);
+    dbg(1, "Tcl_AppInit(): done tkinit()\n");                  
 
     #if HAS_XCB==1
     /* grab an existing xlib connection  20171125 */
@@ -1231,7 +1219,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
                 formats[i].direct.alpha_shift == 24)
                     format_rgba = formats[i];
     }
-    my_free(&formats_reply);
+    my_free(1145, &formats_reply);
     /*/---------------------------------------------------- */
     /* /20171125 */
     #endif /*HAS_XCB */
@@ -1239,7 +1227,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
     screen_number = DefaultScreen(display);
     colormap = DefaultColormap(display, screen_number);
     depth = DisplayPlanes(display, screen_number);
-    if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): screen depth: %d\n",depth);
+    dbg(1, "Tcl_AppInit(): screen depth: %d\n",depth);
 
     visual = DefaultVisual(display, screen_number);
 
@@ -1249,7 +1237,7 @@ int Tcl_AppInit(Tcl_Interp *inter)
     ) return fprintf(errfp, "no 32 bit visual\n");
     visual = vinfo.visual;
     */
-    if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done step b of xinit()\n");
+    dbg(1, "Tcl_AppInit(): done step b of xinit()\n");
     rectcolor= 4;  /* this is the current layer when xschem started. */
     for(i=0;i<cadlayers;i++)
     {
@@ -1261,9 +1249,9 @@ int Tcl_AppInit(Tcl_Interp *inter)
      else XSetFillStyle(display,gcstipple[i],FillStippled);
     }
     gctiled = XCreateGC(display,window,0L, NULL);
-    if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done step c of xinit()\n");
+    dbg(1, "Tcl_AppInit(): done step c of xinit()\n");
     if(build_colors(0.0)) exit(-1);
-    if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done step e of xinit()\n");
+    dbg(1, "Tcl_AppInit(): done step e of xinit()\n");
     /* save_pixmap must be created as resetwin() frees it before recreating with new size. */
 #ifdef __unix__
     save_pixmap = XCreatePixmap(display,window,CADWIDTH,CADHEIGHT,depth);
@@ -1330,32 +1318,38 @@ int Tcl_AppInit(Tcl_Interp *inter)
     #endif /* HAS_CAIRO */
 
     change_linewidth(0.);
-    if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done xinit()\n");
+    dbg(1, "Tcl_AppInit(): done xinit()\n");
     winattr.backing_store = WhenMapped;
     /* winattr.backing_store = NotUseful;*/
     Tk_ChangeWindowAttributes(tkwindow, CWBackingStore, &winattr);
    
-    if(debug_var>=1) 
-       fprintf(errfp, "Tcl_AppInit(): sizeof Instance=%lu , sizeof Instdef=%lu\n",
+    dbg(1, "Tcl_AppInit(): sizeof Instance=%lu , sizeof Instdef=%lu\n",
              (unsigned long) sizeof(Instance),(unsigned long) sizeof(Instdef)); 
     
     /* 20121111 */
     tcleval("xschem line_width $line_width");
 #ifdef __unix__
-    if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): xserver max request size: %d\n", 
+    dbg(1, "Tcl_AppInit(): xserver max request size: %d\n", 
                              (int)XMaxRequestSize(display));
 #else
-    if (debug_var >= 1) fprintf(errfp, "Tcl_AppInit(): xserver max request size:\n");
+    dbg(1, "Tcl_AppInit(): xserver max request size:\n");
 #endif
 
     set_snap(0); /* set default value specified in xschemrc as 'snap' else CADSNAP */
     set_grid(0); /* set default value specified in xschemrc as 'grid' else CADGRID */
  } /* if(has_x) */
- if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): done X init\n");
+ dbg(1, "Tcl_AppInit(): done X init\n");
  /*  END X INITIALIZATION */
 
  init_done=1;  /* 20171008 moved before option processing, otherwise xwin_exit will not be invoked */
                /* leaving undo buffer and other garbage around. */
+
+
+ /*                                                                                  */
+ /* Completing tk windows creation (see xschem.tcl, build_windows) and event binding */
+ /* *AFTER* X initialization done                                                    */ 
+ /*                                                                                  */
+ tcleval("build_windows");
 
  /*                                */
  /*  START PROCESSING USER OPTIONS */
@@ -1378,17 +1372,17 @@ int Tcl_AppInit(Tcl_Interp *inter)
 
  if(filename) {
     char s[PATH_MAX+100];
-    if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): filename %s given, removing symbols\n", filename);
+    dbg(1, "Tcl_AppInit(): filename %s given, removing symbols\n", filename);
     remove_symbols();
     my_snprintf(s, S(s), "file normalize \"%s\"", filename);
     tcleval(s);
-    load_schematic(1, abs_sym_path(Tcl_GetStringResult(interp), ""), 1); /* 20180925.1 */
+    load_schematic(1, abs_sym_path(tclresult(), ""), 1); /* 20180925.1 */
  }
  else { 
    char * tmp; /* 20121110 */
    char filename[PATH_MAX];
    tmp = (char *) tclgetvar("XSCHEM_START_WINDOW"); /* 20121110 */
-   if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): tmp=%s\n", tmp? tmp: "NULL");
+   dbg(1, "Tcl_AppInit(): tmp=%s\n", tmp? tmp: "NULL");
    my_strncpy(filename, abs_sym_path(tmp, ""), S(filename));
    load_schematic(1, filename, 1);
  }
@@ -1420,11 +1414,18 @@ int Tcl_AppInit(Tcl_Interp *inter)
  }
  if(do_print) {
    if(!filename) {
-     fprintf(errfp, "xschem: can't do a print without a filename\n");
+     dbg(0, "xschem: can't do a print without a filename\n");
      tcleval( "exit");
    }
    if(do_print==1) ps_draw();
-   else if(do_print == 2) print_image();
+   else if(do_print == 2) {
+     if(!has_x) {
+       dbg(0, "xschem: can not do a png export if no X11 present / Xserver running (check if DISPLAY set).\n");
+     } else {
+       tcleval("tkwait visibility .drw");
+       print_image();
+     }
+   }
    else svg_draw();
  }
 
@@ -1456,12 +1457,17 @@ int Tcl_AppInit(Tcl_Interp *inter)
  /*  END PROCESSING USER OPTIONS */
  /* */
 
- if(!no_readline) {
+
+ if(
+#ifdef __unix__
+    !batch_mode && 
+#endif
+    !no_readline) {
    tcleval( "if {![catch {package require tclreadline}]} "
       "{::tclreadline::readline customcompleter  completer; ::tclreadline::Loop }" ) ;
  }
 
- if(debug_var>=1) fprintf(errfp, "Tcl_AppInit(): returning TCL_OK\n");
+ dbg(1, "Tcl_AppInit(): returning TCL_OK\n");
  return TCL_OK;
 }
 

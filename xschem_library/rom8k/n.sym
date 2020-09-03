@@ -23,10 +23,10 @@ L 4 5 20 20 20 {}
 L 4 20 20 20 30 {}
 L 4 -5 -15 -5 15 {type=nmos
 format="@name @pinlist @model w=@w l=@l 
-+ ad=\{@w *4.4u\} 
-+ as=\{@w *4.4u\} 
-+ pd=\{@w *2+8.8\} 
-+ ps=\{@w *2+8.8u\} 
++ ad=\{@w *4.4u\}
++ as=\{@w *4.4u\}
++ pd=\{@w *2+8.8\}
++ ps=\{@w *2+8.8u\}
 + SA=8u SB=8u m=@m"
 template="name=m1 model=cmosn w=2u l=1.2u m=1"
 generic_type="model=string"

@@ -1,7 +1,25 @@
-v {xschem version=2.9.5 file_version=1.1}
+v {xschem version=2.9.7 file_version=1.2}
 G {}
 V {}
-S {.save xsa[15].LDQI
+S {
+.save xrpre1.ldzi[15]
+.save xrpre1.ldzi[14]
+.save xrpre1.ldzi[13]
+.save xrpre1.ldzi[12]
+.save xrpre1.ldzi[11]
+.save xrpre1.ldzi[10]
+.save xrpre1.ldzi[9]
+.save xrpre1.ldzi[8]
+.save xrpre1.ldzi[7]
+.save xrpre1.ldzi[6]
+.save xrpre1.ldzi[5]
+.save xrpre1.ldzi[4]
+.save xrpre1.ldzi[3]
+.save xrpre1.ldzi[2]
+.save xrpre1.ldzi[1]
+.save xrpre1.ldzi[0]
+
+.save xsa[15].LDQI
 .save xsa[14].LDQI
 .save xsa[13].LDQI
 .save xsa[12].LDQI

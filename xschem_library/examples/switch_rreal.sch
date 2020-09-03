@@ -1,4 +1,4 @@
-v {xschem version=2.9.5_RC8 file_version=1.1}
+v {xschem version=2.9.7 file_version=1.2}
 G {
 
 -- process
@@ -80,17 +80,30 @@ elsif SCHEDULE'transaction'event  and SCHEDULE=1 then -- A event
 end if; -- now = 0
 end process;
 }
+K {type=subcircuit
+format="@name @pinlist @symname"
+template="name=x1 del=\\"2 ns\\""
+generic_type="del=time"}
 V {}
 S {}
 E {}
-C {use.sym} 0 -310 0 0 {    library ieee,work;
+L 4 -110 -20 110 -20 {}
+L 4 -110 20 110 20 {}
+L 4 -110 -20 -110 20 {}
+L 4 110 -20 110 20 {}
+L 4 110 -10 150 -10 {}
+L 4 -150 -10 -110 -10 {}
+L 4 -150 10 -110 10 {}
+T {@symname} -49.5 -6 0 0 0.3 0.3 {}
+T {@name} 65 -32 0 0 0.2 0.2 {}
+C {use.sym} 120 -280 0 0 {    library ieee,work;
     use ieee.std_logic_1164.all;
     use work.rrreal.all;
     use std.textio.all;
 }
-C {ipin.sym} 80 -120 0 0 {name=p3 lab=ENAB}
-C {iopin.sym} 40 -40 0 1 {name=p2 lab=A sig_type=rreal}
-C {arch_declarations.sym} 20 -190 0 0 {
+C {ipin.sym} -150 10 0 0 {name=p3 lab=ENAB}
+C {iopin.sym} -150 -10 0 1 {name=p2 lab=A sig_type=rreal}
+C {arch_declarations.sym} 140 -160 0 0 {
 
 signal SCHEDULE : integer ;
 
@@ -102,4 +115,4 @@ begin
   print("       " & x'SIMPLE_NAME & ".conduct=" & real'image(x.conduct) & " t= " & time'image(now));
 end print2;
 }
-C {iopin.sym} 170 -40 0 0 {name=p1 lab=B sig_type=rreal}
+C {iopin.sym} 150 -10 0 0 {name=p1 lab=B sig_type=rreal}

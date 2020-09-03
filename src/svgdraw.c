@@ -50,9 +50,15 @@ static void set_svg_colors(unsigned int pixel)
      svg_stroke.green = svg_colors[pixel].green;
      svg_stroke.blue = svg_colors[pixel].blue;
    } else {
-     svg_stroke.red = 0;
-     svg_stroke.green = 0;
-     svg_stroke.blue = 0;
+     if(dark_colorscheme == 0 ) {
+       svg_stroke.red = 0;
+       svg_stroke.green = 0;
+       svg_stroke.blue = 0;
+     } else {
+       svg_stroke.red = 255;
+       svg_stroke.green = 255;
+       svg_stroke.blue = 255;
+     }
    }
 
 }
@@ -192,8 +198,8 @@ static void svg_drawline(int gc, double linex1,double liney1,double linex2,doubl
   }
 }
 
-static void svg_draw_string(int gctext,  char *str, 
-                 int rot, int flip, 
+static void svg_draw_string(int gctext, const char *str, 
+                 int rot, int flip, int hcenter, int vcenter, 
                  double x1,double y1,
                  double xscale, double yscale)  
 
@@ -204,9 +210,9 @@ static void svg_draw_string(int gctext,  char *str,
 
  if(str==NULL) return;
  #ifdef HAS_CAIRO
- text_bbox_nocairo(str, xscale, yscale, rot, flip, x1,y1, &rx1,&ry1,&rx2,&ry2);
+ text_bbox_nocairo(str, xscale, yscale, rot, flip, hcenter, vcenter, x1,y1, &rx1,&ry1,&rx2,&ry2);
  #else
- text_bbox(str, xscale, yscale, rot, flip, x1,y1, &rx1,&ry1,&rx2,&ry2);
+ text_bbox(str, xscale, yscale, rot, flip, hcenter, vcenter, x1,y1, &rx1,&ry1,&rx2,&ry2);
  #endif
  xscale*=nocairo_font_xscale;
  yscale*=nocairo_font_yscale;
@@ -278,13 +284,15 @@ static void svg_draw_symbol(int n,int layer,int tmp_flip, int rot,
 {                           /* a "for(i=0;i<cadlayers;i++)" loop */
  int j;
  double x0,y0,x1,y1,x2,y2;
- int flip;
+ int flip, textlayer;
  Line line;
  Box box;
  Text text;
  xArc arc;
  xPolygon polygon;
 
+  if(inst_ptr[n].ptr == -1) return;
+  if( (layer != PINLAYER && !enable_layer[layer]) ) return;
   if(layer==0)
   {
    x1=X_TO_SVG(inst_ptr[n].x1);
@@ -303,7 +311,7 @@ static void svg_draw_symbol(int n,int layer,int tmp_flip, int rot,
   }
   else if(inst_ptr[n].flags&1)
   {
-   if(debug_var>=1) fprintf(errfp, "draw_symbol(): skippinginst %d\n", n);
+   dbg(1, "draw_symbol(): skippinginst %d\n", n);
    return;
   }
 
@@ -335,7 +343,8 @@ static void svg_draw_symbol(int n,int layer,int tmp_flip, int rot,
          y[k] += y0;
        }
        svg_drawpolygon(layer, NOW, x, y, polygon.points);
-       my_free(&x); my_free(&y);
+       my_free(961, &x);
+       my_free(962, &y);
      }
    }
    for(j=0;j< (inst_ptr[n].ptr+instdef)->arcs[layer];j++)
@@ -353,7 +362,7 @@ static void svg_draw_symbol(int n,int layer,int tmp_flip, int rot,
      svg_drawarc(layer, arc.fill, x0+x1, y0+y1, arc.r, angle, arc.b);
    }
 
-   for(j=0;j< (inst_ptr[n].ptr+instdef)->rects[layer];j++)
+   if( (layer != PINLAYER || enable_layer[layer]) ) for(j=0;j< (inst_ptr[n].ptr+instdef)->rects[layer];j++)
    {
     box = ((inst_ptr[n].ptr+instdef)->boxptr[layer])[j];
     ROTATION(0.0,0.0,box.x1,box.y1,x1,y1);
@@ -364,17 +373,24 @@ static void svg_draw_symbol(int n,int layer,int tmp_flip, int rot,
    if(  (layer==TEXTWIRELAYER  && !(inst_ptr[n].flags&2) ) || 
         (sym_txt && (layer==TEXTLAYER)   && (inst_ptr[n].flags&2) ) )
    {
+    const char *txtptr;
     for(j=0;j< (inst_ptr[n].ptr+instdef)->texts;j++)
     {
      text = (inst_ptr[n].ptr+instdef)->txtptr[j];
      /* if(text.xscale*FONTWIDTH* mooz<1) continue; */
-     text.txt_ptr= 
-       translate(n, text.txt_ptr);
+     txtptr= translate(n, text.txt_ptr);
      ROTATION(0.0,0.0,text.x0,text.y0,x1,y1);
-     svg_draw_string(layer, text.txt_ptr,
-       (text.rot + ( (flip && (text.rot & 1) ) ? rot+2 : rot) ) & 0x3,
-       flip^text.flip,
-       x0+x1, y0+y1, text.xscale, text.yscale);                    
+     textlayer = layer;
+     if( !(layer == PINLAYER && (inst_ptr[n].flags & 4))) {
+       textlayer = (inst_ptr[n].ptr+instdef)->txtptr[j].layer;
+       if(textlayer < 0 || textlayer >= cadlayers) textlayer = layer;
+     }
+     if((layer == PINLAYER && inst_ptr[n].flags & 4) ||  enable_layer[textlayer]) {
+       svg_draw_string(textlayer, txtptr,
+         (text.rot + ( (flip && (text.rot & 1) ) ? rot+2 : rot) ) & 0x3,
+         flip^text.flip, text.hcenter, text.vcenter, 
+         x0+x1, y0+y1, text.xscale, text.yscale);                    
+     }
     }
    }
    Tcl_SetResult(interp,"",TCL_STATIC);  /*26102003 */
@@ -390,12 +406,22 @@ static void fill_svg_colors()
    tcleval( "puts $svg_colors"); 
  }
  for(i=0;i<cadlayers;i++) {
-   my_snprintf(s, S(s), "lindex $svg_colors %d", i);
-   tcleval( s);
-   sscanf(Tcl_GetStringResult(interp),"%x", &c);
-   svg_colors[i].red   = (c & 0xff0000) >> 16;
-   svg_colors[i].green = (c & 0x00ff00) >> 8;
-   svg_colors[i].blue  = (c & 0x0000ff);
+   if(color_ps) {
+     my_snprintf(s, S(s), "lindex $svg_colors %d", i);
+     tcleval( s);
+     sscanf(tclresult(),"%x", &c);
+     svg_colors[i].red   = (c & 0xff0000) >> 16;
+     svg_colors[i].green = (c & 0x00ff00) >> 8;
+     svg_colors[i].blue  = (c & 0x0000ff);
+   } else if(dark_colorscheme) {
+     svg_colors[i].red   = 255;
+     svg_colors[i].green = 255;
+     svg_colors[i].blue  = 255;
+   } else {
+     svg_colors[i].red   = 0;
+     svg_colors[i].green = 0;
+     svg_colors[i].blue  = 0;
+   }
    if(debug_var>=1) {
      fprintf(errfp, "svg_colors: %d %d %d\n", svg_colors[i].red, svg_colors[i].green, svg_colors[i].blue); 
    }
@@ -407,19 +433,19 @@ static void fill_svg_colors()
 void svg_draw(void)
 {
  double dx, dy;
- int c,i; 
+ int c,i, textlayer; 
  int filledrect;
  int old_grid;
  int modified_save; /* 20161121 */
- static char *tmpstring=NULL;
+ char *tmpstring=NULL;
  const char *r;
 
 
  if(!plotfile[0]) {
    my_strdup(61, &tmpstring, "tk_getSaveFile -title {Select destination file} -initialdir $env(PWD)");
    tcleval(tmpstring);
-   r = Tcl_GetStringResult(interp);
-   my_free(&tmpstring);
+   r = tclresult();
+   my_free(963, &tmpstring);
    if(r[0]) my_strncpy(plotfile, r, S(plotfile));
    else return;
  }
@@ -438,7 +464,7 @@ void svg_draw(void)
 
  dx=areax2-areax1;
  dy=areay2-areay1;
- if(debug_var>=1) fprintf(errfp, "svg_draw(): dx=%g  dy=%g\n", dx, dy);
+ dbg(1, "svg_draw(): dx=%g  dy=%g\n", dx, dy);
 
 
  modified_save=modified;
@@ -471,7 +497,7 @@ void svg_draw(void)
  }
  fprintf(fd, "</style>\n");
 
- if(color_ps) {
+ if(dark_colorscheme) {
    /* black background */
    fprintf(fd,"<rect x=\"%g\" y=\"%g\" width=\"%g\" height=\"%g\" fill=\"rgb(%d,%d,%d)\" stroke=\"rgb(%d,%d,%d)\" stroke-width=\"%g\" />\n",
                    0.0,      0.0,      dx,           dy,    0, 0, 0,
@@ -487,8 +513,10 @@ void svg_draw(void)
    set_svg_colors(TEXTLAYER);
    for(i=0;i<lasttext;i++) 
    {
-     svg_draw_string(TEXTLAYER, textelement[i].txt_ptr,
-       textelement[i].rot, textelement[i].flip,
+     textlayer = textelement[i].layer; /*20171206 */
+     if(textlayer < 0 ||  textlayer >= cadlayers) textlayer = TEXTLAYER;
+     svg_draw_string(textlayer, textelement[i].txt_ptr,
+       textelement[i].rot, textelement[i].flip, textelement[i].hcenter, textelement[i].vcenter,
        textelement[i].x0,textelement[i].y0,
        textelement[i].xscale, textelement[i].yscale); 
    }
@@ -541,11 +569,11 @@ void svg_draw(void)
      }
    }
 
- if(debug_var>=1) fprintf(errfp, "svg_draw(): lw=%d\n",lw);
+ dbg(1, "svg_draw(): lw=%d\n",lw);
  fprintf(fd, "</svg>\n");
  fclose(fd);
  draw_grid=old_grid;
- my_free(&svg_colors);
+ my_free(964, &svg_colors);
 
  pop_undo(0); /* 20161121 */
  modified=modified_save;  /* 20161121 */

@@ -82,7 +82,7 @@ int max_undo=MAX_UNDO;
 int draw_dots=1; /*20150331 */
 int draw_single_layer=-1; /* 20151117 */
 int check_version = 0; /* if set ensures 'v' version header line is present before loading file */
-
+int yyparse_error = 0;
 unsigned short enable_stretch=0;
 int cadlayers=0;
 int *enable_layer;
@@ -243,7 +243,8 @@ char file_version[100];
 char *schverilogprop=NULL;/* verilog */
 int show_erc=1;
 int hilight_nets=0;
-char *sch_prefix[CADMAXHIER];
+char *sch_path[CADMAXHIER];
+int sch_inst_number[CADMAXHIER];
 int previous_instance[CADMAXHIER]; /* to remember the instance we came from when going up the hier. */
 int modified = 0;
 int color_ps=-1;
@@ -267,7 +268,7 @@ struct wireentry *wiretable[NBOXES][NBOXES];
 struct instentry *insttable[NBOXES][NBOXES];
 size_t get_tok_value_size;
 size_t get_tok_size;
-
+int batch_mode = 0; /* no tcl console if set; batch mode */
 
 #ifdef HAS_CAIRO
 cairo_surface_t *sfc, *save_sfc;

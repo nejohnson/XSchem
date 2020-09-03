@@ -17,12 +17,11 @@ END  { endfile(_filename_) }
 BEGIN{
 }
 
-/\<DELETE\>|\<LOOKUP\>|\<INSERT\>/{
- gsub(/\<DELETE\>/, "XDELETE")
- gsub(/\<LOOKUP\>/, "XLOOKUP")
- gsub(/\<INSERT\>/, "XINSERT")
- found = 1
+/Tcl_GetStringResult\(interp\)/{
+  found = 1
+  gsub(/Tcl_GetStringResult\(interp\)/, "tclresult()")
 }
+
 
 function replace_pattern(old, new)
 {

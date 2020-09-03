@@ -2,7 +2,7 @@
 
 awk '
 BEGIN{
- pattern = "(my_malloc|my_realloc|my_calloc|my_strdup|my_strndup|my_strdup2|my_strcat|my_strncat)\\("
+ pattern = "(my_free|my_malloc|my_realloc|my_calloc|my_strdup|my_strndup|my_strdup2|my_strcat|my_strncat)\\("
 }
 
 
@@ -49,7 +49,8 @@ vhdl_netlist.c \
 xinit.c \
 | sort -n \
 | awk '{
-  if(n++>0 && $1 != prev+1) print ">>>>>>>>>>>"
+  if(n>0 && $1 <= prev)         print ">>>>>>>>>>> ERROR >>>>>>>>>"
+  else  if(n++>0 && $1 != prev+1) print ">>>>>>>>>>>>>>>>>>>>>>>>>>>"
   prev = $1
   print
 }'

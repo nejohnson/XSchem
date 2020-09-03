@@ -134,7 +134,7 @@ void set_grid(double newgrid)
     }
     cadgrid = newgrid ? newgrid : default_grid;
     sprintf(str, "%.16g", cadgrid);
-    if(debug_var>=1) fprintf(errfp, "set_grid(): default_grid = %.16g, cadgrid=%.16g\n", default_grid, cadgrid);
+    dbg(1, "set_grid(): default_grid = %.16g, cadgrid=%.16g\n", default_grid, cadgrid);
     if(cadgrid == default_grid) {
       tcleval(".statusbar.5 configure -background PaleGreen");
     } else {
@@ -149,7 +149,7 @@ int set_netlist_dir(int force, char *dir)
   if(dir) my_snprintf(cmd, S(cmd), "select_netlist_dir %d %s", force, dir);
   else    my_snprintf(cmd, S(cmd), "select_netlist_dir %d", force);
   tcleval(cmd);
-  if(!strcmp("", Tcl_GetStringResult(interp)) ) {
+  if(!strcmp("", tclresult()) ) {
     return 0;
   }
   return 1;
@@ -161,7 +161,7 @@ const char *abs_sym_path(const char *s, const char *ext)
   char c[PATH_MAX+1000];
   my_snprintf(c, S(c), "abs_sym_path {%s} {%s}", s, ext);
   tcleval(c);
-  return Tcl_GetStringResult(interp);
+  return tclresult();
 }
 
 /* Wrapper to Tcl function */
@@ -170,7 +170,7 @@ const char *rel_sym_path(const char *s)
   char c[PATH_MAX+1000];
   my_snprintf(c, S(c), "rel_sym_path {%s}", s);
   tcleval(c);
-  return Tcl_GetStringResult(interp);
+  return tclresult();
 }
 
 const char *add_ext(const char *f, const char *ext)
@@ -179,18 +179,18 @@ const char *add_ext(const char *f, const char *ext)
   char *p;
   int i;
 
-  if(debug_var>=1) fprintf(errfp, "add_ext(): f=%s ext=%s\n", f, ext);
+  dbg(1, "add_ext(): f=%s ext=%s\n", f, ext);
   if((p=strrchr(f,'.'))) {
     my_strncpy(ff, f, (p-f) + 1);
     p = ff + (p-f);
-    if(debug_var>=1) fprintf(errfp, "add_ext() 1: ff=%s\n", ff);
+    dbg(1, "add_ext() 1: ff=%s\n", ff);
   } else {
     i = my_strncpy(ff, f, S(ff));
     p = ff+i;
-    if(debug_var>=1) fprintf(errfp, "add_ext() 2: ff=%s\n", ff);
+    dbg(1, "add_ext() 2: ff=%s\n", ff);
   } 
   my_strncpy(p, ext, S(ff)-(p-ff));
-  if(debug_var>=1) fprintf(errfp, "add_ext() 3: ff=%s\n", ff);
+  dbg(1, "add_ext() 3: ff=%s\n", ff);
   return ff;
 }
 
@@ -217,9 +217,9 @@ void resetwin(void)
     areah = areay2-areay1;
 
     if( xschem_w !=xrect[0].width || xschem_h !=xrect[0].height) { /* 20171123 avoid unnecessary work if no resize */
-      if(debug_var>=1) fprintf(errfp, "resetwin(): x=%d y=%d   xschem_w=%d xschem_h=%d\n",
+      dbg(1, "resetwin(): x=%d y=%d   xschem_w=%d xschem_h=%d\n",
                        wattr.x, wattr.y, xschem_w,xschem_h);
-      if(debug_var>=1) fprintf(errfp, "resetwin(): changing size\n\n");
+      dbg(1, "resetwin(): changing size\n\n");
       xrect[0].x = 0;
       xrect[0].y = 0; 
       xrect[0].width = xschem_w;
@@ -231,7 +231,7 @@ void resetwin(void)
       {
         unsigned int w, h;
         XQueryBestSize(display, TileShape, window,  xschem_w, xschem_h, &w, &h);
-        if(debug_var>=0) fprintf(errfp, "XQueryBestSize: req: w=%d, h=%d, opt: w=%d h=%d\n", 
+        dbg(1, "XQueryBestSize: req: w=%d, h=%d, opt: w=%d h=%d\n", 
                          xschem_w, xschem_h, w, h);
       }
       */
@@ -255,9 +255,9 @@ void resetwin(void)
       areaw = areax2 - areax1;
       areah = areay2 - areay1;
       if (xschem_w != xrect[0].width || xschem_h != xrect[0].height) { /* 20171123 avoid unnecessary work if no resize */
-        if (debug_var >= 1) fprintf(errfp, "resetwin(): x=%d y=%d   xschem_w=%d xschem_h=%d\n",
+        dbg(1, "resetwin(): x=%d y=%d   xschem_w=%d xschem_h=%d\n",
           rect.right, rect.bottom, xschem_w, xschem_h);
-        if (debug_var >= 1) fprintf(errfp, "resetwin(): changing size\n\n");
+        dbg(1, "resetwin(): changing size\n\n");
         xrect[0].x = 0;
         xrect[0].y = 0;
         xrect[0].width = xschem_w;
@@ -307,7 +307,7 @@ void resetwin(void)
       pending_fullzoom=0;
     } 
     /* debug ... */
-    if(debug_var>=1) fprintf(errfp, "resetwin(): Window reset\n");
+    dbg(1, "resetwin(): Window reset\n");
   }
 }
 
@@ -341,7 +341,7 @@ void toggle_fullscreen()
     else if(fullscreen==2) tclsetvar("fullscreen","2");
     else tclsetvar("fullscreen","0");
 
-    if(debug_var>=1) fprintf(errfp, "toggle_fullscreen(): fullscreen=%d\n", fullscreen);
+    dbg(1, "toggle_fullscreen(): fullscreen=%d\n", fullscreen);
     if(fullscreen==2) {
       tcleval("pack forget .menubar .statusbar; update");
       menu_removed = 1;
@@ -374,7 +374,7 @@ void new_window(const char *cell, int symbol)
      pid_t pid2;
      int status;
     
-     if(debug_var>=1) fprintf(errfp, "new_window(): executable: %s, cell=%s, symbol=%d\n", xschem_executable, cell, symbol);
+     dbg(1, "new_window(): executable: %s, cell=%s, symbol=%d\n", xschem_executable, cell, symbol);
      if(stat(xschem_executable,&buf)) { /*  20121110 */
        fprintf(errfp, "new_window(): executable not found\n");
        return;
@@ -423,7 +423,7 @@ void new_window(const char *cell, int symbol)
 void new_window(const char* cell, int symbol)
 {
   struct stat buf;
-  if (debug_var >= 1) fprintf(errfp, "new_window(): executable: %s, cell=%s, symbol=%d\n", xschem_executable, cell, symbol);
+  dbg(1, "new_window(): executable: %s, cell=%s, symbol=%d\n", xschem_executable, cell, symbol);
   if (stat(xschem_executable, &buf)) { /*  20121110 */
     fprintf(errfp, "new_window(): executable not found\n");
     return;
@@ -437,7 +437,7 @@ const char *get_file_path(char *f)
   char tmp[2*PATH_MAX+100];
   my_snprintf(tmp, S(tmp),"get_file_path \"%s\"", f);
   tcleval(tmp);
-  return Tcl_GetStringResult(interp);
+  return tclresult();
 }
 
 int save(int confirm) /* 20171006 add confirm */
@@ -451,10 +451,10 @@ int save(int confirm) /* 20171006 add confirm */
      {
        if(confirm) {
          tcleval("ask_save");
-         if(!strcmp(Tcl_GetStringResult(interp), "") ) cancel=1;
-         if(!strcmp(Tcl_GetStringResult(interp), "yes") ) save_ok = save_schematic(schematic[currentsch]);
+         if(!strcmp(tclresult(), "") ) cancel=1;
+         if(!strcmp(tclresult(), "yes") ) save_ok = save_schematic(abs_sym_path(schematic[currentsch],""));
        } else {
-         save_ok = save_schematic(schematic[currentsch]);
+         save_ok = save_schematic(abs_sym_path(schematic[currentsch],""));
        }
      }
      if(save_ok==-1) return 1;
@@ -467,7 +467,7 @@ void saveas(const char *f) /*  changed name from ask_save_file to saveas 2012120
     char filename[PATH_MAX];
     char res[PATH_MAX];
     char *p;
-    if(!f) {
+    if(!f && has_x) {
       my_strncpy(filename , abs_sym_path(schematic[currentsch], ""), S(filename));
       if(current_type == SCHEMATIC) {
         my_snprintf(name, S(name), "save_file_dialog {Save file} .sch.sym INITIALLOADDIR {%s}", filename);
@@ -479,20 +479,22 @@ void saveas(const char *f) /*  changed name from ask_save_file to saveas 2012120
       }
 
       tcleval(name);
-      my_strncpy(res, Tcl_GetStringResult(interp), S(res));
+      my_strncpy(res, tclresult(), S(res));
     }
-    else {
+    else if(f) {
       my_strncpy(res, f, S(res));
     }
+    else res[0]='\0';
 
     if(!res[0]) return; /* 20071104 */
-    if(debug_var >= 1) fprintf(errfp, "saveas(): res = %s\n", res);
+    dbg(1, "saveas(): res = %s\n", res);
     save_schematic(res);
     Tcl_VarEval(interp, "update_recent_file {", res,"}",  NULL);
 
     my_strncpy(current_name, rel_sym_path(res), S(current_name)); /* 20190519 */
     return;
 }
+
 void ask_new_file(void)
 {
     char fullname[PATH_MAX]; /*  overflow safe 20161125 */
@@ -503,38 +505,41 @@ void ask_new_file(void)
       if(save(1)) return; /*  user cancels save, so do nothing. */
     }
     tcleval("load_file_dialog {Load Schematic} .sch.sym INITIALLOADDIR");
-    my_snprintf(fullname, S(fullname),"%s", Tcl_GetStringResult(interp));
+    my_snprintf(fullname, S(fullname),"%s", tclresult());
 
 
     if( fullname[0] ) {
-     if(debug_var>=1) fprintf(errfp, "ask_new_file(): load file: %s\n", fullname);
+     dbg(1, "ask_new_file(): load file: %s\n", fullname);
      delete_hilight_net();
      currentsch = 0;
      unselect_all(); /* 20180929 */
      remove_symbols();
      load_schematic(1, fullname,1); /* 20180925.1 */
      Tcl_VarEval(interp, "update_recent_file {", fullname, "}", NULL);
-     my_strdup(1, &sch_prefix[currentsch],".");
+     my_strdup(1, &sch_path[currentsch],".");
+     sch_inst_number[currentsch] = 1;
      zoom_full(1, 0);
     }
 }
 
-/*  20071007 */
-/*  remove last symbol and decrement lastinstdef */
-void remove_symbol(void)
+/* remove symbol and decrement lastinstdef */
+/* Warning: removing a symbol with a loaded schematic will make all symbol references corrupt */
+/* you should clear_drawing() first or load_schematic() or link_symbols_to_instances()
+   immediately afterwards */
+void remove_symbol(int j)
 {
-  int i,c,j;
-  j = lastinstdef-1;
-  if(debug_var>=1) fprintf(errfp, "remove_symbol(): removing symbol %d\n", j);
+  int i,c;
+  Instdef save;
+  dbg(1, "remove_symbol(): removing symbol %d\n", j);
   if(instdef[j].prop_ptr != NULL) {
-    my_free(&instdef[j].prop_ptr);
+    my_free(666, &instdef[j].prop_ptr);
   }
   /*  20150409 */
   if(instdef[j].templ != NULL) {
-    my_free(&instdef[j].templ);
+    my_free(667, &instdef[j].templ);
   }
   if(instdef[j].type != NULL) {
-    my_free(&instdef[j].type);
+    my_free(668, &instdef[j].type);
   }
   /*  /20150409 */
   for(c=0;c<cadlayers;c++) /*  20171115 */
@@ -542,59 +547,64 @@ void remove_symbol(void)
    for(i=0;i<instdef[j].polygons[c];i++)
    {
      if(instdef[j].polygonptr[c][i].prop_ptr != NULL) {
-       my_free(&instdef[j].polygonptr[c][i].prop_ptr);
+       my_free(669, &instdef[j].polygonptr[c][i].prop_ptr);
      }
-     my_free(&instdef[j].polygonptr[c][i].x);
-     my_free(&instdef[j].polygonptr[c][i].y);
-     my_free(&instdef[j].polygonptr[c][i].selected_point);
+     my_free(670, &instdef[j].polygonptr[c][i].x);
+     my_free(671, &instdef[j].polygonptr[c][i].y);
+     my_free(672, &instdef[j].polygonptr[c][i].selected_point);
    }
-   if(instdef[j].polygonptr[c]) my_free(&instdef[j].polygonptr[c]);
+   my_free(673, &instdef[j].polygonptr[c]);
 
    for(i=0;i<instdef[j].lines[c];i++)
    {
     if(instdef[j].lineptr[c][i].prop_ptr != NULL)
     {
-     my_free(&instdef[j].lineptr[c][i].prop_ptr);
+     my_free(674, &instdef[j].lineptr[c][i].prop_ptr);
     }
    }
-   if(instdef[j].lineptr[c]) my_free(&instdef[j].lineptr[c]);
+   my_free(675, &instdef[j].lineptr[c]);
 
    for(i=0;i<instdef[j].arcs[c];i++)
    {
     if(instdef[j].arcptr[c][i].prop_ptr != NULL)
     {
-     my_free(&instdef[j].arcptr[c][i].prop_ptr);
+     my_free(676, &instdef[j].arcptr[c][i].prop_ptr);
     }
    }
-   if(instdef[j].arcptr[c]) my_free(&instdef[j].arcptr[c]);
+   my_free(677, &instdef[j].arcptr[c]);
 
    for(i=0;i<instdef[j].rects[c];i++)
    {
     if(instdef[j].boxptr[c][i].prop_ptr != NULL)
     {
-     my_free(&instdef[j].boxptr[c][i].prop_ptr);
+     my_free(678, &instdef[j].boxptr[c][i].prop_ptr);
     }
    }
-   if(instdef[j].boxptr[c]) my_free(&instdef[j].boxptr[c]);
+   my_free(679, &instdef[j].boxptr[c]);
   }
   for(i=0;i<instdef[j].texts;i++)
   {
    if(instdef[j].txtptr[i].prop_ptr != NULL)
    {
-    my_free(&instdef[j].txtptr[i].prop_ptr);
+    my_free(680, &instdef[j].txtptr[i].prop_ptr);
    }
    if(instdef[j].txtptr[i].txt_ptr != NULL)
    {
-    my_free(&instdef[j].txtptr[i].txt_ptr);
+    my_free(681, &instdef[j].txtptr[i].txt_ptr);
    }
    if(instdef[j].txtptr[i].font != NULL)
    {
-    my_free(&instdef[j].txtptr[i].font);
+    my_free(682, &instdef[j].txtptr[i].font);
    }
   }
-  if(instdef[j].txtptr) my_free(&instdef[j].txtptr);
-  my_free(&instdef[j].name);
+  my_free(683, &instdef[j].txtptr);
+  my_free(684, &instdef[j].name);
 
+  save = instdef[j];
+  for(i = j + 1; i < lastinstdef; i++) {
+    instdef[i-1] = instdef[i];
+  }
+  instdef[lastinstdef-1] = save;
   lastinstdef--;
 }
 
@@ -603,10 +613,10 @@ void remove_symbols(void)
  int j;
  
  for(j=lastinstdef-1;j>=0;j--) {
-   if(debug_var>=2) fprintf(errfp, "remove_symbols(): removing symbol %d\n",j);
-   remove_symbol();
+   dbg(2, "remove_symbols(): removing symbol %d\n",j);
+   remove_symbol(j);
  }
-  if(debug_var>=1) fprintf(errfp, "remove_symbols(): done\n");
+  dbg(1, "remove_symbols(): done\n");
   if(event_reporting) {
     printf("xschem remove_symbols\n");
     fflush(stdout);
@@ -619,59 +629,59 @@ void clear_drawing(void)
  int i,j;
  del_inst_table(); /*  20180917 */
  del_wire_table();   /*  20180917 */
- my_free(&schtedaxprop);
- my_free(&schsymbolprop);
- my_free(&schprop);
- my_free(&schvhdlprop);
- my_free(&xschem_version_string);
- my_free(&schverilogprop); /* 09112003 */
+ my_free(685, &schtedaxprop);
+ my_free(686, &schsymbolprop);
+ my_free(687, &schprop);
+ my_free(688, &schvhdlprop);
+ my_free(689, &xschem_version_string);
+ my_free(690, &schverilogprop); /* 09112003 */
  for(i=0;i<lastwire;i++)
  {
-  my_free(&wire[i].prop_ptr);
-  my_free(&wire[i].node);
+  my_free(691, &wire[i].prop_ptr);
+  my_free(692, &wire[i].node);
  } 
  lastwire = 0;
  for(i=0;i<lastinst;i++)
  {
-  my_free(&inst_ptr[i].prop_ptr);
-  my_free(&inst_ptr[i].name);
-  my_free(&inst_ptr[i].instname);
+  my_free(693, &inst_ptr[i].prop_ptr);
+  my_free(694, &inst_ptr[i].name);
+  my_free(695, &inst_ptr[i].instname);
   delete_inst_node(i);
  }
  lastinst = 0;
  for(i=0;i<lasttext;i++)
  {
-  if(textelement[i].font!=NULL) my_free(&textelement[i].font);
-  if(textelement[i].prop_ptr!=NULL) my_free(&textelement[i].prop_ptr);
-  if(textelement[i].txt_ptr!=NULL) my_free(&textelement[i].txt_ptr);
+  my_free(696, &textelement[i].font);
+  my_free(697, &textelement[i].prop_ptr);
+  my_free(698, &textelement[i].txt_ptr);
  }
  lasttext = 0;
  for(i=0;i<cadlayers;i++)
  {
   for(j=0;j<lastline[i];j++)
   {
-   if(line[i][j].prop_ptr!=NULL) my_free(&line[i][j].prop_ptr);
+   my_free(699, &line[i][j].prop_ptr);
   }
   for(j=0;j<lastrect[i];j++)
   {
-   if(rect[i][j].prop_ptr!=NULL) my_free(&rect[i][j].prop_ptr);
+   my_free(700, &rect[i][j].prop_ptr);
   }
   for(j=0;j<lastarc[i];j++)
   {
-   if(arc[i][j].prop_ptr!=NULL) my_free(&arc[i][j].prop_ptr);
+   my_free(701, &arc[i][j].prop_ptr);
   }
   for(j=0;j<lastpolygon[i]; j++) {/*  20171115 */
-    if(polygon[i][j].x!=NULL) my_free(&polygon[i][j].x);
-    if(polygon[i][j].y!=NULL) my_free(&polygon[i][j].y);
-    if(polygon[i][j].prop_ptr!=NULL) my_free(&polygon[i][j].prop_ptr);
-    if(polygon[i][j].selected_point!=NULL)  my_free(&polygon[i][j].selected_point); 
+    my_free(702, &polygon[i][j].x);
+    my_free(703, &polygon[i][j].y);
+    my_free(704, &polygon[i][j].prop_ptr);
+    my_free(705, &polygon[i][j].selected_point); 
   }
   lastline[i] = 0;
   lastarc[i] = 0;
   lastrect[i] = 0;
   lastpolygon[i] = 0;/*  20171115 */
  }
- if(debug_var>=1) fprintf(errfp, "clear drawing(): deleted data structures, now deleting hash\n");
+ dbg(1, "clear drawing(): deleted data structures, now deleting hash\n");
  clear_instance_hash();
 }
 
@@ -702,10 +712,10 @@ void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
   Box *rect;
   char *labname=NULL;
   char *prop=NULL; /*  20161122 overflow safe */
-  char symname_pin[] = "devices/lab_pin.sym";
-  char symname_wire[] = "devices/lab_wire.sym"; /*  20171005 */
-  char symname_pin2[] = "lab_pin.sym";
-  char symname_wire2[] = "lab_wire.sym"; /*  20171005 */
+  const char symname_pin[] = "devices/lab_pin.sym";
+  const char symname_wire[] = "devices/lab_wire.sym"; /*  20171005 */
+  const char symname_pin2[] = "lab_pin.sym";
+  const char symname_wire2[] = "lab_wire.sym"; /*  20171005 */
   char *type=NULL;
   int dir;
   int k,ii, skip;
@@ -720,6 +730,7 @@ void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
   struct stat buf;
   int indirect;
   int use_label_prefix;
+  int found=0;
 
   if(!stat(abs_sym_path(symname_pin, ""), &buf)) {
     indirect=1;
@@ -734,17 +745,17 @@ void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
   prepare_netlist_structs(0);
   for(j=0;j<k;j++) if(selectedgroup[j].type==ELEMENT) {
 
-
+    found=1;
     my_strdup(5, &prop, inst_ptr[selectedgroup[j].n].instname);
     my_strcat(6, &prop, "_");
     tclsetvar("custom_label_prefix",prop);
     /*  20171005 */
     if(!do_all_inst) {
-      if(debug_var>=1) fprintf(errfp,"attach_labels_to_inst(): invoking tcl attach_labels_to_inst\n");
+      dbg(1,"attach_labels_to_inst(): invoking tcl attach_labels_to_inst\n");
       tcleval("attach_labels_to_inst");
       if(!strcmp(tclgetvar("rcode"),"") ) {
         bbox(END, 0., 0., 0., 0.);
-        my_free(&prop);
+        my_free(706, &prop);
         return;
       }
     }
@@ -753,15 +764,14 @@ void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
     rot_txt = tclgetvar("rotated_text");
     if(strcmp(rot_txt,"")) rotated_text=atoi(rot_txt); /*  20171208 */
 
-    /*  20111030 skip labels / pins */
     my_strdup(7, &type,(inst_ptr[selectedgroup[j].n].ptr+instdef)->type); /*  20150409 */
-    if( type && (strcmp(type,"label") && strcmp(type,"ipin")&&strcmp(type,"opin")&&strcmp(type,"iopin") )==0)
+    if( type && (strcmp(type,"label") && strcmp(type,"ipin")&&strcmp(type,"opin")&&strcmp(type,"iopin") )==0) {
       continue;
-    /*  /20111030 */
+    }
 
     if(!do_all_inst && !strcmp(tclgetvar("do_all_inst"),"1")) do_all_inst=1; /*  20171206 */
 
-    if(debug_var>=1) fprintf(errfp, " 200711 1--> %s %.16g %.16g   %s\n", 
+    dbg(1, " 200711 1--> %s %.16g %.16g   %s\n", 
         inst_ptr[selectedgroup[j].n].name, 
         inst_ptr[selectedgroup[j].n].x0, 
         inst_ptr[selectedgroup[j].n].y0, 
@@ -777,7 +787,7 @@ void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
     
     for(i=0;i<npin;i++) {
        my_strdup(8, &labname,get_tok_value(rect[i].prop_ptr,"name",1));
-       if(debug_var>=1) fprintf(errfp,"200711 2 --> labname=%s\n", labname);
+       dbg(1,"200711 2 --> labname=%s\n", labname);
        
        pinx0 = (rect[i].x1+rect[i].x2)/2;
        piny0 = (rect[i].y1+rect[i].y2)/2;
@@ -849,14 +859,14 @@ void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
              place_symbol(-1,symname_wire2, pinx0, piny0, rot1, dir, prop, 2, first_call);
            first_call=0;
          }
-
-
        }
-       if(debug_var>=1) fprintf(errfp, "%d   %.16g %.16g %s\n", i, pinx0, piny0,labname);
+       dbg(1, "%d   %.16g %.16g %s\n", i, pinx0, piny0,labname);
     }
   }
-  my_free(&prop);
-  my_free(&labname);
+  my_free(707, &prop);
+  my_free(708, &labname);
+  my_free(709, &type);
+  if(!found) return;
   /*  draw things  */
   bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
   draw();
@@ -883,11 +893,11 @@ int place_symbol(int pos, const char *symbol_name, double x, double y, int rot, 
  if(current_type==SYMBOL) return 0; /*  20161210 dont allow components placed inside symbols */
  if(symbol_name==NULL) {
    tcleval("load_file_dialog {Choose symbol} .sym INITIALINSTDIR");
-   my_strncpy(name, Tcl_GetStringResult(interp), S(name));
+   my_strncpy(name, tclresult(), S(name));
  } else {
    my_strncpy(name, symbol_name, S(name));
  }
- if(debug_var>=1) fprintf(errfp, "place_symbol(): load_file_dialog returns:  name=%s\n",name);
+ dbg(1, "place_symbol(): load_file_dialog returns:  name=%s\n",name);
  my_strncpy(name, rel_sym_path(name), S(name));
  if(name[0]) {
    if(first_call) push_undo();
@@ -907,13 +917,13 @@ int place_symbol(int pos, const char *symbol_name, double x, double y, int rot, 
    n=pos;
   }
   /*  03-02-2000 */
-  if(debug_var>=1) fprintf(errfp, "place_symbol(): checked inst_ptr storage, instdef number i=%d\n", i);
+  dbg(1, "place_symbol(): checked inst_ptr storage, instdef number i=%d\n", i);
   inst_ptr[n].ptr = i;
   inst_ptr[n].name=NULL;
   inst_ptr[n].instname=NULL; /*  20150409 */
-  if(debug_var>=1) fprintf(errfp, "place_symbol(): entering my_strdup: name=%s\n",name);  /*  03-02-2000 */
+  dbg(1, "place_symbol(): entering my_strdup: name=%s\n",name);  /*  03-02-2000 */
   my_strdup(12, &inst_ptr[n].name ,name);
-  if(debug_var>=1) fprintf(errfp, "place_symbol(): done my_strdup: name=%s\n",name);  /*  03-02-2000 */
+  dbg(1, "place_symbol(): done my_strdup: name=%s\n",name);  /*  03-02-2000 */
   /*  inst_ptr[n].x0=symbol_name ? x : mousex_snap; */
   /*  inst_ptr[n].y0=symbol_name ? y : mousey_snap; */
   inst_ptr[n].x0= x ; /*  20070228 x and y given in callback */
@@ -925,7 +935,7 @@ int place_symbol(int pos, const char *symbol_name, double x, double y, int rot, 
   inst_ptr[n].sel=0;
   inst_ptr[n].node=NULL;
   inst_ptr[n].prop_ptr=NULL;
-  if(debug_var>=1) fprintf(errfp, "place_symbol() :all inst_ptr members set\n");  /*  03-02-2000 */
+  dbg(1, "place_symbol() :all inst_ptr members set\n");  /*  03-02-2000 */
   if(first_call) hash_all_names(n);
   if(inst_props) {
     new_prop_string(n, inst_props,!first_call, disable_unique_names); /*  20171214 first_call */
@@ -933,7 +943,7 @@ int place_symbol(int pos, const char *symbol_name, double x, double y, int rot, 
   else {
     set_inst_prop(n); /* no props, get from sym template, also calls new_prop_string() */
   }
-  if(debug_var>=1) fprintf(errfp, "place_symbol(): done set_inst_prop()\n");  /*  03-02-2000 */
+  dbg(1, "place_symbol(): done set_inst_prop()\n");  /*  03-02-2000 */
 
   my_strdup2(13, &inst_ptr[n].instname, get_tok_value(inst_ptr[n].prop_ptr,"name",0) ); /*  20150409 */
 
@@ -961,9 +971,6 @@ int place_symbol(int pos, const char *symbol_name, double x, double y, int rot, 
   /*   hilight new element 24122002 */
 
   if(draw_sym & 4 ) {
-    drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
-    drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
-    drawtemparc(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
     select_element(n, SELECTED,0, 0);
     ui_state |= SELECTION;
     drawtemparc(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0, 0.0);
@@ -1029,7 +1036,7 @@ void schematic_in_new_window(void)
 
 void launcher(void) /*  20161102 */
 {
-  char *str;
+  const char *str;
   char program[PATH_MAX];
   int n;
   rebuild_selected_array();
@@ -1038,7 +1045,7 @@ void launcher(void) /*  20161102 */
     n=selectedgroup[0].n;
     my_strncpy(program, get_tok_value(inst_ptr[n].prop_ptr,"program",2), S(program)); /*  20170414 handle backslashes */
     str = get_tok_value(inst_ptr[n].prop_ptr,"url",2); /*  20170414 handle backslashes */
-    if(debug_var>=1) fprintf(errfp, "launcher(): str=%s\n", str);
+    dbg(1, "launcher(): str=%s\n", str);
     if(str[0] || (program[0])) {
       tclsetvar("launcher_var",str);
       if(program[0]) { /*  20170413 leave launcher_program empty if unspecified */
@@ -1058,22 +1065,22 @@ void launcher(void) /*  20161102 */
 
 void descend_schematic(void)
 {
- char *str;
+ const char *str;
  char filename[PATH_MAX];
- int save_ok; /*  20171020 */
- save_ok=0;
+ int inst_mult, inst_number;
+ int save_ok = 0;
 
  if(!(current_type==SCHEMATIC)) return; /*20180928 */
 
  rebuild_selected_array();
  if(lastselected !=1 || selectedgroup[0].type!=ELEMENT) 
  {
-  if(debug_var>=1) fprintf(errfp, "descend_schematic(): wrong selection\n");
+  dbg(1, "descend_schematic(): wrong selection\n");
   return;
  }
  else
  {
-  if(debug_var>=1) fprintf(errfp, "descend_schematic(): selected:%s\n", inst_ptr[selectedgroup[0].n].name);
+  dbg(1, "descend_schematic(): selected:%s\n", inst_ptr[selectedgroup[0].n].name);
   /* no name set for current schematic: save it before descending*/
   if(!strcmp(schematic[currentsch],""))
   {
@@ -1084,14 +1091,14 @@ void descend_schematic(void)
     my_strncpy(filename, schematic[currentsch], S(filename));
     my_snprintf(cmd, S(cmd), "save_file_dialog {Save file} .sch.sym INITIALLOADDIR {%s}", filename);
     tcleval(cmd);
-    my_strncpy(res, Tcl_GetStringResult(interp), S(res));
+    my_strncpy(res, tclresult(), S(res));
     if(!res[0]) return; /* 20071104 */
-    if(debug_var>=1) fprintf(errfp, "descend_schematic(): saving: %s\n",res);
+    dbg(1, "descend_schematic(): saving: %s\n",res);
     save_ok = save_schematic(res);
     if(save_ok==-1) return; /*  20171020 */
   }
 
-  if(debug_var>=1) fprintf(errfp, "type of instance: %s\n", (inst_ptr[selectedgroup[0].n].ptr+instdef)->type);
+  dbg(1, "type of instance: %s\n", (inst_ptr[selectedgroup[0].n].ptr+instdef)->type);
 
   if(                   /*  do not descend if not subcircuit */
      (inst_ptr[selectedgroup[0].n].ptr+instdef)->type && 
@@ -1111,23 +1118,53 @@ void descend_schematic(void)
   }
 
   /*  build up current hierarchy path */
-  str=inst_ptr[selectedgroup[0].n].instname; /*  20150409 */
-  my_strdup(14, &sch_prefix[currentsch+1], sch_prefix[currentsch]);
-  my_strcat(15, &sch_prefix[currentsch+1], str);
-  my_strcat(16, &sch_prefix[currentsch+1], ".");
-  if(debug_var>=1) fprintf(errfp, "descend_schematic(): current path: %s\n", sch_prefix[currentsch+1]);
+  dbg(1, "descend_schematic(): selected instname=%s\n", inst_ptr[selectedgroup[0].n].instname);
+
+
+  if(inst_ptr[selectedgroup[0].n].instname && inst_ptr[selectedgroup[0].n].instname[0]) {
+    str=expandlabel(inst_ptr[selectedgroup[0].n].instname, &inst_mult); /*  20150409 */
+  } else {
+    str = "";
+    inst_mult = 1;
+  }
+  my_strdup(14, &sch_path[currentsch+1], sch_path[currentsch]);
+
+  inst_number = 1;
+  if(inst_mult > 1) { /* on multiple instances ask where to descend, to correctly evaluate 
+                         the hierarchy path you descend to */
+    const char *inum;
+    Tcl_VarEval(interp, "input_line ", "{input instance number (leftmost = 1) to descend into:\n" 
+      "negative numbers select instance starting\nfrom the right (rightmost = -1)}"
+      " {} 1 6", NULL);
+    inum = tclresult();
+    dbg(1, "descend_schematic(): inum=%s\n", inum);
+    if(!inum[0]) {
+      my_free(710, &sch_path[currentsch+1]);
+      return;
+    }
+    inst_number=atoi(inum);
+    if(inst_number < 0 ) inst_number += inst_mult+1;
+    if(inst_number <1 || inst_number > inst_mult) inst_number = 1; /* any invalid number->descend to leftmost inst */
+  }
+  dbg(1," inst_number=%d\n", inst_number);
+  my_strcat(15, &sch_path[currentsch+1], find_nth(str, ',', inst_number));
+  dbg(1," inst_number=%d\n", inst_number);
+  my_strcat(16, &sch_path[currentsch+1], ".");
+  sch_inst_number[currentsch+1] = inst_number;
+  dbg(1, "descend_schematic(): current path: %s\n", sch_path[currentsch+1]);
+  dbg(1, "descend_schematic(): inst_number=%d\n", inst_number);
 
   previous_instance[currentsch]=selectedgroup[0].n;
   zoom_array[currentsch].x=xorigin;
   zoom_array[currentsch].y=yorigin;
   zoom_array[currentsch].zoom=zoom;
-  hilight_child_pins(previous_instance[currentsch]);
+  currentsch++;
+  hilight_child_pins();
 
   my_strncpy(filename, abs_sym_path(get_tok_value(
      (inst_ptr[selectedgroup[0].n].ptr+instdef)->prop_ptr, "schematic",0 ), "")
      , S(filename));
 
-  currentsch++;
   unselect_all();
   remove_symbols();
   if(filename[0]) {
@@ -1141,7 +1178,7 @@ void descend_schematic(void)
     prepare_netlist_structs(0);
     if(enable_drill) drill_hilight(); /*  20171212 */
   }
-  if(debug_var>0) fprintf(errfp, "descend_schematic(): before zoom(): prepared_hash_instances=%d\n", prepared_hash_instances);
+  dbg(1, "descend_schematic(): before zoom(): prepared_hash_instances=%d\n", prepared_hash_instances);
   zoom_full(1, 0);
  }
 }
@@ -1163,8 +1200,8 @@ void go_back(int confirm) /*  20171006 add confirm */
   {
     if(confirm) {
       tcleval("ask_save");
-      if(!strcmp(Tcl_GetStringResult(interp), "yes") ) save_ok = save_schematic(schematic[currentsch]);
-      else if(!strcmp(Tcl_GetStringResult(interp), "") ) return;
+      if(!strcmp(tclresult(), "yes") ) save_ok = save_schematic(schematic[currentsch]);
+      else if(!strcmp(tclresult(), "") ) return;
     } else {
       save_ok = save_schematic(schematic[currentsch]);
     }
@@ -1177,7 +1214,7 @@ void go_back(int confirm) /*  20171006 add confirm */
     /* when returning after editing an embedded symbol
      * load immediately symbol definition before going back (.xschem_embedded... file will be lost) 
      */
-    load_symbol_definition(schematic[currentsch], NULL);
+    load_sym_def(schematic[currentsch], NULL);
     from_embedded_sym=1;
   }
   my_strncpy(schematic[currentsch] , "", S(schematic[currentsch]));
@@ -1202,7 +1239,7 @@ void go_back(int confirm) /*  20171006 add confirm */
   draw();
 
   current_type=SCHEMATIC;
-  if(debug_var>=1) fprintf(errfp, "go_back(): current path: %s\n", sch_prefix[currentsch]);
+  dbg(1, "go_back(): current path: %s\n", sch_path[currentsch]);
  }
 }
 
@@ -1315,7 +1352,7 @@ void calc_drawing_bbox(Box *boundbox, int selected)
  { 
    if(selected == 1 && !wire[i].sel) continue;
    if(selected == 2) {
-     char *str;
+     const char *str;
      str = get_tok_value(wire[i].prop_ptr, "lab",0);
      if(!str[0] || !bus_hilight_lookup(str, 0,XLOOKUP)) continue;
    }
@@ -1334,7 +1371,7 @@ void calc_drawing_bbox(Box *boundbox, int selected)
    customfont = set_text_custom_font(&textelement[i]);
    #endif
    if(text_bbox(textelement[i].txt_ptr, textelement[i].xscale,
-         textelement[i].yscale,textelement[i].rot, textelement[i].flip,
+         textelement[i].yscale,textelement[i].rot, textelement[i].flip, textelement[i].hcenter, textelement[i].vcenter, 
          textelement[i].x0, textelement[i].y0,
          &tmp.x1,&tmp.y1, &tmp.x2,&tmp.y2) ) {
      count++;
@@ -1417,7 +1454,7 @@ void zoom_full(int dr, int sel)
   mooz=1/zoom;
   xorigin=-boundbox.x1+(areaw-4*lw)/40*zoom;
   yorigin=(areah-4*lw)*zoom-boundbox.y2 - (areah-4*lw)/40*zoom;
-  if(debug_var>=1) fprintf(errfp, "zoom_full(): areaw=%d, areah=%d\n", areaw, areah);
+  dbg(1, "zoom_full(): areaw=%d, areah=%d\n", areaw, areah);
 
   change_linewidth(-1.);
   if(dr)
@@ -1485,7 +1522,7 @@ void zoom_box(int what)
     mooz=1/zoom;
     change_linewidth(-1.);
     draw();
-    if(debug_var>=1) fprintf(errfp, "zoom_box(): coord: %.16g %.16g %.16g %.16g zoom=%.16g\n",x1,y1,mousex_snap, mousey_snap,zoom);
+    dbg(1, "zoom_box(): coord: %.16g %.16g %.16g %.16g zoom=%.16g\n",x1,y1,mousex_snap, mousey_snap,zoom);
   }
   if(what & RUBBER)
   {
@@ -1582,32 +1619,32 @@ void new_wire(int what, double mx_snap, double my_snap)
            xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
            ORDER(xx1,yy1,xx2,yy1);
            storeobject(-1, xx1,yy1,xx2,yy1,WIRE,0,0,NULL);
-           drawline(WIRELAYER,NOW, xx1,yy1,xx2,yy1);
+           drawline(WIRELAYER,NOW, xx1,yy1,xx2,yy1, 0);
          }
          if(yy2!=yy1) {
            xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
            ORDER(xx2,yy1,xx2,yy2);
            storeobject(-1, xx2,yy1,xx2,yy2,WIRE,0,0,NULL);
-           drawline(WIRELAYER,NOW, xx2,yy1,xx2,yy2);
+           drawline(WIRELAYER,NOW, xx2,yy1,xx2,yy2, 0);
          }
        } else if(manhattan_lines==2) {
          if(yy2!=yy1) {
            xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
            ORDER(xx1,yy1,xx1,yy2);
            storeobject(-1, xx1,yy1,xx1,yy2,WIRE,0,0,NULL);
-           drawline(WIRELAYER,NOW, xx1,yy1,xx1,yy2);
+           drawline(WIRELAYER,NOW, xx1,yy1,xx1,yy2, 0);
          }
          if(xx2!=xx1) {
            xx1=x1;yy1=y1;xx2=x2;yy2=y2;
            ORDER(xx1,yy2,xx2,yy2);
            storeobject(-1, xx1,yy2,xx2,yy2,WIRE,0,0,NULL);
-           drawline(WIRELAYER,NOW, xx1,yy2,xx2,yy2);
+           drawline(WIRELAYER,NOW, xx1,yy2,xx2,yy2, 0);
          }
        } else {
          xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
          ORDER(xx1,yy1,xx2,yy2);
          storeobject(-1, xx1,yy1,xx2,yy2,WIRE,0,0,NULL);
-         drawline(WIRELAYER,NOW, xx1,yy1,xx2,yy2);
+         drawline(WIRELAYER,NOW, xx1,yy1,xx2,yy2, 0);
        }
        if(event_reporting) {
          printf("xschem wire %g %g %g %g %d\n", xx1, yy1, xx2, yy2, -1);
@@ -1773,7 +1810,7 @@ void new_arc(int what, double sweep)
       if(sweep_angle==360.) b=360.;
       if(r>0.) {
         push_undo();
-        drawarc(rectcolor, NOW, x, y, r, a, b, 0);
+        drawarc(rectcolor, NOW, x, y, r, a, b, 0, 0);
         store_arc(-1, x, y, r, a, b, rectcolor, 0, NULL);
       }
       ui_state &= ~STARTARC;
@@ -1814,32 +1851,32 @@ void new_line(int what)
            xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
            ORDER(xx1,yy1,xx2,yy1);
            storeobject(-1, xx1,yy1,xx2,yy1,LINE,rectcolor,0,NULL);
-           drawline(rectcolor,NOW, xx1,yy1,xx2,yy1);
+           drawline(rectcolor,NOW, xx1,yy1,xx2,yy1, 0);
          }
          if(yy2!=yy1) {
            xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
            ORDER(xx2,yy1,xx2,yy2);
            storeobject(-1, xx2,yy1,xx2,yy2,LINE,rectcolor,0,NULL);
-           drawline(rectcolor,NOW, xx2,yy1,xx2,yy2);
+           drawline(rectcolor,NOW, xx2,yy1,xx2,yy2, 0);
          }
        } else if(manhattan_lines==2) {
          if(yy2!=yy1) {
            xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
            ORDER(xx1,yy1,xx1,yy2);
            storeobject(-1, xx1,yy1,xx1,yy2,LINE,rectcolor,0,NULL);
-           drawline(rectcolor,NOW, xx1,yy1,xx1,yy2);
+           drawline(rectcolor,NOW, xx1,yy1,xx1,yy2, 0);
          }
          if(xx2!=xx1) {
            xx1=x1;yy1=y1;xx2=x2;yy2=y2;
            ORDER(xx1,yy2,xx2,yy2);
            storeobject(-1, xx1,yy2,xx2,yy2,LINE,rectcolor,0,NULL);
-           drawline(rectcolor,NOW, xx1,yy2,xx2,yy2);
+           drawline(rectcolor,NOW, xx1,yy2,xx2,yy2, 0);
          }
        } else {
          xx1 = x1; yy1 = y1; xx2 = x2; yy2 = y2;
          ORDER(xx1,yy1,xx2,yy2);
          storeobject(-1, xx1,yy1,xx2,yy2,LINE,rectcolor,0,NULL);
-         drawline(rectcolor,NOW, xx1,yy1,xx2,yy2);
+         drawline(rectcolor,NOW, xx1,yy1,xx2,yy2, 0);
        }
      }
      x1=x2=mousex_snap;y1=y2=mousey_snap;
@@ -1913,7 +1950,7 @@ void new_rect(int what)
      int save_draw;
      RECTORDER(x1,y1,x2,y2); 
      push_undo();
-     drawrect(rectcolor, NOW, x1,y1,x2,y2);
+     drawrect(rectcolor, NOW, x1,y1,x2,y2, 0);
      save_draw = draw_window;
      draw_window = 1; /* 20181009 */
      filledrect(rectcolor, NOW, x1,y1,x2,y2); /* draw fill pattern even in XCopyArea mode */
@@ -1984,7 +2021,7 @@ void new_polygon(int what) /*  20171115 */
      x[points]=x[points-1];y[points]=y[points-1];
    }
    /* end open or closed poly  by user request */
-   if((what&SET || (what&END)) ||
+   if((what & SET || (what & END)) ||
         /* closed poly end by clicking on first point */
         ((what & ADD) && x[points-1] == x[0] && y[points-1] == y[0]) ) {
      push_undo();
@@ -1993,7 +2030,10 @@ void new_polygon(int what) /*  20171115 */
      /* fprintf(errfp, "new_poly: finish: points=%d\n", points); */
      drawtemppolygon(gc[rectcolor], NOW, x, y, points);
      ui_state &= ~STARTPOLYGON;
-     drawpolygon(rectcolor, NOW, x, y, points, 0); /*  20180914 added fill param */
+     drawpolygon(rectcolor, NOW, x, y, points, 0, 0);
+     my_free(711, &x);
+     my_free(712, &y);
+     maxpoints = points = 0;
    }
    if(what & RUBBER)
    {
@@ -2006,12 +2046,12 @@ void new_polygon(int what) /*  20171115 */
 }
 
 #ifdef HAS_CAIRO
-int text_bbox(char *str, double xscale, double yscale,
-    int rot, int flip, double x1,double y1, double *rx1, double *ry1,
+int text_bbox(const char *str, double xscale, double yscale,
+    int rot, int flip, int hcenter, int vcenter, double x1,double y1, double *rx1, double *ry1,
     double *rx2, double *ry2)
 {
-  int c=0, length =0;
-  char *str_ptr;
+  int c=0;
+  char *str_ptr, *s = NULL;
   double size;
   cairo_text_extents_t ext;
   cairo_font_extents_t fext;
@@ -2028,26 +2068,21 @@ int text_bbox(char *str, double xscale, double yscale,
 
   ww=0.; hh=1.;
   c=0;
-  cairo_longest_line=0;
   cairo_lines=1;
-  str_ptr = str;
-  while( str && str[c] ) {
-    if(str[c] == '\n') {
-      str[c]='\0';
+  my_strdup2(1158, &s, str);
+  str_ptr = s;
+  while( s && s[c] ) {
+    if(s[c] == '\n') {
+      s[c]='\0';
       hh++;
       cairo_lines++;
-      length=0;
       if(str_ptr[0]!='\0') {
         cairo_text_extents(ctx, str_ptr, &ext);
         if(ext.x_advance > ww) ww= ext.x_advance;
       }
-      str[c]='\n';
-      str_ptr = str+c+1;
+      s[c]='\n';
+      str_ptr = s+c+1;
     } else {
-      length++;
-    }
-    if(length > cairo_longest_line) {
-      cairo_longest_line = length;
     }
     c++;
   }
@@ -2055,10 +2090,34 @@ int text_bbox(char *str, double xscale, double yscale,
     cairo_text_extents(ctx, str_ptr, &ext);
     if(ext.x_advance > ww) ww= ext.x_advance;
   }
+  my_free(1159, &s);
   hh = hh*fext.height*cairo_font_line_spacing;
   cairo_longest_line = ww;
 
   *rx1=x1;*ry1=y1; 
+  if(hcenter) {
+    if(rot==0 && flip == 0) { *rx1-= ww*zoom/2;}
+    if(rot==1 && flip == 0) { *ry1-= ww*zoom/2;}
+    if(rot==2 && flip == 0) { *rx1+= ww*zoom/2;}
+    if(rot==3 && flip == 0) { *ry1+= ww*zoom/2;}
+    if(rot==0 && flip == 1) { *rx1+= ww*zoom/2;}
+    if(rot==1 && flip == 1) { *ry1+= ww*zoom/2;}
+    if(rot==2 && flip == 1) { *rx1-= ww*zoom/2;}
+    if(rot==3 && flip == 1) { *ry1-= ww*zoom/2;}
+  }
+
+  if(vcenter) {
+    if(rot==0 && flip == 0) { *ry1-= hh*zoom/2;}
+    if(rot==1 && flip == 0) { *rx1+= hh*zoom/2;}
+    if(rot==2 && flip == 0) { *ry1+= hh*zoom/2;}
+    if(rot==3 && flip == 0) { *rx1-= hh*zoom/2;}
+    if(rot==0 && flip == 1) { *ry1-= hh*zoom/2;}
+    if(rot==1 && flip == 1) { *rx1+= hh*zoom/2;}
+    if(rot==2 && flip == 1) { *ry1+= hh*zoom/2;}
+    if(rot==3 && flip == 1) { *rx1-= hh*zoom/2;}
+  }
+
+
   ROTATION(0.0,0.0, ww*zoom,hh*zoom,(*rx2),(*ry2));
   *rx2+=*rx1;*ry2+=*ry1;
   if     (rot==0) {*ry1-=cairo_vert_correct; *ry2-=cairo_vert_correct;}
@@ -2068,12 +2127,12 @@ int text_bbox(char *str, double xscale, double yscale,
   RECTORDER((*rx1),(*ry1),(*rx2),(*ry2));
   return 1;
 }
-int text_bbox_nocairo(char * str,double xscale, double yscale,
-    int rot, int flip, double x1,double y1, double *rx1, double *ry1,
+int text_bbox_nocairo(const char * str,double xscale, double yscale,
+    int rot, int flip, int hcenter, int vcenter, double x1,double y1, double *rx1, double *ry1,
     double *rx2, double *ry2)
 #else
-int text_bbox(char * str,double xscale, double yscale,
-    int rot, int flip, double x1,double y1, double *rx1, double *ry1,
+int text_bbox(const char * str,double xscale, double yscale,
+    int rot, int flip, int hcenter, int vcenter, double x1,double y1, double *rx1, double *ry1,
     double *rx2, double *ry2)
 #endif
 {
@@ -2096,6 +2155,28 @@ int text_bbox(char * str,double xscale, double yscale,
   else if(rot==2) *ry1+=nocairo_vert_correct;
   else            *rx1-=nocairo_vert_correct;
 
+  if(hcenter) {
+    if(rot==0 && flip == 0) { *rx1-= w/2;}
+    if(rot==1 && flip == 0) { *ry1-= w/2;}
+    if(rot==2 && flip == 0) { *rx1+= w/2;}
+    if(rot==3 && flip == 0) { *ry1+= w/2;}
+    if(rot==0 && flip == 1) { *rx1+= w/2;}
+    if(rot==1 && flip == 1) { *ry1+= w/2;}
+    if(rot==2 && flip == 1) { *rx1-= w/2;}
+    if(rot==3 && flip == 1) { *ry1-= w/2;}
+  }
+
+  if(vcenter) {
+    if(rot==0 && flip == 0) { *ry1-= h/2;}
+    if(rot==1 && flip == 0) { *rx1+= h/2;}
+    if(rot==2 && flip == 0) { *ry1+= h/2;}
+    if(rot==3 && flip == 0) { *rx1-= h/2;}
+    if(rot==0 && flip == 1) { *ry1-= h/2;}
+    if(rot==1 && flip == 1) { *rx1+= h/2;}
+    if(rot==2 && flip == 1) { *ry1+= h/2;}
+    if(rot==3 && flip == 1) { *rx1-= h/2;}
+  }
+
   ROTATION(0.0,0.0,w,h,(*rx2),(*ry2));
   *rx2+=*rx1;*ry2+=*ry1;
   RECTORDER((*rx1),(*ry1),(*rx2),(*ry2)); 
@@ -2106,7 +2187,7 @@ void place_text(int draw_text, double mx, double my)
 {
   char *txt;
   int textlayer;
-  char *strlayer;
+  const char *strlayer;
   int save_draw;
 
   /*  20171112 */
@@ -2115,18 +2196,18 @@ void place_text(int draw_text, double mx, double my)
   #endif
 
   tclsetvar("props","");
-  tclsetvar("txt","");
+  tclsetvar("retval","");
 
   if(tclgetvar("hsize")==NULL)
    tclsetvar("hsize","0.4");
   if(tclgetvar("vsize")==NULL)
    tclsetvar("vsize","0.4");
-  tcleval("enter_text {text:}");
+  tcleval("enter_text {text:} normal");
 
-  if(debug_var>=1) fprintf(errfp, "place_text(): hsize=%s vsize=%s\n",tclgetvar("hsize"),
+  dbg(1, "place_text(): hsize=%s vsize=%s\n",tclgetvar("hsize"),
            tclgetvar("vsize") );
   
-  txt =  (char *)tclgetvar("txt");
+  txt =  (char *)tclgetvar("retval");
   if(!strcmp(txt,"")) return;   /*  01112004 dont allocate text object if empty string given */
   push_undo(); /*  20150327 */
   check_text_storage();
@@ -2146,15 +2227,20 @@ void place_text(int draw_text, double mx, double my)
    my_strdup(20, &textelement[lasttext].prop_ptr, (char *)tclgetvar("props"));
   /*  debug ... */
   /*  textelement[lasttext].prop_ptr=NULL; */
-  if(debug_var>=1) fprintf(errfp, "place_text(): done text input\n");
+  dbg(1, "place_text(): done text input\n");
+
+  strlayer = get_tok_value(textelement[lasttext].prop_ptr, "hcenter", 0);
+  textelement[lasttext].hcenter = strcmp(strlayer, "true")  ? 0 : 1;
+  strlayer = get_tok_value(textelement[lasttext].prop_ptr, "vcenter", 0);
+  textelement[lasttext].vcenter = strcmp(strlayer, "true")  ? 0 : 1;
+
   strlayer = get_tok_value(textelement[lasttext].prop_ptr, "layer", 0);
   if(strlayer[0]) textelement[lasttext].layer = atoi(strlayer);
   else textelement[lasttext].layer = -1;
   my_strdup(21, &textelement[lasttext].font, get_tok_value(textelement[lasttext].prop_ptr, "font", 0));/* 20171206 */
-  textlayer = TEXTLAYER;
-  #ifdef HAS_CAIRO
   textlayer = textelement[lasttext].layer;
   if(textlayer < 0 || textlayer >= cadlayers) textlayer = TEXTLAYER;
+  #ifdef HAS_CAIRO
   textfont = textelement[lasttext].font;
   if(textfont && textfont[0]) {
     cairo_save(ctx);
@@ -2165,7 +2251,7 @@ void place_text(int draw_text, double mx, double my)
   #endif
   save_draw=draw_window; /* 20181009 */
   draw_window=1;
-  if(draw_text) draw_string(textlayer, NOW, textelement[lasttext].txt_ptr, 0, 0, 
+  if(draw_text) draw_string(textlayer, NOW, textelement[lasttext].txt_ptr, 0, 0, textelement[lasttext].hcenter, textelement[lasttext].vcenter,
               textelement[lasttext].x0,textelement[lasttext].y0,
               textelement[lasttext].xscale, textelement[lasttext].yscale);
   draw_window = save_draw;
@@ -2177,8 +2263,6 @@ void place_text(int draw_text, double mx, double my)
     cairo_restore(save_ctx);
   }
   #endif
-  drawtempline(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
-  drawtemprect(gc[SELLAYER], BEGIN, 0.0, 0.0, 0.0, 0.0);
   select_text(lasttext, SELECTED, 0);
   drawtemprect(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);
   drawtempline(gc[SELLAYER], END, 0.0, 0.0, 0.0, 0.0);

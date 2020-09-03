@@ -95,8 +95,8 @@ int callback(int event, int mx, int my, KeySym key,
  mousey=Y_TO_XSCHEM(my); 
  mousex_snap=ROUND(mousex / cadsnap) * cadsnap;
  mousey_snap=ROUND(mousey / cadsnap) * cadsnap;
- my_snprintf(str, S(str), "mouse = %.16g %.16g - selected: %d", 
-   mousex_snap, mousey_snap, lastselected );
+ my_snprintf(str, S(str), "mouse = %.16g %.16g - selected: %d path: %s", 
+   mousex_snap, mousey_snap, lastselected, sch_path[currentsch] );
  statusmsg(str,1);
  switch(event)
  {
@@ -108,7 +108,7 @@ int callback(int event, int mx, int my, KeySym key,
       unselect_all(); 
     }
     if(lastselected == 0 ) {
-      if(debug_var>=2) fprintf(errfp, "callback(): Enter event\n");
+      dbg(2, "callback(): Enter event\n");
       mousex_snap = 490;
       mousey_snap = -340;
       merge_file(1, ".sch");
@@ -130,7 +130,7 @@ int callback(int event, int mx, int my, KeySym key,
       draw_selection(gc[SELLAYER],0);
       XSetClipMask(display, gc[SELLAYER], None);
     }
-    if(debug_var>=1) fprintf(errfp, "callback(): Expose\n");
+    dbg(1, "callback(): Expose\n");
     break;
   case ConfigureNotify:
     resetwin();
@@ -154,7 +154,6 @@ int callback(int event, int mx, int my, KeySym key,
       /* *NOT* a solution but at least makes the program useable. 20171130 */
       XSetClipRectangles(display, gctiled, 0,0, xrect, 1, Unsorted);
       #endif
-      if(ui_state & SELECTION) rebuild_selected_array(); /* 20171129 */
       my_snprintf(str, S(str), "mouse = %.16g %.16g - selected: %d w=%.16g h=%.16g", 
         mousex_snap, mousey_snap, 
         lastselected ,
@@ -236,6 +235,7 @@ int callback(int event, int mx, int my, KeySym key,
         }
         if(abs(mx-mx_save) > 8 || abs(my-my_save) > 8 ) {  /* 20121130 set some reasonable threshold before unselecting */
           select_object(X_TO_XSCHEM(mx_save), Y_TO_XSCHEM(my_save), 0, 0); /* 20121130 remove near object if dragging */
+          rebuild_selected_array();
         }
       }
     }
@@ -463,10 +463,10 @@ int callback(int event, int mx, int my, KeySym key,
      int i,j,k;
      Instdef *symbol;
      int npin;
-     static char *type=NULL;
-     static char *labname=NULL;
-     static char *lab=NULL;
-     static char *netname=NULL;
+     char *type=NULL;
+     char *labname=NULL;
+     char *lab=NULL;
+     char *netname=NULL;
      int mult;
      Box *rect;
 
@@ -481,20 +481,24 @@ int callback(int event, int mx, int my, KeySym key,
        symbol = instdef + inst_ptr[j].ptr;
        npin = symbol->rects[PINLAYER];
        rect=symbol->boxptr[PINLAYER];
-       if(debug_var>=1) fprintf(errfp, "\n");
+       dbg(1, "\n");
        for(i=0;i<npin;i++) {
          my_strdup(24, &labname,get_tok_value(rect[i].prop_ptr,"name",0));
          my_strdup(25, &lab, expandlabel(labname, &mult));
          my_strdup(26, &netname, pin_node(j,i,&mult, 0));
-         if(debug_var>=1) fprintf(errfp, "i=%d labname=%s explabname = %s  net = %s\n", i, labname, lab, netname);
+         dbg(1, "i=%d labname=%s explabname = %s  net = %s\n", i, labname, lab, netname);
          if(netname && strcmp(lab, netname)) { 
-           if(debug_var>=1) fprintf(errfp, "hilight: %s\n", netname);
+           dbg(1, "hilight: %s\n", netname);
            bus_hilight_lookup(netname, hilight_color, XINSERT);
            if(incr_hilight) hilight_color++;
          }
        }
 
      } 
+     my_free(713, &type);
+     my_free(714, &labname);
+     my_free(715, &lab);
+     my_free(716, &netname);
      redraw_hilights();
      /* draw_hilight_net(1);*/
 
@@ -540,7 +544,7 @@ int callback(int event, int mx, int my, KeySym key,
     tcleval("set vertical_move 0; set horizontal_move 0" );
     last_command=0;
     horizontal_move = vertical_move = 0; /* 20171023 */
-    if(debug_var>=1) fprintf(errfp, "callback(): Escape: ui_state=%ld\n", ui_state);
+    dbg(1, "callback(): Escape: ui_state=%ld\n", ui_state);
     if(ui_state & STARTMOVE)
     {
      move_objects(ABORT,0,0,0);
@@ -567,7 +571,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='z' && state == 0)                   /* zoom box */
    {
-    if(debug_var>=1) fprintf(errfp, "callback(): zoom_box call\n");
+    dbg(1, "callback(): zoom_box call\n");
     zoom_box(BEGIN);break;
    }
    if(key=='Z' && state == ShiftMask)                   /* zoom in */
@@ -588,7 +592,7 @@ int callback(int event, int mx, int my, KeySym key,
    if(key=='w' && !ui_state && state==ControlMask)              /* start polygon, 20171115 */
    {
      if(semaphore >= 2) break;
-     if(debug_var>=1) fprintf(errfp, "callback(): start polygon\n");
+     dbg(1, "callback(): start polygon\n");
      mx_save = mx; my_save = my;       /* 20070323 */
      mx_double_save=mousex_snap;
      my_double_save=mousey_snap;
@@ -613,7 +617,7 @@ int callback(int event, int mx, int my, KeySym key,
    if(key<='9' && key >='0' && state==ControlMask)              /* choose layer */
    {
     rectcolor = key - '0'+4;
-    if(debug_var>=1) fprintf(errfp, "callback(): new color: %d\n",color_index[rectcolor]);
+    dbg(1, "callback(): new color: %d\n",color_index[rectcolor]);
     break;
    }
    if(key==XK_Delete && (ui_state & SELECTION) )        /* delete objects */
@@ -650,7 +654,7 @@ int callback(int event, int mx, int my, KeySym key,
      if(semaphore >= 2) break;
      if(modified) {
        tcleval("tk_messageBox -type okcancel -message {UNSAVED data: want to exit?}");
-       if(strcmp(Tcl_GetStringResult(interp),"ok")==0) {
+       if(strcmp(tclresult(),"ok")==0) {
          tcleval( "exit");
        }
      } 
@@ -668,7 +672,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='r' && !ui_state && state==0)              /* start rect */
    {
-    if(debug_var>=1) fprintf(errfp, "callback(): start rect\n");
+    dbg(1, "callback(): start rect\n");
     mx_save = mx; my_save = my; /* 20070323 */
     mx_double_save=mousex_snap;
     my_double_save=mousey_snap;
@@ -751,7 +755,7 @@ int callback(int event, int mx, int my, KeySym key,
     if(semaphore >= 2) break; /* 20180914 */
     if(current_type==SCHEMATIC) {
       tcleval("tk_messageBox -type okcancel -message {do you want to make symbol view ?}");
-      if(strcmp(Tcl_GetStringResult(interp),"ok")==0) 
+      if(strcmp(tclresult(),"ok")==0) 
       {
        save_schematic(schematic[currentsch]);
        make_symbol();
@@ -889,7 +893,7 @@ int callback(int event, int mx, int my, KeySym key,
    {
     if(semaphore >= 2) break;
      tcleval("tk_messageBox -type okcancel -message {Are you sure you want to reload from disk?}");
-     if(strcmp(Tcl_GetStringResult(interp),"ok")==0) {
+     if(strcmp(tclresult(),"ok")==0) {
         char filename[PATH_MAX];
         unselect_all();
         remove_symbols();
@@ -980,8 +984,8 @@ int callback(int event, int mx, int my, KeySym key,
    if(key=='g' && state==ControlMask)              /* set snap factor 20161212 */
    {
     my_snprintf(str, S(str),
-     "input_line \"Enter snap value (default: %.16g current: %.16g)\" \"xschem set cadsnap_noalert\"", 
-     cadsnap, CADSNAP);
+     "input_line {Enter snap value (default: %.16g current: %.16g)}  {xschem set cadsnap} {%g} 10", 
+     CADSNAP, cadsnap, cadsnap);
     tcleval(str);
     break;
    }
@@ -1022,35 +1026,20 @@ int callback(int event, int mx, int my, KeySym key,
     draw();
     break;
    }
-   if(0 & (key=='u') && (state==ControlMask))                   /* testmode */
+   if(0 && (key=='u') && (state==ControlMask))                   /* testmode */
    {
-     int i;
-     double x1, y1, x2, y2;
-     struct wireentry *wptr;
-     struct instentry *iptr;
-     x1 = X_TO_XSCHEM(areax1);
-     y1 = Y_TO_XSCHEM(areay1);
-     x2 = X_TO_XSCHEM(areax2);
-     y2 = Y_TO_XSCHEM(areay2);
-     hash_wires();
-     printf("screen: %g %g %g %g\n", x1, y1, x2, y2);
-     rebuild_selected_array();
-     for(i=0;i<lastselected; i++) if(selectedgroup[i].type==WIRE) {
-       hash_wire(XDELETE, selectedgroup[i].n);
-     }
-     for(i=0;i<lastselected; i++) if(selectedgroup[i].type==ELEMENT) {
-       hash_inst(XDELETE, selectedgroup[i].n);
-     }
-     unselect_all();
-
-     for(init_inst_iterator(x1, y1, x2, y2); ( iptr = inst_iterator_next() );) {
-       select_element(iptr->n, SELECTED, 1, 0);
-     }
-    
-     for(init_wire_iterator(x1, y1, x2, y2); ( wptr = wire_iterator_next() );) {
-       select_wire(wptr->n,SELECTED,1);
-     }
-    
+    int mult;
+    remove_symbol(2);
+    link_symbols_to_instances();
+    expandlabel("/RST", &mult);
+    expandlabel("/CCC[3:0]", &mult);
+    expandlabel("CCC[AA:BB:DD]", &mult);
+    expandlabel("CCC[9:1:2]", &mult);
+    expandlabel("CCC[10:BB:DD]", &mult);
+    expandlabel("CCC[10..BB..DD]", &mult);
+    expandlabel("CCC[10..0..2]", &mult);
+    expandlabel("123", &mult);
+    expandlabel("123AA", &mult);
     break;
    }
    if(key=='u' && state==0)                             /* undo */
@@ -1127,7 +1116,7 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='\\' && state==0)          /* Fullscreen */
    {
-    if(debug_var>=1) fprintf(errfp, "callback(): toggle fullscreen\n");
+    dbg(1, "callback(): toggle fullscreen\n");
     toggle_fullscreen();
     break;
    }
@@ -1209,10 +1198,11 @@ int callback(int event, int mx, int my, KeySym key,
    }
    if(key=='N' && state==ShiftMask)              /* hierarchical netlist */
    {
+    yyparse_error = 0;
     if(semaphore >= 2) break;
     unselect_all(); /* 20180929 */
     if(set_netlist_dir(0, NULL)) {
-      if(debug_var>=1) fprintf(errfp, "callback(): -------------\n");
+      dbg(1, "callback(): -------------\n");
       if(netlist_type == CAD_SPICE_NETLIST)
         global_spice_netlist(1);
       else if(netlist_type == CAD_VHDL_NETLIST)
@@ -1224,16 +1214,17 @@ int callback(int event, int mx, int my, KeySym key,
       else
         if(has_x) tcleval("tk_messageBox -type ok -message {Please Set netlisting mode (Options menu)}");
 
-      if(debug_var>=1) fprintf(errfp, "callback(): -------------\n");
+      dbg(1, "callback(): -------------\n");
     }
     break;
    }
    if(key=='n' && state==0)              /* netlist */
    {
+    yyparse_error = 0;
     if(semaphore >= 2) break;
     unselect_all(); /* 20180929 */
     if( set_netlist_dir(0, NULL) ) {
-      if(debug_var>=1) fprintf(errfp, "callback(): -------------\n");
+      dbg(1, "callback(): -------------\n");
       if(netlist_type == CAD_SPICE_NETLIST)
         global_spice_netlist(0);
       else if(netlist_type == CAD_VHDL_NETLIST)
@@ -1244,7 +1235,7 @@ int callback(int event, int mx, int my, KeySym key,
         global_tedax_netlist(0);
       else
         if(has_x) tcleval("tk_messageBox -type ok -message {Please Set netlisting mode (Options menu)}");
-      if(debug_var>=1) fprintf(errfp, "callback(): -------------\n");
+      dbg(1, "callback(): -------------\n");
     }
     break;
    }
@@ -1392,7 +1383,7 @@ int callback(int event, int mx, int my, KeySym key,
    break;
 
   case ButtonPress:                     /* end operation */
-   if(debug_var>=1) fprintf(errfp, "callback(): ButtonPress  ui_state=%ld state=%d\n",ui_state,state);
+   dbg(1, "callback(): ButtonPress  ui_state=%ld state=%d\n",ui_state,state);
    if(ui_state & STARTPAN2) {  /* 20121123 */
      ui_state &=~STARTPAN2;
      mx_save = mx; my_save = my;
@@ -1407,6 +1398,7 @@ int callback(int event, int mx, int my, KeySym key,
        last_command = 0;
        unselect_all();
        select_object(mousex,mousey,SELECTED, 1);
+       rebuild_selected_array();
        if(state & ShiftMask) {
          edit_property(1);
        } else {
@@ -1443,15 +1435,19 @@ int callback(int event, int mx, int my, KeySym key,
        if(lastselected==0) ui_state &=~SELECTION;
      }
      select_object(mousex, mousey, 0, 0);
+     rebuild_selected_array();
    }
    else if(button==Button2 && (state == 0)) {
      pan2(BEGIN, mx, my);
      ui_state |= STARTPAN2;
      break;
    }
-   else if(semaphore >= 2) {
-     if(button==Button1 && state==0) {
-       tcleval("set editprop_semaphore 2"); /* 20160423 */
+   else if(semaphore >= 2) { /* button1 click to select another instance while edit prop dialog open */
+     if(button==Button1 && state==0 && tclgetvar("edit_symbol_prop_new_sel")[0]) {
+       tcleval("set edit_symbol_prop_new_sel 1; .dialog.f1.b1 invoke"); /* invoke 'OK' of edit prop dialog */
+     } else if(button==Button1 && (state & ShiftMask) && tclgetvar("edit_symbol_prop_new_sel")[0]) {
+       select_object(mousex, mousey, SELECTED, 0);
+       rebuild_selected_array();
      }
      break;
    }
@@ -1612,6 +1608,7 @@ int callback(int event, int mx, int my, KeySym key,
        break;
      }
      if( !(ui_state & STARTSELECT) && !(ui_state & STARTWIRE) && !(ui_state & STARTLINE)  ) {
+       int prev_last_sel = lastselected;
        mx_save = mx; my_save = my;
        mx_double_save=mousex_snap; /* 20070322 */
        my_double_save=mousey_snap; /* 20070322 */
@@ -1623,6 +1620,7 @@ int callback(int event, int mx, int my, KeySym key,
 #endif
        }
        sel = select_object(mousex, mousey, SELECTED, 0);
+       rebuild_selected_array();
 #ifndef __unix__
        draw_selection(gc[SELLAYER], 0); /* 20181009 moved outside of cadlayers loop */
 #endif
@@ -1632,14 +1630,16 @@ int callback(int event, int mx, int my, KeySym key,
        if( !(state & ShiftMask) )  {
          Box boundbox;
          if(auto_hilight && hilight_nets && sel == 0 ) { /* 20160413 20160503 */
-           calc_drawing_bbox(&boundbox, 2);
-           delete_hilight_net();
-           /* undraw_hilight_net(1); */
-           bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0);
-           bbox(ADD, boundbox.x1, boundbox.y1, boundbox.x2, boundbox.y2);
-           bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
-           draw();
-           bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
+           if(!prev_last_sel) {
+             calc_drawing_bbox(&boundbox, 2);
+             delete_hilight_net();
+             /* undraw_hilight_net(1); */
+             bbox(BEGIN, 0.0 , 0.0 , 0.0 , 0.0);
+             bbox(ADD, boundbox.x1, boundbox.y1, boundbox.x2, boundbox.y2);
+             bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
+             draw();
+             bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
+           }
          }
        }
        if(auto_hilight) { /* 20160413 */
@@ -1662,7 +1662,7 @@ int callback(int event, int mx, int my, KeySym key,
 
      break;
    }
-   if(debug_var>=1) fprintf(errfp, "callback(): ButtonRelease  ui_state=%ld state=%d\n",ui_state,state);
+   dbg(1, "callback(): ButtonRelease  ui_state=%ld state=%d\n",ui_state,state);
    if(semaphore >= 2) break; /* 20160423 */
    if(ui_state & STARTSELECT) {
      if(state & ControlMask) {
@@ -1674,11 +1674,16 @@ int callback(int event, int mx, int my, KeySym key,
        /* 20150927 filter out button4 and button5 events */
        if(!(state&(Button4Mask|Button5Mask) ) ) select_rect(END,-1);
      }
+     rebuild_selected_array();
+     my_snprintf(str, S(str), "mouse = %.16g %.16g - selected: %d path: %s", 
+       mousex_snap, mousey_snap, lastselected, sch_path[currentsch] );
+     statusmsg(str,1);
+
    }
    break;
   case -3:  /* double click  : edit prop */
    if(semaphore >= 2) break;
-   if(debug_var>=1) fprintf(errfp, "callback(): DoubleClick  ui_state=%ld state=%d\n",ui_state,state);
+   dbg(1, "callback(): DoubleClick  ui_state=%ld state=%d\n",ui_state,state);
    if(button==Button1) {
      if(ui_state == STARTWIRE) {
        ui_state &= ~STARTWIRE;
@@ -1697,24 +1702,10 @@ int callback(int event, int mx, int my, KeySym key,
     draw();
   }
 #endif
-/*
- * else if(button==Button3) {
- *   if(state==0 || state == ShiftMask) {
- *      select_object(mousex,mousey,SELECTED, 0);
- *      rebuild_selected_array();
- *      if(lastselected ==1 &&  selectedgroup[0].type==ELEMENT) {
- *        if(state==0) descend_schematic();
- *        if(state==ShiftMask) descend_symbol();
- *      }
- *      else  go_back(1);
- *    }
- *    
- * }
- */
    break;
     
   default:
-   if(debug_var>=1) fprintf(errfp, "callback(): Event:%d\n",event);
+   dbg(1, "callback(): Event:%d\n",event);
    break;
  } 
  

@@ -27,20 +27,54 @@
 
 struct Lcc *lcc;
 
-/* skip one line of text from file, stopping at first '\n' or EOF */
-/* return NULL if eof encountered */
-char *read_line(FILE *fp)
+/* 
+read an unknown xschem record usually like:  
+text {string} text {string}....
+until a '\n' (outside the '{' '}' brackets)  or EOF is found.
+within the brackets use load_ascii_string so escapes and string
+newlines are correctly handled
+*/
+void read_record(int firstchar, FILE *fp)
 {
-  static char s[100];
-  char *a;
-  size_t l;
-  while( (a=fgets(s, 100, fp)) ) {
-    l = strlen(s);
-    if(s[l-1]=='\n') {
+  int c;
+  char *str = NULL;
+  dbg(0, "\n-----1- SKIPPING -------\n");
+  if(firstchar != '{') dbg(0, "%c", firstchar);
+  while((c = fgetc(fp)) != EOF) {
+    if(c == '\n') {
+      dbg(0, "\n");
+      ungetc(c, fp); /* so following read_line does not skip next line */
       break;
     }
+    if(c == '{') {
+      ungetc(c, fp);
+      load_ascii_string(&str, fp);
+      dbg(0, "{%s}", str);
+    } else {
+      dbg(0, "%c", c);
+    }
   }
-  return a ? a : "<NULL>";
+  dbg(0,   "------------------------\n");
+  my_free(881, &str);
+}
+
+/* skip line of text from file, stopping before '\n' or EOF */
+char *read_line(FILE *fp, int dbg_level)
+{
+  static char s[300];  
+  int first = 0;
+
+  s[0] = '\0';
+  while(fscanf(fp, "%298[^\n]s", s)>0) {
+    if(!s[0]) break;
+    if(!first) {
+      dbg(dbg_level, "\n-----2- SKIPPING -------\n");
+      first = 1;
+    }
+    dbg(dbg_level, "|%s|", s);
+  }
+  if(first) dbg(dbg_level, "\n------------------------\n");
+  return s[0] ? s : NULL;
 }
 
 /* */
@@ -88,11 +122,11 @@ const char *create_tmpdir(char *prefix)
   for(i=0; i<5;i++) {
     my_snprintf(str, S(str), "%s%s", tclgetvar("XSCHEM_TMP_DIR"), random_string(prefix));
     if(stat(str, &buf) && !mkdir(str, 0700) ) { /* dir must not exist */
-      if(debug_var>=1) fprintf(errfp, "created dir: %s\n", str);
+      dbg(1, "created dir: %s\n", str);
       return str;
       break;
     }
-    if(debug_var>=1) fprintf(errfp, "failed to create %s\n", str);
+    dbg(1, "failed to create %s\n", str);
   }
   fprintf(errfp, "create_tmpdir(): failed to create %s, aborting\n", str);
   return NULL; /* failed to create random dir 5 times */
@@ -115,11 +149,11 @@ FILE *open_tmpfile(char *prefix, char **filename)
     my_snprintf(str, S(str), "%s%s", tclgetvar("XSCHEM_TMP_DIR"), random_string(prefix));
     *filename = str;
     if(stat(str, &buf) && (fd = fopen(str, "w")) ) { /* file must not exist */
-      if(debug_var>=1) fprintf(errfp, "created file: %s\n", str);
+      dbg(1, "created file: %s\n", str);
       return fd;
       break;
     }
-    if(debug_var>=1) fprintf(errfp, "failed to create %s\n", str);
+    dbg(1, "failed to create %s\n", str);
   }
   fprintf(errfp, "open_tmpfile(): failed to create %s, aborting\n", str);
   return NULL; /* failed to create random filename 5 times */
@@ -128,7 +162,7 @@ FILE *open_tmpfile(char *prefix, char **filename)
 void updatebbox(int count, Box *boundbox, Box *tmp)
 {
  RECTORDER(tmp->x1, tmp->y1, tmp->x2, tmp->y2);
- /* if(debug_var >=1) fprintf(errfp, "updatebbox(): count=%d, tmp = %g %g %g %g\n", 
+ /* dbg(1, "updatebbox(): count=%d, tmp = %g %g %g %g\n", 
          count, tmp->x1, tmp->y1, tmp->x2, tmp->y2); */
  if(count==1)  *boundbox = *tmp;
  else
@@ -153,11 +187,10 @@ void save_ascii_string(const char *ptr, FILE *fd)
  fputc('}',fd);
 }
 
-void save_embedded_symbol(Instdef *s, FILE *fd, int brackets)
+void save_embedded_symbol(Instdef *s, FILE *fd)
 {
   int c, i, j;
   
-  if(brackets) fprintf(fd, "[\n");
   fprintf(fd, "v {xschem version=%s file_version=%s}\n", XSCHEM_VERSION, XSCHEM_FILE_VERSION);
   fprintf(fd, "G ");
   save_ascii_string(s->prop_ptr,fd);
@@ -227,7 +260,6 @@ void save_embedded_symbol(Instdef *s, FILE *fd, int brackets)
     fputc('\n' ,fd);
    }
   }
-  if(brackets) fprintf(fd, "]\n");
 }
 
 void save_inst(FILE *fd)
@@ -248,14 +280,15 @@ void save_inst(FILE *fd)
   } else {
     save_ascii_string(rel_sym_path(ptr[i].name), fd);
   }
-  my_free(&tmp);
+  my_free(882, &tmp);
   fprintf(fd, " %.16g %.16g %d %d ",ptr[i].x0, ptr[i].y0, ptr[i].rot, ptr[i].flip ); 
   save_ascii_string(ptr[i].prop_ptr,fd);
   fputc('\n' ,fd);
-  if( !strcmp(get_tok_value(ptr[i].prop_ptr, "embed", 0), "true") 
-     && !(instdef[ptr[i].ptr].flags & EMBEDDED)
-    ) {
-    save_embedded_symbol( instdef+ptr[i].ptr, fd, 1);
+  if( !strcmp(get_tok_value(ptr[i].prop_ptr, "embed", 0), "true") && 
+      !(instdef[ptr[i].ptr].flags & EMBEDDED)) {
+    fprintf(fd, "[\n");
+    save_embedded_symbol( instdef+ptr[i].ptr, fd);
+    fprintf(fd, "]\n");
     instdef[ptr[i].ptr].flags |= EMBEDDED;
   }
  }
@@ -423,8 +456,8 @@ void write_xschem_file(FILE *fd)
 static void load_text(FILE *fd)
 {
   int i;
-  char *strlayer;
-   if(debug_var>=3) fprintf(errfp, "load_text(): start\n");
+  const char *strlayer;
+   dbg(3, "load_text(): start\n");
    check_text_storage();
    i=lasttext;
    textelement[i].txt_ptr=NULL;
@@ -434,7 +467,7 @@ static void load_text(FILE *fd)
      &textelement[i].flip, &textelement[i].xscale,
      &textelement[i].yscale)<6) {
      fprintf(errfp,"WARNING:  missing fields for TEXT object, ignoring\n");
-     read_line(fd);
+     read_line(fd, 0);
      return;
    }
    textelement[i].prop_ptr=NULL;
@@ -442,6 +475,12 @@ static void load_text(FILE *fd)
    textelement[i].sel=0;
    load_ascii_string(&textelement[i].prop_ptr,fd);
    if( textelement[i].prop_ptr) my_strdup(318, &textelement[i].font, get_tok_value(textelement[i].prop_ptr, "font", 0));/*20171206 */
+
+   strlayer = get_tok_value(textelement[i].prop_ptr, "hcenter", 0);
+   textelement[i].hcenter = strcmp(strlayer, "true")  ? 0 : 1;
+   strlayer = get_tok_value(textelement[i].prop_ptr, "vcenter", 0);
+   textelement[i].vcenter = strcmp(strlayer, "true")  ? 0 : 1;
+
    strlayer = get_tok_value(textelement[i].prop_ptr, "layer", 0); /*20171206 */
    if(strlayer[0]) textelement[i].layer = atoi(strlayer);
    else textelement[i].layer = -1;
@@ -453,16 +492,16 @@ static void load_wire(FILE *fd)
 
     double x1,y1,x2,y2;
     char *ptr=NULL;
-    if(debug_var>=3) fprintf(errfp, "load_wire(): start\n");
+    dbg(3, "load_wire(): start\n");
     if(fscanf(fd, "%lf %lf %lf %lf",&x1, &y1, &x2, &y2 )<4) {
       fprintf(errfp,"WARNING:  missing fields for WIRE object, ignoring\n");
-      read_line(fd);
+      read_line(fd, 0);
     } else {
       load_ascii_string( &ptr, fd);
       ORDER(x1, y1, x2, y2);
       storeobject(-1, x1,y1,x2,y2,WIRE,0,0,ptr);
     }
-    my_free(&ptr);
+    my_free(883, &ptr);
 }
 
 static void load_inst(int k, FILE *fd)
@@ -472,25 +511,25 @@ static void load_inst(int k, FILE *fd)
     char name[PATH_MAX];
     char *tmp = NULL;
 
-    if(debug_var>=3) fprintf(errfp, "load_inst(): start\n");
+    dbg(3, "load_inst(): start\n");
     i=lastinst;
     check_inst_storage();
     load_ascii_string(&tmp, fd);
     if(!tmp) return;
-    if(debug_var>=1) fprintf(errfp, "load_inst(): tmp=%s\n", tmp);
+    dbg(1, "load_inst(): tmp=%s\n", tmp);
     my_strncpy(name, tmp, S(name));
-    if(debug_var>=1) fprintf(errfp, "load_inst() 1: name=%s\n", name);
+    dbg(1, "load_inst() 1: name=%s\n", name);
     if(!strcmp(file_version,"1.0") ) {
-      if(debug_var>=1) fprintf(errfp, "load_inst(): add_ext(name,\".sym\") = %s\n", add_ext(name, ".sym") );
+      dbg(1, "load_inst(): add_ext(name,\".sym\") = %s\n", add_ext(name, ".sym") );
       my_strncpy(name, add_ext(name, ".sym"), S(name));
     }
     inst_ptr[i].name=NULL;
     my_strdup2(56, &inst_ptr[i].name, name);
-    if(debug_var>=1) fprintf(errfp, "load_inst() 2: name=%s\n", name);
+    dbg(1, "load_inst() 2: name=%s\n", name);
 
     if(fscanf(fd, "%lf %lf %d %d",&inst_ptr[i].x0, &inst_ptr[i].y0,&inst_ptr[i].rot, &inst_ptr[i].flip) < 4) {
       fprintf(errfp,"WARNING: missing fields for INSTANCE object, ignoring.\n"); 
-      read_line(fd);
+      read_line(fd, 0);
     } else {
       inst_ptr[i].flags=0;
       inst_ptr[i].sel=0;
@@ -501,28 +540,29 @@ static void load_inst(int k, FILE *fd)
       load_ascii_string(&prop_ptr,fd);
       my_strdup(319, &inst_ptr[i].prop_ptr, prop_ptr);
       my_strdup2(320, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); /* 20150409 */
-      if(debug_var>=2) fprintf(errfp, "load_inst(): n=%d name=%s prop=%s\n",
+      dbg(2, "load_inst(): n=%d name=%s prop=%s\n",
             i, inst_ptr[i].name? inst_ptr[i].name:"<NULL>", inst_ptr[i].prop_ptr? inst_ptr[i].prop_ptr:"<NULL>");
       lastinst++;
     }
-    my_free(&tmp);
-    my_free(&prop_ptr);
+    my_free(884, &tmp);
+    my_free(885, &prop_ptr);
 }
 
 static void load_polygon(FILE *fd)
 {
     int i,c, j, points;
     xPolygon *ptr;
+    const char *dash;
 
-    if(debug_var>=3) fprintf(errfp, "load_polygon(): start\n");
+    dbg(3, "load_polygon(): start\n");
     if(fscanf(fd, "%d %d",&c, &points)<2) {
       fprintf(errfp,"WARNING: missing fields for POLYGON object, ignoring.\n"); 
-      read_line(fd);
+      read_line(fd, 0);
       return;
     }
     if(c<0 || c>=cadlayers) {
       fprintf(errfp,"WARNING: wrong layer number for POLYGON object, ignoring.\n"); 
-      read_line(fd);
+      read_line(fd, 0);
       return;
     }
     check_polygon_storage(c);
@@ -540,10 +580,10 @@ static void load_polygon(FILE *fd)
     for(j=0;j<points;j++) {
       if(fscanf(fd, "%lf %lf ",&(ptr[i].x[j]), &(ptr[i].y[j]))<2) {
         fprintf(errfp,"WARNING: missing fields for POLYGON points, ignoring.\n"); 
-        my_free(&ptr[i].x);
-        my_free(&ptr[i].y);
-        my_free(&ptr[i].selected_point);
-        read_line(fd);
+        my_free(886, &ptr[i].x);
+        my_free(887, &ptr[i].y);
+        my_free(888, &ptr[i].selected_point);
+        read_line(fd, 0);
         return;
       }
     }
@@ -553,6 +593,13 @@ static void load_polygon(FILE *fd)
       ptr[i].fill =1;
     else
       ptr[i].fill =0;
+    dash = get_tok_value(ptr[i].prop_ptr,"dash",0);
+    if(strcmp(dash, "")) {
+      int d = atoi(dash);
+      ptr[i].dash = d >= 0 ? d : 0;
+    } else {
+      ptr[i].dash = 0;
+    }
 
     lastpolygon[c]++;
 }
@@ -561,12 +608,13 @@ static void load_arc(FILE *fd)
 {
     int i,c;
     xArc *ptr;
+    const char *dash;
 
-    if(debug_var>=3) fprintf(errfp, "load_arc(): start\n");
+    dbg(3, "load_arc(): start\n");
     fscanf(fd, "%d",&c);
     if(c<0 || c>=cadlayers) {
       fprintf(errfp,"WARNING: wrong layer number for ARC object, ignoring.\n"); 
-      read_line(fd);
+      read_line(fd, 0);
       return;
     }
     check_arc_storage(c);
@@ -575,7 +623,7 @@ static void load_arc(FILE *fd)
     if(fscanf(fd, "%lf %lf %lf %lf %lf ",&ptr[i].x, &ptr[i].y,
            &ptr[i].r, &ptr[i].a, &ptr[i].b) < 5) {
       fprintf(errfp,"WARNING:  missing fields for ARC object, ignoring\n");
-      read_line(fd);
+      read_line(fd, 0);
       return;
     }
     ptr[i].prop_ptr=NULL;
@@ -585,6 +633,13 @@ static void load_arc(FILE *fd)
       ptr[i].fill =1;
     else
       ptr[i].fill =0;
+    dash = get_tok_value(ptr[i].prop_ptr,"dash",0);
+    if(strcmp(dash, "")) {
+      int d = atoi(dash); 
+      ptr[i].dash = d >= 0 ? d : 0;
+    } else {
+      ptr[i].dash = 0;
+    }
     lastarc[c]++;
 }
 
@@ -592,12 +647,13 @@ static void load_box(FILE *fd)
 {
     int i,c;
     Box *ptr;
+    const char *dash;
 
-    if(debug_var>=3) fprintf(errfp, "load_box(): start\n");
+    dbg(3, "load_box(): start\n");
     fscanf(fd, "%d",&c);
     if(c<0 || c>=cadlayers) {
       fprintf(errfp,"WARNING: wrong layer number for xRECT object, ignoring.\n"); 
-      read_line(fd);
+      read_line(fd, 0);
       return;
     }
     check_box_storage(c);
@@ -606,13 +662,20 @@ static void load_box(FILE *fd)
     if(fscanf(fd, "%lf %lf %lf %lf ",&ptr[i].x1, &ptr[i].y1, 
        &ptr[i].x2, &ptr[i].y2) < 4) {
       fprintf(errfp,"WARNING:  missing fields for xRECT object, ignoring\n");
-      read_line(fd);
+      read_line(fd, 0);
       return;
     }
     RECTORDER(ptr[i].x1, ptr[i].y1, ptr[i].x2, ptr[i].y2); /* 20180108 */
     ptr[i].prop_ptr=NULL;
     ptr[i].sel=0;
     load_ascii_string( &ptr[i].prop_ptr, fd);
+    dash = get_tok_value(ptr[i].prop_ptr,"dash",0);
+    if(strcmp(dash, "")) {
+      int d = atoi(dash);
+      ptr[i].dash = d >= 0 ? d : 0;
+    } else {
+      ptr[i].dash = 0;
+    }
     lastrect[c]++;
 }
 
@@ -620,12 +683,13 @@ static void load_line(FILE *fd)
 {
     int i,c;
     Line *ptr;
+    const char *dash;
 
-    if(debug_var>=3) fprintf(errfp, "load_line(): start\n");
+    dbg(3, "load_line(): start\n");
     fscanf(fd, "%d",&c);
     if(c<0 || c>=cadlayers) {
       fprintf(errfp,"WARNING: Wrong layer number for LINE object, ignoring\n");
-      read_line(fd);
+      read_line(fd, 0);
       return;
     } 
     check_line_storage(c);
@@ -634,13 +698,20 @@ static void load_line(FILE *fd)
     if(fscanf(fd, "%lf %lf %lf %lf ",&ptr[i].x1, &ptr[i].y1, 
        &ptr[i].x2, &ptr[i].y2) < 4) {
       fprintf(errfp,"WARNING:  missing fields for LINE object, ignoring\n");
-      read_line(fd);
+      read_line(fd, 0);
       return;
     }
     ORDER(ptr[i].x1, ptr[i].y1, ptr[i].x2, ptr[i].y2); /* 20180108 */
     ptr[i].prop_ptr=NULL;
     ptr[i].sel=0;
     load_ascii_string( &ptr[i].prop_ptr, fd);
+    dash = get_tok_value(ptr[i].prop_ptr,"dash",0);
+    if(strcmp(dash, "")) {
+      int d = atoi(dash);
+      ptr[i].dash = d >= 0 ? d : 0;
+    } else {
+      ptr[i].dash = 0;
+    }
     lastline[c]++;
 }
 
@@ -648,17 +719,17 @@ void read_xschem_file(FILE *fd) /* 20180912 */
 {
   int i, found, endfile;
   char name_embedded[PATH_MAX];
-  char c[1];
+  char tag[1];
   int inst_cnt;
   int version_found = 0;
 
-  if(debug_var>=2) fprintf(errfp, "read_xschem_file(): start\n");
+  dbg(2, "read_xschem_file(): start\n");
   inst_cnt = endfile = 0;
   file_version[0] = '\0';
   while(!endfile)
   {
-    if(fscanf(fd," %c",c)==EOF) break;
-    switch(c[0])
+    if(fscanf(fd," %c",tag)==EOF) break;
+    switch(tag[0])
     {
      case 'v':
       load_ascii_string(&xschem_version_string, fd);
@@ -666,7 +737,7 @@ void read_xschem_file(FILE *fd) /* 20180912 */
         my_snprintf(file_version, S(file_version), "%s", get_tok_value(xschem_version_string, "file_version", 0));
         version_found = 1;
       }
-      if(debug_var >= 1) fprintf(errfp, "read_xschem_file(): file_version=%s\n", file_version);
+      dbg(1, "read_xschem_file(): file_version=%s\n", file_version);
       break;
      case 'E':
       load_ascii_string(&schtedaxprop,fd); /*20100217 */
@@ -684,7 +755,7 @@ void read_xschem_file(FILE *fd) /* 20180912 */
       load_ascii_string(&schvhdlprop,fd);
       if(schvhdlprop && !strncmp(schvhdlprop, "type=", 5)) current_type = SYMBOL;
       else current_type=SCHEMATIC;
-      if(debug_var>=2) fprintf(errfp, "read_xschem_file(): schematic property:%s\n",schvhdlprop?schvhdlprop:"<NULL>");
+      dbg(2, "read_xschem_file(): schematic property:%s\n",schvhdlprop?schvhdlprop:"<NULL>");
       break;
      case 'L':
       load_line(fd);
@@ -712,36 +783,59 @@ void read_xschem_file(FILE *fd) /* 20180912 */
       my_strdup(324, &inst_ptr[lastinst-1].prop_ptr, subst_token(inst_ptr[lastinst-1].prop_ptr, "embed", "true"));
 
       if(inst_ptr[lastinst-1].name) {
+        char *str;
+        int dbg_level = 1;
         my_snprintf(name_embedded, S(name_embedded),
-           "%s/.xschem_embedded_%d_%s.sym", tclgetvar("XSCHEM_TMP_DIR"), getpid(), get_cell(inst_ptr[lastinst-1].name, 0));
+           "%s/.xschem_embedded_%d_%s", tclgetvar("XSCHEM_TMP_DIR"), getpid(), get_cell_w_ext(inst_ptr[lastinst-1].name, 0));
         found=0;
-        /* if loading file coming back from embedded symbol delete temporary file */
         for(i=0;i<lastinstdef;i++)
         {
-         if(debug_var>=1) fprintf(errfp, "read_xschem_file(): instdef[i].name=%s, name_embedded=%s\n", instdef[i].name, name_embedded);
-         if(strcmp(name_embedded, instdef[i].name) == 0)
-         {
-          my_strdup(325, &instdef[i].name, inst_ptr[lastinst-1].name);
-          xunlink(name_embedded);
-          found=1;break;
+         dbg(1, "read_xschem_file(): instdef[i].name=%s, name_embedded=%s\n", instdef[i].name, name_embedded);
+         dbg(1, "read_xschem_file(): inst_ptr[lastinst-1].name=%s\n", inst_ptr[lastinst-1].name);
+         /* symbol has already been loaded: skip [..] */
+         if(!strcmp(instdef[i].name, inst_ptr[lastinst-1].name)) {
+           if(netlist_count)
+             dbg_level = 1; /* when doing netlists symbols are not deleted when descending: perfectly normal
+                               to have redundant embedded definitions */
+           else
+             dbg_level = 0; /* this is an abnormal situation,  so redundant [ ... ] should be skipped and reported */
+   
+           found=1; break;
+         }
+         /* if loading file coming back from embedded symbol delete temporary file */
+         if(!strcmp(name_embedded, instdef[i].name)) {
+           my_strdup(325, &instdef[i].name, inst_ptr[lastinst-1].name);
+           xunlink(name_embedded);
+           dbg_level = 1; /* when returning from embedded symbol, that symbol is already loaded in instdef[] by go_back() 
+                             so it's perfectly normal (and should not be logged) to skip these lines */
+           found=1;break;
          }
         }
-        if(!found) load_symbol_definition(inst_ptr[lastinst-1].name, fd);
+        if(!found) load_sym_def(inst_ptr[lastinst-1].name, fd);
         else {
-          while( strcmp( read_line(fd) , "]\n") ) ; /* skip embedded [ ... ] */
+          read_line(fd, dbg_level);
+          fscanf(fd, "\n");
+          while(1) { /* skip embedded [ ... ] */
+            str = read_line(fd, dbg_level);
+            if(!str) {
+              break;
+            }
+            if(!strcmp(str, "]")) break;
+            fscanf(fd, "\n");
+          }
         }
       }
       break;
      default:
-      /*if(debug_var>=2) fprintf(errfp, "read_xschem_file(): end file reached\n"); */
-      /*endfile=1; */
-      fprintf(errfp, "read_xschem_file(): skipping: %s", read_line(fd)); /* read rest of line and discard */
+      if( tag[0] == '{' ) ungetc(tag[0], fd);
+      read_record(tag[0], fd);
       break;
     }
+    read_line(fd, 0); /* discard any remaining characters till (but not including) newline */
     if(check_version && !version_found) return;
     if(!file_version[0]) {
       my_snprintf(file_version, S(file_version), "1.0");
-      if(debug_var >= 1) fprintf(errfp, "read_xschem_file(): no file_version, assuming file_version=%s\n", file_version);
+      dbg(1, "read_xschem_file(): no file_version, assuming file_version=%s\n", file_version);
     }
   }
 }
@@ -759,34 +853,30 @@ void load_ascii_string(char **ptr, FILE *fd)
   c=fgetc(fd);
   if(c==EOF) {
     fprintf(errfp, "EOF reached, malformed {...} string input, missing close brace\n");
-    my_free(ptr);
-    my_free(&str);
+    my_free(1149, ptr);
+    my_free(889, &str);
     return;
   }
   if(begin) {
-    if(c=='\\') {
-     escape=1;
-     c=fgetc(fd);
-     if(c==EOF) {
-       fprintf(errfp, "EOF reached, malformed {...} string input, missing close brace\n");
-       my_free(ptr);
-       my_free(&str);
-       return;
-     }
-    } else escape=0;
-    str[i]=c;
-    if(c=='}' && !escape) {
-     str[i]='\0';
-     break;
+    if(!escape) {
+      if(c=='}') {
+        str[i]='\0';
+        break;
+      }
+      if(c=='\\') {
+        escape=1;
+        continue;
+      }
     }
+    str[i]=c;
+    escape = 0;
     i++;
   } else if(c=='{') begin=1;
  }
- if(debug_var>=2) fprintf(errfp, "load_ascii_string(): string read=%s\n",str? str:"<NULL>");
- fscanf(fd, " ");
+ dbg(2, "load_ascii_string(): string read=%s\n",str? str:"<NULL>");
  my_strdup(329, ptr, str);
- if(debug_var>=2) fprintf(errfp, "load_ascii_string(): loaded %s\n",*ptr? *ptr:"<NULL>");
- my_free(&str);
+ dbg(2, "load_ascii_string(): loaded %s\n",*ptr? *ptr:"<NULL>");
+ my_free(891, &str);
 }
 
 void make_symbol(void)
@@ -796,22 +886,22 @@ void make_symbol(void)
  if( strcmp(schematic[currentsch],"") )
  {
   my_snprintf(name, S(name), "make_symbol {%s}", schematic[currentsch] );
-  if(debug_var>=1) fprintf(errfp, "make_symbol(): making symbol: name=%s\n", name);
+  dbg(1, "make_symbol(): making symbol: name=%s\n", name);
   tcleval(name);
  }
          
 }
 
-int save_schematic(char *schname) /* 20171020 added return value */
+int save_schematic(const char *schname) /* 20171020 added return value */
 {
   FILE *fd;
   char name[PATH_MAX]; /* overflow safe 20161122 */
 
   if( strcmp(schname,"") ) my_strncpy(schematic[currentsch], schname, S(schematic[currentsch]));
   else return -1;
-  if(debug_var>=1) fprintf(errfp, "save_schematic(): currentsch=%d name=%s\n",currentsch, schname);
-  if(debug_var>=1) fprintf(errfp, "save_schematic(): schematic[currentsch]=%s\n", schematic[currentsch]);
-  if(debug_var>=1) fprintf(errfp, "save_schematic(): abs_sym_path=%s\n", abs_sym_path(schematic[currentsch], ""));
+  dbg(1, "save_schematic(): currentsch=%d name=%s\n",currentsch, schname);
+  dbg(1, "save_schematic(): schematic[currentsch]=%s\n", schematic[currentsch]);
+  dbg(1, "save_schematic(): abs_sym_path=%s\n", abs_sym_path(schematic[currentsch], ""));
   my_strncpy(name, schematic[currentsch], S(name));
   if(has_x) {
     tcleval( "wm title . \"xschem - [file tail [xschem get schname]]\"");    /* 20161207 */
@@ -839,48 +929,18 @@ int save_schematic(char *schname) /* 20171020 added return value */
 
 void link_symbols_to_instances(void) /* 20150326 separated from load_schematic() */
 {
-  int i,symbol, missing;
-  static char *type=NULL; /* 20150407 added static  */
-  char *symfilename;
+  int i;
+  char *type=NULL; /* 20150407 added static  */
   int cond;
 
-  missing = 0;
   for(i=0;i<lastinst;i++)
   {
-    symfilename=inst_ptr[i].name; /*05112003 */
-
-    if(debug_var>=2) fprintf(errfp, "link_symbols_to_instances(): inst=%d\n", i);
-    if(debug_var>=2) fprintf(errfp, "link_symbols_to_instances(): matching inst %d name=%s \n",i, inst_ptr[i].name);
-    if(debug_var>=2) fprintf(errfp, "link_symbols_to_instances(): -------\n");
-    
-    symbol = match_symbol(symfilename);
-    if(symbol == -1) 
-    {
-      if(debug_var>=2) fprintf(errfp, "link_symbols_to_instances(): missing symbol, skipping...\n");
-      my_free(&inst_ptr[i].prop_ptr);  /* 06052001 remove properties */
-      delete_inst_node(i);
-      my_free(&inst_ptr[i].name);      /* 06052001 remove symname */
-      my_free(&inst_ptr[i].instname);  /* 20150409 */
-      missing++;
-      continue;
-    }
-    if(debug_var>=2) fprintf(errfp, "link_symbols_to_instances(): \n");
-    inst_ptr[i].ptr = symbol;
-    if(debug_var>=2) fprintf(errfp, "link_symbols_to_instances(): missing=%d\n",missing);
-    if(missing) 
-    {
-      inst_ptr[i-missing] = inst_ptr[i];
-      inst_ptr[i].prop_ptr=NULL;
-      inst_ptr[i].instname=NULL; /* 20150409 */
-      inst_ptr[i].node=NULL;
-      inst_ptr[i].ptr=-1;  /*04112003 was 0 */
-      inst_ptr[i].flags=0;
-      inst_ptr[i].name=NULL;
-    }
+    dbg(2, "link_symbols_to_instances(): inst=%d\n", i);
+    dbg(2, "link_symbols_to_instances(): matching inst %d name=%s \n",i, inst_ptr[i].name);
+    dbg(2, "link_symbols_to_instances(): -------\n");
+    inst_ptr[i].ptr = match_symbol(inst_ptr[i].name);
   } 
-  lastinst -= missing;
   for(i=0;i<lastinst;i++) {
-    if(inst_ptr[i].ptr <0) continue;
     symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1,
                       &inst_ptr[i].x2, &inst_ptr[i].y2);
     type=instdef[inst_ptr[i].ptr].type; /* 20150409 */
@@ -912,8 +972,8 @@ void load_schematic(int load_symbols, const char *filename, int reset_undo) /* 2
     my_snprintf(msg, S(msg), "set current_dirname \"[file dirname {%s}]\"", name);
     tcleval(msg);
     my_strncpy(current_name, rel_sym_path(name), S(current_name)); /* 20190519 */
-    if(debug_var>=1) fprintf(errfp, "load_schematic(): opening file for loading:%s, filename=%s\n", name, filename);
-    if(debug_var>=1) fprintf(errfp, "load_schematic(): schematic[currentsch]=%s\n", schematic[currentsch]);
+    dbg(1, "load_schematic(): opening file for loading:%s, filename=%s\n", name, filename);
+    dbg(1, "load_schematic(): schematic[currentsch]=%s\n", schematic[currentsch]);
     if(!name[0]) return;
     if(event_reporting) { 
       char n[PATH_MAX];
@@ -928,14 +988,14 @@ void load_schematic(int load_symbols, const char *filename, int reset_undo) /* 2
       clear_drawing();
     } else {
       clear_drawing();
-      if(debug_var>=1) fprintf(errfp, "load_schematic(): reading file: %s\n", name);
+      dbg(1, "load_schematic(): reading file: %s\n", name);
       read_xschem_file(fd);
       fclose(fd); /* 20150326 moved before load symbols */
       set_modify(0);
-      if(debug_var>=2) fprintf(errfp, "load_schematic(): loaded file:wire=%d inst=%d\n",lastwire , lastinst);
+      dbg(2, "load_schematic(): loaded file:wire=%d inst=%d\n",lastwire , lastinst);
       if(load_symbols && current_type == SCHEMATIC) link_symbols_to_instances();
     }
-    if(debug_var>=1) fprintf(errfp, "load_schematic(): %s, returning\n", schematic[currentsch]);
+    dbg(1, "load_schematic(): %s, returning\n", schematic[currentsch]);
   } else {
     set_modify(0);
     clear_drawing();
@@ -944,8 +1004,8 @@ void load_schematic(int load_symbols, const char *filename, int reset_undo) /* 2
       else my_snprintf(name, S(name), "%s-%d.sch", "untitled", i);
       if(stat(name, &buf)) break;
     }
-    my_strncpy(schematic[currentsch], name, S(schematic[currentsch]));
-    my_strncpy(current_name, rel_sym_path(schematic[currentsch]), S(current_name)); /* 20190519 */
+    my_snprintf(schematic[currentsch], S(schematic[currentsch]), "%s/%s", pwd_dir, name);
+    my_strncpy(current_name, name, S(current_name)); /* 20190519 */
   }
   if(has_x) { /* 20161207 moved after if( (fd=..))  */
     if(strcmp(get_cell(schematic[currentsch],1), "systemlib/font")) {
@@ -968,7 +1028,7 @@ void delete_undo(void)  /* 20150327 */
     xunlink(diff_name);
   }
   rmdir(undo_dirname);
-  my_free(&undo_dirname);
+  my_free(895, &undo_dirname);
 }
     
 void clear_undo(void) /* 20150327 */
@@ -989,7 +1049,7 @@ void push_undo(void) /* 20150327 */
     char diff_name[PATH_MAX+100]; /* overflow safe 20161122 */
 
     if(no_undo)return;
-    if(debug_var>=1) fprintf(errfp, "push_undo(): cur_undo_ptr=%d tail_undo_ptr=%d head_undo_ptr=%d\n", 
+    dbg(1, "push_undo(): cur_undo_ptr=%d tail_undo_ptr=%d head_undo_ptr=%d\n", 
        cur_undo_ptr, tail_undo_ptr, head_undo_ptr);
 
 
@@ -1009,7 +1069,7 @@ void push_undo(void) /* 20150327 */
       close(pd[1]);                                     /* close write side of pipe */
       if(!(diff_fd=freopen(diff_name,"w", stdout)))     /* redirect stdout to file diff_name */
       {
-        if(debug_var>=1) fprintf(errfp, "push_undo(): problems opening file %s \n",diff_name);
+        dbg(1, "push_undo(): problems opening file %s \n",diff_name);
         Tcl_Eval(interp, "exit");
       }
 
@@ -1062,7 +1122,7 @@ void pop_undo(int redo)  /* 20150327 */
   if(no_undo)return;
   if(redo) { 
     if(cur_undo_ptr < head_undo_ptr) {
-      if(debug_var>=1) fprintf(errfp, "pop_undo(): redo; cur_undo_ptr=%d tail_undo_ptr=%d head_undo_ptr=%d\n", 
+      dbg(1, "pop_undo(): redo; cur_undo_ptr=%d tail_undo_ptr=%d head_undo_ptr=%d\n", 
          cur_undo_ptr, tail_undo_ptr, head_undo_ptr);
       cur_undo_ptr++;
     } else {
@@ -1070,7 +1130,7 @@ void pop_undo(int redo)  /* 20150327 */
     }
   } else {  /*redo=0 (undo) */
     if(cur_undo_ptr == tail_undo_ptr) return;
-    if(debug_var>=1) fprintf(errfp, "pop_undo(): undo; cur_undo_ptr=%d tail_undo_ptr=%d head_undo_ptr=%d\n", 
+    dbg(1, "pop_undo(): undo; cur_undo_ptr=%d tail_undo_ptr=%d head_undo_ptr=%d\n", 
        cur_undo_ptr, tail_undo_ptr, head_undo_ptr);
     if(head_undo_ptr == cur_undo_ptr) {
       push_undo();
@@ -1099,7 +1159,7 @@ void pop_undo(int redo)  /* 20150327 */
     close(pd[0]);                                    /* close read side of pipe */
     if(!(diff_fd=freopen(diff_name,"r", stdin)))     /* redirect stdin from file name */
     {
-      if(debug_var>=1) fprintf(errfp, "pop_undo(): problems opening file %s \n",diff_name);
+      dbg(1, "pop_undo(): problems opening file %s \n",diff_name);
       Tcl_Eval(interp, "exit");
     }
     /* connect write side of pipe to stdout */
@@ -1108,7 +1168,7 @@ void pop_undo(int redo)  /* 20150327 */
     if(!f[0]) my_strncpy(f, get_file_path("gunzip"), S(f));
     execl(f, f, "-c", NULL);       /* replace current process with command */
     /* never gets here */
-    if(debug_var>=1) fprintf(errfp, "pop_undo(): problems with execl\n");
+    dbg(1, "pop_undo(): problems with execl\n");
     Tcl_Eval(interp, "exit");
   }
   close(pd[1]);                                       /* close write side of pipe */
@@ -1133,7 +1193,7 @@ void pop_undo(int redo)  /* 20150327 */
   #else
   fclose(fd);
   #endif
-  if(debug_var>=2) fprintf(errfp, "pop_undo(): loaded file:wire=%d inst=%d\n",lastwire , lastinst);
+  dbg(2, "pop_undo(): loaded file:wire=%d inst=%d\n",lastwire , lastinst);
   link_symbols_to_instances();
   set_modify(1);
   prepared_hash_instances=0; /* 20171224 */
@@ -1141,7 +1201,7 @@ void pop_undo(int redo)  /* 20150327 */
   prepared_netlist_structs=0; /* 20171224 */
   prepared_hilight_structs=0; /* 20171224 */
   update_conn_cues(0, 0);
-  if(debug_var>=2) fprintf(errfp, "pop_undo(): returning\n");
+  dbg(2, "pop_undo(): returning\n");
   if(event_reporting) {
     if(redo) printf("xschem redo\n");
     else     printf("xschem undo\n");
@@ -1155,7 +1215,8 @@ void pop_undo(int redo)  /* 20150327 */
 static int Gcurrent_sym=0;
 int CmpSchBbox(const void *a, const void *b)
 {
-  char *labela, *labelb, *name;
+  char *labela, *labelb;
+  const char *name;
   Box *boxa = (Box*)a;
   Box *boxb = (Box*)b;
   int i, aa = -1, bb = -1;
@@ -1169,19 +1230,23 @@ int CmpSchBbox(const void *a, const void *b)
     if (!strcmp(name, labelb)) {bb = i;}
     if (aa>=0 && bb>=0) break;
   }
-  my_free(&labela); my_free(&labelb);
+  my_free(896, &labela);
+  my_free(897, &labelb);
   return(aa-bb);
 }
 
-int load_symbol_definition(const char *name, FILE *embed_fd)
+int load_sym_def(const char *name, FILE *embed_fd)
 {
+  static int recursion_counter=0;
   struct Lcc *lcc; /* size = level */
   FILE *fd_tmp;
   int rot,flip;
   double angle;
   double rx1,ry1,rx2,ry2;
   int current_sym;
-  int level, max_level, save;
+  int incremented_level=0;
+  int level = 0;
+  int max_level, save;
   char name2[PATH_MAX];  /* 20161122 overflow safe */
   char name3[PATH_MAX];  /* 20161122 overflow safe */
   char name4[PATH_MAX];  /* 20161122 overflow safe */
@@ -1192,7 +1257,7 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
   double inst_x0, inst_y0;
   int inst_rot, inst_flip;
   char *symname = NULL;
-  char aux_str[1]; /* overflow safe 20161122 */
+  char tag[1]; /* overflow safe 20161122 */
   int *lastl = my_malloc(333, cadlayers * sizeof(lastl)); 
   int *lastr = my_malloc(334, cadlayers * sizeof(int));
   int *lastp = my_malloc(335, cadlayers * sizeof(int));
@@ -1204,14 +1269,19 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
   int lastt; /* 20171115 lastp */
   Text *tt;
   int endfile;
-  char *strlayer, *label, *pin_label = NULL, *recover_str=NULL;
-  if(debug_var>=1) fprintf(errfp, "load_symbol_definition(): name=%s\n", name);
-  level=0; max_level=0;
+  const char *strlayer;
+  const char *label;
+  char *pin_label = NULL, *recover_str=NULL;
+  char *skip_line;
+  const char *dash;
 
+  dbg(1, "load_sym_def(): recursion_counter=%d\n", recursion_counter);
+  recursion_counter++;
+
+  dbg(1, "load_sym_def(): name=%s\n", name);
   lcc=NULL;
   my_realloc(647, &lcc, (level + 1) * sizeof(struct Lcc));
-
-  max_level = 1;
+  max_level = level + 1;
   if(!strcmp(file_version,"1.0")) {
     my_strncpy(name3, abs_sym_path(name, ".sym"), S(name3));
   } else {
@@ -1219,24 +1289,20 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
   }
     
   if(!embed_fd) {
-    if(debug_var>=1) fprintf(errfp, "load_symbol_definition(): trying: %s\n",name3);
     if((lcc[level].fd=fopen(name3,"r"))==NULL)
     {
-      if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): Symbol not found: %s\n",name3);
-      /*return -1; */
-#ifdef __unix__
+      if(recursion_counter == 1) dbg(0, "load_sym_def(): Symbol not found: %s\n",name3);
       my_snprintf(name2, S(name2), "%s/%s.sym", tclgetvar("XSCHEM_SHAREDIR"), "systemlib/missing");
-#else
-      my_snprintf(name2, S(name2), "%s/../src/%s.sym", tclgetvar("XSCHEM_SHAREDIR"), "systemlib/missing");
-#endif
       if((lcc[level].fd=fopen(name2, "r"))==NULL)
       { 
-       fprintf(errfp, "load_symbol_definition(): systemlib/missing.sym missing, I give up\n");
+       fprintf(errfp, "load_sym_def(): systemlib/missing.sym missing, I give up\n");
        tcleval( "exit");
       }
       my_strncpy(name3, name2, S(name3));
     }
+    dbg(1, "load_sym_def(): fopen1(%s), level=%d, fd=%p\n",name3, level, lcc[level].fd);
   } else {
+    dbg(1, "load_sym_def(): getting embed_fd, level=%d\n", level);
     lcc[level].fd = embed_fd;
   }
 
@@ -1260,16 +1326,18 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
 
   while(!endfile)
   {
-   if(fscanf(lcc[level].fd," %c",aux_str)==EOF) {
+   if(fscanf(lcc[level].fd," %c",tag)==EOF) {
      if (level) {
+         dbg(1, "load_sym_def(): fclose1, level=%d, fd=%p\n", level, lcc[level].fd);
          fclose(lcc[level].fd);
-         my_free(&lcc[level].prop_ptr);
-         my_free(&lcc[level].symname);
+         my_free(898, &lcc[level].prop_ptr);
+         my_free(899, &lcc[level].symname);
          --level;
          continue;
      } else break;
    }
-   switch(aux_str[0])
+   incremented_level = 0;
+   switch(tag[0])
    {
     case 'v':
      load_ascii_string(&aux_ptr, lcc[level].fd);
@@ -1309,7 +1377,7 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
      fscanf(lcc[level].fd, "%d",&c);
      if(c < 0 || c>=cadlayers) {
        fprintf(errfp,"WARNING: wrong line layer\n");
-       read_line(lcc[level].fd);
+       read_line(lcc[level].fd, 0);
        continue;
      } /* 20150408 */
      i=lastl[c];
@@ -1317,7 +1385,7 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
      if(fscanf(lcc[level].fd, "%lf %lf %lf %lf ",&ll[c][i].x1, &ll[c][i].y1,
         &ll[c][i].x2, &ll[c][i].y2) < 4 ) {
        fprintf(errfp,"WARNING:  missing fields for LINE object, ignoring\n");
-       read_line(lcc[level].fd);
+       read_line(lcc[level].fd, 0);
        continue;
      }
      if (level>0) {
@@ -1330,18 +1398,26 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
      ORDER(ll[c][i].x1, ll[c][i].y1, ll[c][i].x2, ll[c][i].y2); /* 20180108 */
      ll[c][i].prop_ptr=NULL;
      load_ascii_string( &ll[c][i].prop_ptr, lcc[level].fd);
-      if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): loaded line: ptr=%lx\n", (unsigned long)ll[c]);
+     dbg(2, "l_d_s(): loaded line: ptr=%lx\n", (unsigned long)ll[c]);
+
+     dash = get_tok_value(ll[c][i].prop_ptr,"dash", 0);
+     if( strcmp(dash, "") ) {
+       int d = atoi(dash);
+       ll[c][i].dash = d >= 0 ? d : 0;
+     } else 
+       ll[c][i].dash = 0;
+     ll[c][i].sel = 0;
      lastl[c]++;
      break;
     case 'P': /* 20171115 */
      if(fscanf(lcc[level].fd, "%d %d",&c, &poly_points) < 2 ) {
        fprintf(errfp,"WARNING: missing fields for POLYGON object, ignoring\n");
-       read_line(lcc[level].fd);
+       read_line(lcc[level].fd, 0);
        continue;
      }
      if(c < 0 || c>=cadlayers) {
        fprintf(errfp,"WARNING: wrong polygon layer\n");
-       read_line(lcc[level].fd);
+       read_line(lcc[level].fd, 0);
        continue;
      } /* 20150408 */
      i=lastp[c];
@@ -1368,14 +1444,22 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
      else
        pp[c][i].fill =0;
 
-     if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): loaded polygon: ptr=%lx\n", (unsigned long)pp[c]);
+     dash = get_tok_value(pp[c][i].prop_ptr,"dash", 0);
+     if( strcmp(dash, "") ) {
+       int d = atoi(dash);
+       pp[c][i].dash = d >= 0 ? d : 0;
+     } else 
+       pp[c][i].dash = 0;
+     pp[c][i].sel = 0;
+
+     dbg(2, "l_d_s(): loaded polygon: ptr=%lx\n", (unsigned long)pp[c]);
      lastp[c]++;
      break;
     case 'A':
      fscanf(lcc[level].fd, "%d",&c);
      if(c < 0 || c>=cadlayers) {
        fprintf(errfp,"Wrong arc layer\n");
-       read_line(lcc[level].fd);
+       read_line(lcc[level].fd, 0);
        continue;
      }
      i=lasta[c];
@@ -1383,7 +1467,7 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
      if( fscanf(lcc[level].fd, "%lf %lf %lf %lf %lf ",&aa[c][i].x, &aa[c][i].y,
         &aa[c][i].r, &aa[c][i].a, &aa[c][i].b) < 5 ) {
        fprintf(errfp,"WARNING: missing fields for ARC object, ignoring\n");
-       read_line(lcc[level].fd);
+       read_line(lcc[level].fd, 0);
        continue;
      }
      if (level>0) {
@@ -1407,7 +1491,16 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
      else
        aa[c][i].fill =0;
 
-     if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): loaded arc: ptr=%lx\n", (unsigned long)aa[c]);
+     dash = get_tok_value(aa[c][i].prop_ptr,"dash", 0);
+     if( strcmp(dash, "") ) {
+       int d = atoi(dash);
+       aa[c][i].dash = d >= 0 ? d : 0;
+     } else
+       aa[c][i].dash = 0;
+     aa[c][i].sel = 0;
+
+
+     dbg(2, "l_d_s(): loaded arc: ptr=%lx\n", (unsigned long)aa[c]);
      lasta[c]++;
      break;
     case 'B':
@@ -1432,7 +1525,15 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
      RECTORDER(bb[c][i].x1, bb[c][i].y1, bb[c][i].x2, bb[c][i].y2); /* 20180108 */
      bb[c][i].prop_ptr=NULL;
      load_ascii_string( &bb[c][i].prop_ptr, lcc[level].fd);
-     if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): loaded rect: ptr=%lx\n", (unsigned long)bb[c]);
+     dbg(2, "l_d_s(): loaded rect: ptr=%lx\n", (unsigned long)bb[c]);
+     dash = get_tok_value(bb[c][i].prop_ptr,"dash", 0);
+     if( strcmp(dash, "") ) {
+       int d = atoi(dash);
+       bb[c][i].dash = d >= 0 ? d : 0;
+     } else
+       bb[c][i].dash = 0;
+     bb[c][i].sel = 0;
+
      lastr[c]++;
      break;
     case 'T':
@@ -1444,7 +1545,7 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
      fscanf(lcc[level].fd, "%lf %lf %d %d %lf %lf ",&tt[i].x0, &tt[i].y0, &tt[i].rot,
         &tt[i].flip, &tt[i].xscale, &tt[i].yscale);
      if (level>0) {
-       char* tmp = translate2(lcc, level, tt[i].txt_ptr);
+       const char* tmp = translate2(lcc, level, tt[i].txt_ptr);
        if (tmp) my_strdup(651, &tt[i].txt_ptr, tmp);
        ROTATION(0.0, 0.0, tt[i].x0, tt[i].y0, rx1, ry1);
        tt[i].x0 = lcc[level].x0 + rx1;  tt[i].y0 = lcc[level].y0 + ry1;
@@ -1453,9 +1554,15 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
      }
      tt[i].prop_ptr=NULL;
      load_ascii_string(&tt[i].prop_ptr, lcc[level].fd);
-      if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): loaded text\n");
+     dbg(1, "l_d_s(): loaded text : t=%s p=%s\n", tt[i].txt_ptr, tt[i].prop_ptr);
 
      my_strdup(351, &tt[i].font, get_tok_value(tt[i].prop_ptr, "font", 0));/*20171206 */
+
+     strlayer = get_tok_value(tt[i].prop_ptr, "hcenter", 0);
+     tt[i].hcenter = strcmp(strlayer, "true")  ? 0 : 1;
+     strlayer = get_tok_value(tt[i].prop_ptr, "vcenter", 0);
+     tt[i].vcenter = strcmp(strlayer, "true")  ? 0 : 1;
+
      strlayer = get_tok_value(tt[i].prop_ptr, "layer", 0); /*20171206 */
      if(strlayer[0]) tt[i].layer = atoi(strlayer);
      else tt[i].layer = -1;
@@ -1467,7 +1574,7 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
      if(fscanf(lcc[level].fd, "%lf %lf %lf %lf ",&ll[WIRELAYER][i].x1, &ll[WIRELAYER][i].y1,
         &ll[WIRELAYER][i].x2, &ll[WIRELAYER][i].y2) < 4 ) {
        fprintf(errfp,"WARNING:  missing fields for LINE object, ignoring\n");
-       read_line(lcc[level].fd);
+       read_line(lcc[level].fd, 0);
        continue;
      }
      if (level>0) {
@@ -1480,14 +1587,17 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
      ORDER(ll[WIRELAYER][i].x1, ll[WIRELAYER][i].y1, ll[WIRELAYER][i].x2, ll[WIRELAYER][i].y2); /* 20180108 */
      ll[WIRELAYER][i].prop_ptr=NULL;
      load_ascii_string( &ll[WIRELAYER][i].prop_ptr, lcc[level].fd);
-      if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): loaded line: ptr=%lx\n", (unsigned long)ll[WIRELAYER]);
+     dbg(2, "l_d_s(): loaded line: ptr=%lx\n", (unsigned long)ll[WIRELAYER]);
+     ll[WIRELAYER][i].dash = 0;
+     ll[WIRELAYER][i].sel = 0;
      lastl[WIRELAYER]++;
      break;
     case 'C':
       load_ascii_string(&symname, lcc[level].fd);
+      dbg(1, "C line: symname=%s\n", symname);
       if (fscanf(lcc[level].fd, "%lf %lf %d %d", &inst_x0, &inst_y0, &inst_rot, &inst_flip) < 4) {
         fprintf(errfp, "WARNING: missing fields for COMPONENT object, ignoring\n");
-        read_line(lcc[level].fd);
+        read_line(lcc[level].fd, 0);
         continue;
       }
       load_ascii_string(&prop_ptr, lcc[level].fd);
@@ -1499,24 +1609,32 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
       }
       lastinstdef++; /* do not allow match_symbol() to overwrite current symbol we are loading */
       save = lastinstdef;
+      dbg(1, "load_sym_def(): call1 match_symbol\n");
       if ((recover_str = strrchr(symname, '.')) && !strcmp(recover_str, ".sch")) 
         current_sym = match_symbol(add_ext(symname, ".sym"));
       else 
         current_sym=match_symbol(symname);
 
       my_strdup2(316, &symtype, instdef[current_sym].type);
-      if(debug_var >= 1) fprintf(errfp, "load_symbol_definition(): level=%d, current_sym=%d symname=%s symtype=%s\n", 
+      dbg(1, "load_sym_def(): level=%d, current_sym=%d symname=%s symtype=%s\n", 
                                  level, current_sym, symname, symtype);
-      if(lastinstdef> save) remove_symbol(); /* if previous match_symbol() caused a symbol to be loaded unload it now */
+      if(lastinstdef> save) remove_symbol(lastinstdef - 1); /* if previous match_symbol() caused a symbol to be loaded unload it now */
       lastinstdef--; /* restore symbol we are loading */
 
       if(  /* add here symbol types not to consider when loading schematic-as-symbol instances */
           !strcmp(symtype, "logo") ||
           !strcmp(symtype, "netlist_commands") ||
+          !strcmp(symtype, "arch_declarations") ||
+          !strcmp(symtype, "architecture") ||
+          !strcmp(symtype, "attributes") ||
+          !strcmp(symtype, "package") ||
+          !strcmp(symtype, "port_attributes") ||
           !strcmp(symtype, "use") ||
           !strcmp(symtype, "launcher") ||
+          !strcmp(symtype, "verilog_preprocessor") ||
           !strcmp(symtype, "timescale") 
         ) break;
+      /* add PINLAYER boxes (symbol pins) at schematic i/o/iopin coordinates. */
       if (level==0 && (!strcmp(symtype, "ipin") || !strcmp(symtype, "opin") || !strcmp(symtype, "iopin"))) {
         i = lastr[PINLAYER];
         my_realloc(652, &bb[PINLAYER], (i + 1) * sizeof(Box));
@@ -1530,14 +1648,20 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
         pin_label = my_malloc(315, save);
         pin_label[0] = '\0';
         if (!strcmp(symtype, "ipin")) {
-          my_snprintf(pin_label, save, "name=%s dir=in", label);
+          my_snprintf(pin_label, save, "name=%s dir=in ", label);
         } else if (!strcmp(symtype, "opin")) {
-          my_snprintf(pin_label, save, "name=%s dir=out", label);
+          my_snprintf(pin_label, save, "name=%s dir=out ", label);
         } else if (!strcmp(symtype, "iopin")) {
-          my_snprintf(pin_label, save, "name=%s dir=inout", label);
+          my_snprintf(pin_label, save, "name=%s dir=inout ", label);
         }
         my_strdup(463, &bb[PINLAYER][i].prop_ptr, pin_label);
-        my_free(&pin_label);
+
+        /* add to symbol pins remaining attributes from schematic pins, except name= and lab= */
+
+        my_strdup(157, &pin_label, get_sym_template(prop_ptr, "lab"));   /* remove name=...  and lab=... */
+        my_strcat(159, &bb[PINLAYER][i].prop_ptr, pin_label);
+
+        my_free(900, &pin_label);
         lastr[PINLAYER]++;
       }
       if (!strcmp(file_version, "1.0")) {
@@ -1547,6 +1671,7 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
         my_strncpy(name4, abs_sym_path(symname, ""), S(name4));
       }
 
+      /* replace i/o/iopin.sym with better looking (for symbol) pins */
       if(level == 0) {
         if (!strcmp(symtype, "ipin")) {
            my_snprintf(name4, S(name4), "%s/%s", tclgetvar("XSCHEM_SHAREDIR"), "systemlib/ipin_lcc_top.sym");
@@ -1566,14 +1691,16 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
       }
 
       if ((fd_tmp = fopen(name4, "r")) == NULL) {
-        fprintf(errfp, "load_symbol_definition(): unable to open file to read schematic: %s\n", name4);
+        fprintf(errfp, "load_sym_def(): unable to open file to read schematic: %s\n", name4);
       } else {
         if (level+1 >= max_level) {
           
           my_realloc(653, &lcc, (max_level + 1) * sizeof(struct Lcc));
           max_level++;
         }
+        dbg(1, "load_sym_def(): fopen2(%s), level=%d, fd=%p\n", name4, level, fd_tmp);
         ++level;
+        incremented_level = 1;
         lcc[level].fd = fd_tmp;
         lcc[level].prop_ptr = NULL;
         lcc[level].symname = NULL;
@@ -1581,6 +1708,7 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
         lcc[level].y0 = inst_y0;
         lcc[level].rot = inst_rot;
         lcc[level].flip = inst_flip;
+        /* calculate LCC sub-schematic x0, y0, rotation and flip */ 
         if (level > 1) {
           int rot, flip;
           static int map[4]={0,3,2,1};
@@ -1596,20 +1724,39 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
         }
         my_strdup(654, &lcc[level].prop_ptr, prop_ptr);
         my_strdup(657, &lcc[level].symname, symname);
+        dbg(1, "level incremented: level=%d, symname=%s, name4=%s\n", level, symname, name4);
       }
       break;
+    case '[':
+     read_line(lcc[level].fd, 0);
+     fscanf(lcc[level].fd, "\n");
+     while(1) { /* skip embedded [ ... ] */
+       skip_line = read_line(lcc[level].fd, 0);
+       if(!skip_line) {
+         break;
+       }
+       if(!strcmp(skip_line, "]")) break;
+       fscanf(lcc[level].fd, "\n");
+     }
+     break;
     case ']':
-     read_line(lcc[level].fd);
+     read_line(lcc[level].fd, 0);
      endfile=1;
      break;
     default:
-     /* if(debug_var>=1) fprintf(errfp, "load_symbol_definition(): unknown line, assuming EOF\n"); */
-     /* endfile=1; */
-     fprintf(errfp, "load_symbol_definition(): skipping: %s", read_line(lcc[level].fd)); /* read rest of line and discard */
+     if( tag[0] == '{' ) ungetc(tag[0], lcc[level].fd);
+     read_record(tag[0], lcc[level].fd);
      break;
    }
+   /* if a 'C' line was encountered and level was incremented, rest of line must be read
+      with lcc[level-1].fd file pointer */
+   if(incremented_level) 
+     read_line(lcc[level-1].fd, 0); /* discard any remaining characters till (but not including) newline */
+   else 
+     read_line(lcc[level].fd, 0); /* discard any remaining characters till (but not including) newline */
   }
   if(!embed_fd) {
+    dbg(1, "load_sym_def(): fclose2, level=%d, fd=%p\n", level, lcc[0].fd);
     fclose(lcc[0].fd);
   }
   if(embed_fd || strstr(name, ".xschem_embedded_")) {
@@ -1617,7 +1764,7 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
   } else {
     instdef[lastinstdef].flags &= ~EMBEDDED;
   }
-  if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): finished parsing file\n");
+  dbg(2, "l_d_s(): finished parsing file\n");
   for(c=0;c<cadlayers;c++)
   {
    instdef[lastinstdef].arcs[c] = lasta[c];
@@ -1641,7 +1788,7 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
     count++;
     tmp.x1=ll[c][i].x1;tmp.y1=ll[c][i].y1;tmp.x2=ll[c][i].x2;tmp.y2=ll[c][i].y2;
     updatebbox(count,&boundbox,&tmp);
-    if(debug_var>=2) fprintf(errfp, "load_symbol_definition(): line[%d][%d]: %g %g %g %g\n", 
+    dbg(2, "l_d_s(): line[%d][%d]: %g %g %g %g\n", 
 			c, i, tmp.x1,tmp.y1,tmp.x2,tmp.y2);
    }
    for(i=0;i<lasta[c];i++)
@@ -1692,33 +1839,34 @@ int load_symbol_definition(const char *name, FILE *embed_fd)
   instdef[lastinstdef].maxx = boundbox.x2;
   instdef[lastinstdef].miny = boundbox.y1;
   instdef[lastinstdef].maxy = boundbox.y2;
-  /* if(debug_var>=1) fprintf(errfp, "load_symbol_definition(): symbol %d, returning, bbox= %g %g %g %g\n",
-           lastinstdef, boundbox.x1, boundbox.y1, boundbox.x2, boundbox.y2);*/
 
   lastinstdef++;
-  my_free(&lastl);
-  my_free(&lastr);
-  my_free(&lastp);
-  my_free(&lasta);
-  my_free(&ll);
-  my_free(&bb);
-  my_free(&aa);
-  my_free(&pp);
-  my_free(&lcc);
-  my_free(&prop_ptr);
-  my_free(&aux_ptr);
-  my_free(&symname);
-  my_free(&symtype);
+  my_free(901, &lastl);
+  my_free(902, &lastr);
+  my_free(903, &lastp);
+  my_free(904, &lasta);
+  my_free(905, &ll);
+  my_free(906, &bb);
+  my_free(907, &aa);
+  my_free(908, &pp);
+  my_free(909, &lcc);
+  my_free(910, &prop_ptr);
+  my_free(911, &aux_ptr);
+  my_free(912, &symname);
+  my_free(913, &symtype);
   my_strncpy(name4, name, S(name4));
   if ((prop_ptr = strrchr(name4, '.')) && !strcmp(prop_ptr, ".sch")) {
     save = lastinstdef; /* save idx because match_symbol may call load_symbol_definition */
+    dbg(1, "load_sym_def(): call2 match_symbol\n");
     current_sym = match_symbol(add_ext(name4, ".sym"));
     if ( instdef[current_sym].type && strcmp(instdef[current_sym].type, "missing")) { /* To ensure SCH's BOX's PINLAYER matches SYM so netlisting will be corect */
       Gcurrent_sym = current_sym;
       qsort(instdef[save-1].boxptr[PINLAYER], instdef[save-1].rects[PINLAYER], sizeof(Box), CmpSchBbox);
     }
-    if(lastinstdef > save) remove_symbol(); /* if previous match_symbol() caused a symbol to be loaded unload it now */
+    if(lastinstdef > save) remove_symbol(lastinstdef - 1); /* if previous match_symbol() caused a symbol to be loaded unload it now */
   }
+  recursion_counter--;
+  dbg(1, "load_sym_def(): exiting, recursion_counter=%d\n", recursion_counter);
   return 1;
 }
 
@@ -1738,13 +1886,13 @@ void create_sch_from_sym(void)
   char *generic_pin2 = {"generic_pin.sym"};
   int indirect;
 
-  static char *dir = NULL;
-  static char *prop = NULL;
+  char *dir = NULL;
+  char *prop = NULL;
   char schname[PATH_MAX];
-  static char *savecmd=NULL;
+  char *savecmd=NULL;
   char *sub_prop;
-  static char *sub2_prop=NULL;
-  static char *str=NULL;
+  char *sub2_prop=NULL;
+  char *str=NULL;
   struct stat buf;
   int ln;
 
@@ -1770,12 +1918,16 @@ void create_sch_from_sym(void)
       my_strcat(354, &savecmd, schname);
       my_strcat(355, &savecmd, " ?\nWARNING: This schematic file already exists, it will be overwritten\"");
       tcleval(savecmd);
-      if(strcmp(Tcl_GetStringResult(interp), "yes") ) return;
+      if(strcmp(tclresult(), "yes") ) {
+        my_free(914, &savecmd);
+        return;
+      }
     }
     if(!(fd=fopen(schname,"w")))
     {
       fprintf(errfp, "create_sch_from_sym(): problems opening file %s \n",schname);
       tcleval("alert_ {file opening for write failed!} {}"); /* 20171020 */
+      my_free(915, &savecmd);
       return;
     }
     fprintf(fd, "v {xschem version=%s file_version=%s}\n", XSCHEM_VERSION, XSCHEM_FILE_VERSION);
@@ -1838,6 +1990,11 @@ void create_sch_from_sym(void)
     }  /* for(j) */
     fclose(fd);
   } /* if(lastselected...) */
+  my_free(916, &dir);
+  my_free(917, &prop);
+  my_free(918, &savecmd);
+  my_free(919, &sub2_prop);
+  my_free(920, &str);
 }
 
 void descend_symbol(void)
@@ -1861,10 +2018,11 @@ void descend_symbol(void)
 
   /* build up current hierarchy path */
   my_strdup(363,  &str, inst_ptr[selectedgroup[0].n].instname);  /* 20180911 */
-  my_strdup(364, &sch_prefix[currentsch+1], sch_prefix[currentsch]);
-  my_strcat(365, &sch_prefix[currentsch+1], str);
-  my_strcat(366, &sch_prefix[currentsch+1], ".");
-  my_free(&str);
+  my_strdup(364, &sch_path[currentsch+1], sch_path[currentsch]);
+  my_strcat(365, &sch_path[currentsch+1], str);
+  my_strcat(366, &sch_path[currentsch+1], ".");
+  sch_inst_number[currentsch+1] = 1;
+  my_free(921, &str);
   previous_instance[currentsch]=selectedgroup[0].n;
   zoom_array[currentsch].x=xorigin;
   zoom_array[currentsch].y=yorigin;
@@ -1872,12 +2030,13 @@ void descend_symbol(void)
   ++currentsch;
   if((inst_ptr[selectedgroup[0].n].ptr+instdef)->flags & EMBEDDED ||
     !strcmp(get_tok_value(inst_ptr[selectedgroup[0].n].prop_ptr,"embed", 0), "true")) {
+    /* save embedded symbol into a temporary file */
     my_snprintf(name_embedded, S(name_embedded),
-      "%s/.xschem_embedded_%d_%s.sym", tclgetvar("XSCHEM_TMP_DIR"), getpid(), get_cell(name, 0));
+      "%s/.xschem_embedded_%d_%s", tclgetvar("XSCHEM_TMP_DIR"), getpid(), get_cell_w_ext(name, 0));
     if(!(fd = fopen(name_embedded, "w")) ) {
       fprintf(errfp, "descend_symbol(): problems opening file %s \n", name_embedded);
     }
-    save_embedded_symbol(inst_ptr[selectedgroup[0].n].ptr+instdef, fd, 0);
+    save_embedded_symbol(inst_ptr[selectedgroup[0].n].ptr+instdef, fd);
     fclose(fd);
     unselect_all();
     remove_symbols(); /* must follow save (if) embedded */
@@ -1980,7 +2139,7 @@ void save_selection(int what)
  int i, c, n, k;
  char name[PATH_MAX];
 
- if(debug_var>=3) fprintf(errfp, "save_selection():\n");
+ dbg(3, "save_selection():\n");
  if(what==1)
    my_snprintf(name, S(name), "%s/%s.sch",user_conf_dir , ".selection"); /* 20150502 changed PWD to HOME */
  else /* what=2 */

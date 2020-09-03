@@ -31,7 +31,7 @@ static void instdelete(int n, int x, int y)
   while(ptr) {
     if(ptr -> n == n) {
       saveptr = ptr->next;
-      my_free(&ptr);
+      my_free(821, &ptr);
       *prevptr = saveptr;
       return;
     }
@@ -49,7 +49,7 @@ static void instinsert(int n, int x, int y)
   newptr->next=ptr;
   newptr->n=n;
   insttable[x][y]=newptr;
-  if(debug_var>=2) fprintf(errfp, "instinsert(): inserting object %d at %d,%d\n",n,x,y);
+  dbg(2, "instinsert(): inserting object %d at %d,%d\n",n,x,y);
 }
 
 static struct instentry *delinstentry(struct instentry *t)
@@ -57,7 +57,7 @@ static struct instentry *delinstentry(struct instentry *t)
   struct instentry *tmp;
   while( t ) {
     tmp = t->next;
-    my_free(&t);
+    my_free(822, &t);
     t = tmp;
   }
   return NULL;
@@ -71,7 +71,7 @@ void del_inst_table(void)
     for(j=0;j<NBOXES;j++)
       insttable[i][j] = delinstentry(insttable[i][j]);
   prepared_hash_instances=0;
-  if(debug_var>0) fprintf(errfp, "cleared object hash table\n");
+  dbg(1, "cleared object hash table\n");
 }
 
 /* what: 
@@ -139,7 +139,7 @@ static void instpindelete(int n,int pin, int x, int y)
   while(ptr) {
     if(ptr->n == n && ptr->pin == pin) {
       saveptr = ptr->next;
-      my_free(&ptr);
+      my_free(823, &ptr);
       *prevptr = saveptr;
       return;
     }
@@ -162,7 +162,7 @@ static void instpininsert(int n,int pin, double x0, double y0, int x, int y)
  newptr->y0=y0;
  newptr->pin=pin;
  instpintable[x][y]=newptr;
-  if(debug_var>=2) fprintf(errfp, "instpininsert(): inserting inst %d at %d,%d\n",n,x,y);
+ dbg(2, "instpininsert(): inserting inst %d at %d,%d\n",n,x,y);
 }
 
 
@@ -172,7 +172,7 @@ struct instpinentry *delinstpinentry(struct instpinentry *t)
 
   while(t) {
     tmp = t->next;
-    my_free(&t);
+    my_free(824, &t);
     t = tmp;
   }
   return NULL;
@@ -196,7 +196,7 @@ static void wiredelete(int n, int x, int y)
   while(ptr) {
     if(ptr -> n == n) {
       saveptr = ptr->next;
-      my_free(&ptr);
+      my_free(825, &ptr);
       *prevptr = saveptr;
       return;
     }
@@ -215,7 +215,7 @@ static void wireinsert(int n, int x, int y)
   newptr->next=ptr;
   newptr->n=n;
   wiretable[x][y]=newptr;
-  if(debug_var>=2) fprintf(errfp, "wireinsert(): inserting wire %d at %d,%d\n",n,x,y);
+  dbg(2, "wireinsert(): inserting wire %d at %d,%d\n",n,x,y);
 }
 
 static struct wireentry *delwireentry(struct wireentry *t)
@@ -224,7 +224,7 @@ static struct wireentry *delwireentry(struct wireentry *t)
 
   while( t ) {
     tmp = t->next;
-    my_free(&t);
+    my_free(826, &t);
     t = tmp;
   }
   return NULL;
@@ -318,7 +318,7 @@ void hash_wire(int what, int n)
 
   /* 20190606 */
   /* wire[n].node=NULL; */ 
-  my_free(&wire[n].node);
+  my_free(827, &wire[n].node);
 
   wire[n].end1 = wire[n].end2=-1;
   x1=wire[n].x1;
@@ -373,14 +373,14 @@ int check_lib(char *s)
  
  found=0;
  tcleval("llength $xschem_libs");
- range = atoi(Tcl_GetStringResult(interp));
- if(debug_var>=1) fprintf(errfp, "check_lib(): %s, range=%d\n", s, range);
+ range = atoi(tclresult());
+ dbg(1, "check_lib(): %s, range=%d\n", s, range);
 
  for(i=0;i<range;i++){
   my_snprintf(str, S(str), "lindex $xschem_libs %d",i);
   tcleval(str);
-  if(debug_var>=1) fprintf(errfp, "check_lib(): xschem_libs=%s\n", Tcl_GetStringResult(interp));
-  if( strstr(s,Tcl_GetStringResult(interp))) found=1;
+  dbg(1, "check_lib(): xschem_libs=%s\n", tclresult());
+  if( strstr(s,tclresult())) found=1;
  }
  if(found) return 0;
  else return 1;
@@ -388,7 +388,7 @@ int check_lib(char *s)
 
 void netlist_options(int i) 
 {
-  char * str;
+  const char * str;
   str = get_tok_value(inst_ptr[i].prop_ptr, "bus_replacement_char", 0);
   if(str[0] && str[1] && strlen(str) ==2) {
     bus_replacement_char[0] = str[0];
@@ -419,14 +419,14 @@ void print_wires(void)
  for(i=0;i<NBOXES;i++) {
    for(j=0;j<NBOXES;j++)
    {
-    if(debug_var>=1) fprintf(errfp, "print_wires(): %4d%4d :\n",i,j);
+    dbg(1, "print_wires(): %4d%4d :\n",i,j);
     ptr=wiretable[i][j];
     while(ptr)
     {
-     if(debug_var>=1) fprintf(errfp, "print_wires(): %6d\n", ptr->n);
+     dbg(1, "print_wires(): %6d\n", ptr->n);
      ptr=ptr->next;
     }
-    if(debug_var>=1) fprintf(errfp, "print_wires(): \n");
+    dbg(1, "print_wires(): \n");
    }
  }
  ptr=wiretable[0][1];
@@ -445,7 +445,7 @@ static void signal_short( char *n1, char *n2)
  if( n1 && n2 && strcmp( n1, n2) )
  {
    my_snprintf(str, S(str), "shorted: %s - %s", n1, n2);
-   if(debug_var>=1) fprintf(errfp, "signal_short(): signal_short: shorted: %s - %s", n1, n2);
+   dbg(1, "signal_short(): signal_short: shorted: %s - %s", n1, n2);
    statusmsg(str,2);
    if(!netlist_count) {
       bus_hilight_lookup(n1, hilight_color, XINSERT);
@@ -514,9 +514,9 @@ static void wirecheck(int k)    /* recursive routine */
      }
      ptr2=ptr2->next;
     }
-     if(debug_var>=2) fprintf(errfp, "wirecheck(): %d/%d\n", tmpi,tmpj );
+     dbg(2, "wirecheck(): %d/%d\n", tmpi,tmpj );
    }
-    if(debug_var>=2) fprintf(errfp, "wirecheck(): \n");
+    dbg(2, "wirecheck(): \n");
   }
 }
 
@@ -531,11 +531,11 @@ int get_unnamed_node(int what, int mult,int node)
   static int node_mult_size;
   int i;
 
-  if (debug_var>=2) fprintf(errfp, "get_unnamed_node(): what=%d mult=%d node=%d\n", what, mult, node);
+  dbg(2, "get_unnamed_node(): what=%d mult=%d node=%d\n", what, mult, node);
   if (what==0)  /* initialize unnamed node data structures */
   {
     new_node=0;
-    my_free(&node_mult); 
+    my_free(828, &node_mult); 
     node_mult_size=0;
     return 0;
   }
@@ -559,7 +559,7 @@ int get_unnamed_node(int what, int mult,int node)
   }
   else /* what=3 , return node multiplicity */
   {
-    if (debug_var>=2) fprintf(errfp, "get_unnamed_node(): returning mult=%d\n", node_mult[node]);
+    dbg(2, "get_unnamed_node(): returning mult=%d\n", node_mult[node]);
     return node_mult[node];
   }
 }
@@ -595,9 +595,9 @@ int record_global_node(int what, FILE *fp, char *node)
  } else if(what == 0 || what == 2) {
     for(i=0;i<max_globals;i++) {
        if(what == 0 && netlist_type == CAD_SPICE_NETLIST) fprintf(fp, ".GLOBAL %s\n", globals[i]);
-       my_free(&globals[i]);
+       my_free(829, &globals[i]);
     }
-    my_free(&globals);
+    my_free(830, &globals);
     size_globals=max_globals=0;
  } 
  return 0;
@@ -620,13 +620,13 @@ void prepare_netlist_structs(int for_netlist)
   struct instpinentry *iptr;
   struct node_hashentry;
   int i,j, rects, generic_rects;
-  static char *dir=NULL;
-  static char *type=NULL;
-  static char *sig_type=NULL;
-  static char *verilog_type=NULL;
-  static char *value=NULL;
-  static char *class=NULL;
-  static char *global_node=NULL;
+  char *dir=NULL;
+  char *type=NULL;
+  char *sig_type=NULL;
+  char *verilog_type=NULL;
+  char *value=NULL;
+  char *class=NULL;
+  char *global_node=NULL;
   int inst_mult, pin_mult;
 
   if (for_netlist>0 && prepared_netlist_structs) return; /* 20160413 */
@@ -638,7 +638,7 @@ void prepare_netlist_structs(int for_netlist)
     statusmsg(nn,2);
   }
   /* reset wire & inst node labels */
-  if (debug_var>=1) fprintf(errfp, "prepare_netlist_structs(): resetting node hash tables\n");
+  dbg(1, "prepare_netlist_structs(): resetting node hash tables\n");
   hash_wires();
   for (i=0;i<lastinst;i++)
   {
@@ -657,7 +657,7 @@ void prepare_netlist_structs(int for_netlist)
     }
   }
 
-  if (debug_var>=2) fprintf(errfp, "prepare_netlist_structs(): naming pins from attrs\n");
+  dbg(2, "prepare_netlist_structs(): naming pins from attrs\n");
   for (i=0;i<lastinst;i++) 
   { 
     /* name ipin opin label node fields from prop_ptr attributes */
@@ -700,10 +700,10 @@ void prepare_netlist_structs(int for_netlist)
 
       /* obtain ipin/opin/label signal type (default: std_logic) */
       if (!for_netlist) {
-        my_free(&sig_type);
-        my_free(&verilog_type);
-        my_free(&value);
-        my_free(&class);
+        my_free(831, &sig_type);
+        my_free(832, &verilog_type);
+        my_free(833, &value);
+        my_free(834, &class);
       } else {
         my_strdup(258, &sig_type,get_tok_value(inst_ptr[i].prop_ptr,"sig_type",0));
         my_strdup(259, &verilog_type,get_tok_value(inst_ptr[i].prop_ptr,"verilog_type",0)); /*09112003 */
@@ -714,12 +714,12 @@ void prepare_netlist_structs(int for_netlist)
       my_strdup(262, &inst_ptr[i].node[0], get_tok_value(inst_ptr[i].prop_ptr,"lab",1));
       if (!(inst_ptr[i].node[0])) {
         my_strdup(65, &inst_ptr[i].node[0], get_tok_value((inst_ptr[i].ptr+instdef)->templ, "lab",1));
-        if (debug_var>=1) fprintf(errfp, "no lab attr on instance, pick from symbol: %s\n", inst_ptr[i].node[0]);
+        dbg(1, "no lab attr on instance, pick from symbol: %s\n", inst_ptr[i].node[0]);
       }
 
       /* handle global nodes (global=1 set as symbol property) 28032003 */
       if (!strcmp(type,"label") && global_node && !strcmp(global_node, "true")) {
-        if(debug_var>=1) fprintf(errfp, "prepare_netlist_structs(): global node: %s\n",inst_ptr[i].node[0]);
+        dbg(1, "prepare_netlist_structs(): global node: %s\n",inst_ptr[i].node[0]);
         record_global_node(1,NULL, inst_ptr[i].node[0]);
       }
    
@@ -727,11 +727,11 @@ void prepare_netlist_structs(int for_netlist)
       bus_hash_lookup(inst_ptr[i].node[0],    /* insert node in hash table */
         dir, XINSERT, port, sig_type, verilog_type, value, class);
 
-      if (debug_var>=2) fprintf(errfp, "prepare_netlist_structs(): name=%s\n",
+      dbg(2, "prepare_netlist_structs(): name=%s\n",
         get_tok_value( inst_ptr[i].prop_ptr, "lab",0));
-      if (debug_var>=2) fprintf(errfp, "prepare_netlist_structs(): pin=%s\n",
+      dbg(2, "prepare_netlist_structs(): pin=%s\n",
         get_tok_value( (inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][0].prop_ptr, "name",0));
-      if (debug_var>=2) fprintf(errfp, "prepare_netlist_structs(): dir=%s\n",
+      dbg(2, "prepare_netlist_structs(): dir=%s\n",
         get_tok_value( (inst_ptr[i].ptr+instdef)->boxptr[PINLAYER][0].prop_ptr, "dir",0));
 
       /* name nets that touch ioin opin alias instances */
@@ -763,7 +763,7 @@ void prepare_netlist_structs(int for_netlist)
   } /* for(i=0;i<lastinst... */
 
   /* name nets that do not touch ipin opin alias instances */
-  if (debug_var>=2) fprintf(errfp, "prepare_netlist_structs(): naming nets that dont touch labels\n");
+  dbg(2, "prepare_netlist_structs(): naming nets that dont touch labels\n");
   get_unnamed_node(0,0,0); /*initializes node multiplicity data struct */
   for (i=0;i<lastwire;i++)
   {
@@ -787,7 +787,7 @@ void prepare_netlist_structs(int for_netlist)
   /* NAME GENERICS  */
 
   /* name generic pins from attached labels */
-  if (debug_var>=2) fprintf(errfp, "prepare_netlist_structs(): naming generics from attached labels\n");
+  dbg(2, "prepare_netlist_structs(): naming generics from attached labels\n");
   for (i=0;i<lastinst;i++) /* ... assign node fields on all (non label) instances */
   {
     if (inst_ptr[i].ptr<0) continue;
@@ -827,7 +827,7 @@ void prepare_netlist_structs(int for_netlist)
               if ((inst_ptr[iptr->n].ptr+instdef)->type && inst_ptr[iptr->n].node[iptr->pin] != NULL &&
                  !strcmp((inst_ptr[iptr->n].ptr+instdef)->type, "label")) /* 20150409 */
               {
-                if (debug_var>=2) fprintf(errfp, "prepare_netlist_structs(): naming generic %s\n", 
+                dbg(2, "prepare_netlist_structs(): naming generic %s\n", 
                   inst_ptr[iptr->n].node[iptr->pin]); 
 
                 my_strdup(268,  &inst_ptr[i].node[j], 
@@ -862,7 +862,7 @@ void prepare_netlist_structs(int for_netlist)
   /* END NAME GENERICS  */
 
   /* name instance pins  of non (label,pin) instances */
-  if (debug_var>=2) fprintf(errfp, "prepare_netlist_structs(): assigning node names on instance pins\n");
+  dbg(2, "prepare_netlist_structs(): assigning node names on instance pins\n");
   for (i=0;i<lastinst;i++) /* ... assign node fields on all (non label) instances */
   {
     if(inst_ptr[i].ptr<0) continue;
@@ -891,7 +891,7 @@ void prepare_netlist_structs(int for_netlist)
           get_square(x0, y0, &sqx, &sqy);
           /* name instance nodes that touch named nets */
           wptr=wiretable[sqx][sqy];
-          if (debug_var>=2) fprintf(errfp, "prepare_netlist_structs():           from attached nets\n");
+          dbg(2, "prepare_netlist_structs():           from attached nets\n");
           while (wptr)
           {
             if (touch(wire[wptr->n].x1, wire[wptr->n].y1,
@@ -923,7 +923,7 @@ void prepare_netlist_structs(int for_netlist)
             wptr=wptr->next;
           } 
     
-          if (debug_var>=2) fprintf(errfp, "prepare_netlist_structs():           from other instances\n");
+          dbg(2, "prepare_netlist_structs():           from other instances\n");
           touches_unnamed=0;
           iptr=instpintable[sqx][sqy];
           while (iptr)
@@ -973,7 +973,7 @@ void prepare_netlist_structs(int for_netlist)
           } 
 
           /*   pin did not touch named pins or nets so we name it now */
-          if (debug_var>=2) fprintf(errfp, "prepare_netlist_structs():           naming the other pins\n");
+          dbg(2, "prepare_netlist_structs():           naming the other pins\n");
           if (!touches)
           {
             if (!(CAD_VHDL_NETLIST && !touches_unnamed))
@@ -1002,7 +1002,15 @@ void prepare_netlist_structs(int for_netlist)
   rebuild_selected_array();
   if (for_netlist>0) prepared_netlist_structs=1;
   else prepared_hilight_structs=1;
-  if (debug_var>=1) fprintf(errfp, "prepare_netlist_structs(): returning\n");
+
+  my_free(835, &dir);
+  my_free(836, &type);
+  my_free(837, &sig_type);
+  my_free(838, &verilog_type);
+  my_free(839, &value);
+  my_free(840, &class);
+  my_free(841, &global_node);
+  dbg(1, "prepare_netlist_structs(): returning\n");
 }
 
 int sym_vs_sch_pins()
@@ -1022,7 +1030,7 @@ int sym_vs_sch_pins()
   int version_found;
   int tmpi;
   int endfile;
-  char c;
+  char tag[1];
   char filename[PATH_MAX];
   n_syms = lastinstdef;
   for(i=0;i<n_syms;i++)
@@ -1040,8 +1048,8 @@ int sym_vs_sch_pins()
         version_found=0;
         file_version[0] = '\0';
         while(!endfile) {
-          if(fscanf(fd," %c",&c)==EOF) break;
-          switch(c) {
+          if(fscanf(fd," %c",tag)==EOF) break;
+          switch(tag[0]) {
             case 'v':
              load_ascii_string(&xschem_version_string, fd);
              my_snprintf(file_version, S(file_version), "%s", get_tok_value(xschem_version_string, "file_version", 0));
@@ -1061,7 +1069,7 @@ int sym_vs_sch_pins()
             case 'N':
               if(fscanf(fd, "%lf %lf %lf %lf ",&tmpd, &tmpd, &tmpd, &tmpd) < 4) {
                  fprintf(errfp,"WARNING:  missing fields for LINE/BOX object, ignoring\n");
-                 read_line(fd);
+                 read_line(fd, 0);
                  break;
                }
                load_ascii_string(&tmp, fd);
@@ -1069,13 +1077,13 @@ int sym_vs_sch_pins()
             case 'P':
               if(fscanf(fd, "%d %d",&tmpi, &tmpi)<2) {
                 fprintf(errfp,"WARNING: missing fields for POLYGON object, ignoring.\n");
-                read_line(fd);
+                read_line(fd, 0);
                 break;
               }
               for(j=0;j<tmpi;j++) {
                 if(fscanf(fd, "%lf %lf ",&tmpd, &tmpd)<2) {
                   fprintf(errfp,"WARNING: missing fields for POLYGON points, ignoring.\n");
-                  read_line(fd);
+                  read_line(fd, 0);
                 }
               }
               load_ascii_string( &tmp, fd);
@@ -1084,7 +1092,7 @@ int sym_vs_sch_pins()
               fscanf(fd, "%d",&tmpi);
               if(fscanf(fd, "%lf %lf %lf %lf %lf ",&tmpd, &tmpd, &tmpd, &tmpd, &tmpd) < 5) {
                 fprintf(errfp,"WARNING:  missing fields for ARC object, ignoring\n");
-                read_line(fd);
+                read_line(fd, 0);
                 break;
               }
               load_ascii_string(&tmp, fd);
@@ -1093,7 +1101,7 @@ int sym_vs_sch_pins()
               load_ascii_string(&tmp,fd);
               if(fscanf(fd, "%lf %lf %d %d %lf %lf ", &tmpd, &tmpd, &tmpi, &tmpi, &tmpd, &tmpd) < 6 ) {
                 fprintf(errfp,"WARNING:  missing fields for TEXT object, ignoring\n");
-                read_line(fd);
+                read_line(fd, 0);
                 break;
               }
               load_ascii_string(&tmp,fd);
@@ -1103,13 +1111,13 @@ int sym_vs_sch_pins()
               my_strncpy(name, tmp, S(name));
 
               if(!strcmp(file_version,"1.0") ) {
-                if(debug_var>=1) fprintf(errfp, "sym_vs_sch_pins(): add_ext(name,\".sym\") = %s\n", add_ext(name, ".sym") );
+                dbg(1, "sym_vs_sch_pins(): add_ext(name,\".sym\") = %s\n", add_ext(name, ".sym") );
                 my_strncpy(name, add_ext(name, ".sym"), S(name));
               }
 
               if(fscanf(fd, "%lf %lf %d %d", &tmpd, &tmpd, &tmpi, &tmpi) < 4) {
                 fprintf(errfp,"sym_vs_sch_pins() WARNING: missing fields for INSTANCE object, filename=%s\n", filename);
-                read_line(fd);
+                read_line(fd, 0);
                 break;
               }
               load_ascii_string(&tmp,fd);
@@ -1166,20 +1174,22 @@ int sym_vs_sch_pins()
               }
               break;
             case '[':
-              load_symbol_definition(name, fd);
+              load_sym_def(name, fd);
               break;
             case ']':
-              read_line(fd);
+              read_line(fd, 0);
               endfile=1;
               break;
             default: 
-              read_line(fd);
+              if( tag[0] == '{' ) ungetc(tag[0], fd);
+              read_record(tag[0], fd);
               break;
           }
+          read_line(fd, 0); /* discard any remaining characters till (but not including) newline */
           if(check_version && !version_found) break;
           if(!file_version[0]) {
             my_snprintf(file_version, S(file_version), "1.0");
-            if(debug_var >= 1) fprintf(errfp, "sym_vs_sch_pins(): no file_version, assuming file_version=%s\n", file_version);
+            dbg(1, "sym_vs_sch_pins(): no file_version, assuming file_version=%s\n", file_version);
           }
         } /* while(!endfile) */
         fclose(fd);
@@ -1219,9 +1229,9 @@ int sym_vs_sch_pins()
       }
       if(lab_array_size) {
         for(k=0;k<pin_cnt;k++) {
-          my_free( &(lab_array[k]));
+          my_free(842, &(lab_array[k]));
         }
-        my_free(&lab_array);
+        my_free(843, &lab_array);
         lab_array_size = 0;
         pin_cnt=0;
       }
@@ -1231,14 +1241,14 @@ int sym_vs_sch_pins()
     } /* if( ... "subcircuit"... ) */
 
 
-    my_free(&type);
-    my_free(&tmp);
-    my_free(&lab);
-    my_free(&pin_name);
-    my_free(&pin_dir);
+    my_free(844, &type);
+    my_free(845, &tmp);
+    my_free(846, &lab);
+    my_free(847, &pin_name);
+    my_free(848, &pin_dir);
   } /* for(i=0;i<n_syms;i++) */
 
-  while(lastinstdef > n_syms) remove_symbol();
+  while(lastinstdef > n_syms) remove_symbol(lastinstdef - 1);
   return 0;
 }
 
@@ -1251,8 +1261,8 @@ void delete_inst_node(int i)
    if( rects > 0 )
    {
      for(j=0;j< rects ;j++)
-       my_free( &inst_ptr[i].node[j]);
-     my_free(& inst_ptr[i].node );
+       my_free(849, &inst_ptr[i].node[j]);
+     my_free(850, &inst_ptr[i].node );
    }
 }
 
@@ -1260,19 +1270,19 @@ void delete_netlist_structs(void)
 {
  int i;
   /* erase node data structures */
-   if(debug_var>=1) fprintf(errfp, "delete_netlist_structs(): begin erasing\n");
+   dbg(1, "delete_netlist_structs(): begin erasing\n");
   for(i=0;i<lastinst;i++)
   {
    delete_inst_node(i);
   }
   for(i=0;i<lastwire;i++)
   {
-    my_free(&wire[i].node);
+    my_free(851, &wire[i].node);
   } 
   /* erase inst and wire topological hash tables */
   del_inst_pin_table();
   free_node_hash();
-   if(debug_var>=1) fprintf(errfp, "delete_netlist_structs(): end erasing\n");
+  dbg(1, "delete_netlist_structs(): end erasing\n");
   prepared_netlist_structs=0;
   prepared_hilight_structs=0;
 }

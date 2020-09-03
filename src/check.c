@@ -76,7 +76,7 @@ void check_touch(int i, int j,
   if((*xt > x1 && *xt < x2)||(*yt > y1 && *yt < y2)) *broken = 1;
  }
  if(touch1 && touch2) *includes = 1;
-  if(debug_var>=2) fprintf(errfp, "check_touch(): xt=%.16g, yt=%.16g\n",*xt, *yt);
+  dbg(2, "check_touch(): xt=%.16g, yt=%.16g\n",*xt, *yt);
 }
 
 void update_conn_cues(int draw_cues, int dr_win)
@@ -130,10 +130,9 @@ void update_conn_cues(int draw_cues, int dr_win)
       }
     }
   }
-  if(debug_var>=3) fprintf(errfp, "update_conn_cues(): check3\n");
+  dbg(3, "update_conn_cues(): check3\n");
   if(draw_cues) {
     save_draw = draw_window; draw_window = dr_win;
-    filledarc(WIRELAYER, BEGIN, 0.0, 0.0, 0.0, 0.0, 0.0);
     for(init_wire_iterator(x1, y1, x2, y2); ( wireptr = wire_iterator_next() ) ;) {
       i = wireptr->n;
       /* optimization when editing small areas (detailed zoom)  of a huge schematic */
@@ -289,7 +288,7 @@ void trim_wires(void)
      prepared_hash_wires=0;
    }
   } while( changed ) ;
-  if(debug_var>=1) fprintf(errfp, "trim_wires:loops=%d\n", loops);
+  dbg(1, "trim_wires:loops=%d\n", loops);
   draw_dots=1;
 }
  

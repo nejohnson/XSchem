@@ -8,8 +8,7 @@
 2. Install Tree
 C:/Program Files/XSchem/bin                          - Binaries (executable file).
 C:/Program Files/XSchem/doc                          - Various documentation.
-C:/Program Files/XSchem/share                        - default share directory (can be overriden with XSCHEM_SHARE_DIR) xschemrc and *.awk
-C:/Program Files/XSchem/src                          - default xschem.tcl, xschemrc, xschem.help, systemlib/font.sch, systemlib/missing.sym
+C:/Program Files/XSchem/share                        - default share directory containing systemlib, utile, xschem.tcl, xschemrc and *.awk (can be overriden with XSCHEM_SHARE_DIR) 
 C:/Program Files/XSchem/xschem_library               - XSchem library consisting of .sch and .sym
 C:/Users/<YourUserName>/xschem                       - User configuration directory
 

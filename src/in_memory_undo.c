@@ -71,9 +71,9 @@ void free_lines(int slot)
   
   for(c=0;c<cadlayers; c++) {
     for(i=0;i<uslot[slot].lines[c]; i++) {
-      my_free(&uslot[slot].lptr[c][i].prop_ptr);
+      my_free(783, &uslot[slot].lptr[c][i].prop_ptr);
     }
-    my_free(&uslot[slot].lptr[c]);
+    my_free(784, &uslot[slot].lptr[c]);
     uslot[slot].lines[c] = 0;
   }
 }
@@ -84,9 +84,9 @@ void free_boxes(int slot)
 
   for(c=0;c<cadlayers; c++) {
     for(i=0;i<uslot[slot].boxes[c]; i++) {
-      my_free(&uslot[slot].bptr[c][i].prop_ptr);
+      my_free(785, &uslot[slot].bptr[c][i].prop_ptr);
     }
-    my_free(&uslot[slot].bptr[c]);
+    my_free(786, &uslot[slot].bptr[c]);
     uslot[slot].boxes[c] = 0;
   }
 }
@@ -97,12 +97,12 @@ void free_polygons(int slot)
 
   for(c=0;c<cadlayers; c++) {
     for(i=0;i<uslot[slot].polygons[c]; i++) {
-      my_free(&uslot[slot].pptr[c][i].prop_ptr);
-      my_free(&uslot[slot].pptr[c][i].x);
-      my_free(&uslot[slot].pptr[c][i].y);
-      my_free(&uslot[slot].pptr[c][i].selected_point);
+      my_free(787, &uslot[slot].pptr[c][i].prop_ptr);
+      my_free(788, &uslot[slot].pptr[c][i].x);
+      my_free(789, &uslot[slot].pptr[c][i].y);
+      my_free(790, &uslot[slot].pptr[c][i].selected_point);
     }
-    my_free(&uslot[slot].pptr[c]);
+    my_free(791, &uslot[slot].pptr[c]);
     uslot[slot].polygons[c] = 0;
   }
 }
@@ -113,9 +113,9 @@ void free_arcs(int slot)
 
   for(c=0;c<cadlayers; c++) {
     for(i=0;i<uslot[slot].arcs[c]; i++) {
-      my_free(&uslot[slot].aptr[c][i].prop_ptr);
+      my_free(792, &uslot[slot].aptr[c][i].prop_ptr);
     }
-    my_free(&uslot[slot].aptr[c]);
+    my_free(793, &uslot[slot].aptr[c]);
     uslot[slot].arcs[c] = 0;
   }
 }
@@ -125,9 +125,9 @@ void free_wires(int slot)
   int i;
 
   for(i=0;i<uslot[slot].wires; i++) {
-    my_free(&uslot[slot].wptr[i].prop_ptr);
+    my_free(794, &uslot[slot].wptr[i].prop_ptr);
   }
-  my_free(&uslot[slot].wptr);
+  my_free(795, &uslot[slot].wptr);
   uslot[slot].wires = 0;
 }
 
@@ -136,11 +136,11 @@ void free_texts(int slot)
   int i;
     
   for(i=0;i<uslot[slot].texts; i++) {
-    my_free(&uslot[slot].tptr[i].prop_ptr);
-    my_free(&uslot[slot].tptr[i].txt_ptr);
-    my_free(&uslot[slot].tptr[i].font);
+    my_free(796, &uslot[slot].tptr[i].prop_ptr);
+    my_free(797, &uslot[slot].tptr[i].txt_ptr);
+    my_free(798, &uslot[slot].tptr[i].font);
   }
-  my_free(&uslot[slot].tptr);
+  my_free(799, &uslot[slot].tptr);
   uslot[slot].texts = 0;
 }
 
@@ -149,11 +149,11 @@ void free_instances(int slot)
   int i;
 
   for(i=0;i<uslot[slot].instances; i++) {
-    my_free(&uslot[slot].iptr[i].name);
-    my_free(&uslot[slot].iptr[i].prop_ptr);
-    my_free(&uslot[slot].iptr[i].instname);
+    my_free(800, &uslot[slot].iptr[i].name);
+    my_free(801, &uslot[slot].iptr[i].prop_ptr);
+    my_free(802, &uslot[slot].iptr[i].instname);
   }
-  my_free(&uslot[slot].iptr);
+  my_free(803, &uslot[slot].iptr);
   uslot[slot].instances = 0;
 }
 
@@ -181,14 +181,14 @@ void delete_undo(void)  /* 20150327 */
 
   clear_undo();
   for(slot=0;slot<MAX_UNDO; slot++) {
-    my_free(&uslot[slot].lines);
-    my_free(&uslot[slot].boxes);
-    my_free(&uslot[slot].arcs);
-    my_free(&uslot[slot].polygons);
-    my_free(&uslot[slot].lptr);
-    my_free(&uslot[slot].bptr);
-    my_free(&uslot[slot].aptr);
-    my_free(&uslot[slot].pptr);
+    my_free(804, &uslot[slot].lines);
+    my_free(805, &uslot[slot].boxes);
+    my_free(806, &uslot[slot].arcs);
+    my_free(807, &uslot[slot].polygons);
+    my_free(808, &uslot[slot].lptr);
+    my_free(809, &uslot[slot].bptr);
+    my_free(810, &uslot[slot].aptr);
+    my_free(811, &uslot[slot].pptr);
   }
 
 }

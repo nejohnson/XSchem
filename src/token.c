@@ -108,14 +108,14 @@ static struct inst_hashentry *inst_hash_lookup(struct inst_hashentry **table, ch
     if( entry->hash==hashcode && !strcmp(token,entry->token) ) { /* found a matching token */
       if(remove == XDELETE) {              /* remove token from the hash table ... */
         saveptr=entry->next;
-        my_free(&entry->token);
-        my_free(&entry);
+        my_free(968, &entry->token);
+        my_free(969, &entry);
         *preventry=saveptr;
         return NULL;
       } else if(remove == XINSERT) {
         entry->value = value;
       }
-      /* if(debug_var>=1) fprintf(errfp, "inst_hash_lookup: returning: %s , %d\n", entry->token, entry->value); */
+      /* dbg(1, "inst_hash_lookup: returning: %s , %d\n", entry->token, entry->value); */
       return entry;        /* found matching entry, return the address */
     } 
     preventry=&entry->next; /* descend into the list. */
@@ -128,9 +128,9 @@ static struct inst_hashentry *inst_free_hash_entry(struct inst_hashentry *entry)
   struct inst_hashentry *tmp;
   while( entry ) {
     tmp = entry -> next;
-    my_free(&(entry->token));
-    if(debug_var>=3) fprintf(errfp, "inst_free_hash_entry(): removing entry %lu\n", (unsigned long)entry);
-    my_free(&entry);
+    my_free(970, &(entry->token));
+    dbg(3, "inst_free_hash_entry(): removing entry %lu\n", (unsigned long)entry);
+    my_free(971, &entry);
     entry = tmp;
   }
   return NULL;
@@ -140,7 +140,7 @@ static void inst_free_hash(struct inst_hashentry **table) /* remove the whole ha
 {
  int i;
   
- if(debug_var>=1) fprintf(errfp, "inst_free_hash(): removing hash table\n");
+ dbg(1, "inst_free_hash(): removing hash table\n");
  for(i=0;i<HASHSIZE;i++)
  {
    table[i] = inst_free_hash_entry( table[i] );
@@ -197,7 +197,7 @@ void check_unique_names(int rename)
         else start = comma_pos;
         comma_pos = strchr(start, ',');
         if(comma_pos) *comma_pos = '\0';
-        if(debug_var>=1) fprintf(errfp, "check_unique_names: checking %s\n", start);
+        dbg(1, "check_unique_names: checking %s\n", start);
         if( (entry = inst_hash_lookup(table, start, i, XINSERT, strlen(start)) ) && entry->value != i) {
           inst_ptr[i].flags |=4;
           hilight_nets=1;
@@ -225,9 +225,9 @@ void check_unique_names(int rename)
         inst_hash_lookup(table, inst_ptr[i].instname, i, XINSERT, strlen(inst_ptr[i].instname));
         symbol_bbox(i, &inst_ptr[i].x1, &inst_ptr[i].y1, &inst_ptr[i].x2, &inst_ptr[i].y2);
         bbox(ADD, inst_ptr[i].x1, inst_ptr[i].y1, inst_ptr[i].x2, inst_ptr[i].y2);
-        my_free(&tmp);
+        my_free(972, &tmp);
       }
-      my_free(&expanded_instname);
+      my_free(973, &expanded_instname);
     }
   } /* for(i...) */
   if(rename == 1 && hilight_nets) {
@@ -249,50 +249,50 @@ int match_symbol(const char *name)  /* never returns -1, if symbol not found loa
  found=0;
  for(i=0;i<lastinstdef;i++)
  {
-  /* if(debug_var>=1) fprintf(errfp, "match_symbol(): name=%s, instdef[i].name=%s\n",name, instdef[i].name);*/
+  /* dbg(1, "match_symbol(): name=%s, instdef[i].name=%s\n",name, instdef[i].name);*/
   if(strcmp(name, instdef[i].name) == 0)
   {
-   if(debug_var>=2) fprintf(errfp, "match_symbol(): found matching symbol:%s\n",name);
+   dbg(1, "match_symbol(): found matching symbol:%s\n",name);
    found=1;break;
   }
  }
  if(!found)
  {
-  if(debug_var>=1) fprintf(errfp, "match_symbol(): matching symbol not found:%s, loading\n",name);
-  load_symbol_definition(name, NULL); /* append another symbol to the instdef[] array */
+  dbg(1, "match_symbol(): matching symbol not found:%s, loading\n",name);
+  load_sym_def(name, NULL); /* append another symbol to the instdef[] array */
  }
- if(debug_var>=2) fprintf(errfp, "match_symbol(): returning %d\n",i);
+ dbg(1, "match_symbol(): returning %d\n",i);
  return i;
 }
 
 /* update **s modifying only the token values that are */
 /* different between *new and *old */
 /* return 1 if s modified 20081221 */
-int set_different_token(char **s,char *new, char *old, int object, int n)
+int set_different_token(char **s,const char *new, const char *old, int object, int n)
 {
  register int c, state=XBEGIN, space;
- static char *token=NULL, *value=NULL;
+ char *token=NULL, *value=NULL;
  int sizetok=0, sizeval=0;
  int token_pos=0, value_pos=0;
  int quote=0;
  int escape=0;
  int mod;
- char *my_new;
+ const char *my_new;
 
  mod=0;
  my_new = new;
- if(debug_var>=1) fprintf(errfp, "set_different_token(): *s=%s, new=%s, old=%s n=%d\n",*s, new, old, n);
+ dbg(1, "set_different_token(): *s=%s, new=%s, old=%s n=%d\n",*s, new, old, n);
  if(new==NULL) return 0;
- sizetok=CADCHUNKALLOC;
- if(token==NULL) token=my_malloc(427, sizetok);
- else my_realloc(428, &token,sizetok);
- sizeval=CADCHUNKALLOC;
- if(value==NULL) value=my_malloc(429, sizeval);
- else my_realloc(430, &value,sizeval);
+
+ sizeval = sizetok = CADCHUNKALLOC;
+ my_realloc(427, &token, sizetok);
+ my_realloc(429, &value, sizeval);
+
  /* parse new string and add / change attributes that are missing / different from old */
  while(1) {
   c=*my_new++; 
   space=SPACE(c) ;
+  if(c=='"' && !escape) quote=!quote;
   if( (state==XBEGIN || state==XENDTOK) && !space && c != '=') state=XTOKEN;
   else if( state==XTOKEN && space) state=XENDTOK;
   else if( (state==XTOKEN || state==XENDTOK) && c=='=') state=XSEPARATOR;
@@ -308,11 +308,7 @@ int set_different_token(char **s,char *new, char *old, int object, int n)
   }
   if(state==XTOKEN) token[token_pos++]=c;
   else if(state==XVALUE) {
-   if(c=='"' && !escape) quote=!quote;
    value[value_pos++]=c;
-   if(c=='\\') {
-     escape=1;
-   } else escape=0;
   }
   else if(state==XENDTOK || state==XSEPARATOR) {
    if(token_pos) {
@@ -339,10 +335,9 @@ int set_different_token(char **s,char *new, char *old, int object, int n)
    }
    state=XBEGIN;
   }
+  escape = (c=='\\' && !escape);
   if(c=='\0') break;
  }
-
-
 
  state = XBEGIN;
  escape = quote = token_pos = value_pos = 0;
@@ -350,6 +345,7 @@ int set_different_token(char **s,char *new, char *old, int object, int n)
  while(old) {
   c=*old++;
   space=SPACE(c) ;
+  if(c=='"' && !escape) quote=!quote;
   if( (state==XBEGIN || state==XENDTOK) && !space && c != '=') state=XTOKEN;
   else if( state==XTOKEN && space) state=XENDTOK;
   else if( (state==XTOKEN || state==XENDTOK) && c=='=') state=XSEPARATOR;
@@ -365,20 +361,13 @@ int set_different_token(char **s,char *new, char *old, int object, int n)
   }
   if(state==XTOKEN) token[token_pos++]=c;
   else if(state==XVALUE) {
-   if(c=='"' && !escape) quote=!quote;
    value[value_pos++]=c;
-   if(c=='\\') {
-     escape=1;
-   } else escape=0;
   }
   else if(state==XENDTOK || state==XSEPARATOR) {
    if(token_pos) {
      token[token_pos]='\0';
      token_pos=0;
    }
-  } else if(state==XEND) {
-   value[value_pos]='\0';
-   value_pos=0;
    get_tok_value(new,token,1);
    if(get_tok_size == 0 ) {
 
@@ -394,13 +383,79 @@ int set_different_token(char **s,char *new, char *old, int object, int n)
     mod=1;
     my_strdup(443, s, subst_token(*s, token, NULL) );
    }
+  } else if(state==XEND) {
+   value[value_pos]='\0';
+   value_pos=0;
    state=XBEGIN;
   }
+  escape = (c=='\\' && !escape);
   if(c=='\0') break;
  }
+ my_free(974, &token);
+ my_free(975, &value);
  return mod;
 }
 
+/* return a string containing the list of all tokens in s */
+/* with_quotes: */
+/* 0: eat non escaped quotes (") */
+/* 1: return unescaped quotes as part of the token value if they are present */
+/* 2: eat backslashes */
+const char *list_tokens(const char *s, int with_quotes)
+{
+  static char *token=NULL;
+  int  sizetok=0;
+  register int c, state=XBEGIN, space;
+  register int token_pos=0;
+  int quote=0;
+  int escape=0;
+ 
+  if(s==NULL) {
+    my_free(435, &token);
+    sizetok = 0;
+    return "";
+  }
+  sizetok = CADCHUNKALLOC;
+  my_realloc(451, &token, sizetok);
+  while(1) {
+    c=*s++;
+    space=SPACE(c) ;
+    if( (state==XBEGIN || state==XENDTOK) && !space && c != '=') state=XTOKEN;
+    else if( state==XTOKEN && space && !quote && !escape) state=XENDTOK;
+    else if( (state==XTOKEN || state==XENDTOK) && c=='=') state=XSEPARATOR;
+    else if( state==XSEPARATOR && !space) state=XVALUE;
+    else if( state==XVALUE && space && !quote && !escape ) state=XEND;
+    if(token_pos>=sizetok) {
+      sizetok+=CADCHUNKALLOC;
+      my_realloc(434, &token,sizetok);
+    }
+    if(c=='"') {
+      if(!escape) quote=!quote;
+    }
+    if(state==XTOKEN) {
+      if(c=='"') {
+        if((with_quotes & 1) || escape)  token[token_pos++]=c;
+      }
+      else if( !(c == '\\' && (with_quotes & 2)) ) token[token_pos++]=c;
+      else if(escape && c == '\\') token[token_pos++]=c;
+    } else if(state==XVALUE) {
+      /* do nothing */
+    } else if(state==XENDTOK || state==XSEPARATOR) {
+        if(token_pos) {
+          token[token_pos++]= ' ';
+        }
+    } else if(state==XEND) {
+      state=XBEGIN;
+    }
+    escape = (c=='\\' && !escape);
+    if(c=='\0') {
+      if(token_pos) {
+        token[token_pos-1]= (c != '\0' ) ? ' ' : '\0';
+      }
+      return token;
+    }
+  }
+}
 
 /* state machine that parses a string made up of <token>=<value> ... */
 /* couples and returns the value of the given token  */
@@ -411,27 +466,29 @@ int set_different_token(char **s,char *new, char *old, int object, int n)
 /* 0: eat non escaped quotes (") */
 /* 1: return unescaped quotes as part of the token value if they are present */
 /* 2: eat backslashes */
-char *get_tok_value(const char *s,const char *tok, int with_quotes)
+const char *get_tok_value(const char *s,const char *tok, int with_quotes)
 {
   static char *result=NULL;
   static char *token=NULL;
-  static int size=0;
-  static int  sizetok=0;
+  int size=0;
+  int  sizetok=0;
   register int c, state=XBEGIN, space;
   register int token_pos=0, value_pos=0;
   int quote=0;
   int escape=0;
-  int tok_size = 0;
+  int cmp = 1;
  
-  get_tok_size = 0;
-  if(!size) {
-    size=CADCHUNKALLOC;
-    sizetok=CADCHUNKALLOC;
-    my_realloc(434, &result,size);
-    my_realloc(435, &token,sizetok);
+  if(s==NULL) {
+    my_free(976, &result);
+    my_free(977, &token);
+    get_tok_value_size = get_tok_size = 0;
+    return "";
   }
-  if(s==NULL){result[0]='\0'; return result;}
-  if(debug_var>=2) fprintf(errfp, "get_tok_value(): looking for <%s> in <%s>\n",tok,s);
+  get_tok_value_size = get_tok_size = 0;
+  dbg(2, "get_tok_value(): looking for <%s> in <%s>\n",tok,s);
+  sizetok = size = CADCHUNKALLOC;
+  my_realloc(454, &result, size);
+  my_realloc(457, &token, sizetok);
   while(1) {
     c=*s++;
     space=SPACE(c) ;
@@ -452,6 +509,11 @@ char *get_tok_value(const char *s,const char *tok, int with_quotes)
       if(!escape) quote=!quote;
     }
     if(state==XTOKEN) {
+      if(!cmp) { /* previous token matched search and was without value, return get_tok_size */
+        result[0] = '\0';
+        get_tok_value_size = 0;
+        return result;
+      }
       if(c=='"') {
         if((with_quotes & 1) || escape)  token[token_pos++]=c;
       }
@@ -465,15 +527,16 @@ char *get_tok_value(const char *s,const char *tok, int with_quotes)
       else if( (c == '\\') && escape ) result[value_pos++]=c; /* 20170414 add escaped backslashes */
     } else if(state==XENDTOK || state==XSEPARATOR) {
         if(token_pos) {
-          tok_size = token_pos;
           token[token_pos]='\0';
-          if(debug_var >= 2) fprintf(errfp, "get_tok_value(): token=%s\n", token);
+          if( !(cmp = strcmp(token,tok)) ) {
+            get_tok_size = token_pos; /* report back also token size, useful to check if requested token exists */
+          }
+          dbg(2, "get_tok_value(): token=%s\n", token);
           token_pos=0;
         }
     } else if(state==XEND) {
       result[value_pos]='\0';
-      if( !strcmp(token,tok) ) {
-        get_tok_size = tok_size; /* report back also token size, useful to check if requested token exists */
+      if( !cmp ) {
         get_tok_value_size = value_pos; /* return also size so to avoid using strlen 20180926 */
         return result;
       }
@@ -492,14 +555,14 @@ char *get_tok_value(const char *s,const char *tok, int with_quotes)
 
 /* return template string excluding name=... and token=value where token listed in extra */
 /* 20081206 */
-char *get_sym_template(char *s,char *extra)
+const char *get_sym_template(char *s,char *extra)
 {
  static char *result=NULL;
- static char *value=NULL;
- static char *token=NULL;
- static int sizeres=0;
- static int sizeval=0;
- static int  sizetok=0;
+ int sizeres=0;
+ int sizetok=0;
+ int sizeval=0;
+ char *value=NULL;
+ char *token=NULL;
  register int c, state=XBEGIN, space;
  register int token_pos=0, value_pos=0, result_pos=0;
  int quote=0;
@@ -512,18 +575,18 @@ char *get_sym_template(char *s,char *extra)
 /* 2: eat backslashes */
 /* 3: 1+2  :) */
 
- if(!sizeval) {
-   sizeval=CADCHUNKALLOC;
-   sizetok=CADCHUNKALLOC;
-   my_realloc(438, &value,sizeval);
-   my_realloc(439, &token,sizetok);
+ if(s==NULL) {
+   my_free(978, &result);
+   return "";
  }
  l = strlen(s);
  if(l >= sizeres) {
    sizeres = l+1;
    my_realloc(330, &result,sizeres);
  }
- if(s==NULL){result[0]='\0'; return result;}
+ sizetok = sizeval = CADCHUNKALLOC;
+ my_realloc(438, &value,sizeval);
+ my_realloc(439, &token,sizetok);
  while(1) {
   c=*s++; 
   space=SPACE(c) ;
@@ -551,8 +614,8 @@ char *get_sym_template(char *s,char *extra)
     }
     else if( (c=='\\') && (with_quotes & 2) )  ;  /* dont store backslash */
     else value[value_pos++]=c;
-    if(c=='\\') escape=1;
-    else escape=0;
+    escape = (c=='\\' && !escape);
+
   } else if(state==XEND) {
     value[value_pos]='\0';
     if((!extra || !strstr(extra, token)) && strcmp(token,"name")) {
@@ -575,9 +638,12 @@ char *get_sym_template(char *s,char *extra)
     }
   }
   if(c=='\0') {
-    return result;
+    break;
   }
  }
+ my_free(979, &value);
+ my_free(980, &token);
+ return result;
 }
 
 const char *find_bracket(const char *s)
@@ -591,10 +657,10 @@ char *get_pin_attr_from_inst(int inst, int pin, const char *attr)
    int attr_size;
    char *pinname = NULL, *pname = NULL, *pinnumber = NULL;
    char *pnumber = NULL;
-   char *str;
+   const char *str;
 
 
-   if(debug_var >= 1) fprintf(errfp, "get_pin_attr_from_inst: inst=%d pin=%d attr=%s\n", inst, pin, attr);
+   dbg(1, "get_pin_attr_from_inst: inst=%d pin=%d attr=%s\n", inst, pin, attr);
    pinnumber = NULL;
    str = get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][pin].prop_ptr,"name",0);
    if(str[0]) {
@@ -602,16 +668,16 @@ char *get_pin_attr_from_inst(int inst, int pin, const char *attr)
      my_strdup(498, &pinname, str);
      pname =my_malloc(49, get_tok_value_size + attr_size + 30);
      my_snprintf(pname, get_tok_value_size + attr_size + 30, "%s(%s)", attr, pinname);
-     my_free(&pinname);
+     my_free(981, &pinname);
      str = get_tok_value(inst_ptr[inst].prop_ptr, pname, 0);
-     my_free(&pname);
+     my_free(982, &pname);
      if(get_tok_size) my_strdup2(51, &pinnumber, str);
      else {
        pnumber = my_malloc(52, attr_size + 100);
        my_snprintf(pnumber, attr_size + 100, "%s(%d)", attr, pin);
        str = get_tok_value(inst_ptr[inst].prop_ptr, pnumber, 0);
-       if(debug_var >= 1) fprintf(errfp, "get_pin_attr_from_inst: pnumber=%s\n", pnumber);
-       my_free(&pnumber);
+       dbg(1, "get_pin_attr_from_inst: pnumber=%s\n", pnumber);
+       my_free(983, &pnumber);
        if(get_tok_size) my_strdup2(40, &pinnumber, str);
      }
    }
@@ -626,7 +692,8 @@ void new_prop_string(int i, const char *old_prop, int fast, int disable_unique_n
 /* if necessary) */
 /* if old_prop=NULL return NULL */
 /* if old_prop does not contain a valid "name" or empty return old_prop */
- static char prefix, *old_name=NULL, *new_name=NULL;
+ static char prefix;
+ char *old_name=NULL, *new_name=NULL;
  const char *tmp;
  const char *tmp2;
  int q,qq;
@@ -637,13 +704,13 @@ void new_prop_string(int i, const char *old_prop, int fast, int disable_unique_n
  char *old_name_base = NULL;
  struct inst_hashentry *entry;
  
- if(debug_var>=1) fprintf(errfp, "new_prop_string(): i=%d, old_prop=%s, fast=%d\n", i, old_prop, fast);
+ dbg(1, "new_prop_string(): i=%d, old_prop=%s, fast=%d\n", i, old_prop, fast);
  if(!fast) { /* on 1st invocation of new_prop_string */
    for(q=1;q<=255;q++) last[q]=1;
  }
  if(old_prop==NULL) 
  { 
-  my_free(&inst_ptr[i].prop_ptr);
+  my_free(984, &inst_ptr[i].prop_ptr);
   return;
  }
  old_name_len = my_strdup(444, &old_name,get_tok_value(old_prop,"name",0) ); /* added old_name_len 20180926 */
@@ -659,6 +726,7 @@ void new_prop_string(int i, const char *old_prop, int fast, int disable_unique_n
  {
   inst_hash_lookup(table, old_name, i, XINSERT, old_name_len);
   my_strdup(447, &inst_ptr[i].prop_ptr, old_prop);
+  my_free(985, &old_name);
   return;
  }
  old_name_base = my_malloc(64, old_name_len+1);
@@ -679,133 +747,179 @@ void new_prop_string(int i, const char *old_prop, int fast, int disable_unique_n
     break;
    }
  } 
- if(n >= 1) my_free(&old_name_base);
+ my_free(986, &old_name_base);
  tmp2 = subst_token(old_prop, "name", new_name); 
  if(strcmp(tmp2, old_prop) ) {
    my_strdup(449, &inst_ptr[i].prop_ptr, tmp2);
  }
  inst_hash_lookup(table, new_name, i, XINSERT, new_name_len); /* reinsert in hash */
+ my_free(987, &old_name);
+ my_free(988, &new_name);
 }
 
-char *subst_token(const char *s, const char *tok, const char *new_val)
+const char *subst_token(const char *s, const char *tok, const char *new_val)
 /* given a string <s> with multiple "token=value ..." assignments */
 /* substitute <tok>'s value with <new_val> */
-/* if tok not found in s add tok=new_val at end. 04052001 */
+/* if tok not found in s and new_val!=NULL add tok=new_val at end.*/
 /* if new_val is empty ('\0') set token value to "" (token="") */
-/* if new_val is NULL *remove* 'token=val' from s */
+/* if new_val is NULL *remove* 'token (and =val if any)' from s */
 {
- static char *result=NULL;
- int size=0, tmp;
- register int c, state=XBEGIN, space;
- static char *token=NULL;
- int sizetok=0;
- int token_pos=0, result_pos=0, result_save_pos = 0;
- int quote=0;
- int done_subst=0;
- int escape=0;
- int cmptok = 1;
-
- if(debug_var>=1) fprintf(errfp, "subst_token(%s, %s, %s)\n", s, tok, new_val);
- sizetok=CADCHUNKALLOC;
- if(token==NULL) token=my_malloc(451, sizetok);
- else my_realloc(452, &token,sizetok);
- size=CADCHUNKALLOC;
- if(result==NULL) result=my_malloc(453, size);
- else my_realloc(454, &result,size);
- if(s==NULL){result[0]='\0';}
- while( s ) {
-  c=*s++; 
-  space=SPACE(c);
-  if( (state==XBEGIN || state==XENDTOK) && !space && c != '=') {
-    result_save_pos = result_pos-1;
-    if(result_save_pos < 0) result_save_pos = 0;
-    token_pos=0 ;
-    state=XTOKEN; 
-  } else if( state==XTOKEN && space) state=XENDTOK;
-  else if( (state==XTOKEN || state==XENDTOK) && c=='=') state=XSEPARATOR;
-  else if( state==XSEPARATOR && !space) state=XVALUE;
-  else if( state==XVALUE && space && !quote && !escape) state=XEND;
-  if(result_pos >= size) {
-   size += CADCHUNKALLOC;
-   my_realloc(455, &result, size);
+  static char *result=NULL;
+  int size=0;
+  register int c, state=XBEGIN, space;
+  int sizetok=0;
+  char *token=NULL;
+  int token_pos=0, result_pos=0, result_save_pos = 0;
+  int quote=0, tmp;
+  int done_subst=0;
+  int escape=0, matched_tok=0;
+ 
+  if(s==NULL && tok == NULL){
+    my_free(989, &result);
+    return "";
   }
-  if(token_pos >= sizetok) {
-   sizetok += CADCHUNKALLOC;
-   my_realloc(456, &token, sizetok); /* 20171104 **Long** standing bug fixed, was doing realloc on result instead of token. */
-                               /* causing the program to crash on first very long token encountered */
+  if((tok == NULL || tok[0]=='\0') && s ){
+    my_strdup2(458, &result, s);
+    return result;
   }
-  if(state==XTOKEN) {
-       token[token_pos++] = c;
-       result[result_pos++] = c;
-  } else if(state==XSEPARATOR) {
-       token[token_pos] = '\0'; 
-       if(!(cmptok = strcmp(token,tok)) && !new_val) {
-         result_pos = result_save_pos;
-         if(debug_var>=3) fprintf(errfp, "subst_token(): result_pos=%d\n", result_pos);
-       } else {
-         result[result_pos++] = c;
-       }
-  } else if(state==XVALUE) {
+  dbg(1, "subst_token(%s, %s, %s)\n", s, tok, new_val);
+  sizetok = size = CADCHUNKALLOC;
+  my_realloc(1152, &result, size);
+  my_realloc(1153, &token, sizetok);
+  result[0] = '\0';
+  while( s ) {
+    c=*s++; 
+    space=SPACE(c);
     if(c == '"' && !escape) quote=!quote;
-    if(c == '\\') escape = 1;
-    else escape = 0;
-    if(!cmptok)
-    {
-     if(!done_subst)
-     {
-       if(new_val && new_val[0]) {
-         tmp = strlen(new_val);
-       } else if(new_val) {
-         new_val = "\"\"";
-         tmp = 2;
-       }
-       if(new_val) {
-         if(result_pos + tmp >= size)
-         {
-           size = (1 + (result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
-           my_realloc(457, &result, size);
-         }
-         memcpy(result + result_pos ,new_val, tmp + 1); /* 20180923 */
-         result_pos += tmp;
-       }
-       done_subst = 1;
-     }
+    /* alloc data */
+    if(result_pos >= size) {
+      size += CADCHUNKALLOC;
+      my_realloc(455, &result, size);
     }
-    else result[result_pos++]=c;
-  } else if(state==XENDTOK) {
-     token[token_pos]='\0';
-     result[result_pos++] = c;
-  } else if(state == XEND) {
-       if(c=='\0' || !(result_save_pos == 0 && !cmptok && !new_val) ) result[result_pos++] = c;
-       state = XBEGIN;
-  } else if(state == XBEGIN) {
-       if(c=='\0' || !(result_save_pos == 0 && !cmptok && !new_val) ) result[result_pos++] = c;
+    if(token_pos >= sizetok) {
+      sizetok += CADCHUNKALLOC;
+      my_realloc(456, &token, sizetok);
+    }
+  
+    /* parsing state machine                                    */
+    /* states:                                                  */
+    /*    XBEGIN XTOKEN XENDTOK XSEPARATOR XVALUE               */
+    /*                                                          */
+    /*                                                          */
+    /* XBEGIN                                                   */
+    /* |      XTOKEN                                            */
+    /* |      |   XENDTOK                                       */
+    /* |      |   |  XSEPARATOR                                 */
+    /* |      |   |  | XVALUE                                   */
+    /* |      |   |  | | XBEGIN                                 */
+    /* |      |   |  | | |   XTOKEN                             */
+    /* |      |   |  | | |   |     XENDTOK                      */
+    /* |      |   |  | | |   |     |  XTOKEN                    */
+    /* |      |   |  | | |   |     |  |                         */
+    /* .......name...=.x1....format...type..=..subcircuit....   */
+    /* . : space                                                */
+
+    if(state == XBEGIN && !space && c != '=' ) {
+      result_save_pos = result_pos;
+      token_pos = 0;
+      state = XTOKEN;
+    } else if(state == XENDTOK  && (!space || c == '\0') && c != '=' ) {
+      if(!done_subst && matched_tok) {
+        if(new_val) { /* add new_val to matching token with no value */
+          if(new_val[0]) {
+            tmp = strlen(new_val);
+          } else {
+            new_val = "\"\"";
+            tmp = 2;
+          }
+          if(result_pos+tmp+2 >= size) {
+            size = (1+(result_pos+tmp+2) / CADCHUNKALLOC) * CADCHUNKALLOC;
+            my_realloc(1154, &result, size);
+          }
+          memcpy(result + result_pos, "=", 1);
+          memcpy(result + result_pos+1, new_val, tmp);
+          memcpy(result + result_pos+1+tmp, " ", 1);
+          result_pos += tmp + 2;
+          done_subst = 1;
+        } else { /* remove token (and value if any) */
+          result_pos = result_save_pos;
+          done_subst = 1;
+        }
+      }
+      result_save_pos = result_pos;
+      if(c != '\0') state = XTOKEN; /* if end of string remain in XENDTOK state */
+    } else if( state == XTOKEN && space) {
+      token[token_pos] = '\0';
+      token_pos = 0;
+      matched_tok = !strcmp(token, tok) && !done_subst;
+      state=XENDTOK;
+      if(c == '\0') {
+        s--; /* go to next iteration and process '\0' as XENDTOK */
+        continue;
+      }
+    } else if(state == XTOKEN && c=='=') {
+      token[token_pos] = '\0';
+      token_pos = 0;
+      matched_tok = !strcmp(token, tok) && !done_subst;
+      state=XSEPARATOR;
+    } else if(state == XENDTOK && c=='=') {
+      state=XSEPARATOR;
+    } else if( state == XSEPARATOR && !space) {
+      if(!done_subst && matched_tok) {
+        if(new_val) { /* replace token value with new_val */
+          if(new_val[0]) {
+            tmp = strlen(new_val);
+          } else {
+            new_val = "\"\"";
+            tmp = 2;
+          }
+          if(result_pos + tmp >= size) {
+            size = (1 + (result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
+            my_realloc(1155, &result, size);
+          }
+          memcpy(result + result_pos ,new_val, tmp + 1);
+          result_pos += tmp;
+          done_subst = 1;
+        } else { /* remove token (and value if any) */
+          result_pos = result_save_pos;
+          done_subst = 1;
+        }
+      }
+      state=XVALUE;
+    } else if( state == XVALUE && space && !quote && !escape) {
+      state=XBEGIN;
+    }
+    /* state actions */
+    if(state == XBEGIN) {
+      result[result_pos++] = c;
+    } else if(state == XTOKEN) {
+      token[token_pos++] = c;
+      result[result_pos++] = c;
+    } else if(state == XENDTOK) {
+      result[result_pos++] = c;
+    } else if(state == XSEPARATOR) {
+      result[result_pos++] = c;
+    } else if(state==XVALUE) {
+      if(!matched_tok) result[result_pos++] = c; /* skip value for matching token */
+    }
+    escape = (c=='\\' && !escape);
+    if(c == '\0') break;
   }
-  if(c == '\0')  break;
- } /* end while */
- if(!done_subst) { /* 04052001 if tok not found add tok=new_value at end */
-  if(result[0] == '\0' && new_val) {
-   if(!new_val[0]) new_val = "\"\"";
-   tmp = strlen(new_val) + strlen(tok) + 2;
-   if(result_pos + tmp >= size) {
-     size = (1 + (result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
-     my_realloc(458, &result,size);
-   }
-   my_realloc(459, &result, size);
-   my_snprintf(result, size, "%s=%s", tok, new_val ); /* overflow safe 20161122 */
+  if(!done_subst) { /* if tok not found add tok=new_value at end */
+    if(result_pos == 0 ) result_pos = 1; /* result="" */
+    if(new_val) {
+      if(!new_val[0]) new_val = "\"\"";
+      tmp = strlen(new_val) + strlen(tok) + 2;
+      if(result_pos + tmp  >= size) {
+        size = (1 + (result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
+        my_realloc(460, &result,size);
+      }
+      my_snprintf(result + result_pos - 1, size, " %s=%s", tok, new_val ); /* result_pos guaranteed to be > 0 */
+    } 
   }
-  else if(new_val) {
-   if(!new_val[0]) new_val = "\"\"";
-   tmp = strlen(new_val) + strlen(tok) + 2; /* 20171104 */
-   if(result_pos + tmp >= size) {
-     size = (1 + (result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
-     my_realloc(460, &result,size);
-   }
-   my_snprintf(result + result_pos - 1, size, " %s=%s", tok, new_val ); /* 20171104, 20171201 -> result_pos-1 */
-  }
- }
- if(debug_var >= 2) fprintf(errfp, "subst_token(): returning: %s\n",result);
- return result;
+  dbg(2, "subst_token(): returning: %s\n",result);
+  my_free(990, &token);
+  return result;
 }
 
 const char *get_trailing_path(const char *str, int no_of_dir, int skip_ext)
@@ -825,9 +939,9 @@ const char *get_trailing_path(const char *str, int no_of_dir, int skip_ext)
   if(skip_ext) s[ext_pos] = '\0';
 
   if(dir_pos==len) return s;
-  if(debug_var>=2) fprintf(errfp, "get_trailing_path(): str=%s, no_of_dir=%d, skip_ext=%d\n", 
+  dbg(2, "get_trailing_path(): str=%s, no_of_dir=%d, skip_ext=%d\n", 
                    str, no_of_dir, skip_ext);
-  if(debug_var>=2) fprintf(errfp, "get_trailing_path(): returning: %s\n", s+(dir_pos<len ? dir_pos+1 : 0));
+  dbg(2, "get_trailing_path(): returning: %s\n", s+(dir_pos<len ? dir_pos+1 : 0));
   return s+(dir_pos<len ? dir_pos+1 : 0);
 }
 
@@ -849,277 +963,277 @@ const char *get_cell_w_ext(const char *str, int no_of_dir)
 }
 
 
-
- int count_labels(char *s)
+/* not used? */
+int count_labels(char *s)
 {
- int i=1;
- int c;
+  int i=1;
+  int c;
  
- if(s==NULL) return 1;
- while( (c=(*s++)) )
- {
-  if(c==',') i++;
- }
- return i;
+  if(s==NULL) return 1;
+  while( (c=(*s++)) ) {
+    if(c==',') i++;
+  }
+  return i;
 }
 
 void print_vhdl_element(FILE *fd, int inst) /* 20071217 */
 {
- int i=0, mult, tmp, tmp1;
- const char *str_ptr;
- register int c, state=XBEGIN, space;
- const char *lab;
- static char *name=NULL;
- static char  *generic_value=NULL, *generic_type=NULL;
- static char *template=NULL,*s, *value=NULL,  *token=NULL;
- int no_of_pins=0, no_of_generics=0;
- int sizetok=0, sizeval=0;
- int token_pos=0, value_pos=0;
- int quote=0;
- int escape=0;
- int token_number=0;
-
- if(get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"vhdl_format",2)[0] != '\0') {  /* 20071217 */
-  print_vhdl_primitive(fd, inst); /*20071217 */
-  return;
- }
-
- my_strdup(461, &template,
-     (inst_ptr[inst].ptr+instdef)->templ); /* 2015049 */
-
- my_strdup(462, &name,inst_ptr[inst].instname); /* 20161210 */
- if(!name) my_strdup(58, &name, get_tok_value(template, "name", 0));
-
- if(name==NULL) return;
- no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
- no_of_generics= (inst_ptr[inst].ptr+instdef)->rects[GENERICLAYER];
-
- s=inst_ptr[inst].prop_ptr;
-
-/* print instance name and subckt */
- if(debug_var>=2) fprintf(errfp, "print_vhdl_element(): printing inst name & subcircuit name\n");
- if( (lab = expandlabel(name, &tmp)) != NULL)
-   fprintf(fd, "%d %s : %s\n", tmp, lab, skip_dir(inst_ptr[inst].name) );
- else  /*  name in some strange format, probably an error */
-   fprintf(fd, "1 %s : %s\n", name, skip_dir(inst_ptr[inst].name) );
- if(debug_var>=2) fprintf(errfp, "print_vhdl_element(): printing generics passed as properties\n");
-
-
- /* -------- print generics passed as properties */
-
- tmp=0;
- /* 20080213 use generic_type property to decide if some properties are strings, see later */
- my_strdup(464, &generic_type, get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"generic_type",2));
-
- while(1)
- {
-   if (s==NULL) break;
-  c=*s++;
-  if(c=='\\') {
-    escape=1;
-    c=*s++;
+  int i=0, mult, tmp, tmp1;
+  const char *str_ptr;
+  register int c, state=XBEGIN, space;
+  const char *lab;
+  char *name=NULL;
+  char  *generic_value=NULL, *generic_type=NULL;
+  char *template=NULL,*s, *value=NULL,  *token=NULL;
+  int no_of_pins=0, no_of_generics=0;
+  int sizetok=0, sizeval=0;
+  int token_pos=0, value_pos=0;
+  int quote=0;
+  int escape=0;
+ 
+  if(get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"vhdl_format",2)[0] != '\0') {  /* 20071217 */
+   print_vhdl_primitive(fd, inst); /*20071217 */
+   return;
   }
-  else 
-   escape=0;
-  space=SPACE(c);
-  if( (state==XBEGIN || state==XENDTOK) && !space && c != '=') state=XTOKEN;
-  else if( state==XTOKEN && space) state=XENDTOK;
-  else if( (state==XTOKEN || state==XENDTOK) && c=='=') state=XSEPARATOR;
-  else if( state==XSEPARATOR && !space) state=XVALUE;
-  else if( state==XVALUE && space && !quote) state=XEND;
-  if(value_pos>=sizeval) {
-   sizeval+=CADCHUNKALLOC;
-   my_realloc(465, &value,sizeval);
+  my_strdup(462, &name,inst_ptr[inst].instname);
+  if(!name) my_strdup(58, &name, get_tok_value(template, "name", 0));
+  if(name==NULL) {
+    my_free(991, &name);
+    return;
   }
-  if(token_pos>=sizetok) {
-   sizetok+=CADCHUNKALLOC;
-   my_realloc(466, &token,sizetok);
+  my_strdup(461, &template, (inst_ptr[inst].ptr+instdef)->templ);
+  no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
+  no_of_generics= (inst_ptr[inst].ptr+instdef)->rects[GENERICLAYER];
+ 
+  s=inst_ptr[inst].prop_ptr;
+ 
+ /* print instance name and subckt */
+  dbg(2, "print_vhdl_element(): printing inst name & subcircuit name\n");
+  if( (lab = expandlabel(name, &tmp)) != NULL)
+    fprintf(fd, "%d %s : %s\n", tmp, lab, skip_dir(inst_ptr[inst].name) );
+  else  /*  name in some strange format, probably an error */
+    fprintf(fd, "1 %s : %s\n", name, skip_dir(inst_ptr[inst].name) );
+  dbg(2, "print_vhdl_element(): printing generics passed as properties\n");
+ 
+ 
+  /* -------- print generics passed as properties */
+ 
+  tmp=0;
+  /* 20080213 use generic_type property to decide if some properties are strings, see later */
+  my_strdup(464, &generic_type, get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"generic_type",2));
+ 
+  while(1)
+  {
+    if (s==NULL) break;
+   c=*s++;
+   if(c=='\\') {
+     escape=1;
+     c=*s++;
+   }
+   else 
+    escape=0;
+   space=SPACE(c);
+   if( (state==XBEGIN || state==XENDTOK) && !space && c != '=') state=XTOKEN;
+   else if( state==XTOKEN && space) state=XENDTOK;
+   else if( (state==XTOKEN || state==XENDTOK) && c=='=') state=XSEPARATOR;
+   else if( state==XSEPARATOR && !space) state=XVALUE;
+   else if( state==XVALUE && space && !quote) state=XEND;
+   if(value_pos>=sizeval) {
+    sizeval+=CADCHUNKALLOC;
+    my_realloc(465, &value,sizeval);
+   }
+   if(token_pos>=sizetok) {
+    sizetok+=CADCHUNKALLOC;
+    my_realloc(466, &token,sizetok);
+   }
+   if(state==XTOKEN) token[token_pos++]=c;
+   else if(state==XVALUE) {
+     if(c=='"' && !escape) quote=!quote;
+     else value[value_pos++]=c;
+   }
+   else if(state==XENDTOK || state==XSEPARATOR) {
+     if(token_pos) {
+       token[token_pos]='\0';
+       token_pos=0;
+     }
+   } else if(state==XEND) {
+     value[value_pos]='\0';
+     value_pos=0;
+     get_tok_value(template, token, 0);
+     if(get_tok_size) {
+       if(strcmp(token, "name") && value[0] != '\0') /* token has a value */
+       {
+         if(tmp == 0) {fprintf(fd, "generic map(\n");tmp++;tmp1=0;}
+         if(tmp1) fprintf(fd, " ,\n");
+      
+         /* 20080213  put "" around string type generics! */
+         if( generic_type && !strcmp(get_tok_value(generic_type,token, 2), "string")  ) {
+           fprintf(fd, "  %s => \"%s\"", token, value);
+         } else {
+           fprintf(fd, "  %s => %s", token, value);
+         }
+         /* /20080213 */
+    
+         tmp1=1;
+       }
+     }
+     state=XBEGIN;
+   }
+   if(c=='\0')  /* end string */
+   {
+    break ;
+   }
   }
-  if(state==XTOKEN) token[token_pos++]=c;
-  else if(state==XVALUE) {
+ 
+  /* -------- end print generics passed as properties */
+      dbg(2, "print_vhdl_element(): printing generic maps \n");
+ 
+     /* print generic map */
+     for(i=0;i<no_of_generics;i++)
+     {
+       my_strdup(467, &generic_type,get_tok_value(
+         (inst_ptr[inst].ptr+instdef)->boxptr[GENERICLAYER][i].prop_ptr,"type",0));
+       my_strdup(468, &generic_value,   inst_ptr[inst].node[no_of_pins+i] );
+       /*my_strdup(469, &generic_value, get_tok_value( */
+       /*  (inst_ptr[inst].ptr+instdef)->boxptr[GENERICLAYER][i].prop_ptr,"value") ); */
+       str_ptr = get_tok_value(
+         (inst_ptr[inst].ptr+instdef)->boxptr[GENERICLAYER][i].prop_ptr,"name",0);
+    if(generic_value) {                  /*03062002 dont print generics if unassigned */
+       if(tmp) fprintf(fd, " ,\n");
+       if(!tmp) fprintf(fd, "generic map (\n");
+       fprintf(fd,"   %s => %s",
+                             str_ptr ? str_ptr : "<NULL>",
+                             generic_value ? generic_value : "<NULL>"  );
+       tmp=1;
+    }
+  }
+  if(tmp) fprintf(fd, "\n)\n");
+ 
+ 
+ 
+  
+   dbg(2, "print_vhdl_element(): printing port maps \n");
+  /* print port map */
+  fprintf(fd, "port map(\n" );
+  tmp=0;
+  for(i=0;i<no_of_pins;i++)
+  {
+    if(strcmp(get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"vhdl_ignore",0), "true")) {
+      if( (str_ptr =  pin_node(inst,i, &mult, 0)) )
+      {
+        if(tmp) fprintf(fd, " ,\n");
+        fprintf(fd, "   %s => %s",
+          get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"name",0),
+          str_ptr);
+        tmp=1;
+      }
+    }
+  }
+  fprintf(fd, "\n);\n\n");
+   dbg(2, "print_vhdl_element(): ------- end ------ \n");
+  my_free(992, &name);
+  my_free(993, &generic_value);
+  my_free(994, &generic_type);
+  my_free(995, &template);
+  my_free(996, &value);
+  my_free(997, &token);
+}
+
+void print_generic(FILE *fd, char *ent_or_comp, int symbol)
+{
+  int tmp;
+  register int c, state=XBEGIN, space;
+  char *template=NULL,*format=NULL, *s, *value=NULL,  *token=NULL;
+  char *type=NULL, *generic_type=NULL, *generic_value=NULL;
+  const char *str_tmp;
+  int i, sizetok=0, sizeval=0;
+  int token_pos=0, value_pos=0;
+  int quote=0;
+  int escape=0;
+  int token_number=0;
+ 
+  my_strdup(472, &template, instdef[symbol].templ); /* 20150409 */
+  if( !template || !(template[0]) ) {
+    my_free(998, &template);
+    return;
+  }
+  my_strdup(470, &format, get_tok_value(instdef[symbol].prop_ptr,"format",0));
+  my_strdup(471, &generic_type, get_tok_value(instdef[symbol].prop_ptr,"generic_type",0));
+  dbg(2, "print_generic(): symbol=%d template=%s \n", symbol, template);
+ 
+  fprintf(fd, "%s %s ",ent_or_comp, skip_dir(instdef[symbol].name));
+  if(!strcmp(ent_or_comp,"entity"))
+   fprintf(fd, "is\n");
+  else
+   fprintf(fd, "\n");
+  s=template;
+  tmp=0;
+  while(1)
+  {
+   c=*s++;
+   if(c=='\\')
+   {
+     escape=1;
+     c=*s++;
+   }
+   else 
+    escape=0;
+   space=SPACE(c);
+   if( (state==XBEGIN || state==XENDTOK) && !space && c != '=') state=XTOKEN;
+   else if( state==XTOKEN && space) state=XENDTOK;
+   else if( (state==XTOKEN || state==XENDTOK) && c=='=') state=XSEPARATOR;
+   else if( state==XSEPARATOR && !space) state=XVALUE;
+   else if( state==XVALUE && space && !quote) state=XEND;
+   if(value_pos>=sizeval)
+   {
+    sizeval+=CADCHUNKALLOC;
+    my_realloc(473, &value,sizeval);
+   }
+   if(token_pos>=sizetok)
+   {
+    sizetok+=CADCHUNKALLOC;
+    my_realloc(474, &token,sizetok);
+   }
+   if(state==XTOKEN) token[token_pos++]=c;
+   else if(state==XVALUE) 
+   {
     if(c=='"' && !escape) quote=!quote;
     else value[value_pos++]=c;
-  }
-  else if(state==XENDTOK || state==XSEPARATOR) {
-    if(token_pos) {
-      token[token_pos]='\0';
-      token_pos=0;
-    }
-  } else if(state==XEND) {
+   }
+   else if(state==XENDTOK || state==XSEPARATOR) {
+     if(token_pos) {
+       token[token_pos]='\0';
+       token_pos=0;
+     }
+   } else if(state==XEND)                    /* got a token */
+   {
     token_number++;
     value[value_pos]='\0';
     value_pos=0;
+    my_strdup(475, &type, get_tok_value(generic_type,token,0));
  
     if(value[0] != '\0') /* token has a value */
     {
      if(token_number>1)
      {
-       if(tmp == 0) {fprintf(fd, "generic map(\n");tmp++;tmp1=0;}
-       if(tmp1) fprintf(fd, " ,\n");
-   
-       /* 20080213  put "" around string type generics! */
-       if( generic_type && !strcmp(get_tok_value(generic_type,token, 2), "string")  ) {
-         fprintf(fd, "  %s => \"%s\"", token, value);
+       if(!tmp) {fprintf(fd, "generic (\n");}
+       if(tmp) fprintf(fd, " ;\n");
+       if(!type || strcmp(type,"string") ) { /* 20080213 print "" around string values 20080418 check for type==NULL */
+         fprintf(fd, "  %s : %s := %s", token, type? type:"integer", value);
        } else {
-         fprintf(fd, "  %s => %s", token, value);
-       }
-       /* /20080213 */
+         fprintf(fd, "  %s : %s := \"%s\"", token, type? type:"integer", value);
+       }                                         /* /20080213 */
  
-       tmp1=1;
+       tmp=1;
      }
     }
     state=XBEGIN;
-  }
-  if(c=='\0')  /* end string */
-  {
-   break ;
-  }
- }
-
- /* -------- end print generics passed as properties */
-     if(debug_var>=2) fprintf(errfp, "print_vhdl_element(): printing generic maps \n");
-
-    /* print generic map */
-    for(i=0;i<no_of_generics;i++)
-    {
-      my_strdup(467, &generic_type,get_tok_value(
-        (inst_ptr[inst].ptr+instdef)->boxptr[GENERICLAYER][i].prop_ptr,"type",0));
-      my_strdup(468, &generic_value,   inst_ptr[inst].node[no_of_pins+i] );
-      /*my_strdup(469, &generic_value, get_tok_value( */
-      /*  (inst_ptr[inst].ptr+instdef)->boxptr[GENERICLAYER][i].prop_ptr,"value") ); */
-      str_ptr = get_tok_value(
-        (inst_ptr[inst].ptr+instdef)->boxptr[GENERICLAYER][i].prop_ptr,"name",0);
-   if(generic_value) {                  /*03062002 dont print generics if unassigned */
-      if(tmp) fprintf(fd, " ,\n");
-      if(!tmp) fprintf(fd, "generic map (\n");
-      fprintf(fd,"   %s => %s",
-                            str_ptr ? str_ptr : "<NULL>",
-                            generic_value ? generic_value : "<NULL>"  );
-      tmp=1;
    }
- }
- if(tmp) fprintf(fd, "\n)\n");
-
-
-
- 
-  if(debug_var>=2) fprintf(errfp, "print_vhdl_element(): printing port maps \n");
- /* print port map */
- fprintf(fd, "port map(\n" );
- tmp=0;
- for(i=0;i<no_of_pins;i++)
- {
-   if( (str_ptr =  pin_node(inst,i, &mult, 0)) )
+   if(c=='\0')  /* end string */
    {
-     if(tmp) fprintf(fd, " ,\n");
-     fprintf(fd, "   %s => %s",
-       get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"name",0),
-       str_ptr);
-     tmp=1;
+    break ;
    }
- }
- fprintf(fd, "\n);\n\n");
-  if(debug_var>=2) fprintf(errfp, "print_vhdl_element(): ------- end ------ \n");
- 
-}
-
-void print_generic(FILE *fd, char *ent_or_comp, int symbol)
-{
- int tmp;
- register int c, state=XBEGIN, space;
- static char *template=NULL,*format=NULL, *s, *value=NULL,  *token=NULL;
- static char *type=NULL, *generic_type=NULL, *generic_value=NULL;
- char *str_tmp;
- int i, sizetok=0, sizeval=0;
- int token_pos=0, value_pos=0;
- int quote=0;
- int escape=0;
- int token_number=0;
-
- my_strdup(470, &format, get_tok_value(instdef[symbol].prop_ptr,"format",0));
- my_strdup(471, &generic_type, get_tok_value(instdef[symbol].prop_ptr,"generic_type",0));
- my_strdup(472, &template, instdef[symbol].templ); /* 20150409 */
- if( !template || !(template[0]) )  return;
-  if(debug_var>=2) fprintf(errfp, "print_generic(): symbol=%d template=%s \n", symbol, template);
-
- fprintf(fd, "%s %s ",ent_or_comp, skip_dir(instdef[symbol].name));
- if(!strcmp(ent_or_comp,"entity"))
-  fprintf(fd, "is\n");
- else
-  fprintf(fd, "\n");
- s=template;
- tmp=0;
- while(1)
- {
-  c=*s++;
-  if(c=='\\')
-  {
-    escape=1;
-    c=*s++;
   }
-  else 
-   escape=0;
-  space=SPACE(c);
-  if( (state==XBEGIN || state==XENDTOK) && !space && c != '=') state=XTOKEN;
-  else if( state==XTOKEN && space) state=XENDTOK;
-  else if( (state==XTOKEN || state==XENDTOK) && c=='=') state=XSEPARATOR;
-  else if( state==XSEPARATOR && !space) state=XVALUE;
-  else if( state==XVALUE && space && !quote) state=XEND;
-  if(value_pos>=sizeval)
-  {
-   sizeval+=CADCHUNKALLOC;
-   my_realloc(473, &value,sizeval);
-  }
-  if(token_pos>=sizetok)
-  {
-   sizetok+=CADCHUNKALLOC;
-   my_realloc(474, &token,sizetok);
-  }
-  if(state==XTOKEN) token[token_pos++]=c;
-  else if(state==XVALUE) 
-  {
-   if(c=='"' && !escape) quote=!quote;
-   else value[value_pos++]=c;
-  }
-  else if(state==XENDTOK || state==XSEPARATOR) {
-    if(token_pos) {
-      token[token_pos]='\0';
-      token_pos=0;
-    }
-  } else if(state==XEND)                    /* got a token */
-  {
-   token_number++;
-   value[value_pos]='\0';
-   value_pos=0;
-   my_strdup(475, &type, get_tok_value(generic_type,token,0));
-
-   if(value[0] != '\0') /* token has a value */
-   {
-    if(token_number>1)
-    {
-      if(!tmp) {fprintf(fd, "generic (\n");}
-      if(tmp) fprintf(fd, " ;\n");
-      if(!type || strcmp(type,"string") ) { /* 20080213 print "" around string values 20080418 check for type==NULL */
-        fprintf(fd, "  %s : %s := %s", token, type? type:"integer", value);
-      } else {
-        fprintf(fd, "  %s : %s := \"%s\"", token, type? type:"integer", value);
-      }                                         /* /20080213 */
-
-      tmp=1;
-    }
-   }
-   state=XBEGIN;
-  }
-  if(c=='\0')  /* end string */
-  {
-   break ;
-  }
- }
-
-
-
-
-
 
   for(i=0;i<instdef[symbol].rects[GENERICLAYER];i++)
   {
@@ -1137,13 +1251,20 @@ void print_generic(FILE *fd, char *ent_or_comp, int symbol)
     tmp=1;
   }
   if(tmp) fprintf(fd, "\n);\n");
+  my_free(999, &template);
+  my_free(1000, &format);
+  my_free(1001, &value);
+  my_free(1002, &token);
+  my_free(1003, &type);
+  my_free(1004, &generic_type);
+  my_free(1005, &generic_value);
 }
 
 
 void print_verilog_param(FILE *fd, int symbol) /*16112003 */
 {
  register int c, state=XBEGIN, space;
- static char *template=NULL, *s, *value=NULL,  *generic_type=NULL, *token=NULL;
+ char *template=NULL, *s, *value=NULL,  *generic_type=NULL, *token=NULL;
  int sizetok=0, sizeval=0;
  int token_pos=0, value_pos=0;
  int quote=0;
@@ -1153,8 +1274,12 @@ void print_verilog_param(FILE *fd, int symbol) /*16112003 */
  /* my_strdup(478, &template, get_tok_value(instdef[symbol].prop_ptr,"template",0)); */
  my_strdup(479, &template, instdef[symbol].templ); /* 20150409 20171103 */
  my_strdup(480, &generic_type, get_tok_value(instdef[symbol].prop_ptr,"generic_type",0));
- if( !template || !(template[0]) )  return;
-  if(debug_var>=2) fprintf(errfp, "print_verilog_param(): symbol=%d template=%s \n", symbol, template);
+ if( !template || !(template[0]) )  {
+   my_free(1006, &template);
+   my_free(1007, &generic_type);
+   return;
+ }
+ dbg(2, "print_verilog_param(): symbol=%d template=%s \n", symbol, template);
 
  s=template;
  while(1)
@@ -1226,7 +1351,10 @@ void print_verilog_param(FILE *fd, int symbol) /*16112003 */
    break ;
   }
  }
-
+ my_free(1008, &template);
+ my_free(1009, &generic_type);
+ my_free(1010, &value);
+ my_free(1011, &token);
 }
 
 
@@ -1238,7 +1366,7 @@ void print_spice_subckt(FILE *fd, int symbol)
  int i=0, mult;
  const char *str_ptr=NULL; 
  register int c, state=XBEGIN, space;
- static char *format=NULL,*s, *token=NULL;
+ char *format=NULL,*s, *token=NULL;
  int pin_number; /* 20180911 */
  int sizetok=0;
  int token_pos=0, escape=0;
@@ -1246,7 +1374,10 @@ void print_spice_subckt(FILE *fd, int symbol)
  int quote=0; /* 20171029 */
  
  my_strdup(103, &format, get_tok_value(instdef[symbol].prop_ptr,"format",0));
- if( (format==NULL) ) return; /* no format */
+ if( (format==NULL) ) {
+   my_free(1012, &format);
+   return; /* no format */
+ }
  no_of_pins= instdef[symbol].rects[PINLAYER];
  s=format;
 
@@ -1279,26 +1410,35 @@ void print_spice_subckt(FILE *fd, int symbol)
      /* do nothing */
    }
    else if(strcmp(token, "@symname")==0) {
-     return ;
+     break ;
    }
    else if(strcmp(token, "@pinlist")==0) {
     for(i=0;i<no_of_pins;i++)
     {
-      str_ptr=
-        expandlabel(get_tok_value(instdef[symbol].boxptr[PINLAYER][i].prop_ptr,"name",0), &mult);
-      fprintf(fd, "%s ", str_ptr);
+      if(strcmp(get_tok_value(instdef[symbol].boxptr[PINLAYER][i].prop_ptr,"spice_ignore",0), "true")) {
+        str_ptr=
+          expandlabel(get_tok_value(instdef[symbol].boxptr[PINLAYER][i].prop_ptr,"name",0), &mult);
+        fprintf(fd, "%s ", str_ptr);
+      }
     }
    }
    else if(token[0]=='@' && token[1]=='@') {    /* recognize single pins 15112003 */
-     fprintf(fd, "%s ", expandlabel(token+2, &mult));
+     for(i = 0; i<no_of_pins; i++) {
+       if(!strcmp(get_tok_value(instdef[symbol].boxptr[PINLAYER][i].prop_ptr,"name",0), token + 2)) break;
+     }
+     if(i<no_of_pins && strcmp(get_tok_value(instdef[symbol].boxptr[PINLAYER][i].prop_ptr,"spice_ignore",0), "true")) {
+       fprintf(fd, "%s ", expandlabel(token+2, &mult));
+     }
    }
    /* reference by pin number instead of pin name, allows faster lookup of the attached net name 20180911 */
    else if(token[0]=='@' && token[1]=='#') {
-       pin_number = atoi(token+2); 
-       if(pin_number < no_of_pins) {
-         str_ptr =  get_tok_value(instdef[symbol].boxptr[PINLAYER][pin_number].prop_ptr,"name",0);
-         fprintf(fd, "%s ",  expandlabel(str_ptr, &mult));
+     pin_number = atoi(token+2); 
+     if(pin_number < no_of_pins) {
+       if(strcmp(get_tok_value(instdef[symbol].boxptr[PINLAYER][pin_number].prop_ptr,"spice_ignore",0), "true")) {
+       str_ptr =  get_tok_value(instdef[symbol].boxptr[PINLAYER][pin_number].prop_ptr,"name",0);
+       fprintf(fd, "%s ",  expandlabel(str_ptr, &mult));
        }
+     }
    }
    if(c != '@' && c!='\0' && (c!='\\'  || escape) ) fputc(c,fd);
    if(c == '@') s--;
@@ -1310,10 +1450,13 @@ void print_spice_subckt(FILE *fd, int symbol)
   }
   if(c=='\0') 
   {
-   return ;
+   break ;
   }
-  if(c=='\\')  escape=1;  else escape=0;
+  escape = (c=='\\' && !escape);
+
  }
+ my_free(1013, &format);
+ my_free(1014, &token);
 }
 
 
@@ -1324,8 +1467,8 @@ void print_spice_element(FILE *fd, int inst)
   int i=0, mult, tmp;
   const char *str_ptr=NULL; 
   register int c, state=XBEGIN, space;
-  static char *template=NULL,*format=NULL,*s, *value=NULL, *name=NULL,  *token=NULL;
-  const char *lab;
+  char *template=NULL,*format=NULL,*s, *name=NULL,  *token=NULL;
+  const char *lab, *value = NULL;
   int pin_number; /* 20180911 */
   int sizetok=0;
   int token_pos=0, escape=0;
@@ -1342,10 +1485,17 @@ void print_spice_element(FILE *fd, int inst)
 
   my_strdup(486, &format,
     get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"format",2));
-  if ((name==NULL) || (format==NULL)) return; /* do no netlist unwanted insts(no format) */
+
+  if ((name==NULL) || (format==NULL)) {
+    my_free(1015, &template); 
+    my_free(1016, &format); 
+    my_free(1017, &name); 
+    return; /* do no netlist unwanted insts(no format) */
+  }
+
   no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
   s=format;
-  if (debug_var>=1) fprintf(errfp, "print_spice_element: name=%s, format=%s netlist_count=%d\n",name,format, netlist_count);
+  dbg(1, "print_spice_element: name=%s, format=%s netlist_count=%d\n",name,format, netlist_count);
 
   /* begin parsing format string */
   while(1)
@@ -1359,11 +1509,11 @@ void print_spice_element(FILE *fd, int inst)
     /* 20150317 use SPACE2() instead of SPACE() */
     space=SPACE2(c);
                                 /* 20151028 */
-    if (state==XBEGIN && c=='@' && !escape) state=XTOKEN;
+    if (state==XBEGIN && (c=='@'|| c=='$')  && !escape) state=XTOKEN;
 
     /* 20171029 added !escape, !quote */
-    else if (state==XTOKEN && (space || c == '@' || c == '\\')  && token_pos > 1 && !escape && !quote) {
-      if(debug_var >= 1 ) fprintf(errfp, "print_spice_element: c=%c, space=%d, escape=%d, quote=%d\n", c, space, escape, quote);
+    else if (state==XTOKEN && (space || c == '$' || c == '@' || c == '\\')  && token_pos > 1 && !escape && !quote) {
+      dbg(1, "print_spice_element: c=%c, space=%d, escape=%d, quote=%d\n", c, space, escape, quote);
       state=XSEPARATOR;
     }
 
@@ -1384,13 +1534,15 @@ void print_spice_element(FILE *fd, int inst)
       if (!spiceprefix && !strcmp(token, "@spiceprefix")) { 
         value=NULL;
       } else {
-        if (debug_var >=1) fprintf(errfp, "print_spice_element(): token: |%s|\n", token);
+        dbg(1, "print_spice_element(): token: |%s|\n", token);
         value = get_tok_value(inst_ptr[inst].prop_ptr, token+1, 2);
         if (value[0] == '\0')
         value=get_tok_value(template, token+1, 0);
       }
-      if (value && value[0]!='\0')
-      {  /* instance names (name) and node labels (lab) go thru the expandlabel function. */
+      if(!get_tok_size && token[0] =='$') {
+        fputs(token + 1, fd);
+      } else if (value && value[0]!='\0') {
+         /* instance names (name) and node labels (lab) go thru the expandlabel function. */
         /*if something else must be parsed, put an if here! */
   
         if (!(strcmp(token+1,"name") && strcmp(token+1,"lab"))  /* expand name/labels */
@@ -1414,9 +1566,11 @@ void print_spice_element(FILE *fd, int inst)
       {                                    /* and node number: m1 n1 m2 n2 .... */
         for(i=0;i<no_of_pins;i++)
         {
-          str_ptr =  pin_node(inst,i, &mult, 0);
-          /* fprintf(errfp, "inst: %s  --> %s\n", name, str_ptr); */
-          fprintf(fd, "@%d %s ", mult, str_ptr);
+          if(strcmp(get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"spice_ignore",0), "true")) {
+            str_ptr =  pin_node(inst,i, &mult, 0);
+            /* fprintf(errfp, "inst: %s  --> %s\n", name, str_ptr); */
+            fprintf(fd, "@%d %s ", mult, str_ptr);
+          }
         }
       }
       else if(token[0]=='@' && token[1]=='@') {    /* recognize single pins 15112003 */
@@ -1424,8 +1578,10 @@ void print_spice_element(FILE *fd, int inst)
           if (!strcmp(
             get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"name",0),
             token+2)) {
-            str_ptr =  pin_node(inst,i, &mult, 0);
-            fprintf(fd, "@%d %s", mult, str_ptr);
+            if(strcmp(get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"spice_ignore",0), "true")) {
+              str_ptr =  pin_node(inst,i, &mult, 0);
+              fprintf(fd, "@%d %s", mult, str_ptr);
+            }
             break; /* 20171029 */
           }
         }
@@ -1434,8 +1590,10 @@ void print_spice_element(FILE *fd, int inst)
       else if (token[0]=='@' && token[1]=='#') {
         pin_number = atoi(token+2); 
         if (pin_number < no_of_pins) {
-          str_ptr =  pin_node(inst,pin_number, &mult, 0);
-          fprintf(fd, "@%d %s ", mult, str_ptr);
+          if(strcmp(get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][pin_number].prop_ptr,"spice_ignore",0), "true")) {
+            str_ptr =  pin_node(inst,pin_number, &mult, 0);
+            fprintf(fd, "@%d %s ", mult, str_ptr);
+          }
         }
       }
       else if (!strncmp(token,"@tcleval", 8)) { /* 20171029 */
@@ -1446,14 +1604,14 @@ void print_spice_element(FILE *fd, int inst)
         tclcmd = my_malloc(488, s);
         Tcl_ResetResult(interp);
         my_snprintf(tclcmd, s, "tclpropeval {%s} {%s} {%s}", token, name, inst_ptr[inst].name);
-        if(debug_var>=1) fprintf(errfp, "tclpropeval {%s} {%s} {%s}", token, name, inst_ptr[inst].name);
+        dbg(1, "tclpropeval {%s} {%s} {%s}", token, name, inst_ptr[inst].name);
         tcleval(tclcmd);
-        fprintf(fd, "%s", Tcl_GetStringResult(interp));
-        my_free(&tclcmd);
+        fprintf(fd, "%s", tclresult());
+        my_free(1018, &tclcmd);
       } /* /20171029 */
                     /* 20151028 dont print escaping backslashes */
-      if (c != '@' && c!='\0' && (c!='\\'  || escape)) fputc(c,fd);
-      if (c == '@') s--;
+      if (c != '$' && c != '@' && c!='\0' && (c!='\\'  || escape)) fputc(c,fd);
+      if (c == '@' || c == '$' ) s--;
       state=XBEGIN;
     }
                    /* 20151028 dont print escaping backslashes */
@@ -1461,10 +1619,14 @@ void print_spice_element(FILE *fd, int inst)
     if(c=='\0') 
     {
       fputc('\n',fd);
-      return;
+      break;
     }
     if (c=='\\') escape=1; else escape=0;
   }
+  my_free(1019, &template);
+  my_free(1020, &format);
+  my_free(1021, &name);
+  my_free(1022, &token);
 }
 
 
@@ -1476,11 +1638,13 @@ void print_tedax_element(FILE *fd, int inst)
  int i=0, mult;
  const char *str_ptr=NULL; 
  register int c, state=XBEGIN, space;
- static char *template=NULL,*format=NULL,*s, *value=NULL, *name=NULL, *token=NULL;
- static char *extra=NULL, *extra_pinnumber=NULL;
- static char *numslots=NULL;
+ char *template=NULL,*format=NULL,*s, *name=NULL, *token=NULL;
+ const char *value;
+ char *extra=NULL, *extra_pinnumber=NULL;
+ char *numslots=NULL;
  int pin_number; /* 20180911 */
- char *extra_token, *extra_ptr, *extra_token_val;
+ const char *extra_token, *extra_token_val;
+ char *extra_ptr;
  char *extra_pinnumber_token, *extra_pinnumber_ptr;
  char *saveptr1, *saveptr2;
  const char *tmp;
@@ -1490,7 +1654,6 @@ void print_tedax_element(FILE *fd, int inst)
  int no_of_pins=0;
  int quote=0; /* 20171029 */
  /* struct inst_hashentry *ptr; */
-
 
  my_strdup(489, &extra, get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"extra",2));
  my_strdup(41, &extra_pinnumber, get_tok_value(inst_ptr[inst].prop_ptr,"extra_pinnumber",2));
@@ -1507,8 +1670,15 @@ void print_tedax_element(FILE *fd, int inst)
 
  my_strdup(497, &format,
      get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"tedax_format",2));
- if(name==NULL) return; 
- if(!format || !format[0]) return; /* do no netlist unwanted insts(no format) */
+ if(name==NULL || !format || !format[0]) {
+   my_free(1023, &extra);
+   my_free(1024, &extra_pinnumber);
+   my_free(1025, &template);
+   my_free(1026, &numslots);
+   my_free(1027, &format);
+   my_free(1028, &name);
+   return; 
+ }
  no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
 
  fprintf(fd, "begin_inst %s numslots %s\n", name, numslots);
@@ -1528,7 +1698,7 @@ void print_tedax_element(FILE *fd, int inst)
            pinnumber,
            i+1);
    }
-   my_free(&pinnumber);
+   my_free(1029, &pinnumber);
  }
  
  if(extra){ 
@@ -1545,7 +1715,7 @@ void print_tedax_element(FILE *fd, int inst)
 
      /* alternate instance based extra net naming: net:<pinumber>=netname */
      my_snprintf(netstring, S(netstring), "net:%s", extra_pinnumber_token);
-     if(debug_var>=1) fprintf(errfp, "print_tedax_element(): netstring=%s\n", netstring);
+     dbg(1, "print_tedax_element(): netstring=%s\n", netstring);
      extra_token_val=get_tok_value(inst_ptr[inst].prop_ptr, extra_token, 0);
      if(!extra_token_val[0]) extra_token_val=get_tok_value(inst_ptr[inst].prop_ptr, netstring, 0);
      if(!extra_token_val[0]) extra_token_val=get_tok_value(template, extra_token, 0);
@@ -1561,7 +1731,7 @@ void print_tedax_element(FILE *fd, int inst)
      
  if(format) {
   s=format;
-  if(debug_var>=1) fprintf(errfp, "print_tedax_element: name=%s, tedax_format=%s netlist_count=%d\n",name,format, netlist_count);
+  dbg(1, "print_tedax_element: name=%s, tedax_format=%s netlist_count=%d\n",name,format, netlist_count);
   /* begin parsing format string */
   while(1)
   {
@@ -1574,10 +1744,10 @@ void print_tedax_element(FILE *fd, int inst)
    /* 20150317 use SPACE2() instead of SPACE() */
    space=SPACE2(c);
                                /* 20151028 */
-   if( state==XBEGIN && c=='@' && !escape) state=XTOKEN;
+   if( state==XBEGIN && (c=='$' || c=='@') && !escape) state=XTOKEN;
  
    /* 20171029 added !escape, !quote */
-   else if( state==XTOKEN && (space || c == '@' || c == '\\')  && token_pos > 1 && !escape && !quote) state=XSEPARATOR;
+   else if( state==XTOKEN && (space || c == '$' || c == '@' || c == '\\')  && token_pos > 1 && !escape && !quote) state=XSEPARATOR;
  
    if(token_pos>=sizetok)
    {
@@ -1595,8 +1765,9 @@ void print_tedax_element(FILE *fd, int inst)
  
     value = get_tok_value(inst_ptr[inst].prop_ptr, token+1, 0);
     if(!get_tok_size) value=get_tok_value(template, token+1, 0);
- 
-    if(value[0]!='\0')
+    if(!get_tok_size && token[0] =='$') {
+      fputs(token + 1, fd);
+    } else if(value[0]!='\0')
     {
       fputs(value,fd);
     }
@@ -1668,8 +1839,8 @@ void print_tedax_element(FILE *fd, int inst)
             fprintf(fd, "%s", value);
           }
         }
-        my_free(&subtok);
-        my_free(&subtok2);
+        my_free(1030, &subtok);
+        my_free(1031, &subtok2);
       } else {
         /* reference by pin number instead of pin name, allows faster lookup of the attached net name 20180911 */
         /* @#n --> return net name attached to pin of index 'n' */
@@ -1689,15 +1860,15 @@ void print_tedax_element(FILE *fd, int inst)
       Tcl_ResetResult(interp);
       my_snprintf(tclcmd, s, "tclpropeval {%s} {%s} {%s}", token, name, inst_ptr[inst].name);
       tcleval(tclcmd);
-      fprintf(fd, "%s", Tcl_GetStringResult(interp));
-      my_free(&tclcmd);
+      fprintf(fd, "%s", tclresult());
+      my_free(1032, &tclcmd);
       /* fprintf(errfp, "%s\n", tclcmd); */
     } /* /20171029 */
  
  
                   /* 20151028 dont print escaping backslashes */
-    if(c!='@' && c!='\0' && (c!='\\'  || escape) ) fputc(c,fd);
-    if(c == '@') s--;
+    if(c!='$' && c!='@' && c!='\0' && (c!='\\'  || escape) ) fputc(c,fd);
+    if(c == '@' || c == '$' ) s--;
     state=XBEGIN;
    }
                   /* 20151028 dont print escaping backslashes */
@@ -1707,37 +1878,49 @@ void print_tedax_element(FILE *fd, int inst)
     fputc('\n',fd);
     break ;
    }
-   if(c=='\\')  escape=1;  else escape=0;
+   escape = (c=='\\' && !escape);
+
  
   }
  } /* if(format) */
  fprintf(fd,"end_inst\n");
+ my_free(1033, &extra);
+ my_free(1034, &extra_pinnumber);
+ my_free(1035, &template);
+ my_free(1036, &numslots);
+ my_free(1037, &format);
+ my_free(1038, &name);
+ my_free(1039, &token);
 }
 
-
-
+/* verilog module instantiation:
+     cmos_inv
+     #(
+     .WN ( 1.5e-05 ) ,
+     .WP ( 4.5e-05 ) ,
+     .LLN ( 3e-06 ) ,
+     .LLP ( 3e-06 )
+     )
+     Xinv ( 
+      .A( AA ),
+      .Z( Z )
+     );
+*/
 void print_verilog_element(FILE *fd, int inst)
 {
  int i=0, mult, tmp;
  const char *str_ptr;
  const char *lab;
- static char *name=NULL;
- static char  *generic_type=NULL;
- static char *template=NULL,*s;
+ char *name=NULL;
+ char  *generic_type=NULL;
+ char *template=NULL,*s;
  int no_of_pins=0;
-
-
  int  tmp1 = 0;
  register int c, state=XBEGIN, space;
- static char *value=NULL,  *token=NULL;
+ char *value=NULL,  *token=NULL;
  int sizetok=0, sizeval=0;
  int token_pos=0, value_pos=0;
  int quote=0;
- int token_number=0;
-
-
- /* 20080915 use generic_type property to decide if some properties are strings, see later */
- my_strdup(505, &generic_type, get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"generic_type",2));
  
  if(get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"verilog_format",2)[0] != '\0') {
   print_verilog_primitive(fd, inst); /*15112003 */
@@ -1748,13 +1931,20 @@ void print_verilog_element(FILE *fd, int inst)
 
  my_strdup(507, &name,inst_ptr[inst].instname); /* 20161210 */
  if(!name) my_strdup(3, &name, get_tok_value(template, "name", 0));
- if(name==NULL) return;
+ if(name==NULL) {
+   my_free(1040, &template);
+   my_free(1041, &name);
+   return;
+ }
  no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
+
+ /* 20080915 use generic_type property to decide if some properties are strings, see later */
+ my_strdup(505, &generic_type, get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"generic_type",2));
 
  s=inst_ptr[inst].prop_ptr;
 
 /* print instance  subckt */
-  if(debug_var>=2) fprintf(errfp, "print_verilog_element(): printing inst name & subcircuit name\n");
+  dbg(2, "print_verilog_element(): printing inst name & subcircuit name\n");
    fprintf(fd, "%s\n", skip_dir(inst_ptr[inst].name) );
 
  /* -------- print generics passed as properties */
@@ -1798,28 +1988,25 @@ void print_verilog_element(FILE *fd, int inst)
     }
   } else if(state==XEND) 
   {
-   token_number++;
    value[value_pos]='\0';
    value_pos=0;
-
-   if(value[0] != '\0') /* token has a value */
-   {
-    if(token_number>1)
-    {
-      /* 20080915 put "" around string params */
-      if(strcmp(token,"spice_ignore") && strcmp(token,"vhdl_ignore") && strcmp(token,"tedax_ignore")) {
-        if(tmp == 0) {fprintf(fd, "#(\n---- start parameters\n");tmp++;tmp1=0;}
-        if(tmp1) fprintf(fd, " ,\n");
-        if( !generic_type || strcmp(get_tok_value(generic_type,token, 2), "time")  ) {
-          if( generic_type && !strcmp(get_tok_value(generic_type,token, 2), "string")  ) {
-            fprintf(fd, "  .%s ( \"%s\" )", token, value);
-          } else {
-            fprintf(fd, "  .%s ( %s )", token, value);
-          }
-          tmp1=1;
-        }
-      }
-    }
+   get_tok_value(template, token, 0);
+   if(strcmp(token, "name") && get_tok_size) {
+     if(value[0] != '\0') /* token has a value */
+     {
+       if(strcmp(token,"spice_ignore") && strcmp(token,"vhdl_ignore") && strcmp(token,"tedax_ignore")) {
+         if(tmp == 0) {fprintf(fd, "#(\n---- start parameters\n");tmp++;tmp1=0;}
+         if(tmp1) fprintf(fd, " ,\n");
+         if( !generic_type || strcmp(get_tok_value(generic_type,token, 2), "time")  ) {
+           if( generic_type && !strcmp(get_tok_value(generic_type,token, 2), "string")  ) {
+             fprintf(fd, "  .%s ( \"%s\" )", token, value);
+           } else {
+             fprintf(fd, "  .%s ( %s )", token, value);
+           }
+           tmp1=1;
+         }
+       }
+     }
    }
    state=XBEGIN;
   }
@@ -1838,23 +2025,29 @@ void print_verilog_element(FILE *fd, int inst)
  else  /*  name in some strange format, probably an error */
    fprintf(fd, "---- instance %s (\n", name );
  
-  if(debug_var>=2) fprintf(errfp, "print_verilog_element(): printing port maps \n");
+  dbg(2, "print_verilog_element(): printing port maps \n");
  /* print port map */
  tmp=0;
  for(i=0;i<no_of_pins;i++)
  {
-   if( (str_ptr =  pin_node(inst,i, &mult, 0)) )
-   {
-     /*printf("print_verilog_element(): expandlabel: str=%s mult=%d\n", str_ptr, mult); */
-     if(tmp) fprintf(fd,"\n");
-     fprintf(fd, "  @%d %s %s ", mult, 
-       get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"name",0),
-       str_ptr);
-     tmp=1;
+   if(strcmp(get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"verilog_ignore",0), "true")) {
+     if( (str_ptr =  pin_node(inst,i, &mult, 0)) )
+     {
+       if(tmp) fprintf(fd,"\n");
+       fprintf(fd, "  @%d %s %s ", mult, 
+         get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"name",0),
+         str_ptr);
+       tmp=1;
+     }
    }
  }
  fprintf(fd, "\n);\n\n");
-  if(debug_var>=2) fprintf(errfp, "print_verilog_element(): ------- end ------ \n");
+ dbg(2, "print_verilog_element(): ------- end ------ \n");
+ my_free(1042, &name);
+ my_free(1043, &generic_type);
+ my_free(1044, &template);
+ my_free(1045, &value);
+ my_free(1046, &token);
 }
 
 
@@ -1870,7 +2063,7 @@ const char *pin_node(int i, int j, int *mult, int hash_prefix_unnamed_net)
   {
    /* get unnamed node multiplicity ( minimum mult found in circuit) */
    *mult = get_unnamed_node(3, 0, atoi((inst_ptr[i].node[j])+4) );
-    if(debug_var>=2) fprintf(errfp, "pin_node(): node = %s  n=%d mult=%d\n",
+    dbg(2, "pin_node(): node = %s  n=%d mult=%d\n",
      inst_ptr[i].node[j], atoi(inst_ptr[i].node[j]), *mult);
    if(hash_prefix_unnamed_net) {
      if(*mult>1)   /* unnamed is a bus */
@@ -1915,7 +2108,8 @@ void print_vhdl_primitive(FILE *fd, int inst) /* netlist  primitives, 20071217 *
  const char *str_ptr;
  register int c, state=XBEGIN, space;
  const char *lab;
- static char *template=NULL,*format=NULL,*s, *value, *name=NULL, *token=NULL;
+ char *template=NULL,*format=NULL,*s, *name=NULL, *token=NULL;
+ const char *value;
  int pin_number; /* 20180911 */
  int sizetok=0;
  int token_pos=0, escape=0;
@@ -1923,18 +2117,20 @@ void print_vhdl_primitive(FILE *fd, int inst) /* netlist  primitives, 20071217 *
  int quote=0; /* 20171029 */
  /* struct inst_hashentry *ptr; */
 
- my_strdup(513, &template,
-     /* get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"template",2)); */
-     (inst_ptr[inst].ptr+instdef)->templ); /* 20150409 20171103 */
- my_strdup(514, &name, inst_ptr[inst].instname); /* 20161210 */
+ my_strdup(513, &template, (inst_ptr[inst].ptr+instdef)->templ);
+ my_strdup(514, &name, inst_ptr[inst].instname);
  if(!name) my_strdup(50, &name, get_tok_value(template, "name", 0));
 
- my_strdup(516, &format,
-     get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"vhdl_format",2)); /* 20071217 */
- if((name==NULL) || (format==NULL) ) return; /*do no netlist unwanted insts(no format) */
+ my_strdup(516, &format, get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"vhdl_format",2)); /* 20071217 */
+ if((name==NULL) || (format==NULL) ) {
+   my_free(1047, &template);
+   my_free(1048, &name);
+   my_free(1151, &format);
+   return; /*do no netlist unwanted insts(no format) */
+ }
  no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
  s=format;
- if(debug_var>=1) fprintf(errfp, "print_vhdl_primitive: name=%s, format=%s netlist_count=%d\n",name,format, netlist_count);
+ dbg(1, "print_vhdl_primitive: name=%s, format=%s netlist_count=%d\n",name,format, netlist_count);
 
  fprintf(fd, "---- start primitive ");
  lab=expandlabel(name, &tmp);
@@ -1950,9 +2146,9 @@ void print_vhdl_primitive(FILE *fd, int inst) /* netlist  primitives, 20071217 *
   if(c=='\n' && escape ) c=*s++; /* 20171030 eat escaped newlines */
   space=SPACE(c);
                                /* 20171029 */
-  if( state==XBEGIN && c=='@' && !escape ) state=XTOKEN;
+  if( state==XBEGIN && (c=='@' || c=='$') && !escape ) state=XTOKEN;
   /* 20171029 added !escape, !quote */
-  else if( state==XTOKEN && (space || c=='@' || c == '\\') && token_pos > 1 && !escape && !quote) state=XSEPARATOR;
+  else if( state==XTOKEN && (space || c=='$' || c=='@' || c == '\\') && token_pos > 1 && !escape && !quote) state=XSEPARATOR;
 
   if(token_pos>=sizetok)
   {
@@ -1971,8 +2167,9 @@ void print_vhdl_primitive(FILE *fd, int inst) /* netlist  primitives, 20071217 *
    value = get_tok_value(inst_ptr[inst].prop_ptr, token+1, 2);
    if(value[0] == '\0')
    value=get_tok_value(template, token+1, 0);
-
-   if(value[0]!='\0')
+   if(!get_tok_size && token[0] =='$') {
+     fputs(token + 1, fd);
+   } else if(value[0]!='\0')
    {  /* instance names (name) and node labels (lab) go thru the expandlabel function. */
       /*if something else must be parsed, put an if here! */
 
@@ -2006,9 +2203,10 @@ void print_vhdl_primitive(FILE *fd, int inst) /* netlist  primitives, 20071217 *
    {                                    /* and node number: m1 n1 m2 n2 .... */
     for(i=0;i<no_of_pins;i++)
     {
-      str_ptr =  pin_node(inst,i, &mult, 0);
-      /*fprintf(fd, "@%d %s ", mult, str_ptr); */ /* 25122004 disabled bus handling, until verilog.awk knows about it */
-      fprintf(fd, "----pin(%s) ", str_ptr);
+      if(strcmp(get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"vhdl_ignore",0), "true")) {
+        str_ptr =  pin_node(inst,i, &mult, 0);
+        fprintf(fd, "----pin(%s) ", str_ptr);
+      }
     }
    }
    else if(token[0]=='@' && token[1]=='@') {    /* recognize single pins 15112003 */
@@ -2016,11 +2214,11 @@ void print_vhdl_primitive(FILE *fd, int inst) /* netlist  primitives, 20071217 *
      if(!strcmp(
           get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"name",0),
           token+2
-         )
-       ) {
-       str_ptr =  pin_node(inst,i, &mult, 0);
-       /*fprintf(fd, "@%d %s ", mult, str_ptr); */ /* 25122004 disabled bus handling, until verilog.awk knows about it */
-       fprintf(fd, "----pin(%s) ", str_ptr);
+         )) {
+       if(strcmp(get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"vhdl_ignore",0), "true")) {
+         str_ptr =  pin_node(inst,i, &mult, 0);
+         fprintf(fd, "----pin(%s) ", str_ptr);
+       }
        break; /* 20171029 */
      }
     }
@@ -2029,8 +2227,10 @@ void print_vhdl_primitive(FILE *fd, int inst) /* netlist  primitives, 20071217 *
    else if(token[0]=='@' && token[1]=='#') {
        pin_number = atoi(token+2);
        if(pin_number < no_of_pins) {
-         str_ptr =  pin_node(inst,pin_number, &mult, 0);
-         fprintf(fd, "----pin(%s) ", str_ptr);
+         if(strcmp(get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][pin_number].prop_ptr,"vhdl_ignore",0), "true")) {
+           str_ptr =  pin_node(inst,pin_number, &mult, 0);
+           fprintf(fd, "----pin(%s) ", str_ptr);
+         }
        }
    }
    else if(!strncmp(token,"@tcleval", 8)) { /* 20171029 */
@@ -2042,13 +2242,13 @@ void print_vhdl_primitive(FILE *fd, int inst) /* netlist  primitives, 20071217 *
      Tcl_ResetResult(interp);
      my_snprintf(tclcmd, s, "tclpropeval {%s} {%s} {%s}", token, name, inst_ptr[inst].name);
      tcleval(tclcmd);
-     fprintf(fd, "%s", Tcl_GetStringResult(interp));
-     my_free(&tclcmd);
+     fprintf(fd, "%s", tclresult());
+     my_free(1049, &tclcmd);
    }
 
                  /* 20180911 dont print escaping backslashes */
-   if(c!='@' && c!='\0' && (c!='\\'  || escape) ) fputc(c,fd);
-   if(c == '@') s--;
+   if(c!='$' && c!='@' && c!='\0' && (c!='\\'  || escape) ) fputc(c,fd);
+   if(c == '@' || c == '$') s--;
    state=XBEGIN;
   }
                  /* 20180911 dont print escaping backslashes */
@@ -2058,177 +2258,180 @@ void print_vhdl_primitive(FILE *fd, int inst) /* netlist  primitives, 20071217 *
   {
    fputc('\n',fd);
    fprintf(fd, "---- end primitive\n");
-   return ;
+   break ;
   }
-  if(c=='\\')
-  {
-    escape=1;
-   /*c=*s++; */
-  }
-  else 
-   escape=0;
-
+  escape = (c=='\\' && !escape);
  }
+ my_free(1050, &template);
+ my_free(1051, &format);
+ my_free(1052, &name);
+ my_free(1053, &token);
 }
 
+/* print verilog element if verilog_format is specified */
 void print_verilog_primitive(FILE *fd, int inst) /* netlist switch level primitives, 15112003 */
 {
- int i=0, mult, tmp;
- const char *str_ptr;
- register int c, state=XBEGIN, space;
- const char *lab;
- static char *template=NULL,*format=NULL,*s=NULL, *value=NULL, *name=NULL, *token=NULL;
- int pin_number; /* 20180911 */
- int sizetok=0;
- int token_pos=0, escape=0;
- int no_of_pins=0;
- int quote=0; /* 20171029 */
- /* struct inst_hashentry *ptr; */
-
- my_strdup(519, &template,
-     (inst_ptr[inst].ptr+instdef)->templ); /* 20150409 */
-
- my_strdup(520, &name,inst_ptr[inst].instname); /*20161210 */
- if(!name) my_strdup(4, &name, get_tok_value(template, "name", 0));
-
- my_strdup(522, &format,
-     get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"verilog_format",2));
- if((name==NULL) || (format==NULL) ) return; /*do no netlist unwanted insts(no format) */
- no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
- s=format;
- if(debug_var>=1) fprintf(errfp, "print_verilog_primitive: name=%s, format=%s netlist_count=%d\n",name,format, netlist_count);
-
- fprintf(fd, "---- start primitive ");
- lab=expandlabel(name, &tmp);
- fprintf(fd, "%d\n",tmp);
- /* begin parsing format string */
- while(1)
- {
-  c=*s++; 
-  if(c=='"' && !escape) {
-    quote=!quote; /* 20171029 */
-    c = *s++;
+  int i=0, mult, tmp;
+  const char *str_ptr;
+  register int c, state=XBEGIN, space;
+  const char *lab;
+  char *template=NULL,*format=NULL,*s=NULL, *name=NULL, *token=NULL;
+  const char *value;
+  int pin_number; /* 20180911 */
+  int sizetok=0;
+  int token_pos=0, escape=0;
+  int no_of_pins=0;
+  int quote=0; /* 20171029 */
+  /* struct inst_hashentry *ptr; */
+ 
+  my_strdup(519, &template,
+      (inst_ptr[inst].ptr+instdef)->templ); /* 20150409 */
+ 
+  my_strdup(520, &name,inst_ptr[inst].instname); /*20161210 */
+  if(!name) my_strdup(4, &name, get_tok_value(template, "name", 0));
+ 
+  my_strdup(522, &format,
+      get_tok_value((inst_ptr[inst].ptr+instdef)->prop_ptr,"verilog_format",2));
+  if((name==NULL) || (format==NULL) ) {
+    my_free(1054, &template);
+    my_free(1055, &name);
+    my_free(1056, &format);
+    return; /*do no netlist unwanted insts(no format) */
   }
-  if(c=='\n' && escape ) c=*s++; /* 20171030 eat escaped newlines */
-  space=SPACE(c);                
-                                 /*20171029 */
-  if( state==XBEGIN && c=='@'  && !escape ) state=XTOKEN;
-  /* 20171029 added !escape, !quote */
-  else if( state==XTOKEN && (space || c == '@' || c == '\\') && token_pos > 1 && !escape && !quote) state=XSEPARATOR;
-
-  if(token_pos>=sizetok)
+  no_of_pins= (inst_ptr[inst].ptr+instdef)->rects[PINLAYER];
+  s=format;
+  dbg(1, "print_verilog_primitive: name=%s, format=%s netlist_count=%d\n",name,format, netlist_count);
+ 
+  fprintf(fd, "---- start primitive ");
+  lab=expandlabel(name, &tmp);
+  fprintf(fd, "%d\n",tmp);
+  /* begin parsing format string */
+  while(1)
   {
-   sizetok+=CADCHUNKALLOC;
-   my_realloc(523, &token,sizetok);
-  }
-
-  if(state==XTOKEN) {
-    if(c!='\\' || escape) token[token_pos++]=c; /* 20171029 remove escaping backslashes */
-  }
-  else if(state==XSEPARATOR)                    /* got a token */
-  {
-   token[token_pos]='\0'; 
-   token_pos=0;
-
-   value = get_tok_value(inst_ptr[inst].prop_ptr, token+1, 2);
-   if(value[0] == '\0')
-   value=get_tok_value(template, token+1, 0);
-
-   if(value[0]!='\0')
-   {  /* instance names (name) and node labels (lab) go thru the expandlabel function. */
-      /*if something else must be parsed, put an if here! */
-
-    if(!(strcmp(token+1,"name"))) {
-      if( (lab=expandlabel(value, &tmp)) != NULL) 
-         fprintf(fd, "----name(%s)", lab);
-      else 
-         fprintf(fd, "%s", value);
-    }
-    else if(!(strcmp(token+1,"lab"))) {
-      if( (lab=expandlabel(value, &tmp)) != NULL) 
-         fprintf(fd, "----pin(%s)", lab);
-      else 
-         fprintf(fd, "%s", value);
-    }
-    else  fprintf(fd, "%s", value);
+   c=*s++; 
+   if(c=='"' && !escape) {
+     quote=!quote; /* 20171029 */
+     c = *s++;
    }
-   else if(strcmp(token,"@symname")==0) /* of course symname must not be present  */
-                                        /* in hash table */
+   if(c=='\n' && escape ) c=*s++; /* 20171030 eat escaped newlines */
+   space=SPACE(c);                
+   if( state==XBEGIN && (c=='@' || c=='$') && !escape ) state=XTOKEN;
+   /* 20171029 added !escape, !quote */
+   else if( state==XTOKEN && (space || c == '$' || c == '@' || c == '\\') && token_pos > 1 && !escape && !quote) state=XSEPARATOR;
+ 
+   if(token_pos>=sizetok)
    {
-    fprintf( fd, "%s",skip_dir(inst_ptr[inst].name) );
+    sizetok+=CADCHUNKALLOC;
+    my_realloc(523, &token,sizetok);
    }
-   else if(strcmp(token,"@schname")==0) /* of course schname must not be present  */
-                                        /* in hash table */
+ 
+   if(state==XTOKEN) {
+     if(c!='\\' || escape) token[token_pos++]=c; /* 20171029 remove escaping backslashes */
+   }
+   else if(state==XSEPARATOR)                    /* got a token */
    {
-     /* fputs(schematic[currentsch],fd); */
-     fputs(current_name, fd); /* 20190519 */
-   }
-   else if(strcmp(token,"@pinlist")==0) /* of course pinlist must not be present  */
-                                        /* in hash table. print multiplicity */
-   {                                    /* and node number: m1 n1 m2 n2 .... */
-    for(i=0;i<no_of_pins;i++)
-    {
-      str_ptr =  pin_node(inst,i, &mult, 0);
-      /*fprintf(fd, "@%d %s ", mult, str_ptr); */ /* 25122004 disabled bus handling, until verilog.awk knows about it */
-      fprintf(fd, "----pin(%s) ", str_ptr);
-    }
-   }
-   else if(token[0]=='@' && token[1]=='@') {    /* recognize single pins 15112003 */
-    for(i=0;i<no_of_pins;i++) {
-     if(!strcmp(
-          get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"name",0),
-          token+2
-         )
-       ) {
-       str_ptr =  pin_node(inst,i, &mult, 0);
-       /*fprintf(fd, "@%d %s ", mult, str_ptr); */ /* 25122004 disabled bus handling, until verilog.awk knows about it */
-       fprintf(fd, "----pin(%s) ", str_ptr);
-       break; /* 20171029 */
+    token[token_pos]='\0'; 
+    token_pos=0;
+ 
+    value = get_tok_value(inst_ptr[inst].prop_ptr, token+1, 2);
+    if(value[0] == '\0')
+    value=get_tok_value(template, token+1, 0);
+    if(!get_tok_size && token[0] =='$') {
+      fputs(token + 1, fd);
+    } else if(value[0]!='\0') {
+       /* instance names (name) and node labels (lab) go thru the expandlabel function. */
+       /*if something else must be parsed, put an if here! */
+ 
+     if(!(strcmp(token+1,"name"))) {
+       if( (lab=expandlabel(value, &tmp)) != NULL) 
+          fprintf(fd, "----name(%s)", lab);
+       else 
+          fprintf(fd, "%s", value);
      }
+     else if(!(strcmp(token+1,"lab"))) {
+       if( (lab=expandlabel(value, &tmp)) != NULL) 
+          fprintf(fd, "----pin(%s)", lab);
+       else 
+          fprintf(fd, "%s", value);
+     }
+     else  fprintf(fd, "%s", value);
     }
-   }
-   /* reference by pin number instead of pin name, allows faster lookup of the attached net name 20180911 */
-   else if(token[0]=='@' && token[1]=='#') {
-       pin_number = atoi(token+2);
-       if(pin_number < no_of_pins) {
-         str_ptr =  pin_node(inst,pin_number, &mult, 0);
+    else if(strcmp(token,"@symname")==0) /* of course symname must not be present  */
+                                         /* in hash table */
+    {
+     fprintf( fd, "%s",skip_dir(inst_ptr[inst].name) );
+    }
+    else if(strcmp(token,"@schname")==0) /* of course schname must not be present  */
+                                         /* in hash table */
+    {
+      /* fputs(schematic[currentsch],fd); */
+      fputs(current_name, fd); /* 20190519 */
+    }
+    else if(strcmp(token,"@pinlist")==0) /* of course pinlist must not be present  */
+                                         /* in hash table. print multiplicity */
+    {                                    /* and node number: m1 n1 m2 n2 .... */
+     for(i=0;i<no_of_pins;i++)
+     {
+       if(strcmp(get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"verilog_ignore",0), "true")) {
+         str_ptr =  pin_node(inst,i, &mult, 0);
          fprintf(fd, "----pin(%s) ", str_ptr);
        }
+     }
+    }
+    else if(token[0]=='@' && token[1]=='@') {    /* recognize single pins 15112003 */
+     for(i=0;i<no_of_pins;i++) {
+      if(!strcmp(
+           get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"name",0),
+           token+2)) {
+        if(strcmp(get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][i].prop_ptr,"verilog_ignore",0), "true")) {
+          str_ptr =  pin_node(inst,i, &mult, 0);
+          fprintf(fd, "----pin(%s) ", str_ptr);
+        }
+        break; /* 20171029 */
+      }
+     }
+    }
+    /* reference by pin number instead of pin name, allows faster lookup of the attached net name 20180911 */
+    else if(token[0]=='@' && token[1]=='#') {
+        pin_number = atoi(token+2);
+        if(pin_number < no_of_pins) {
+          if(strcmp(get_tok_value((inst_ptr[inst].ptr+instdef)->boxptr[PINLAYER][pin_number].prop_ptr,"verilog_ignore",0), "true")) {
+            str_ptr =  pin_node(inst,pin_number, &mult, 0);
+            fprintf(fd, "----pin(%s) ", str_ptr);
+          }
+        }
+    }
+    else if(!strncmp(token,"@tcleval", 8)) { /* 20171029 */
+      /* char tclcmd[strlen(token)+100] ; */
+      size_t s;
+      char *tclcmd=NULL;
+      s = token_pos + strlen(name) + strlen(inst_ptr[inst].name) + 100;
+      tclcmd = my_malloc(524, s);
+      Tcl_ResetResult(interp);
+      my_snprintf(tclcmd, s, "tclpropeval {%s} {%s} {%s}", token, name, inst_ptr[inst].name);
+      tcleval(tclcmd);
+      fprintf(fd, "%s", tclresult());
+      my_free(1057, &tclcmd);
+    }
+                  /* 20180911 dont print escaping backslashes */
+    if(c!='$' && c!='@' && c!='\0' && (c!='\\'  || escape) ) fputc(c,fd);
+    if(c == '@' || c == '$') s--;
+    state=XBEGIN;
    }
-   else if(!strncmp(token,"@tcleval", 8)) { /* 20171029 */
-     /* char tclcmd[strlen(token)+100] ; */
-     size_t s;
-     char *tclcmd=NULL;
-     s = token_pos + strlen(name) + strlen(inst_ptr[inst].name) + 100;
-     tclcmd = my_malloc(524, s);
-     Tcl_ResetResult(interp);
-     my_snprintf(tclcmd, s, "tclpropeval {%s} {%s} {%s}", token, name, inst_ptr[inst].name);
-     tcleval(tclcmd);
-     fprintf(fd, "%s", Tcl_GetStringResult(interp));
-     my_free(&tclcmd);
+                  /* 20180911 dont print escaping backslashes */
+   else if(state==XBEGIN && c!='\0' && (c!='\\' || escape))  fputc(c,fd);
+   if(c=='\0') 
+   {
+    fputc('\n',fd);
+    fprintf(fd, "---- end primitive\n");
+    break ;
    }
-                 /* 20180911 dont print escaping backslashes */
-   if(c!='@' && c!='\0' && (c!='\\'  || escape) ) fputc(c,fd);
-   if(c == '@') s--;
-   state=XBEGIN;
+   escape = (c=='\\' && !escape);
   }
-                 /* 20180911 dont print escaping backslashes */
-  else if(state==XBEGIN && c!='\0' && (c!='\\' || escape))  fputc(c,fd);
-  if(c=='\0') 
-  {
-   fputc('\n',fd);
-   fprintf(fd, "---- end primitive\n");
-   return ;
-  }
-  if(c=='\\')
-  {
-    escape=1;
-   /*c=*s++; */
-  }
-  else 
-   escape=0;
-
- }
+  my_free(1058, &template);
+  my_free(1059, &format);
+  my_free(1060, &name);
+  my_free(1061, &token);
 }
 
 int isonlydigit(const char *s)
@@ -2243,23 +2446,27 @@ int isonlydigit(const char *s)
 }
 
 /* 20180911 */
-char *find_nth(char *str, char sep, int n)
+const char *find_nth(const char *str, char sep, int n)
 {
-  static char *ss=NULL;
+  static char *result=NULL;
   static char empty[]="";
   int i;
   char *ptr;
   int count;
 
-  my_strdup(525, &ss, str);
-  if(!ss) return empty;
-  for(i=0, count=1, ptr=ss; ss[i] != 0; i++) {
-    if(ss[i]==sep) {
-      ss[i]=0;
+  if(!str) {
+    my_free(1062, &result);
+    return empty;
+  }
+  my_strdup(525, &result, str);
+  if(!result) return empty;
+  for(i=0, count=1, ptr=result; result[i] != 0; i++) {
+    if(result[i]==sep) {
+      result[i]=0;
       if(count==n) {
         return ptr;
       }
-      ptr=ss+i+1;
+      ptr=result+i+1;
       count++;
     }
   }
@@ -2270,12 +2477,13 @@ char *find_nth(char *str, char sep, int n)
 /* substitute given tokens in a string with their corresponding values */
 /* ex.: name=@name w=@w l=@l ---> name=m112 w=3e-6 l=0.8e-6 */
 /* if s==NULL return emty string */
-char *translate(int inst, char* s)
+const char *translate(int inst, char* s)
 {
+ static char empty[]="";
  static char *result=NULL;
  int size=0, tmp;
  register int c, state=XBEGIN, space;
- static char *token=NULL;
+ char *token=NULL;
  const char *tmp_sym_name;
  int sizetok=0;
  int result_pos=0, token_pos=0;
@@ -2283,37 +2491,36 @@ char *translate(int inst, char* s)
  struct stat time_buf;
  struct tm *tm;
  char file_name[PATH_MAX];
- static char *value; /* 20100401 */
- int escape=0; /* 20161210 */
+ const char *value;
+ int escape=0;
  char date[200];
- 
+
+
+ if(!s) {
+   my_free(1063, &result);
+   return empty;
+ }
+    
  size=CADCHUNKALLOC;
- if(result==NULL) result=my_malloc(526, size);
- else my_realloc(527, &result,size);
+ my_realloc(527, &result,size);
  result[0]='\0';
 
- if(debug_var>=2) fprintf(errfp, "translate(): substituting props in <%s>, instance <%s>\n",
+ dbg(2, "translate(): substituting props in <%s>, instance <%s>\n",
         s?s:"NULL",inst_ptr[inst].instname?inst_ptr[inst].instname:"NULL");
 
- while(s)
+ while(1)
  {
   c=*s++; 
-  
-  /* 20161210 */
-  if(c=='\\')
-  {
+  if(c=='\\') {
     escape=1;
     c=*s++;
   }
-  else
-   escape=0;
-  /* /20161210 */
-
+  else escape=0;
   space=SPACE2(c);
-  if( state==XBEGIN && (c=='@' || c=='\f' ) && !escape  ) state=XTOKEN; /* 20161210 escape */
+  if( state==XBEGIN && (c=='@' || c=='$' ) && !escape  ) state=XTOKEN; /* 20161210 escape */
   else if( state==XTOKEN && ( 
                               (space && !escape)  || 
-                               (c =='@' || c == '\f') ||
+                               (c =='@' || c == '$') ||
                               (!space && escape)
                             ) 
                          && token_pos > 1 ) state=XSEPARATOR;
@@ -2333,18 +2540,23 @@ char *translate(int inst, char* s)
   else if(state==XSEPARATOR) 
   {
    token[token_pos]='\0'; 
-   if(debug_var >= 2) fprintf(errfp, "translate(): token=%s\n", token);
+   dbg(2, "translate(): token=%s\n", token);
 
-   value = get_tok_value(inst_ptr[inst].prop_ptr, token+1, 2);
-   if(!get_tok_size) value=get_tok_value((inst_ptr[inst].ptr+instdef)->templ, token+1, 2); /* 20190310 2 instead of 0 */
+   if(!spiceprefix && !strcmp(token, "@spiceprefix")) {
+     value = NULL;
+     get_tok_size = 0;
+   } else {
+     value = get_tok_value(inst_ptr[inst].prop_ptr, token+1, 2);
+     if(!get_tok_size) value=get_tok_value((inst_ptr[inst].ptr+instdef)->templ, token+1, 2); /* 20190310 2 instead of 0 */
+   }
 
-   if(!get_tok_size && token[0] =='\f') {
-    tmp=token_pos - 1; /* strlen(token+1), excluding leading '\f' */
+   if(!get_tok_size && token[0] =='$') {
+    tmp=token_pos - 1; /* strlen(token+1), excluding leading '$' */
     if(result_pos + tmp>=size) {
      size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
-     my_realloc(530, &result,size);
+     my_realloc(368, &result,size);
     }
-    if(debug_var >= 2) fprintf(errfp, "translate(): token=%s, token_pos = %d\n", token, token_pos);
+    dbg(2, "translate(): token=%s, token_pos = %d\n", token, token_pos);
     memcpy(result+result_pos, token + 1, tmp+1); /* 20180923 */
     result_pos+=tmp;
    }
@@ -2358,7 +2570,7 @@ char *translate(int inst, char* s)
     memcpy(result+result_pos, value, tmp+1); /* 20180923 */
     result_pos+=tmp;
    } else if(strcmp(token,"@symname")==0) {
-    tmp_sym_name=get_cell_w_ext(inst_ptr[inst].name, 0);
+    tmp_sym_name=inst_ptr[inst].name ? get_cell(inst_ptr[inst].name, 0) : "";
     tmp=strlen(tmp_sym_name);
     if(result_pos + tmp>=size) {
      size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
@@ -2366,6 +2578,16 @@ char *translate(int inst, char* s)
     }
     memcpy(result+result_pos,tmp_sym_name, tmp+1); /* 20180923 */
     result_pos+=tmp;
+   } else if(strcmp(token,"@symname_ext")==0) {
+    tmp_sym_name=inst_ptr[inst].name ? get_cell_w_ext(inst_ptr[inst].name, 0) : "";
+    tmp=strlen(tmp_sym_name);
+    if(result_pos + tmp>=size) {
+     size=(1+(result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
+     my_realloc(453, &result,size);
+    }
+    memcpy(result+result_pos,tmp_sym_name, tmp+1); /* 20180923 */
+    result_pos+=tmp;
+
    } else if(token[0]=='@' && token[1]=='#') {  /* 20180911 */
      int n;
      char *pin_attr = my_malloc(532, sizetok * sizeof(char));
@@ -2406,10 +2628,10 @@ char *translate(int inst, char* s)
          memcpy(result+result_pos, value, tmp+1); /* 20180923 */
          result_pos+=tmp;
        }
-       my_free(&pinnumber);
+       my_free(1064, &pinnumber);
      }
-     my_free(&pin_attr);
-     my_free(&pin_num_or_name);
+     my_free(1065, &pin_attr);
+     my_free(1066, &pin_num_or_name);
    } else if(strcmp(token,"@sch_last_modified")==0) {
 
     my_strncpy(file_name, abs_sym_path(get_tok_value(
@@ -2534,7 +2756,7 @@ char *translate(int inst, char* s)
      result_pos+=tmp;
    }
 
-   if(c == '@' || c == '\f') s--;
+   if(c == '@' || c == '$') s--;
    else result[result_pos++]=c;
    state=XBEGIN;
   }
@@ -2545,12 +2767,14 @@ char *translate(int inst, char* s)
    break;
   }
  }
- if(debug_var >=2) fprintf(errfp, "translate(): returning %s\n", result);
+ dbg(2, "translate(): returning %s\n", result);
+ my_free(1067, &token);
  return result;
 }
 
-char* translate2(struct Lcc *lcc, int level, char* s)
+const char *translate2(struct Lcc *lcc, int level, char* s)
 {
+  static char empty[]="";
   static char *result = NULL;
   int i, size = 0, tmp, save_tok_size, save_value_size;
   register int c, state = XBEGIN, space;
@@ -2563,12 +2787,15 @@ char* translate2(struct Lcc *lcc, int level, char* s)
   char *value = NULL;
   int escape = 0;
 
+  if(!s) {
+    my_free(1068, &result);
+    return empty;
+  }
   size = CADCHUNKALLOC;
-  if (result == NULL) result = my_malloc(660, size);
-  else my_realloc(661, &result, size);
+  my_realloc(661, &result, size);
   result[0] = '\0';
 
-  while (s) {
+  while (1) {
     c = *s++;
     if (c == '\\') {
       escape = 1;
@@ -2592,7 +2819,13 @@ char* translate2(struct Lcc *lcc, int level, char* s)
     else if (state == XSEPARATOR) {
       token[token_pos] = '\0';
       token_pos = 0;
-      my_strdup2(332, &value1, get_tok_value(lcc[level].prop_ptr, token + 1, 2));
+
+      if(!spiceprefix && !strcmp(token, "@spiceprefix")) {
+        my_free(1069, &value1);
+        get_tok_size = 0;
+      } else {
+        my_strdup2(332, &value1, get_tok_value(lcc[level].prop_ptr, token + 1, 2));
+      }
       
       value = "";
       if(get_tok_size) {
@@ -2614,17 +2847,27 @@ char* translate2(struct Lcc *lcc, int level, char* s)
           i--;
         }
         tmp = get_tok_value_size;  /* strlen(value); */
-        if (result_pos + tmp + 1 >= size) { /* +1 to add leading '\f' */
+        if (result_pos + tmp + 1 >= size) { /* +1 to add leading '$' */
           size = (1 + (result_pos + tmp + 1) / CADCHUNKALLOC) * CADCHUNKALLOC;
           my_realloc(664, &result, size);
         }
-        /* prefix substituted token with a form-feed so it will be recognized by translate() for last level translation with 
+        /* prefix substituted token with a '$' so it will be recognized by translate() for last level translation with 
            instance placement prop_ptr attributes  at drawing/netlisting time. */
-        memcpy(result + result_pos , "\f", 1);
+        memcpy(result + result_pos , "$", 1);
         memcpy(result + result_pos + 1 , value, tmp + 1);
         result_pos += tmp + 1;
       }
       else if (strcmp(token, "@symname") == 0) {
+        tmp_sym_name = lcc[level].symname ? get_cell(lcc[level].symname, 0) : "";
+        tmp = strlen(tmp_sym_name);
+        if (result_pos + tmp >= size) {
+          size = (1 + (result_pos + tmp) / CADCHUNKALLOC) * CADCHUNKALLOC;
+          my_realloc(655, &result, size);
+        }
+        memcpy(result + result_pos, tmp_sym_name, tmp + 1);
+        result_pos += tmp;
+      }
+      else if (strcmp(token, "@symname_ext") == 0) {
         tmp_sym_name = lcc[level].symname ? get_cell_w_ext(lcc[level].symname, 0) : "";
         tmp = strlen(tmp_sym_name);
         if (result_pos + tmp >= size) {
@@ -2634,6 +2877,7 @@ char* translate2(struct Lcc *lcc, int level, char* s)
         memcpy(result + result_pos, tmp_sym_name, tmp + 1);
         result_pos += tmp;
       }
+
       if (c == '@') s--;
       else result[result_pos++] = c;
       state = XBEGIN;
@@ -2644,8 +2888,8 @@ char* translate2(struct Lcc *lcc, int level, char* s)
       break;
     }
   }
-  my_free(&token);
-  my_free(&value1);
-  my_free(&value2);
+  my_free(1070, &token);
+  my_free(1071, &value1);
+  my_free(1072, &value2);
   return result;
 }

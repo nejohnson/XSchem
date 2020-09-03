@@ -15,6 +15,7 @@ src/parselabel.h
 
 # Exclude tool-related config files
 .project
+.svn
 
 # Exclude admin files
 xschem_library/devices/spice/admin/*

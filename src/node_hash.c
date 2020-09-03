@@ -24,7 +24,7 @@
 
 static struct node_hashentry *node_table[HASHSIZE];
 
-static unsigned int hash(char *tok)
+static unsigned int hash(const char *tok)
 {
   unsigned int hash = 0;
   int c;
@@ -45,7 +45,7 @@ void print_vhdl_signals(FILE *fd)
  struct node_hashentry *ptr;
  int i, found;
  int mult,j;
- static char *class=NULL;
+ char *class=NULL;
 
  found=0;
  for(i=0;i<HASHSIZE;i++)
@@ -54,7 +54,7 @@ void print_vhdl_signals(FILE *fd)
   while(ptr)
   {
    if(strstr(ptr->token, ".")) {
-     if(debug_var>=2) fprintf(errfp, "print_vhdl_signals(): record field, skipping: %s\n", ptr->token);
+     dbg(2, "print_vhdl_signals(): record field, skipping: %s\n", ptr->token);
      ptr = ptr->next; 
      continue; /* signal is a record field, no declaration */
    }
@@ -69,7 +69,7 @@ void print_vhdl_signals(FILE *fd)
     {
      mult=1;
     }
-    if(debug_var>=2) fprintf(errfp, " print_vhdl_signals(): node: %s mult: %d value=%s \n\n",
+    dbg(2, " print_vhdl_signals(): node: %s mult: %d value=%s \n\n",
            ptr->token,mult, ptr->value?ptr->value:"NULL");
 
     if( ptr->class && ptr->class[0] )
@@ -110,6 +110,7 @@ void print_vhdl_signals(FILE *fd)
   }
  }
  if(found) fprintf(fd, "\n" );
+ my_free(852, &class);
 }
 
 
@@ -120,7 +121,7 @@ void print_verilog_signals(FILE *fd)
  int i, found;
  int mult,j;
 
- if(debug_var>=2) fprintf(errfp, " print_verilog_signals(): entering routine\n");
+ dbg(2, " print_verilog_signals(): entering routine\n");
  found=0;
  for(i=0;i<HASHSIZE;i++)
  {
@@ -138,7 +139,7 @@ void print_verilog_signals(FILE *fd)
     {
      mult=1;
     }
-    if(debug_var>=2) fprintf(errfp, " print_verilog_signals(): node: %s mult: %d value=%s \n\n",
+    dbg(2, " print_verilog_signals(): node: %s mult: %d value=%s \n\n",
            ptr->token,mult, ptr->value?ptr->value:"NULL");
 
     if(mult>1)
@@ -179,7 +180,7 @@ void print_verilog_signals(FILE *fd)
 
 /* wrapper to node_hash_lookup that handles buses */
 /* warning, in case of buses return only pointer to first bus element */
-struct node_hashentry *bus_hash_lookup(char *token, char *dir,int remove,int port,
+struct node_hashentry *bus_hash_lookup(const char *token, const char *dir,int remove,int port,
        char *sig_type,char *verilog_type, char *value, char *class)
 {
  char *start, *string_ptr, c;
@@ -194,9 +195,9 @@ struct node_hashentry *bus_hash_lookup(char *token, char *dir,int remove,int por
  }
  else
  {
-   if(debug_var >=3) fprintf(errfp, "bus_hash_lookup(): expanding node: %s\n", token);
+   dbg(3, "bus_hash_lookup(): expanding node: %s\n", token);
    my_strdup(280, &string, expandlabel(token,&mult));
-   if(debug_var >=3) fprintf(errfp, "bus_hash_lookup(): done expanding node: %s\n", token);
+   dbg(3, "bus_hash_lookup(): done expanding node: %s\n", token);
  }
  if(string==NULL) return NULL;
  string_ptr = start = string; 
@@ -209,7 +210,7 @@ struct node_hashentry *bus_hash_lookup(char *token, char *dir,int remove,int por
     /* insert one bus element at a time in hash table */
     ptr1=node_hash_lookup(start, dir, remove,port, sig_type, verilog_type, value, class, token);
     if(!ptr2) ptr2=ptr1;
-    if(debug_var >=3) fprintf(errfp, "bus_hash_lookup(): processing node: %s\n", start);
+    dbg(3, "bus_hash_lookup(): processing node: %s\n", start);
     *string_ptr=c;     /* ....restore original char */
     start=string_ptr+1;
   }
@@ -217,13 +218,13 @@ struct node_hashentry *bus_hash_lookup(char *token, char *dir,int remove,int por
   string_ptr++;
  }
  /* if something found return first pointer */
- my_free(&string);
+ my_free(853, &string);
  return ptr2;
 }
 
 
-struct node_hashentry *node_hash_lookup(char *token, char *dir,int remove,int port,
-       char *sig_type, char *verilog_type, char *value, char *class, char *orig_tok)
+struct node_hashentry *node_hash_lookup(const char *token, const char *dir,int remove,int port,
+       char *sig_type, char *verilog_type, char *value, char *class, const char *orig_tok)
 /*    token        dir      remove    ... what ... */
 /* -------------------------------------------------------------------------- */
 /* "whatever"     "in"/"out"    0,XINSERT  insert in hash table if not in and return NULL */
@@ -241,7 +242,7 @@ struct node_hashentry *node_hash_lookup(char *token, char *dir,int remove,int po
  struct drivers d;
 
  if(token==NULL || token[0]==0 ) return NULL;
- if(debug_var>=3) fprintf(errfp, "node_hash_lookup(): called with: %s dir=%s remove=%d port=%d\n",
+ dbg(3, "node_hash_lookup(): called with: %s dir=%s remove=%d port=%d\n",
         token, dir, remove, port);
  d.in=d.out=d.inout=0;
  if(!strcmp(dir,"in") )  d.in=1;
@@ -276,9 +277,9 @@ struct node_hashentry *node_hash_lookup(char *token, char *dir,int remove,int po
     entry->d.inout=d.inout;
     entry->hash=hashcode;
     *preventry=entry;
-    if(debug_var>=3) fprintf(errfp, "node_hash_lookup(): hashing %s : value=%s\n\n",
+    dbg(3, "node_hash_lookup(): hashing %s : value=%s\n\n",
            entry->token, entry->value? entry->value:"NULL");
-    if(debug_var>=3) fprintf(errfp, "node_hash_lookup(): hashing %s in=%d out=%d inout=%d port=%d\n",
+    dbg(3, "node_hash_lookup(): hashing %s in=%d out=%d inout=%d port=%d\n",
                 token, d.in, d.out, d.inout, d.port);
    }
    return NULL; /* whether inserted or not return NULL since it was not in */
@@ -288,13 +289,13 @@ struct node_hashentry *node_hash_lookup(char *token, char *dir,int remove,int po
    if(remove==XDELETE)                /* remove token from the hash table ... */
    {
     saveptr=entry->next;
-    if(entry->token) my_free(& entry->token);
-    if(entry->verilog_type) my_free(& entry->verilog_type); /* 09112003 */
-    if(entry->sig_type) my_free(& entry->sig_type); /* 24092001 */
-    if(entry->class) my_free(& entry->class); /* 07102001 */
-    if(entry->orig_tok) my_free(& entry->orig_tok); /* 07102001 */
-    if(entry->value) my_free(& entry->value); /* 27092001 */
-    my_free(&entry);
+    my_free(854, &entry->token);
+    my_free(855, &entry->verilog_type); /* 09112003 */
+    my_free(856, &entry->sig_type); /* 24092001 */
+    my_free(857, &entry->class); /* 07102001 */
+    my_free(858, &entry->orig_tok); /* 07102001 */
+    my_free(859, &entry->value); /* 27092001 */
+    my_free(860, &entry);
     *preventry=saveptr;
     return NULL;
    }
@@ -310,7 +311,7 @@ struct node_hashentry *node_hash_lookup(char *token, char *dir,int remove,int po
       my_strdup(289,  &(entry->verilog_type), verilog_type); /* 09112003 */
     if(value && value[0] !='\0')
       my_strdup(290,  &(entry->value), value); /* 27092001 */
-    if(debug_var>=3) fprintf(errfp, "node_hash_lookup(): hashing %s : value=%s\n\n",
+    dbg(3, "node_hash_lookup(): hashing %s : value=%s\n\n",
            entry->token, entry->value? entry->value:"NULL");
     return entry;
    }
@@ -369,7 +370,7 @@ void traverse_node_hash()
        statusmsg(str,2);
      }
    }
-   if(debug_var>=1) fprintf(errfp, "traverse_node_hash(): node: %s in=%d out=%d inout=%d port=%d\n", 
+   dbg(1, "traverse_node_hash(): node: %s in=%d out=%d inout=%d port=%d\n", 
         entry->token, entry->d.in, entry->d.out, entry->d.inout, entry->d.port);
 
    entry = entry->next;
@@ -386,13 +387,13 @@ static struct node_hashentry *free_hash_entry(struct node_hashentry *entry)
   while(entry) {
     n_elements++; collisions++;
     tmp = entry->next;
-    if(entry->token) my_free(&entry->token);
-    if(entry->verilog_type) my_free(&entry->verilog_type); /* 09112003 */
-    if(entry->sig_type) my_free(&entry->sig_type); /* 24092001 */
-    if(entry->class) my_free(&entry->class); /* 07102001 */
-    if(entry->orig_tok) my_free(&entry->orig_tok); /* 07102001 */
-    if(entry->value) my_free(&entry->value); /* 27092001 */
-    my_free(&entry);
+    my_free(861, &entry->token);
+    my_free(862, &entry->verilog_type); /* 09112003 */
+    my_free(863, &entry->sig_type); /* 24092001 */
+    my_free(864, &entry->class); /* 07102001 */
+    my_free(865, &entry->orig_tok); /* 07102001 */
+    my_free(866, &entry->value); /* 27092001 */
+    my_free(867, &entry);
     entry = tmp;
   }
   return NULL;
@@ -402,7 +403,7 @@ void free_node_hash(void) /* remove the whole hash table  */
 {
  int i;
   
- if(debug_var>=2) fprintf(errfp, "free_node_hash(): removing hash table\n");
+ dbg(2, "free_node_hash(): removing hash table\n");
  n_elements=0;
  for(i=0;i<HASHSIZE;i++)
  {
@@ -410,7 +411,7 @@ void free_node_hash(void) /* remove the whole hash table  */
   node_table[i] = free_hash_entry( node_table[i] );
   if(collisions>max_collisions) max_collisions=collisions;
  }
- if(debug_var>=1) fprintf(errfp, "# free_node_hash(): max_collisions=%d n_elements=%d hashsize=%d\n",
+ dbg(1, "# free_node_hash(): max_collisions=%d n_elements=%d hashsize=%d\n",
                    max_collisions, n_elements, HASHSIZE);
  max_collisions=0;
 

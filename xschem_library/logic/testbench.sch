@@ -1,4 +1,4 @@
-v {xschem version=2.9.6 file_version=1.1}
+v {xschem version=2.9.7 file_version=1.2}
 G {process
 begin
 A<='0';
@@ -216,15 +216,15 @@ C {use.sym} 40 -670 0 0 {------------------------------------------------
 library ieee;
         use ieee.std_logic_1164.all;
         use ieee.numeric_std.all;}
-C {ram.sym} 840 -670 0 0 {name=xcoderam   dim=5 width=8 hex=1 datafile=ram.list}
-C {lab_pin.sym} 990 -730 0 1 {name=p25 lab=DOUT[7:0]}
-C {lab_pin.sym} 690 -730 0 0 {name=p26 lab=ADD[4:0]}
-C {lab_pin.sym} 690 -690 0 0 {name=p27 lab=DIN[7:0]}
-C {lab_pin.sym} 690 -670 0 0 {name=p28 lab=WEN}
-C {lab_pin.sym} 690 -630 0 0 {name=p29 lab=OEN}
-C {lab_pin.sym} 690 -610 0 0 {name=p30 lab=CK}
-C {lab_pin.sym} 690 -650 0 0 {name=p31 lab=CEN}
-C {lab_pin.sym} 690 -710 0 0 {name=p32 lab=M[7:0]}
+C {ram.sym} 840 -630 0 0 {name=xcoderam   dim=5 width=8 hex=1 datafile=ram.list}
+C {lab_pin.sym} 990 -690 0 1 {name=p25 lab=DOUT[7:0]}
+C {lab_pin.sym} 690 -690 0 0 {name=p26 lab=ADD[4:0]}
+C {lab_pin.sym} 690 -650 0 0 {name=p27 lab=DIN[7:0]}
+C {lab_pin.sym} 690 -630 0 0 {name=p28 lab=WEN}
+C {lab_pin.sym} 690 -590 0 0 {name=p29 lab=OEN}
+C {lab_pin.sym} 690 -570 0 0 {name=p30 lab=CK}
+C {lab_pin.sym} 690 -610 0 0 {name=p31 lab=CEN}
+C {lab_pin.sym} 690 -670 0 0 {name=p32 lab=M[7:0]}
 C {lab_pin.sym} 220 -280 0 1 {name=p34 lab=ADD[4:0] verilog_type=reg}
 C {lab_pin.sym} 220 -320 0 1 {name=p35 lab=DIN[7:0] verilog_type=reg}
 C {lab_pin.sym} 220 -240 0 1 {name=p36 lab=WEN verilog_type=reg}
@@ -232,12 +232,12 @@ C {lab_pin.sym} 220 -220 0 1 {name=p37 lab=OEN verilog_type=reg}
 C {lab_pin.sym} 220 -200 0 1 {name=p38 lab=CK verilog_type=reg}
 C {lab_pin.sym} 220 -260 0 1 {name=p39 lab=CEN verilog_type=reg}
 C {lab_pin.sym} 220 -300 0 1 {name=p40 lab=M[7:0] verilog_type=reg}
-C {sync_reg.sym} 840 -850 0 0 {name=x8 width=8}
-C {lab_pin.sym} 740 -880 0 0 {name=p33 lab=DIN[7:0]}
-C {lab_pin.sym} 740 -820 0 0 {name=p41 lab=CK}
-C {lab_pin.sym} 740 -840 0 0 {name=p42 lab=BN}
-C {lab_pin.sym} 740 -860 0 0 {name=p43 lab=A}
-C {lab_pin.sym} 940 -880 0 1 {name=p44 lab=DATA_OUT[7:0]}
+C {sync_reg.sym} 840 -810 0 0 {name=x8 width=8}
+C {lab_pin.sym} 740 -840 0 0 {name=p33 lab=DIN[7:0]}
+C {lab_pin.sym} 740 -780 0 0 {name=p41 lab=CK}
+C {lab_pin.sym} 740 -800 0 0 {name=p42 lab=BN}
+C {lab_pin.sym} 740 -820 0 0 {name=p43 lab=A}
+C {lab_pin.sym} 940 -840 0 1 {name=p44 lab=DATA_OUT[7:0]}
 C {iv.sym} 850 -90 0 0 {name=x9 }
 C {lab_pin.sym} 780 -90 2 1 {name=p45 lab=B}
 C {lab_pin.sym} 920 -90 2 0 {name=p46 lab=BN}

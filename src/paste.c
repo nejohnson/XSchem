@@ -29,7 +29,7 @@
 void merge_text(FILE *fd)
 {
    int i;
-   char *strlayer;
+   const char *strlayer;
     check_text_storage();
     i=lasttext;
      textelement[i].txt_ptr=NULL;
@@ -43,6 +43,13 @@ void merge_text(FILE *fd)
      textelement[i].sel=0;
      load_ascii_string(&textelement[i].prop_ptr,fd);
      my_strdup(302, &textelement[i].font, get_tok_value(textelement[i].prop_ptr, "font", 0));/*20171206 */
+
+
+     strlayer = get_tok_value(textelement[i].prop_ptr, "hcenter", 0);
+     textelement[i].hcenter = strcmp(strlayer, "true")  ? 0 : 1;
+     strlayer = get_tok_value(textelement[i].prop_ptr, "vcenter", 0);
+     textelement[i].vcenter = strcmp(strlayer, "true")  ? 0 : 1;
+
      strlayer = get_tok_value(textelement[i].prop_ptr, "layer", 0); /*20171206 */
      if(strlayer[0]) textelement[i].layer = atoi(strlayer);
      else textelement[i].layer = -1;
@@ -61,7 +68,7 @@ void merge_wire(FILE *fd)
     fscanf(fd, "%lf %lf %lf %lf",&x1, &y1, &x2, &y2 );
     load_ascii_string( &ptr, fd);
     storeobject(-1, x1,y1,x2,y2,WIRE,0,SELECTED,ptr);
-    my_free(&ptr);
+    my_free(870, &ptr);
     select_wire(i, SELECTED, 1);
 }
 
@@ -194,7 +201,7 @@ void merge_inst(int k,FILE *fd)
     load_ascii_string(&ptr[i].name,fd);
     if(fscanf(fd, "%lf %lf %d %d",&ptr[i].x0, &ptr[i].y0,&ptr[i].rot, &ptr[i].flip) < 4) {
       fprintf(errfp,"WARNING: missing fields for INSTANCE object, ignoring.\n");
-      read_line(fd);
+      read_line(fd, 0);
       return;
     }
     ptr[i].sel=0;
@@ -209,7 +216,7 @@ void merge_inst(int k,FILE *fd)
     /* the final tmp argument is zero for the 1st call and used in */
     /* new_prop_string() for cleaning some internal caches. */
     my_strdup2(306, &inst_ptr[i].instname, get_tok_value(inst_ptr[i].prop_ptr, "name", 0)); /* 20150409 */
-    my_free(&prop_ptr);
+    my_free(871, &prop_ptr);
     lastinst++;
     set_modify(1);
     prepared_hash_instances=0;
@@ -232,10 +239,10 @@ void match_merged_inst(int old)
      symbol = match_symbol(inst_ptr[i].name);
      if(symbol == -1)
      {
-      if(debug_var>=1) fprintf(errfp, "merge_inst(): missing symbol, skipping...\n");
-      my_free(&inst_ptr[i].prop_ptr);  /* 06052001 remove properties */
-      my_free(&inst_ptr[i].name);      /* 06052001 remove symname   */
-      my_free(&inst_ptr[i].instname);
+      dbg(1, "merge_inst(): missing symbol, skipping...\n");
+      my_free(872, &inst_ptr[i].prop_ptr);  /* 06052001 remove properties */
+      my_free(873, &inst_ptr[i].name);      /* 06052001 remove symname   */
+      my_free(874, &inst_ptr[i].instname);
       missing++;
       continue;
      }
@@ -280,7 +287,7 @@ void merge_file(int selection_load, const char ext[])
     int k=0, old;
     int endfile=0;
     char name[PATH_MAX];
-    char name1[PATH_MAX]; /* overflow safe */
+    char tag[1]; /* overflow safe */
     char tmp[256]; /* 20161122 overflow safe */
     char *aux_ptr=NULL;
     int got_mouse;
@@ -290,13 +297,13 @@ void merge_file(int selection_load, const char ext[])
      if(!strcmp(ext,"")) {      /* 20071215 */
        my_snprintf(tmp, S(tmp), "load_file_dialog {Merge file} {.sch.sym} INITIALLOADDIR", ext);
        tcleval(tmp);
-       if(!strcmp(Tcl_GetStringResult(interp),"")) return;
-       my_strncpy(name, (char *)Tcl_GetStringResult(interp), S(name)); /* 20180925 */
+       if(!strcmp(tclresult(),"")) return;
+       my_strncpy(name, (char *)tclresult(), S(name)); /* 20180925 */
      } 
      else {                     /* 20071215 */
        my_strncpy(name, ext, S(name));
      }
-     if(debug_var>=1) fprintf(errfp, "merge_file(): sch=%d name=%s\n",currentsch,name);
+     dbg(1, "merge_file(): sch=%d name=%s\n",currentsch,name);
     }
     else if(selection_load==1)
     {
@@ -314,8 +321,8 @@ void merge_file(int selection_load, const char ext[])
      old=lastinst;
      while(!endfile)
      {
-      if(fscanf(fd,"%4095s",name1)==EOF) break;
-      switch(name1[0])
+      if(fscanf(fd," %c",tag)==EOF) break;
+      switch(tag[0])
       {
        case 'v':
         load_ascii_string(&aux_ptr, fd);
@@ -364,13 +371,11 @@ void merge_file(int selection_load, const char ext[])
         merge_inst(k++,fd);
         break;
        default:
-        /* if(debug_var>=1) fprintf(errfp, "merge_file(): unknown line, assuming EOF\n"); */
-        /* endfile=1; */
-        read_line(fd); /* read rest of line and discard */
-        fprintf(errfp, "merge_file(): skipping: %s", read_line(fd)); /* read rest of line and discard */
-
+        if( tag[0] == '{' ) ungetc(tag[0], fd);
+        read_record(tag[0], fd);
         break;
       }
+      read_line(fd, 0); /* discard any remaining characters till (but not including) newline */
      }
      if(!got_mouse) {
        mx_double_save = mousex_snap;
@@ -378,11 +383,11 @@ void merge_file(int selection_load, const char ext[])
        mousex_snap = 0.;
        mousey_snap = 0.;
      }
-     my_free(&aux_ptr);
+     my_free(875, &aux_ptr);
      match_merged_inst(old);
      fclose(fd);
      ui_state |= STARTMERGE;
-     if(debug_var>=1) fprintf(errfp, "merge_file(): loaded file:wire=%d inst=%d ui_state=%ld\n",
+     dbg(1, "merge_file(): loaded file:wire=%d inst=%d ui_state=%ld\n",
              lastwire , lastinst, ui_state);
      move_objects(BEGIN,0,0,0);
      mousex_snap = mx_double_save;

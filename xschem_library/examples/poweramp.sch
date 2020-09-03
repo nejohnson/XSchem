@@ -1,4 +1,4 @@
-v {xschem version=2.9.6 file_version=1.1}
+v {xschem version=2.9.7 file_version=1.2}
 G {}
 V {}
 S {}
@@ -86,12 +86,12 @@ N 350 -890 400 -890 {lab=FBN}
 N 350 -430 400 -430 {lab=FB}
 N 580 -1110 620 -1110 {lab=VSS}
 N 580 -1120 580 -1110 {lab=VSS}
-C {code.sym} 1050 -580 0 0 {name=STIMULI
+C {code.sym} 1020 -210 0 0 {name=STIMULI
 only_toplevel=true
 tclcommand="xschem edit_vi_prop"
 value=".option PARHIER=LOCAL RUNLVL=6 post MODMONTE=1 warn maxwarns=400
 .option ITL4=20000 ITL5=0
-* .option sampling_method = SRS 
+* .option sampling_method = SRS  
 * .option method=gear
 vvss vss 0 dc 0 
 .temp 30

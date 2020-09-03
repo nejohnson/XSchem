@@ -11,14 +11,15 @@ L 4 270 -260 290 -280 {}
 L 4 250 -280 290 -280 {}
 L 4 250 -280 270 -260 {}
 L 4 270 -340 270 -280 {}
-L 4 350 -620 370 -600 {}
-L 4 370 -640 370 -600 {}
-L 4 350 -620 370 -640 {}
-L 4 370 -620 530 -620 {}
-L 4 1400 -290 1420 -310 {}
-L 4 1400 -330 1400 -290 {}
-L 4 1400 -330 1420 -310 {}
-L 4 1240 -310 1400 -310 {}
+L 4 350 -620 370 -600 {dash=3}
+L 4 370 -640 370 -600 {dash=3}
+L 4 350 -620 370 -640 {dash=3}
+L 4 370 -620 530 -620 {dash=3}
+L 4 1400 -290 1420 -310 {dash=3}
+L 4 1400 -330 1400 -290 {dash=3}
+L 4 1400 -330 1420 -310 {dash=3}
+L 4 1240 -310 1400 -310 {dash=3}
+P 4 7 530 -860 1130 -860 1130 -690 1390 -690 1390 -580 530 -580 530 -860 {dash=3}
 T {These 2 instances are equivalent} 290 -320 0 0 0.4 0.4 {}
 T {Example of using a schematic as a
 component instance instead of the 
@@ -52,7 +53,7 @@ value="
 .save all
 "}
 C {code.sym} 760 -170 0 0 {name=MODEL
-only_toplevel=true
+only_toplevel="true"
 tclcommand="xschem edit_vi_prop"
 value="************************************************
 *         NOMINAL N-Channel Transistor         *
@@ -129,5 +130,5 @@ C {lab_pin.sym} 420 -420 0 0 {name=p15 lab=HALF}
 C {title.sym} 160 -30 0 0 {name=l1 author="Stefan Schippers"}
 C {cmos_inv.sch} 140 -300 0 0 {name=Xinv WN=15u WP=45u LLN=3u LLP=3u}
 C {cmos_inv.sym} 280 -230 0 0 {name=Xinv2 WN=15u WP=45u LLN=3u LLP=3u}
-C {bus_keeper.sch} 1200 60 0 0 {name=Xkeeper WN_FB=3u WP_FB=4u}
+C {bus_keeper.sch} 1200 60 0 0 {name=Xkeeper WN_FB=3u WP_FB=5u}
 C {lab_pin.sym} 700 -530 0 1 {name=p1 lab=Z}

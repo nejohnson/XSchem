@@ -28,11 +28,7 @@ void compile_font(void)
  char name[PATH_MAX];
 
  currentsch = 0;
-#ifdef __unix__
  my_snprintf(name, S(name), "%s/systemlib/font.sch", tclgetvar("XSCHEM_SHAREDIR"));
-#else
- my_snprintf(name, S(name), "%s/../src/systemlib/font.sch", tclgetvar("XSCHEM_SHAREDIR"));
-#endif
  unselect_all();
  remove_symbols();
  load_schematic(1,name,1);
@@ -44,7 +40,7 @@ void compile_font(void)
   rebuild_selected_array();
   character[code] = my_calloc(134, lastselected*4+1, sizeof(double));
   character[code][0] = (double)lastselected;
-  if(debug_var >=2) fprintf(errfp, "compile_font(): character[%d][]={%.16g",code,character[code][0]);
+  dbg(2, "compile_font(): character[%d][]={%.16g",code,character[code][0]);
   for(i=0;i<lastselected;i++)
   {
    character[code][i*4+1] = 
@@ -55,11 +51,11 @@ void compile_font(void)
       line[selectedgroup[i].col][selectedgroup[i].n].x2-code*FONTOFFSET;
    character[code][i*4+4] = 
       line[selectedgroup[i].col][selectedgroup[i].n].y2+FONTHEIGHT;
-   if(debug_var>=2) fprintf(errfp, ",\n%.16g,%.16g,%.16g,%.16g",
+   dbg(2, ",\n%.16g,%.16g,%.16g,%.16g",
     character[code][i*4+1],character[code][i*4+2],
     character[code][i*4+3],character[code][i*4+4]);
   }
-  if(debug_var>=2) fprintf(errfp, "};\n");
+  dbg(2, "};\n");
  }
  clear_drawing();
  unselect_all();

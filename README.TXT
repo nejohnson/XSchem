@@ -38,6 +38,25 @@ If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
 2.9.8
+- When loading/descending in a symbol set netlist_type to CAD_SYMBOL_ATTRS, set back to previous value when done.
+- Tcl procedure "load_file_dialog" is now used also for saving files (so list of defined xschem libs is available
+  as well as preview window).
+- eliminated any differences between SYMBOL and SCHEMATIC files.
+  There is no "current_type" variable any more. Symbols who used to have netlisting rules defined in schvhdlprop
+  have now these attributes in schsymbolprop.
+  Old symbol files with schvhdlprop will be saved with netlisting rules in schsymbolprop.
+- Bring open dialogs always on top of xschem main window if user clicks title bar on gnome/metacity DMs
+- allow '@' in net names as this is sometimes uded in CDL / backannotated netlists.
+- enable "bus=true" attribute for lines as well as for wires.
+  As a side effect LCC schematics with bussed wires will display thick buses
+- added command <Alt-b> (menu Symbol->Show only instance Bounding boxes) to toggle
+  displaying instance detals / only bounding box.
+- added "dash=n" (n=integer) attribute for lines, polygons, rectangles, arcs to set dashed line style.
+  n is the dash length in pixels.
+- verilog_ignore, spice_ignore, vhdl_ignore attributes on schematic pins are propagated to symbol pin attributes
+  (if using make symbol from schematic, otherwise propagate by hand). 
+  These pins are not netlisted in the respective netlist format
+- -b option to detach xschem from terminal
 - NO_CAIRO builds also use 'layer=' attribute to display text on custom layers.
 - pdf and svg exports follow the enable_layer[] array to display/hide layers as does draw() 
 - LCC function (Local Custom Cell):

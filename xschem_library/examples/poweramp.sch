@@ -1,5 +1,6 @@
-v {xschem version=2.9.7 file_version=1.2}
+v {xschem version=2.9.8 file_version=1.2}
 G {}
+K {}
 V {}
 S {}
 E {}
@@ -14,9 +15,9 @@ L 18 880 -530 900 -580 {}
 L 18 880 -530 880 -450 {}
 L 18 900 -580 900 -400 {}
 T {actual value
-50u} 410 -820 0 0 0.4 0.4 {}
+50u} 400 -820 0 0 0.4 0.4 {}
 T {actual value
-50u} 420 -360 0 0 0.4 0.4 {}
+50u} 400 -360 0 0 0.4 0.4 {}
 T {actual value
 50u} 50 -750 0 0 0.4 0.4 {}
 T {actual value
@@ -25,25 +26,23 @@ T {actual value
 200} 870 -1330 0 0 0.4 0.4 {}
 N 160 -1250 160 -1230 {lab=#net1}
 N 160 -1110 160 -1090 {lab=#net2}
-N 280 -1170 340 -1170 {lab=VSS}
+N 370 -1170 380 -1170 {lab=VSS}
 N 710 -700 860 -700 {lab=OUTM}
 N 510 -1200 580 -1200 {lab=VSS}
 N 580 -1200 580 -1190 {lab=VSS}
 N 580 -1190 620 -1190 {lab=VSS}
 N 550 -1240 580 -1240 {lab=IN}
 N 620 -1250 710 -1250 {lab=REFP}
-N 280 -1180 280 -1170 {lab=VSS}
-N 280 -1250 280 -1240 {lab=VPP}
-N 270 -1100 270 -1090 {lab=VNN}
-N 270 -1170 270 -1160 {lab=VSS}
+N 270 -1100 270 -1090 {lab=#net3}
+N 270 -1170 270 -1160 {lab=#net4}
 N 160 -1090 190 -1090 {lab=#net2}
-N 270 -1090 340 -1090 {lab=VNN}
+N 370 -1090 380 -1090 {lab=VNN}
 N 160 -1250 190 -1250 {lab=#net1}
-N 280 -1250 340 -1250 {lab=VPP}
-N 270 -1170 280 -1170 {lab=VSS}
-N 250 -1250 280 -1250 {lab=VPP}
-N 250 -1090 270 -1090 {lab=VNN}
-N 160 -1170 270 -1170 {lab=VSS}
+N 370 -1250 380 -1250 {lab=VPP}
+N 270 -1170 280 -1170 {lab=#net4}
+N 250 -1250 280 -1250 {lab=#net5}
+N 250 -1090 270 -1090 {lab=#net3}
+N 160 -1170 270 -1170 {lab=#net4}
 N 550 -950 710 -950 {lab=OUTM}
 N 400 -890 550 -890 {lab=FBN}
 N 550 -770 550 -750 {lab=IN}
@@ -55,8 +54,7 @@ N 550 -490 710 -490 {lab=OUTP}
 N 400 -430 550 -430 {lab=FB}
 N 350 -430 350 -240 {lab=FB}
 N 710 -490 710 -240 {lab=OUTP}
-N 240 -370 240 -350 {lab=VPP}
-N 240 -290 240 -220 {lab=INX}
+N 240 -400 240 -380 {lab=VPP}
 N 260 -220 260 -190 {lab=INX}
 N 260 -130 260 -110 {lab=VSS}
 N 510 -1120 580 -1120 {lab=VSS}
@@ -68,8 +66,7 @@ N 650 -700 710 -700 {lab=OUTM}
 N 650 -240 710 -240 {lab=OUTP}
 N 240 -220 260 -220 {lab=INX}
 N 260 -680 350 -680 {lab=VSSX}
-N 240 -830 240 -810 {lab=VPP}
-N 240 -750 240 -680 {lab=VSSX}
+N 240 -860 240 -840 {lab=VPP}
 N 260 -680 260 -650 {lab=VSSX}
 N 260 -590 260 -570 {lab=VSS}
 N 240 -680 260 -680 {lab=VSSX}
@@ -77,15 +74,28 @@ N 180 -680 240 -680 {lab=VSSX}
 N 880 -1250 900 -1250 {lab=IN_INT}
 N 880 -1250 880 -1220 {lab=IN_INT}
 N 400 -1000 400 -980 {lab=VPP}
-N 400 -920 400 -890 {lab=FBN}
 N 400 -540 400 -520 {lab=VPP}
-N 400 -460 400 -430 {lab=FB}
 N 860 -700 860 -520 {lab=OUTM}
 N 860 -460 860 -240 {lab=OUTP}
 N 350 -890 400 -890 {lab=FBN}
 N 350 -430 400 -430 {lab=FB}
 N 580 -1110 620 -1110 {lab=VSS}
 N 580 -1120 580 -1110 {lab=VSS}
+N 280 -1250 310 -1250 {lab=#net5}
+N 270 -1090 310 -1090 {lab=#net3}
+N 280 -1170 310 -1170 {lab=#net4}
+N 280 -1180 280 -1170 { lab=#net4}
+N 280 -1250 280 -1240 { lab=#net5}
+N 240 -730 240 -680 { lab=VSSX}
+N 240 -270 240 -220 { lab=INX}
+N 400 -920 400 -910 { lab=FBN}
+N 400 -910 400 -890 { lab=FBN}
+N 400 -460 400 -450 { lab=FB}
+N 400 -450 400 -430 { lab=FB}
+N 240 -780 240 -760 { lab=VSSX}
+N 240 -760 240 -730 { lab=VSSX}
+N 240 -320 240 -300 { lab=INX}
+N 240 -300 240 -270 { lab=INX}
 C {code.sym} 1020 -210 0 0 {name=STIMULI
 only_toplevel=true
 tclcommand="xschem edit_vi_prop"
@@ -96,9 +106,10 @@ value=".option PARHIER=LOCAL RUNLVL=6 post MODMONTE=1 warn maxwarns=400
 vvss vss 0 dc 0 
 .temp 30
 
-.param frequ=20k
-.param gain=42
-.tran  6e-7 0.009 uic
+.param frequ=5k
+.param gain=45
+.op
+.tran  6e-7 0.06 uic
 
 
 ** models are generally not free: you must download
@@ -106,22 +117,22 @@ vvss vss 0 dc 0
 ** referenced file in simulation directory.
 .include \\"models_poweramp.txt\\"
 .save all
+.option savecurrents
 * .FOUR 20k v(outm,outp)
 * .probe i(*) 
 * .probe p(r*) p(v*)
 "}
-C {vsource.sym} 160 -1200 0 0 {name=V1 value="pwl 0 0 1m 50"}
-C {vsource.sym} 160 -1140 0 0 {name=V0 value="pwl 0 0 1m 50"}
-C {lab_pin.sym} 340 -1250 0 1 {name=p5 lab=VPP}
-C {lab_pin.sym} 340 -1090 0 1 {name=p6 lab=VNN}
-C {lab_pin.sym} 340 -1170 0 1 {name=p3 lab=VSS}
+C {vsource.sym} 160 -1200 0 0 {name=V1 value="dc 50 pwl 0 0 1m 50"}
+C {vsource.sym} 160 -1140 0 0 {name=V0 value="dc 50 pwl 0 0 1m 50"}
+C {lab_pin.sym} 380 -1250 0 1 {name=p5 lab=VPP}
+C {lab_pin.sym} 380 -1090 0 1 {name=p6 lab=VNN}
+C {lab_pin.sym} 380 -1170 0 1 {name=p3 lab=VSS}
 C {lab_pin.sym} 860 -240 0 1 {name=p14 lab=OUTP}
 C {res.sym} 860 -490 0 1 {name=R1 m=1 value=8}
 C {lab_pin.sym} 510 -1200 0 0 {name=p26 lab=VSS}
 C {lab_pin.sym} 550 -1240 0 0 {name=p31 lab=IN}
 C {vcvs.sym} 620 -1220 0 0 {name=E3 value='gain*0.99'}
 C {lab_pin.sym} 710 -1250 0 1 {name=p32 lab=REFP}
-C {capa.sym} 280 -1210 0 0 {name=C2 m=1 value="100u"}
 C {capa.sym} 270 -1130 0 0 {name=C3 m=1 value="100u"}
 C {res.sym} 220 -1250 1 1 {name=R11 m=1 value=0.3}
 C {res.sym} 220 -1090 1 1 {name=R9 m=1 value=0.3}
@@ -135,8 +146,8 @@ C {lab_pin.sym} 860 -700 0 1 {name=p9 lab=OUTM}
 C {mos_power_ampli.sym} 500 -200 0 0 {name=x0}
 C {lab_pin.sym} 350 -180 0 0 {name=p12 lab=VPP}
 C {lab_pin.sym} 350 -160 0 0 {name=p13 lab=VNN}
-C {res.sym} 240 -320 0 1 {name=R6 m=1 value=100k}
-C {lab_pin.sym} 240 -370 0 0 {name=p7 lab=VPP}
+C {res.sym} 240 -350 0 1 {name=R6 m=1 value=100k}
+C {lab_pin.sym} 240 -400 0 0 {name=p7 lab=VPP}
 C {res.sym} 260 -160 0 1 {name=R7 m=1 value=100k}
 C {lab_pin.sym} 260 -110 0 0 {name=p15 lab=VSS}
 C {lab_pin.sym} 510 -1120 0 0 {name=p20 lab=VSS}
@@ -154,11 +165,11 @@ C {lab_pin.sym} 350 -660 0 0 {name=p1 lab=VSS}
 C {res.sym} 550 -460 0 1 {name=R2 m=1 value='100k'}
 C {res.sym} 550 -400 0 1 {name=R3 m=1 value="'100k/(gain-2)'"}
 C {vsource.sym} 880 -1190 0 0 {name=V3 
-xvalue="pulse -.1 .1 1m .1u .1u 10.1u 20u" 
-value="sin 0 1 frequ 1m"
+xvalue="dc 0 pulse -.1 .1 1m .1u .1u 10.1u 20u" 
+value="dc 0 sin 0 1 frequ 1m"
 }
-C {res.sym} 240 -780 0 1 {name=R4 m=1 value=100k}
-C {lab_pin.sym} 240 -830 0 0 {name=p18 lab=VPP}
+C {res.sym} 240 -810 0 1 {name=R4 m=1 value=100k}
+C {lab_pin.sym} 240 -860 0 0 {name=p18 lab=VPP}
 C {res.sym} 260 -620 0 1 {name=R5 m=1 value=100k}
 C {lab_pin.sym} 260 -570 0 0 {name=p10 lab=VSS}
 C {res.sym} 400 -950 0 1 {name=R8 m=1 value=100k}
@@ -171,9 +182,75 @@ C {res.sym} 930 -1250 1 1 {name=R10 m=1 value=2}
 C {lab_pin.sym} 400 -1000 0 0 {name=p24 lab=VPP}
 C {res.sym} 400 -490 0 1 {name=R13 m=1 value=100k}
 C {lab_pin.sym} 400 -540 0 0 {name=p16 lab=VPP}
-C {vsource.sym} 880 -1130 0 0 {name=V4 value=0 xvalue="pwl 0 .1 1m .1 1.01m 0"
+C {vsource.sym} 880 -1130 0 0 {name=Vin value=0 xvalue="pwl 0 .1 1m .1 1.01m 0"
 }
 C {lab_pin.sym} 350 -270 0 0 {name=p19 lab=FB}
 C {lab_pin.sym} 350 -730 0 0 {name=p25 lab=FBN}
 C {title.sym} 160 -30 0 0 {name=l2 author="Stefan Schippers"}
 C {lab_pin.sym} 880 -1250 0 0 {name=p27 lab=IN_INT}
+C {ammeter.sym} 340 -1250 3 0 {name=vcurrvpp  net_name=true      current=0.54}
+C {ammeter.sym} 340 -1090 3 0 {name=vcurrvnn  net_name=true      current=-0.4526}
+C {ammeter.sym} 340 -1170 3 0 {name=vcurrvss  net_name=true      current=-0.08742}
+C {launcher.sym} 780 -120 0 0 {name=h2
+descr="Ctrl-Click
+Clear all probes" 
+tclcommand="
+    xschem push_undo
+    xschem set no_undo 1
+    xschem set no_draw 1
+ 
+    set lastinst [xschem get instances]
+    for \{ set i 0 \} \{ $i < $lastinst \} \{incr i \} \{
+      set type [xschem getprop instance $i cell::type]
+      if \{ [regexp \{(^|/)probe$\} $type ] \} \{
+        xschem setprop $i voltage fast
+      \}
+      if \{ [regexp \{current_probe$\} $type ] \} \{
+        xschem setprop $i current fast
+      \}
+      if \{ [regexp \{differential_probe$\} $type ] \} \{
+        xschem setprop $i voltage fast
+      \}
+    \}
+    xschem set no_undo 0
+    xschem set no_draw 0
+    xschem redraw
+"
+}
+C {ngspice_probe.sym} 350 -810 0 1 {name=p55}
+C {ngspice_probe.sym} 240 -1170 0 1 {name=p34}
+C {capa.sym} 280 -1210 0 0 {name=C2 m=1 value="100u"}
+C {ngspice_probe.sym} 160 -1250 0 1 {name=p35}
+C {ngspice_probe.sym} 160 -1090 0 1 {name=p36}
+C {ngspice_probe.sym} 380 -1170 0 0 {name=p37}
+C {ngspice_probe.sym} 810 -700 0 1 {name=p29}
+C {ngspice_probe.sym} 810 -240 0 1 {name=p38}
+C {ngspice_probe.sym} 300 -680 0 1 {name=p33}
+C {ngspice_probe.sym} 300 -220 0 1 {name=p30}
+C {ngspice_probe.sym} 350 -320 0 1 {name=p39}
+C {ngspice_get_expr.sym} 565 -455 0 0 {name=r18 
+node="[ngspice::get_current \{r2[i]\}]"
+descr = current
+ }
+C {ngspice_get_expr.sym} 575 -915 0 0 {name=r1 
+node="[ngspice::get_current \{r19[i]\}]"
+descr = current
+ }
+C {ngspice_get_expr.sym} 820 -510 2 0 {name=r29 
+node="[format %.4g [expr ([ngspice::get_voltage outm] - [ngspice::get_voltage outp]) * [ngspice::get_current \{r1[i]\}]]] W"
+descr = power
+}
+C {launcher.sym} 780 -190 0 0 {name=h3
+descr="Load file into gaw" 
+comment="
+  This launcher gets raw filename from current schematic using 'xschem get schname'
+  and stripping off path and suffix.  It then loads raw file into gaw.
+  This allow to use it in any schematic without changes.
+"
+tclcommand="
+set rawfile [file tail [file rootname [xschem get schname]]].raw
+gaw_cmd \\"tabledel $rawfile
+load $netlist_dir/$rawfile
+table_set $rawfile\\"
+unset rawfile"
+}

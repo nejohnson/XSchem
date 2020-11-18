@@ -21,62 +21,65 @@
 ## xschem system-wide design library paths XSCHEM_LIBRARY_PATH
 ###########################################################################
 
-# If unset xschem starts with the default set compile time, typically:
-# set XSCHEM_LIBRARY_PATH .:~/.xschem/xschem_library:${XSCHEM_SHAREDIR}/xschem_library/devices
+# If unset xschem starts with XSCHEM_LIBRARY_PATH set to the default, typically:
+# .
+# /home/schippes/.xschem/xschem_library
+# /home/schippes/share/xschem/xschem_library/devices
+# /home/schippes/share/doc/xschem/examples
+# /home/schippes/share/doc/xschem/ngspice
+# /home/schippes/share/doc/xschem/logic
+# /home/schippes/share/doc/xschem/binto7seg
+# /home/schippes/share/doc/xschem/pcb
+# /home/schippes/share/doc/xschem/rom8k
 
 # For testing in build src directory
-#
-# set XSCHEM_LIBRARY_PATH .:../xschem_library/devices
+# if unset following paths are set:
+# .
+# ../xschem_library/devices
 
-# for testing after installation:
+# For testing after installation:
 #
 # set XSCHEM_LIBRARY_PATH {}
-# append XSCHEM_LIBRARY_PATH :.
+# set xschem_doc_dir [file dirname ${XSCHEM_SHAREDIR}]/doc/xschem
 # append XSCHEM_LIBRARY_PATH :~/.xschem/xschem_library
 # append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/xschem_library/devices
-# append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/logic
-# append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/examples
-# append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/binto7seg
-# append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/xTAG
-# append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/rulz-r8c33
-# append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/ngspice
-# append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/rom8k
-# append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/pcb
-# append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/symgen
-# append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/gschem_import
-# append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/gschem_import/sym
-
-###########################################################################
-## Pull in spice libraries
-###########################################################################
-
-append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/xschem_library/devices/spice
+# append XSCHEM_LIBRARY_PATH ${xschem_doc_dir}/logic
+# append XSCHEM_LIBRARY_PATH ${xschem_doc_dir}/examples
+# append XSCHEM_LIBRARY_PATH ${xschem_doc_dir}/binto7seg
+# append XSCHEM_LIBRARY_PATH ${xschem_doc_dir}/xTAG
+# append XSCHEM_LIBRARY_PATH ${xschem_doc_dir}/rulz-r8c33
+# append XSCHEM_LIBRARY_PATH ${xschem_doc_dir}/ngspice
+# append XSCHEM_LIBRARY_PATH ${xschem_doc_dir}/rom8k
+# append XSCHEM_LIBRARY_PATH ${xschem_doc_dir}/pcb
+# append XSCHEM_LIBRARY_PATH ${xschem_doc_dir}/symgen
+# append XSCHEM_LIBRARY_PATH ${xschem_doc_dir}/gschem_import
+# append XSCHEM_LIBRARY_PATH ${xschem_doc_dir}/gschem_import/sym
 
 # For Windows, use ; instead of :, and enclosed pathname with ""
-#append XSCHEM_LIBRARY_PATH ";."
 #append XSCHEM_LIBRARY_PATH ";${XSCHEM_SHAREDIR}/../xschem_library"
 #append XSCHEM_LIBRARY_PATH ";${XSCHEM_SHAREDIR}/../xschem_library/devices"
+#append XSCHEM_LIBRARY_PATH ";${XSCHEM_SHAREDIR}/../xschem_library/examples"
+#append XSCHEM_LIBRARY_PATH ";${XSCHEM_SHAREDIR}/../xschem_library/ngspice"
+#append XSCHEM_LIBRARY_PATH ";${XSCHEM_SHAREDIR}/../xschem_library/logic"
+#append XSCHEM_LIBRARY_PATH ";${XSCHEM_SHAREDIR}/../xschem_library/binto7seg"
+#append XSCHEM_LIBRARY_PATH ";${XSCHEM_SHAREDIR}/../xschem_library/pcb"
+#append XSCHEM_LIBRARY_PATH ";${XSCHEM_SHAREDIR}/../xschem_library/rom8k"
 
 ###########################################################################
 ## set custom colors for xschem libraries matching certain patterns
-## each line contains a pattern followed by a color
+## each line contains a dircolor(pattern) followed by a color
 ## color can be an ordinary name (grey, brown, blue) or a hex code {#77aaff}
 ## hex code must be enclosed in braces
-## don't forget backslash at end of line
 ###########################################################################
 
-# set dircolor(/share/xschem/) red
-# set dircolor(/share/doc/xschem/) {#00aa00}
+set dircolor(devices$) red
+set dircolor(examples$) {darkgreen}
 
 ###########################################################################
 ## Window to open on startup XSCHEM_START_WINDOW
 ###########################################################################
 
-# Start without a design:
-#
-# set XSCHEM_START_WINDOW {}
-
-# Start with a design
+# Start without a design if no filename given on command line:
 # To avoid absolute paths, use a path that is relative to one of the
 # XSCHEM_LIBRARY_PATH directories.
 #
@@ -156,55 +159,6 @@ set disable_unique_names 0
 #   "#ef6158" "#fdb200" }
 
 ###########################################################################
-## Toolbar configuration
-###########################################################################
-
-# set toolbar_visible 0
-# set toolbar_horiz   1
-# set toolbar_list { 
-#    FileNew
-#    FileNewSym
-#    FileOpen
-#    FileSave
-#    FileMerge
-#    FileReload
-#    "---"
-#    EditUndo
-#    EditRedo
-#    EditCut
-#    EditCopy
-#    EditPaste
-#    EditDelete
-#    "---"
-#    EditDuplicate
-#    EditMove
-#    "---"
-#    EditPushSch
-#    EditPushSym
-#    EditPop
-#    "---"
-#    ViewRedraw
-#    ViewZoomIn
-#    ViewZoomOut
-#    ViewZoomBox
-#    ViewToggleColors
-#    "---"
-#    ToolInsertSymbol
-#    ToolInsertText
-#    ToolInsertWire
-#    ToolInsertLine
-#    ToolInsertRect
-#    ToolInsertPolygon
-#    ToolInsertArc
-#    ToolInsertCircle
-#    "---"
-#    ToolSearch
-#    "---"
-#    ToolJoinTrim
-#    ToolBreak
-#  }
-
-###########################################################################
 ## CAIRO STUFF
 ###########################################################################
 
@@ -220,7 +174,8 @@ set disable_unique_names 0
 # set cairo_font_line_spacing 1.0
 
 #### Specify a font
-set cairo_font_name {Monospace Regular}
+# set cairo_font_name {Sans Serif}
+# set svg_font_name {Sans Serif}
 
 #### Lift up text by some zoom-corrected pixels for
 #### better compatibility wrt no cairo version.
@@ -248,6 +203,8 @@ set terminal {xterm -geometry 100x35 -fn 9x15 -bg black -fg white -cr white -ms 
 ## editor must not detach from launching shell (-f mandatory for gvim)
 # set editor { xterm -geometry 100x40 -e nano }
 # set editor { xterm -geometry 100x40 -e pico }
+# For Windows
+# set editor {notepad.exe}
 set editor {gvim -f -geometry 90x28}
 
 #### show info window (ERC rules errors warnings etc) 

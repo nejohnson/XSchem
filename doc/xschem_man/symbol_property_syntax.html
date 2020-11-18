@@ -24,7 +24,7 @@ p{padding: 15px  30px 10px;}
 <h3>GENERAL RULES</h3>
  <p>
   For symbols a global property string (to show it press <kbd>'q'</kbd> when nothing
-  is selected). defines at least 3 attributes:
+  is selected and <kbd>Options-&gt;Symbol global attrs</kbd> is selected) defines at least 3 attributes:
  </p>
  <ul>
  <li><kbd>type</kbd> defines the the type of symbol. Normally the type attribute describes the symbol 
@@ -59,7 +59,8 @@ p{padding: 15px  30px 10px;}
      character is a 'substitution character', it means that the token that follows is a parameter
      that will be substituted with the value passed at component instantiation. If no 
      value is given there a value will be picked from the attribute declared in the <kbd>template</kbd>
-     string.<br>
+     string.
+     <br>
      The <kbd>@pinlist</kbd> is a special token that will be substituted with the name of the wires that 
      connect to symbol pins, in the order they are created in the symbol. See the
      <a href="xschem_properties.html">pin ordering</a> section in the xschem properties slide.
@@ -71,7 +72,15 @@ p{padding: 15px  30px 10px;}
      the correct pin ordering in the symbol pins will make netlist generation faster. This is important
      for very big components with lot of pins, and <kbd>@pinlist</kbd> is the default when symbol is generated
      automatically (<kbd>Symbol -&gt;Make symbol</kbd> menu of <kbd>&lt;Shift&gt;A</kbd> key).
+     <br>
+     The <kbd>format</kbd> attribute may contain a <kbd>@spiceprefix</kbd> string immediately preceding
+     (with no spaces) the <kbd>@name</kbd> attribute.. This will be substituted with 
+     value given in instance (example: <kbd>spiceprefix=X</kbd>) but *ONLY* if
+     <kbd>Simulation-&gt;Use 'spiceprefix' attribute</kbd> is set.
+     This allows to create different netlists for simulation (example: all MOS are defined as subcircuits)
+     or LVS (no device subcircuits).
      </li>
+     <img src="spiceprefix.png">
  <li><kbd>template</kbd>: Specifies default values for symbol parameters</li>
  </ul>
 <img src="general_rules.png">
@@ -110,9 +119,20 @@ type=nmos
   need to escape the '$' in property strings a different and less used character was chosen.<br>
   A literal <kbd>@</kbd> must be escaped to prevent it to be interpreted as the start of a token to be
   substituted (<kbd>\@</kbd>). If a non space character (different than <kbd>@</kbd>) ends a token it must be escaped.
-  Attribute substitution takes place in symbol format attribute and in every text, as shown in below picture.
+  Attribute substitution with values defined in instance attributes takes place in symbol
+  format attribute and in every text, as shown in below picture.
+ </p>
+ <br>
+ <p class="important">
+  In recent xschem versions a <kbd>$</kbd> prefixed attribute (example: <kbd>$var</kbd>) can be used
+  instead of a <lbd>@</kbd> prefix. The only difference is that if no matching attribute is defined
+  in instance the <kbd>$var</kbd> resolves to <kbd>var</kbd> instead of an empty string.
  </p>
  <img src="attribute_substitution.png">
+ <p>
+  If no matching attribute is defined in instance (for example we have <kbd>@W</kbd> in symbol and no <kbd>W=...</kbd> in instance) 
+  the <kbd>@W</kbd> string is substituted with an empty string.
+ </p>
  <h3>OTHER PREDEFINED SYMBOL ATTRIBUTES</h3>
  <ul>
   <li><kbd>vhdl_ignore</kbd></li>
@@ -135,6 +155,11 @@ type=nmos
   <p> same as above <kbd>_stop</kbd> attributes, but in this case the schematic subcircuit is completely ignored,
    only the 'format' string is dumped to netlist. No component/entity is generated in vhdl netlist, 
    no module declaration in verilog, no .subckt in spice, no schematic global attributes are exported to netlist.</p>
+  <li><kbd>highlight</kbd></li>
+  <p>If set to <kbd>true</kbd> the symbol will be highlighted when one of the nets attached to its pins are highlighted.</p>
+  <li><kbd>net_name</kbd></li>
+  <p>If set to <kbd>true</kbd> the <kbd>#n:net_name</kbd> symbol attributes will display the net names attached to pin terminals.
+     the <kbd>n</kbd> is a pin number or name.</p>
   <li><kbd>place</kbd></li>
   <p> this attribute is only useable in <kbd>netlist_commands</kbd> type symbols (<kbd>netlist.sym, code.sym,...</kbd>) 
     if set to <kbd>end</kbd> it tells XSCHEM that 
@@ -336,6 +361,9 @@ verilog_format="xnor #(@risedel , @falldel ) @name ( @@Z , @@A , @@B );"
     information defined in the instance name (example: U1:2, slot number 2 of IC U1).
     These tokens may be placed as text in the symbol graphic window, not in format strings.
   </p>
+  <li><kbd>@#pin_name:net_name</kbd></li>
+  <li><kbd>@#n:net_name</kbd></li>
+  <p> these expand to the net name attached to pin with name <kbd>pin_name</kbd> or with sequence number <kbd>n</kbd>. </p>
   <li><kbd>@sch_last_modified</kbd></li>
   <p>
    this indicates the last modification time of the <kbd>.sch</kbd> file of the symbol.

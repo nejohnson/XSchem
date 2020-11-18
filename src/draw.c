@@ -1,7 +1,7 @@
 /* File: draw.c
- * 
+ *
  * This file is part of XSCHEM,
- * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit 
+ * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit
  * simulation.
  * Copyright (C) 1998-2020 Stefan Frederik Schippers
  *
@@ -22,8 +22,16 @@
 
 #include "xschem.h"
 
+
+/* Window doesn't work with LineDoubleDash, but will with LineOnOffDash */
+#ifdef __unix__
+#define xDashType LineDoubleDash
+#else
+#define xDashType LineOnOffDash
+#endif
+
 static double textx1,textx2,texty1,texty2;
- 
+
 int textclip(int x1,int y1,int x2,int y2,
           double xa,double ya,double xb,double yb)
 /* check if some of (xa,ya-xb,yb) is inside (x1,y1-x2,y2) */
@@ -37,12 +45,12 @@ int textclip(int x1,int y1,int x2,int y2,
  else if     (X_TO_SCREEN(xb)<x1) return 0;
  else if     (Y_TO_SCREEN(yb)<y1) return 0;
  return 1;
-}           
+}
 
 void print_image()
 {
   int w, h, tmp, ww, hh, save_draw_grid, changed_size;
-  int modified_save; /* 20161121 */
+  int modified_save;
   char cmd[PATH_MAX+100];
   const char *r;
   char *tmpstring=NULL;
@@ -61,7 +69,7 @@ void print_image()
     } else {
      if(w != xschem_w || h != xschem_h) changed_size = 1;
     }
-    my_strdup(60, &tmpstring, "tk_getSaveFile -title {Select destination file} -initialdir $env(PWD)");
+    my_strdup(60, &tmpstring, "tk_getSaveFile -title {Select destination file} -initialdir [pwd]");
     tcleval(tmpstring);
     r = tclresult();
     my_free(717, &tmpstring);
@@ -70,24 +78,24 @@ void print_image()
   }
 
   modified_save=modified; /* 20161121 save state */
-  push_undo(); /* 20161121 */
+  push_undo();
   trim_wires();    /* 20161121 add connection boxes on wires but undo at end */
 
   XUnmapWindow(display, window);
 
   xrect[0].x = 0;
-  xrect[0].y = 0; 
+  xrect[0].y = 0;
   xschem_w = xrect[0].width = w;
   xschem_h = xrect[0].height = h;
-  areax2 = w+2*lw;
-  areay2 = h+2*lw;
-  areax1 = -2*lw;
-  areay1 = -2*lw;
+  areax2 = w+2*INT_WIDTH(xctx->lw);
+  areay2 = h+2*INT_WIDTH(xctx->lw);
+  areax1 = -2*INT_WIDTH(xctx->lw);
+  areay1 = -2*INT_WIDTH(xctx->lw);
   areaw = areax2-areax1;
   areah = areay2-areay1;
-  saveorx = xorigin;
-  saveory = yorigin;
-  savezoom = zoom;
+  saveorx = xctx->xorigin;
+  saveory = xctx->yorigin;
+  savezoom = xctx->zoom;
 #ifdef __unix__
   XFreePixmap(display,save_pixmap);
   /* save_pixmap = XCreatePixmap(display,window,areaw,areah,depth); */
@@ -100,14 +108,15 @@ void print_image()
   XSetTile(display, gctiled, save_pixmap);
 
   #ifdef HAS_CAIRO
-  cairo_destroy(save_ctx);
+  cairo_destroy(cairo_save_ctx);
   cairo_surface_destroy(save_sfc);
 
   #if HAS_XRENDER==1
   #if HAS_XCB==1
   save_sfc = cairo_xcb_surface_create_with_xrender_format(xcbconn, screen_xcb, save_pixmap, &format_rgb, w, h);
   #else
-  save_sfc = cairo_xlib_surface_create_with_xrender_format (display, save_pixmap, DefaultScreenOfDisplay(display), format, w, h);
+  save_sfc = cairo_xlib_surface_create_with_xrender_format(display,
+             save_pixmap, DefaultScreenOfDisplay(display), format, w, h);
   #endif /*HAS_XCB */
   #else
   save_sfc = cairo_xlib_surface_create(display, save_pixmap, visual, w, h);
@@ -116,13 +125,13 @@ void print_image()
     fprintf(errfp, "ERROR: invalid cairo xcb surface\n");
      exit(-1);
   }
-  save_ctx = cairo_create(save_sfc);
-  cairo_set_line_width(save_ctx, 1);
-  cairo_set_line_join(save_ctx, CAIRO_LINE_JOIN_ROUND);
-  cairo_set_line_cap(save_ctx, CAIRO_LINE_CAP_ROUND);
-  cairo_select_font_face (save_ctx, cairo_font_name, 
+  cairo_save_ctx = cairo_create(save_sfc);
+  cairo_set_line_width(cairo_save_ctx, 1);
+  cairo_set_line_join(cairo_save_ctx, CAIRO_LINE_JOIN_ROUND);
+  cairo_set_line_cap(cairo_save_ctx, CAIRO_LINE_CAP_ROUND);
+  cairo_select_font_face (cairo_save_ctx, cairo_font_name,
        CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-  cairo_set_font_size (save_ctx, 20);
+  cairo_set_font_size (cairo_save_ctx, 20);
   #endif /*HAS_CAIRO */
   for(tmp=0;tmp<cadlayers;tmp++)
   {
@@ -134,7 +143,7 @@ void print_image()
   draw_grid=0;
   draw_pixmap=1;
   if(changed_size) zoom_full(0, 0);
-  
+
   draw();
 #ifdef __unix__
   XpmWriteFileFromPixmap(display, "plot.xpm", save_pixmap,0, NULL ); /* .gz ???? */
@@ -143,27 +152,27 @@ void print_image()
 
   if(plotfile[0]) {
     my_snprintf(cmd, S(cmd), "convert_to_png plot.xpm %s", plotfile);
-    tcleval(cmd); /* 20161121 */
-  } else tcleval( "convert_to_png plot.xpm plot.png"); /* 20161121 */
+    tcleval(cmd);
+  } else tcleval( "convert_to_png plot.xpm plot.png");
   my_strncpy(plotfile,"", S(plotfile));
   pop_undo(0); /* 20161121 restore state */
-  modified=modified_save;  /* 20161121 */
+  modified=modified_save;
 
   w=ww;h=hh;
   xrect[0].x = 0;
-  xrect[0].y = 0; 
+  xrect[0].y = 0;
   xschem_w = xrect[0].width = w;
   xschem_h = xrect[0].height = h;
-  areax2 = w+2*lw;
-  areay2 = h+2*lw;
-  areax1 = -2*lw;
-  areay1 = -2*lw;
+  areax2 = w+2*INT_WIDTH(xctx->lw);
+  areay2 = h+2*INT_WIDTH(xctx->lw);
+  areax1 = -2*INT_WIDTH(xctx->lw);
+  areay1 = -2*INT_WIDTH(xctx->lw);
   areaw = areax2-areax1;
   areah = areay2-areay1;
-  zoom = savezoom;
-  mooz = 1/zoom;
-  xorigin = saveorx;
-  yorigin = saveory;
+  xctx->zoom = savezoom;
+  xctx->mooz = 1/xctx->zoom;
+  xctx->xorigin = saveorx;
+  xctx->yorigin = saveory;
 #ifdef __unix__
   XFreePixmap(display,save_pixmap);
   save_pixmap = XCreatePixmap(display,window,areaw,areah,depth);
@@ -175,14 +184,15 @@ void print_image()
 
 
 #ifdef HAS_CAIRO
-  cairo_destroy(save_ctx);
+  cairo_destroy(cairo_save_ctx);
   cairo_surface_destroy(save_sfc);
 
   #if HAS_XRENDER==1
   #if HAS_XCB==1
   save_sfc = cairo_xcb_surface_create_with_xrender_format(xcbconn, screen_xcb, save_pixmap, &format_rgb, w, h);
   #else
-  save_sfc = cairo_xlib_surface_create_with_xrender_format (display, save_pixmap, DefaultScreenOfDisplay(display), format, w, h);
+  save_sfc = cairo_xlib_surface_create_with_xrender_format (display,
+             save_pixmap, DefaultScreenOfDisplay(display), format, w, h);
   #endif /*HAS_XCB */
   #else
   save_sfc = cairo_xlib_surface_create(display, save_pixmap, visual, w, h);
@@ -191,21 +201,20 @@ void print_image()
     fprintf(errfp, "ERROR: invalid cairo xcb surface\n");
      exit(-1);
   }
-  save_ctx = cairo_create(save_sfc);
-  cairo_set_line_width(save_ctx, 1);
-  cairo_set_line_join(save_ctx, CAIRO_LINE_JOIN_ROUND);
-  cairo_set_line_cap(save_ctx, CAIRO_LINE_CAP_ROUND);
-  cairo_select_font_face (save_ctx, cairo_font_name,
-       CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-  cairo_set_font_size (save_ctx, 20);
+  cairo_save_ctx = cairo_create(save_sfc);
+  cairo_set_line_width(cairo_save_ctx, 1);
+  cairo_set_line_join(cairo_save_ctx, CAIRO_LINE_JOIN_ROUND);
+  cairo_set_line_cap(cairo_save_ctx, CAIRO_LINE_CAP_ROUND);
+  cairo_select_font_face (cairo_save_ctx, cairo_font_name, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+  cairo_set_font_size (cairo_save_ctx, 20);
   #endif /*HAS_CAIRO */
 
   for(tmp=0;tmp<cadlayers;tmp++)
   {
     XSetClipMask(display, gc[tmp], None); /*20171110 no need to clip, already done in software */
-    XSetClipMask(display, gcstipple[tmp], None); /*20171110  */
+    XSetClipMask(display, gcstipple[tmp], None);
   }
-  XSetClipMask(display, gctiled, None); /*20171110  */
+  XSetClipMask(display, gctiled, None);
 
   XMapWindow(display, window);
   draw_grid=save_draw_grid;
@@ -214,21 +223,28 @@ void print_image()
 }
 
 #ifdef HAS_CAIRO
-/* remember to call cairo_restore(ctx) when done !! */
-int set_text_custom_font(Text *txt) /* 20171122 for correct text_bbox calculation */
+/* remember to call cairo_restore(cairo_ctx) when done !! */
+int set_text_custom_font(xText *txt) /* 20171122 for correct text_bbox calculation */
 {
   char *textfont;
 
   textfont = txt->font;
-  if(textfont && textfont[0]) {
-    cairo_save(ctx);
-    cairo_select_font_face (ctx, textfont, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+  if((textfont && textfont[0]) || txt->flags) {
+    cairo_font_slant_t slant;
+    cairo_font_weight_t weight;
+    textfont = (txt->font && txt->font[0]) ? txt->font : cairo_font_name;
+    weight = ( txt->flags & TEXT_BOLD) ? CAIRO_FONT_WEIGHT_BOLD : CAIRO_FONT_WEIGHT_NORMAL;
+    slant = CAIRO_FONT_SLANT_NORMAL;
+    if(txt->flags & TEXT_ITALIC) slant = CAIRO_FONT_SLANT_ITALIC;
+    if(txt->flags & TEXT_OBLIQUE) slant = CAIRO_FONT_SLANT_OBLIQUE;
+    cairo_save(cairo_ctx);
+    cairo_select_font_face (cairo_ctx, textfont, slant, weight);
     return 1;
   }
   return 0;
 }
 #else
-int set_text_custom_font(Text *txt)
+int set_text_custom_font(xText *txt)
 {
   return 0;
 }
@@ -236,31 +252,24 @@ int set_text_custom_font(Text *txt)
 
 
 #ifdef HAS_CAIRO
-void cairo_draw_string_line(cairo_t *ctx, char *s,
-    double x, double y, double size, int rot, int flip, 
+static void cairo_draw_string_line(cairo_t *cairo_ctx, char *s,
+    double x, double y, int rot, int flip,
     int lineno, double fontheight, double fontascent, double fontdescent, int llength)
 {
-  double ix, iy; 
+  double ix, iy;
   int rot1;
-  cairo_text_extents_t ext;
   int line_delta;
   int line_offset;
-  double xadvance;
   double lines;
   double vc; /* 20171121 vert correct */
   /*int rx1, ry1, rx2, ry2, save_rot, save_flip; */
   /* GC gcclear; */
   if(s==NULL) return;
   if(llength==0) return;
-  cairo_text_extents(ctx, s, &ext);
-  xadvance = ext.x_advance;
 
   line_delta = lineno*fontheight*cairo_font_line_spacing;
   lines = (cairo_lines-1)*fontheight*cairo_font_line_spacing;
-  line_offset=cairo_longest_line-xadvance;
-
-  /* 20171215 NO! will skip drawing of long strings */
-  /* if(xadvance>14000) return; */ /* too big: close to short overflow */
+  line_offset=cairo_longest_line;
 
   ix=X_TO_SCREEN(x);
   iy=Y_TO_SCREEN(y);
@@ -268,51 +277,49 @@ void cairo_draw_string_line(cairo_t *ctx, char *s,
     rot1=3;
   } else rot1=0;
 
-  vc = cairo_vert_correct*mooz; /* converted to device (pixel) space */
+  vc = cairo_vert_correct*xctx->mooz; /* converted to device (pixel) space */
 
   if(     rot==0 && flip==0) {iy+=line_delta+fontascent-vc;}
-  else if(rot==1 && flip==0) {iy+=xadvance+line_offset;ix=ix-fontheight+fontascent+vc-lines+line_delta;}
-  else if(rot==2 && flip==0) {iy=iy-fontheight-lines+line_delta+fontascent+vc; ix=ix-xadvance-line_offset;}
+  else if(rot==1 && flip==0) {iy+=line_offset;ix=ix-fontheight+fontascent+vc-lines+line_delta;}
+  else if(rot==2 && flip==0) {iy=iy-fontheight-lines+line_delta+fontascent+vc; ix=ix-line_offset;}
   else if(rot==3 && flip==0) {ix+=line_delta+fontascent-vc;}
-  else if(rot==0 && flip==1) {ix=ix-xadvance-line_offset;iy+=line_delta+fontascent-vc;}
+  else if(rot==0 && flip==1) {ix=ix-line_offset;iy+=line_delta+fontascent-vc;}
   else if(rot==1 && flip==1) {ix=ix-fontheight+line_delta-lines+fontascent+vc;}
   else if(rot==2 && flip==1) {iy=iy-fontheight-lines+line_delta+fontascent+vc;}
-  else if(rot==3 && flip==1) {iy=iy+xadvance+line_offset;ix+=line_delta+fontascent-vc;}
+  else if(rot==3 && flip==1) {iy=iy+line_offset;ix+=line_delta+fontascent-vc;}
 
-  cairo_save(ctx);
-  cairo_translate(ctx, ix, iy);
-  cairo_rotate(ctx, XSCH_PI/2*rot1);
+  cairo_save(cairo_ctx);
+  cairo_translate(cairo_ctx, ix, iy);
+  cairo_rotate(cairo_ctx, XSCH_PI/2*rot1);
 
-  /* fprintf(errfp, "string_line: |%s|, y_bearing: %f descent: %f ascent: %f height: %f\n", */
-  /*     s, ext.y_bearing, fontdescent, fontascent, fontheight); */
-  cairo_move_to(ctx, 0,0);
-  cairo_show_text(ctx, s);
-  cairo_restore(ctx);
+  cairo_move_to(cairo_ctx, 0,0);
+  cairo_show_text(cairo_ctx, s);
+  cairo_restore(cairo_ctx);
 }
 
 /* CAIRO version */
-void draw_string(int layer, int what, const char *s, int rot, int flip, int hcenter, int vcenter,
+void draw_string(int layer, int what, const char *str, int rot, int flip, int hcenter, int vcenter,
                  double x, double y, double xscale, double yscale)
 {
   char *tt, *ss, *sss=NULL;
   char c;
-  int lineno=0; 
+  int lineno=0;
   double size;
   cairo_font_extents_t fext;
   int llength=0;
 
   (void)what; /* UNUSED in cairo version, avoid compiler warning */
-  if(s==NULL || !has_x ) return;
+  if(str==NULL || !has_x ) return;
   size = xscale*52.*cairo_font_scale;
-  /*fprintf(errfp, "size=%.16g\n", size*mooz); */
-  if(size*mooz<3.0) return; /* too small */
-  if(size*mooz>800) return; /* too big */
+  /*fprintf(errfp, "size=%.16g\n", size*xctx->mooz); */
+  if(size*xctx->mooz<3.0) return; /* too small */
+  if(size*xctx->mooz>1600) return; /* too big */
 
-  text_bbox(s, xscale, yscale, rot, flip, hcenter, vcenter, x,y, &textx1,&texty1,&textx2,&texty2);
+  text_bbox(str, xscale, yscale, rot, flip, hcenter, vcenter, x,y, &textx1,&texty1,&textx2,&texty2);
   if(!textclip(areax1,areay1,areax2,areay2,textx1,texty1,textx2,texty2)) {
     return;
   }
-
+  
   if(hcenter) {
     if(rot == 0 && flip == 0 ) { x=textx1;}
     if(rot == 1 && flip == 0 ) { y=texty1;}
@@ -334,29 +341,31 @@ void draw_string(int layer, int what, const char *s, int rot, int flip, int hcen
     if(rot == 3 && flip == 1 ) { x=textx1;}
   }
 
-  cairo_set_source_rgb(ctx,
+  cairo_set_source_rgb(cairo_ctx,
     (double)xcolor_array[layer].red/65535.0,
     (double)xcolor_array[layer].green/65535.0,
     (double)xcolor_array[layer].blue/65535.0);
-  cairo_set_source_rgb(save_ctx,
+  cairo_set_source_rgb(cairo_save_ctx,
     (double)xcolor_array[layer].red/65535.0,
     (double)xcolor_array[layer].green/65535.0,
     (double)xcolor_array[layer].blue/65535.0);
 
-  cairo_set_font_size (ctx, size*mooz);
-  cairo_set_font_size (save_ctx, size*mooz);
-  cairo_font_extents(ctx, &fext);
+  cairo_set_font_size (cairo_ctx, size*xctx->mooz);
+  cairo_set_font_size (cairo_save_ctx, size*xctx->mooz);
+  cairo_font_extents(cairo_ctx, &fext);
+  dbg(1, "draw_string(): size * mooz=%g height=%g ascent=%g descent=%g\n",
+       size * xctx->mooz, fext.height, fext.ascent, fext.descent);
   llength=0;
-  my_strdup2(73, &sss, s);
+  my_strdup2(73, &sss, str);
   tt=ss=sss;
   for(;;) {
     c=*ss;
     if(c=='\n' || c==0) {
       *ss='\0';
       /*fprintf(errfp, "cairo_draw_string(): tt=%s, longest line: %d\n", tt, cairo_longest_line); */
-      if(draw_window) cairo_draw_string_line(ctx, tt, x, y, size, rot, flip, 
+      if(draw_window) cairo_draw_string_line(cairo_ctx, tt, x, y, rot, flip,
          lineno, fext.height, fext.ascent, fext.descent, llength);
-      if(draw_pixmap) cairo_draw_string_line(save_ctx, tt, x, y, size, rot, flip, 
+      if(draw_pixmap) cairo_draw_string_line(cairo_save_ctx, tt, x, y, rot, flip,
          lineno, fext.height, fext.ascent, fext.descent, llength);
       lineno++;
       if(c==0) break;
@@ -374,8 +383,8 @@ void draw_string(int layer, int what, const char *s, int rot, int flip, int hcen
 #else /* !HAS_CAIRO */
 
 /* no CAIRO version */
-void draw_string(int layer, int what, const char *str, int rot, int flip, int hcenter, int vcenter, 
-                 double x1,double y1, double xscale, double yscale)  
+void draw_string(int layer, int what, const char *str, int rot, int flip, int hcenter, int vcenter,
+                 double x1,double y1, double xscale, double yscale)
 {
  double a=0.0,yy;
  register double rx1=0,rx2=0,ry1=0,ry2=0;
@@ -384,12 +393,12 @@ void draw_string(int layer, int what, const char *str, int rot, int flip, int hc
  register int pos=0,pos2=0;
  register unsigned int cc;
  register double *char_ptr_x1,*char_ptr_y1,*char_ptr_x2,*char_ptr_y2;
- register int i,lines; 
+ register int i,lines;
 
  if(str==NULL || !has_x ) return;
  dbg(2, "draw_string(): string=%s\n",str);
- if(xscale*FONTWIDTH*mooz<1) {
-   dbg(1, "draw_string(): xscale=%.16g zoom=%.16g \n",xscale,zoom);
+ if(xscale*FONTWIDTH*xctx->mooz<1) {
+   dbg(1, "draw_string(): xscale=%.16g zoom=%.16g \n",xscale,xctx->zoom);
    return;
  }
  else {
@@ -403,14 +412,14 @@ void draw_string(int layer, int what, const char *str, int rot, int flip, int hc
   flip = 0; yy=y1;
   invxscale=1/xscale;
   while(str[pos2]) {
-     cc = (unsigned int)str[pos2++];
+     cc = (unsigned char)str[pos2++];
      if(cc>127) cc= '?';
      if(cc=='\n') {
         yy+=(FONTHEIGHT+FONTDESCENT+FONTWHITESPACE)* yscale;
         pos=0;
         a=0.0;
         continue;
-     } 
+     }
      lines=character[cc][0]*4;
      char_ptr_x1=character[cc]+1;
      char_ptr_y1=character[cc]+2;
@@ -422,8 +431,8 @@ void draw_string(int layer, int what, const char *str, int rot, int flip, int hc
         curr_y1 = ( char_ptr_y1[i] ) * yscale+yy;
         curr_x2 = ( char_ptr_x2[i]+ zx1 ) * xscale ;
         curr_y2 = ( char_ptr_y2[i] ) * yscale+yy;
-        ROTATION(x1,y1,curr_x1,curr_y1,rx1,ry1);
-        ROTATION(x1,y1,curr_x2,curr_y2,rx2,ry2);
+        ROTATION(rot, flip, x1,y1,curr_x1,curr_y1,rx1,ry1);
+        ROTATION(rot, flip, x1,y1,curr_x2,curr_y2,rx2,ry2);
         ORDER(rx1,ry1,rx2,ry2);
         drawline(layer, what, rx1, ry1, rx2, ry2, 0);
      }
@@ -436,7 +445,7 @@ void draw_string(int layer, int what, const char *str, int rot, int flip, int hc
 #endif /* HAS_CAIRO */
 
 void draw_temp_string(GC gctext, int what, const char *str, int rot, int flip, int hcenter, int vcenter,
-                 double x1,double y1, double xscale, double yscale)  
+                 double x1,double y1, double xscale, double yscale)
 {
  if(!has_x) return;
  dbg(2, "draw_string(): string=%s\n",str);
@@ -444,147 +453,169 @@ void draw_temp_string(GC gctext, int what, const char *str, int rot, int flip, i
  drawtemprect(gctext,what, textx1,texty1,textx2,texty2);
 }
 
-void draw_symbol(int what,int c, int n,int layer,int tmp_flip, int rot, 
-        double xoffset, double yoffset) 
+void draw_symbol(int what,int c, int n,int layer,int tmp_flip, int rot,
+        double xoffset, double yoffset)
                             /* draws current layer only, should be called within  */
 {                           /* a "for(i=0;i<cadlayers;i++)" loop */
   register int j;
   register double x0,y0,x1,y1,x2,y2;
   int flip;
-  Line line;
-  Box box;
+  int hide = 0;
+  xLine line;
+  xRect box;
   xArc arc;
-  xPolygon polygon; /* 20171115 */
-  Text text;
-  register Instdef *symptr; /*20150408 */
+  xPoly polygon;
+  xText text;
+  register xSymbol *symptr;
   int textlayer;
   double angle;
   #ifdef HAS_CAIRO
   char *textfont;
   #endif
-
-  if(inst_ptr[n].ptr == -1) return;
+  if(xctx->inst[n].ptr == -1) return;
   if( (layer != PINLAYER && !enable_layer[layer]) ) return;
   if(!has_x) return;
+  if(
+    (hide_symbols==1 && (xctx->inst[n].ptr+ xctx->sym)->prop_ptr &&
+     !strcmp( (xctx->inst[n].ptr+ xctx->sym)->type, "subcircuit") ) || (hide_symbols == 2) ) {
+    hide = 1;
+  } else {
+    hide = 0;
+  }
+  if(hide && layer == 0) {
+    drawrect(4, what, xctx->inst[n].xx1, xctx->inst[n].yy1, xctx->inst[n].xx2, xctx->inst[n].yy2, 2);
+  }
   if(layer==0) {
-    x1=X_TO_SCREEN(inst_ptr[n].x1+xoffset);  /* 20150729 added xoffset, yoffset */
-    x2=X_TO_SCREEN(inst_ptr[n].x2+xoffset);
-    y1=Y_TO_SCREEN(inst_ptr[n].y1+yoffset);
-    y2=Y_TO_SCREEN(inst_ptr[n].y2+yoffset);
- 
- 
+    x1=X_TO_SCREEN(xctx->inst[n].x1+xoffset);  /* 20150729 added xoffset, yoffset */
+    x2=X_TO_SCREEN(xctx->inst[n].x2+xoffset);
+    y1=Y_TO_SCREEN(xctx->inst[n].y1+yoffset);
+    y2=Y_TO_SCREEN(xctx->inst[n].y2+yoffset);
     if(!only_probes && (x2-x1)< 0.3 && (y2-y1)< 0.3) {
-      inst_ptr[n].flags|=1;
-      return; /* 20171210 */
+      xctx->inst[n].flags|=1;
+      return;
     }
-    else if(OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2)) 
+    else if(OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2))
     {
-     inst_ptr[n].flags|=1;
+     xctx->inst[n].flags|=1;
      return;
     }
-    else inst_ptr[n].flags&=~1;
- 
-    /* following code handles different text color for labels/pins 06112002 */
- 
-  } else if(inst_ptr[n].flags&1) {  
+    else xctx->inst[n].flags&=~1;
+
+  } else if(xctx->inst[n].flags&1) {
     dbg(2, "draw_symbol(): skipping inst %d\n", n);
     return;
   }
-
-  flip = inst_ptr[n].flip;
+  flip = xctx->inst[n].flip;
   if(tmp_flip) flip = !flip;
-  rot = (inst_ptr[n].rot + rot ) & 0x3;
- 
-  x0=inst_ptr[n].x0 + xoffset;
-  y0=inst_ptr[n].y0 + yoffset;
-  symptr = (inst_ptr[n].ptr+instdef);
-  for(j=0;j< symptr->lines[layer];j++)
-  {
-    line = (symptr->lineptr[layer])[j];
-    ROTATION(0.0,0.0,line.x1,line.y1,x1,y1);
-    ROTATION(0.0,0.0,line.x2,line.y2,x2,y2);
-    ORDER(x1,y1,x2,y2);
-    drawline(c,what, x0+x1, y0+y1, x0+x2, y0+y2, line.dash);
-  }
-  for(j=0;j< symptr->polygons[layer];j++) /* 20171115 */
-  { 
-    polygon = (symptr->polygonptr[layer])[j];
-    {   /* scope block so we declare some auxiliary arrays for coord transforms. 20171115 */
-      int k;
-      double *x = my_malloc(34, sizeof(double) * polygon.points);
-      double *y = my_malloc(35, sizeof(double) * polygon.points);
-      for(k=0;k<polygon.points;k++) {
-        ROTATION(0.0,0.0,polygon.x[k],polygon.y[k],x[k],y[k]);
-        x[k]+= x0;
-        y[k] += y0;
-      }
-      drawpolygon(c, NOW, x, y, polygon.points, polygon.fill, polygon.dash); /* 20180914 added fill */
-      my_free(718, &x);
-      my_free(719, &y);
-    }
-  }
-  for(j=0;j< symptr->arcs[layer];j++)
-  { 
-    
-    arc = (symptr->arcptr[layer])[j];
-    if(flip) {
-      angle = 270.*rot+180.-arc.b-arc.a;
-    } else {
-      angle = arc.a+rot*270.;
-    }
-    angle = fmod(angle, 360.);
-    if(angle<0.) angle+=360.;
-    ROTATION(0.0,0.0,arc.x,arc.y,x1,y1);
-    drawarc(c,what, x0+x1, y0+y1, arc.r, angle, arc.b, arc.fill, arc.dash);
-  }
+  rot = (xctx->inst[n].rot + rot ) & 0x3;
 
-  if( (layer != PINLAYER || enable_layer[layer]) ) for(j=0;j< symptr->rects[layer];j++)
-  {
-    box = (symptr->boxptr[layer])[j];
-    ROTATION(0.0,0.0,box.x1,box.y1,x1,y1);
-    ROTATION(0.0,0.0,box.x2,box.y2,x2,y2);
-    RECTORDER(x1,y1,x2,y2); 
-    drawrect(c,what, x0+x1, y0+y1, x0+x2, y0+y2, box.dash);
-    filledrect(c,what, x0+x1, y0+y1, x0+x2, y0+y2);
+  x0=xctx->inst[n].x0 + xoffset;
+  y0=xctx->inst[n].y0 + yoffset;
+  symptr = (xctx->inst[n].ptr+ xctx->sym);
+  if(!hide) {
+    for(j=0;j< symptr->lines[layer];j++)
+    {
+      line = (symptr->line[layer])[j];
+      ROTATION(rot, flip, 0.0,0.0,line.x1,line.y1,x1,y1);
+      ROTATION(rot, flip, 0.0,0.0,line.x2,line.y2,x2,y2);
+      ORDER(x1,y1,x2,y2);
+      if(line.bus)
+        drawline(c,THICK, x0+x1, y0+y1, x0+x2, y0+y2, line.dash);
+      else
+        drawline(c,what, x0+x1, y0+y1, x0+x2, y0+y2, line.dash);
+    }
+    for(j=0;j< symptr->polygons[layer];j++)
+    {
+      polygon = (symptr->poly[layer])[j];
+      {   /* scope block so we declare some auxiliary arrays for coord transforms. 20171115 */
+        int k;
+        double *x = my_malloc(34, sizeof(double) * polygon.points);
+        double *y = my_malloc(35, sizeof(double) * polygon.points);
+        for(k=0;k<polygon.points;k++) {
+          ROTATION(rot, flip, 0.0,0.0,polygon.x[k],polygon.y[k],x[k],y[k]);
+          x[k]+= x0;
+          y[k] += y0;
+        }
+        drawpolygon(c, NOW, x, y, polygon.points, polygon.fill, polygon.dash); /* 20180914 added fill */
+        my_free(718, &x);
+        my_free(719, &y);
+      }
+    }
+    for(j=0;j< symptr->arcs[layer];j++)
+    {
+
+      arc = (symptr->arc[layer])[j];
+      if(flip) {
+        angle = 270.*rot+180.-arc.b-arc.a;
+      } else {
+        angle = arc.a+rot*270.;
+      }
+      angle = fmod(angle, 360.);
+      if(angle<0.) angle+=360.;
+      ROTATION(rot, flip, 0.0,0.0,arc.x,arc.y,x1,y1);
+      drawarc(c,what, x0+x1, y0+y1, arc.r, angle, arc.b, arc.fill, arc.dash);
+    }
+  } /* if(!hide) */
+
+  if( (!hide && (layer != PINLAYER || enable_layer[layer]))  ||
+      (hide && layer == PINLAYER && enable_layer[layer]) ) {
+    for(j=0;j< symptr->rects[layer];j++)
+    {
+      box = (symptr->rect[layer])[j];
+      ROTATION(rot, flip, 0.0,0.0,box.x1,box.y1,x1,y1);
+      ROTATION(rot, flip, 0.0,0.0,box.x2,box.y2,x2,y2);
+      RECTORDER(x1,y1,x2,y2);
+      drawrect(c,what, x0+x1, y0+y1, x0+x2, y0+y2, box.dash);
+      filledrect(c,what, x0+x1, y0+y1, x0+x2, y0+y2);
+    }
   }
-  if( (layer==TEXTWIRELAYER && !(inst_ptr[n].flags&2) ) || 
-      (sym_txt && (layer==TEXTLAYER) && (inst_ptr[n].flags&2) ) ) {
+  if( (layer==TEXTWIRELAYER && !(xctx->inst[n].flags&2) ) ||
+      (sym_txt && (layer==TEXTLAYER) && (xctx->inst[n].flags&2) ) ) {
     const char *txtptr;
     for(j=0;j< symptr->texts;j++)
     {
-      text = symptr->txtptr[j];
-      if(text.xscale*FONTWIDTH*mooz<1) continue;
+      text = symptr->text[j];
+      if(text.xscale*FONTWIDTH*xctx->mooz<1) continue;
+      if( hide && text.txt_ptr && strcmp(text.txt_ptr, "@symname") && strcmp(text.txt_ptr, "@name") ) continue;
       txtptr= translate(n, text.txt_ptr);
-      ROTATION(0.0,0.0,text.x0,text.y0,x1,y1);
+      ROTATION(rot, flip, 0.0,0.0,text.x0,text.y0,x1,y1);
 
       textlayer = c;
-      if( !(c == PINLAYER && (inst_ptr[n].flags & 4))) {
-        textlayer = symptr->txtptr[j].layer;
+      if( !(c == PINLAYER && (xctx->inst[n].flags & 4))) {
+        textlayer = symptr->text[j].layer;
         if(textlayer < 0 || textlayer >= cadlayers) textlayer = c;
       }
-      if((c == PINLAYER && inst_ptr[n].flags & 4) ||  enable_layer[textlayer]) {
+      if((c == PINLAYER && xctx->inst[n].flags & 4) ||  enable_layer[textlayer]) {
         #ifdef HAS_CAIRO
-        textfont = symptr->txtptr[j].font;
-        if(textfont && textfont[0]) {
-          cairo_save(ctx);
-          cairo_save(save_ctx);
-          cairo_select_font_face (ctx, textfont, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-          cairo_select_font_face (save_ctx, textfont, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+        textfont = symptr->text[j].font;
+        if((textfont && textfont[0]) || symptr->text[j].flags) {
+          cairo_font_slant_t slant;
+          cairo_font_weight_t weight;
+          textfont = (symptr->text[j].font && symptr->text[j].font[0]) ? symptr->text[j].font : cairo_font_name;
+          weight = ( symptr->text[j].flags & TEXT_BOLD) ? CAIRO_FONT_WEIGHT_BOLD : CAIRO_FONT_WEIGHT_NORMAL;
+          slant = CAIRO_FONT_SLANT_NORMAL;
+          if(symptr->text[j].flags & TEXT_ITALIC) slant = CAIRO_FONT_SLANT_ITALIC;
+          if(symptr->text[j].flags & TEXT_OBLIQUE) slant = CAIRO_FONT_SLANT_OBLIQUE;
+
+          cairo_save(cairo_ctx);
+          cairo_save(cairo_save_ctx);
+          cairo_select_font_face (cairo_ctx, textfont, slant, weight);
+          cairo_select_font_face (cairo_save_ctx, textfont, slant, weight);
         }
         #endif
         dbg(1, "drawing string: str=%s prop=%s\n", txtptr, text.prop_ptr);
         draw_string(textlayer, what, txtptr,
           (text.rot + ( (flip && (text.rot & 1) ) ? rot+2 : rot) ) & 0x3,
-          flip^text.flip, text.hcenter, text.vcenter, 
-          x0+x1, y0+y1, text.xscale, text.yscale);                    
+          flip^text.flip, text.hcenter, text.vcenter,
+          x0+x1, y0+y1, text.xscale, text.yscale);
         #ifndef HAS_CAIRO
         drawrect(textlayer, END, 0.0, 0.0, 0.0, 0.0, 0);
         drawline(textlayer, END, 0.0, 0.0, 0.0, 0.0, 0);
         #endif
         #ifdef HAS_CAIRO
-        if(textfont && textfont[0]) {
-          cairo_restore(ctx);
-          cairo_restore(save_ctx);
+        if( (textfont && textfont[0]) || symptr->text[j].flags) {
+          cairo_restore(cairo_ctx);
+          cairo_restore(cairo_save_ctx);
         }
         #endif
       }
@@ -599,66 +630,69 @@ void draw_temp_symbol(int what, GC gc, int n,int layer,int tmp_flip, int rot,
  int j;
  double x0,y0,x1,y1,x2,y2;
  int flip;
- Line line;
- xPolygon polygon;
- Box box;
+ xLine line;
+ xPoly polygon;
+ xRect box;
  xArc arc;
- Text text;
- register Instdef *symptr; /*20150408 */
+ xText text;
+ register xSymbol *symptr;
  double angle;
 
  #ifdef HAS_CAIRO
  int customfont;
  #endif
 
- if(inst_ptr[n].ptr == -1) return;
+ if(xctx->inst[n].ptr == -1) return;
  if(!has_x) return;
 
- flip = inst_ptr[n].flip;
+ flip = xctx->inst[n].flip;
  if(tmp_flip) flip = !flip;
- rot = (inst_ptr[n].rot + rot ) & 0x3;
+ rot = (xctx->inst[n].rot + rot ) & 0x3;
 
- if(layer==0) { /* 20150424 */
-   x1=X_TO_SCREEN(inst_ptr[n].x1+xoffset); /* 20150729 added xoffset, yoffset */
-   x2=X_TO_SCREEN(inst_ptr[n].x2+xoffset);
-   y1=Y_TO_SCREEN(inst_ptr[n].y1+yoffset);
-   y2=Y_TO_SCREEN (inst_ptr[n].y2+yoffset);
+ if(layer==0) {
+   x1=X_TO_SCREEN(xctx->inst[n].x1+xoffset); /* 20150729 added xoffset, yoffset */
+   x2=X_TO_SCREEN(xctx->inst[n].x2+xoffset);
+   y1=Y_TO_SCREEN(xctx->inst[n].y1+yoffset);
+   y2=Y_TO_SCREEN (xctx->inst[n].y2+yoffset);
    if(OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2))
    {
-    inst_ptr[n].flags|=1;
+    xctx->inst[n].flags|=1;
     return;
    }
-   else inst_ptr[n].flags&=~1;
+   else xctx->inst[n].flags&=~1;
 
    /* following code handles different text color for labels/pins 06112002 */
 
- } else if(inst_ptr[n].flags&1) {
+ } else if(xctx->inst[n].flags&1) {
    dbg(2, "draw_symbol(): skipping inst %d\n", n);
    return;
  } /* /20150424 */
 
- x0=inst_ptr[n].x0 + xoffset;
- y0=inst_ptr[n].y0 + yoffset;
- symptr = (inst_ptr[n].ptr+instdef);
+ x0=xctx->inst[n].x0 + xoffset;
+ y0=xctx->inst[n].y0 + yoffset;
+ symptr = (xctx->inst[n].ptr+ xctx->sym);
  for(j=0;j< symptr->lines[layer];j++)
  {
-  line = (symptr->lineptr[layer])[j];
-  ROTATION(0.0,0.0,line.x1,line.y1,x1,y1);
-  ROTATION(0.0,0.0,line.x2,line.y2,x2,y2);
+  line = (symptr->line[layer])[j];
+  ROTATION(rot, flip, 0.0,0.0,line.x1,line.y1,x1,y1);
+  ROTATION(rot, flip, 0.0,0.0,line.x2,line.y2,x2,y2);
   ORDER(x1,y1,x2,y2);
-  drawtempline(gc,what, x0+x1, y0+y1, x0+x2, y0+y2);
+  if(line.bus)
+    drawtempline(gc,THICK, x0+x1, y0+y1, x0+x2, y0+y2);
+  else
+    drawtempline(gc,what, x0+x1, y0+y1, x0+x2, y0+y2);
  }
- for(j=0;j< symptr->polygons[layer];j++) /* 20171115 */
+ for(j=0;j< symptr->polygons[layer];j++)
  {
    /*fprintf(errfp, "draw_temp_symbol: polygon\n"); */
-   polygon = (symptr->polygonptr[layer])[j];
+   polygon = (symptr->poly[layer])[j];
 
    {   /* scope block so we declare some auxiliary arrays for coord transforms. 20171115 */
      int k;
      double *x = my_malloc(36, sizeof(double) * polygon.points);
      double *y = my_malloc(37, sizeof(double) * polygon.points);
      for(k=0;k<polygon.points;k++) {
-       ROTATION(0.0,0.0,polygon.x[k],polygon.y[k],x[k],y[k]);
+       ROTATION(rot, flip, 0.0,0.0,polygon.x[k],polygon.y[k],x[k],y[k]);
        x[k] += x0;
        y[k] += y0;
      }
@@ -667,18 +701,18 @@ void draw_temp_symbol(int what, GC gc, int n,int layer,int tmp_flip, int rot,
      my_free(721, &y);
    }
  }
- 
+
  for(j=0;j< symptr->rects[layer];j++)
  {
-  box = (symptr->boxptr[layer])[j];
-  ROTATION(0.0,0.0,box.x1,box.y1,x1,y1);
-  ROTATION(0.0,0.0,box.x2,box.y2,x2,y2);
+  box = (symptr->rect[layer])[j];
+  ROTATION(rot, flip, 0.0,0.0,box.x1,box.y1,x1,y1);
+  ROTATION(rot, flip, 0.0,0.0,box.x2,box.y2,x2,y2);
   RECTORDER(x1,y1,x2,y2);
   drawtemprect(gc,what, x0+x1, y0+y1, x0+x2, y0+y2);
  }
  for(j=0;j< symptr->arcs[layer];j++)
  {
-   arc = (symptr->arcptr[layer])[j];
+   arc = (symptr->arc[layer])[j];
    if(flip) {
      angle = 270.*rot+180.-arc.b-arc.a;
    } else {
@@ -686,7 +720,7 @@ void draw_temp_symbol(int what, GC gc, int n,int layer,int tmp_flip, int rot,
    }
    angle = fmod(angle, 360.);
    if(angle<0.) angle+=360.;
-   ROTATION(0.0,0.0,arc.x,arc.y,x1,y1);
+   ROTATION(rot, flip, 0.0,0.0,arc.x,arc.y,x1,y1);
    drawtemparc(gc, what, x0+x1, y0+y1, arc.r, angle, arc.b);
  }
 
@@ -695,18 +729,18 @@ void draw_temp_symbol(int what, GC gc, int n,int layer,int tmp_flip, int rot,
   const char *txtptr;
   for(j=0;j< symptr->texts;j++)
   {
-   text = symptr->txtptr[j];
-   if(text.xscale*FONTWIDTH*mooz<1) continue;
+   text = symptr->text[j];
+   if(text.xscale*FONTWIDTH*xctx->mooz<1) continue;
    txtptr= translate(n, text.txt_ptr);
-   ROTATION(0.0,0.0,text.x0,text.y0,x1,y1);
+   ROTATION(rot, flip, 0.0,0.0,text.x0,text.y0,x1,y1);
    #ifdef HAS_CAIRO
    customfont = set_text_custom_font(&text);
    #endif
    if(txtptr[0]) draw_temp_string(gc, what, txtptr,
      (text.rot + ( (flip && (text.rot & 1) ) ? rot+2 : rot) ) & 0x3,
-     flip^text.flip, text.hcenter, text.vcenter, x0+x1, y0+y1, text.xscale, text.yscale);                    
+     flip^text.flip, text.hcenter, text.vcenter, x0+x1, y0+y1, text.xscale, text.yscale);
    #ifdef HAS_CAIRO
-   if(customfont) cairo_restore(ctx);
+   if(customfont) cairo_restore(cairo_ctx);
    #endif
 
   }
@@ -719,9 +753,9 @@ void drawgrid()
  double delta,tmp;
  int i=0;
  if( !draw_grid || !has_x) return;
- delta=cadgrid*mooz;
+ delta=cadgrid*xctx->mooz;
  while(delta<CADGRIDTHRESHOLD) delta*=CADGRIDMULTIPLY;  /* <-- to be improved,but works */
- x = xorigin*mooz;y = yorigin*mooz;
+ x = xctx->xorigin*xctx->mooz;y = xctx->yorigin*xctx->mooz;
  if(y>areay1 && y<areay2)
  {
   if(draw_window) XDrawLine(display, window, gc[GRIDLAYER],areax1+1,(int)y, areax2-1, (int)y);
@@ -734,8 +768,8 @@ void drawgrid()
   if(draw_pixmap)
     XDrawLine(display, save_pixmap, gc[GRIDLAYER],(int)x,areay1+1, (int)x, areay2-1);
  }
- tmp = floor((areay1+1)/delta)*delta-fmod(-yorigin*mooz,delta);
- for(x=floor((areax1+1)/delta)*delta-fmod(-xorigin*mooz,delta);x<areax2;x+=delta)
+ tmp = floor((areay1+1)/delta)*delta-fmod(-xctx->yorigin*xctx->mooz,delta);
+ for(x=floor((areax1+1)/delta)*delta-fmod(-xctx->xorigin*xctx->mooz,delta);x<areax2;x+=delta)
  {
   for(y=tmp;y<areay2;y+=delta)
   {
@@ -769,7 +803,7 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
  register XSegment *rr;
  char dash_arr[2];
 
- if(dash) what = NOW;
+ if(dash && what !=THICK) what = NOW;
 
  if(!has_x) return;
  rr=r;
@@ -795,10 +829,10 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
   y1=Y_TO_SCREEN(liney1);
   x2=X_TO_SCREEN(linex2);
   y2=Y_TO_SCREEN(liney2);
-  if(!only_probes && (x2-x1)< 0.3 && fabs(y2-y1) < 0.3) return; /* 20171206 */
+  if(!only_probes && (x2-x1)< 0.3 && fabs(y2-y1) < 0.3) return;
   if( clip(&x1,&y1,&x2,&y2) )
   {
-   rr[i].x1=(short)x1; 
+   rr[i].x1=(short)x1;
    rr[i].y1=(short)y1;
    rr[i].x2=(short)x2;
    rr[i].y2=(short)y2;
@@ -811,45 +845,45 @@ void drawline(int c, int what, double linex1, double liney1, double linex2, doub
   y1=Y_TO_SCREEN(liney1);
   x2=X_TO_SCREEN(linex2);
   y2=Y_TO_SCREEN(liney2);
-  if(!only_probes && (x2-x1)< 0.3 && fabs(y2-y1)< 0.3) return; /* 20171206 */
+  if(!only_probes && (x2-x1)< 0.3 && fabs(y2-y1)< 0.3) return;
   if( clip(&x1,&y1,&x2,&y2) )
   {
    if(dash) {
      dash_arr[0] = dash_arr[1] = dash;
      XSetDashes(display, gc[c], 0, dash_arr, 2);
-     XSetLineAttributes (display, gc[c], lw ,LineDoubleDash, CapButt , JoinBevel);
+     XSetLineAttributes (display, gc[c], INT_WIDTH(xctx->lw), xDashType, CapButt, JoinBevel);
    }
    if(draw_window) XDrawLine(display, window, gc[c], x1, y1, x2, y2);
-   if(draw_pixmap) 
+   if(draw_pixmap)
     XDrawLine(display, save_pixmap, gc[c], x1, y1, x2, y2);
    if(dash) {
-     XSetLineAttributes (display, gc[c], lw ,LineSolid, CapRound , JoinRound);
+     XSetLineAttributes (display, gc[c], INT_WIDTH(xctx->lw), LineSolid, CapRound, JoinRound);
    }
   }
- } 
+ }
 
- else if(what & THICK)           /* 26122004 */
- { 
+ else if(what & THICK)
+ {
   x1=X_TO_SCREEN(linex1);
   y1=Y_TO_SCREEN(liney1);
   x2=X_TO_SCREEN(linex2);
   y2=Y_TO_SCREEN(liney2);
-  if(!only_probes && (x2-x1)< 0.3 && fabs(y2-y1)< 0.3) return; /* 20171206 */
+  if(!only_probes && (x2-x1)< 0.3 && fabs(y2-y1)< 0.3) return;
   if( clip(&x1,&y1,&x2,&y2) )
   {
    if(dash) {
      dash_arr[0] = dash_arr[1] = dash;
      XSetDashes(display, gc[c], 0, dash_arr, 2);
-     XSetLineAttributes (display, gc[c], bus_width ,LineDoubleDash, CapButt , JoinBevel);
+     XSetLineAttributes (display, gc[c], INT_BUS_WIDTH(xctx->lw), xDashType, CapButt, JoinBevel);
    } else {
-     XSetLineAttributes (display, gc[c], bus_width , LineSolid, CapRound , JoinRound);
+     XSetLineAttributes (display, gc[c], INT_BUS_WIDTH(xctx->lw), LineSolid, CapRound, JoinRound);
    }
    if(draw_window) XDrawLine(display, window, gc[c], x1, y1, x2, y2);
    if(draw_pixmap) XDrawLine(display, save_pixmap, gc[c], x1, y1, x2, y2);
-   XSetLineAttributes (display, gc[c], lw, LineSolid, CapRound , JoinRound);
+   XSetLineAttributes (display, gc[c], INT_WIDTH(xctx->lw), LineSolid, CapRound , JoinRound);
   }
  }
- else if(what & BEGIN) i=0;
+ else if(what & START) i=0;
  else if((what & END) && i)
  {
 #ifdef __unix__
@@ -913,8 +947,8 @@ void drawtempline(GC gc, int what, double linex1,double liney1,double linex2,dou
   {
    XDrawLine(display, window, gc, x1, y1, x2, y2);
   }
- } 
- else if(what & THICK)           /* 26122004 */
+ }
+ else if(what & THICK)
  {
   x1=X_TO_SCREEN(linex1);
   y1=Y_TO_SCREEN(liney1);
@@ -922,14 +956,14 @@ void drawtempline(GC gc, int what, double linex1,double liney1,double linex2,dou
   y2=Y_TO_SCREEN(liney2);
   if( clip(&x1,&y1,&x2,&y2) )
   {
-   XSetLineAttributes (display, gc, bus_width, LineSolid, CapRound , JoinRound); /* 20150410 */
+   XSetLineAttributes (display, gc, INT_BUS_WIDTH(xctx->lw), LineSolid, CapRound , JoinRound);
 
    XDrawLine(display, window, gc, x1, y1, x2, y2);
-   XSetLineAttributes (display, gc, lw, LineSolid, CapRound , JoinRound);
+   XSetLineAttributes (display, gc, INT_WIDTH(xctx->lw), LineSolid, CapRound , JoinRound);
   }
  }
 
- else if(what & BEGIN) i=0;
+ else if(what & START) i=0;
  else if((what & END) && i)
  {
 #ifdef __unix__
@@ -946,7 +980,7 @@ void drawtempline(GC gc, int what, double linex1,double liney1,double linex2,dou
 void drawtemparc(GC gc, int what, double x, double y, double r, double a, double b)
 {
  static int i=0;
- static XArc arc[CADDRAWBUFFERSIZE];
+ static XArc xarc[CADDRAWBUFFERSIZE];
  double x1, y1, x2, y2; /* arc bbox */
  double xx1, yy1, xx2, yy2; /* complete circle bbox in screen coords */
 
@@ -955,7 +989,7 @@ void drawtemparc(GC gc, int what, double x, double y, double r, double a, double
  {
   if(i>=CADDRAWBUFFERSIZE)
   {
-   XDrawArcs(display, window, gc, arc,i);
+   XDrawArcs(display, window, gc, xarc,i);
    i=0;
   }
   xx1=X_TO_SCREEN(x-r);
@@ -969,12 +1003,12 @@ void drawtemparc(GC gc, int what, double x, double y, double r, double a, double
   y2=Y_TO_SCREEN(y2);
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
-   arc[i].x=(short)xx1;
-   arc[i].y=(short)yy1;
-   arc[i].width= (unsigned short)(xx2 - xx1);
-   arc[i].height=(unsigned short)(yy2 - yy1);
-   arc[i].angle1 = a*64;
-   arc[i].angle2 = b*64;
+   xarc[i].x=(short)xx1;
+   xarc[i].y=(short)yy1;
+   xarc[i].width= (unsigned short)(xx2 - xx1);
+   xarc[i].height=(unsigned short)(yy2 - yy1);
+   xarc[i].angle1 = a*64;
+   xarc[i].angle2 = b*64;
    i++;
   }
  }
@@ -994,10 +1028,10 @@ void drawtemparc(GC gc, int what, double x, double y, double r, double a, double
    XDrawArc(display, window, gc, xx1, yy1, xx2-xx1, yy2-yy1, a*64, b*64);
   }
  }
- else if(what & BEGIN) i=0;
+ else if(what & START) i=0;
  else if((what & END) && i)
  {
-  XDrawArcs(display, window, gc, arc,i);
+  XDrawArcs(display, window, gc, xarc,i);
   i=0;
  }
 }
@@ -1005,10 +1039,10 @@ void drawtemparc(GC gc, int what, double x, double y, double r, double a, double
 /* x1,y1: start; x2,y2: end; x3,y3: way point */
 void arc_3_points(double x1, double y1, double x2, double y2, double x3, double y3,
          double *x, double *y, double *r, double *a, double *b)
-{ 
+{
   double A, B, C;
   double c, s;
-  
+
   /* s = signed_area, if > 0 : clockwise in xorg coordinate space */
   s = x3*y2-x2*y3 + x2*y1 -x1*y2 + x1*y3-x3*y1;
   A = x1*(y2-y3) - y1*(x2-x3) + x2*y3 - x3*y2;
@@ -1017,7 +1051,7 @@ void arc_3_points(double x1, double y1, double x2, double y2, double x3, double 
   /* printf("s=%g\n", s); */
   *x = -B/2./A;
   *y = -C/2./A;
-  *r = sqrt( (*x-x1)*(*x-x1) + (*y-y1)*(*y-y1) ); 
+  *r = sqrt( (*x-x1)*(*x-x1) + (*y-y1)*(*y-y1) );
   *a = fmod(atan2(*y-y1 ,x1-*x )*180./XSCH_PI, 360.);
   if(*a<0.) *a+=360.;
   *b = fmod(atan2(*y-y2 ,x2-*x )*180./XSCH_PI, 360.);
@@ -1040,7 +1074,7 @@ void arc_3_points(double x1, double y1, double x2, double y2, double x3, double 
 void filledarc(int c, int what, double x, double y, double r, double a, double b)
 {
  static int i=0;
- static XArc arc[CADDRAWBUFFERSIZE];
+ static XArc xarc[CADDRAWBUFFERSIZE];
  double x1, y1, x2, y2; /* arc bbox */
  double xx1, yy1, xx2, yy2; /* complete circle bbox in screen coords */
 
@@ -1049,8 +1083,8 @@ void filledarc(int c, int what, double x, double y, double r, double a, double b
  {
   if(i>=CADDRAWBUFFERSIZE)
   {
-   if(draw_window) XFillArcs(display, window, gc[c], arc,i);
-   if(draw_pixmap) XFillArcs(display, save_pixmap, gc[c], arc,i);
+   if(draw_window) XFillArcs(display, window, gc[c], xarc,i);
+   if(draw_pixmap) XFillArcs(display, save_pixmap, gc[c], xarc,i);
    i=0;
   }
   xx1=X_TO_SCREEN(x-r);
@@ -1064,12 +1098,12 @@ void filledarc(int c, int what, double x, double y, double r, double a, double b
   y2=Y_TO_SCREEN(y2);
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
-   arc[i].x=(short)xx1;
-   arc[i].y=(short)yy1;
-   arc[i].width =(unsigned short)(xx2 - xx1);
-   arc[i].height=(unsigned short)(yy2 - yy1);
-   arc[i].angle1 = a*64;
-   arc[i].angle2 = b*64;
+   xarc[i].x=(short)xx1;
+   xarc[i].y=(short)yy1;
+   xarc[i].width =(unsigned short)(xx2 - xx1);
+   xarc[i].height=(unsigned short)(yy2 - yy1);
+   xarc[i].angle1 = a*64;
+   xarc[i].angle2 = b*64;
    i++;
   }
  }
@@ -1090,11 +1124,11 @@ void filledarc(int c, int what, double x, double y, double r, double a, double b
    if(draw_pixmap) XFillArc(display, save_pixmap, gc[c], xx1, yy1, xx2-xx1, yy2-yy1, a*64, b*64);
   }
  }
- else if(what & BEGIN) i=0;
+ else if(what & START) i=0;
  else if((what & END) && i)
  {
-  if(draw_window) XFillArcs(display, window, gc[c], arc,i);
-  if(draw_pixmap) XFillArcs(display, save_pixmap, gc[c], arc,i);
+  if(draw_window) XFillArcs(display, window, gc[c], xarc,i);
+  if(draw_pixmap) XFillArcs(display, save_pixmap, gc[c], xarc,i);
   i=0;
  }
 }
@@ -1103,7 +1137,7 @@ void filledarc(int c, int what, double x, double y, double r, double a, double b
 void drawarc(int c, int what, double x, double y, double r, double a, double b, int arc_fill, int dash)
 {
  static int i=0;
- static XArc arc[CADDRAWBUFFERSIZE];
+ static XArc xarc[CADDRAWBUFFERSIZE];
  double x1, y1, x2, y2; /* arc bbox */
  double xx1, yy1, xx2, yy2; /* complete circle bbox in screen coords */
 
@@ -1114,8 +1148,8 @@ void drawarc(int c, int what, double x, double y, double r, double a, double b, 
  {
   if(i>=CADDRAWBUFFERSIZE)
   {
-   if(draw_window) XDrawArcs(display, window, gc[c], arc,i);
-   if(draw_pixmap) XDrawArcs(display, save_pixmap, gc[c], arc,i);
+   if(draw_window) XDrawArcs(display, window, gc[c], xarc,i);
+   if(draw_pixmap) XDrawArcs(display, save_pixmap, gc[c], xarc,i);
    i=0;
   }
   xx1=X_TO_SCREEN(x-r);
@@ -1129,12 +1163,12 @@ void drawarc(int c, int what, double x, double y, double r, double a, double b, 
   y2=Y_TO_SCREEN(y2);
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
-   arc[i].x=(short)xx1;
-   arc[i].y=(short)yy1;
-   arc[i].width =(unsigned short)(xx2 - xx1);
-   arc[i].height=(unsigned short)(yy2 - yy1);
-   arc[i].angle1 = a*64;
-   arc[i].angle2 = b*64;
+   xarc[i].x=(short)xx1;
+   xarc[i].y=(short)yy1;
+   xarc[i].width =(unsigned short)(xx2 - xx1);
+   xarc[i].height=(unsigned short)(yy2 - yy1);
+   xarc[i].angle1 = a*64;
+   xarc[i].angle2 = b*64;
    i++;
   }
  }
@@ -1158,7 +1192,7 @@ void drawarc(int c, int what, double x, double y, double r, double a, double b, 
      char dash_arr[2];
      dash_arr[0] = dash_arr[1] = dash;
      XSetDashes(display, gc[c], 0, dash_arr, 2);
-     XSetLineAttributes (display, gc[c], lw ,LineDoubleDash, CapButt , JoinBevel);
+     XSetLineAttributes (display, gc[c], INT_WIDTH(xctx->lw), xDashType, CapButt, JoinBevel);
    }
 
    if(draw_window) {
@@ -1170,22 +1204,22 @@ void drawarc(int c, int what, double x, double y, double r, double a, double b, 
 
    if(fill && fill_type[c]){
      if(arc_fill) {
-       if(draw_window) 
+       if(draw_window)
          XFillArc(display, window, gcstipple[c], xx1, yy1, xx2-xx1, yy2-yy1, a*64, b*64);
        if(draw_pixmap)
          XFillArc(display, save_pixmap, gcstipple[c], xx1, yy1, xx2-xx1, yy2-yy1, a*64, b*64);
      }
    }
    if(dash) {
-     XSetLineAttributes (display, gc[c], lw ,LineSolid, CapRound , JoinRound);
+     XSetLineAttributes (display, gc[c], INT_WIDTH(xctx->lw) ,LineSolid, CapRound , JoinRound);
    }
   }
  }
- else if(what & BEGIN) i=0;
+ else if(what & START) i=0;
  else if((what & END) && i)
  {
-  if(draw_window) XDrawArcs(display, window, gc[c], arc,i);
-  if(draw_pixmap) XDrawArcs(display, save_pixmap, gc[c], arc,i);
+  if(draw_window) XDrawArcs(display, window, gc[c], xarc,i);
+  if(draw_pixmap) XDrawArcs(display, save_pixmap, gc[c], xarc,i);
   i=0;
  }
 }
@@ -1205,19 +1239,19 @@ void filledrect(int c, int what, double rectx1,double recty1,double rectx2,doubl
   y1=Y_TO_SCREEN(recty1);
   x2=X_TO_SCREEN(rectx2);
   y2=Y_TO_SCREEN(recty2);
-  if(!only_probes && (x2-x1)< 2 && (y2-y1)< 2) return; /* 20171206 */
+  if(!only_probes && (x2-x1)< 2 && (y2-y1)< 2) return;
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
-   if(draw_window) XFillRectangle(display, window, gcstipple[c], (int)x1, (int)y1, 
+   if(draw_window) XFillRectangle(display, window, gcstipple[c], (int)x1, (int)y1,
     (unsigned int)x2 - (unsigned int)x1,
     (unsigned int)y2 - (unsigned int)y1);
    if(draw_pixmap)
-     XFillRectangle(display, save_pixmap,gcstipple[c],  (int)x1, (int)y1, 
+     XFillRectangle(display, save_pixmap,gcstipple[c],  (int)x1, (int)y1,
       (unsigned int)x2 - (unsigned int)x1,
       (unsigned int)y2 - (unsigned int)y1);
   }
  }
- else if(what & BEGIN) i=0;
+ else if(what & START) i=0;
  else if(what & ADD)
  {
   if(i>=CADDRAWBUFFERSIZE)
@@ -1231,10 +1265,10 @@ void filledrect(int c, int what, double rectx1,double recty1,double rectx2,doubl
   y1=Y_TO_SCREEN(recty1);
   x2=X_TO_SCREEN(rectx2);
   y2=Y_TO_SCREEN(recty2);
-  if(!only_probes && (x2-x1)< 2 && (y2-y1)< 2) return; /* 20171206 */
+  if(!only_probes && (x2-x1)< 2 && (y2-y1)< 2) return;
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
-   r[i].x=(short)x1; 
+   r[i].x=(short)x1;
    r[i].y=(short)y1;
    r[i].width=(unsigned short)x2-r[i].x;
    r[i].height=(unsigned short)y2-r[i].y;
@@ -1261,7 +1295,7 @@ void polygon_bbox(double *x, double *y, int points, double *bx1, double *by1, do
 }
 
 
-void arc_bbox(double x, double y, double r, double a, double b, 
+void arc_bbox(double x, double y, double r, double a, double b,
               double *bx1, double *by1, double *bx2, double *by2)
 {
   double x2, y2, x3, y3;
@@ -1279,7 +1313,7 @@ void arc_bbox(double x, double y, double r, double a, double b,
   aa = (int)(ceil(a/90.))*90;
   bb = (int)(floor((a+b)/90.))*90;
 
-    
+
   /* printf("arc_bbox(): aa=%d bb=%d\n", aa, bb); */
   x2 = x + r * cos(a * XSCH_PI/180.);
   y2 = y - r * sin(a * XSCH_PI/180.);
@@ -1334,7 +1368,7 @@ void drawpolygon(int c, int what, double *x, double *y, int points, int poly_fil
   if( !rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) ) {
     return;
   }
-  if( !only_probes && (x2-x1)<0.3 && (y2-y1)<0.3) return; /* 20171206 */
+  if( !only_probes && (x2-x1)<0.3 && (y2-y1)<0.3) return;
 
   p = my_malloc(38, sizeof(XPoint) * points);
   for(i=0;i<points; i++) {
@@ -1345,20 +1379,20 @@ void drawpolygon(int c, int what, double *x, double *y, int points, int poly_fil
     char dash_arr[2];
     dash_arr[0] = dash_arr[1] = dash;
     XSetDashes(display, gc[c], 0, dash_arr, 2);
-    XSetLineAttributes (display, gc[c], lw ,LineDoubleDash, CapButt , JoinBevel);
+    XSetLineAttributes (display, gc[c], INT_WIDTH(xctx->lw), xDashType, CapButt, JoinBevel);
   }
   if(draw_window) XDrawLines(display, window, gc[c], p, points, CoordModeOrigin);
   if(draw_pixmap)
     XDrawLines(display, save_pixmap, gc[c], p, points, CoordModeOrigin);
   if(fill && fill_type[c]){
-    if(poly_fill && (x[0] == x[points-1]) && (y[0] == y[points-1])) { /* 20180914 */
+    if(poly_fill && (x[0] == x[points-1]) && (y[0] == y[points-1])) {
       if(draw_window) XFillPolygon(display, window, gcstipple[c], p, points, Polygontype, CoordModeOrigin);
       if(draw_pixmap)
          XFillPolygon(display, save_pixmap, gcstipple[c], p, points, Polygontype, CoordModeOrigin);
     }
   }
   if(dash) {
-    XSetLineAttributes (display, gc[c], lw ,LineSolid, CapRound , JoinRound);
+    XSetLineAttributes (display, gc[c], INT_WIDTH(xctx->lw) ,LineSolid, CapRound , JoinRound);
   }
 
   my_free(722, &p);
@@ -1401,13 +1435,13 @@ void drawrect(int c, int what, double rectx1,double recty1,double rectx2,double 
   y1=Y_TO_SCREEN(recty1);
   x2=X_TO_SCREEN(rectx2);
   y2=Y_TO_SCREEN(recty2);
-  if(!only_probes && (x2-x1)< 0.3 && (y2-y1)< 0.3) return; /* 20171206 */
+  if(!only_probes && (x2-x1)< 0.3 && (y2-y1)< 0.3) return;
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
    if(dash) {
      dash_arr[0] = dash_arr[1] = dash;
      XSetDashes(display, gc[c], 0, dash_arr, 2);
-     XSetLineAttributes (display, gc[c], lw ,LineDoubleDash, CapButt , JoinBevel);
+     XSetLineAttributes (display, gc[c], INT_WIDTH(xctx->lw), xDashType, CapButt, JoinBevel);
    }
    if(draw_window) XDrawRectangle(display, window, gc[c], (int)x1, (int)y1,
     (unsigned int)x2 - (unsigned int)x1,
@@ -1419,11 +1453,11 @@ void drawrect(int c, int what, double rectx1,double recty1,double rectx2,double 
     (unsigned int)y2 - (unsigned int)y1);
    }
    if(dash) {
-     XSetLineAttributes (display, gc[c], lw ,LineSolid, CapRound , JoinRound);
+     XSetLineAttributes (display, gc[c], INT_WIDTH(xctx->lw) ,LineSolid, CapRound , JoinRound);
    }
   }
  }
- else if(what & BEGIN) i=0;
+ else if(what & START) i=0;
  else if(what & ADD)
  {
   if(i>=CADDRAWBUFFERSIZE)
@@ -1437,10 +1471,10 @@ void drawrect(int c, int what, double rectx1,double recty1,double rectx2,double 
   y1=Y_TO_SCREEN(recty1);
   x2=X_TO_SCREEN(rectx2);
   y2=Y_TO_SCREEN(recty2);
-  if(!only_probes && (x2-x1)< 0.3 && (y2-y1)< 0.3) return; /* 20171206 */
+  if(!only_probes && (x2-x1)< 0.3 && (y2-y1)< 0.3) return;
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
-   r[i].x=(short)x1; 
+   r[i].x=(short)x1;
    r[i].y=(short)y1;
    r[i].width=(unsigned short)x2-r[i].x;
    r[i].height=(unsigned short)y2-r[i].y;
@@ -1468,15 +1502,15 @@ void drawtemprect(GC gc, int what, double rectx1,double recty1,double rectx2,dou
   y1=Y_TO_SCREEN(recty1);
   x2=X_TO_SCREEN(rectx2);
   y2=Y_TO_SCREEN(recty2);
-  if( (x2-x1)< 0.3 && (y2-y1)< 0.3) return; /* 20171206 */
+  if( (x2-x1)< 0.3 && (y2-y1)< 0.3) return;
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
-   XDrawRectangle(display, window, gc, (int)x1, (int)y1, 
+   XDrawRectangle(display, window, gc, (int)x1, (int)y1,
     (unsigned int)x2 - (unsigned int)x1,
     (unsigned int)y2 - (unsigned int)y1);
   }
  }
- else if(what & BEGIN) i=0;
+ else if(what & START) i=0;
  else if(what & ADD)
  {
   if(i>=CADDRAWBUFFERSIZE)
@@ -1488,10 +1522,10 @@ void drawtemprect(GC gc, int what, double rectx1,double recty1,double rectx2,dou
   y1=Y_TO_SCREEN(recty1);
   x2=X_TO_SCREEN(rectx2);
   y2=Y_TO_SCREEN(recty2);
-  if( (x2-x1)< 0.3 && (y2-y1)< 0.3) return; /* 20171206 */
+  if( (x2-x1)< 0.3 && (y2-y1)< 0.3) return;
   if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
   {
-   r[i].x=(short)x1; 
+   r[i].x=(short)x1;
    r[i].y=(short)y1;
    r[i].width=(unsigned short)x2-r[i].x;
    r[i].height=(unsigned short)y2-r[i].y;
@@ -1512,12 +1546,12 @@ void draw(void)
  struct instentry *instanceptr;
  struct wireentry *wireptr;
  int ii;
- char *type=NULL; /* 20180109 */
+ char *type=NULL;
  int use_hash;
- register int c,i; 
- register Instdef *symptr; /* 20150408 */
+ register int c,i;
+ register xSymbol *symptr;
  int textlayer;
-  /* 20171112 */
+
   #ifdef HAS_CAIRO
   char *textfont;
   #endif
@@ -1534,164 +1568,182 @@ void draw(void)
     y1 = Y_TO_XSCHEM(areay1);
     x2 = X_TO_XSCHEM(areax2);
     y2 = Y_TO_XSCHEM(areay2);
-    use_hash =  (lastwire> 2000 || lastinst > 2000 ) &&  (x2 - x1  < ITERATOR_THRESHOLD);
-        
+    use_hash =  (xctx->wires> 2000 || xctx->instances > 2000 ) &&  (x2 - x1  < ITERATOR_THRESHOLD);
+
     if(use_hash) {
       hash_instances();
       hash_wires();
     }
-    if(!only_probes) { /* 20110112 */
-        
+    if(!only_probes) {
         dbg(3, "draw(): check4\n");
         for(c=0;c<cadlayers;c++)
         {
-          if(draw_single_layer!=-1 && c != draw_single_layer) continue; /* 20151117 */
-        
-          for(i=0;i<lastline[c];i++) 
-            drawline(c, ADD, line[c][i].x1, line[c][i].y1, line[c][i].x2, line[c][i].y2, line[c][i].dash);
-          for(i=0;i<lastrect[c];i++) 
-          {
-            drawrect(c, ADD, rect[c][i].x1, rect[c][i].y1, rect[c][i].x2, rect[c][i].y2, rect[c][i].dash);
-            filledrect(c, ADD, rect[c][i].x1, rect[c][i].y1, rect[c][i].x2, rect[c][i].y2);
+          if(draw_single_layer!=-1 && c != draw_single_layer) continue;
+
+          if(enable_layer[c]) for(i=0;i<xctx->lines[c];i++) {
+            xLine *l = &xctx->line[c][i];
+            if(l->bus)
+              drawline(c, THICK, l->x1, l->y1, l->x2, l->y2, l->dash);
+            else
+              drawline(c, ADD, l->x1, l->y1, l->x2, l->y2, l->dash);
           }
-          for(i=0;i<lastarc[c];i++) 
+          if(enable_layer[c]) for(i=0;i<xctx->rects[c];i++)
           {
-            drawarc(c, ADD, arc[c][i].x, arc[c][i].y, arc[c][i].r, arc[c][i].a, arc[c][i].b, arc[c][i].fill, arc[c][i].dash);
+            xRect *r = &xctx->rect[c][i];
+            drawrect(c, ADD, r->x1, r->y1, r->x2, r->y2, r->dash);
+            filledrect(c, ADD, r->x1, r->y1, r->x2, r->y2);
           }
-          for(i=0;i<lastpolygon[c];i++) {
-            /* 20180914 added fill */
-            drawpolygon(c, NOW, polygon[c][i].x, polygon[c][i].y, polygon[c][i].points, polygon[c][i].fill, polygon[c][i].dash);
+          if(enable_layer[c]) for(i=0;i<xctx->arcs[c];i++)
+          {
+            xArc *a = &xctx->arc[c][i];
+            drawarc(c, ADD, a->x, a->y, a->r, a->a, a->b, a->fill, a->dash);
+          }
+          if(enable_layer[c]) for(i=0;i<xctx->polygons[c];i++) {
+            xPoly *p = &xctx->poly[c][i];
+            drawpolygon(c, NOW, p->x, p->y, p->points, p->fill, p->dash);
           }
           if(use_hash) {
-  
+
             /* --------------------------------- inst_ptr iterator 20171224 */
             /*loop thru all squares that intersect drawing area */
             for(init_inst_iterator(x1, y1, x2, y2); ( instanceptr = inst_iterator_next() ) ;) {
               int ptr;
               i = instanceptr->n;
-              ptr = inst_ptr[i].ptr;
-              if( ptr !=-1) { /* 20180921 */
-                symptr = ptr+instdef;
-                if( c==0 || /*20150408 draw_symbol call is needed on layer 0 to avoid redundant work (outside check) */
-                    symptr->lines[c] ||  /* 20150408 */
+              ptr = xctx->inst[i].ptr;
+              if( ptr !=-1) {
+                symptr = ptr+xctx->sym;
+                if( c==0 || /*draw_symbol call is needed on layer 0 to avoid redundant work (outside check) */
+                    symptr->lines[c] ||
                     symptr->arcs[c] ||
-                    symptr->rects[c] ||   /* 20150408 */
-                    symptr->polygons[c] ||   /* 20150408 */
-                    ((c==TEXTWIRELAYER || c==TEXTLAYER) && symptr->texts)) {  /* 20150408 */
-    
+                    symptr->rects[c] ||
+                    symptr->polygons[c] ||
+                    ((c==TEXTWIRELAYER || c==TEXTLAYER) && symptr->texts)) {
+
                   type = symptr->type;
                   if(!(
                        hilight_nets &&
                        type  &&
                        (
                         (
-                          !(strcmp(type,"label") && strcmp(type,"ipin") && strcmp(type,"iopin") && strcmp(type,"opin")) &&
-                          bus_hilight_lookup( get_tok_value(inst_ptr[i].prop_ptr,"lab",0) , 0, XLOOKUP )
+                            IS_LABEL_SH_OR_PIN(type) && xctx->inst[i].node && xctx->inst[i].node[0] &&
+                            bus_hilight_lookup(xctx->inst[i].node[0], 0, XLOOKUP )
                         ) ||
                         (
-                          (strcmp(type,"label") && strcmp(type,"ipin") && strcmp(type,"iopin") && strcmp(type,"opin")) && 
-                          (inst_ptr[i].flags & 4) 
+                           !IS_LABEL_SH_OR_PIN(type) && (xctx->inst[i].flags & 4)
                         )
                        )
                       )
                   ) {
                     draw_symbol(ADD, c, instanceptr->n,c,0,0,0.0,0.0);
                   }
-                }  /* 20150408 */
+                }
               } /*if( ptr !=-1)  */
             }
             /* --------------------------------- /20171224 */
           } else {
-            for(i=0;i<lastinst;i++) {
-              if(inst_ptr[i].ptr == -1) continue;
-              symptr = (inst_ptr[i].ptr+instdef);
+
+            for(i=0;i<xctx->instances;i++) {
+              if(xctx->inst[i].ptr == -1) continue;
+              symptr = (xctx->inst[i].ptr+ xctx->sym);
               if( c==0 || /*20150408 draw_symbol call is needed on layer 0 to avoid redundant work (outside check) */
-                  symptr->lines[c] ||  /* 20150408 */
+                  symptr->lines[c] ||
                   symptr->arcs[c] ||
-                  symptr->rects[c] ||   /* 20150408 */
-                  symptr->polygons[c] ||   /* 20150408 */
-                  ((c==TEXTWIRELAYER || c==TEXTLAYER) && symptr->texts)) {  /* 20150408 */
-  
-  
-                type = (inst_ptr[i].ptr+instdef)->type;
+                  symptr->rects[c] ||
+                  symptr->polygons[c] ||
+                  ((c==TEXTWIRELAYER || c==TEXTLAYER) && symptr->texts)) {
+
+
+                type = (xctx->inst[i].ptr+ xctx->sym)->type;
                 if(!(
                      hilight_nets &&
                      type  &&
                      (
                       (
-                        !(strcmp(type,"label") && strcmp(type,"ipin") && strcmp(type,"iopin") && strcmp(type,"opin")) &&
-                        bus_hilight_lookup( get_tok_value(inst_ptr[i].prop_ptr,"lab",0) , 0, XLOOKUP )
+                        IS_LABEL_SH_OR_PIN(type) && xctx->inst[i].node && xctx->inst[i].node[0] &&
+                        bus_hilight_lookup(xctx->inst[i].node[0], 0, XLOOKUP )
                       ) ||
                       (
-                        (strcmp(type,"label") && strcmp(type,"ipin") && strcmp(type,"iopin") && strcmp(type,"opin")) && 
-                        (inst_ptr[i].flags & 4) 
+                        !IS_LABEL_SH_OR_PIN(type) && (xctx->inst[i].flags & 4)
                       )
                      )
                     )
                 ) {
                   draw_symbol(ADD, c, i,c,0,0,0.0,0.0);
                 }
-              }  /* 20150408 */
+              }
             }
           }
-        
+
           filledrect(c, END, 0.0, 0.0, 0.0, 0.0);
           drawarc(c, END, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0);
           drawrect(c, END, 0.0, 0.0, 0.0, 0.0, 0);
           drawline(c, END, 0.0, 0.0, 0.0, 0.0, 0);
         }
-        if(draw_single_layer==-1 || draw_single_layer==WIRELAYER){ /* 20151117 */
+        if(draw_single_layer==-1 || draw_single_layer==WIRELAYER){
 
           if(use_hash) {
             dbg(3, "using spatial hash table iterator\n");
             /*loop thru all squares that intersect drawing area */
-  
+
             for(init_wire_iterator(x1, y1, x2, y2); ( wireptr = wire_iterator_next() ) ;) {
               ii=wireptr->n;
-              if(wire[ii].bus) {
-                drawline(WIRELAYER, THICK, wire[ii].x1,wire[ii].y1,wire[ii].x2,wire[ii].y2, 0);
+              if(xctx->wire[ii].bus) {
+                drawline(WIRELAYER, THICK, xctx->wire[ii].x1,xctx->wire[ii].y1,
+                  xctx->wire[ii].x2,xctx->wire[ii].y2, 0);
               }
               else
-                drawline(WIRELAYER, ADD, wire[ii].x1,wire[ii].y1,wire[ii].x2,wire[ii].y2, 0);
+                drawline(WIRELAYER, ADD, xctx->wire[ii].x1,xctx->wire[ii].y1,
+                  xctx->wire[ii].x2,xctx->wire[ii].y2, 0);
             }
           } else {
-            for(i=0;i<lastwire;i++)
+            for(i=0;i<xctx->wires;i++)
             {
-              if(wire[i].bus) {
-                drawline(WIRELAYER, THICK, wire[i].x1,wire[i].y1,wire[i].x2,wire[i].y2, 0);
+              if(xctx->wire[i].bus) {
+                drawline(WIRELAYER, THICK, xctx->wire[i].x1,xctx->wire[i].y1,
+                  xctx->wire[i].x2,xctx->wire[i].y2, 0);
               }
               else
-                drawline(WIRELAYER, ADD, wire[i].x1,wire[i].y1,wire[i].x2,wire[i].y2, 0);
+                drawline(WIRELAYER, ADD, xctx->wire[i].x1,xctx->wire[i].y1,
+                  xctx->wire[i].x2,xctx->wire[i].y2, 0);
             }
           }
           update_conn_cues(1, draw_window);
           filledrect(WIRELAYER, END, 0.0, 0.0, 0.0, 0.0);
           drawline(WIRELAYER, END, 0.0, 0.0, 0.0, 0.0, 0);
         }
-        if(draw_single_layer ==-1 || draw_single_layer==TEXTLAYER) { /* 20151117 */
-          for(i=0;i<lasttext;i++) 
+        if(draw_single_layer ==-1 || draw_single_layer==TEXTLAYER) {
+          for(i=0;i<xctx->texts;i++)
           {
-            textlayer = textelement[i].layer; /*20171206 */
+            textlayer = xctx->text[i].layer;
             if(textlayer < 0 ||  textlayer >= cadlayers) textlayer = TEXTLAYER;
-            dbg(1, "draw(): drawing string %d = %s\n",i, textelement[i].txt_ptr);
+            dbg(1, "draw(): drawing string %d = %s\n",i, xctx->text[i].txt_ptr);
             #ifdef HAS_CAIRO
-            textfont = textelement[i].font; /* 20171206 */
-            if(textfont && textfont[0]) {
-              cairo_save(ctx);
-              cairo_save(save_ctx);
-              cairo_select_font_face (ctx, textfont, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-              cairo_select_font_face (save_ctx, textfont, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+            if(!enable_layer[textlayer]) continue;
+            textfont = xctx->text[i].font;
+            if( (textfont && textfont[0]) || xctx->text[i].flags) {
+              cairo_font_slant_t slant;
+              cairo_font_weight_t weight;
+              textfont = (xctx->text[i].font && xctx->text[i].font[0]) ? xctx->text[i].font : cairo_font_name;
+              weight = ( xctx->text[i].flags & TEXT_BOLD) ? CAIRO_FONT_WEIGHT_BOLD : CAIRO_FONT_WEIGHT_NORMAL;
+              slant = CAIRO_FONT_SLANT_NORMAL;
+              if(xctx->text[i].flags & TEXT_ITALIC) slant = CAIRO_FONT_SLANT_ITALIC;
+              if(xctx->text[i].flags & TEXT_OBLIQUE) slant = CAIRO_FONT_SLANT_OBLIQUE;
+
+              cairo_save(cairo_ctx);
+              cairo_save(cairo_save_ctx);
+              cairo_select_font_face (cairo_ctx, textfont, slant, weight);
+              cairo_select_font_face (cairo_save_ctx, textfont, slant, weight);
             }
             #endif
 
-            draw_string(textlayer, ADD, textelement[i].txt_ptr,
-              textelement[i].rot, textelement[i].flip, textelement[i].hcenter, textelement[i].vcenter,
-              textelement[i].x0,textelement[i].y0,
-              textelement[i].xscale, textelement[i].yscale); 
+            draw_string(textlayer, ADD, xctx->text[i].txt_ptr,
+              xctx->text[i].rot, xctx->text[i].flip, xctx->text[i].hcenter, xctx->text[i].vcenter,
+              xctx->text[i].x0,xctx->text[i].y0,
+              xctx->text[i].xscale, xctx->text[i].yscale);
             #ifdef HAS_CAIRO
-            if(textfont && textfont[0]) {
-              cairo_restore(ctx);
-              cairo_restore(save_ctx);
+            if((textfont && textfont[0]) || xctx->text[i].flags ) {
+              cairo_restore(cairo_ctx);
+              cairo_restore(cairo_save_ctx);
             }
             #endif
             #ifndef HAS_CAIRO
@@ -1703,18 +1755,19 @@ void draw(void)
     } /* !only_probes, 20110112 */
     draw_hilight_net(draw_window);
     if(!draw_window) {
-      XCopyArea(display, save_pixmap, window, gctiled, xrect[0].x, xrect[0].y, 
-         xrect[0].width, xrect[0].height, xrect[0].x, xrect[0].y); /* 20181009 */
+      XCopyArea(display, save_pixmap, window, gctiled, xrect[0].x, xrect[0].y,
+         xrect[0].width, xrect[0].height, xrect[0].x, xrect[0].y);
     }
     draw_selection(gc[SELLAYER], 0); /* 20181009 moved outside of cadlayers loop */
 
-    dbg(1, "draw(): lw=%d\n",lw);
+    dbg(1, "draw(): INT_WIDTH(xctx->lw)=%d\n",INT_WIDTH(xctx->lw));
  } /* if(has_x) */
 }
 
 #ifndef __unix__
 /* place holder for Windows to show that these XLib functions are not supported in Windows. */
-int XSetClipRectangles(register Display* dpy, GC gc, int clip_x_origin, int clip_y_origin, XRectangle* rectangles, int n, int ordering)
+int XSetClipRectangles(register Display* dpy, GC gc, int clip_x_origin, int clip_y_origin,
+                       XRectangle* rectangles, int n, int ordering)
 {
   return 0;
 }

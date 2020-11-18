@@ -13,6 +13,7 @@
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
     <DefineConstants>Debug</DefineConstants>
+    <CompilerAdditionalOptions>-arch x64</CompilerAdditionalOptions>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <OutputPath>bin\$(Configuration)\</OutputPath>
@@ -20,9 +21,12 @@
     <CompilerAdditionalOptions>-arch x64</CompilerAdditionalOptions>
     <LinkerAdditionalOptions>
     </LinkerAdditionalOptions>
+    <DefineConstants>docSrcDir=../../doc;xschemLibrarySrcDir=../../xschem_library</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="doc.wxs" />
     <Compile Include="Product.wxs" />
+    <Compile Include="xschem_library.wxs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\XSchemWin.vcxproj">
@@ -34,6 +38,12 @@
       <RefTargetDir>INSTALLFOLDER</RefTargetDir>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <WixExtension Include="WixUIExtension">
+      <HintPath>$(WixExtDir)\WixUIExtension.dll</HintPath>
+      <Name>WixUIExtension</Name>
+    </WixExtension>
+  </ItemGroup>
   <Import Project="$(WixTargetsPath)" Condition=" '$(WixTargetsPath)' != '' " />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets" Condition=" '$(WixTargetsPath)' == '' AND Exists('$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets') " />
   <Target Name="EnsureWixToolsetInstalled" Condition=" '$(WixTargetsImported)' != 'true' ">
@@ -43,8 +53,8 @@
     <PostBuildEvent />
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>C:\"Program Files (x86)"\"WiX Toolset v3.11"\bin\heat.exe dir "..\..\..\..\doc" -cg doc -gg -sfrag -fragment -out $(ProjectDir)heat_doc.wxs
-C:\"Program Files (x86)"\"WiX Toolset v3.11"\bin\heat.exe dir "..\..\..\..\xschem_library" -cg xschem_library -gg -sfrag -fragment -out $(ProjectDir)heat_xschem_library.wxs</PreBuildEvent>
+    <PreBuildEvent>C:\"Program Files (x86)"\"WiX Toolset v3.11"\bin\heat.exe dir "..\..\..\..\doc"  -dr INSTALLFOLDER -cg doc -gg -sfrag -var "var.docSrcDir" -out $(ProjectDir)heat_doc.wxs
+C:\"Program Files (x86)"\"WiX Toolset v3.11"\bin\heat.exe dir "..\..\..\..\xschem_library" -dr INSTALLFOLDER -cg xschem_library -gg -sfrag -var "var.xschemLibrarySrcDir" -out $(ProjectDir)heat_xschem_library.wxs</PreBuildEvent>
   </PropertyGroup>
   <!--
 	To modify your build process, add your task inside one of the targets below and uncomment it.

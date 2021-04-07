@@ -152,6 +152,7 @@ void free_instances(int slot)
     my_free(800, &uslot[slot].iptr[i].name);
     my_free(801, &uslot[slot].iptr[i].prop_ptr);
     my_free(802, &uslot[slot].iptr[i].instname);
+    my_free(104, &uslot[slot].iptr[i].lab);
   }
   my_free(803, &uslot[slot].iptr);
   uslot[slot].instances = 0;
@@ -160,9 +161,9 @@ void free_instances(int slot)
 void clear_undo(void)
 {
   int slot;
-  cur_undo_ptr = 0;
-  tail_undo_ptr = 0;
-  head_undo_ptr = 0;
+  xctx->cur_undo_ptr = 0;
+  xctx->tail_undo_ptr = 0;
+  xctx->head_undo_ptr = 0;
   if(!initialized) return;
   for(slot=0; slot<MAX_UNDO; slot++) {
     free_lines(slot);
@@ -202,7 +203,7 @@ void push_undo(void)
     initialized=1;
     init_undo();
   }
-  slot = cur_undo_ptr%max_undo;
+  slot = xctx->cur_undo_ptr%max_undo;
 
   my_strdup(173, &uslot[slot].gptr, xctx->schvhdlprop);
   my_strdup(174, &uslot[slot].vptr, xctx->schverilogprop);
@@ -278,7 +279,9 @@ void push_undo(void)
     uslot[slot].iptr[i].prop_ptr = NULL;
     uslot[slot].iptr[i].name = NULL;
     uslot[slot].iptr[i].instname = NULL;
+    uslot[slot].iptr[i].lab = NULL;
     uslot[slot].iptr[i].node = NULL;
+    my_strdup(330, &uslot[slot].iptr[i].lab, xctx->inst[i].lab);
     my_strdup2(191, &uslot[slot].iptr[i].instname, xctx->inst[i].instname);
     my_strdup(192, &uslot[slot].iptr[i].prop_ptr, xctx->inst[i].prop_ptr);
     my_strdup(193, &uslot[slot].iptr[i].name, xctx->inst[i].name);
@@ -303,9 +306,9 @@ void push_undo(void)
   }
 
 
-  cur_undo_ptr++;
-  head_undo_ptr = cur_undo_ptr;
-  tail_undo_ptr = head_undo_ptr <= max_undo? 0: head_undo_ptr-max_undo;
+  xctx->cur_undo_ptr++;
+  xctx->head_undo_ptr = xctx->cur_undo_ptr;
+  xctx->tail_undo_ptr = xctx->head_undo_ptr <= max_undo? 0: xctx->head_undo_ptr-max_undo;
 }
 
 
@@ -315,22 +318,22 @@ void pop_undo(int redo)
 
   if(no_undo)return;
   if(redo) {
-    if(cur_undo_ptr < head_undo_ptr) {
-      cur_undo_ptr++;
+    if(xctx->cur_undo_ptr < xctx->head_undo_ptr) {
+      xctx->cur_undo_ptr++;
     } else {
       return;
     }
   } else {  /*redo=0 (undo) */
-    if(cur_undo_ptr == tail_undo_ptr) return;
-    if(head_undo_ptr == cur_undo_ptr) {
+    if(xctx->cur_undo_ptr == xctx->tail_undo_ptr) return;
+    if(xctx->head_undo_ptr == xctx->cur_undo_ptr) {
       push_undo();
-      head_undo_ptr--;
-      cur_undo_ptr--;
+      xctx->head_undo_ptr--;
+      xctx->cur_undo_ptr--;
     }
-    if(cur_undo_ptr<=0) return; /* check undo tail */
-    cur_undo_ptr--;
+    if(xctx->cur_undo_ptr<=0) return; /* check undo tail */
+    xctx->cur_undo_ptr--;
   }
-  slot = cur_undo_ptr%max_undo;
+  slot = xctx->cur_undo_ptr%max_undo;
   clear_drawing();
   unselect_all();
   my_strdup(198, &xctx->schvhdlprop, uslot[slot].gptr);
@@ -387,20 +390,22 @@ void pop_undo(int redo)
 
   /* instances */
   xctx->maxi = xctx->instances = uslot[slot].instances;
-  inst_ptr = my_calloc(213, xctx->instances, sizeof(xInstance));
+  xctx->inst = my_calloc(213, xctx->instances, sizeof(xInstance));
   for(i=0;i<xctx->instances;i++) {
     xctx->inst[i] = uslot[slot].iptr[i];
     xctx->inst[i].prop_ptr=NULL;
     xctx->inst[i].name=NULL;
     xctx->inst[i].instname=NULL;
+    xctx->inst[i].lab=NULL;
     my_strdup(214, &xctx->inst[i].prop_ptr, uslot[slot].iptr[i].prop_ptr);
     my_strdup(215, &xctx->inst[i].name, uslot[slot].iptr[i].name);
     my_strdup2(216, &xctx->inst[i].instname, uslot[slot].iptr[i].instname);
+    my_strdup(766, &xctx->inst[i].lab, uslot[slot].iptr[i].lab);
   }
 
   /* texts */
   xctx->maxt = xctx->texts = uslot[slot].texts;
-  textelement = my_calloc(217, xctx->texts, sizeof(xText));
+  xctx->text = my_calloc(217, xctx->texts, sizeof(xText));
   for(i=0;i<xctx->texts;i++) {
     xctx->text[i] = uslot[slot].tptr[i];
     xctx->text[i].txt_ptr=NULL;
@@ -413,7 +418,7 @@ void pop_undo(int redo)
 
   /* wires */
   xctx->maxw = xctx->wires = uslot[slot].wires;
-  wire = my_calloc(221, xctx->wires, sizeof(xWire));
+  xctx->wire = my_calloc(221, xctx->wires, sizeof(xWire));
   for(i=0;i<xctx->wires;i++) {
     xctx->wire[i] = uslot[slot].wptr[i];
     xctx->wire[i].prop_ptr=NULL;
@@ -421,12 +426,12 @@ void pop_undo(int redo)
     my_strdup(222, &xctx->wire[i].prop_ptr, uslot[slot].wptr[i].prop_ptr);
   }
 
-  link_symbols_to_instances();
+  link_symbols_to_instances(-1);
   set_modify(1);
-  prepared_hash_instances=0;
-  prepared_hash_wires=0;
-  prepared_netlist_structs=0;
-  prepared_hilight_structs=0;
+  xctx->prep_hash_inst=0;
+  xctx->prep_hash_wires=0;
+  xctx->prep_net_structs=0;
+  xctx->prep_hi_structs=0;
   update_conn_cues(0, 0);
 }
 

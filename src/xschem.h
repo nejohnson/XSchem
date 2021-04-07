@@ -23,7 +23,7 @@
 #ifndef CADGLOBALS
 #define CADGLOBALS
 
-#define XSCHEM_VERSION "2.9.8"
+#define XSCHEM_VERSION "2.9.9"
 #define XSCHEM_FILE_VERSION "1.2"
 
 #if HAS_PIPE == 1
@@ -76,10 +76,12 @@
 #include <fcntl.h>
 #include <time.h>
 
-
 /* #include <sys/time.h>  for gettimeofday(). use time() instead */
 #include <signal.h>
 #ifdef __unix__
+#if HAS_XRENDER==1
+#include <X11/extensions/Xrender.h>
+#endif
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/keysymdef.h>
@@ -95,19 +97,24 @@
 #define MOUSE_WHEEL_UP 38
 extern int XSetClipRectangles(register Display* dpy, GC gc, int clip_x_origin, 
             int clip_y_origin, XRectangle* rectangles, int n, int ordering);
-extern int XSetTile(Display* display, GC gctiled, Pixmap save_pixmap);
+extern int XSetTile(Display* display, GC gctiled, Pixmap s_pixmap);
 extern void change_to_unix_fn(char* fn);
 extern char win_temp_dir[PATH_MAX];
 #define xfseek _fseeki64
 #define xftell _ftelli64
 #endif
 
-#ifdef HAS_CAIRO
+
+#if HAS_XCB==1
+#include <xcb/render.h>
+#include <X11/Xlib-xcb.h>
+#endif
+
+#if HAS_CAIRO==1
 #include <cairo.h>
 #include <cairo-xlib.h>
 #include "cairo-xlib-xrender.h"
 #if HAS_XCB==1
-#include <X11/Xlib-xcb.h>
 #include <cairo-xcb.h>
 #endif
 #endif
@@ -292,7 +299,7 @@ extern char win_temp_dir[PATH_MAX];
 #define LINE_OUTSIDE(xa,ya,xb,yb,x1,y1,x2,y2) \
  (xa>=x2 || xb<=x1 ||  ( (ya<yb)? (ya>=y2 || yb<=y1) : (yb>=y2 || ya<=y1) ) )
 
-#define CLIP(x,a,b) (x<a?a:x>b?b:x)
+#define CLIP(x,a,b) ((x) < a ? (a) : (x) > b ? (b) : (x))
 
 #define MINOR(a,b) ( (a) <= (b) ? (a) : (b) )
 #define ROUND(a) ((a) > 0.0 ? ceil((a) - 0.5) : floor((a) + 0.5))
@@ -317,7 +324,7 @@ do { \
     *size = __str_alloc_tmp__ + CADCHUNKALLOC; \
     my_realloc(1212, dest_string, *size); \
   } \
-} while(0) \
+} while(0)
 
 #define INT_WIDTH(x) ( (int)(x) == 0 ? 1 : (int)(x) ) 
 #define INT_BUS_WIDTH(x) ( (int)( (BUS_WIDTH) * (x) ) == 0 ? 1 : (int)( (BUS_WIDTH) * (x) ) ) 
@@ -326,7 +333,7 @@ typedef struct
 {
    unsigned short type;
    int n;
-   unsigned short col;
+   unsigned int col;
 } Selected;
 
 typedef struct
@@ -340,7 +347,7 @@ typedef struct
    short sel;
    char  *node;
    char *prop_ptr;
-   int bus; /*  20171201 cache here wire "bus" property, to avoid too many get_tok_value() calls */
+   short bus; /*  20171201 cache here wire "bus" property, to avoid too many get_tok_value() calls */
 } xWire;
 
 typedef struct
@@ -351,8 +358,8 @@ typedef struct
    double y2;
    unsigned short sel;
    char *prop_ptr;
-   int dash;
-   int bus;
+   short dash;
+   short bus;
 } xLine;
 
 typedef struct
@@ -363,7 +370,7 @@ typedef struct
    double y2;
    unsigned short sel;
    char *prop_ptr;
-   int dash;
+   short dash;
 } xRect;
 
 typedef struct
@@ -376,8 +383,8 @@ typedef struct
   unsigned short *selected_point;
   unsigned short sel;
   char *prop_ptr;
-  int fill;
-  int dash;
+  short fill;
+  short dash;
 } xPoly;
 
 typedef struct
@@ -389,22 +396,22 @@ typedef struct
   double b; /* arc angle */
   unsigned short sel;
   char *prop_ptr;
-  int fill;
-  int dash;
+  short fill;
+  short dash;
 } xArc;
 
 typedef struct
 {
   char *txt_ptr;
   double x0,y0;
-  int rot;
-  int flip;
-  int sel;
+  short rot;
+  short flip;
+  short sel;
   double xscale;
   double yscale;
   char *prop_ptr;
   int layer; /*  20171201 for cairo  */
-  int hcenter, vcenter;
+  short hcenter, vcenter;
   char *font; /*  20171201 for cairo */
   int flags;
 } xText;
@@ -429,7 +436,9 @@ typedef struct
    char *prop_ptr;
    char *type;
    char *templ;
-   unsigned int flags; /* currently only used for embedded symbols (EMBEDDED) */
+   int flags; /* bit 0: embedded flag 
+                 * bit 1: **free**
+                 * bit 2: highight if connected wire highlighted */
 } xSymbol;
 
 typedef struct
@@ -446,14 +455,16 @@ typedef struct
    double yy1;
    double xx2;
    double yy2;
-   int rot;
-   int flip;
-   int sel;
-   int flags; /*  bit 0: skip field, bit 1: flag for different textlayer for pin/labels
-               *  bit 2 : hilight flag.
-               */
+   short rot;
+   short flip;
+   short sel;
+   int color; /* hilight color */
+   short flags; /* bit 0: skip field, 
+                 * bit 1: flag for different textlayer for pin/labels , 1: ordinary symbol, 0: label/pin/show 
+                 * bit 2: highlight if connected net/label is highlighted */
    char *prop_ptr;
    char **node;
+   char *lab;      /*  lab attribute if any (pin/label) */
    char *instname; /*  20150409 instance name (example: I23)  */
 } xInstance;
 
@@ -464,6 +475,35 @@ typedef struct
   double y;
   double zoom;
 } Zoom;
+
+
+struct iterator_ctx {
+                  int x1a, x2a;
+                  int y1a, y2a;
+                  int i, j, counti, countj;
+                  int tmpi, tmpj;
+                  struct instentry *instanceptr;
+                  struct wireentry *wireptr;
+                  unsigned short *instflag;
+                  unsigned short *wireflag;
+                 };
+
+struct simdata_pin {
+                  char *function;
+                  char *go_to;
+                  short clock;
+                 };
+ 
+struct simdata_inst {
+                  struct simdata_pin *pin;
+                  int npin;
+                 };
+
+struct simdata {
+                 struct simdata_inst *inst;
+                 int ninst;
+                 int valid;
+               };
 
 typedef struct {
   xWire *wire;
@@ -501,6 +541,7 @@ typedef struct {
   char current_name[PATH_MAX];
   char file_version[100];
   char *sch_path[CADMAXHIER];
+  int sch_path_hash[CADMAXHIER];
   int sch_inst_number[CADMAXHIER];
   int previous_instance[CADMAXHIER]; /* to remember the instance we came from when going up the hier. */
   Zoom zoom_array[CADMAXHIER];
@@ -508,13 +549,88 @@ typedef struct {
   double zoom;
   double mooz;
   double lw;
+  unsigned long ui_state ; /* this signals that we are doing a net place,panning etc.
+                            * used to prevent nesting of some commands */
+  double mousex,mousey; /* mouse coord. */
+  double mousex_snap,mousey_snap; /* mouse coord. snapped to grid */
+  double mx_double_save, my_double_save;
+  int areax1,areay1,areax2,areay2,areaw,areah; /* window corners / size, line width beyond screen edges */
+  int xschem_h, xschem_w; /* true window size from XGetWindowAttributes */
+  int need_reb_sel_arr;
+  int lastsel;
+  int maxsel;
+  Selected *sel_array;
+  int prep_net_structs;
+  int prep_hi_structs;
+  int prep_hash_inst;
+  int prep_hash_wires;
+  struct simdata simdata;
+  int modified;
+  int semaphore;
+  int get_tok_size;
+  int get_tok_value_size;
+  char netlist_name[PATH_MAX];
+  char current_dirname[PATH_MAX];
+  int netlist_unconn_cnt; /* unique count of unconnected pins while netlisting */
+  struct instpinentry *instpintable[NBOXES][NBOXES];
+  struct wireentry *wiretable[NBOXES][NBOXES];
+  struct instentry *insttable[NBOXES][NBOXES];
+  Window window;
+  Pixmap save_pixmap;
+  XRectangle xrect[1];
+  #if HAS_CAIRO==1
+  cairo_surface_t *cairo_sfc, *cairo_save_sfc;
+  cairo_t *cairo_ctx, *cairo_save_ctx;
+  #endif
+  GC gctiled;
+  char *undo_dirname;
+  int cur_undo_ptr;
+  int tail_undo_ptr;
+  int head_undo_ptr;
+  struct node_hashentry *node_table[HASHSIZE];
+  struct hilight_hashentry *hilight_table[HASHSIZE];
+  int hilight_nets;
+  int hilight_color;
+  int hilight_time; /* timestamp for sims */
+  unsigned int rectcolor; /* current layer */
+  /* get_unnamed_node() */
+  int new_node;
+  int *node_mult;
+  int node_mult_size;
+  /* callback.c */
+  int mx_save, my_save, last_command;
+  char sel_or_clip[PATH_MAX];
+  /* move.c */
+  struct int_hashentry *node_redraw_table[HASHSIZE];
+  double rx1, rx2, ry1, ry2;
+  short move_rot;
+  short move_flip;
+  double x1, y_1, x2, y_2, deltax, deltay;
+  int movelastsel;
+  short rotatelocal;
+  /* new_wire, new_line, new_rect*/
+  double nl_x1,nl_y1,nl_x2,nl_y2;
+  double nl_xx1,nl_yy1,nl_xx2,nl_yy2;
+  /* new_arc */
+  double nl_x, nl_y, nl_r, nl_a, nl_b;
+  double nl_x3, nl_y3;
+  int nl_state;
+  double nl_sweep_angle;
+  /* new_polygon */
+  double *nl_polyx, *nl_polyy;
+  int nl_points, nl_maxpoints;
+  /* select_rect */
+  double nl_xr, nl_yr, nl_xr2, nl_yr2;
+  int nl_sel, nl_sem;
+  XSegment *biggridpoint;
+  XPoint *gridpoint;
 } Xschem_ctx;
 
 struct Lcc { /* used for symbols containing schematics as instances (LCC, Local Custom Cell) */
   double x0;
   double y0;
-  int rot;
-  int flip;
+  short rot;
+  short flip;
   FILE *fd;
   char *prop_ptr;
   char *symname;
@@ -560,7 +676,9 @@ struct hilight_hashentry {
                   unsigned int hash;
                   char *token;
                   char *path; /* hierarchy path */
+                  int oldvalue;  /* used for FF simulation */
                   int value;  /* hilight color */
+                  int time; /*delta-time for sims */
                  };
 
 /*  for netlist.c */
@@ -585,23 +703,15 @@ struct instentry {
 extern Xschem_ctx *xctx;
 extern int help;
 extern char *cad_icon[];
-extern int semaphore;
-extern int a3page;
 extern int manhattan_lines;
 extern int cadlayers;
 extern int *active_layer;
 extern int *enable_layer;
 extern int n_active_layers;
-extern int hilight_color;
 extern int do_print;
-extern int prepared_netlist_structs;
-extern int prepared_hilight_structs;
-extern int prepared_hash_instances;
-extern int prepared_hash_wires;
 extern int has_x;
 extern int no_draw;
 extern int sym_txt;
-extern int event_reporting;
 extern int rainbow_colors;
 extern FILE *errfp;
 extern int no_readline;
@@ -615,6 +725,7 @@ extern char *tcl_command;
 extern char tcl_script[PATH_MAX];
 extern char plotfile[PATH_MAX];
 extern int persistent_command;
+extern int autotrim_wires;
 extern int dis_uniq_names;
 
 extern int tcp_port;
@@ -627,53 +738,35 @@ extern int incr_hilight;
 extern int auto_hilight;
 extern int fill; /*  fill rectangles */
 extern int draw_grid;
+extern int big_grid_points;
 extern int text_svg;
+extern int text_ps;
 extern double cadgrid;
 extern double cadhalfdotsize;
 extern int draw_pixmap; /*  pixmap used as 2nd buffer */
 extern int draw_window;
-extern int need_rebuild_selected_array;
-extern unsigned int rectcolor;
 extern XEvent xev;
 extern KeySym key;
 extern unsigned short enable_stretch;
 extern unsigned int button;
 extern unsigned int state; /*  status of shift,ctrl etc.. */
-extern Selected *selectedgroup; /*  array of selected objs to draw while moving */
-extern int lastselected;
 extern int currentsch;
 extern char *xschem_version_string;
-extern int max_selected;
 extern int split_files;
 extern char *netlist_dir;
-extern char user_top_netl_name[PATH_MAX];
-extern char bus_replacement_char[];
-
-extern unsigned long ui_state ; /*  this signals that we are doing a net place, */
-                              /*  panning etc... */
-
-extern char *undo_dirname;
-extern int cur_undo_ptr;
-extern int tail_undo_ptr;
-extern int head_undo_ptr;
+extern char initial_netlist_name[PATH_MAX];
+extern char bus_char[];
 extern int max_undo;
 extern int draw_dots;
 extern int draw_single_layer;
-extern int check_version;
 extern int yyparse_error;
 extern char *xschem_executable;
 extern int depth;
 extern int *fill_type; /* 20171117 for every layer: 0: no fill, 1, solid fill, 2: stipple fill */
-extern int  areax1,areay1,areax2,areay2,areaw,areah;
 extern Tcl_Interp *interp;
-extern XRectangle xrect[];
-extern int xschem_h, xschem_w; /*  20171130 window size */
-extern double mousex,mousey; /*  mouse coord. */
-extern double mousex_snap,mousey_snap; /*  mouse coord. snapped to grid */
 extern double cadsnap;
-extern int horizontal_move;
-extern int vertical_move;
 extern double *character[256];
+extern int constrained_move;
 extern int netlist_show;
 extern int flat_netlist;
 extern int netlist_type;
@@ -683,11 +776,11 @@ extern int do_waves;
 extern int netlist_count;
 extern int top_subckt;
 extern int spiceprefix;
+extern char hiersep[20];
 extern int quit;
 extern int show_erc;
-extern int hilight_nets;
-extern int modified;
 extern int color_ps;
+extern int transparent_svg;
 extern int only_probes;
 extern int pending_fullzoom;
 extern int fullscreen;
@@ -696,20 +789,15 @@ extern int dark_colorscheme;
 extern double color_dim;
 extern int no_undo;
 extern int enable_drill;
-extern struct wireentry *wiretable[NBOXES][NBOXES];
-extern struct instpinentry *instpintable[NBOXES][NBOXES];
-extern double mx_double_save, my_double_save;
-extern struct instentry *insttable[NBOXES][NBOXES];
 extern size_t get_tok_value_size;
 extern size_t get_tok_size;
 extern int batch_mode; /* no TCL console */
 extern int hide_symbols; /* draw only a bounding box for component instances and @symname, @name texts */
 extern int show_pin_net_names;
-extern char svg_font_name[1024];
+extern int en_hilight_conn_inst;
+extern char svg_font_name[80];
 /* CAIRO specific global variables */
-extern char cairo_font_name[1024];
-extern int cairo_longest_line;
-extern int cairo_lines;
+extern char cairo_font_name[80];
 extern double cairo_font_scale; /*  default: 1.0, allows to adjust font size */
 extern double nocairo_font_xscale;
 extern double nocairo_font_yscale;
@@ -720,29 +808,28 @@ extern const char fopen_read_mode[];
 
 /* X11 specific globals */
 extern Colormap colormap;
-extern Window window;
 extern Window pre_window;
 extern Window parent_of_topwindow;
 extern unsigned char **pixdata;
 extern unsigned char pixdata_init[22][32];
 extern GC *gc, *gcstipple, gctiled;
 extern Display *display;
+extern int screen_number;
 extern XRectangle *rectangle;
-extern XPoint *gridpoint;
-extern Pixmap cad_icon_pixmap, cad_icon_mask, *pixmap,save_pixmap;
+extern Pixmap cad_icon_pixmap, cad_icon_mask, *pixmap;
 extern XColor xcolor_array[];
 extern Visual *visual;
-#ifdef HAS_CAIRO
-extern cairo_surface_t *sfc, *save_sfc;
-extern cairo_t *cairo_ctx, *cairo_save_ctx;
-extern XRenderPictFormat *format;
+#if HAS_XRENDER==1
+extern XRenderPictFormat *render_format;
+#endif
 #if HAS_XCB==1
 extern xcb_connection_t *xcbconn;
 extern xcb_screen_t *screen_xcb;
+#if HAS_XRENDER==1
 extern xcb_render_pictforminfo_t format_rgb, format_rgba;
+#endif
 extern xcb_visualtype_t *visual_xcb;
 #endif  /*  HAS_XCB */
-#endif /*  HAS_CAIRO */
 
 /*  FUNCTIONS */
 extern double timer(int start);
@@ -752,7 +839,7 @@ extern void set_grid(double);
 extern void create_plot_cmd(int viewer);
 extern void set_modify(int mod);
 extern void dbg(int level, char *fmt, ...);
-extern void here(void);
+extern void here(int i);
 extern void print_version(void);
 extern int set_netlist_dir(int force, char *dir);
 extern void netlist_options(int i);
@@ -767,13 +854,17 @@ extern int samefile(const char *fa, const char *fb);
 extern void saveas(const char *f, int type);
 extern const char *get_file_path(char *f);
 extern int save(int confirm);
-extern struct hilight_hashentry *bus_hilight_lookup(const char *token, int value, int remove) ;
+extern void save_ascii_string(const char *ptr, FILE *fd, int newline);
+extern struct hilight_hashentry *bus_hilight_lookup(const char *token, int value, int what) ;
+extern struct hilight_hashentry *hilight_lookup(const char *token, int value, int what);
 extern int  name_strcmp(char *s, char *d) ;
-extern int search(const char *tok, const char *val, int sub, int sel, int what);
+extern int search(const char *tok, const char *val, int sub, int sel);
 extern int process_options(int argc, char **argv);
 extern void calc_drawing_bbox(xRect *boundbox, int selected);
+extern void create_ps(char **psfile);
 extern void ps_draw(void);
 extern void svg_draw(void);
+extern void set_viewport_size(int w, int h, double lw);
 extern void print_image();
 extern const char *skip_dir(const char *str);
 extern const char *get_cell(const char *str, int no_of_dir);
@@ -783,20 +874,24 @@ extern const char *abs_sym_path(const char *s, const char *ext);
 extern const char *add_ext(const char *f, const char *ext);
 extern void make_symbol(void);
 extern const char *get_sym_template(char *s, char *extra);
-extern void zoom_full(int draw, int sel);
+/* bit0: invoke change_linewidth(), bit1: centered zoom */
+extern void zoom_full(int draw, int sel, int flags, double shrink);
 extern void updatebbox(int count,xRect *boundbox,xRect *tmp);
 extern void draw_selection(GC g, int interruptable);
 extern void delete(void);
 extern void delete_only_rect_line_arc_poly(void);
 extern void polygon_bbox(double *x, double *y, int points, double *bx1, double *by1, double *bx2, double *by2);
-extern void arc_bbox(double x, double y, double r, double a, double b, double *bx1, double *by1, double *bx2, double *by2);
+extern void arc_bbox(double x, double y, double r, double a, double b,
+                     double *bx1, double *by1, double *bx2, double *by2);
 extern void bbox(int what,double x1,double y1, double x2, double y2);
 extern int set_text_custom_font(xText *txt);
 extern int text_bbox(const char * str,double xscale, double yscale,
-            int rot, int flip, int hcenter, int vcenter, double x1,double y1, double *rx1, double *ry1,
-            double *rx2, double *ry2);
+            short rot, short flip, int hcenter, int vcenter, 
+            double x1,double y1, double *rx1, double *ry1,
+            double *rx2, double *ry2, int *cairo_lines, int *longest_line);
 
-
+extern int get_color(int value);
+extern void incr_hilight_color(void);
 extern void hash_inst(int what, int n);
 extern void hash_inst_pin(int what, int i, int j);
 extern void del_inst_table(void);
@@ -805,10 +900,11 @@ extern void hash_wire(int what, int n, int incremental);
 extern void wirecheck(int k);
 extern void hash_instances(void); /*  20171203 insert instance bbox in spatial hash table */
 
-#ifdef HAS_CAIRO
+#if HAS_CAIRO==1
 extern int text_bbox_nocairo(const char * str,double xscale, double yscale,
-            int rot, int flip, int hcenter, int vcenter, double x1,double y1, double *rx1, double *ry1,
-            double *rx2, double *ry2);
+            short rot, short flip, int hcenter, int vcenter,
+            double x1,double y1, double *rx1, double *ry1,
+            double *rx2, double *ry2, int *cairo_lines, int *longest_line);
 #endif
 
 extern unsigned short select_object(double mx,double my, unsigned short sel_mode,
@@ -816,11 +912,12 @@ extern unsigned short select_object(double mx,double my, unsigned short sel_mode
 extern void unselect_all(void);
 extern void select_inside(double x1,double y1, double x2, double y2, int sel);
 extern void xwin_exit(void);
+extern void resetcairo(int create, int clear, int force_or_resize);
 extern int Tcl_AppInit(Tcl_Interp *interp);
 extern int source_tcl_file(char *s);
 extern int callback(int event, int mx, int my, KeySym key,
                         int button, int aux, int state);
-extern void resetwin(int create_pixmap, int clear_pixmap, int preview_window);
+extern void resetwin(int create_pixmap, int clear_pixmap, int force, int w, int h);
 extern void find_closest_net(double mx,double my);
 extern void find_closest_box(double mx,double my);
 extern void find_closest_arc(double mx,double my);
@@ -832,10 +929,10 @@ extern Selected find_closest_obj(double mx,double my);
 extern void find_closest_net_or_symbol_pin(double mx,double my, double *x, double *y);
 
 extern void drawline(int c, int what, double x1,double y1,double x2,double y2, int dash);
-extern void draw_string(int layer,int what, const char *str, int rot, int flip, int hcenter, int vcenter,
+extern void draw_string(int layer,int what, const char *str, short rot, short flip, int hcenter, int vcenter,
        double x1, double y1, double xscale, double yscale);
 extern void draw_symbol(int what,int c, int n,int layer,
-            int tmp_flip, int tmp_rot, double xoffset, double yoffset);
+            short tmp_flip, short tmp_rot, double xoffset, double yoffset);
 extern void drawrect(int c, int what, double rectx1,double recty1,
             double rectx2,double recty2, int dash);
 extern void filledrect(int c, int what, double rectx1,double recty1,
@@ -852,12 +949,13 @@ extern void filledarc(int c, int what, double x, double y, double r, double a, d
 extern void drawtemppolygon(GC gc, int what, double *x, double *y, int points);
 extern void drawpolygon(int c, int what, double *x, double *y, int points, int poly_fill, int dash);
 extern void draw_temp_symbol(int what, GC gc, int n,int layer,
-            int tmp_flip, int tmp_rot, double xoffset, double yoffset);
-extern void draw_temp_string(GC gc,int what, const char *str, int rot, int flip, int hcenter, int vcenter,
+            short tmp_flip, short tmp_rot, double xoffset, double yoffset);
+extern void draw_temp_string(GC gc,int what, const char *str, short rot, short flip, int hcenter, int vcenter,
        double x1, double y1, double xscale, double yscale);
 
-
 extern void draw(void);
+extern short clip_to_short(double n);
+extern void clip_xy_to_short(double x, double y, short *sx, short *sy);
 extern int clip( double*,double*,double*,double*);
 extern int textclip(int x1,int y1,int x2,int y2,
            double xa,double ya,double xb,double yb);
@@ -904,7 +1002,7 @@ extern void remove_symbol(int i);
 extern void clear_drawing(void);
 extern int load_sym_def(const char name[], FILE *embed_fd);
 extern void descend_symbol(void);
-extern int place_symbol(int pos, const char *symbol_name, double x, double y, int rot, int flip,
+extern int place_symbol(int pos, const char *symbol_name, double x, double y, short rot, short flip,
                          const char *inst_props, int draw_sym, int first_call);
 extern void place_net_label(int type);
 extern void attach_labels_to_inst(void);
@@ -917,7 +1015,7 @@ extern void pop_undo(int redo);
 extern void delete_undo(void);
 extern void clear_undo(void);
 extern void load_schematic(int load_symbol, const char *abs_name, int reset_undo);
-extern void link_symbols_to_instances(void);
+extern void link_symbols_to_instances(int from);
 extern void load_ascii_string(char **ptr, FILE *fd);
 extern void read_xschem_file(FILE *fd);
 extern char *read_line(FILE *fp, int dbg_level);
@@ -934,12 +1032,14 @@ extern void new_arc(int what, double sweep);
 extern void arc_3_points(double x1, double y1, double x2, double y2, double x3, double y3,
          double *x, double *y, double *r, double *a, double *b);
 extern void move_objects(int what,int merge, double dx, double dy);
+extern void redraw_w_a_l_r_p_rubbers(void); /* redraw wire, arcs, line, polygon rubbers */
 extern void copy_objects(int what);
-extern void find_inst_to_be_redrawn(const char *node);
-extern void find_inst_hash_clear(void);
+extern void find_inst_to_be_redrawn();
 extern void pan(int what);
 extern void pan2(int what, int mx, int my);
-extern void zoom_box(int what);
+extern void zoom_rectangle(int what);
+extern void zoom_box(double x1, double y1, double x2, double y2, double factor);
+extern void save_restore_zoom(int save);
 extern void select_rect(int what, int select);
 extern void new_rect(int what);
 extern void new_polygon(int what);
@@ -956,10 +1056,10 @@ extern void tclsetvar(const char *s, const char *value);
 extern void tcl_hook(char **res);
 extern void statusmsg(char str[],int n);
 extern void place_text(int draw_text, double mx, double my);
-extern void init_inst_iterator(double x1, double y1, double x2, double y2);
-extern struct instentry *inst_iterator_next();
-extern void init_wire_iterator(double x1, double y1, double x2, double y2);
-extern struct wireentry *wire_iterator_next();
+extern void init_inst_iterator(struct iterator_ctx *ctx, double x1, double y1, double x2, double y2);
+extern struct instentry *inst_iterator_next(struct iterator_ctx *ctx);
+extern void init_wire_iterator(struct iterator_ctx *ctx, double x1, double y1, double x2, double y2);
+extern struct wireentry *wire_iterator_next(struct iterator_ctx *ctx);
 extern void check_unique_names(int rename);
 
 extern void clear_instance_hash();
@@ -976,6 +1076,7 @@ extern const char* translate2(struct Lcc *lcc, int level, char* s);
 extern void print_tedax_element(FILE *fd, int inst);
 extern void print_spice_element(FILE *fd, int inst);
 extern void print_spice_subckt(FILE *fd, int symbol);
+extern void print_tedax_subckt(FILE *fd, int symbol);
 extern void print_vhdl_element(FILE *fd, int inst);
 extern void print_verilog_element(FILE *fd, int inst);
 extern void print_verilog_primitive(FILE *fd, int inst);
@@ -1015,6 +1116,7 @@ extern void check_arc_storage(int c);
 extern void check_line_storage(int c);
 extern void check_polygon_storage(int c);
 extern const char *expandlabel(const char *s, int *m);
+extern void parse(const char *s);
 extern void clear_expandlabel_data(void);
 extern void merge_inst(int k, FILE *fd);
 extern void merge_file(int selection_load, const char ext[]);
@@ -1045,15 +1147,21 @@ extern void print_verilog_signals(FILE *fd);
 extern void print_generic(FILE *fd, char *ent_or_comp, int symbol);
 extern void print_verilog_param(FILE *fd, int symbol);
 extern void hilight_net(int to_waveform);
+extern void logic_set(int v, int num);
 extern int hilight_netname(const char *name);
 extern void unhilight_net();
+extern void propagate_hilights(int set, int clear, int mode);
+extern void  select_connected_wires(int stop_at_junction);
 extern void draw_hilight_net(int on_window);
 extern void display_hilights(char **str);
-extern void redraw_hilights(void);
+extern void redraw_hilights(int clear);
+extern void override_netlist_type(int type);
 extern void prepare_netlist_structs(int for_netlist);
+extern void create_simdata(void);
+extern void free_simdata(void);
 extern void delete_netlist_structs(void);
 extern void delete_inst_node(int i);
-extern void delete_hilight_net(void);
+extern void clear_all_hilights(void);
 extern void hilight_child_pins(void);
 extern void hilight_parent_pins(void);
 extern void hilight_net_pin_mismatches(void);
@@ -1065,13 +1173,14 @@ extern void change_layer();
 extern void launcher();
 extern void windowid();
 extern void preview_window(const char *what, const char *tk_win_path, const char *filename);
+extern void new_schematic(const char *what, const char *tk_win_path, const char *filename);
 extern int window_state (Display *disp, Window win, char *arg);
 extern void toggle_fullscreen();
 extern void toggle_only_probes();
 extern void update_symbol(const char *result, int x);
 extern void tclexit(ClientData s);
 extern int build_colors(double dim); /*  reparse the TCL 'colors' list and reassign colors 20171113 */
-extern void drill_hilight(void);
+extern void drill_hilight(int mode);
 extern void get_square(double x, double y, int *xx, int *yy);
 extern void del_wire_table(void);
 extern void del_object_table(void);

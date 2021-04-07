@@ -34,10 +34,14 @@ void merge_text(FILE *fd)
     i=xctx->texts;
      xctx->text[i].txt_ptr=NULL;
      load_ascii_string(&xctx->text[i].txt_ptr,fd);
-     fscanf(fd, "%lf %lf %d %d %lf %lf ",
-      &xctx->text[i].x0, &xctx->text[i].y0, &xctx->text[i].rot,
-      &xctx->text[i].flip, &xctx->text[i].xscale,
-      &xctx->text[i].yscale);
+     if(fscanf(fd, "%lf %lf %hd %hd %lf %lf ",
+       &xctx->text[i].x0, &xctx->text[i].y0, &xctx->text[i].rot,
+       &xctx->text[i].flip, &xctx->text[i].xscale,
+       &xctx->text[i].yscale) <6) {
+         fprintf(errfp,"merge_text(): WARNING:  missing fields for TEXT object, ignoring\n");
+         read_line(fd, 0);
+         return;
+     }
      xctx->text[i].prop_ptr=NULL;
      xctx->text[i].font=NULL;
      xctx->text[i].sel=0;
@@ -72,7 +76,11 @@ void merge_wire(FILE *fd)
     double x1,y1,x2,y2;
     char *ptr=NULL;
     i=xctx->wires;
-    fscanf(fd, "%lf %lf %lf %lf",&x1, &y1, &x2, &y2 );
+    if(fscanf(fd, "%lf %lf %lf %lf",&x1, &y1, &x2, &y2 ) < 4) {
+      fprintf(errfp,"merge_wire(): WARNING:  missing fields for WIRE object, ignoring\n");
+      read_line(fd, 0);
+      return;
+    }
     load_ascii_string( &ptr, fd);
     storeobject(-1, x1,y1,x2,y2,WIRE,0,SELECTED,ptr);
     my_free(870, &ptr);
@@ -81,19 +89,24 @@ void merge_wire(FILE *fd)
 
 void merge_box(FILE *fd)
 {
-    int i,c;
+    int i,c,n;
     xRect *ptr;
 
-    fscanf(fd, "%d",&c);
-    if(c>=cadlayers) {
-      fprintf(errfp,"Rectangle layer > defined cadlayers, increase cadlayers\n");
-      c=cadlayers-1;
+    n = fscanf(fd, "%d",&c);
+    if(n != 1 || c < 0 || c >= cadlayers) {
+      fprintf(errfp,"merge_arc(): WARNING: wrong or missing layer number for xRECT object, ignoring.\n");
+      read_line(fd, 0);
+      return;
     }
     check_box_storage(c);
     i=xctx->rects[c];
     ptr=xctx->rect[c];
-    fscanf(fd, "%lf %lf %lf %lf ",&ptr[i].x1, &ptr[i].y1,
-       &ptr[i].x2, &ptr[i].y2);
+    if(fscanf(fd, "%lf %lf %lf %lf ",&ptr[i].x1, &ptr[i].y1,
+       &ptr[i].x2, &ptr[i].y2) < 4) {
+      fprintf(errfp,"merge_arc(): WARNING:  missing fields for xRECT object, ignoring\n");
+      read_line(fd, 0);
+      return;
+    }
     ptr[i].prop_ptr=NULL;
     RECTORDER(ptr[i].x1, ptr[i].y1, ptr[i].x2, ptr[i].y2);
     ptr[i].sel=0;
@@ -105,19 +118,25 @@ void merge_box(FILE *fd)
 
 void merge_arc(FILE *fd)
 {
-    int i,c;
+    int i,c,n;
     xArc *ptr;
 
-    fscanf(fd, "%d",&c);
-    if(c>=cadlayers) {
-      fprintf(errfp,"arc layer > defined cadlayers, increase cadlayers\n");
-      c=cadlayers-1;
+    n = fscanf(fd, "%d",&c);
+    if(n != 1 || c < 0 || c >= cadlayers) {
+      fprintf(errfp,"merge_arc(): WARNING: wrong or missing layer number for ARC object, ignoring.\n");
+      read_line(fd, 0);
+      return;
     }
     check_arc_storage(c);
     i=xctx->arcs[c];
     ptr=xctx->arc[c];
-    fscanf(fd, "%lf %lf %lf %lf %lf ",&ptr[i].x, &ptr[i].y,
-           &ptr[i].r, &ptr[i].a, &ptr[i].b);
+    if(fscanf(fd, "%lf %lf %lf %lf %lf ",&ptr[i].x, &ptr[i].y,
+           &ptr[i].r, &ptr[i].a, &ptr[i].b) < 5) {
+      fprintf(errfp,"merge_arc(): WARNING:  missing fields for ARC object, ignoring\n");
+      read_line(fd, 0);
+      return;
+    }
+
     ptr[i].prop_ptr=NULL;
     ptr[i].sel=0;
     load_ascii_string(&ptr[i].prop_ptr, fd);
@@ -136,10 +155,15 @@ void merge_polygon(FILE *fd)
     int i,c, j, points;
     xPoly *ptr;
 
-    fscanf(fd, "%d %d",&c, &points);
-    if(c>=cadlayers) {
-      fprintf(errfp,"Rectangle layer > defined cadlayers, increase cadlayers\n");
-      c=cadlayers-1;
+    if(fscanf(fd, "%d %d",&c, &points)<2) {
+      fprintf(errfp,"merge_polygon(): WARNING: missing fields for POLYGON object, ignoring.\n");
+      read_line(fd, 0);
+      return;
+    }
+    if(c < 0 || c>=cadlayers) {
+      fprintf(errfp,"merge_polygon(): Rectangle layer > defined cadlayers, increase cadlayers\n");
+      read_line(fd, 0);
+      return;
     }
     check_polygon_storage(c);
     i=xctx->polygons[c];
@@ -154,7 +178,14 @@ void merge_polygon(FILE *fd)
     ptr[i].points=points;
     ptr[i].sel=0;
     for(j=0;j<points;j++) {
-      fscanf(fd, "%lf %lf ",&(ptr[i].x[j]), &(ptr[i].y[j]));
+      if(fscanf(fd, "%lf %lf ",&(ptr[i].x[j]), &(ptr[i].y[j]))<2) {
+        fprintf(errfp,"merge_polygon(): WARNING: missing fields for POLYGON points, ignoring.\n");
+        my_free(827, &ptr[i].x);
+        my_free(1218, &ptr[i].y);
+        my_free(1223, &ptr[i].selected_point);
+        read_line(fd, 0);
+        return;
+      }
     }
     load_ascii_string( &ptr[i].prop_ptr, fd);
     if( !strcmp(get_tok_value(ptr[i].prop_ptr,"fill",0),"true") )
@@ -168,21 +199,24 @@ void merge_polygon(FILE *fd)
 
 void merge_line(FILE *fd)
 {
-    int i,c;
+    int i,c,n;
     xLine *ptr;
 
-    fscanf(fd, "%d",&c);
-    if(c>=cadlayers) {
-      fprintf(errfp,"Rectangle layer > defined cadlayers, increase cadlayers\n");
-      c=cadlayers-1;
+    n = fscanf(fd, "%d",&c);
+    if(n != 1 || c < 0 || c >= cadlayers) {
+      fprintf(errfp,"merge_line(): WARNING: Wrong or missing layer number for LINE object, ignoring\n");
+      read_line(fd, 0);
+      return;
     }
     check_line_storage(c);
     i=xctx->lines[c];
     ptr=xctx->line[c];
-    fscanf(fd, "%lf %lf %lf %lf ",&ptr[i].x1, &ptr[i].y1,
-       &ptr[i].x2, &ptr[i].y2);
+    if(fscanf(fd, "%lf %lf %lf %lf ",&ptr[i].x1, &ptr[i].y1, &ptr[i].x2, &ptr[i].y2) < 4) {
+      fprintf(errfp,"merge_line(): WARNING:  missing fields for LINE object, ignoring\n");
+      read_line(fd, 0);
+      return;
+    }
     ORDER(ptr[i].x1, ptr[i].y1, ptr[i].x2, ptr[i].y2);
-
     ptr[i].prop_ptr=NULL;
     ptr[i].sel=0;
     load_ascii_string( &ptr[i].prop_ptr, fd);
@@ -199,23 +233,33 @@ void merge_inst(int k,FILE *fd)
 {
     int i;
     char *prop_ptr=NULL;
-
+    char *tmp = NULL;
     xInstance *ptr;
     i=xctx->instances;
     check_inst_storage();
     ptr=xctx->inst;
     ptr[i].name=NULL;
-    load_ascii_string(&ptr[i].name,fd);
-    if(fscanf(fd, "%lf %lf %d %d",&ptr[i].x0, &ptr[i].y0,&ptr[i].rot, &ptr[i].flip) < 4) {
+    load_ascii_string(&tmp, fd);
+    /* avoid as much as possible calls to rel_sym_path (slow) */
+    #ifdef __unix__
+    if(tmp[0] == '/') my_strdup(763, &ptr[i].name, rel_sym_path(tmp));
+    else my_strdup(755, &ptr[i].name,tmp);
+    #else
+    my_strdup(780, &ptr[i].name, rel_sym_path(tmp));
+    #endif
+    my_free(756, &tmp);
+    if(fscanf(fd, "%lf %lf %hd %hd",&ptr[i].x0, &ptr[i].y0,&ptr[i].rot, &ptr[i].flip) < 4) {
       fprintf(errfp,"WARNING: missing fields for INSTANCE object, ignoring.\n");
       read_line(fd, 0);
       return;
     }
     ptr[i].sel=0;
     ptr[i].flags=0;
+    ptr[i].color=-10000;
     ptr[i].ptr=-1;
     ptr[i].prop_ptr=NULL;
     ptr[i].instname=NULL;
+    ptr[i].lab=NULL;  /* assigned in link_symbols_to_instances */
     ptr[i].node=NULL;
     load_ascii_string(&prop_ptr,fd);
     if(!k) hash_all_names(i);
@@ -223,58 +267,11 @@ void merge_inst(int k,FILE *fd)
     /* the final tmp argument is zero for the 1st call and used in */
     /* new_prop_string() for cleaning some internal caches. */
     my_strdup2(306, &xctx->inst[i].instname, get_tok_value(xctx->inst[i].prop_ptr, "name", 0));
+    if(!strcmp(get_tok_value(xctx->inst[i].prop_ptr,"highlight",0), "true")) xctx->inst[i].flags |= 4;
+
     my_free(871, &prop_ptr);
     xctx->instances++;
     set_modify(1);
-}
-
-
-
-
-
-void match_merged_inst(int old)
-{
-    int i,missing,symbol;
-    int cond;
-    char *type;
-    missing = 0;
-    for(i=old;i<xctx->instances;i++)
-    {
-     symbol = match_symbol(xctx->inst[i].name);
-     if(symbol == -1)
-     {
-      dbg(1, "match_merged_inst(): missing symbol, skipping...\n");
-      my_free(872, &xctx->inst[i].prop_ptr);  /* 06052001 remove properties */
-      my_free(873, &xctx->inst[i].name);      /* 06052001 remove symname   */
-      my_free(874, &xctx->inst[i].instname);
-      missing++;
-      continue;
-     }
-     xctx->inst[i].ptr = symbol;
-     if(missing)
-     {
-
-      xctx->inst[i-missing] = xctx->inst[i];
-      xctx->inst[i].prop_ptr=NULL;
-      /* delete_inst_node(i); */  /* probably not needed */
-      xctx->inst[i].ptr=-1;  /*04112003 was 0 */
-      xctx->inst[i].flags=0;
-      xctx->inst[i].name=NULL;
-      xctx->inst[i].instname=NULL;
-     }
-    }
-    xctx->instances -= missing;
-    for(i=old;i<xctx->instances;i++)
-    {
-     if(xctx->inst[i].ptr<0) continue;
-     select_element(i,SELECTED,1, 0);
-     symbol_bbox(i, &xctx->inst[i].x1, &xctx->inst[i].y1,
-                       &xctx->inst[i].x2, &xctx->inst[i].y2);
-     type=xctx->sym[xctx->inst[i].ptr].type;
-     cond= !type || !IS_LABEL_SH_OR_PIN(type);
-     if(cond) xctx->inst[i].flags|=2;
-     else xctx->inst[i].flags &=~2;
-    }
 }
 
 /* merge selection if selection_load=1, otherwise ask for filename */
@@ -317,10 +314,10 @@ void merge_file(int selection_load, const char ext[])
       my_snprintf(name, S(name), "%s/.clipboard.sch", user_conf_dir);
     }
     if( (fd=fopen(name,"r"))!= NULL) {
-     prepared_hilight_structs=0;
-     prepared_netlist_structs=0;
-     prepared_hash_instances=0;
-     prepared_hash_wires=0;
+     xctx->prep_hi_structs=0;
+     xctx->prep_net_structs=0;
+     xctx->prep_hash_inst=0;
+     xctx->prep_hash_wires=0;
      got_mouse = 0;
      push_undo();
      unselect_all();
@@ -349,9 +346,9 @@ void merge_file(int selection_load, const char ext[])
         load_ascii_string(&aux_ptr, fd);
         if(selection_load)
         {
-          mx_double_save = mousex_snap;
-          my_double_save = mousey_snap;
-          sscanf( aux_ptr, "%lf %lf", &mousex_snap, &mousey_snap);
+          xctx->mx_double_save = xctx->mousex_snap;
+          xctx->my_double_save = xctx->mousey_snap;
+          sscanf( aux_ptr, "%lf %lf", &xctx->mousex_snap, &xctx->mousey_snap);
           got_mouse = 1;
         }
         break;
@@ -384,20 +381,20 @@ void merge_file(int selection_load, const char ext[])
       read_line(fd, 0); /* discard any remaining characters till (but not including) newline */
      }
      if(!got_mouse) {
-       mx_double_save = mousex_snap;
-       my_double_save = mousey_snap;
-       mousex_snap = 0.;
-       mousey_snap = 0.;
+       xctx->mx_double_save = xctx->mousex_snap;
+       xctx->my_double_save = xctx->mousey_snap;
+       xctx->mousex_snap = 0.;
+       xctx->mousey_snap = 0.;
      }
      my_free(875, &aux_ptr);
-     match_merged_inst(old);
+     link_symbols_to_instances(old);
      fclose(fd);
-     ui_state |= STARTMERGE;
+     xctx->ui_state |= STARTMERGE;
      dbg(1, "merge_file(): loaded file:wire=%d inst=%d ui_state=%ld\n",
-             xctx->wires , xctx->instances, ui_state);
+             xctx->wires , xctx->instances, xctx->ui_state);
      move_objects(START,0,0,0);
-     mousex_snap = mx_double_save;
-     mousey_snap = my_double_save;
+     xctx->mousex_snap = xctx->mx_double_save;
+     xctx->mousey_snap = xctx->my_double_save;
      move_objects(RUBBER,0,0,0);
     } else {
       dbg(0, "merge_file(): can not open %s\n", name);

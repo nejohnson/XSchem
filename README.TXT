@@ -37,7 +37,192 @@ INSTALL
 If destination paths are correctly set in the Makefile: 'make install'
 
 CHANGELOG
+2.9.9:
+- add (as comments in netlist) absolute paths for .sch and .sym of all expanded subcircuits
+- ngspice_annotator: implicitly add "x" to subcircuit instance names that do not begin with "x" or "X"
+- Postscript/svg  print: addition of ISO 8859-1 characters 
+- When editing multiple text objects with "preserve unchanged attrs" set do not change individual text dimensions.
+- saving to file made 4x faster, this implies less latency due to undo buffer savings on freaking big schematics.
+- add sample file for custom menu additions
+- bind select "connected wires" to alt/ctrl-right button click
+- Add Shift-Delete command that selects all nets/labels/probes physically attached to current selected wire segment/label/pin/probe
+- added "auto join/trim wires" menu option since now the trim operation is doing fast even on big designs
+- option for transparent background in svg export
+- added ngspice backannotation tutorial
+- add xschem commands for specifying image size for png and pdf:
+   xschem print svg file.svg 800 600;
+  svg background color taken from svg_colors variable so it can be changed like any other color
+- xschem page aspect ratio decides if postscript or landscape for ps/pdf
+- ps/pdf export uses true postscript fonts
+- spice_probe symbols generate .save instructions and these are flattened by xschem
+  to enable ngspice save hierarchic nodes
+- variable width grid point option (for 4K displays) 
+- Added 'PWD' button il file load dialog
+- almost all global context related to a schematic in xctx structure. This potentially
+  allows to load more schematic windows with 1 running xschem process.
+- fix spiceprefix to be applied on all expanded vector intances in spice netlists
+
 2.9.8
+- ERC checks: do sch/sym node equivalence check on expandlabel()'ed nodes,
+  avoid flagging DATA[5,3,1] != DATA[5:1:2] != DATA[5],DATA[3],DATA[1]
+- bounding box fix while copying objects done in r1224 was not correct. Object rotation fixed now
+- allow spaces in bussed nodes (A B,CC,D\ C, A B[3:0]),
+- switch LC_ALL to "C" locale to avoid output file format issues in foreign 
+  localized systems. 
+- various commands for schematic backannotation:
+  Added various procedures to select flat / hierarchical instances and re-route
+  a terminal to a different net. 
+  reroute_inst -> change a pin connection, 
+  reroute_net -> change net updating all connected components.
+  "xschem instances_to_net", "xschem instance_nodemap", "xschem instance_pin_coord" 
+  new query commands added. "xschem get expandlabel node" renamed to "xschem expandlabel node".
+- allow tEDAx (flattened) netlisting of hierarchical schematics
+- allow tcleval(...) in instance attributes , example for a for a 
+  MOS: W=2 L=0.13 AD="tcleva([expr @W*0.29])" 
+- svg export uses true fonts (svg <text> element) 
+- select highlight net function made faster (highlight -> select highlight nets) 
+- great trim_wires() improvement (>2 oom speed) 
+- guard against extended ascii characters in nocairo/svgdraw/psprint functions
+- added variable "S" containing full schematic path in "Simulations->Configure simulators
+  and tools". This can be used to add search paths to simulators.
+- allow tcl commands ( [..cmds..] ) in Simulation->configure simulators and tools
+  (useful to retrieve needed information about current dir etc.).
+- better xschem icon: added shapemask for "transparent" background
+- synchronize command sending to gaw with gaw replies so at the end the tcp channel
+  is closed gracefully (avoid port in use error messages). Timeout whatchdog is set
+  to prevent forever waits/deadlocks.
+- Fixed Windows Xschem running from VS2019 without installing Xschem to find (Root)/xschem_library/devices
+  as XSCHEM_LIBRARY_PATH, so that viewing schematics through VS2019 will find all
+  symbols in xschem_library/devices.
+- Moved doc and xschem_library XML files to its own *.wxs
+- cleaned up Product.wxs by taking out doc and xschem_library files; fixed spacings
+  in License.rtf; added condition that proper version of Active TCL is required to
+  install
+- added res_ac.sym
+- added m parameter to npn.sym and pnp.sym, text attribute edit dialog box renamed
+  from .t to .dialog so it will be always raised on top of xschem window
+- put braces around "expr" tcl statements as this boosts speed
+- Removed all static/global name conflicts, avoided global conflicts with flex/bison
+  generated code so xschem (as a test bench) can be compiled as a single big file
+  that includes all other sources
+- updated  "xplot" file syntax according to recent ngspice changes
+- "Delete files" menu command added
+- added Shift-I bindkey as an alternative to Insert key (missing on Apple machines)
+  to insert a component
+- add some hidden commands in menu: "place net label(2)", "highlight net/pin name
+  mismatches of selected instances", "Flip", "Rotate"
+- according to answer from ngspice guys ngspice does not accept continuation lines
+  for .title, .include and .lib statements, so break.awk will avoid breaking those
+  lines. reversed default for tcl dim_background variable, so toggle colorscheme
+  will work.
+- added notepad.exe as editor for Windows
+- some "tcl_version > 8.4"  conditions in xschem.tcl to ensure proper working on
+  old (tcl/tk8.4) machines.
+- added backannotation ngspice_get_expr.sym, gspice_get_value.sym, ngspice_probe.sym,
+  and sqwsource.sym into Windows release package
+- exampels/poweramp.sch and examples/cmos_example.sch show how to use dynamuc ngspice
+  simulation data backannotation, optimized fix of previous bbox bug
+- added ngspice_probe.sym and ngspice_get_value.sym that use a pull method to fetch
+  values from ngspice .raw datafile, fixed a long standing bug that changed bounding
+  boxes of symbols that were selected for a copy if they were copied and copy operation
+  involved rotations of flips.
+- xschem setprop made way faster if "fast" argument is provided. Example "clear probes"
+  launcher object in mos_power_ampli.sch.
+- do not call calc_drawing_bbox() on monster schematics as it takes more time than
+  just drawing the viewport
+- better regexp for probe search in ngspice_backannotate.tcl, comments in token.c
+- allow dim background color in "View -> Dim oclors"
+- if xschem is started with -n (netlist) load_schematic will not call tcl proc is_xschem_file
+  to determine if sch or sym type, since command line option has higher priority.
+  reverted back possibility in update_symbol() to have double quotes around name
+  attribute (name="My strange name"). This has toooo many implications everywhere.
+  name attribute must be wihout double quotes, xschem will strip them off if any.
+- preview function now does no more need to save whole schematic on the undo stack,
+  it is just a matter of pointer switching
+- all xctx context is now a dynamically allocated structure; no observable performace
+  impact
+- r1191 | stefan | 2020-10-15 15:52:08 +0200 (gio, 15 ott 2020) | 1 line
+- added "xchem load_symbol" command to load a symbol without binding to any instance,
+  text edit attribute "Load" button will start in "$current_dirname"
+- avoid printing erc warnings about missing "name=" attribute in symbols if there
+  is a definition in symbol template string
+- remove instname and symname parameters to tclpropeval2 as they are no more necessary
+- updated print_spice_subckt() to reflect updates done in print_spice_element();
+  abs_sym_path recognize ././././, ./., other strange paths., use $env(PWD) for current_dirname
+  on startup instead of getcwd() if possible, to avoid dereferencing symlinks
+- cleanup in print_spice_element(), print_verilog_primitive(), print_vhdl_primitive(),
+  print_tedax_element(), parselabel allows ~ in node names (XSPICE inversion operator)
+- match embed with what's updated in verilog_timescale.sym: "verilog_preprocessor
+  and verilog_timescale now use verilog_format instead of format (which is for spice)"
+- if strings passed to translate() are encloded in tcleval(...) the translated string
+  is passed to tcl for evaluation. This allows to display formula results for symbols,
+  for example capacitance values based on W and L: 
+  tcleval(C=[ expr @ca * @L * @W ]) --> tcl will substitute the calculated value: C=1.234e-14
+- code refactoring (global context in Xschem_ctx)
+- when netlisting primitive elements (not subcircuits) the "format", "verilog_format",
+  "vhdl_format, "tedax_format" can be specified in instance attributes to override
+  symbol. This allows to adapt primitives (example digital standard cells) to different
+  design kits without using wrapper subcircuits. Together with "symname" redefinition
+  in instance this allows to completely customize element netlisting.
+- verilog_preprocessor and verilog_timescale now use verilog_format instead of format
+  (which is for spice), corrected verilog_netlist.c; better backslash and quote (")
+  escaping  and unescaping when using attribute select combobox; for unquoting use
+  "xschem get_tok tok 2" instead of "xschem get_tok tok 0" + regsub ....(remove backslashes)...
+- allow probing to gaw current in voltage sources in addition to ammeters
+- "Option->Show info win" moved to "View->Show ERC info window"
+- Preserve existing text (notably license info) in xschem files under version "v"
+  tag; some code refactoring, removed obsoleted comments
+- added support for probing waveforms into gaw if raw file written by Xyce; Xyce
+  uses uppercase, does not wrap voltage nodes into V(...). uses ":" instead of "."
+  as hierarchy separator and other quirks.
+- some clarifications of  steps to be taken to simulate example rom8k circuit
+- fix hierarchical pathname for current probes to gaw
+- better wire connecting bubble zoom scaling at different snap levels
+- added vsqsource, square wave source generator, with only "hi" and "freq" as parameters
+- correctly draw net labels / pins when they are highlighted and user changes their
+  lab attribute so they become unhilighted
+- added warnings (Options -> Show  info window) if components are missing a name=...
+  attribute / if symbols are missing a type=... attribute
+- fix erroneous slotted instance recognition (confuse U2[3:0] with U3:2) in translate(),
+  breaking in some cases the "add net name on instance pin" feature
+- more precise bounding box calculation for net highlights (will extend the bbox
+  to cover wide (bus) wires and solder dots) so there are no more "half coloured"
+  connecting dots etc.
+- "@#n:net_name" attribute (n = pin name or number) in symbols translates to net
+  name attached to pin.  "lab_show.sym" component that shows (does not assign) net
+  name. "highlight=true" attribute can be given on instances in addition to symbols.
+  Set filename in recent history also  when given on command line.
+- save embedded components not only on first embeded instance but on all of them.
+  This makes reloading easier and the overall thing much simpler. In LCC schematic
+  allow get_sym_type() to read symbol data from folowing embedded tags "[...]" if
+  any. Fix potential segfault in preview_window()
+- better read_line(): handle unextected EOFs (noeol last lines)
+- completely eliminated match_symbol() (which in turn may call load_sym_def() ) calls
+  from within load_sym_def(), even for aligning LCC schematic pin ordering to symbol.
+  A dedicated "align_sch_pins_with_sym()" together with "get_sym_type()" does the
+  job in O(N) instead of using a sort routine.
+- off-loaded some functions from load_sym_def() to make it smaller, avoid overkill
+  recursive load_sym_def() calls to get only the type of a component in LCC schematic
+  instances.
+- Alt-b command toggles bounding box view: 0: view all, 1: bbox view for subcircuits,
+  2: bbox view for all symbols.
+- fix un-graceful termination of load_sym_def() in case of recursive schematics instantiating
+  themselves. It was not allowed to unroll all hierarchy levels cleaning up allocated
+  memory after issuing the max-hierarchy warning.
+- fix inaccurate mouse to arc distance calculation for selections
+- add gtkwave_server.tcl hook for gtkwave to listen to a tcp port
+- Fixed some flaws in execute/execute_wait/simulate procedures (Simulate button was
+  not cleared after a foreground simulation)
+- add attributes "weight=bold", "slant=italic", "slant=oblique" on text objects for
+  bold/italic/oblique texts, doc updates.
+- capslock and numlock status detect and report in statusbar
+- "xschem hilight_netname" command to hilight a specific  net name, "xschem search
+  exact ..." finds specific instances of vector instances, "probe_net" procedure
+  descends into the right bussed instance and hilights the correct net bit, added
+  "xschem display_hilights" to return all hilighted nets in the hierarchy, added
+  "gaw_cmd" procedure to send socket commands to gaw (like "gaw_cmd reload_all")
+  (recently added command to gaw ttg)
+- make "ctrl-[0-9]" commands work again (change layer)
 - When loading/descending in a symbol set netlist_type to CAD_SYMBOL_ATTRS, set back to previous value when done.
 - Tcl procedure "load_file_dialog" is now used also for saving files (so list of defined xschem libs is available
   as well as preview window).

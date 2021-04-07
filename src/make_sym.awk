@@ -68,7 +68,7 @@ function beginfile(f)
  text_voffset=20
  lab_voffset=4
  ip=op=n_pin=0
- print "v {xschem version=2.9.8 file_version=1.2}" > sym
+ print "v {xschem version=2.9.9 file_version=1.2}" > sym
  if(template=="") {
   printf "%s", "K {type=subcircuit\nformat=\"@name @pinlist @symname\"\n"  >sym
   printf "%s\n", "template=\"name=x1\""  >sym
@@ -150,6 +150,7 @@ function rest_of_props()
   sub(/sig_type[ \t]*=[ \t]*[^ \t]+[ \t]?/, "")
   sub(/lab[ \t]*=[ \t]*[^ \t]+[ \t]?/, "")
   sub(/value[ \t]*=[ \t]*[^ \t]+[ \t]?/, "")
+  sub(/name[ \t]*=[ \t]*[^ \t]+[ \t]?/, "")
   sub(/^[ \t]*$/, "")
   return $0
 }

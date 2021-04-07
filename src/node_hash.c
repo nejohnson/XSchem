@@ -22,159 +22,135 @@
 
 #include "xschem.h"
 
-static struct node_hashentry *node_table[HASHSIZE];
-
 static unsigned int nh_hash(const char *tok)
 {
-  unsigned int hash = 0;
-  int c;
+  register unsigned int hash = 0;
+  register int c;
 
   while ( (c = *tok++) )
-      hash = c + (hash << 6) + (hash << 16) - hash;
+      hash = c + hash * 65599;
   return hash;
 }
 
 
 struct node_hashentry **get_node_table_ptr(void)
 {
- return node_table;
+ return xctx->node_table;
 }
 
 void print_vhdl_signals(FILE *fd)
 {
- struct node_hashentry *ptr;
- int i, found;
- int mult,j;
- char *class=NULL;
-
- found=0;
- for(i=0;i<HASHSIZE;i++)
- {
-  ptr = node_table[i];
-  while(ptr)
-  {
-   if(strstr(ptr->token, ".")) {
-     dbg(2, "print_vhdl_signals(): record field, skipping: %s\n", ptr->token);
-     ptr = ptr->next;
-     continue; /* signal is a record field, no declaration */
-   }
-   if(ptr->d.port == 0 )
-   {
-    found = 1;
-    if(ptr->token[0]=='#')
-    {
-     mult=get_unnamed_node(3, 0,  atoi((ptr->token)+4) );
-    }
-    else
-    {
-     mult=1;
-    }
-    dbg(2, " print_vhdl_signals(): node: %s mult: %d value=%s \n\n",
-           ptr->token,mult, ptr->value?ptr->value:"NULL");
-
-    if( ptr->class && ptr->class[0] )
-     my_strdup(277, &class, ptr->class);
-    else
-     my_strdup(278, &class, "signal");
-
-    if(mult>1)
-    {
-     for(j=mult-1;j>=0;j--)
-     {
-      fprintf(fd, "%s %s[%d] : ", class, ptr->token[0]=='#' ? ptr->token+1 : ptr->token,j);
-      if(ptr->sig_type && ptr->sig_type[0])
-      {
-         fprintf(fd, "%s", ptr->sig_type);
+  struct node_hashentry *ptr;
+  int i, found;
+  int mult,j;
+  char *class=NULL;
+ 
+  found=0;
+  for(i=0;i<HASHSIZE;i++) {
+    ptr = xctx->node_table[i];
+    while(ptr) {
+      if(strstr(ptr->token, ".")) {
+        dbg(2, "print_vhdl_signals(): record field, skipping: %s\n", ptr->token);
+        ptr = ptr->next;
+        continue; /* signal is a record field, no declaration */
       }
-      else
-        fprintf(fd, "std_logic");
-      if(ptr->value && ptr->value[0]) fprintf(fd, " := %s ", ptr->value);
-      fprintf(fd, " ; %s\n", ptr->orig_tok);
-     }
+      if(ptr->d.port == 0 ) {
+        found = 1;
+        if(ptr->token[0]=='#') {
+          mult=get_unnamed_node(3, 0,  atoi((ptr->token)+4) );
+        }
+        else {
+          mult=1;
+        }
+        dbg(2, "print_vhdl_signals(): node: %s mult: %d value=%s \n\n",
+              ptr->token,mult, ptr->value?ptr->value:"NULL");
+        if( ptr->class && ptr->class[0] )
+          my_strdup(277, &class, ptr->class);
+        else
+          my_strdup(278, &class, "signal");
+        if(mult>1) {
+          for(j=mult-1;j>=0;j--) {
+            fprintf(fd, "%s %s[%d] : ", class, ptr->token[0]=='#' ? ptr->token+1 : ptr->token,j);
+            if(ptr->sig_type && ptr->sig_type[0]) {
+              fprintf(fd, "%s", ptr->sig_type);
+            }
+            else {
+             fprintf(fd, "std_logic");
+            }
+            if(ptr->value && ptr->value[0]) fprintf(fd, " := %s ", ptr->value);
+            fprintf(fd, " ; %s\n", ptr->orig_tok);
+          }
+        }
+        else {
+          fprintf(fd, "%s %s : ", class, ptr->token[0]=='#' ? ptr->token+1 : ptr->token);
+          if(ptr->sig_type && ptr->sig_type[0]) {
+            fprintf(fd, "%s", ptr->sig_type);
+          }
+          else {
+            fprintf(fd, "std_logic");
+          }
+          if(ptr->value && ptr->value[0]) fprintf(fd, " := %s ", ptr->value);
+          fprintf(fd, " ; %s\n", ptr->orig_tok);
+        }
+      }
+      ptr = ptr->next;
     }
-    else
-    {
-     fprintf(fd, "%s %s : ", class, ptr->token[0]=='#' ? ptr->token+1 : ptr->token);
-
-     if(ptr->sig_type && ptr->sig_type[0])
-     {
-        fprintf(fd, "%s", ptr->sig_type);
-     }
-     else
-       fprintf(fd, "std_logic");
-     if(ptr->value && ptr->value[0]) fprintf(fd, " := %s ", ptr->value);
-     fprintf(fd, " ; %s\n", ptr->orig_tok);
-    }
-   }
-   ptr = ptr->next;
   }
- }
- if(found) fprintf(fd, "\n" );
- my_free(852, &class);
+  if(found) fprintf(fd, "\n" );
+  my_free(852, &class);
 }
 
 
 
 void print_verilog_signals(FILE *fd)
 {
- struct node_hashentry *ptr;
- int i, found;
- int mult,j;
-
- dbg(2, " print_verilog_signals(): entering routine\n");
- found=0;
- for(i=0;i<HASHSIZE;i++)
- {
-  ptr = node_table[i];
-  while(ptr)
-  {
-   if(ptr->d.port == 0 )
-   {
-    found = 1;
-    if(ptr->token[0]=='#')
-    {
-     mult=get_unnamed_node(3, 0,  atoi((ptr->token)+4) );
-    }
-    else
-    {
-     mult=1;
-    }
-    dbg(2, " print_verilog_signals(): node: %s mult: %d value=%s \n\n",
-           ptr->token,mult, ptr->value?ptr->value:"NULL");
-
-    if(mult>1)
-    {
-     for(j=mult-1;j>=0;j--)
-     {
-      if(ptr->verilog_type && ptr->verilog_type[0])
-      {
-         fprintf(fd, "%s ", ptr->verilog_type);
+  struct node_hashentry *ptr;
+  int i, found;
+  int mult,j;
+ 
+  dbg(2, " print_verilog_signals(): entering routine\n");
+  found=0;
+  for(i=0;i<HASHSIZE;i++) {
+    ptr = xctx->node_table[i];
+    while(ptr) {
+      if(ptr->d.port == 0 ) {
+        found = 1;
+        if(ptr->token[0]=='#') {
+         mult=get_unnamed_node(3, 0,  atoi((ptr->token)+4) );
+        }
+        else {
+         mult=1;
+        }
+        dbg(2, " print_verilog_signals(): node: %s mult: %d value=%s \n\n",
+               ptr->token,mult, ptr->value?ptr->value:"NULL");
+        if(mult>1) {
+          for(j=mult-1;j>=0;j--) {
+            if(ptr->verilog_type && ptr->verilog_type[0]) {
+              fprintf(fd, "%s ", ptr->verilog_type);
+            }
+            else {
+              fprintf(fd, "wire ");
+            }
+            fprintf(fd, "%s[%d] ", ptr->token[0]=='#' ? ptr->token+1 : ptr->token,j);
+            if(ptr->value && ptr->value[0]) fprintf(fd, "= %s ", ptr->value);
+            fprintf(fd, "; // %s\n", ptr->orig_tok);
+          }
+        }
+        else {
+          if(ptr->verilog_type && ptr->verilog_type[0]) {
+            fprintf(fd, "%s ", ptr->verilog_type);
+          } else {
+            fprintf(fd, "wire ");
+          }
+          fprintf(fd, "%s ", ptr->token[0]=='#' ? ptr->token+1 : ptr->token);
+          if(ptr->value && ptr->value[0]) fprintf(fd, "= %s ", ptr->value);
+          fprintf(fd, "; // %s\n", ptr->orig_tok);
+        }
       }
-      else
-        fprintf(fd, "wire ");
-      fprintf(fd, "%s[%d] ", ptr->token[0]=='#' ? ptr->token+1 : ptr->token,j);
-      if(ptr->value && ptr->value[0]) fprintf(fd, "= %s ", ptr->value);
-      fprintf(fd, "; // %s\n", ptr->orig_tok);
-     }
+      ptr = ptr->next;
     }
-    else
-    {
-
-     if(ptr->verilog_type && ptr->verilog_type[0])
-     {
-        fprintf(fd, "%s ", ptr->verilog_type);
-     }
-     else
-       fprintf(fd, "wire ");
-     fprintf(fd, "%s ", ptr->token[0]=='#' ? ptr->token+1 : ptr->token);
-     if(ptr->value && ptr->value[0]) fprintf(fd, "= %s ", ptr->value);
-     fprintf(fd, "; // %s\n", ptr->orig_tok);
-    }
-   }
-   ptr = ptr->next;
   }
- }
- if(found) fprintf(fd, "\n" );
+  if(found) fprintf(fd, "\n" );
 }
 
 
@@ -252,8 +228,8 @@ struct node_hashentry *node_hash_lookup(const char *token, const char *dir,int w
  d.port=port;
  hashcode=nh_hash(token);
  index=hashcode % HASHSIZE;
- entry=node_table[index];
- preventry=&node_table[index];
+ entry=xctx->node_table[index];
+ preventry=&xctx->node_table[index];
  while(1)
  {
   if( !entry )                  /* empty slot */
@@ -331,43 +307,43 @@ void traverse_node_hash()
  if(!show_erc)return;
  for(i=0;i<HASHSIZE;i++)
  {
-  entry = node_table[i];
+  entry = xctx->node_table[i];
   while(entry)
   {
    if( !record_global_node(3, NULL, entry->token)) {
      if(entry->d.out + entry->d.inout + entry->d.in == 1)
      {
        my_snprintf(str, S(str), "open net: %s", entry->token);
-       if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color, XINSERT);
-       if(incr_hilight) hilight_color++;
+       if(!netlist_count) bus_hilight_lookup(entry->token, xctx->hilight_color, XINSERT_NOREPLACE);
+       if(incr_hilight) incr_hilight_color();
        statusmsg(str,2);
      }
      else if(entry->d.out ==0  && entry->d.inout == 0)
      {
        my_snprintf(str, S(str), "undriven node: %s", entry->token);
-       if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color, XINSERT);
-       if(incr_hilight) hilight_color++;
+       if(!netlist_count) bus_hilight_lookup(entry->token, xctx->hilight_color, XINSERT_NOREPLACE);
+       if(incr_hilight) incr_hilight_color();
        statusmsg(str,2);
      }
      else if(entry->d.out >=2 && entry->d.port>=0)  /*  era d.port>=2   03102001 */
      {
        my_snprintf(str, S(str), "shorted output node: %s", entry->token);
-       if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color, XINSERT);
-       if(incr_hilight) hilight_color++;
+       if(!netlist_count) bus_hilight_lookup(entry->token, xctx->hilight_color, XINSERT_NOREPLACE);
+       if(incr_hilight) incr_hilight_color();
        statusmsg(str,2);
      }
      else if(entry->d.in ==0 && entry->d.inout == 0)
      {
        my_snprintf(str, S(str), "node: %s goes nowhere", entry->token);
-       if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color, XINSERT);
-       if(incr_hilight) hilight_color++;
+       if(!netlist_count) bus_hilight_lookup(entry->token, xctx->hilight_color, XINSERT_NOREPLACE);
+       if(incr_hilight) incr_hilight_color();
        statusmsg(str,2);
      }
      else if(entry->d.out >=2 && entry->d.inout == 0 && entry->d.port>=0)  /*  era d.port>=2   03102001 */
      {
        my_snprintf(str, S(str), "shorted output node: %s", entry->token);
-       if(!netlist_count) bus_hilight_lookup(entry->token, hilight_color, XINSERT);
-       if(incr_hilight) hilight_color++;
+       if(!netlist_count) bus_hilight_lookup(entry->token, xctx->hilight_color, XINSERT_NOREPLACE);
+       if(incr_hilight) incr_hilight_color();
        statusmsg(str,2);
      }
    }
@@ -379,14 +355,11 @@ void traverse_node_hash()
  }
 }
 
-static  int collisions, max_collisions=0, n_elements=0;
-
 static struct node_hashentry *free_hash_entry(struct node_hashentry *entry)
 {
   struct node_hashentry *tmp;
 
   while(entry) {
-    n_elements++; collisions++;
     tmp = entry->next;
     my_free(861, &entry->token);
     my_free(862, &entry->verilog_type);
@@ -405,16 +378,9 @@ void free_node_hash(void) /* remove the whole hash table  */
  int i;
 
  dbg(2, "free_node_hash(): removing hash table\n");
- n_elements=0;
  for(i=0;i<HASHSIZE;i++)
  {
-  collisions=0;
-  node_table[i] = free_hash_entry( node_table[i] );
-  if(collisions>max_collisions) max_collisions=collisions;
+  xctx->node_table[i] = free_hash_entry( xctx->node_table[i] );
  }
- dbg(1, "# free_node_hash(): max_collisions=%d n_elements=%d hashsize=%d\n",
-                   max_collisions, n_elements, HASHSIZE);
- max_collisions=0;
-
 }
 

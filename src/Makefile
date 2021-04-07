@@ -6,7 +6,7 @@ prefix=$(HOME)
 # prefix=/usr/local
 
 sharedir=$(prefix)/share/xschem
-userconfdir=$(HOME)/.xschem
+userconfdir=~/.xschem
 
 ## specify user schematic/symbol libraries; 
 ## you may redefine it later in .xschem/xschemrc startup file
@@ -27,6 +27,7 @@ ${prefix}/share/doc/xschem/ngspice:$\
 ${prefix}/share/doc/xschem/logic:$\
 ${prefix}/share/doc/xschem/binto7seg:$\
 ${prefix}/share/doc/xschem/pcb:$\
+${prefix}/share/doc/xschem/xschem_simulator:$\
 ${prefix}/share/doc/xschem/rom8k
 
 xschem_library_path=$(user_library_dir):$(system_library_dir):$(xschem_example_paths)
@@ -135,6 +136,8 @@ install: xschem rawtovcd
 	cp break.awk "$(prefix)"/share/xschem
 	cp convert_to_verilog2001.awk "$(prefix)"/share/xschem
 	cp flatten.awk "$(prefix)"/share/xschem
+	cp flatten_savenodes.awk "$(prefix)"/share/xschem
+	cp flatten_tedax.awk "$(prefix)"/share/xschem
 	cp make_sym.awk "$(prefix)"/share/xschem
 	cp symgen.awk "$(prefix)"/share/xschem
 	cp order_labels.awk "$(prefix)"/share/xschem
@@ -145,6 +148,7 @@ install: xschem rawtovcd
 	cp xschemrc "$(prefix)"/share/xschem
 	cp vhdl.awk "$(prefix)"/share/xschem
 	cp hspice_backannotate.tcl "$(prefix)"/share/xschem
+	cp add_custom_menu.tcl "$(prefix)"/share/xschem
 	cp ngspice_backannotate.tcl "$(prefix)"/share/xschem
 	cp gschemtoxschem.awk "$(prefix)"/share/xschem
 	cp change_index.tcl "$(prefix)"/share/xschem
@@ -158,6 +162,7 @@ install: xschem rawtovcd
 	cp -ru ../xschem_library/xTAG "$(prefix)"/share/doc/xschem/
 	cp -ru ../xschem_library/rulz-r8c33 "$(prefix)"/share/doc/xschem/
 	cp -ru ../xschem_library/ngspice "$(prefix)"/share/doc/xschem/
+	cp -ru ../xschem_library/xschem_simulator "$(prefix)"/share/doc/xschem/
 	cp -ru ../xschem_library/rom8k "$(prefix)"/share/doc/xschem/
 	cp -ru ../xschem_library/pcb "$(prefix)"/share/doc/xschem/
 	cp -ru ../xschem_library/logic "$(prefix)"/share/doc/xschem/

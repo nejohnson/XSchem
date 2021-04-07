@@ -80,39 +80,48 @@ static char *expandlabel_strdup(char *src)
  }
 }
 
-static char *my_strcat2(char *s1, char c, char *s2)
+static char *expandlabel_strcat(char *s1, char *s2)
 /* concatenates s1 and s2, with c in between */
 {
  int l1=0,l2=0;
  char *res;
 
- if(s1!=NULL) l1=strlen(s1);
- if(s1!=NULL) l2=strlen(s2);
- res=my_malloc(123, l1+l2+2); /* 2 strings plus 'c' and '\0' */
- 
- /* 20180923 */
- memcpy(res, s1, l1);
- res[l1] = c;
- memcpy(res + l1 + 1, s2, l2+1);
- /* *res='\0'; */
- /* if(l1) strcpy(res, s1); */
- /* res[l1]=c; */
- /* if(l2) strcpy(res+l1+1, s2); */
+ if(s1) l1=strlen(s1);
+ if(s2) l2=strlen(s2);
+ res=my_malloc(730, l1+l2+1); /* 2 strings plus '\0' */
+ if(s1) memcpy(res, s1, l1);
+ if(s2) memcpy(res + l1 , s2, l2+1);
+ else   memcpy(res + l1 , "", 1);
  return res;
+}
 
+static char *expandlabel_strcat_char(char *s1, char c, char *s2)
+/* concatenates s1 and s2, with c in between */
+{
+ int l1=0,l2=0;
+ char *res;
+
+ if(s1) l1=strlen(s1);
+ if(s2) l2=strlen(s2);
+ res=my_malloc(123, l1+l2+2); /* 2 strings plus 'c' and '\0' */
+ if(s1) memcpy(res, s1, l1);
+ res[l1] = c;
+ if(s2) memcpy(res + l1 + 1, s2, l2+1);
+ else   memcpy(res + l1 + 1, "", 1);
+ return res;
 }
 /* */
 /* example: */
 /* if n==3 and s="a,b,c" return "a,a,a,b,b,b,c,c,c" */
 /* */
-static char *my_strmult2(int n, char *s)
+static char *expandlabel_strmult2(int n, char *s)
 /* if n==0 returns "\0" */
 {
  register int i, len;
  register char *pos,*prev;
  char *str, *ss;
 
- dbg(3, "my_strmult2(): n=%d s=%s\n", n, s);
+ dbg(3, "expandlabel_strmult2(): n=%d s=%s\n", n, s);
  if(n==0) return expandlabel_strdup("");
  len=strlen(s);
  prev=s;
@@ -140,7 +149,7 @@ static char *my_strmult2(int n, char *s)
 /* example: */
 /* if n==3 and s="a,b,c" return "a,b,c,a,b,c,a,b,c" */
 /* */
-static char *my_strmult(int n, char *s)
+static char *expandlabel_strmult(int n, char *s)
 /* if n==0 returns "\0" */
 {
  register int i, len;
@@ -161,7 +170,7 @@ static char *my_strmult(int n, char *s)
  return str;
 }
 
-static char *my_strbus(char *s, int *n)
+static char *expandlabel_strbus(char *s, int *n)
 {
  int i,l;
  int tmplen;
@@ -192,7 +201,7 @@ static void check_idx(int **ptr,int n)
  }
 }
 
-static char *my_strbus_nobracket(char *s, int *n)
+static char *expandlabel_strbus_nobracket(char *s, int *n)
 {
  int i,l;
  int tmplen;
@@ -205,7 +214,7 @@ static char *my_strbus_nobracket(char *s, int *n)
  {
   tmplen = sprintf(tmp, "%s%d,", s, n[i]);
   /* strcpy(res+l,tmp); */
-  memcpy(res+l,tmp, tmplen+1); /* 20180923 */
+  memcpy(res+l,tmp, tmplen+1);
   l+=tmplen;
  }
  my_free(736, &tmp);
@@ -236,61 +245,72 @@ int  *idx;  /* for bus index & bus index ranges */
 %type <idx> index_nobracket
 
 /* operator precedences (bottom = highest)  and associativity  */
+%left B_NAME
 %left B_DOUBLEDOT
+%left ':'
 %left B_CAR
 %left ','
-%left ':'
 %left '*'
 
 /* Grammar follows */
 %%
-input:    /* empty string. allows ctrl-D as input */
-        | input line
-;
-line:     list          {
-                         my_strdup(129,  &(dest_string.str),$1.str); /*19102004 */
-                         my_free(737, &$1.str); /*19102004 */
+
+
+line:    /* empty */
+         | list         {
+                         my_strdup(129,  &(dest_string.str),$1.str); 
+                         my_free(737, &$1.str); 
                          dest_string.m=$1.m;
                         }
-        | B_NUM         {
-                         char n[40];
-                         dbg(3, "yyparse(): B_NUM = %d\n", $1);
-                         sprintf(n, "%d", $1);
-                         my_strdup(158,  &(dest_string.str),n); /*19102004 */
-                         dest_string.m = 1;
-                        }
-          
 ;
 list:     B_NAME        { 
-                         dbg(3, "yyparse(): B_NAME (%lu) \n", (unsigned long) $1);
                          dbg(3, "yyparse(): B_NAME, $1=%s\n", $1);
-                         $$.str = expandlabel_strdup($1); /* 19102004 prima era =$1 */
-                         my_free(738, &$1);  /*191020004 */
+                         $$.str = expandlabel_strdup($1);
+                         my_free(738, &$1);
                          $$.m = 1;
                         }
         | B_LINE        {
                          dbg(3, "yyparse(): B_LINE\n");
-                         $$.str = expandlabel_strdup($1); /* 19102004 prima era =$1 */
-                         my_free(739, &$1);  /*191020004 */
+                         $$.str = expandlabel_strdup($1); /* prima era =$1 */
+                         my_free(739, &$1);
                          $$.m = 1;
                         }
-        | list '*' B_NUM{
+
+        | list B_NAME   { 
+                         dbg(3, "yyparse(): list B_NAME, $2=%s\n", $2);
+                         $$.str = expandlabel_strcat($1.str, $2);
+                         my_free(1208, &$1.str);
+                         my_free(452, &$2);
+                         $$.m = $1.m;
+                        }
+
+        | list '*' B_NUM
+                        {
                          dbg(3, "yyparse(): list * B_NUM\n");
                          dbg(3, "yyparse(): |%s| %d \n",$1.str,$3);
-                         $$.str=my_strmult2($3,$1.str);
+                         $$.str=expandlabel_strmult2($3,$1.str);
                          dbg(3, "yyparse(): |%s|\n",$$.str);
                          $$.m = $3 * $1.m;
                          my_free(740, &$1.str);
                         }
-        | B_NUM '*' list{
+        | B_NUM '*' list
+                        {
                          dbg(3, "yyparse(): B_NUM * list\n");
-                         $$.str=my_strmult($1,$3.str);
+                         $$.str=expandlabel_strmult($1,$3.str);
                          $$.m = $1 * $3.m;
                          my_free(741, &$3.str);
                         }
+        | B_NAME '*' list
+                        {
+                         dbg(3, "yyparse(): B_NAME * list\n");
+                         $$.str=expandlabel_strcat_char($1, '*', $3.str);
+                         $$.m = 1;
+                         my_free(883, &$1);
+                         my_free(158, &$3.str);
+                        }
         | list ',' list { 
                          dbg(3, "yyparse(): list , list\n");
-                         $$.str=my_strcat2($1.str, ',', $3.str);
+                         $$.str=expandlabel_strcat_char($1.str, ',', $3.str);
                          $$.m = $1.m + $3.m;
                          my_free(742, &$1.str);
                          my_free(743, &$3.str);
@@ -298,7 +318,7 @@ list:     B_NAME        {
         | list B_CAR list
                         {
                          dbg(3, "yyparse(): list B_CAR list\n");
-                         $$.str=my_strcat2($1.str, $2, $3.str);
+                         $$.str=expandlabel_strcat_char($1.str, $2, $3.str);
                          $$.m = $1.m + $3.m;
                          my_free(744, &$1.str);
                          my_free(745, &$3.str);
@@ -320,27 +340,27 @@ list:     B_NAME        {
                         {
                          dbg(3, "yyparse(): making bus: n=%d\n",$3[0]);
                          dbg(3, "yyparse(): B_NAME[ index ] , $1=%s $3=%d\n", $1, *$3);
-                         $$.str=my_strbus($1,$3);
+                         $$.str=expandlabel_strbus($1,$3);
                          my_free(748, &$1); 
                          dbg(3, "yyparse(): done making bus: n=%d\n",$3[0]);
                          $$.m=$3[0];
-                         my_free(749, &$3); /*19102004 */
+                         my_free(749, &$3); 
                          idxsize=INITIALIDXSIZE;
                         }
         | B_NAME  '[' index_nobracket  ']' 
                         {
                          dbg(3, "yyparse(): making nobracket bus: n=%d\n",$3[0]);
-                         $$.str=my_strbus_nobracket($1,$3);
+                         $$.str=expandlabel_strbus_nobracket($1,$3);
                          my_free(750, &$1);
                          dbg(3, "yyparse(): done making nobracket bus: n=%d\n",$3[0]);
                          $$.m=$3[0];
-                         my_free(751, &$3); /*19102004 */
+                         my_free(751, &$3); 
                          idxsize=INITIALIDXSIZE;
                         }
 ;
 index:    B_IDXNUM ':' B_IDXNUM ':' B_IDXNUM
                         {
-                         int i;                                 /* 20120229 */
+                         int i;
                          int sign;
 
                          sign = SIGN($3-$1);
@@ -354,7 +374,7 @@ index:    B_IDXNUM ':' B_IDXNUM ':' B_IDXNUM
 
                           if(sign==1 && i>=$3) break;
                           if(sign==-1 && i<=$3) break;
-                         }                                      /* /20120229 */
+                         }
                         }
         | B_IDXNUM ':' B_IDXNUM
                         {
@@ -378,7 +398,7 @@ index:    B_IDXNUM ':' B_IDXNUM ':' B_IDXNUM
                         }
         | index ',' B_IDXNUM ':' B_IDXNUM ':' B_IDXNUM
                         {
-                         int i;                                 /* 20120229 */
+                         int i;                                 
                          int sign;
 
                          sign = SIGN($5-$3);
@@ -389,7 +409,7 @@ index:    B_IDXNUM ':' B_IDXNUM ':' B_IDXNUM
                           $$[$$[0]]=i;
                           if(sign==1 && i>=$5) break;
                           if(sign==-1 && i<=$5) break;
-                         }                                      /* /20120229 */
+                         }                                      
                         }
         | index ',' B_IDXNUM ':' B_IDXNUM
                         {

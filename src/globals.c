@@ -25,7 +25,6 @@
 
 /* X11 specific globals */
 Colormap colormap;
-Window window; /* window is the drawing area, topwindow is the root win */
 Window pre_window; /* preview when opening files */
 Window parent_of_topwindow;
 unsigned char **pixdata;
@@ -96,17 +95,16 @@ unsigned char pixdata_init[22][32]={    /* fill patterns... indexed by laynumb. 
 {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},/*20 */
 {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}/*21 */
 };
-GC *gcstipple,*gc, gctiled;
+GC *gcstipple,*gc;
+Pixmap *pixmap = NULL;
 Display *display;
-XRectangle xrect[1] = {{0,0,0,0}};
-Pixmap cad_icon_pixmap=0, cad_icon_mask=0, *pixmap,save_pixmap;  /* save_pixmap used to restore window */
-XPoint *gridpoint;           /* pointer to array of gridpoints, used in draw() */
+int screen_number;
+Pixmap cad_icon_pixmap=0, cad_icon_mask=0;
 XColor xcolor_array[256];
 Visual *visual;
-#ifdef HAS_CAIRO
-cairo_surface_t *sfc, *save_sfc;
-cairo_t *cairo_ctx, *cairo_save_ctx;
-XRenderPictFormat *format;
+#if HAS_XRENDER==1
+XRenderPictFormat *render_format;
+#endif
 
 #if HAS_XCB==1
 xcb_connection_t *xcbconn;
@@ -114,20 +112,58 @@ xcb_render_pictforminfo_t format_rgb, format_rgba;
 xcb_screen_t *screen_xcb;
 xcb_visualtype_t *visual_xcb;
 #endif /*HAS_XCB */
-#endif /*HAS_CAIRO */
+
+/* these variables are mirrored in tcl code */
+int fullscreen=0;
+char *netlist_dir=NULL; /* user set netlist directory via cmd-option or menu or xschemrc */
+char initial_netlist_name[PATH_MAX]={0};
+int top_subckt = 0;
+int spiceprefix = 1;
+int unzoom_nodrift=1;
+int change_lw=0; /* allow change lw */
+int incr_hilight=1;
+unsigned short enable_stretch=0;
+int auto_hilight=0;
+int has_x=1;
+int split_files=0; /* split netlist files 20081202 */
+double cadgrid = CADGRID;
+double cadsnap = CADSNAP;
+int draw_grid=1;
+int big_grid_points=0;
+int rainbow_colors=0;
+int dis_uniq_names=0; /* if set allow instances with duplicate names */
+int persistent_command=0; /* remember last command 20181022 */
+int autotrim_wires=0;
+int color_ps=-1;
+int transparent_svg=-1;
+int only_probes=0;
+int netlist_show=0;
+int flat_netlist=0;
+int cadlayers=0;
+int hide_symbols = 0; /* draw only a bounding box for component instances and @symname, @name texts */
+int dark_colorscheme=1;
+char cairo_font_name[80]="Sans-Serif";
+char svg_font_name[80]="Sans-Serif";
+double cairo_font_scale=1.0; /* default: 1.0, allows to adjust font size */
+double nocairo_font_xscale=0.85; /* match with cairo sizing */
+double nocairo_font_yscale=0.88; /* match with cairo sizing */
+double cairo_font_line_spacing=1.0; /* allows to change line spacing: default: 1.0 */
+/* lift up the text by 'n' pixels (zoom corrected) within the bbox.  */
+/* This correction is used to better align existing schematics */
+/* compared to the nocairo xschem version. */
+/* allowed values should be in the range [-4, 4] */
+double cairo_vert_correct=0.0;
+double nocairo_vert_correct=0.0;
+int sym_txt=1;
+int netlist_type=-1;
+int show_pin_net_names = 0;
+/* enable hilight instances attached to hilighted nets if they have the "highlight=true attr set */
+int en_hilight_conn_inst = 0; 
 
 
 int help=0; /* help option set to global scope, printing help is deferred */
             /* when configuration ~/.schem has been read 20140406 */
-int fullscreen=0;
-int semaphore=0; /* needed at global scope as it is set by tcl */
-int unzoom_nodrift=1;
-int a3page=-1;
-int has_x=1;
 int no_draw=0;
-int sym_txt=1;
-int event_reporting=0;
-int rainbow_colors=0;
 int manhattan_lines=0;
 FILE *errfp;
 char *filename=NULL; /* filename given on cmdline */
@@ -145,8 +181,6 @@ char plotfile[PATH_MAX] = {'\0'};
 char rcfile[PATH_MAX] = {'\0'};
 char *tcl_command = NULL;
 char tcl_script[PATH_MAX] = {'\0'};
-int persistent_command=0; /* remember last command 20181022 */
-int dis_uniq_names=0; /* if set allow instances with duplicate names */
 int quit=0;  /* set from process_options (ex netlist from cmdline and quit) */
 int debug_var=-10;  /* will be set to 0 in xinit.c */
 int tcp_port = 0;
@@ -155,101 +189,36 @@ int no_readline=0;
 int fill=1; /* filled rectangles */
 int draw_pixmap=1; /* use pixmap for double buffer */
 int draw_window=0;
-int draw_grid=1;
 int text_svg=1; /* use <text> svg element for text instead of xschem's internal vector font */
-double cadgrid = CADGRID;
+int text_ps=1;  /* use ps font for text instead of xschem's internal vector font */
 double cadhalfdotsize = CADHALFDOTSIZE;
-int change_lw=0; /* allow change xctx->lw */
-int incr_hilight=1;
-int auto_hilight=0;
 unsigned int color_index[256]; /* layer color lookup table */
-unsigned int rectcolor ; /* this is the currently used layer */
-unsigned long ui_state = 0; /* this signals that we are doing a net place,panning etc. */
-                          /* used to prevent nesting of some commands */
-char *undo_dirname = NULL;
-int cur_undo_ptr=0;
-int tail_undo_ptr=0;
-int head_undo_ptr=0;
 int max_undo=MAX_UNDO;
 int draw_dots=1;
 int draw_single_layer=-1;
-int check_version = 0; /* if set ensures 'v' version header line is present before loading file */
 int yyparse_error = 0;
-unsigned short enable_stretch=0;
-int cadlayers=0;
 int *enable_layer;
 int n_active_layers=0;
 int *active_layer;
-int need_rebuild_selected_array=1;
 int depth;
-int *fill_type; /*20171117 for every layer: 0: no fill, 1, solid fill, 2: stipple fill */
+int *fill_type; /* for every layer: 0: no fill, 1, solid fill, 2: stipple fill */
 char **color_array;
-int areax1,areay1,areax2,areay2,areaw,areah; /* window corners / size */
-int xschem_h, xschem_w; /* 20171130 window size */
-double mousex,mousey; /* mouse coord. */
-double mousex_snap,mousey_snap; /* mouse coord. snapped to grid */
-double mx_double_save, my_double_save;
 char *xschem_executable=NULL;
-double cadsnap = CADSNAP;
 double *character[256]; /* array or per-char coordinates of xschem internal vector font */
-int lastselected = 0;
-int max_selected;
-Selected *selectedgroup;     /*  array of selected objects to be */
 Tcl_Interp *interp;
 int do_netlist=0;  /* set by process_options if user wants netllist from cmdline */
 int do_simulation=0;
 int do_waves=0;
 int netlist_count=0; /* netlist counter incremented at any cell being netlisted */
-int top_subckt = 0;
-int spiceprefix = 1;
-int netlist_show=0;
-int flat_netlist=0;
-int netlist_type=-1;
-char bus_replacement_char[3] = {0, 0, 0};
-int prepared_netlist_structs=0;
-int prepared_hilight_structs=0;
-int prepared_hash_instances=0;
-int prepared_hash_wires=0;
-int horizontal_move=0;
-int vertical_move=0;
-int modified = 0;
-int color_ps=-1;
-int only_probes=0;
-int hilight_color=0;
+char hiersep[20]=".";
+char bus_char[3] = {0, 0, 0};
 int pending_fullzoom=0;
-int split_files=0; /* split netlist files 20081202 */
-char *netlist_dir=NULL; /* user set netlist directory via cmd-option or menu or xschemrc */
-char user_top_netl_name[PATH_MAX] = ""; /* user set netlist name via cmd option -N <name> */
-int dark_colorscheme=1;
+int constrained_move = 0;
 double color_dim=0.0;
 int no_undo=0;
-int enable_drill=0; /* 20171211 pass net hilights through components with 'propagate_to' property set on pins */
-struct instpinentry *instpintable[NBOXES][NBOXES];
-struct wireentry *wiretable[NBOXES][NBOXES];
-struct instentry *insttable[NBOXES][NBOXES];
-size_t get_tok_value_size;
-size_t get_tok_size;
+int enable_drill=0; /* pass net hilights through components with 'propag=' property set on pins */
 int batch_mode = 0; /* no tcl console if set; batch mode */
-int hide_symbols = 0; /* draw only a bounding box for component instances and @symname, @name texts */
-int show_pin_net_names = 0;
-
-char cairo_font_name[1024]="Sans Serif";
-char svg_font_name[1024]="Sans Serif";
-int cairo_longest_line;
-int cairo_lines;
-double cairo_font_scale=1.0; /* default: 1.0, allows to adjust font size */
-double nocairo_font_xscale=0.85; /* match with cairo sizing */
-double nocairo_font_yscale=0.88; /* match with cairo sizing */
-double cairo_font_line_spacing=1.0; /* allows to change line spacing: default: 1.0 */
-
-/* lift up the text by 'n' pixels (zoom corrected) within the bbox.  */
-/* This correction is used to better align existing schematics */
-/* compared to the nocairo xschem version. */
-/* allowed values should be in the range [-4, 4] */
-double cairo_vert_correct=0.0;
-double nocairo_vert_correct=0.0;
 int show_erc=1;
-int hilight_nets=0;
 
 /* following data is relative to the current schematic */
 Xschem_ctx *xctx;

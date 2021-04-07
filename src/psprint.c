@@ -24,6 +24,68 @@
 #define X_TO_PS(x) ( (x+xctx->xorigin)* xctx->mooz )
 #define Y_TO_PS(y) ( (y+xctx->yorigin)* xctx->mooz )
 
+#if 0
+/* FIXME: overflow check. Not used, BTW */
+static char *strreplace(char s[], char token[], char replace[])
+{
+  static char res[200];
+  char *p1, *p2;
+  int l;
+
+  res[0] = '\0';
+  l = strlen(token);
+  p1 = p2 = s;
+  while( (p2 = strstr(p1, token)) ) {
+     strncat(res, p1, p2 - p1);
+     strcat(res, replace);
+     p1 = p2 = p2 + l;
+  }
+  strcat(res, p1);
+  return res;
+}
+#endif
+
+char *utf8_enc[]={
+  "/recodedict 24 dict def\n",
+  "/recode {recodedict begin /nco&na exch def\n",
+  "/nfnam exch def /basefontname exch def /basefontdict basefontname findfont def\n",
+  "/newfont basefontdict maxlength dict def basefontdict {exch dup /FID ne\n",
+  "{dup /Encoding eq {exch dup length array copy newfont 3 1 roll put} {exch\n",
+  "newfont 3 1 roll put} ifelse} {pop pop} ifelse } forall newfont\n",
+  "/FontName nfnam put nco&na aload pop nco&na length 2 idiv {newfont\n",
+  "/Encoding get 3 1 roll put} repeat nfnam newfont definefont pop end } def\n",
+};
+
+char *utf8[]={
+"/chararr [\n",
+/* 0xC2 2-byte characters */
+" 161 /exclamdown\n", " 162 /cent\n", " 163 /sterling\n", " 164 /currency\n",
+" 165 /yen\n", " 166 /bar\n", " 167 /section\n", " 168 /dieresis\n",
+" 169 /copyright\n", " 170 /ordfeminine\n", " 171 /guillemotleft\n", " 172 /logicalnot\n",
+" 173 /emdash\n", " 174 /registered\n", " 175 /macron\n", " 176 /degree\n",
+" 177 /plusminus\n", " 178 /twosuperior\n", " 179 /threesuperior\n", " 180 /acute\n",
+" 181 /mu\n", " 182 /paragraph\n", " 183 /periodcentered\n", " 184 /cedilla\n",
+" 185 /onesuperior\n", " 186 /ordmasculine\n", " 187 /guillemotright\n", " 188 /onequarter\n",
+" 189 /onehalf\n", " 190 /threequarters\n", " 191 /questiondown\n",
+/* 0xC3 2-byte characters */
+" 192 /Agrave\n", " 193 /Aacute\n", " 194 /Acircumflex\n", " 195 /Atilde\n",
+" 196 /Adieresis\n", " 197 /Aring\n", " 198 /AE\n", " 199 /Ccedilla\n",
+" 200 /Egrave\n", " 201 /Eacute\n", " 202 /Ecircumflex\n", " 203 /Edieresis\n",
+" 204 /Igrave\n", " 205 /Iacute\n", " 206 /Icircumflex\n", " 207 /Idieresis\n",
+" 208 /Eth\n", " 209 /Ntilde\n", " 210 /Ograve\n", " 211 /Oacute\n",
+" 212 /Ocircumflex\n", " 213 /Otilde\n", " 214 /Odieresis\n", " 215 /multiply\n",
+" 216 /Oslash\n", " 217 /Ugrave\n", " 218 /Uacute\n", " 219 /Ucircumflex\n",
+" 220 /Udieresis\n", " 221 /Yacute\n", " 222 /Thorn\n", " 223 /germandbls\n",
+" 224 /agrave\n", " 225 /aacute\n", " 226 /acircumflex\n", " 227 /atilde\n",
+" 228 /adieresis\n", " 229 /aring\n", " 230 /ae\n", " 231 /ccedilla\n",
+" 232 /egrave\n", " 233 /eacute\n", " 234 /ecircumflex\n", " 235 /edieresis\n",
+" 236 /igrave\n", " 237 /iacute\n", " 238 /icircumflex\n", " 239 /idieresis\n",
+" 240 /eth\n", " 241 /ntilde\n", " 242 /ograve\n", " 243 /oacute\n",
+" 244 /ocircumflex\n", " 245 /otilde\n", " 246 /odieresis\n", " 247 /divide\n",
+" 248 /oslash\n", " 249 /ugrave\n", " 250 /uacute\n", " 251 /ucircumflex\n",
+" 252 /udieresis\n", " 253 /yacute\n", " 254 /thorn\n", " 255 /ydieresis\n",
+" ] def\n"};
+
 static FILE *fd;
 
 typedef struct {
@@ -33,20 +95,22 @@ typedef struct {
 } Ps_color;
 
 static Ps_color *ps_colors;
+static char ps_font_name[80] = "Helvetica"; /* Courier Times Helvetica Symbol */
+static char ps_font_family[80] = "Helvetica"; /* Courier Times Helvetica Symbol */
 
-static void restore_lw(void)
+
+static void set_lw(void)
 {
  if(xctx->lw==0.0)
-   fprintf(fd, "%.16g setlinewidth\n",0.5);
+   fprintf(fd, "%g setlinewidth\n",0.5);
  else
-   if(a3page) fprintf(fd, "%.16g setlinewidth\n",xctx->lw/1.2/sqrt(2));
-   else fprintf(fd, "%.16g setlinewidth\n",xctx->lw/1.2);
+   fprintf(fd, "%g setlinewidth\n",xctx->lw/1.2);
 }
 
 static void set_ps_colors(unsigned int pixel)
 {
 
-   if(color_ps) fprintf(fd, "%.16g %.16g %.16g setrgbcolor\n",
+   if(color_ps) fprintf(fd, "%g %g %g RGB\n",
     (double)ps_colors[pixel].red/256.0, (double)ps_colors[pixel].green/256.0,
     (double)ps_colors[pixel].blue/256.0);
 
@@ -55,31 +119,29 @@ static void set_ps_colors(unsigned int pixel)
 static void ps_xdrawarc(int layer, int fillarc, double x, double y, double r, double a, double b)
 {
  if(fill && fillarc)
-   fprintf(fd, "%.16g %.16g %.16g %.16g %.16g AF\n", x, y, r, -a, -a-b);
+   fprintf(fd, "%g %g %g %g %g A %g %g LT C F S\n", x, y, r, -a, -a-b, x, y);
  else
-   fprintf(fd, "%.16g %.16g %.16g %.16g %.16g A\n", x, y, r, -a, -a-b);
+   fprintf(fd, "%g %g %g %g %g A S\n", x, y, r, -a, -a-b);
 
 }
 
 static void ps_xdrawline(int layer, double x1, double y1, double x2,
                   double y2)
 {
- fprintf(fd, "%.16g %.16g %.16g %.16g L\n", x2, y2, x1, y1);
+ fprintf(fd, "%.6g %.6g %.6g %.6g L\n", x2, y2, x1, y1);
 }
 
 static void ps_xdrawpoint(int layer, double x1, double y1)
 {
- fprintf(fd, "%.16g %.16g %.16g %.16g L\n", x1, y1,x1,y1);
+ fprintf(fd, "%g %g %g %g L\n", x1, y1,x1,y1);
 }
 
 static void ps_xfillrectange(int layer, double x1, double y1, double x2,
                   double y2)
 {
- /*fprintf(fd, "%.16g %.16g moveto %.16g %.16g lineto %.16g %.16g lineto %.16g %.16g lineto closepath\n", */
- /*       x1,y1,x2,y1,x2,y2,x1,y2); */
- fprintf(fd, "%.16g %.16g %.16g %.16g R\n", x1,y1,x2-x1,y2-y1);
- if( (layer==4 || layer==PINLAYER || layer==WIRELAYER) && fill) {
-   fprintf(fd, "%.16g %.16g %.16g %.16g RF\n", x1,y1,x2-x1,y2-y1);
+ fprintf(fd, "%g %g %g %g R\n", x1,y1,x2-x1,y2-y1);
+ if( (fill_type[layer] == 1) && fill) {
+   fprintf(fd, "%g %g %g %g RF\n", x1,y1,x2-x1,y2-y1);
    /* fprintf(fd,"fill\n"); */
  }
  /*fprintf(fd,"stroke\n"); */
@@ -98,7 +160,7 @@ static void ps_drawpolygon(int c, int what, double *x, double *y, int points, in
   y1=Y_TO_PS(y1);
   x2=X_TO_PS(x2);
   y2=Y_TO_PS(y2);
-  if( !rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) ) {
+  if( !rectclip(xctx->areax1,xctx->areay1,xctx->areax2,xctx->areay2,&x1,&y1,&x2,&y2) ) {
     return;
   }
 
@@ -109,15 +171,13 @@ static void ps_drawpolygon(int c, int what, double *x, double *y, int points, in
   for(i=0;i<points; i++) {
     xx = X_TO_PS(x[i]);
     yy = Y_TO_PS(y[i]);
-    if(i==0) fprintf(fd, "newpath\n%.16g %.16g MT\n", xx, yy);
-    else fprintf(fd, "%.16g %.16g LT\n", xx, yy);
+    if(i==0) fprintf(fd, "NP\n%g %g MT\n", xx, yy);
+    else fprintf(fd, "%g %g LT\n", xx, yy);
   }
   if(fill && fill_type[c] && poly_fill) {
-    fprintf(fd, "closepath gsave stroke\n");
-    fprintf(fd, "grestore\n");
-    fprintf(fd, " fill\n");
+    fprintf(fd, "C F S\n");
   } else {
-    fprintf(fd, "closepath stroke\n");
+    fprintf(fd, "S\n");
   }
 
 
@@ -136,7 +196,7 @@ static void ps_filledrect(int gc, double rectx1,double recty1,double rectx2,doub
   y1=Y_TO_PS(recty1);
   x2=X_TO_PS(rectx2);
   y2=Y_TO_PS(recty2);
-  if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
+  if( rectclip(xctx->areax1,xctx->areay1,xctx->areax2,xctx->areay2,&x1,&y1,&x2,&y2) )
   {
     psdash = dash / xctx->zoom;
     if(dash) {
@@ -164,7 +224,7 @@ static void ps_drawarc(int gc, int fillarc, double x,double y,double r,double a,
   x2=X_TO_PS(x2);
   y2=Y_TO_PS(y2);
 
-  if( rectclip(areax1,areay1,areax2,areay2,&x1,&y1,&x2,&y2) )
+  if( rectclip(xctx->areax1,xctx->areay1,xctx->areax2,xctx->areay2,&x1,&y1,&x2,&y2) )
   {
     psdash = dash / xctx->zoom;
     if(dash) {
@@ -200,26 +260,167 @@ static void ps_drawline(int gc, double linex1,double liney1,double linex2,double
   }
 }
 
-static void ps_draw_string(int gctext,  const char *str,
-                 int rot, int flip, int hcenter, int vcenter,
+
+
+static void ps_draw_string_line(int layer, char *s, double x, double y, double size, 
+           short rot, short flip, int lineno, double fontheight, double fontascent, 
+           double fontdescent, int llength, int no_of_lines, int longest_line)
+{
+  double ix, iy;
+  short rot1;
+  unsigned char c;
+  int line_delta, offset;
+  double lines;
+  set_ps_colors(layer);
+  if(s==NULL) return;
+  if(llength==0) return;
+
+  line_delta = lineno*fontheight;
+  lines = (no_of_lines-1)*fontheight;
+
+  ix=X_TO_PS(x);
+  iy=Y_TO_PS(y);
+  if(rot&1) {
+    rot1=3;
+  } else rot1=0;
+
+  if(     rot==0 && flip==0) {iy+=line_delta+fontascent;}
+  else if(rot==1 && flip==0) {ix=ix-fontheight+fontascent-lines+line_delta;}
+  else if(rot==2 && flip==0) {iy=iy-fontheight-lines+line_delta+fontascent;}
+  else if(rot==3 && flip==0) {ix+=line_delta+fontascent;}
+  else if(rot==0 && flip==1) {iy+=line_delta+fontascent;}
+  else if(rot==1 && flip==1) {ix=ix-fontheight+line_delta-lines+fontascent;}
+  else if(rot==2 && flip==1) {iy=iy-fontheight-lines+line_delta+fontascent;}
+  else if(rot==3 && flip==1) {ix+=line_delta+fontascent;}
+
+  fprintf(fd, "GS\n");
+  fprintf(fd, "/%s", ps_font_family);
+  fprintf(fd, " FF\n");
+  fprintf(fd, "%g SCF\n", size * xctx->mooz);
+  fprintf(fd, "SF\n");
+  fprintf(fd, "NP\n");
+  fprintf(fd, "%g %g MT\n", ix, iy);
+  if(rot1) fprintf(fd, "%d rotate\n", rot1*90);
+  fprintf(fd, "1 -1 scale\n");
+  fprintf(fd, "(");
+  offset = 0;
+  while( (c = (unsigned char) *s) ) {
+    if(c > 127) {
+      if(c == 195) {offset = 64;s++; continue;}
+      if(c == 194) {s++; continue;}
+      fprintf(fd, "\\%03o", c + offset);
+      offset = 0;
+    } else
+    switch(c) {
+      case '(':
+        fputs("\\(", fd);
+        break;
+      case ')':
+        fputs("\\)", fd);
+        break;
+      default:
+       fputc(c, fd);
+    }
+    s++;
+  }
+  fprintf(fd, ")\n");
+  if     (rot==1 && flip==0) {fprintf(fd, "dup SW pop neg 0 RMT\n");}
+  else if(rot==2 && flip==0) {fprintf(fd, "dup SW pop neg 0 RMT\n");}
+  else if(rot==0 && flip==1) {fprintf(fd, "dup SW pop neg 0 RMT\n");}
+  else if(rot==3 && flip==1) {fprintf(fd, "dup SW pop neg 0 RMT\n");}
+
+  fprintf(fd, "show\n");
+  fprintf(fd, "GR\n");
+}
+
+
+
+static void ps_draw_string(int layer, const char *str, short rot, short flip, int hcenter, int vcenter,
+                 double x,double y, double xscale, double yscale)
+{
+  char *tt, *ss, *sss=NULL;
+  double textx1,textx2,texty1,texty2;
+  char c;
+  int lineno=0;
+  double size, height, ascent, descent;
+  int llength=0, no_of_lines, longest_line;
+
+  if(str==NULL || !has_x ) return;
+  size = xscale*53.;
+  height =  size*xctx->mooz * 1.147; /* was 1.147 */
+  ascent =  size*xctx->mooz * 0.808; /* was 0.908 */
+  descent = size*xctx->mooz * 0.219; /* was 0.219 */
+
+  text_bbox(str, xscale, yscale, rot, flip, hcenter, vcenter,
+            x,y, &textx1,&texty1,&textx2,&texty2, &no_of_lines, &longest_line);
+  if(!textclip(xctx->areax1,xctx->areay1,xctx->areax2,
+               xctx->areay2,textx1,texty1,textx2,texty2)) {
+    return;
+  }
+  if(hcenter) {
+    if(rot == 0 && flip == 0 ) { x=textx1;}
+    if(rot == 1 && flip == 0 ) { y=texty1;}
+    if(rot == 2 && flip == 0 ) { x=textx2;}
+    if(rot == 3 && flip == 0 ) { y=texty2;}
+    if(rot == 0 && flip == 1 ) { x=textx2;}
+    if(rot == 1 && flip == 1 ) { y=texty2;}
+    if(rot == 2 && flip == 1 ) { x=textx1;}
+    if(rot == 3 && flip == 1 ) { y=texty1;}
+  }
+  if(vcenter) {
+    if(rot == 0 && flip == 0 ) { y=texty1;}
+    if(rot == 1 && flip == 0 ) { x=textx2;}
+    if(rot == 2 && flip == 0 ) { y=texty2;}
+    if(rot == 3 && flip == 0 ) { x=textx1;}
+    if(rot == 0 && flip == 1 ) { y=texty1;}
+    if(rot == 1 && flip == 1 ) { x=textx2;}
+    if(rot == 2 && flip == 1 ) { y=texty2;}
+    if(rot == 3 && flip == 1 ) { x=textx1;}
+  }
+  llength=0;
+  my_strdup2(54, &sss, str);
+  tt=ss=sss;
+  for(;;) {
+    c=*ss;
+    if(c=='\n' || c==0) {
+      *ss='\0';
+      ps_draw_string_line(layer, tt, x, y, size, rot, flip, lineno, 
+              height, ascent, descent, llength, no_of_lines, longest_line);
+      lineno++;
+      if(c==0) break;
+      *ss='\n';
+      tt=ss+1;
+      llength=0;
+    } else {
+      llength++;
+    }
+    ss++;
+  }
+  my_free(53, &sss);
+}
+
+static void old_ps_draw_string(int gctext,  const char *str,
+                 short rot, short flip, int hcenter, int vcenter,
                  double x1,double y1,
                  double xscale, double yscale)
 
 {
  double a,yy,curr_x1,curr_y1,curr_x2,curr_y2,rx1,rx2,ry1,ry2;
  int pos=0,cc,pos2=0;
- int i;
+ int i, no_of_lines, longest_line;
 
  if(str==NULL) return;
- #ifdef HAS_CAIRO
- text_bbox_nocairo(str, xscale, yscale, rot, flip, hcenter, vcenter, x1,y1, &rx1,&ry1,&rx2,&ry2);
+ #if HAS_CAIRO==1
+ text_bbox_nocairo(str, xscale, yscale, rot, flip, hcenter, vcenter,
+                   x1,y1, &rx1,&ry1,&rx2,&ry2, &no_of_lines, &longest_line);
  #else
- text_bbox(str, xscale, yscale, rot, flip, hcenter, vcenter, x1,y1, &rx1,&ry1,&rx2,&ry2);
+ text_bbox(str, xscale, yscale, rot, flip, hcenter, vcenter,
+           x1,y1, &rx1,&ry1,&rx2,&ry2, &no_of_lines, &longest_line);
  #endif
  xscale*=nocairo_font_xscale;
  yscale*=nocairo_font_yscale;
 
- if(!textclip(areax1,areay1,areax2,areay2,rx1,ry1,rx2,ry2)) return;
+ if(!textclip(xctx->areax1,xctx->areay1,xctx->areax2,xctx->areay2,rx1,ry1,rx2,ry2)) return;
  set_ps_colors(gctext);
  x1=rx1;y1=ry1;
  if(rot&1) {y1=ry2;rot=3;}
@@ -252,7 +453,6 @@ static void ps_draw_string(int gctext,  const char *str,
  }
 }
 
-
 static void ps_drawgrid()
 {
  double x,y;
@@ -262,19 +462,19 @@ static void ps_drawgrid()
  while(delta<CADGRIDTHRESHOLD) delta*=CADGRIDMULTIPLY;  /* <-- to be improved,but works */
  x = xctx->xorigin* xctx->mooz;y = xctx->yorigin* xctx->mooz;
  set_ps_colors(GRIDLAYER);
- if(y>areay1 && y<areay2)
+ if(y>xctx->areay1 && y<xctx->areay2)
  {
-  ps_xdrawline(GRIDLAYER,areax1+1,(int)y, areax2-1, (int)y);
+  ps_xdrawline(GRIDLAYER,xctx->areax1+1,(int)y, xctx->areax2-1, (int)y);
  }
- if(x>areax1 && x<areax2)
+ if(x>xctx->areax1 && x<xctx->areax2)
  {
-  ps_xdrawline(GRIDLAYER,(int)x,areay1+1, (int)x, areay2-1);
+  ps_xdrawline(GRIDLAYER,(int)x,xctx->areay1+1, (int)x, xctx->areay2-1);
  }
  set_ps_colors(GRIDLAYER);
- tmp = floor((areay1+1)/delta)*delta-fmod(-xctx->yorigin* xctx->mooz,delta);
- for(x=floor((areax1+1)/delta)*delta-fmod(-xctx->xorigin* xctx->mooz,delta);x<areax2;x+=delta)
+ tmp = floor((xctx->areay1+1)/delta)*delta-fmod(-xctx->yorigin* xctx->mooz,delta);
+ for(x=floor((xctx->areax1+1)/delta)*delta-fmod(-xctx->xorigin* xctx->mooz,delta);x<xctx->areax2;x+=delta)
  {
-  for(y=tmp;y<areay2;y+=delta)
+  for(y=tmp;y<xctx->areay2;y+=delta)
   {
    ps_xdrawpoint(GRIDLAYER,(int)(x), (int)(y));
   }
@@ -283,18 +483,20 @@ static void ps_drawgrid()
 
 
 
-static void ps_draw_symbol(int n,int layer,int tmp_flip, int rot,
-        double xoffset, double yoffset)
+static void ps_draw_symbol(int n,int layer, short tmp_flip, short rot, double xoffset, double yoffset)
                             /* draws current layer only, should be called within  */
 {                           /* a "for(i=0;i<cadlayers;i++)" loop */
  int j;
  double x0,y0,x1,y1,x2,y2;
- int flip, textlayer;
+ short flip; 
+ int textlayer;
  xLine line;
  xRect box;
  xText text;
  xArc arc;
  xPoly polygon;
+ xSymbol *symptr;
+ char *textfont;
 
   if(xctx->inst[n].ptr == -1) return;
   if( (layer != PINLAYER && !enable_layer[layer]) ) return;
@@ -304,7 +506,7 @@ static void ps_draw_symbol(int n,int layer,int tmp_flip, int rot,
    x2=X_TO_PS(xctx->inst[n].x2);
    y1=Y_TO_PS(xctx->inst[n].y1);
    y2=Y_TO_PS(xctx->inst[n].y2);
-   if(OUTSIDE(x1,y1,x2,y2,areax1,areay1,areax2,areay2))
+   if(OUTSIDE(x1,y1,x2,y2,xctx->areax1,xctx->areay1,xctx->areax2,xctx->areay2))
    {
     xctx->inst[n].flags|=1;
     return;
@@ -326,6 +528,7 @@ static void ps_draw_symbol(int n,int layer,int tmp_flip, int rot,
 
   x0=xctx->inst[n].x0 + xoffset;
   y0=xctx->inst[n].y0 + yoffset;
+  symptr = (xctx->inst[n].ptr+ xctx->sym);
    for(j=0;j< (xctx->inst[n].ptr+ xctx->sym)->lines[layer];j++)
    {
     line = ((xctx->inst[n].ptr+ xctx->sym)->line[layer])[j];
@@ -366,7 +569,7 @@ static void ps_draw_symbol(int n,int layer,int tmp_flip, int rot,
      ROTATION(rot, flip, 0.0,0.0,arc.x,arc.y,x1,y1);
      ps_drawarc(layer, arc.fill, x0+x1, y0+y1, arc.r, angle, arc.b, arc.dash);
    }
-   if( (layer != PINLAYER || enable_layer[layer]) ) for(j=0;j< (xctx->inst[n].ptr+ xctx->sym)->rects[layer];j++)
+   if( enable_layer[layer] ) for(j=0;j< (xctx->inst[n].ptr+ xctx->sym)->rects[layer];j++)
    {
     box = ((xctx->inst[n].ptr+ xctx->sym)->rect[layer])[j];
     ROTATION(rot, flip, 0.0,0.0,box.x1,box.y1,x1,y1);
@@ -385,20 +588,45 @@ static void ps_draw_symbol(int n,int layer,int tmp_flip, int rot,
      txtptr= translate(n, text.txt_ptr);
      ROTATION(rot, flip, 0.0,0.0,text.x0,text.y0,x1,y1);
      textlayer = layer;
-     if( !(layer == PINLAYER && (xctx->inst[n].flags & 4))) {
+     /* do not allow custom text color on PINLAYER hilighted instances */
+     if( !(xctx->inst[n].color == -PINLAYER)) {
        textlayer = (xctx->inst[n].ptr+ xctx->sym)->text[j].layer;
        if(textlayer < 0 || textlayer >= cadlayers) textlayer = layer;
      }
-     if((layer == PINLAYER && xctx->inst[n].flags & 4) ||  enable_layer[textlayer]) {
-       ps_draw_string(textlayer, txtptr,
-         (text.rot + ( (flip && (text.rot & 1) ) ? rot+2 : rot) ) & 0x3,
-         flip^text.flip, text.hcenter, text.vcenter,
-         x0+x1, y0+y1, text.xscale, text.yscale);
+      /* display PINLAYER colored instance texts even if PINLAYER disabled */
+     if(xctx->inst[n].color == -PINLAYER || enable_layer[textlayer]) {
+       my_snprintf(ps_font_family, S(ps_font_name), "Helvetica");
+       my_snprintf(ps_font_name, S(ps_font_name), "Helvetica");
+       textfont = symptr->text[j].font;
+       if( (textfont && textfont[0])) {
+         my_snprintf(ps_font_family, S(ps_font_family), textfont);
+         my_snprintf(ps_font_name, S(ps_font_name), textfont);
+       }
+       if( symptr->text[j].flags & TEXT_BOLD) { 
+         if( (symptr->text[j].flags & TEXT_ITALIC) || (symptr->text[j].flags & TEXT_OBLIQUE) ) {
+           my_snprintf(ps_font_family, S(ps_font_family), "%s-BoldOblique", ps_font_name);
+         } else {
+           my_snprintf(ps_font_family, S(ps_font_family), "%s-Bold", ps_font_name);
+         }
+       }
+       else if( symptr->text[j].flags & TEXT_ITALIC)
+         my_snprintf(ps_font_family, S(ps_font_family), "%s-Oblique", ps_font_name);
+       else if( symptr->text[j].flags & TEXT_OBLIQUE)
+         my_snprintf(ps_font_family, S(ps_font_family), "%s-Oblique", ps_font_name);
+       if(text_ps) {
+         ps_draw_string(textlayer, txtptr,
+           (text.rot + ( (flip && (text.rot & 1) ) ? rot+2 : rot) ) & 0x3,
+           flip^text.flip, text.hcenter, text.vcenter,
+           x0+x1, y0+y1, text.xscale, text.yscale);
+       } else {
+         old_ps_draw_string(textlayer, txtptr,
+           (text.rot + ( (flip && (text.rot & 1) ) ? rot+2 : rot) ) & 0x3,
+           flip^text.flip, text.hcenter, text.vcenter,
+           x0+x1, y0+y1, text.xscale, text.yscale);
+       }
      }
     }
-    restore_lw();
    }
-   Tcl_SetResult(interp,"",TCL_STATIC);
 
 }
 
@@ -421,184 +649,243 @@ static void fill_ps_colors()
 
 }
 
+void create_ps(char **psfile)
+{
+  double dx, dy, scale, scaley;
+  int landscape=1;
+  double margin=10; /* in postscript points, (1/72)". No need to add margin as xschem zoom full already has margins.*/
+
+  /* Legal: 612 792 */
+  double pagex=842;/* a4, in postscript points, (1/72)" */
+  double pagey=595;/* a4, in postscript points, (1/72)" */
+  xRect boundbox;
+  int c,i, textlayer;
+  int old_grid;
+  const char *textfont;
+  
+  if(!(fd = open_tmpfile("psplot_", psfile)) ) {
+    fprintf(errfp, "ps_draw(): can not create tmpfile %s\n", *psfile);
+    return;
+  }
+  ps_colors=my_calloc(311, cadlayers, sizeof(Ps_color));
+  if(ps_colors==NULL){
+    fprintf(errfp, "create_ps(): calloc error\n");tcleval( "exit");
+  }
+
+  fill_ps_colors();
+  old_grid=draw_grid;
+  draw_grid=0;
+
+  boundbox.x1 = xctx->areax1;
+  boundbox.x2 = xctx->areax2;
+  boundbox.y1 = xctx->areay1;
+  boundbox.y2 = xctx->areay2;
+  dx=boundbox.x2-boundbox.x1;
+  dy=boundbox.y2-boundbox.y1;
+
+  /* xschem window aspect ratio decides if portrait or landscape */
+  if(dy > dx) landscape = 0;
+  else landscape = 1;
+  if(!landscape) {
+    double tmp;
+    tmp = pagex;
+    pagex = pagey;
+    pagey = tmp;
+  }
+
+  dbg(1, "ps_draw(): bbox: x1=%g y1=%g x2=%g y2=%g\n", boundbox.x1, boundbox.y1, boundbox.x2, boundbox.y2);
+  fprintf(fd, "%%!PS-Adobe-3.0\n");
+  /* fprintf(fd, "%%%%DocumentMedia: %s %g %g 80 () ()\n", landscape ? "a4land" : "a4", pagex, pagey); */
+  fprintf(fd, "%%%%DocumentMedia: %s %g %g 80 () ()\n", "a4", pagex, pagey);
+  fprintf(fd, "%%%%PageOrientation: %s\n", landscape ? "Landscape" : "Portrait");
+  fprintf(fd, "%%%%Title: xschem plot\n");
+  fprintf(fd, "%%%%Creator: xschem\n");
+  fprintf(fd, "%%%%Pages: 1\n");
+  fprintf(fd, "%%%%EndComments\n");
+  fprintf(fd, "%%%%BeginProlog\n\n");
+
+  for(i = 0; i < sizeof(utf8_enc)/sizeof(char *); i++) {
+    fprintf(fd, utf8_enc[i]);
+  }
+  for(i = 0; i < sizeof(utf8)/sizeof(char *); i++) {
+    fprintf(fd, utf8[i]);
+  }
+
+  fprintf(fd, "/Times /Times chararr recode\n");
+  fprintf(fd, "/Times-Bold /Times-Bold chararr recode\n");
+  fprintf(fd, "/Times-Oblique /Times-Oblique chararr recode\n");
+  fprintf(fd, "/Times-BoldOblique /Times-BoldOblique chararr recode\n");
+  fprintf(fd, "/Helvetica /Helvetica chararr recode\n");
+  fprintf(fd, "/Helvetica-Bold /Helvetica-Bold chararr recode\n");
+  fprintf(fd, "/Helvetica-Oblique /Helvetica-Oblique chararr recode\n");
+  fprintf(fd, "/Helvetica-BoldOblique /Helvetica-BoldOblique chararr recode\n");
+  fprintf(fd, "/Courier /Courier chararr recode\n");
+  fprintf(fd, "/Courier-Bold /Courier-Bold chararr recode\n");
+  fprintf(fd, "/Courier-Oblique /Courier-Oblique chararr recode\n");
+  fprintf(fd, "/Courier-BoldOblique /Courier-BoldOblique chararr recode\n");
+
+  fprintf(fd,"/cm {28.346457 mul} bind def\n");
+  fprintf(fd,"/LT {lineto} bind def\n");
+  fprintf(fd,"/MT {moveto} bind def\n");
+  fprintf(fd,"/RMT {rmoveto} bind def\n");
+  fprintf(fd,"/L {moveto lineto stroke} bind def\n");
+  fprintf(fd,"/RGB {setrgbcolor} bind def\n");
+  fprintf(fd,"/FF {findfont} bind def\n");
+  fprintf(fd,"/SF {setfont} bind def\n");
+  fprintf(fd,"/SCF {scalefont} bind def\n");
+  fprintf(fd,"/SW {stringwidth} bind def\n");
+  fprintf(fd,"/GS {gsave} bind def\n");
+  fprintf(fd,"/GR {grestore} bind def\n");
+  fprintf(fd,"/NP {newpath} bind def\n");
+  fprintf(fd,"/A {arcn} bind def\n");
+  fprintf(fd,"/R {rectstroke} bind def\n");
+  fprintf(fd,"/S {stroke} bind def\n");
+  fprintf(fd,"/C {closepath} bind def\n");
+  fprintf(fd,"/F {fill} bind def\n");
+  fprintf(fd,"/RF {rectfill} bind def\n");
+  fprintf(fd, "%%%%EndProlog\n");
+  fprintf(fd, "%%%%BeginSetup\n");
+  fprintf(fd, "<< /PageSize [%g %g] /Orientation 0 >> setpagedevice\n", pagex, pagey);
+  fprintf(fd, "%%%%Page: 1 1\n\n");
+  fprintf(fd, "%%%%BeginPageSetup\n");
+  fprintf(fd, "%%%%EndPageSetup\n");
+
+  scaley = scale = (pagey-2 * margin) / dy;
+  dbg(1, "scale=%g pagex=%g pagey=%g dx=%g dy=%g\n", scale, pagex, pagey, dx, dy);
+  if(dx * scale > (pagex - 2 * margin)) {
+    scale = (pagex - 2 * margin) / dx;
+    dbg(1, "scale=%g\n", scale);
+  }
+  fprintf(fd, "%g %g translate\n", 
+    -scale * boundbox.x1 + margin, pagey - (scaley - scale) * dy - margin + scale * boundbox.y1);
+  fprintf(fd, "%g %g scale\n", scale, -scale);
+  fprintf(fd, "1 setlinejoin 1 setlinecap\n");
+  set_lw();
+  ps_drawgrid();
+
+  for(i=0;i<xctx->texts;i++)
+  {
+    textlayer = xctx->text[i].layer;
+    if(textlayer < 0 ||  textlayer >= cadlayers) textlayer = TEXTLAYER;
+
+    my_snprintf(ps_font_family, S(ps_font_name), "Helvetica");
+    my_snprintf(ps_font_name, S(ps_font_name), "Helvetica");
+    textfont = xctx->text[i].font;
+    if( (textfont && textfont[0])) {
+      my_snprintf(ps_font_family, S(ps_font_family), textfont);
+      my_snprintf(ps_font_name, S(ps_font_name), textfont);
+    }
+    if( xctx->text[i].flags & TEXT_BOLD) { 
+      if( (xctx->text[i].flags & TEXT_ITALIC) || (xctx->text[i].flags & TEXT_OBLIQUE) ) {
+        my_snprintf(ps_font_family, S(ps_font_family), "%s-BoldOblique", ps_font_name);
+      } else {
+        my_snprintf(ps_font_family, S(ps_font_family), "%s-Bold", ps_font_name);
+      }
+    }
+    else if( xctx->text[i].flags & TEXT_ITALIC)
+      my_snprintf(ps_font_family, S(ps_font_family), "%s-Oblique", ps_font_name);
+    else if( xctx->text[i].flags & TEXT_OBLIQUE)
+      my_snprintf(ps_font_family, S(ps_font_family), "%s-Oblique", ps_font_name);
+
+    if(text_ps) {
+      ps_draw_string(textlayer, xctx->text[i].txt_ptr,
+        xctx->text[i].rot, xctx->text[i].flip, xctx->text[i].hcenter, xctx->text[i].vcenter,
+        xctx->text[i].x0,xctx->text[i].y0,
+        xctx->text[i].xscale, xctx->text[i].yscale);
+    } else {
+      old_ps_draw_string(textlayer, xctx->text[i].txt_ptr,
+        xctx->text[i].rot, xctx->text[i].flip, xctx->text[i].hcenter, xctx->text[i].vcenter,
+        xctx->text[i].x0,xctx->text[i].y0,
+        xctx->text[i].xscale, xctx->text[i].yscale);
+    }
+  }
+  for(c=0;c<cadlayers;c++)
+  {
+    set_ps_colors(c);
+    for(i=0;i<xctx->lines[c];i++)
+      ps_drawline(c, xctx->line[c][i].x1, xctx->line[c][i].y1,
+        xctx->line[c][i].x2, xctx->line[c][i].y2, xctx->line[c][i].dash);
+    for(i=0;i<xctx->rects[c];i++)
+    {
+      ps_filledrect(c, xctx->rect[c][i].x1, xctx->rect[c][i].y1,
+        xctx->rect[c][i].x2, xctx->rect[c][i].y2, xctx->rect[c][i].dash);
+    }
+    for(i=0;i<xctx->arcs[c];i++)
+    {
+      ps_drawarc(c, xctx->arc[c][i].fill, xctx->arc[c][i].x, xctx->arc[c][i].y, 
+        xctx->arc[c][i].r, xctx->arc[c][i].a, xctx->arc[c][i].b, xctx->arc[c][i].dash);
+    }
+    for(i=0;i<xctx->polygons[c];i++) {
+      ps_drawpolygon(c, NOW, xctx->poly[c][i].x, xctx->poly[c][i].y, xctx->poly[c][i].points,
+        xctx->poly[c][i].fill, xctx->poly[c][i].dash);
+    }
+    for(i=0;i<xctx->instances;i++)
+      ps_draw_symbol(i,c,0,0,0.0,0.0);
+  }
+  set_ps_colors(WIRELAYER);
+  for(i=0;i<xctx->wires;i++)
+  {
+    ps_drawline(WIRELAYER, xctx->wire[i].x1,xctx->wire[i].y1,xctx->wire[i].x2,xctx->wire[i].y2, 0);
+  }
+
+  {
+    double x1, y1, x2, y2;
+    struct wireentry *wireptr;
+    int i;
+    struct iterator_ctx ctx;
+    update_conn_cues(0, 0);
+    /* draw connecting dots */
+    x1 = X_TO_XSCHEM(xctx->areax1);
+    y1 = Y_TO_XSCHEM(xctx->areay1);
+    x2 = X_TO_XSCHEM(xctx->areax2);
+    y2 = Y_TO_XSCHEM(xctx->areay2);
+    for(init_wire_iterator(&ctx, x1, y1, x2, y2); ( wireptr = wire_iterator_next(&ctx) ) ;) {
+      i = wireptr->n;
+      if( xctx->wire[i].end1 >1 ) { /* 20150331 draw_dots */
+        ps_drawarc(WIRELAYER, 1, xctx->wire[i].x1, xctx->wire[i].y1, cadhalfdotsize, 0, 360, 0);
+      }
+      if( xctx->wire[i].end2 >1 ) { /* 20150331 draw_dots */
+        ps_drawarc(WIRELAYER, 1, xctx->wire[i].x2, xctx->wire[i].y2, cadhalfdotsize, 0, 360, 0);
+      }
+    }
+  }
+
+  dbg(1, "ps_draw(): INT_WIDTH(lw)=%d plotfile=%s\n",INT_WIDTH(xctx->lw), plotfile);
+  fprintf(fd, "showpage\n\n");
+  fprintf(fd, "%%%%trailer\n");
+  fprintf(fd, "%%%%EOF\n");
+  fclose(fd);
+  draw_grid=old_grid;
+  my_free(879, &ps_colors);
+}
 
 void ps_draw(void)
 {
- double dx, dy, delta,scale;
- int c,i, textlayer;
- char *tmp=NULL;
- int old_grid;
- int modified_save;
+ char tmp[2*PATH_MAX+40];
+ static char lastdir[PATH_MAX] = "";
  const char *r;
+ char *psfile;
 
+ if(!lastdir[0]) my_strncpy(lastdir, pwd_dir, S(lastdir));
  if(!plotfile[0]) {
-   my_strdup(59, &tmp, "tk_getSaveFile -title {Select destination file} -initialdir [pwd]");
-   tcleval(tmp);
-   my_free(878, &tmp);
+   Tcl_VarEval(interp, "tk_getSaveFile -title {Select destination file} -initialfile ",
+     get_cell(xctx->sch[xctx->currsch], 0) , ".pdf -initialdir ", lastdir, NULL);
    r = tclresult();
-   if(r[0]) my_strncpy(plotfile, r, S(plotfile));
-   else {
-     return;
+   if(r[0]) {
+     my_strncpy(plotfile, r, S(plotfile));
+     Tcl_VarEval(interp, "file dirname ", plotfile, NULL);
+     my_strncpy(lastdir, tclresult(), S(lastdir));
    }
+   else return;
  }
- modified_save=modified;
- push_undo();
- trim_wires();    /* 20161121 add connection boxes on wires but undo at end */
- ps_colors=my_calloc(311, cadlayers, sizeof(Ps_color));
- if(ps_colors==NULL){
-   fprintf(errfp, "ps_draw(): calloc error\n");tcleval( "exit");
- }
-
- fill_ps_colors();
- old_grid=draw_grid;
- draw_grid=0;
-
- dx=areax2-areax1;
- dy=areay2-areay1;
- dbg(1, "ps_draw(): dx=%.16g  dy=%.16g\n", dx, dy);
-
- fd=fopen("plot.ps", "w");
- fprintf(fd, "%%!\n");
-
-
- fprintf(fd, "%%%%BoundingBox: (atend)\n");
- fprintf(fd, "%%%%Title: xschem plot\n");
- fprintf(fd, "%%%%Creator: xschem\n");
- fprintf(fd, "%%%%Pages: 1\n");
- fprintf(fd, "%%%%DocumentFonts: (atend)\n");
- fprintf(fd, "%%%%EndComments\n");
- fprintf(fd, "%%%%BeginProlog\n\n");
- fprintf(fd, "%%%%EndProlog\n");
- fprintf(fd, "%%%%BeginSetup\n");
- if(a3page) {
-   fprintf(fd, "%%%%BeginFeature: *PageSize A3\n");
-   fprintf(fd, "<< /PageSize [842 1191]  /ImagingBBox null >> setpagedevice\n");
- }
- fprintf(fd, "%%%%EndSetup\n");
- fprintf(fd, "%%%%Page: 1 1\n\n");
-
- fprintf(fd,"/cm {28.346457 mul} bind def\n");
- fprintf(fd,"/LT {lineto} bind def\n");
- fprintf(fd,"/MT {moveto} bind def\n");
- fprintf(fd,"/L {moveto lineto stroke} bind def\n");
- fprintf(fd,"/A {arcn stroke} bind def\n");
- fprintf(fd,"/AF {arcn fill stroke} bind def\n");
- fprintf(fd,"/R {rectstroke} bind def\n");
- fprintf(fd,"/RF {rectfill} bind def\n");
- if(dx/dy>27.7/19 || dy/dx>27.7/19)
- {
-  delta=dx>dy? dx:dy;
-  if(a3page) scale=28.7*28.346457/delta*sqrt(2);
-  else  scale=27.7*28.346457/delta;
- }
- else
- {
-  delta=dx>dy? dy:dx;
-  if(a3page) scale=20*28.346457/delta*sqrt(2);
-  else scale=19*28.346457/delta;
- }
- if(dx>dy)
- {
-  if(a3page) fprintf(fd,"28.99137803 cm 41.29503602 cm translate\n");
-  else fprintf(fd,"20 cm 28.7 cm translate\n");
-  fprintf(fd,"-90 rotate\n");
-  fprintf(fd,"%.16g %.16g scale\n",scale,-scale);
- }
- else
- {
-  fprintf(fd,"1 cm 28.7 cm translate\n");
-  fprintf(fd,"%.16g %.16g scale\n",scale,-scale);
- }
-
- fprintf(fd, "1 setlinejoin 1 setlinecap\n");
- restore_lw();
- ps_drawgrid();
-
- for(i=0;i<xctx->texts;i++)
- {
-   textlayer = xctx->text[i].layer;
-   if(textlayer < 0 ||  textlayer >= cadlayers) textlayer = TEXTLAYER;
-   ps_draw_string(textlayer, xctx->text[i].txt_ptr,
-     xctx->text[i].rot, xctx->text[i].flip, xctx->text[i].hcenter, xctx->text[i].vcenter,
-     xctx->text[i].x0,xctx->text[i].y0,
-     xctx->text[i].xscale, xctx->text[i].yscale);
- }
- restore_lw();
-
- for(c=0;c<cadlayers;c++)
- {
-  set_ps_colors(c);
-  for(i=0;i<xctx->lines[c];i++)
-   ps_drawline(c, xctx->line[c][i].x1, xctx->line[c][i].y1,
-                  xctx->line[c][i].x2, xctx->line[c][i].y2, xctx->line[c][i].dash);
-  for(i=0;i<xctx->rects[c];i++)
-  {
-   ps_filledrect(c, xctx->rect[c][i].x1, xctx->rect[c][i].y1,
-                    xctx->rect[c][i].x2, xctx->rect[c][i].y2, xctx->rect[c][i].dash);
-  }
-  for(i=0;i<xctx->arcs[c];i++)
-  {
-    ps_drawarc(c, xctx->arc[c][i].fill, xctx->arc[c][i].x, xctx->arc[c][i].y, 
-                  xctx->arc[c][i].r, xctx->arc[c][i].a, xctx->arc[c][i].b, xctx->arc[c][i].dash);
-  }
-  for(i=0;i<xctx->polygons[c];i++) {
-    ps_drawpolygon(c, NOW, xctx->poly[c][i].x, xctx->poly[c][i].y, xctx->poly[c][i].points,
-       xctx->poly[c][i].fill, xctx->poly[c][i].dash);
-  }
-
-
-  for(i=0;i<xctx->instances;i++)
-   ps_draw_symbol(i,c,0,0,0.0,0.0);
-
- }
- set_ps_colors(WIRELAYER);
- for(i=0;i<xctx->wires;i++)
- {
-    ps_drawline(WIRELAYER, xctx->wire[i].x1,xctx->wire[i].y1,xctx->wire[i].x2,xctx->wire[i].y2, 0);
- }
-
- {
-   double x1, y1, x2, y2;
-   struct wireentry *wireptr;
-   int i;
-   update_conn_cues(0, 0);
-   /* draw connecting dots */
-   x1 = X_TO_XSCHEM(areax1);
-   y1 = Y_TO_XSCHEM(areay1);
-   x2 = X_TO_XSCHEM(areax2);
-   y2 = Y_TO_XSCHEM(areay2);
-   for(init_wire_iterator(x1, y1, x2, y2); ( wireptr = wire_iterator_next() ) ;) {
-     i = wireptr->n;
-     if( xctx->wire[i].end1 >1 ) { /* 20150331 draw_dots */
-       ps_drawarc(WIRELAYER, 1, xctx->wire[i].x1, xctx->wire[i].y1, cadhalfdotsize, 0, 360, 0);
-     }
-     if( xctx->wire[i].end2 >1 ) { /* 20150331 draw_dots */
-       ps_drawarc(WIRELAYER, 1, xctx->wire[i].x2, xctx->wire[i].y2, cadhalfdotsize, 0, 360, 0);
-     }
-   }
- }
-
-
-
-
-
-
- dbg(1, "ps_draw(): INT_WIDTH(xctx->lw)=%d plotfile=%s\n",INT_WIDTH(xctx->lw), plotfile);
- fprintf(fd, "showpage\n\n");
- fprintf(fd, "%%%%EOF\n");
- fclose(fd);
- draw_grid=old_grid;
- my_free(879, &ps_colors);
+ create_ps(&psfile);
  if(plotfile[0]) {
-   my_strdup(53, &tmp, "convert_to_pdf plot.ps ");
-   my_strcat(54, &tmp, plotfile);
+   my_snprintf(tmp, S(tmp), "convert_to_pdf %s %s", psfile, plotfile);
  } else {
-   my_strdup(312, &tmp, "convert_to_pdf plot.ps plot.pdf");
+   my_snprintf(tmp, S(tmp), "convert_to_pdf %s plot.pdf", psfile);
  }
  my_strncpy(plotfile,"", S(plotfile));
  tcleval( tmp);
- my_free(880, &tmp);
- pop_undo(0);
- modified=modified_save;
+ Tcl_SetResult(interp,"",TCL_STATIC);
 }
 

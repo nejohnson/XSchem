@@ -331,6 +331,7 @@ function compact_pinlist(inst,inst_sub                  , prevgroup, group,i,ii,
              else net_ret[ii] = compact_label(inst,net_ar,curr_n,i-1)
            }
            dir_ret[ii] = pin_ar[inst_sub,"dir",pin_ar[inst_sub,i-1] ]
+           if(dir_ret[ii] == "") dir_ret[ii] = "B"
            ii++
            curr=base;curr_n=i
            prevgroup=group
@@ -345,6 +346,7 @@ function compact_pinlist(inst,inst_sub                  , prevgroup, group,i,ii,
    }
 
    dir_ret[ii] = pin_ar[inst_sub,"dir",pin_ar[inst_sub,np] ]
+   if(dir_ret[ii] == "") dir_ret[ii] = "B"
    pin_ret["n"] =  dir_ret["n"] = ii
    if(inst) net_ret["n"] = ii
 }
@@ -692,7 +694,7 @@ function print_sym(sym, template, format, subckt_name, sym_type, extra, dir, pin
 
 
  print "start print symbol: " sym
- print "v {xschem version=2.9.8 file_version=1.2}"
+ print "v {xschem version=2.9.9 file_version=1.2}"
  print "K {type=" sym_type > sym
  # print "format=\"@name @pinlist @symname " format_translate(template)  "\"" > sym
  iii = format_translate(template, extra)

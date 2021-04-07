@@ -26,9 +26,10 @@ BEGIN{
  lines = 0;
  first=1
  user_code=0 #20180129
- # 20081209 hspice syntax variants
- if( ARGV[1] == "-hspice" ) {
-   hspice=1
+
+ while( ARGV[1] ~ /^[-]/) {
+   if(ARGV[1] == "-hspice") hspice = 1
+   if(ARGV[1] == "-xyce") { xyce = 1} 
    for(i=2; i<= ARGC;i++) {
      ARGV[i-1] = ARGV[i]
    }
@@ -58,16 +59,22 @@ END{
   $0=yy
   line[lines++] = $0
 
-
-  ## place to insert processing awk hooks
-
   ## resolve parametric instance name vector multiplicity
   substitute_instance_param()
-
-  ## /place to insert processing awk hooks
   
   for(i=0; i<lines; i++) {
     $0 = line[i]
+
+    ## /place to insert processing awk hooks
+    if(xyce == 1) {
+      ## transform ".save" lines into ".print tran" *only* for spice_probe elements, not user code
+      if(tolower($0) ~/^[ \t]*\.save[ \t]+.*\?[0-9]+/) {   # .save file=test1.raw format=raw v( ?1 C2  )
+        $1 = ""
+        if(tolower($2) == "tran") $2 = ""
+        $0 = ".print tran" $0
+      }
+      gsub(/ [mM] *= *1 *$/,"") # xyce does not like m=# fields (multiplicity) removing m=1 is no an issue anyway
+    }
     process()
   }
 }
@@ -126,6 +133,14 @@ function sign(x)
 function process(        i, iprefix)
 {
 
+  if($0 ~/\*\*\*\* end_element/){
+    spiceprefix=""
+    return
+  }
+  if($0 ~/\*\*\*\* spice_prefix/){
+    spiceprefix=$3
+    return
+  }
   if($0 ~/\*\*\*\* begin user architecture code/){ #20180129
     user_code=1
     print
@@ -208,11 +223,10 @@ function process(        i, iprefix)
    if($0 ~ /^D/ ) sub(/PERI[ \t]*=/,"PJ=")
  }
 
-
-
-
- # .probe tran v( ?1 DL[3],DL[2],DL[1],DL[0] , ?1 WL[3],WL{2],WL[1],WL[0] )
- if($1 ==".probe" && $4 ~/^\?-?[0-9]+$/ && $7 ~/^\?-?[0-9]+$/ && NF==9) {
+ # Xyce
+ # .print tran v( ?1 DL[3],DL[2],DL[1],DL[0] , ?1 WL[3],WL{2],WL[1],WL[0] )
+ #                        ............          .......... --> matches ?n and ?-n
+ if(tolower($1) ==".print" && $4 ~/^\?-?[0-9]+$/ && $7 ~/^\?-?[0-9]+$/ && NF==9) {
    num1=split($5,name,",")
    num2=split($8,name2,",")
 
@@ -221,8 +235,10 @@ function process(        i, iprefix)
      print $1 " " $2 " " $3 " " name[(i-1)%num1+1]  " , " name2[(i-1)%num2+1] " " $9 
    }
 
+ # Ngspice
  # .save v( ?1 DL[3],DL[2],DL[1],DL[0] , ?1 WL[3],WL{2],WL[1],WL[0] )
- } else if($1 ==".save" && $3 ~/^\?-?[0-9]+$/ && $6 ~/^\?-?[0-9]+$/ && NF==8) {
+ #                              ............          .......... --> matches ?n and ?-n
+ } else if(tolower($1) ==".save" && $3 ~/^\?-?[0-9]+$/ && $6 ~/^\?-?[0-9]+$/ && NF==8) {
    num1=split($4,name,",")
    num2=split($7,name2,",")
 
@@ -231,36 +247,37 @@ function process(        i, iprefix)
      print $1 " " $2 " " name[(i-1)%num1+1]  " , " name2[(i-1)%num2+1] " " $8
    }
 
-
- # .probe tran v( ?1 LDY1_B[1],LDY1_B[0]  )
- } else if($1 ==".probe" && $4 ~/^\?-?[0-9]+$/ && NF==6) {
+ # Xyce
+ # .print tran v( ?1 LDY1_B[1],LDY1_B[0] )
+ #                               ............ --> matches ?n and ?-n
+ } else if(tolower($1) ==".print" && $4 ~/^\?-?[0-9]+$/ && NF==6) {
    num=split($5,name,",")
    for(i=1;i<=num;i++) {
      print $1 " " $2 " " $3 " " name[i] " " $6
    }
- # .save v( ?1 LDY1_B[1],LDY1_B[0]  )
- } else if($1 ==".save" && $3 ~/^\?-?[0-9]+$/ && NF==5) {
+
+ # Ngspice
+ # .save v( ?1 LDY1_B[1],LDY1_B[0] )
+ #                              ............ --> matches ?n and ?-n
+ } else if(tolower($1) ==".save" && $3 ~/^\?-?[0-9]+$/ && NF==5) {
    num=split($4,name,",")
    for(i=1;i<=num;i++) { 
      print $1 " " $2 " " name[i] " " $5
    }
 
-
- # .probe i( v1[15],v1[14],v1[13],v1[12],v1[11],v1[10],v1[9],v1[8],v1[7],v1[6],v1[5],v1[4],v1[3],v1[2],v1[1],v1[0] )
- } else if($0 ~ /^\.(probe|save) +[iIvVxX] *\(.*\)/) {
+ # .save i( v1[15],v1[14],v1[13],v1[12],v1[11],v1[10],v1[9],v1[8],v1[7],v1[6],v1[5],v1[4],v1[3],v1[2],v1[1],v1[0] )
+ } else if(tolower($0) ~ /^[ \t]*\.(print|save) +.* +[ivx] *\(.*\)/) {
    num=$0
    sub(/.*\( */,"",num)
    sub(/ *\).*/,"",num)
+   sub(/^\?[0-9]+/,"", num)  # .print tran file=test1.raw format=raw v(?1 C2)   <-- remove ?1
    num=split(num,name,",")
    num1 = $0
-   sub(/^.*probe */,"",num1)
    sub(/^.*save */,"",num1)
+   sub(/^.*print */,"",num1)
    sub(/\(.*/,"(",num1)
    for(i=1;i<=num;i++) {
-     if($0 ~ /^\.probe/) 
-       print ".probe " num1 name[i] ")"
-     else
-       print ".save " num1 name[i] ")"
+     print $1 " "  num1 name[i] ")"
    }
  } else if( $1 ~ /^\*\.(ipin|opin|iopin)/ ) {
    num=split($2,name,",")
@@ -277,6 +294,7 @@ function process(        i, iprefix)
  
   for(j=2;j<=NF;j+=1)  		# start from 2 not from 3 20070221
   {
+    #       ............ --> matches ?n and ?-n         
     if($j ~/^\?-?[0-9]+$/) continue	# handle the case that $2 not pinlist  20070221
     arg_num[j]=split($j,tmp,",")
     for(k=1;k<=arg_num[j]; k++) {
@@ -285,10 +303,11 @@ function process(        i, iprefix)
   }
   for(i=1;i<=num;i++)
   {
-   printf "%s ", name[i]
+   printf "%s ", spiceprefix name[i]
 
    for(j=2;j<=NF;j++)
    {
+    #         ............ --> matches ?n and ?-n
     if($j !~ /^\?-?[0-9]+$/)
     {
       printf "%s ", $j # if not a node just print it

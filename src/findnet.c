@@ -113,7 +113,7 @@ void find_closest_net_or_symbol_pin(double mx,double my, double *x, double *y)
   int i, j, no_of_pin_rects;
   double x0, x1, x2, y0, y1, y2, xx, yy, dist, min_dist_x=0, min_dist_y=0;
   xRect box;
-  int rot, flip;
+  short rot, flip;
   char *type=NULL;
 
   distance = DBL_MAX;
@@ -271,26 +271,27 @@ void find_closest_element(double mx,double my)
 
 void find_closest_text(double mx,double my)
 {
- int rot,flip;
+ short rot,flip;
  double xx1,xx2,yy1,yy2;
- int i,r=-1;
+ int i,r=-1, tmp;
  double threshold = CADWIREMINDIST * CADWIREMINDIST * cadgrid * cadgrid / 400;
- #ifdef HAS_CAIRO
+ #if HAS_CAIRO==1
  int customfont;
  #endif
   for(i=0;i<xctx->texts;i++)
   {
    rot = xctx->text[i].rot;
    flip = xctx->text[i].flip;
-   #ifdef HAS_CAIRO
+   #if HAS_CAIRO==1
    customfont = set_text_custom_font(&xctx->text[i]);
    #endif
    text_bbox(xctx->text[i].txt_ptr,
-             xctx->text[i].xscale, xctx->text[i].yscale, rot, flip, xctx->text[i].hcenter, xctx->text[i].vcenter,
+             xctx->text[i].xscale, xctx->text[i].yscale, rot, flip,
+              xctx->text[i].hcenter, xctx->text[i].vcenter,
              xctx->text[i].x0, xctx->text[i].y0,
-             &xx1,&yy1, &xx2,&yy2);
-   #ifdef HAS_CAIRO
-   if(customfont) cairo_restore(cairo_ctx);
+             &xx1,&yy1, &xx2,&yy2, &tmp, &tmp);
+   #if HAS_CAIRO==1
+   if(customfont) cairo_restore(xctx->cairo_ctx);
    #endif
    if(POINTINSIDE(mx,my,xx1,yy1, xx2, yy2))
    {

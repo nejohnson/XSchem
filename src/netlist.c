@@ -354,21 +354,27 @@ void hash_wires(void)
 }
 
 /* return 0 if library path of s matches any lib name in tcl variable $xschem_libs */
-int check_lib(char *s)
+/* what: 1: netlist exclude lib, 2: hierarchical print exclude lib */
+int check_lib(int what, const char *s)
 {
  int range,i, found;
- char str[200]; /* overflow safe 20161122 */
+ char str[PATH_MAX + 512]; /* overflow safe 20161122 */
 
  found=0;
- tcleval("llength $xschem_libs");
+ if(what & 1) tcleval("llength $xschem_libs");
+ if(what & 2) tcleval("llength $noprint_libs");
  range = atoi(tclresult());
- dbg(1, "check_lib(): %s, range=%d\n", s, range);
+ dbg(1, "check_lib(): s=%s, range=%d\n", s, range);
 
  for(i=0;i<range;i++){
-  my_snprintf(str, S(str), "lindex $xschem_libs %d",i);
+  if(what & 1 ) my_snprintf(str, S(str), "lindex $xschem_libs %d",i);
+  if(what & 2 ) my_snprintf(str, S(str), "lindex $noprint_libs %d",i);
   tcleval(str);
-  dbg(1, "check_lib(): xschem_libs=%s\n", tclresult());
-  if( strstr(s,tclresult())) found=1;
+  dbg(1, "check_lib(): %s -> %s\n", str, tclresult());
+  my_snprintf(str, S(str), "regexp {%s} %s", tclresult(), s);
+  dbg(1, "check_lib(): str=%s\n", str);
+  tcleval(str);
+  if( tclresult()[0] == '1') found=1;
  }
  if(found) return 0;
  else return 1;
@@ -1059,12 +1065,17 @@ int sym_vs_sch_pins()
   int endfile;
   char tag[1];
   char filename[PATH_MAX];
+  char *sch = NULL;
   n_syms = xctx->symbols;
   for(i=0;i<n_syms;i++)
   {
     if( xctx->sym[i].type && !strcmp(xctx->sym[i].type,"subcircuit")) {
       rects = xctx->sym[i].rects[PINLAYER];
-      my_strncpy(filename, abs_sym_path(get_tok_value(xctx->sym[i].prop_ptr, "schematic", 0), "") , S(filename));
+
+      my_strdup2(1248, &sch, get_tok_value(xctx->sym[i].prop_ptr, "schematic", 0));
+      tcl_hook(&sch);
+      my_strncpy(filename, abs_sym_path(sch, ""), S(filename));
+      my_free(1249, &sch);
       if(!filename[0]) {
         my_strncpy(filename, add_ext(abs_sym_path(xctx->sym[i].name, ""), ".sch"), S(filename));
       }
@@ -1176,7 +1187,7 @@ int sym_vs_sch_pins()
                         )
                       ) {
                       char str[2048];
-                      my_snprintf(str, S(str), "xSymbol %s: Unmatched subcircuit schematic pin direction: %s",
+                      my_snprintf(str, S(str), "Symbol %s: Unmatched subcircuit schematic pin direction: %s",
                                   xctx->sym[i].name, lab);
                       statusmsg(str,2);
                       my_snprintf(str, S(str), "    %s <--> %s", type, pin_dir);
@@ -1195,7 +1206,7 @@ int sym_vs_sch_pins()
                 if(!pin_match) {
                   char str[2048];
                   /* fprintf(errfp, "  unmatched sch / sym pin: %s\n", lab); */
-                  my_snprintf(str, S(str), "xSymbol %s: schematic pin: %s not in symbol", xctx->sym[i].name, lab);
+                  my_snprintf(str, S(str), "Symbol %s: schematic pin: %s not in symbol", xctx->sym[i].name, lab);
                   statusmsg(str,2);
                   for(j = 0; j < xctx->instances; j++) {
                     if(!strcmp(xctx->inst[j].name, xctx->sym[i].name)) {
@@ -1227,7 +1238,7 @@ int sym_vs_sch_pins()
         fclose(fd);
         if(pin_cnt != rects) {
           char str[2048];
-          my_snprintf(str, S(str), "xSymbol %s has %d pins, its schematic has %d pins",
+          my_snprintf(str, S(str), "Symbol %s has %d pins, its schematic has %d pins",
                       xctx->sym[i].name, rects, pin_cnt);
           statusmsg(str,2);
           for(j = 0; j < xctx->instances; j++) {
@@ -1250,7 +1261,7 @@ int sym_vs_sch_pins()
           if(!pin_match) {
             char str[2048];
             /* fprintf(errfp, "  unmatched sch / sym pin: %s\n", lab); */
-            my_snprintf(str, S(str), "xSymbol %s: symbol pin: %s not in schematic",
+            my_snprintf(str, S(str), "Symbol %s: symbol pin: %s not in schematic",
                         xctx->sym[i].name, pin_name ? pin_name : "<NULL>");
             statusmsg(str,2);
             for(k = 0; k < xctx->instances; k++) {

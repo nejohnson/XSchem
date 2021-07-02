@@ -311,7 +311,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
       cmd_found = 1;
       rebuild_selected_array();
       save_selection(2);
-      delete();
+      delete(1/*to_push_undo*/);
       Tcl_ResetResult(interp);
     }
   }
@@ -330,7 +330,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
     else if(!strcmp(argv[1],"delete"))
     {
       cmd_found = 1;
-      if(argc==2) delete();
+      if(argc==2) delete(1/*to_push_undo*/);
       Tcl_ResetResult(interp);
     }
    
@@ -1048,6 +1048,8 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
      printf("                   place new symbol, asking filename\n");
      printf("      xschem make_symbol\n");
      printf("                   make symbol view from current schematic\n");
+     printf("      xschem make_sch_from_sel\n");
+     printf("                   make schematic view from selected components\n");
      printf("      xschem place_text\n");
      printf("                   place new text\n");
      printf("      xschem debug  n\n");
@@ -1059,6 +1061,12 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
      #endif
     }
    
+    else if(!strcmp(argv[1],"hier_psprint"))
+    {
+      cmd_found = 1;
+      hier_psprint();
+      Tcl_ResetResult(interp);
+    }
     else if(!strcmp(argv[1],"hilight"))
     {
       cmd_found = 1;
@@ -1087,12 +1095,12 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
       cmd_found = 1;
       if(argc==7)
        /*           pos sym_name      x                y             rot          flip      prop draw first */
-        place_symbol(-1, argv[2], atof(argv[3]), atof(argv[4]), atoi(argv[5]), atoi(argv[6]),NULL, 3, 1);
+        place_symbol(-1, argv[2], atof(argv[3]), atof(argv[4]), atoi(argv[5]), atoi(argv[6]),NULL, 3, 1, 1/*to_push_undo*/);
       else if(argc==8)
-        place_symbol(-1, argv[2], atof(argv[3]), atof(argv[4]), atoi(argv[5]), atoi(argv[6]), argv[7], 3, 1);
+        place_symbol(-1, argv[2], atof(argv[3]), atof(argv[4]), atoi(argv[5]), atoi(argv[6]), argv[7], 3, 1, 1/*to_push_undo*/);
       else if(argc==9) {
         int x = !(atoi(argv[8]));
-        place_symbol(-1, argv[2], atof(argv[3]), atof(argv[4]), atoi(argv[5]), atoi(argv[6]), argv[7], 0, x);
+        place_symbol(-1, argv[2], atof(argv[3]), atof(argv[4]), atoi(argv[5]), atoi(argv[6]), argv[7], 0, x, 1/*to_push_undo*/);
       }
     }
    
@@ -1476,7 +1484,14 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
       }
       Tcl_ResetResult(interp);
     }
-   
+
+    else if (!strcmp(argv[1], "make_sch_from_sel"))
+    {
+      cmd_found = 1;
+      make_schematic_symbol_from_sel();
+      Tcl_ResetResult(interp);
+    }
+
     else if(!strcmp(argv[1],"merge"))
     {
       cmd_found = 1;
@@ -1638,9 +1653,9 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
       xctx->mx_double_save = xctx->mousex_snap;
       xctx->my_double_save = xctx->mousey_snap;
       if(argc == 4) {
-        ret = place_symbol(-1,argv[2],xctx->mousex_snap, xctx->mousey_snap, 0, 0, argv[3], 4, 1);
+        ret = place_symbol(-1,argv[2],xctx->mousex_snap, xctx->mousey_snap, 0, 0, argv[3], 4, 1, 1/*to_push_undo*/);
       } else if(argc == 3) {
-        ret = place_symbol(-1,argv[2],xctx->mousex_snap, xctx->mousey_snap, 0, 0, NULL, 4, 1);
+        ret = place_symbol(-1,argv[2],xctx->mousex_snap, xctx->mousey_snap, 0, 0, NULL, 4, 1, 1/*to_push_undo*/);
       } else {
         #if 1  /* enable on request also in callback.c */
         rebuild_selected_array();
@@ -1649,7 +1664,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
              abs_sym_path(xctx->inst[xctx->sel_array[0].n].name, ""), "}]", NULL);
         } 
         #endif
-        ret = place_symbol(-1,NULL,xctx->mousex_snap, xctx->mousey_snap, 0, 0, NULL, 4, 1);
+        ret = place_symbol(-1,NULL,xctx->mousex_snap, xctx->mousey_snap, 0, 0, NULL, 4, 1, 1/*to_push_undo*/);
       }
    
       if(ret) {
@@ -1700,12 +1715,12 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
         return TCL_ERROR;
       }
       if(argc >= 4) {
-        Tcl_VarEval(interp, "file normalize ", argv[3], NULL);
+        Tcl_VarEval(interp, "file normalize \"", argv[3], "\"", NULL);
         my_strncpy(plotfile, Tcl_GetStringResult(interp), S(plotfile));
       }
 
       if(!strcmp(argv[2],"pdf") || !strcmp(argv[2],"ps")) {
-        ps_draw();
+        ps_draw(7);
       }
       else if(!strcmp(argv[2],"png")) {
         int w = 0, h = 0;

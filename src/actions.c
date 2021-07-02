@@ -272,21 +272,16 @@ void new_window(const char *cell, int symbol)
       exit(0); /* --> child of child will be reparented to init */
     } else if (!pid2) {
       /* child of child */
-      if(!(freopen("/dev/null","w",stdout) && freopen("/dev/null","r",stdin) &&
-        freopen("/dev/null","w",stderr))){
-        fprintf(errfp, "new_window(): freopen error\n");
-        tcleval("exit");
-      }
       if(!cell || !cell[0]) {
-        execl(xschem_executable,xschem_executable,"-r", NULL);
+        execl(xschem_executable,xschem_executable,"-b", NULL);
       }
       else if(!symbol) {
         my_strncpy(f, cell, S(f));
-        execl(xschem_executable,xschem_executable,"-r",f, NULL);
+        execl(xschem_executable,xschem_executable,"-b",f, NULL);
       }
       else {
         my_strncpy(f, cell, S(f));
-        execl(xschem_executable,xschem_executable,"-r",f, NULL);
+        execl(xschem_executable,xschem_executable,"-b",f, NULL);
       }
     } else {
       /* error */
@@ -735,15 +730,15 @@ void attach_labels_to_inst() /*  offloaded from callback.c 20171005 */
          }
          if(!strcmp(tclgetvar("use_lab_wire"),"0")) {
            if(indirect)
-             place_symbol(-1,symname_pin, pinx0, piny0, rot1, dir, prop, 2, first_call);
+             place_symbol(-1,symname_pin, pinx0, piny0, rot1, dir, prop, 2, first_call, 1/*to_push_undo*/);
            else
-             place_symbol(-1,symname_pin2, pinx0, piny0, rot1, dir, prop, 2, first_call);
+             place_symbol(-1,symname_pin2, pinx0, piny0, rot1, dir, prop, 2, first_call, 1/*to_push_undo*/);
            first_call=0;
          } else {
            if(indirect)
-             place_symbol(-1,symname_wire, pinx0, piny0, rot1, dir, prop, 2, first_call);
+             place_symbol(-1,symname_wire, pinx0, piny0, rot1, dir, prop, 2, first_call, 1/*to_push_undo*/);
            else
-             place_symbol(-1,symname_wire2, pinx0, piny0, rot1, dir, prop, 2, first_call);
+             place_symbol(-1,symname_wire2, pinx0, piny0, rot1, dir, prop, 2, first_call, 1/*to_push_undo*/);
            first_call=0;
          }
        }
@@ -778,15 +773,15 @@ void place_net_label(int type)
   struct stat buf;
   if(type == 1) {
     if(!stat(abs_sym_path("lab_pin.sym", ""), &buf)) {
-      place_symbol(-1, "lab_pin.sym", xctx->mousex_snap, xctx->mousey_snap, 0, 0, NULL, 4, 1);
+      place_symbol(-1, "lab_pin.sym", xctx->mousex_snap, xctx->mousey_snap, 0, 0, NULL, 4, 1, 1/*to_push_undo*/);
     } else if(!stat(abs_sym_path("devices/lab_pin.sym", ""), &buf)) {
-      place_symbol(-1, "devices/lab_pin.sym", xctx->mousex_snap, xctx->mousey_snap, 0, 0, NULL, 4, 1);
+      place_symbol(-1, "devices/lab_pin.sym", xctx->mousex_snap, xctx->mousey_snap, 0, 0, NULL, 4, 1, 1/*to_push_undo*/);
     }
   } else {
     if(!stat(abs_sym_path("lab_wire.sym", ""), &buf)) {
-      place_symbol(-1, "lab_wire.sym", xctx->mousex_snap, xctx->mousey_snap, 0, 0, NULL, 4, 1);
+      place_symbol(-1, "lab_wire.sym", xctx->mousex_snap, xctx->mousey_snap, 0, 0, NULL, 4, 1, 1/*to_push_undo*/);
     } else if(!stat(abs_sym_path("devices/lab_wire.sym", ""), &buf)) {
-      place_symbol(-1, "devices/lab_wire.sym", xctx->mousex_snap, xctx->mousey_snap, 0, 0, NULL, 4, 1);
+      place_symbol(-1, "devices/lab_wire.sym", xctx->mousex_snap, xctx->mousey_snap, 0, 0, NULL, 4, 1, 1/*to_push_undo*/);
     }
   }
   move_objects(START,0,0,0);
@@ -801,7 +796,7 @@ void place_net_label(int type)
 /*  set to 0 on next calls, this speeds up searching for unique names in prop string */
 /*  returns 1 if symbol successfully placed, 0 otherwise */
 int place_symbol(int pos, const char *symbol_name, double x, double y, short rot, short flip,
-                   const char *inst_props, int draw_sym, int first_call)
+                   const char *inst_props, int draw_sym, int first_call, int to_push_undo)
 /*  if symbol_name is a valid string load specified cell and */
 /*  use the given params, otherwise query user */
 {
@@ -818,7 +813,7 @@ int place_symbol(int pos, const char *symbol_name, double x, double y, short rot
  dbg(1, "place_symbol(): load_file_dialog returns:  name=%s\n",name);
  my_strncpy(name, rel_sym_path(name), S(name));
  if(name[0]) {
-   if(first_call) push_undo();
+   if(first_call && to_push_undo) push_undo();
  } else  return 0;
  i=match_symbol(name);
 
@@ -928,6 +923,7 @@ void symbol_in_new_window(void)
 
 void schematic_in_new_window(void)
 {
+ char *sch = NULL;
  char filename[PATH_MAX];
  rebuild_selected_array();
  if(xctx->lastsel !=1 || xctx->sel_array[0].type!=ELEMENT)
@@ -950,9 +946,11 @@ void schematic_in_new_window(void)
      )
   ) return;
 
-  my_strncpy(filename, abs_sym_path(get_tok_value(
-    (xctx->inst[xctx->sel_array[0].n].ptr+ xctx->sym)->prop_ptr, "schematic",0 ), "")
-    , S(filename));
+  my_strdup2(1246, &sch, get_tok_value(
+    (xctx->inst[xctx->sel_array[0].n].ptr+ xctx->sym)->prop_ptr, "schematic",0 ));
+  tcl_hook(&sch);
+  my_strncpy(filename, abs_sym_path(sch, ""), S(filename));
+  my_free(1247, &sch);
   if(!filename[0]) {
     my_strncpy(filename, add_ext(abs_sym_path(xctx->inst[xctx->sel_array[0].n].name, ""), ".sch"), S(filename));
   }
@@ -997,6 +995,7 @@ void launcher(void)
 void descend_schematic(int instnumber)
 {
  const char *str;
+ char *sch = NULL;
  char filename[PATH_MAX];
  int inst_mult, inst_number;
  int save_ok = 0;
@@ -1093,10 +1092,11 @@ void descend_schematic(int instnumber)
   xctx->currsch++;
   hilight_child_pins();
 
-  my_strncpy(filename, abs_sym_path(get_tok_value(
-     (xctx->inst[xctx->sel_array[0].n].ptr+ xctx->sym)->prop_ptr, "schematic",0 ), "")
-     , S(filename));
-
+  my_strdup2(1244, &sch, 
+    get_tok_value((xctx->inst[xctx->sel_array[0].n].ptr+ xctx->sym)->prop_ptr, "schematic",0 ));
+  tcl_hook(&sch);
+  my_strncpy(filename, abs_sym_path(sch, ""), S(filename));
+  my_free(1245, &sch);
   unselect_all();
   remove_symbols();
   if(filename[0]) {

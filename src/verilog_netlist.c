@@ -38,6 +38,7 @@ void global_verilog_netlist(int global)  /* netlister driver */
  char *type=NULL;
  struct stat buf;
  char *subckt_name;
+ char *abs_path = NULL;
 
  xctx->netlist_unconn_cnt=0; /* unique count of unconnected pins while netlisting */
  statusmsg("",2);  /* clear infowindow */
@@ -293,7 +294,8 @@ void global_verilog_netlist(int global)  /* netlister driver */
    {
     if( strcmp(get_tok_value(xctx->sym[i].prop_ptr,"verilog_ignore",0),"true")==0 ) continue;
     if(!xctx->sym[i].type) continue;
-    if(strcmp(xctx->sym[i].type,"subcircuit")==0 && check_lib(xctx->sym[i].name)) {
+    my_strdup(1234, &abs_path, abs_sym_path(xctx->sym[i].name, ""));
+    if(strcmp(xctx->sym[i].type,"subcircuit")==0 && check_lib(1, abs_path)) {
       /* xctx->sym can be SCH or SYM, use hash to avoid writing duplicate subckt */
       my_strdup(328, &subckt_name, get_cell(xctx->sym[i].name, 0));
       if (str_hash_lookup(subckt_table, subckt_name, "", XLOOKUP)==NULL)
@@ -308,6 +310,7 @@ void global_verilog_netlist(int global)  /* netlister driver */
             verilog_block_netlist(fd, i);
       }
     }
+    my_free(1235, &abs_path);
    }
    free_hash(subckt_table);
    my_free(1073, &subckt_name);
@@ -362,13 +365,17 @@ void verilog_block_netlist(FILE *fd, int i)
   char tcl_cmd_netlist[PATH_MAX + 100];
   char cellname[PATH_MAX];
   const char *str_tmp;
+  char *sch = NULL;
 
   if(!strcmp( get_tok_value(xctx->sym[i].prop_ptr,"verilog_stop",0),"true") )
      verilog_stop=1;
   else
      verilog_stop=0;
   if((str_tmp = get_tok_value(xctx->sym[i].prop_ptr, "schematic",0 ))[0]) {
-    my_strncpy(filename, abs_sym_path(str_tmp, ""), S(filename));
+    my_strdup2(1260, &sch, str_tmp);
+    tcl_hook(&sch);
+    my_strncpy(filename, abs_sym_path(sch, ""), S(filename));
+    my_free(1261, &sch);
   } else {
     my_strncpy(filename, add_ext(abs_sym_path(xctx->sym[i].name, ""), ".sch"), S(filename));
   }

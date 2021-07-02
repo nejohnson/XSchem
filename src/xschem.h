@@ -843,7 +843,7 @@ extern void here(int i);
 extern void print_version(void);
 extern int set_netlist_dir(int force, char *dir);
 extern void netlist_options(int i);
-extern int  check_lib(char * s);
+extern int  check_lib(int what, const char * s);
 extern void select_all(void);
 extern void change_linewidth(double w);
 extern void schematic_in_new_window(void);
@@ -861,8 +861,8 @@ extern int  name_strcmp(char *s, char *d) ;
 extern int search(const char *tok, const char *val, int sub, int sel);
 extern int process_options(int argc, char **argv);
 extern void calc_drawing_bbox(xRect *boundbox, int selected);
-extern void create_ps(char **psfile);
-extern void ps_draw(void);
+extern void create_ps(char **psfile, int what);
+extern int ps_draw(int what);
 extern void svg_draw(void);
 extern void set_viewport_size(int w, int h, double lw);
 extern void print_image();
@@ -873,12 +873,14 @@ extern const char *rel_sym_path(const char *s);
 extern const char *abs_sym_path(const char *s, const char *ext);
 extern const char *add_ext(const char *f, const char *ext);
 extern void make_symbol(void);
+extern void make_schematic(const char *schname);
+extern void make_schematic_symbol_from_sel(void);
 extern const char *get_sym_template(char *s, char *extra);
 /* bit0: invoke change_linewidth(), bit1: centered zoom */
 extern void zoom_full(int draw, int sel, int flags, double shrink);
 extern void updatebbox(int count,xRect *boundbox,xRect *tmp);
 extern void draw_selection(GC g, int interruptable);
-extern void delete(void);
+extern void delete(int to_push_undo);
 extern void delete_only_rect_line_arc_poly(void);
 extern void polygon_bbox(double *x, double *y, int points, double *bx1, double *by1, double *bx2, double *by2);
 extern void arc_bbox(double x, double y, double r, double a, double b,
@@ -984,6 +986,7 @@ extern void store_poly(int pos, double *x, double *y, int points,
 extern void store_arc(int pos, double x, double y, double r, double a, double b,
                unsigned int rectcolor, unsigned short sel, char *prop_ptr);
 
+extern void hier_psprint(void);
 extern void freenet_nocheck(int i);
 extern void spice_netlist(FILE *fd, int spice_stop);
 extern void tedax_netlist(FILE *fd, int spice_stop);
@@ -1003,7 +1006,7 @@ extern void clear_drawing(void);
 extern int load_sym_def(const char name[], FILE *embed_fd);
 extern void descend_symbol(void);
 extern int place_symbol(int pos, const char *symbol_name, double x, double y, short rot, short flip,
-                         const char *inst_props, int draw_sym, int first_call);
+                         const char *inst_props, int draw_sym, int first_call, int to_push_undo);
 extern void place_net_label(int type);
 extern void attach_labels_to_inst(void);
 extern void delete_files(void);

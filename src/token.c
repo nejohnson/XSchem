@@ -2319,7 +2319,8 @@ const char *net_name(int i, int j, int *multip, int hash_prefix_unnamed_net, int
  }
  else
  {
-   *multip=1;
+   expandlabel(get_tok_value(                             /* remove quotes --. */
+           (xctx->inst[i].ptr+ xctx->sym)->rect[PINLAYER][j].prop_ptr,"name",0), multip);
 
    if(erc) {
      my_snprintf(errstr, S(errstr), "Warning: unconnected pin,  Inst idx: %d, Pin idx: %d  Inst:%s\n",
@@ -2330,8 +2331,11 @@ const char *net_name(int i, int j, int *multip, int hash_prefix_unnamed_net, int
        xctx->hilight_nets=1;
      }
    }
-   my_snprintf(unconn, S(unconn), "__UNCONNECTED_PIN__%d", xctx->netlist_unconn_cnt++);
-   return unconn;
+   if(*multip <= 1) 
+     my_snprintf(unconn, S(unconn), "__UNCONNECTED_PIN__%d", xctx->netlist_unconn_cnt++);
+   else
+     my_snprintf(unconn, S(unconn), "__UNCONNECTED_PIN__%d[%d:0]", xctx->netlist_unconn_cnt++, *multip - 1);
+   return expandlabel(unconn, &tmp);
  }
 }
 
@@ -2748,6 +2752,7 @@ const char *translate(int inst, const char* s)
  const char *value;
  int escape=0;
  char date[200];
+ char *sch = NULL;
 
  if(!s) {
    my_free(1063, &result);
@@ -2916,9 +2921,10 @@ const char *translate(int inst, const char* s)
      my_free(1066, &pin_num_or_name);
    } else if(strcmp(token,"@sch_last_modified")==0) {
 
-    my_strncpy(file_name, abs_sym_path(get_tok_value(
-      (xctx->inst[inst].ptr+ xctx->sym)->prop_ptr, "schematic",0 ), "")
-      , S(file_name));
+    my_strdup2(1258, &sch, get_tok_value((xctx->inst[inst].ptr+ xctx->sym)->prop_ptr, "schematic",0 ));
+    tcl_hook(&sch);
+    my_strncpy(file_name, abs_sym_path(sch, ""), S(file_name));
+    my_free(1259, &sch);
     if(!file_name[0]) {
       my_strncpy(file_name, add_ext(abs_sym_path(xctx->inst[inst].name, ""), ".sch"), S(file_name));
     }

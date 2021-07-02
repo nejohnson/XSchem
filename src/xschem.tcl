@@ -194,14 +194,14 @@ proc netlist {source_file show netlist_file} {
 # 20161121
 proc convert_to_pdf {filename dest} {
   global to_pdf
-  # puts "convert_to_pdf: $filename --> $dest"
   if { [regexp -nocase {\.pdf$} $dest] } {
     set pdffile [file rootname $filename].pdf
-    set cmd "exec $to_pdf $filename $pdffile"
+    # puts "---> $to_pdf $filename $pdffile"
+    set cmd "exec $to_pdf \$filename \$pdffile"
     if {$::OS == "Windows"} {
-      set cmd "exec $to_pdf $pdffile $filename"
+      set cmd "exec $to_pdf \$pdffile \$filename"
     } 
-    if { ![catch $cmd msg] } {
+    if { ![catch {eval $cmd} msg] } {
       file rename -force $pdffile $dest
       # ps2pdf succeeded, so remove original .ps file
       if { ![xschem get debug_var] } {
@@ -218,12 +218,12 @@ proc convert_to_pdf {filename dest} {
 # 20161121
 proc convert_to_png {filename dest} {
   global to_png tcl_debug
-  # puts "---> $to_png $filename $destfile"
-  set cmd "exec $to_png $filename png:$dest"
+  # puts "---> $to_png $filename $dest"
+  set cmd "exec $to_png \$filename png:\$dest"
     if {$::OS == "Windows"} {
-      set cmd "exec $to_png $dest $filename"
+      set cmd "exec $to_png \$dest \$filename"
     } 
-  if { ![catch $cmd msg] } {
+  if { ![catch {eval $cmd} msg] } {
     # conversion succeeded, so remove original .xpm file
     if { ![xschem get debug_var] } {
       file delete $filename
@@ -1755,6 +1755,14 @@ proc make_symbol {name} {
   return {}
 }
 
+proc make_symbol_lcc {name} {
+  global XSCHEM_SHAREDIR
+  set name [abs_sym_path $name]
+  # puts "make_symbol{}, executing: ${XSCHEM_SHAREDIR}/make_sym_lcc.awk ${name}"
+  eval exec {awk -f ${XSCHEM_SHAREDIR}/make_sym_lcc.awk $name}
+  return {}
+}
+
 # create simulation dir 'simulation/' under current schematic directory
 proc simuldir {} {
   global netlist_dir local_netlist_dir
@@ -3078,11 +3086,11 @@ proc get_file_path {ff} {
   #        Linux                Windows
   if { [regexp {^/} $ff] || [regexp {^[a-zA-Z]:} $ff] } { return $ff }
   if {$::OS == "Windows"} {
-    set pathlist [split $env(PATH) \;]
+    set mylist [split $env(PATH) \;]
   } else {
-    set pathlist [split $env(PATH) :]
+    set mylist [split $env(PATH) :]
   }
-  foreach i $pathlist {
+  foreach i $mylist {
     set ii $i/$ff
     if { [file exists $ii]} {return $ii}
   }
@@ -3389,8 +3397,10 @@ proc set_paths {} {
       regsub {^~} $i $env(HOME) i
       if { ![string compare $i .] } {
         lappend pathlist $i
+      } elseif { [ regexp {\.\.\/} $i] } {
+        lappend pathlist [file normalize $i]
       } elseif { [ file exists $i] } {
-        lappend pathlist ${i}
+        lappend pathlist $i
       }
     }
   }
@@ -3515,6 +3525,7 @@ if {$::OS == "Windows"} {
 
 # used in C code
 set_ne xschem_libs {}
+set_ne noprint_libs {}
 set_ne tcl_debug 0
 # used to activate debug from menu
 set_ne menu_tcl_debug 0
@@ -3828,6 +3839,7 @@ if { ( $::OS== "Windows" || [string length [lindex [array get env DISPLAY] 1] ] 
      -command "xschem saveas {} SYMBOL" -accelerator {Ctrl+Alt+S}
   # added svg, png 20171022
   .menubar.file.menu add command -label "PDF/PS Export" -command "xschem print pdf" -accelerator {*}
+  .menubar.file.menu add command -label "Hierarchical PDF/PS Export" -command "xschem hier_psprint"
   .menubar.file.menu add command -label "PNG Export" -command "xschem print png" -accelerator {Ctrl+*}
   .menubar.file.menu add command -label "SVG Export" -command "xschem print svg" -accelerator {Alt+*}
   .menubar.file.menu add separator
@@ -4087,6 +4099,7 @@ if { ( $::OS== "Windows" || [string length [lindex [array get env DISPLAY] 1] ] 
      -command {xschem set hide_symbols $hide_symbols; xschem redraw} -accelerator Alt+B
   .menubar.sym.menu add command -label "Make symbol from schematic" -command "xschem make_symbol" -accelerator A
   .menubar.sym.menu add command -label "Make schematic from symbol" -command "xschem make_sch" -accelerator Ctrl+L
+  .menubar.sym.menu add command -label "Make schematic and symbol from selected components" -command "xschem make_sch_from_sel" -accelerator Ctrl+Shift+H
   .menubar.sym.menu add command -label "Attach pins to component instance" \
      -command "xschem attach_pins" -accelerator Shift+H
   .menubar.sym.menu add command -label "Create symbol pins from selected schematic pins" \

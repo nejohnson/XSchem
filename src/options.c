@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit
  * simulation.
- * Copyright (C) 1998-2020 Stefan Frederik Schippers
+ * Copyright (C) 1998-2021 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,7 +59,7 @@ void check_opt(char *opt, char *optval, int type)
 
     } else if( (type == LONG && !strcmp("plotfile", opt)) ) {
         dbg(1, "process_options(): user plotfile specified: %s\n", optval ? optval : "NULL");
-        if(optval) my_strncpy(plotfile, optval, S(plotfile));
+        if(optval) my_strncpy(xctx->plotfile, optval, S(xctx->plotfile));
 
     } else if( (type == LONG && !strcmp("rcfile", opt)) ) {
         dbg(1, "process_options(): user rcfile specified: %s\n", optval ? optval : "NULL");

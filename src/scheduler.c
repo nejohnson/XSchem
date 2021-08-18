@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit
  * simulation.
- * Copyright (C) 1998-2020 Stefan Frederik Schippers
+ * Copyright (C) 1998-2021 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1716,7 +1716,7 @@ int xschem(ClientData clientdata, Tcl_Interp *interp, int argc, const char * arg
       }
       if(argc >= 4) {
         Tcl_VarEval(interp, "file normalize \"", argv[3], "\"", NULL);
-        my_strncpy(plotfile, Tcl_GetStringResult(interp), S(plotfile));
+        my_strncpy(xctx->plotfile, Tcl_GetStringResult(interp), S(xctx->plotfile));
       }
 
       if(!strcmp(argv[2],"pdf") || !strcmp(argv[2],"ps")) {

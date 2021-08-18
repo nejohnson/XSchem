@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit
  * simulation.
- * Copyright (C) 1998-2020 Stefan Frederik Schippers
+ * Copyright (C) 1998-2021 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -416,6 +416,7 @@ void alloc_xschem_data()
   xctx->get_tok_size = 0;
   xctx->get_tok_value_size = 0;
   xctx->netlist_name[0] = '\0';
+  xctx->plotfile[0] = '\0';
   xctx->netlist_unconn_cnt = 0; /* unique count of unconnected pins while netlisting */
   xctx->current_dirname[0] = '\0';
   for(i = 0; i < NBOXES; i++) {

@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit
  * simulation.
- * Copyright (C) 1998-2020 Stefan Frederik Schippers
+ * Copyright (C) 1998-2021 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -624,6 +624,7 @@ typedef struct {
   int nl_sel, nl_sem;
   XSegment *biggridpoint;
   XPoint *gridpoint;
+  char plotfile[PATH_MAX];
 } Xschem_ctx;
 
 struct Lcc { /* used for symbols containing schematics as instances (LCC, Local Custom Cell) */
@@ -723,7 +724,6 @@ extern int load_initfile;
 extern char rcfile[PATH_MAX];
 extern char *tcl_command;
 extern char tcl_script[PATH_MAX];
-extern char plotfile[PATH_MAX];
 extern int persistent_command;
 extern int autotrim_wires;
 extern int dis_uniq_names;

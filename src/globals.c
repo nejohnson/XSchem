@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit
  * simulation.
- * Copyright (C) 1998-2020 Stefan Frederik Schippers
+ * Copyright (C) 1998-2021 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -177,7 +177,6 @@ const char fopen_read_mode[] = "rb";
 const char fopen_read_mode[] = "r";
 #endif
 int load_initfile=1;
-char plotfile[PATH_MAX] = {'\0'};
 char rcfile[PATH_MAX] = {'\0'};
 char *tcl_command = NULL;
 char tcl_script[PATH_MAX] = {'\0'};

@@ -3,7 +3,7 @@
  * This file is part of XSCHEM,
  * a schematic capture and Spice/Vhdl/Verilog netlisting tool for circuit
  * simulation.
- * Copyright (C) 1998-2020 Stefan Frederik Schippers
+ * Copyright (C) 1998-2021 Stefan Frederik Schippers
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -2326,6 +2326,7 @@ const char *net_name(int i, int j, int *multip, int hash_prefix_unnamed_net, int
      my_snprintf(errstr, S(errstr), "Warning: unconnected pin,  Inst idx: %d, Pin idx: %d  Inst:%s\n",
                  i, j, xctx->inst[i].instname ) ;
      statusmsg(errstr,2);
+     tcleval("wm deiconify .infotext"); /* critical error: force ERC window showing */
      if(!netlist_count) {
        xctx->inst[i].color = -PINLAYER;
        xctx->hilight_nets=1;

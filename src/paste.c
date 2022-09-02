@@ -26,7 +26,7 @@
 
 
 
-void merge_text(FILE *fd)
+static void merge_text(FILE *fd)
 {
    int i;
    const char *str;
@@ -64,13 +64,15 @@ void merge_text(FILE *fd)
      xctx->text[i].flags |= strcmp(str, "italic")  ? 0 : TEXT_ITALIC;
      str = get_tok_value(xctx->text[i].prop_ptr, "weight", 0);
      xctx->text[i].flags |= strcmp(str, "bold")  ? 0 : TEXT_BOLD;
+     str = get_tok_value(xctx->text[i].prop_ptr, "hide", 0);
+     xctx->text[i].flags |= strcmp(str, "true")  ? 0 : HIDE_TEXT;
 
      select_text(i,SELECTED, 1);
      set_modify(1);
      xctx->texts++;
 }
 
-void merge_wire(FILE *fd)
+static void merge_wire(FILE *fd)
 {
     int i;
     double x1,y1,x2,y2;
@@ -87,10 +89,11 @@ void merge_wire(FILE *fd)
     select_wire(i, SELECTED, 1);
 }
 
-void merge_box(FILE *fd)
+static void merge_box(FILE *fd)
 {
     int i,c,n;
     xRect *ptr;
+    const char *dash;
 
     n = fscanf(fd, "%d",&c);
     if(n != 1 || c < 0 || c >= cadlayers) {
@@ -108,18 +111,28 @@ void merge_box(FILE *fd)
       return;
     }
     ptr[i].prop_ptr=NULL;
+    ptr[i].extraptr=NULL;
     RECTORDER(ptr[i].x1, ptr[i].y1, ptr[i].x2, ptr[i].y2);
     ptr[i].sel=0;
     load_ascii_string( &ptr[i].prop_ptr, fd);
-    select_box(c,i, SELECTED, 1);
+    dash = get_tok_value(ptr[i].prop_ptr,"dash",0);
+    if(strcmp(dash, "")) {
+      int d = atoi(dash);
+      ptr[i].dash = d >= 0 ? d : 0;
+    } else {
+      ptr[i].dash = 0;
+    }
+    set_rect_flags(&xctx->rect[c][i]); /* set cached .flags bitmask from on attributes */
+    select_box(c,i, SELECTED, 1, 1);
     xctx->rects[c]++;
     set_modify(1);
 }
 
-void merge_arc(FILE *fd)
+static void merge_arc(FILE *fd)
 {
     int i,c,n;
     xArc *ptr;
+    const char *dash;
 
     n = fscanf(fd, "%d",&c);
     if(n != 1 || c < 0 || c >= cadlayers) {
@@ -144,16 +157,25 @@ void merge_arc(FILE *fd)
       ptr[i].fill =1;
     else
       ptr[i].fill =0;
+    dash = get_tok_value(ptr[i].prop_ptr,"dash",0);
+    if(strcmp(dash, "")) {
+      int d = atoi(dash);
+      ptr[i].dash = d >= 0 ? d : 0;
+    } else {
+      ptr[i].dash = 0;
+    }
+
     select_arc(c,i, SELECTED, 1);
     xctx->arcs[c]++;
     set_modify(1);
 }
 
 
-void merge_polygon(FILE *fd)
+static void merge_polygon(FILE *fd)
 {
     int i,c, j, points;
     xPoly *ptr;
+    const char *dash;
 
     if(fscanf(fd, "%d %d",&c, &points)<2) {
       fprintf(errfp,"merge_polygon(): WARNING: missing fields for POLYGON object, ignoring.\n");
@@ -192,15 +214,24 @@ void merge_polygon(FILE *fd)
       ptr[i].fill =1;
     else
       ptr[i].fill =0;
+    dash = get_tok_value(ptr[i].prop_ptr,"dash",0);
+    if(strcmp(dash, "")) {
+      int d = atoi(dash);
+      ptr[i].dash = d >= 0 ? d : 0;
+    } else {
+      ptr[i].dash = 0;
+    }
+
     select_polygon(c,i, SELECTED, 1);
     xctx->polygons[c]++;
     set_modify(1);
 }
 
-void merge_line(FILE *fd)
+static void merge_line(FILE *fd)
 {
     int i,c,n;
     xLine *ptr;
+    const char *dash;
 
     n = fscanf(fd, "%d",&c);
     if(n != 1 || c < 0 || c >= cadlayers) {
@@ -220,6 +251,13 @@ void merge_line(FILE *fd)
     ptr[i].prop_ptr=NULL;
     ptr[i].sel=0;
     load_ascii_string( &ptr[i].prop_ptr, fd);
+    dash = get_tok_value(ptr[i].prop_ptr,"dash",0);
+    if(strcmp(dash, "")) {
+      int d = atoi(dash);
+      ptr[i].dash = d >= 0 ? d : 0;
+    } else {
+      ptr[i].dash = 0;
+    }
     select_line(c,i, SELECTED, 1);
     xctx->lines[c]++;
     set_modify(1);
@@ -229,45 +267,43 @@ void merge_line(FILE *fd)
 
 
 
-void merge_inst(int k,FILE *fd)
+static void merge_inst(int k,FILE *fd)
 {
     int i;
     char *prop_ptr=NULL;
     char *tmp = NULL;
-    xInstance *ptr;
     i=xctx->instances;
     check_inst_storage();
-    ptr=xctx->inst;
-    ptr[i].name=NULL;
+    xctx->inst[i].name=NULL;
     load_ascii_string(&tmp, fd);
     /* avoid as much as possible calls to rel_sym_path (slow) */
     #ifdef __unix__
-    if(tmp[0] == '/') my_strdup(763, &ptr[i].name, rel_sym_path(tmp));
-    else my_strdup(755, &ptr[i].name,tmp);
+    if(tmp[0] == '/') my_strdup(763, &xctx->inst[i].name, rel_sym_path(tmp));
+    else my_strdup(755, &xctx->inst[i].name,tmp);
     #else
-    my_strdup(780, &ptr[i].name, rel_sym_path(tmp));
+    my_strdup(780, &xctx->inst[i].name, rel_sym_path(tmp));
     #endif
     my_free(756, &tmp);
-    if(fscanf(fd, "%lf %lf %hd %hd",&ptr[i].x0, &ptr[i].y0,&ptr[i].rot, &ptr[i].flip) < 4) {
+    if(fscanf(fd, "%lf %lf %hd %hd",&xctx->inst[i].x0, &xctx->inst[i].y0,&xctx->inst[i].rot, &xctx->inst[i].flip) < 4) {
       fprintf(errfp,"WARNING: missing fields for INSTANCE object, ignoring.\n");
       read_line(fd, 0);
       return;
     }
-    ptr[i].sel=0;
-    ptr[i].flags=0;
-    ptr[i].color=-10000;
-    ptr[i].ptr=-1;
-    ptr[i].prop_ptr=NULL;
-    ptr[i].instname=NULL;
-    ptr[i].lab=NULL;  /* assigned in link_symbols_to_instances */
-    ptr[i].node=NULL;
+    xctx->inst[i].sel=0;
+    xctx->inst[i].flags=0;
+    xctx->inst[i].color=-10000;
+    xctx->inst[i].ptr=-1;
+    xctx->inst[i].prop_ptr=NULL;
+    xctx->inst[i].instname=NULL;
+    xctx->inst[i].lab=NULL;  /* assigned in link_symbols_to_instances */
+    xctx->inst[i].node=NULL;
     load_ascii_string(&prop_ptr,fd);
     if(!k) hash_all_names(i);
-    new_prop_string(i, prop_ptr, k, dis_uniq_names);
+    new_prop_string(i, prop_ptr, k, tclgetboolvar("disable_unique_names")); /* will also assign .instname */
     /* the final tmp argument is zero for the 1st call and used in */
     /* new_prop_string() for cleaning some internal caches. */
-    my_strdup2(306, &xctx->inst[i].instname, get_tok_value(xctx->inst[i].prop_ptr, "name", 0));
-    if(!strcmp(get_tok_value(xctx->inst[i].prop_ptr,"highlight",0), "true")) xctx->inst[i].flags |= 4;
+    if(!strcmp(get_tok_value(xctx->inst[i].prop_ptr,"highlight",0), "true"))
+       xctx->inst[i].flags |= HILIGHT_CONN;
 
     my_free(871, &prop_ptr);
     xctx->instances++;
@@ -295,7 +331,7 @@ void merge_file(int selection_load, const char ext[])
     if(selection_load==0)
     {
      if(!strcmp(ext,"")) {
-       my_snprintf(tmp, S(tmp), "load_file_dialog {Merge file} {.sch.sym} INITIALLOADDIR", ext);
+       my_snprintf(tmp, S(tmp), "load_file_dialog {Merge file} {.sch.sym} INITIALLOADDIR");
        tcleval(tmp);
        if(!strcmp(tclresult(),"")) return;
        my_strncpy(name, (char *)tclresult(), S(name));
@@ -313,13 +349,13 @@ void merge_file(int selection_load, const char ext[])
     {
       my_snprintf(name, S(name), "%s/.clipboard.sch", user_conf_dir);
     }
-    if( (fd=fopen(name,"r"))!= NULL) {
+    if( (fd=fopen(name, fopen_read_mode))!= NULL) {
      xctx->prep_hi_structs=0;
      xctx->prep_net_structs=0;
      xctx->prep_hash_inst=0;
      xctx->prep_hash_wires=0;
      got_mouse = 0;
-     push_undo();
+     xctx->push_undo();
      unselect_all();
      old=xctx->instances;
      while(!endfile)
@@ -329,6 +365,12 @@ void merge_file(int selection_load, const char ext[])
       {
        case 'v':
         load_ascii_string(&aux_ptr, fd);
+        break;
+       case '#':
+        read_line(fd, 1);
+        break;
+       case 'F': /* extension for future symbol floater labels */
+        read_line(fd, 1);
         break;
        case 'V':
         load_ascii_string(&aux_ptr, fd);
@@ -387,7 +429,7 @@ void merge_file(int selection_load, const char ext[])
        xctx->mousey_snap = 0.;
      }
      my_free(875, &aux_ptr);
-     link_symbols_to_instances(old);
+     link_symbols_to_instances(old); /* in case of paste/merge will set instances .sel to SELECTED */
      fclose(fd);
      xctx->ui_state |= STARTMERGE;
      dbg(1, "merge_file(): loaded file:wire=%d inst=%d ui_state=%ld\n",

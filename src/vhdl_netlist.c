@@ -22,7 +22,96 @@
 
 #include "xschem.h"
 
-static struct hashentry *subckt_table[HASHSIZE];
+static Str_hashentry *subckt_table[HASHSIZE]; /* safe even with multiple schematics */
+
+static void vhdl_netlist(FILE *fd , int vhdl_stop)
+{
+ int i,l;
+ char *type=NULL;
+
+ /* set_modify(1); */ /* 20160302 prepare_netlist_structs could change schematic (wire node naming for example) */
+ if(!vhdl_stop) {
+   xctx->prep_net_structs = 0;
+   prepare_netlist_structs(1);
+   traverse_node_hash();  /* print all warnings about unconnected floatings etc */
+ }
+
+ dbg(1, "vhdl_netlist():       architecture declarations\n");
+ fprintf(fd, "//// begin user declarations\n");
+ for(l=0;l<xctx->instances;l++)
+ {
+  if( strcmp(get_tok_value(xctx->inst[l].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue;
+  if(!(xctx->inst[l].ptr+ xctx->sym)->type) continue;
+  if(xctx->inst[l].ptr<0) continue;
+  if(!strcmp(get_tok_value( (xctx->inst[l].ptr+ xctx->sym)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
+    continue;
+  }
+  if(!strcmp((xctx->inst[l].ptr+ xctx->sym)->type, "arch_declarations") )
+   fprintf(fd, "%s\n", xctx->inst[l].prop_ptr?  xctx->inst[l].prop_ptr: "");
+ }
+ fprintf(fd, "//// end user declarations\n");
+
+ dbg(1, "vhdl_netlist():       print erc checks\n");
+ if(!vhdl_stop) print_vhdl_signals(fd);
+ dbg(1, "vhdl_netlist():       done print erc checks\n");
+
+ dbg(1, "vhdl_netlist():       attributes\n");
+ fprintf(fd, "//// begin user attributes\n");
+ for(l=0;l<xctx->instances;l++)
+ {
+  if( strcmp(get_tok_value(xctx->inst[l].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue;
+  if(xctx->inst[l].ptr<0) continue;
+  if(!strcmp(get_tok_value( (xctx->inst[l].ptr+ xctx->sym)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
+    continue;
+  }
+  my_strdup(602, &type,(xctx->inst[l].ptr+ xctx->sym)->type);
+  if( type && (strcmp(type,"attributes"))==0)
+  {
+   if(xctx->inst[l].prop_ptr) fprintf(fd, "\n%s\n", xctx->inst[l].prop_ptr);
+  }
+ }
+ fprintf(fd, "//// end user attributes\n");
+
+
+ fprintf(fd, "begin\n"); /* begin reintroduced 09122003 */
+ if(!vhdl_stop)
+ {
+   for(i=0;i<xctx->instances;i++) /* ... print all element except ipin opin labels use package */
+   {                       /* dont print elements with vhdl_ignore=true set in symbol */
+    if( strcmp(get_tok_value(xctx->inst[i].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue;
+    if(xctx->inst[i].ptr<0) continue;
+    if(!strcmp(get_tok_value( (xctx->inst[i].ptr+ xctx->sym)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
+      continue;
+    }
+    dbg(2, "vhdl_netlist():       into the netlisting loop\n");
+    my_strdup(603, &type,(xctx->inst[i].ptr+ xctx->sym)->type);
+    if( type &&
+       ( !IS_LABEL_OR_PIN(type) &&
+         strcmp(type,"generic")&&
+         strcmp(type,"use")&&
+         strcmp(type,"netlist_commands")&&
+         strcmp(type,"package")  &&
+         strcmp(type,"attributes")  &&
+         strcmp(type,"port_attributes")  &&
+         strcmp(type,"arch_declarations")
+       ))
+    {
+     if(xctx->lastsel)
+     {
+      if(xctx->inst[i].sel==SELECTED) {
+        print_vhdl_element(fd, i) ;
+      }
+     } else {
+        print_vhdl_element(fd, i) ;
+     }
+    }
+   }
+   my_free(1097, &type);
+ }
+ dbg(1, "vhdl_netlist():       end\n");
+ if(!vhdl_stop && !xctx->netlist_count) redraw_hilights(0); /* draw_hilight_net(1); */
+}
+
 void global_vhdl_netlist(int global)  /* netlister driver */
 {
  FILE *fd;
@@ -30,7 +119,7 @@ void global_vhdl_netlist(int global)  /* netlister driver */
  char *dir_tmp = NULL;
  char *sig_type = NULL;
  char *port_value = NULL;
- int i,j, tmp, save_ok;
+ int i,j, tmp;
  unsigned int *stored_flags;
  char netl_filename[PATH_MAX];   /* overflow safe 20161122 */
  char tcl_cmd_netlist[PATH_MAX + 100];  /* 20081202 overflow safe 20161122 */
@@ -39,22 +128,22 @@ void global_vhdl_netlist(int global)  /* netlister driver */
  struct stat buf;
  char *subckt_name;
  char *abs_path = NULL;
+ int split_f;
 
+ split_f = tclgetboolvar("split_files");
+ xctx->push_undo();
  xctx->netlist_unconn_cnt=0; /* unique count of unconnected pins while netlisting */
  statusmsg("",2);  /* clear infowindow */
  /* top sch properties used for library use declarations and type definitions */
  /* to be printed before any entity declarations */
 
- if(xctx->modified) {
-   save_ok = save_schematic(xctx->sch[xctx->currsch]);
-   if(save_ok == -1) return;
- }
- netlist_count=0;
- free_hash(subckt_table);
+ xctx->netlist_count=0;
+ str_hash_free(subckt_table);
  my_snprintf(netl_filename, S(netl_filename), "%s/.%s_%d", 
-   netlist_dir, skip_dir(xctx->sch[xctx->currsch]), getpid());
+   tclgetvar("netlist_dir"), skip_dir(xctx->sch[xctx->currsch]), getpid());
  fd=fopen(netl_filename, "w");
 
+ fprintf(fd, "-- sch_path: %s\n", xctx->sch[xctx->currsch]);
 
  if(xctx->netlist_name[0]) {
    my_snprintf(cellname, S(cellname), "%s", get_cell_w_ext(xctx->netlist_name, 0));
@@ -113,11 +202,11 @@ void global_vhdl_netlist(int global)  /* netlister driver */
  /* flush data structures (remove unused symbols) */
  unselect_all();
  remove_symbols();  /* removed 25122002, readded 04112003.. this removes unused symbols */
- load_schematic(1, xctx->sch[xctx->currsch], 0);
-
+ /* reload data without popping undo stack, this populates embedded symbols if any */
+ xctx->pop_undo(2, 0);
+ /* link_symbols_to_instances(-1); */ /* done in xctx->pop_undo() */
 
  /* 20071009 print top level generics if defined in symbol */
-
  str_tmp = add_ext(xctx->sch[xctx->currsch], ".sym");
  if(!stat(str_tmp, &buf)) {
    load_sym_def(str_tmp, NULL );
@@ -292,7 +381,7 @@ void global_vhdl_netlist(int global)  /* netlister driver */
   }
   my_free(1241, &abs_path);
  }
- free_hash(subckt_table);
+ str_hash_free(subckt_table);
  my_free(1086, &subckt_name);
 
  dbg(1, "global_vhdl_netlist(): netlisting  top level\n");
@@ -316,15 +405,19 @@ void global_vhdl_netlist(int global)  /* netlister driver */
  }
  fprintf(fd, "end arch_%s ;\n\n", skip_dir( xctx->sch[xctx->currsch]) );
 
- if(split_files) {
+ if(split_f) {
+   int save;
    fclose(fd);
    my_snprintf(tcl_cmd_netlist, S(tcl_cmd_netlist), "netlist {%s} noshow {%s}", netl_filename, cellname);
-   override_netlist_type(CAD_VHDL_NETLIST);
+   save = xctx->netlist_type;
+   xctx->netlist_type = CAD_VHDL_NETLIST;
+   set_tcl_netlist_type();
    tcleval(tcl_cmd_netlist);
-   override_netlist_type(-1); /* restore to netlist_dir default */
+   xctx->netlist_type = save;
+   set_tcl_netlist_type();
    if(debug_var==0) xunlink(netl_filename);
  }
- netlist_count++;
+ xctx->netlist_count++;
 
  /* preserve current level instance flags before descending hierarchy for netlisting, restore later */
  stored_flags = my_calloc(151, xctx->instances, sizeof(unsigned int));
@@ -335,8 +428,9 @@ void global_vhdl_netlist(int global)  /* netlister driver */
    int saved_hilight_nets = xctx->hilight_nets;
    unselect_all();
    remove_symbols(); /* 20161205 ensure all unused symbols purged before descending hierarchy */
-   load_schematic(1, xctx->sch[xctx->currsch], 0);
-
+   /* reload data without popping undo stack, this populates embedded symbols if any */
+   xctx->pop_undo(2, 0);
+   /* link_symbols_to_instances(-1); */ /* done in xctx->pop_undo() */
    my_strdup(502, &xctx->sch_path[xctx->currsch+1], xctx->sch_path[xctx->currsch]);
    my_strcat(509, &xctx->sch_path[xctx->currsch+1], "->netlisting");
    xctx->sch_path_hash[xctx->currsch+1] = 0;
@@ -356,9 +450,9 @@ void global_vhdl_netlist(int global)  /* netlister driver */
       if (str_hash_lookup(subckt_table, subckt_name, "", XLOOKUP)==NULL)
       {
         str_hash_lookup(subckt_table, subckt_name, "", XINSERT);
-        if( split_files && strcmp(get_tok_value(xctx->sym[i].prop_ptr,"verilog_netlist",0),"true")==0 )
+        if( split_f && strcmp(get_tok_value(xctx->sym[i].prop_ptr,"verilog_netlist",0),"true")==0 )
           verilog_block_netlist(fd, i);
-        else if( split_files && strcmp(get_tok_value(xctx->sym[i].prop_ptr,"spice_netlist",0),"true")==0 )
+        else if( split_f && strcmp(get_tok_value(xctx->sym[i].prop_ptr,"spice_netlist",0),"true")==0 )
           spice_block_netlist(fd, i);
         else
           if( strcmp(get_tok_value(xctx->sym[i].prop_ptr,"vhdl_primitive",0),"true"))
@@ -367,17 +461,16 @@ void global_vhdl_netlist(int global)  /* netlister driver */
     }
     my_free(1243, &abs_path);
    }
-   free_hash(subckt_table);
+   str_hash_free(subckt_table);
    my_free(1087, &subckt_name);
    my_strncpy(xctx->sch[xctx->currsch] , "", S(xctx->sch[xctx->currsch]));
    xctx->currsch--;
    unselect_all();
-   /* remove_symbols(); */
-   load_schematic(1, xctx->sch[xctx->currsch], 0);
+   xctx->pop_undo(0, 0);
+   my_strncpy(xctx->current_name, rel_sym_path(xctx->sch[xctx->currsch]), S(xctx->current_name));
    prepare_netlist_structs(1); /* so 'lab=...' attributes for unnamed nets are set */
    /* symbol vs schematic pin check, we do it here since now we have ALL symbols loaded */
    sym_vs_sch_pins();
-
    if(!xctx->hilight_nets) xctx->hilight_nets = saved_hilight_nets;
  }
  /* restore hilight flags from errors found analyzing top level before descending hierarchy */
@@ -386,9 +479,9 @@ void global_vhdl_netlist(int global)  /* netlister driver */
  draw_hilight_net(1);
  my_free(1088, &stored_flags);
  dbg(1, "global_vhdl_netlist(): starting awk on netlist!\n");
- if(!split_files) {
+ if(!split_f) {
    fclose(fd);
-   if(netlist_show) {
+   if(tclgetboolvar("netlist_show")) {
     my_snprintf(tcl_cmd_netlist, S(tcl_cmd_netlist), "netlist {%s} show {%s}", netl_filename, cellname);
     tcleval(tcl_cmd_netlist);
    }
@@ -401,7 +494,7 @@ void global_vhdl_netlist(int global)  /* netlister driver */
  my_free(1089, &sig_type);
  my_free(1090, &type);
  my_free(1091, &port_value);
- netlist_count = 0;
+ xctx->netlist_count = 0;
 }
 
 
@@ -420,21 +513,23 @@ void  vhdl_block_netlist(FILE *fd, int i)
   const char *str_tmp;
   char *abs_path = NULL;
   char *sch = NULL;
+  int split_f;
 
+  split_f = tclgetboolvar("split_files");
   if(!strcmp( get_tok_value(xctx->sym[i].prop_ptr,"vhdl_stop",0),"true") )
     vhdl_stop=1;
   else
     vhdl_stop=0;
   if((str_tmp = get_tok_value(xctx->sym[i].prop_ptr, "schematic",0 ))[0]) {
     my_strdup2(1262, &sch, str_tmp);
-    tcl_hook(&sch);
     my_strncpy(filename, abs_sym_path(sch, ""), S(filename));
     my_free(1263, &sch);
   } else {
     my_strncpy(filename, add_ext(abs_sym_path(xctx->sym[i].name, ""), ".sch"), S(filename));
   }
-  if(split_files) {
-    my_snprintf(netl_filename, S(netl_filename), "%s/.%s_%d", netlist_dir, skip_dir(xctx->sym[i].name), getpid());
+  if(split_f) {
+    my_snprintf(netl_filename, S(netl_filename), "%s/.%s_%d",
+       tclgetvar("netlist_dir"), skip_dir(xctx->sym[i].name), getpid());
     dbg(1, "vhdl_block_netlist(): split_files: netl_filename=%s\n", netl_filename);
     fd=fopen(netl_filename, "w");
     my_snprintf(cellname, S(cellname), "%s.vhdl", skip_dir(xctx->sym[i].name) );
@@ -528,14 +623,14 @@ void  vhdl_block_netlist(FILE *fd, int i)
 
   dbg(1, "vhdl_block_netlist():       used components\n");
   /* print all components */
-  if(!vhdl_stop)
+  if(!vhdl_stop) {
     for(j=0;j<xctx->symbols;j++)
     {
       if( strcmp(get_tok_value(xctx->sym[j].prop_ptr,"vhdl_primitive",0),"true")==0 ) continue;
       if(!xctx->sym[j].type || (strcmp(xctx->sym[j].type,"primitive")!=0 && 
          strcmp(xctx->sym[j].type,"subcircuit")!=0))
            continue;
-      my_strdup(1238, &abs_path, abs_sym_path(xctx->sym[i].name, ""));
+      my_strdup2(1238, &abs_path, abs_sym_path(xctx->sym[i].name, ""));
       if(( strcmp(xctx->sym[j].type,"subcircuit")==0 || strcmp(xctx->sym[j].type,"primitive")==0) && 
           check_lib(1, abs_path)
         ) {
@@ -549,7 +644,7 @@ void  vhdl_block_netlist(FILE *fd, int i)
           if(!strcmp(get_tok_value( (xctx->inst[l].ptr+ xctx->sym)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
             continue;
           }
-          if(!strcmp(xctx->sym[j].name,xctx->inst[l].name))
+          if(!xctx->x_strcmp(xctx->sym[j].name,xctx->inst[l].name))
           {
             found=1; break;
           }
@@ -584,8 +679,9 @@ void  vhdl_block_netlist(FILE *fd, int i)
         if(tmp) fprintf(fd, "\n);\n");
         fprintf(fd, "end component ;\n\n");
       }
-      my_free(1239, &abs_path);
-    }
+    } /* for(j...) */
+  } /* if(!vhdl_stop) */
+  my_free(1239, &abs_path);
   dbg(1, "vhdl_block_netlist():  netlisting %s\n", skip_dir( xctx->sch[xctx->currsch]));
   vhdl_netlist(fd, vhdl_stop);
   fprintf(fd,"//// begin user architecture code\n");
@@ -596,7 +692,7 @@ void  vhdl_block_netlist(FILE *fd, int i)
     if(!strcmp(get_tok_value( (xctx->inst[l].ptr+ xctx->sym)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
       continue;
     }
-    if(netlist_count &&
+    if(xctx->netlist_count &&
       !strcmp(get_tok_value(xctx->inst[l].prop_ptr, "only_toplevel", 0), "true")) continue;
 
     my_strdup(601, &type,(xctx->inst[l].ptr+ xctx->sym)->type);
@@ -607,104 +703,21 @@ void  vhdl_block_netlist(FILE *fd, int i)
 
   if(xctx->schvhdlprop && xctx->schvhdlprop[0]) fprintf(fd, "%s\n", xctx->schvhdlprop);
   fprintf(fd, "end arch_%s ;\n\n", skip_dir(xctx->sym[i].name) ); /* skip_dir( xctx->sch[xctx->currsch]) ); */
-  if(split_files) {
+  if(split_f) {
+    int save;
     fclose(fd);
     my_snprintf(tcl_cmd_netlist, S(tcl_cmd_netlist), "netlist {%s} noshow {%s}", netl_filename, cellname);
-    override_netlist_type(CAD_VHDL_NETLIST);
+    save = xctx->netlist_type;
+    xctx->netlist_type = CAD_VHDL_NETLIST;
+    set_tcl_netlist_type();
     tcleval(tcl_cmd_netlist);
-    override_netlist_type(-1); /* restore to netlist_dir default */
+    xctx->netlist_type = save;
+    set_tcl_netlist_type();
     if(debug_var==0) xunlink(netl_filename);
   }
-  netlist_count++;
+  xctx->netlist_count++;
   my_free(1094, &sig_type);
   my_free(1095, &port_value);
   my_free(1096, &type);
 }
 
-void vhdl_netlist(FILE *fd , int vhdl_stop)
-{
- int i,l;
- char *type=NULL;
-
- /* set_modify(1); */ /* 20160302 prepare_netlist_structs could change schematic (wire node naming for example) */
- if(!vhdl_stop) {
-   xctx->prep_net_structs = 0;
-   prepare_netlist_structs(1);
-   traverse_node_hash();  /* print all warnings about unconnected floatings etc */
- }
-
- dbg(1, "vhdl_netlist():       architecture declarations\n");
- fprintf(fd, "//// begin user declarations\n");
- for(l=0;l<xctx->instances;l++)
- {
-  if( strcmp(get_tok_value(xctx->inst[l].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue;
-  if(!(xctx->inst[l].ptr+ xctx->sym)->type) continue;
-  if(xctx->inst[l].ptr<0) continue;
-  if(!strcmp(get_tok_value( (xctx->inst[l].ptr+ xctx->sym)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
-    continue;
-  }
-  if(!strcmp((xctx->inst[l].ptr+ xctx->sym)->type, "arch_declarations") )
-   fprintf(fd, "%s\n", xctx->inst[l].prop_ptr?  xctx->inst[l].prop_ptr: "");
- }
- fprintf(fd, "//// end user declarations\n");
-
- dbg(1, "vhdl_netlist():       print erc checks\n");
- if(!vhdl_stop) print_vhdl_signals(fd);
- dbg(1, "vhdl_netlist():       done print erc checks\n");
-
- dbg(1, "vhdl_netlist():       attributes\n");
- fprintf(fd, "//// begin user attributes\n");
- for(l=0;l<xctx->instances;l++)
- {
-  if( strcmp(get_tok_value(xctx->inst[l].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue;
-  if(xctx->inst[l].ptr<0) continue;
-  if(!strcmp(get_tok_value( (xctx->inst[l].ptr+ xctx->sym)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
-    continue;
-  }
-  my_strdup(602, &type,(xctx->inst[l].ptr+ xctx->sym)->type);
-  if( type && (strcmp(type,"attributes"))==0)
-  {
-   if(xctx->inst[l].prop_ptr) fprintf(fd, "\n%s\n", xctx->inst[l].prop_ptr);
-  }
- }
- fprintf(fd, "//// end user attributes\n");
-
-
- fprintf(fd, "begin\n"); /* begin reintroduced 09122003 */
- if(!vhdl_stop)
- {
-   for(i=0;i<xctx->instances;i++) /* ... print all element except ipin opin labels use package */
-   {                       /* dont print elements with vhdl_ignore=true set in symbol */
-    if( strcmp(get_tok_value(xctx->inst[i].prop_ptr,"vhdl_ignore",0),"true")==0 ) continue;
-    if(xctx->inst[i].ptr<0) continue;
-    if(!strcmp(get_tok_value( (xctx->inst[i].ptr+ xctx->sym)->prop_ptr, "vhdl_ignore",0 ), "true") ) {
-      continue;
-    }
-    dbg(2, "vhdl_netlist():       into the netlisting loop\n");
-    my_strdup(603, &type,(xctx->inst[i].ptr+ xctx->sym)->type);
-    if( type &&
-       ( !IS_LABEL_OR_PIN(type) &&
-         strcmp(type,"generic")&&
-         strcmp(type,"use")&&
-         strcmp(type,"netlist_commands")&&
-         strcmp(type,"package")  &&
-         strcmp(type,"attributes")  &&
-         strcmp(type,"port_attributes")  &&
-         strcmp(type,"arch_declarations")
-       ))
-    {
-     if(xctx->lastsel)
-     {
-      if(xctx->inst[i].sel==SELECTED) {
-        print_vhdl_element(fd, i) ;
-      }
-     } else {
-        print_vhdl_element(fd, i) ;
-     }
-    }
-   }
-   my_free(1097, &type);
- }
- dbg(1, "vhdl_netlist():       end\n");
- if(!vhdl_stop && !netlist_count) redraw_hilights(0); /* draw_hilight_net(1); */
-}

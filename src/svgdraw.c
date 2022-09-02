@@ -197,7 +197,7 @@ static void svg_draw_string_line(int layer, char *s, double x, double y, double 
   if(color_ps) 
     my_snprintf(col, S(col), "#%02x%02x%02x",
       svg_colors[layer].red, svg_colors[layer].green, svg_colors[layer].blue);
-  else if(dark_colorscheme)
+  else if(tclgetboolvar("dark_colorscheme"))
     my_snprintf(col, S(col), "#%02x%02x%02x", 255, 255, 255);
   else
     my_snprintf(col, S(col), "#%02x%02x%02x", 0, 0, 0);
@@ -225,7 +225,7 @@ static void svg_draw_string_line(int layer, char *s, double x, double y, double 
   fprintf(fd,"<text fill=\"%s\"  xml:space=\"preserve\" font-size=\"%g\" ", col, size*xctx->mooz);
   if(strcmp(svg_font_weight, "normal")) fprintf(fd, "font-weight=\"%s\" ", svg_font_weight);
   if(strcmp(svg_font_style, "normal")) fprintf(fd, "font-style=\"%s\" ", svg_font_style);
-  if(strcmp(svg_font_family, svg_font_name)) fprintf(fd, "style=\"font-family:%s;\" ", svg_font_family);
+  if(strcmp(svg_font_family, tclgetvar("svg_font_name"))) fprintf(fd, "style=\"font-family:%s;\" ", svg_font_family);
   if(rot1) fprintf(fd, "transform=\"translate(%g, %g) rotate(%d)\" ", ix, iy, rot1*90);
   else fprintf(fd, "transform=\"translate(%g, %g)\" ", ix, iy);
   fprintf(fd, ">");
@@ -329,8 +329,8 @@ static void old_svg_draw_string(int layer, const char *str,
  text_bbox(str, xscale, yscale, rot, flip, hcenter, vcenter, x,y,
            &rx1,&ry1,&rx2,&ry2, &no_of_lines, &longest_line);
  #endif
- xscale*=nocairo_font_xscale;
- yscale*=nocairo_font_yscale;
+ xscale*=tclgetdoublevar("nocairo_font_xscale");
+ yscale*=tclgetdoublevar("nocairo_font_yscale");
  if(!textclip(xctx->areax1,xctx->areay1,xctx->areax2,xctx->areay2,rx1,ry1,rx2,ry2)) return;
  x=rx1;y=ry1;
  if(rot&1) {y=ry2;rot=3;}
@@ -367,8 +367,8 @@ static void svg_drawgrid()
 {
  double x,y;
  double delta,tmp;
- if(!draw_grid) return;
- delta=cadgrid* xctx->mooz;
+ if(!tclgetboolvar("draw_grid")) return;
+ delta=tclgetdoublevar("cadgrid")* xctx->mooz;
  while(delta<CADGRIDTHRESHOLD) delta*=CADGRIDMULTIPLY;  /* <-- to be improved,but works */
  x = xctx->xorigin* xctx->mooz;y = xctx->yorigin* xctx->mooz;
  if(y>xctx->areay1 && y<xctx->areay2)
@@ -390,17 +390,56 @@ static void svg_drawgrid()
 }
 
 
+static void svg_embedded_image(xRect *r, double rx1, double ry1, double rx2, double ry2, int rot, int flip)
+{
+  const char *ptr;
+  double x1, y1, x2, y2, w, h, scalex = 1.0, scaley = 1.0;
+  int jpg = 0;
+  char opacity[100];
+  char transform[150];
+  double alpha = 1.0;
+
+  x1=X_TO_SVG(rx1);
+  y1=Y_TO_SVG(ry1);
+  x2=X_TO_SVG(rx2);
+  y2=Y_TO_SVG(ry2);
+  if(rot == 1 || rot == 3) {
+    w = fabs(y2 - y1);
+    h = fabs(x2 - x1);
+  } else {
+    h = fabs(y2 - y1);
+    w = fabs(x2 - x1);
+  }
+
+  if(flip && (rot == 0 || rot == 2)) scalex = -1.0;
+  else if(flip && (rot == 1 || rot == 3)) scaley = -1.0;
+  ptr =  get_tok_value(r->prop_ptr, "alpha", 0);
+  if(ptr[0]) alpha = atof(ptr);
+  ptr =  get_tok_value(r->prop_ptr, "image_data", 0);
+  
+  my_snprintf(transform, S(transform), 
+    "transform=\"translate(%g,%g) scale(%g,%g) rotate(%d)\"", x1, y1, scalex, scaley, rot * 90);
+  if(alpha == 1.0)  strcpy(opacity, "");
+  else my_snprintf(opacity, S(opacity), "style=\"opacity:%g;\"", alpha);
+  if(ptr[0]) {
+    if(!strncmp(ptr, "/9j/4", 5)) jpg = 1; /* jpeg base64 header (30 bits checked) */
+    fprintf(fd, "<image x=\"%g\" y=\"%g\" width=\"%g\" height=\"%g\" %s %s "
+                "xlink:href=\"data:image/%s;base64,%s\"/>\n",
+                0.0, 0.0, w, h, transform, opacity, jpg ? "jpg" : "png", ptr);
+  }
+}
+
 
 static void svg_draw_symbol(int c, int n,int layer,short tmp_flip, short rot,
         double xoffset, double yoffset)
                             /* draws current layer only, should be called within  */
 {                           /* a "for(i=0;i<cadlayers;i++)" loop */
-  int j;
+  int j, hide = 0;
   double x0,y0,x1,y1,x2,y2;
   short flip;
   int textlayer;
   xLine line;
-  xRect box;
+  xRect *rect;
   xText text;
   xArc arc;
   xPoly polygon;
@@ -408,7 +447,14 @@ static void svg_draw_symbol(int c, int n,int layer,short tmp_flip, short rot,
   char *textfont;
 
   if(xctx->inst[n].ptr == -1) return;
-  if( (layer != PINLAYER && !enable_layer[layer]) ) return;
+  if( (layer != PINLAYER && !xctx->enable_layer[layer]) ) return;
+  if( (xctx->hide_symbols==1 && (xctx->inst[n].ptr+ xctx->sym)->prop_ptr &&
+      !strcmp( (xctx->inst[n].ptr+ xctx->sym)->type, "subcircuit") ) || (xctx->hide_symbols == 2) ) {
+    hide = 1;
+  } else {
+    hide = 0;
+  }
+
   if(layer==0) {
     x1=X_TO_SVG(xctx->inst[n].x1);
     x2=X_TO_SVG(xctx->inst[n].x2);
@@ -467,19 +513,31 @@ static void svg_draw_symbol(int c, int n,int layer,short tmp_flip, short rot,
     svg_drawarc(c, arc.fill, x0+x1, y0+y1, arc.r, angle, arc.b, arc.dash);
   }
 
-  if( enable_layer[layer] ) for(j=0;j< symptr->rects[layer];j++) {
-    box = (symptr->rect[layer])[j];
-    ROTATION(rot, flip, 0.0,0.0,box.x1,box.y1,x1,y1);
-    ROTATION(rot, flip, 0.0,0.0,box.x2,box.y2,x2,y2);
-    RECTORDER(x1,y1,x2,y2);
-    svg_filledrect(c, x0+x1, y0+y1, x0+x2, y0+y2, box.dash);
+  if( xctx->enable_layer[layer] ) for(j=0;j< symptr->rects[layer];j++) {
+    rect = &(symptr->rect[layer])[j];
+    ROTATION(rot, flip, 0.0,0.0,rect->x1,rect->y1,x1,y1);
+    ROTATION(rot, flip, 0.0,0.0,rect->x2,rect->y2,x2,y2);
+
+
+    if(layer == GRIDLAYER && rect->flags & 1024) {
+      double xx1 = x0 + x1;
+      double yy1 = y0 + y1;
+      double xx2 = x0 + x2;
+      double yy2 = y0 + y2;
+      svg_embedded_image(rect, xx1, yy1, xx2, yy2, rot, flip);
+    } else {
+      RECTORDER(x1,y1,x2,y2);
+      svg_filledrect(c, x0+x1, y0+y1, x0+x2, y0+y2, rect->dash);
+    }
   }
   if( (layer==TEXTWIRELAYER  && !(xctx->inst[n].flags&2) ) ||
-      (sym_txt && (layer==TEXTLAYER)   && (xctx->inst[n].flags&2) ) ) {
+      (xctx->sym_txt && (layer==TEXTLAYER)   && (xctx->inst[n].flags&2) ) ) {
     const char *txtptr;
     for(j=0;j< symptr->texts;j++) {
       text = symptr->text[j];
       /* if(text.xscale*FONTWIDTH* xctx->mooz<1) continue; */
+      if(symptr->text[j].flags & HIDE_TEXT) continue;
+      if( hide && text.txt_ptr && strcmp(text.txt_ptr, "@symname") && strcmp(text.txt_ptr, "@name") ) continue;
       txtptr= translate(n, text.txt_ptr);
       ROTATION(rot, flip, 0.0,0.0,text.x0,text.y0,x1,y1);
       textlayer = c;
@@ -489,8 +547,8 @@ static void svg_draw_symbol(int c, int n,int layer,short tmp_flip, short rot,
         if(textlayer < 0 || textlayer >= cadlayers) textlayer = c;
       }
       /* display PINLAYER colored instance texts even if PINLAYER disabled */
-      if(xctx->inst[n].color == PINLAYER ||  enable_layer[textlayer]) {
-        my_snprintf(svg_font_family, S(svg_font_family), svg_font_name);
+      if(xctx->inst[n].color == PINLAYER ||  xctx->enable_layer[textlayer]) {
+        my_snprintf(svg_font_family, S(svg_font_family), tclgetvar("svg_font_name"));
         my_snprintf(svg_font_style, S(svg_font_style), "normal");
         my_snprintf(svg_font_weight, S(svg_font_weight), "normal");
         textfont = symptr->text[j].font;
@@ -523,9 +581,10 @@ static void fill_svg_colors()
 {
  char s[200]; /* overflow safe 20161122 */
  unsigned int i,c;
- if(debug_var>=1) {
-   tcleval( "puts $svg_colors");
- }
+ /* if(debug_var>=1) {
+  *   tcleval( "puts $svg_colors");
+  * }
+  */
  for(i=0;i<cadlayers;i++) {
    if(color_ps) {
      my_snprintf(s, S(s), "lindex $svg_colors %d", i);
@@ -534,7 +593,7 @@ static void fill_svg_colors()
      svg_colors[i].red   = (c & 0xff0000) >> 16;
      svg_colors[i].green = (c & 0x00ff00) >> 8;
      svg_colors[i].blue  = (c & 0x0000ff);
-   } else if(dark_colorscheme) {
+   } else if(tclgetboolvar("dark_colorscheme")) {
      svg_colors[i].red   = 255;
      svg_colors[i].green = 255;
      svg_colors[i].blue  = 255;
@@ -559,16 +618,16 @@ void svg_draw(void)
   const char *r, *textfont;
   int *unused_layer;
   int color;
-  struct hilight_hashentry *entry;
+  Hilight_hashentry *entry;
   
   if(!lastdir[0]) my_strncpy(lastdir, pwd_dir, S(lastdir));
-  if(!xctx->plotfile[0]) {
-    Tcl_VarEval(interp, "tk_getSaveFile -title {Select destination file} -initialfile ",
-      get_cell(xctx->sch[xctx->currsch], 0) , ".svg -initialdir ", lastdir, NULL);
+  if(has_x && !xctx->plotfile[0]) {
+    tclvareval("tk_getSaveFile -title {Select destination file} -initialfile {",
+      get_cell(xctx->sch[xctx->currsch], 0) , ".svg} -initialdir {", lastdir, "}", NULL);
     r = tclresult();
     if(r[0]) {
       my_strncpy(xctx->plotfile, r, S(xctx->plotfile));
-      Tcl_VarEval(interp, "file dirname ", xctx->plotfile, NULL);
+      tclvareval("file dirname {", xctx->plotfile, "}", NULL);
       my_strncpy(lastdir, tclresult(), S(lastdir));
     }
     else return;
@@ -576,13 +635,14 @@ void svg_draw(void)
   svg_restore_lw();
   svg_colors=my_calloc(419, cadlayers, sizeof(Svg_color));
   if(svg_colors==NULL){
-    fprintf(errfp, "svg_draw(): calloc error\n");tcleval( "exit");
+    fprintf(errfp, "svg_draw(): calloc error\n");
+    return;
   }
   fill_svg_colors();
-  old_grid=draw_grid;
-  draw_grid=0;
-  dx=xctx->xschem_w;
-  dy=xctx->xschem_h;
+  old_grid=tclgetboolvar("draw_grid");
+  tclsetvar("draw_grid", "0");
+  dx=xctx->xrect[0].width;
+  dy=xctx->xrect[0].height;
   dbg(1, "svg_draw(): dx=%g  dy=%g\n", dx, dy);
  
   if(xctx->plotfile[0]) {
@@ -602,58 +662,59 @@ void svg_draw(void)
 
   unused_layer = my_calloc(873, cadlayers, sizeof(int));
   #if 0
-  /* Determine used layers. Disabled since we want hilight colors */
-  for(c=0;c<cadlayers;c++) unused_layer[c] = 1;
-  unused_layer[0] = 0; /* background */
-  for(i=0;i<xctx->texts;i++)
-  {
-    textlayer = xctx->text[i].layer;
-    if(textlayer < 0 ||  textlayer >= cadlayers) textlayer = TEXTLAYER;
-    unused_layer[textlayer] = 0;
-  }
-  for(c=0;c<cadlayers;c++)
-  {
-    xSymbol symptr = (xctx->inst[i].ptr + xctx->sym);
-    if(xctx->lines[c] || xctx->rects[c] || xctx->arcs[c] || xctx->polygons[c]) unused_layer[c] = 0;
-    if(xctx->wires) unused_layer[WIRELAYER] = 0;
-    for(i=0;i<xctx->instances;i++) {
-      if( (c == PINLAYER || enable_layer[c]) && symptr->lines[c] ) unused_layer[c] = 0;
-      if( (c == PINLAYER || enable_layer[c]) && symptr->polygons[c] ) unused_layer[c] = 0;
-      if( (c == PINLAYER || enable_layer[c]) && symptr->arcs[c] ) unused_layer[c] = 0;
-      if( (c != PINLAYER || enable_layer[c]) && symptr->rects[c] ) unused_layer[c] = 0;
-      if( (c==TEXTWIRELAYER  && !(xctx->inst[i].flags&2) ) ||
-          (sym_txt && (c==TEXTLAYER)   && (xctx->inst[i].flags&2) ) )
-      {
-        int j;
-        for(j=0;j< symptr->texts;j++)
-        {
-          textlayer = c;
-          if( !(xctx->inst[i].color == PINLAYER)) {
-            textlayer = symptr->text[j].layer;
-            if(textlayer < 0 || textlayer >= cadlayers) textlayer = c;
-          }
-          /* display PINLAYER colored instance texts even if PINLAYER disabled */
-          if(xctx->inst[i].color == PINLAYER ||  enable_layer[textlayer]) {
-            used_layer[textlayer] = 0;
-          }
-        }
-      }
-    }
-    dbg(1, "used_layer[%d] = %d\n", c, used_layer[c]);
-  }
-  /* End determine used layer */
+  *     /* Determine used layers. Disabled since we want hilight colors */
+  *     for(c=0;c<cadlayers;c++) unused_layer[c] = 1;
+  *     unused_layer[0] = 0; /* background */
+  *     for(i=0;i<xctx->texts;i++)
+  *     {
+  *       textlayer = xctx->text[i].layer;
+  *       if(textlayer < 0 ||  textlayer >= cadlayers) textlayer = TEXTLAYER;
+  *       unused_layer[textlayer] = 0;
+  *     }
+  *     for(c=0;c<cadlayers;c++)
+  *     {
+  *       xSymbol symptr = (xctx->inst[i].ptr + xctx->sym);
+  *       if(xctx->lines[c] || xctx->rects[c] || xctx->arcs[c] || xctx->polygons[c]) unused_layer[c] = 0;
+  *       if(xctx->wires) unused_layer[WIRELAYER] = 0;
+  *       for(i=0;i<xctx->instances;i++) {
+  *         if( (c == PINLAYER || xctx->enable_layer[c]) && symptr->lines[c] ) unused_layer[c] = 0;
+  *         if( (c == PINLAYER || xctx->enable_layer[c]) && symptr->polygons[c] ) unused_layer[c] = 0;
+  *         if( (c == PINLAYER || xctx->enable_layer[c]) && symptr->arcs[c] ) unused_layer[c] = 0;
+  *         if( (c != PINLAYER || xctx->enable_layer[c]) && symptr->rects[c] ) unused_layer[c] = 0;
+  *         if( (c==TEXTWIRELAYER  && !(xctx->inst[i].flags&2) ) ||
+  *             (xctx->sym_txt && (c==TEXTLAYER)   && (xctx->inst[i].flags&2) ) )
+  *         {
+  *           int j;
+  *           for(j=0;j< symptr->texts;j++)
+  *           {
+  *             textlayer = c;
+  *             if( !(xctx->inst[i].color == PINLAYER)) {
+  *               textlayer = symptr->text[j].layer;
+  *               if(textlayer < 0 || textlayer >= cadlayers) textlayer = c;
+  *             }
+  *             /* display PINLAYER colored instance texts even if PINLAYER disabled */
+  *             if(xctx->inst[i].color == PINLAYER ||  xctx->enable_layer[textlayer]) {
+  *               used_layer[textlayer] = 0;
+  *             }
+  *           }
+  *         }
+  *       }
+  *       dbg(1, "used_layer[%d] = %d\n", c, used_layer[c]);
+  *     }
+  *     /* End determine used layer */
   #endif
 
   fprintf(fd, "<svg xmlns=\"http://www.w3.org/2000/svg\""
+              " xmlns:xlink=\"http://www.w3.org/1999/xlink\""
               " width=\"%g\" height=\"%g\" version=\"1.1\">\n", dx, dy);
  
   fprintf(fd, "<style type=\"text/css\">\n");  /* use css stylesheet 20121119 */
   for(i=0;i<cadlayers;i++){
     if(unused_layer[i]) continue;
     fprintf(fd, ".l%d{\n", i);
-    if(fill_type[i] == 1) 
+    if(xctx->fill_type[i] == 1) 
       fprintf(fd, " fill: #%02x%02x%02x;\n", svg_colors[i].red, svg_colors[i].green, svg_colors[i].blue);
-    else if(fill_type[i] == 2) 
+    else if(xctx->fill_type[i] == 2) 
       fprintf(fd, " fill: #%02x%02x%02x; fill-opacity: 0.5;\n", 
          svg_colors[i].red, svg_colors[i].green, svg_colors[i].blue);
     else
@@ -662,14 +723,14 @@ void svg_draw(void)
     fprintf(fd, "  stroke-linecap:round;\n");
     fprintf(fd, "  stroke-linejoin:round;\n");
     fprintf(fd, "  stroke-width: %g;\n", svg_linew);
-    if(i == 0 && transparent_svg) {
+    if(i == 0 && tclgetboolvar("transparent_svg")) {
       fprintf(fd, "  fill-opacity: 0;\n");
       fprintf(fd, "  stroke-opacity: 0;\n");
     }
     fprintf(fd, "}\n");
   }
  
-  fprintf(fd, "text {font-family: %s;}\n", svg_font_name);
+  fprintf(fd, "text {font-family: %s;}\n", tclgetvar("svg_font_name"));
   fprintf(fd, "</style>\n");
  
     /* background */
@@ -678,8 +739,9 @@ void svg_draw(void)
     for(i=0;i<xctx->texts;i++)
     {
       textlayer = xctx->text[i].layer;
+      if(xctx->text[i].flags & HIDE_TEXT) continue;
       if(textlayer < 0 ||  textlayer >= cadlayers) textlayer = TEXTLAYER;
-      my_snprintf(svg_font_family, S(svg_font_family), svg_font_name);
+      my_snprintf(svg_font_family, S(svg_font_family), tclgetvar("svg_font_name"));
       my_snprintf(svg_font_style, S(svg_font_style), "normal");
       my_snprintf(svg_font_weight, S(svg_font_weight), "normal");
       textfont = xctx->text[i].font;
@@ -711,8 +773,13 @@ void svg_draw(void)
                       xctx->line[c][i].x2, xctx->line[c][i].y2, xctx->line[c][i].dash);
      for(i=0;i<xctx->rects[c];i++)
      {
-      svg_filledrect(c, xctx->rect[c][i].x1, xctx->rect[c][i].y1,
-                        xctx->rect[c][i].x2, xctx->rect[c][i].y2, xctx->rect[c][i].dash);
+       if(c == GRIDLAYER && (xctx->rect[c][i].flags & 1024) ) {
+          xRect *r = &xctx->rect[c][i];
+          svg_embedded_image(r, r->x1, r->y1, r->x2, r->y2, 0, 0);
+       } else if(c != GRIDLAYER || !(xctx->rect[c][i].flags & 1) )  {
+         svg_filledrect(c, xctx->rect[c][i].x1, xctx->rect[c][i].y1,
+                           xctx->rect[c][i].x2, xctx->rect[c][i].y2, xctx->rect[c][i].dash);
+       }
      }
      for(i=0;i<xctx->arcs[c];i++)
      {
@@ -733,7 +800,7 @@ void svg_draw(void)
     for(i=0;i<xctx->wires;i++)
     {
       color = WIRELAYER;
-      if(xctx->hilight_nets && (entry=bus_hilight_lookup( xctx->wire[i].node, 0, XLOOKUP))) {
+      if(xctx->hilight_nets && (entry=bus_hilight_hash_lookup( xctx->wire[i].node, 0, XLOOKUP))) {
         color = get_color(entry->value);
       }
       svg_drawline(color, xctx->wire[i].bus, xctx->wire[i].x1, 
@@ -741,9 +808,9 @@ void svg_draw(void)
     }
     {
       double x1, y1, x2, y2;
-      struct wireentry *wireptr;
+      Wireentry *wireptr;
       int i;
-      struct iterator_ctx ctx;
+      Iterator_ctx ctx;
       update_conn_cues(0, 0);
       /* draw connecting dots */
       x1 = X_TO_XSCHEM(xctx->areax1);
@@ -753,13 +820,13 @@ void svg_draw(void)
       for(init_wire_iterator(&ctx, x1, y1, x2, y2); ( wireptr = wire_iterator_next(&ctx) ) ;) {
         i = wireptr->n;
         color = WIRELAYER;
-        if(xctx->hilight_nets && (entry=bus_hilight_lookup( xctx->wire[i].node, 0, XLOOKUP))) {
+        if(xctx->hilight_nets && (entry=bus_hilight_hash_lookup( xctx->wire[i].node, 0, XLOOKUP))) {
           color = get_color(entry->value);
         }
-        if( xctx->wire[i].end1 >1 ) { /* 20150331 draw_dots */
+        if( xctx->wire[i].end1 >1 ) {
           svg_drawcircle(color, 1, xctx->wire[i].x1, xctx->wire[i].y1, cadhalfdotsize, 0, 360);
         }
-        if( xctx->wire[i].end2 >1 ) { /* 20150331 draw_dots */
+        if( xctx->wire[i].end2 >1 ) {
           svg_drawcircle(color, 1, xctx->wire[i].x2, xctx->wire[i].y2, cadhalfdotsize, 0, 360);
         }
       }
@@ -767,8 +834,7 @@ void svg_draw(void)
   dbg(1, "svg_draw(): INT_WIDTH(lw)=%d\n",INT_WIDTH(xctx->lw));
   fprintf(fd, "</svg>\n");
   fclose(fd);
-
-  draw_grid=old_grid;
+  tclsetboolvar("draw_grid", old_grid);
   my_free(964, &svg_colors);
   my_free(1217, &unused_layer);
   Tcl_SetResult(interp,"",TCL_STATIC);

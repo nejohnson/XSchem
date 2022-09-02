@@ -32,8 +32,12 @@
 
 #define CAD_SPICE_NETLIST 1
 
+
 int dbg_var = 0;
-extern int netlist_type;
+#include "xschem.h"
+
+/* 
+extern int xctx;
 extern int has_x;
 extern FILE *errfp;
 extern size_t my_strdup(int id, char **dest, const char *src);
@@ -42,7 +46,7 @@ extern char bus_char[];
 extern const char *tcleval(const char str[]);
 extern void *my_malloc(int id, size_t size);
 extern int  my_snprintf(char *str, int size, const char *fmt, ...);
-
+*/
 #ifndef STRINGPTR
 #define STRINGPTR
 typedef struct          /* used in expandlabel.y */
@@ -66,7 +70,7 @@ void clear_expandlabel_data(void)
   my_free(868, &dest_string.str);
 }
 
-void str_char_replace(char s[], char chr, char repl_chr)
+static void str_char_replace(char s[], char chr, char repl_chr)
 {
      int i=0;
      while(s[i]!='\0')
@@ -106,7 +110,8 @@ const char *expandlabel(const char *s, int *m)
    cmd = my_malloc(526, l);
    fprintf(errfp, "syntax error in %s\n", s);
    my_snprintf(cmd, l, 
-     "tk_messageBox -icon error -type ok -message {Syntax error in identifier expansion: %s}", s);
+     "tk_messageBox -icon error -type ok -parent [xschem get topwindow] "
+     "-message {Syntax error in identifier expansion: %s}", s);
    if(has_x) tcleval(cmd);
    my_free(543, &cmd);
 
@@ -118,7 +123,7 @@ const char *expandlabel(const char *s, int *m)
  else
     *m=-1;
  if(dest_string.str) {
-   if(netlist_type == CAD_SPICE_NETLIST && bus_char[0] && bus_char[1]) {
+   if(xctx->netlist_type == CAD_SPICE_NETLIST && bus_char[0] && bus_char[1]) {
      str_char_replace(dest_string.str, '[', bus_char[0]);
      str_char_replace(dest_string.str, ']', bus_char[1]);
    }
@@ -142,9 +147,9 @@ NOTSP [^ \t\n]
 INT [0-9]+
 DDOT {SP}".."{SP}
 CLN {SP}":"{SP}
-LAB [-a-zA-Z_%$~"#!/\\<>]
+LAB [-a-zA-Z_%$~"+#!/\\<>]
   /* includes numbers */
-LAB_NUM [-a-zA-Z_%$~"#!/\\<>0-9]
+LAB_NUM [-a-zA-Z_%$~"+#!/\\<>0-9]
   /* includes numbers and space and *+(). */
 IDX_LAB_NUM_SP [-a-zA-Z_%$~"#!/\\<> \t\n0-9*+().]
   /* identifier, may start with a number */
@@ -154,9 +159,9 @@ IDX_ID (("("|{LAB})+{IDX_LAB_NUM_SP}*)
   /* includes numbers and space and +().  and :*/
 LAB_NUM_SP [-a-zA-Z_%$~"#!:/\\<> \t\n0-9+().]
   /* identifier, may start with a number */
-ID_NUM ({LAB_NUM}+({LAB_NUM_SP}*{LAB_NUM})*)
+ID_NUM ({LAB_NUM}+({LAB_NUM_SP}*{LAB_NUM})*\??)
   /* identifier, not starting with a number */
-ID (("("|{LAB})+{LAB_NUM_SP}*)
+ID (("("|{LAB})+{LAB_NUM_SP}*\??)
   /* ~#diUV=9_(\#-hgvUY=) */
 ID_EXT_PARENTHESIS ([-~"#+/=_a-zA-Z][-#!@\\/:.=_+a-zA-Z0-9]*\([-~"#!@\\/:.=_+a-zA-Z0-9]*\))
 

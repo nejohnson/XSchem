@@ -24,7 +24,7 @@
 #define SHORT 1
 #define LONG 2
 
-void check_opt(char *opt, char *optval, int type)
+static void check_opt(char *opt, char *optval, int type)
 {
     if( (type == SHORT && *opt == 'd') || (type == LONG && !strcmp("debug", opt)) ) {
         if(optval) debug_var=atoi(optval);
@@ -32,50 +32,50 @@ void check_opt(char *opt, char *optval, int type)
 
     } else if( (type == SHORT && *opt == 'S') || (type == LONG && !strcmp("simulate", opt)) ) {
         dbg(1, "process_options(): will do simulation\n");
-        do_simulation=1;
+        cli_opt_do_simulation=1;
 
     } else if( (type == SHORT && *opt == 'W') || (type == LONG && !strcmp("waves", opt)) ) {
         dbg(1, "process_options(): will show waves\n");
-        do_waves=1;
+        cli_opt_do_waves=1;
 
     } else if( (type == SHORT && *opt == 'n') || (type == LONG && !strcmp("netlist", opt)) ) {
         dbg(1, "process_options(): will do netlist\n");
-        do_netlist=1;
+        cli_opt_do_netlist=1;
 
     } else if( (type == SHORT && *opt == 'f') || (type == LONG && !strcmp("flat_netlist", opt)) ) {
         dbg(1, "process_options(): set flat netlist\n");
-        flat_netlist=1;
+        cli_opt_flat_netlist=1;
 
     } else if( (type == SHORT && *opt == 'r') || (type == LONG && !strcmp("no_readline", opt)) ) {
-        no_readline=1;
+        cli_opt_no_readline=1;
 
     } else if( (type == SHORT && *opt == 'p') || (type == LONG && !strcmp("postscript", opt)) ) {
         dbg(1, "process_options(): will print postscript/pdf\n");
-        do_print=1;
+        cli_opt_do_print=1;
 
     } else if( (type == LONG && !strcmp("pdf", opt)) ) {
         dbg(1, "process_options(): will print postscript/pdf\n");
-        do_print=1;
+        cli_opt_do_print=1;
 
     } else if( (type == LONG && !strcmp("plotfile", opt)) ) {
         dbg(1, "process_options(): user plotfile specified: %s\n", optval ? optval : "NULL");
-        if(optval) my_strncpy(xctx->plotfile, optval, S(xctx->plotfile));
+        if(optval) my_strncpy(cli_opt_plotfile, optval, S(cli_opt_plotfile));
 
     } else if( (type == LONG && !strcmp("rcfile", opt)) ) {
         dbg(1, "process_options(): user rcfile specified: %s\n", optval ? optval : "NULL");
-        if(optval) my_strncpy(rcfile, optval, S(rcfile));
+        if(optval) my_strncpy(cli_opt_rcfile, optval, S(cli_opt_rcfile));
 
     } else if( (type == LONG && !strcmp("png", opt)) ) {
         dbg(1, "process_options(): will print png\n");
-        do_print=2;
+        cli_opt_do_print=2;
 
     } else if( (type == LONG && !strcmp("tcl", opt)) ) {
         dbg(1, "process_options(): passing tcl command to interpreter: %s\n", optval);
-        if(optval) my_strdup(110, &tcl_command, optval);
+        if(optval) my_strdup(110, &cli_opt_tcl_command, optval);
 
     } else if( (type == LONG && !strcmp("script", opt)) ) {
         dbg(1, "process_options(): passing tcl script file  to interpreter: %s\n", optval);
-        if(optval) my_strncpy(tcl_script, optval, S(tcl_script));
+        if(optval) my_strncpy(cli_opt_tcl_script, optval, S(cli_opt_tcl_script));
 
     } else if( (type == LONG && !strcmp("tcp_port", opt)) ) {
         dbg(1, "process_options(): setting tcp port: %s\n", optval);
@@ -84,14 +84,14 @@ void check_opt(char *opt, char *optval, int type)
 
     } else if( (type == LONG && !strcmp("svg", opt)) ) {
         dbg(1, "process_options(): will print png\n");
-        do_print=3;
+        cli_opt_do_print=3;
 
     } else if( (type == SHORT && *opt == 'c') || (type == LONG && !strcmp("color_ps", opt)) ) {
         dbg(1, "process_options(): set color postscript\n");
         color_ps=1;
 
     } else if( (type == SHORT && *opt == 'i') || (type == LONG && !strcmp("no_rcload", opt)) ) {
-        load_initfile=0;
+        cli_opt_load_initfile=0;
 
     } else if( (type == SHORT && *opt == 'l') || (type == LONG && !strcmp("log", opt)) ) {
         if(optval) {
@@ -102,33 +102,37 @@ void check_opt(char *opt, char *optval, int type)
           }
         }
     } else if( (type == SHORT && *opt == 'o') || (type == LONG && !strcmp("netlist_path", opt)) ) {
-        if(optval) my_strdup(48, &netlist_dir, optval);
+        if(optval) my_strncpy(cli_opt_netlist_dir, optval, S(cli_opt_netlist_dir));
 
     } else if( (type == SHORT && *opt == 'N') || (type == LONG && !strcmp("netlist_filename", opt)) ) {
         dbg(1, "process_options(): set netlist name to %s\n", optval);
-        if(optval) my_strncpy(initial_netlist_name, optval, S(initial_netlist_name));
+        if(optval) my_strncpy(cli_opt_initial_netlist_name, optval, S(cli_opt_initial_netlist_name));
 
     } else if( (type == SHORT && *opt == 's') || (type == LONG && !strcmp("spice", opt)) ) {
         dbg(1, "process_options(): set netlist type to spice\n");
-        netlist_type=CAD_SPICE_NETLIST;
+        cli_opt_netlist_type=CAD_SPICE_NETLIST;
+
+    } else if( (type == SHORT && *opt == 'y') || (type == LONG && !strcmp("symbol", opt)) ) {
+        dbg(1, "process_options(): set netlist type to symbol\n");
+        cli_opt_netlist_type=CAD_SYMBOL_ATTRS;
 
     } else if( (type == SHORT && *opt == 'V') || (type == LONG && !strcmp("vhdl", opt)) ) {
         dbg(1, "process_options(): set netlist type to vhdl\n");
-        netlist_type=CAD_VHDL_NETLIST;
+        cli_opt_netlist_type=CAD_VHDL_NETLIST;
 
     } else if( (type == SHORT && *opt == 'w') || (type == LONG && !strcmp("verilog", opt)) ) {
         dbg(1, "process_options(): set netlist type to verilog\n");
-        netlist_type=CAD_VERILOG_NETLIST;
+        cli_opt_netlist_type=CAD_VERILOG_NETLIST;
 
-    } else if( (type == SHORT && *opt == 'b') || (type == LONG && !strcmp("batch", opt)) ) {
-        batch_mode = 1;
+    } else if( (type == SHORT && *opt == 'b') || (type == LONG && !strcmp("detach", opt)) ) {
+        detach = 1;
 
     } else if( (type == SHORT && *opt == 'v') || (type == LONG && !strcmp("version", opt)) ) {
         print_version();
 
     } else if( (type == SHORT && *opt == 't') || (type == LONG && !strcmp("tedax", opt)) ) {
         dbg(1, "process_options(): set netlist type to tEDAx\n");
-        netlist_type=CAD_TEDAX_NETLIST;
+        cli_opt_netlist_type=CAD_TEDAX_NETLIST;
 
     } else if( (type == SHORT && *opt == 'q') || (type == LONG && !strcmp("quit", opt)) ) {
         quit=1;
@@ -226,9 +230,9 @@ int process_options(int argc, char *argv[])
   }
   if (arg_cnt>=2) {
     dbg(1, "process_option(): file name given: %s\n",argv[1]);
-    my_strdup(291, &filename, argv[1]);
+    my_strncpy(cli_opt_filename, argv[1], S(cli_opt_filename));
 #ifndef __unix__
-    change_to_unix_fn(filename);
+    change_to_unix_fn(cli_opt_filename);
 #endif
   }
   return arg_cnt;

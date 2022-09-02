@@ -76,12 +76,13 @@ Alt + LeftButton        Unselect selected object
 Alt + LeftButton drag  
                         Unselect objects by area
 
-RightButton             Edit property of object under the mouse
-                        else edit global schematic / symbol property string
+RightButton             Context menu
 
-Shift + RightButton     Edit property of object under the mouse 
-                        else edit global schematic / symbol property string
-                        using the specified (or default) text editor.
+Shift + RightButton     Select object under the mouse and if label/pin
+                        select attached nets
+
+Ctrl + RightButton      Select object under the mouse and if label/pin
+                        select attached nets up to net junctions
 
 LeftButton Double click Terminate Polygon placement
 
@@ -91,12 +92,15 @@ LeftButton Double click Terminate Polygon placement
 -          BackSpace    Back to parent schematic
 -          Delete       Delete selected objects
 -          Insert       Insert element from library
--          Down         Move down
-ctrl       Enter        Confirm closing dialog boxes
 -          Escape       Abort, redraw, unselect
+ctrl       Enter        Confirm closing dialog boxes
+-          Down         Move down
 -          Left         Move right
 -          Right        Move left
 -          Up           Move up
+ctrl       Left         Previous tab (if tabbed interface enabled)
+ctrl       Right        Next tab (if tabbed interface enabled)
+-           '\'         Toggle fullscreen
 -           '!'         Break selected wires at any wire or component pin
                         connection
 -           ' '         Pan schematic
@@ -109,7 +113,8 @@ ctrl        '0-9'       set current layer (4 -13)
             '0'         set selected net or label to logic value '0'
             '1'         set selected net or label to logic value '1'
             '2'         set selected net or label to logic value 'X'
-            '3'         toggle selected net or label: 1->0, 0->1, X->X
+            '3'         set selected net or label to logic value 'Z'
+            '4'         toggle selected net or label: 1-&gt;0, 0-&gt;1, X-&gt;X
 -           'a'         Make symbol from pin list of current schematic
 ctrl        'a'         Select all
 shift       'A'         Toggle show netlist
@@ -130,6 +135,7 @@ shift       'F'         Flip
 alt         'f'         Flip objects around their anchor points
 ctrl        'f'         Find/select by substring or regexp
 -           'f'         Full zoom
+shift+ctrl  'F'         Zoom full selected elements
 shift       'G'         Double snap factor
 -           'g'         Half snap factor
 ctrl        'g'         Set snap factor
@@ -159,10 +165,12 @@ alt         'l'         add lab_pin.sym to schematic
 ctrl+shift  'o'         Load most recent schematic
 ctrl        'o'         Load schematic
 -           'm'         Move selected obj.
-shift       'N'         Hierarchical netlist
--           'n'         Netlist
+shift       'N'         Top level only netlist
+-           'n'         Hierarchical Netlist
 ctrl        'n'         New schematic
 ctrl+shift  'N'         New symbol
+alt         'n'         Empty schematic in new window
+alt+shift   'N'         Empty symbol in new window
 shift       'O'         Toggle Light / Dark colorscheme
 ctrl        'o'         Load schematic
 alt         'p'         Add symbol pin

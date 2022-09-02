@@ -46,16 +46,16 @@ static int check_breaks(double x1, double y1, double x2, double y2, double x, do
 void update_conn_cues(int draw_cues, int dr_win)
 {
   int k, i, l, sqx, sqy, save_draw;
-  struct wireentry *wptr;
+  Wireentry *wptr;
   double x0, y0;
   double x1, y1, x2, y2;
-  struct wireentry *wireptr;
+  Wireentry *wireptr;
   xWire * const wire = xctx->wire;
-  struct iterator_ctx ctx;
+  Iterator_ctx ctx;
 
-  hash_wires(); /* must be done also if wires==0 to clear wiretable */
+  hash_wires(); /* must be done also if wires==0 to clear wire_spatial_table */
   if(!xctx->wires) return;
-  if(!draw_dots) return;
+  if(!xctx->draw_dots) return;
   if(cadhalfdotsize*xctx->mooz<0.7) return;
   x1 = X_TO_XSCHEM(xctx->areax1);
   y1 = Y_TO_XSCHEM(xctx->areay1);
@@ -78,7 +78,7 @@ void update_conn_cues(int draw_cues, int dr_win)
         y0 = wire[k].y2;
       }
       get_square(x0, y0, &sqx, &sqy);
-      for(wptr = xctx->wiretable[sqx][sqy] ; wptr ; wptr = wptr->next) {
+      for(wptr = xctx->wire_spatial_table[sqx][sqy] ; wptr ; wptr = wptr->next) {
         i = wptr->n;
         if(i == k) {
           continue; /* no check wire against itself */
@@ -98,21 +98,21 @@ void update_conn_cues(int draw_cues, int dr_win)
   }
   dbg(3, "update_conn_cues(): check3\n");
   if(draw_cues) {
-    save_draw = draw_window; draw_window = dr_win;
+    save_draw = xctx->draw_window; xctx->draw_window = dr_win;
     for(init_wire_iterator(&ctx, x1, y1, x2, y2); ( wireptr = wire_iterator_next(&ctx) ) ;) {
       i = wireptr->n;
       /* optimization when editing small areas (detailed zoom)  of a huge schematic */
       if(LINE_OUTSIDE(wire[i].x1, wire[i].y1,
                       wire[i].x2, wire[i].y2, x1, y1, x2, y2)) continue;
-      if( wire[i].end1 >1 ) { /* 20150331 draw_dots */
+      if( wire[i].end1 >1 ) {
         filledarc(WIRELAYER, ADD, wire[i].x1, wire[i].y1, cadhalfdotsize, 0, 360);
       }
-      if( wire[i].end2 >1 ) { /* 20150331 draw_dots */
+      if( wire[i].end2 >1 ) {
         filledarc(WIRELAYER, ADD, wire[i].x2, wire[i].y2, cadhalfdotsize, 0, 360);
       }
     }
     filledarc(WIRELAYER, END, 0.0, 0.0, 0.0, 0.0, 0.0);
-    draw_window = save_draw;
+    xctx->draw_window = save_draw;
   }
 }
 
@@ -121,7 +121,8 @@ void update_conn_cues(int draw_cues, int dr_win)
  * start = 2: return total time from initialize */
 double timer(int start)
 {
-  static double st, cur, lap;
+  /* used only for test mode. No problem with switching schematic context */
+  static double st, cur, lap; /* safe to keep even with multiple schematics */
   if(start == 0) return lap = st = (double) clock() / CLOCKS_PER_SEC;
   else if(start == 1) {
     double prevlap = lap;
@@ -139,18 +140,18 @@ void trim_wires(void)
   double x0, y0;
   int j, i, changed;
   int includes, breaks;
-  struct wireentry *wptr;
-  static unsigned short *wireflag=NULL;
+  Wireentry *wptr;
+  unsigned short *wireflag=NULL;
 
   doloops = 0;
   xctx->prep_hash_wires = 0;
-  timer(0);
+  /* timer(0); */
   do {
-    dbg(1, "trim_wires(): start: %g\n", timer(1));
+    /* dbg(1, "trim_wires(): start: %g\n", timer(1)); */
     changed = 0;
     doloops++;
     hash_wires(); /* end1 and end2 reset to -1 */
-    dbg(1, "trim_wires(): hash_wires_1: %g\n", timer(1));
+    /* dbg(1, "trim_wires(): hash_wires_1: %g\n", timer(1)); */
 
     /* break all wires */
     for(i=0;i<xctx->wires;i++) {
@@ -159,13 +160,13 @@ void trim_wires(void)
       y0 = xctx->wire[i].y1;
       get_square(x0, y0, &sqx, &sqy);
       k=1;
-      for(wptr = xctx->wiretable[sqx][sqy] ; ; wptr = wptr->next) {
+      for(wptr = xctx->wire_spatial_table[sqx][sqy] ; ; wptr = wptr->next) {
         if(!wptr) {
           if(k == 1) {
             x0 = xctx->wire[i].x2;
             y0 = xctx->wire[i].y2;
             get_square(x0, y0, &sqx, &sqy);
-            wptr = xctx->wiretable[sqx][sqy];
+            wptr = xctx->wire_spatial_table[sqx][sqy];
             k = 2;
             if(!wptr) break;
           } else break;
@@ -209,7 +210,7 @@ void trim_wires(void)
       }
       dbg(2, "trim_wires(): hashloopcnt = %d, wires = %d\n", hashloopcnt, xctx->wires);
     }
-    dbg(1, "trim_wires(): break: %g\n", timer(1));
+    /* dbg(1, "trim_wires(): break: %g\n", timer(1)); */
     /* reduce included wires */
     my_realloc(29, &wireflag, xctx->wires*sizeof(unsigned short));
     memset(wireflag, 0, xctx->wires*sizeof(unsigned short));
@@ -219,13 +220,13 @@ void trim_wires(void)
       y0 = xctx->wire[i].y1;
       get_square(x0, y0, &sqx, &sqy);
       k=1;
-      for(wptr = xctx->wiretable[sqx][sqy] ; ; wptr = wptr->next) {
+      for(wptr = xctx->wire_spatial_table[sqx][sqy] ; ; wptr = wptr->next) {
         if(!wptr) {
           if(k == 1) {
             x0 = xctx->wire[i].x2;
             y0 = xctx->wire[i].y2;
             get_square(x0, y0, &sqx, &sqy);
-            wptr = xctx->wiretable[sqx][sqy];
+            wptr = xctx->wire_spatial_table[sqx][sqy];
             k = 2;
             if(!wptr) break;
           } else break;
@@ -245,7 +246,7 @@ void trim_wires(void)
         }
       }
     }
-    dbg(1, "trim_wires(): included: %g\n", timer(1));
+    /* dbg(1, "trim_wires(): included: %g\n", timer(1)); */
   
     /* delete wires */
     j = 0;
@@ -267,14 +268,14 @@ void trim_wires(void)
       xctx->prep_hash_wires=0;
       changed = 1;
     }
-    dbg(1, "trim_wires(): delete_1: %g\n", timer(1));
+    /* dbg(1, "trim_wires(): delete_1: %g\n", timer(1)); */
   
     /* after wire deletions full rehash is needed */
     hash_wires();
 
     my_realloc(30, &wireflag, xctx->wires*sizeof(unsigned short));
     memset(wireflag, 0, xctx->wires*sizeof(unsigned short));
-    dbg(1, "trim_wires(): hash_wires_2: %g\n", timer(1));
+    /* dbg(1, "trim_wires(): hash_wires_2: %g\n", timer(1)); */
 
     /* update endpoint (end1, end2) connection counters */
     for(i=0;i<xctx->wires;i++) {
@@ -283,13 +284,13 @@ void trim_wires(void)
       xctx->wire[i].end1 = xctx->wire[i].end2 = 0;
       get_square(x0, y0, &sqx, &sqy);
       k=1;
-      for(wptr = xctx->wiretable[sqx][sqy] ; ; wptr = wptr->next) {
+      for(wptr = xctx->wire_spatial_table[sqx][sqy] ; ; wptr = wptr->next) {
         if(!wptr) {
           if(k == 1) {
             x0 = xctx->wire[i].x2;
             y0 = xctx->wire[i].y2;
             get_square(x0, y0, &sqx, &sqy);
-            wptr = xctx->wiretable[sqx][sqy];
+            wptr = xctx->wire_spatial_table[sqx][sqy];
             k = 2;
             if(!wptr) break;
           } else break;
@@ -313,7 +314,7 @@ void trim_wires(void)
         }
       }
     }
-    dbg(1, "trim_wires(): endpoints: %g\n", timer(1));
+    /* dbg(1, "trim_wires(): endpoints: %g\n", timer(1)); */
   
     /* merge parallel touching (in wire[i].x2, wire[i].y2) wires */
     for(i=0;i<xctx->wires;i++) {
@@ -321,7 +322,7 @@ void trim_wires(void)
       x0 = xctx->wire[i].x2;
       y0 = xctx->wire[i].y2;
       get_square(x0, y0, &sqx, &sqy);
-      for(wptr = xctx->wiretable[sqx][sqy] ; wptr ; wptr = wptr->next) {
+      for(wptr = xctx->wire_spatial_table[sqx][sqy] ; wptr ; wptr = wptr->next) {
         j = wptr->n;
         if(i == j || wireflag[j]) continue;
         if( touch(xctx->wire[j].x1, xctx->wire[j].y1, xctx->wire[j].x2, xctx->wire[j].y2, x0,y0) &&
@@ -340,7 +341,7 @@ void trim_wires(void)
         }
       }
     }
-    dbg(1, "trim_wires(): merge: %g\n", timer(1));
+    /* dbg(1, "trim_wires(): merge: %g\n", timer(1)); */
   
     /* delete wires */
     j = 0;
@@ -363,7 +364,7 @@ void trim_wires(void)
       xctx->prep_hash_wires=0; /* after wire deletions full rehash is needed */
       changed = 1;
     }
-    dbg(1, "trim_wires(): delete_2: %g\n", timer(1));
+    /* dbg(1, "trim_wires(): delete_2: %g\n", timer(1)); */
 
     if(changed) {
       xctx->need_reb_sel_arr = 1;
@@ -381,13 +382,13 @@ void break_wires_at_pins(void)
 {
   int k, i, j, r, rects, sqx, sqy;
   short rot, flip;
-  struct wireentry *wptr;
+  Wireentry *wptr;
   xRect *rct;
   double x0, y0, rx1, ry1;
   int changed=0;
 
   hash_wires();
-  xctx->need_reb_sel_arr=1;
+  /* xctx->need_reb_sel_arr=1; */ /* seems not needed */
   rebuild_selected_array();
 
   /* for(k=0;k<xctx->instances;k++) */
@@ -406,14 +407,14 @@ void break_wires_at_pins(void)
         x0=xctx->inst[k].x0+rx1;
         y0=xctx->inst[k].y0+ry1;
         get_square(x0, y0, &sqx, &sqy);
-        for(wptr=xctx->wiretable[sqx][sqy]; wptr; wptr=wptr->next) {
+        for(wptr=xctx->wire_spatial_table[sqx][sqy]; wptr; wptr=wptr->next) {
           i = wptr->n;
           if( touch(xctx->wire[i].x1, xctx->wire[i].y1,
                     xctx->wire[i].x2, xctx->wire[i].y2, x0,y0) )
           {
             if( (x0!=xctx->wire[i].x1 && x0!=xctx->wire[i].x2) ||
                 (y0!=xctx->wire[i].y1 && y0!=xctx->wire[i].y2) ) {
-              if(!changed) { push_undo(); changed=1;}
+              if(!changed) { xctx->push_undo(); changed=1;}
               check_wire_storage();
               xctx->wire[xctx->wires].x1=xctx->wire[i].x1;
               xctx->wire[xctx->wires].y1=xctx->wire[i].y1;
@@ -457,7 +458,7 @@ void break_wires_at_pins(void)
       }
       get_square(x0, y0, &sqx, &sqy);
       /* printf("  k=%d, x0=%g, y0=%g\n", k, x0, y0); */
-      for(wptr=xctx->wiretable[sqx][sqy] ; wptr ; wptr = wptr->next) {
+      for(wptr=xctx->wire_spatial_table[sqx][sqy] ; wptr ; wptr = wptr->next) {
         i = wptr->n;
         /* printf("check wire %d to wire %d\n", k, i); */
         if(i==k) {
@@ -469,7 +470,7 @@ void break_wires_at_pins(void)
           if( (x0!=xctx->wire[i].x1 && x0!=xctx->wire[i].x2) ||
               (y0!=xctx->wire[i].y1 && y0!=xctx->wire[i].y2) ) {
             /* printf("touch in mid point: %d\n", l+1); */
-            if(!changed) { push_undo(); changed=1;}
+            if(!changed) { xctx->push_undo(); changed=1;}
             check_wire_storage();
             xctx->wire[xctx->wires].x1=xctx->wire[i].x1;
             xctx->wire[xctx->wires].y1=xctx->wire[i].y1;

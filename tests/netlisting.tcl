@@ -68,6 +68,7 @@ proc netlisting_dir {dir} {
 proc run_xschem_netlist {type output_dir fn fpath} {
   global testname pathlist xschem_cmd num_fatals
   set fn_debug [join [list $output_dir , [regsub {\.} $fn {_}] "_${type}_debug.txt"] ""]
+  regsub {./} $fn_debug {_} fn_debug
   set sch_name [regsub {\.sch} $fn {}]
   set fn_netlist [join [list $sch_name "." $type] ""]
   set output [join [list $testname / results / $fn_debug] ""]
@@ -77,8 +78,8 @@ proc run_xschem_netlist {type output_dir fn fpath} {
   if {$type eq "vhdl"} {set opt V}
   if {$type eq "v"} {set opt w}
   if {$type eq "tdx"} {set opt t}
-  if {[catch {eval exec {$xschem_cmd $fpath -q -x -r -d 1 -$opt -o $netlist_output_dir -n 2> $output}} msg]} {
-    puts "FATAL: $xschem_cmd $fpath -q -x -r -d 1 -$opt -o $netlist_output_dir -n 2> $output : $msg"
+  if {[catch {eval exec {$xschem_cmd $fpath -q -x -r -$opt -o $netlist_output_dir -n 2> $output}} msg]} {
+    puts "FATAL: $xschem_cmd $fpath -q -x -r -$opt -o $netlist_output_dir -n 2> $output : $msg"
     incr num_fatals 
   } else {
     lappend pathlist $fn_debug

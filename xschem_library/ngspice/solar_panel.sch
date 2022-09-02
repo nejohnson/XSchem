@@ -1,4 +1,4 @@
-v {xschem version=2.9.9 file_version=1.2 }
+v {xschem version=3.0.0 file_version=1.2 }
 G {}
 K {}
 V {}
@@ -38,6 +38,42 @@ L 8 790 -530 790 -510 {}
 L 8 770 -610 790 -610 {}
 L 8 790 -610 807.5 -620 {}
 L 8 810 -610 830 -610 {}
+B 2 1270 -740 1690 -570 {flags=graph 
+y1 = 4.9e-06
+y2 = 20
+divy = 6
+subdivy=1
+x1=-9.66825e-10
+x2=0.0006
+divx=8
+node="panel
+led" unitx=m
+color="7 4"}
+B 2 1270 -570 1690 -400 {flags=graph 
+y1 = 4e-13
+y2 = 3.8
+divy = 4
+subdivy=1
+x1=-9.66825e-10
+x2=0.0006
+divx=8
+  unitx=m
+color="7 4"
+node="i(vpanel)
+i(vled)"}
+B 2 1270 -930 1690 -740 {flags=graph 
+y1 = -6.4e-08
+y2 = 40
+divy = 5
+subdivy=1
+x1=-9.66825e-10
+x2=0.0006
+divx=9
+
+ unitx=m subdivx=4
+color="7 4"
+node="\\"Panel power; i(vpanel) v(panel) *\\"
+\\"Led power; i(vled) v(led) *\\""}
 B 18 45 -850 300 -665 {}
 A 5 300 -850 5.590169943749475 243.434948822922 360 {fill=true}
 P 7 6 375 -665 320 -821.25 315 -835 302.5 -850 290 -855 45 -865 {}
@@ -63,6 +99,8 @@ T {Maximum Power} 287.5 -870 0 0 0.2 0.2 {layer=8}
 T {2x10 1W white LED} 1230 -340 0 0 0.4 0.4 {layer=8}
 T {IDEAL Diode} 690 -470 0 0 0.4 0.4 {layer=8}
 T {2xseries 1W white LEDs} 1250 -230 0 0 0.4 0.4 {}
+T {Select one or more graphs (and no other objects)
+and use arrow keys to zoom / pan waveforms} 1190 -1010 0 0 0.3 0.3 {}
 N 80 -450 80 -430 {lab=SRC}
 N 1050 -250 1140 -250 {lab=0}
 N 1140 -290 1140 -250 {lab=0}
@@ -91,14 +129,11 @@ N 860 -470 860 -430 { lab=#net3}
 N 960 -650 980 -650 { lab=#net4}
 N 310 -450 345 -450 {lab=PANEL}
 C {title.sym} 160 -40 0 0 {name=l1 author="Stefan Schippers" net_name=true}
-C {code_shown.sym} 245 -245 0 0 {name=CONTROL value="* .control
-* save all
-* tran 5n 500u uic
-* write led_driver.raw
-* .endc
-.option savecurrents
-*.save all
-.tran 5n 200u uic
+C {code_shown.sym} 245 -245 0 0 {name=CONTROL value=".control
+save v(panel) v(sw) v(led) i(vpanel)
+tran 1u 600u uic
+write solar_panel.raw
+.endc
 * .dc VP 0 21 0.01
 " net_name=true}
 C {code.sym} 15 -225 0 0 {name=MODELS value=".MODEL DIODE D(IS=1.139e-08 RS=0.99 CJO=9.3e-12 VJ=1.6 M=0.411 BV=30 EG=0.7 ) 
@@ -136,7 +171,7 @@ footprint=1206
 device=resistor
 m=1
  net_name=true}
-C {vsource.sym} 610 -780 0 0 {name=Vset1 value="pulse 0 1 0 1n 1n 1.9u 5u" net_name=true}
+C {vsource.sym} 610 -780 0 0 {name=Vset1 value="pulse 0 1 0 1n 1n 1.7u 5u" net_name=true}
 C {lab_pin.sym} 610 -750 0 0 {name=l13 sig_type=std_logic lab=0 net_name=true}
 C {res.sym} 800 -650 3 0 {name=R3
 value="r='V(CTRL1) > 0.5 ? 0.01 : 1e7'"
@@ -190,3 +225,10 @@ C {spice_probe.sym} 1160 -480 0 0 {name=p1 analysis=tran}
 C {spice_probe.sym} 360 -450 0 0 {name=p2 analysis=tran}
 C {spice_probe.sym} 860 -550 0 1 {name=p3 analysis=tran}
 C {spice_probe.sym} 100 -450 0 1 {name=p4 analysis=tran}
+C {launcher.sym} 1195 -1045 0 0 {name=h3 
+descr="Select arrow and 
+Ctrl-Left-Click to load/unload waveforms" 
+tclcommand="
+xschem raw_read $netlist_dir/[file tail [file rootname [xschem get current_name]]].raw
+"
+}

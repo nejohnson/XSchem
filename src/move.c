@@ -145,6 +145,7 @@ void check_collapsing_objects()
      if(xctx->rect[c][i].x1==xctx->rect[c][i].x2 || xctx->rect[c][i].y1 == xctx->rect[c][i].y2)
      {
       my_free(815, &xctx->rect[c][i].prop_ptr);
+      set_rect_extraptr(0, &xctx->rect[c][i]);
       found=1;
       j++;
       continue;
@@ -163,7 +164,7 @@ void check_collapsing_objects()
   }
 }
 
-void update_symbol_bboxes(short rot, short flip)
+static void update_symbol_bboxes(short rot, short flip)
 {
   int i, n;
   short save_flip, save_rot;
@@ -192,7 +193,7 @@ void draw_selection(GC g, int interruptable)
   int customfont;
   #endif
 
-  if(g == gc[SELLAYER]) xctx->movelastsel = xctx->lastsel;
+  if(g == xctx->gc[SELLAYER]) xctx->movelastsel = xctx->lastsel;
   for(i=0;i<xctx->movelastsel;i++)
   {
    c = xctx->sel_array[i].col;n = xctx->sel_array[i].n;
@@ -418,12 +419,12 @@ void draw_selection(GC g, int interruptable)
        drawtemparc(g, ADD, xctx->rx1, xctx->ry1,
                 fabs(xctx->arc[c][n].r+xctx->deltax), angle, xctx->arc[c][n].b);
      } else if(xctx->arc[c][n].sel==SELECTED3) {
-       angle = ROUND(fmod(atan2(-xctx->deltay, xctx->deltax)*180./XSCH_PI+xctx->arc[c][n].b, 360.));
+       angle = my_round(fmod(atan2(-xctx->deltay, xctx->deltax)*180./XSCH_PI+xctx->arc[c][n].b, 360.));
        if(angle<0.) angle +=360.;
        if(angle==0) angle=360.;
        drawtemparc(g, ADD, xctx->rx1, xctx->ry1, xctx->arc[c][n].r, xctx->arc[c][n].a, angle);
      } else if(xctx->arc[c][n].sel==SELECTED2) {
-       angle = ROUND(fmod(atan2(-xctx->deltay, xctx->deltax)*180./XSCH_PI+angle, 360.));
+       angle = my_round(fmod(atan2(-xctx->deltay, xctx->deltax)*180./XSCH_PI+angle, 360.));
        if(angle<0.) angle +=360.;
        drawtemparc(g, ADD, xctx->rx1, xctx->ry1, xctx->arc[c][n].r, angle, xctx->arc[c][n].b);
      }
@@ -443,7 +444,7 @@ void draw_selection(GC g, int interruptable)
      break;
    }
 #ifdef __unix__
-   if(XPending(display) && interruptable)
+   if(pending_events() && interruptable)
    {
     drawtemparc(g, END, 0.0, 0.0, 0.0, 0.0, 0.0);
     drawtemprect(g, END, 0.0, 0.0, 0.0, 0.0);
@@ -461,59 +462,137 @@ void draw_selection(GC g, int interruptable)
      return;
    }
 #endif
-  }
+  } /* for(i=0;i<xctx->movelastsel;i++) */
   drawtemparc(g, END, 0.0, 0.0, 0.0, 0.0, 0.0);
   drawtemprect(g, END, 0.0, 0.0, 0.0, 0.0);
   drawtempline(g, END, 0.0, 0.0, 0.0, 0.0);
   xctx->movelastsel = i;
 }
 
-/* A list of electrical nodes that could potentially have been changed is previously hashed
- * into xctx->node_redraw_table, find all connected instances/wires and set bbox of areas
- * that potentially need to be redraw (show net names on symbol pins)
+/* 
+ * build list of nodes attached to objects (wires, pins, wire labels) about to be moved/copied/deleted,
+ * first time call with find_inst_to_be_redrawn(1), before doing the move/copy/delete,
+ * then call with find_inst_to_be_redrawn(6) (2 | 4) after move/copy/delete is done.
+ * what (bits can be ORed together):
+ * 1: collect list of instances to be redrawn, add bboxes
+ * 2: use previously collected list, add bboxes with updated node names, do this call after moving/deleting 
+ *    objects and after a prepare_netlist_structs() 
+ * 4: call symbol_bbox before bbox(ADD, ...) 
+ * 8: do NOT build xctx->node_redraw_table using selected instances/wires
+ * 16: clear hash and arrays
+ * 32: call prepare_netlist_structs(0) if hilights or show net name on pins
  */
-void find_inst_to_be_redrawn()
+void find_inst_to_be_redrawn(int what)
 {
-  struct int_hashentry *ientry;
-  int i, p, rects;
+  Int_hashentry *nentry;
+  int i, n, p, rects;
   xSymbol * sym;
+  xInstance * const inst = xctx->inst;
 
-  for(i=0; i < xctx->instances; i++) {
-    sym = xctx->inst[i].ptr + xctx->sym;
-    rects = sym->rects[PINLAYER];
-    for(p = 0; p < rects; p++) {
-      if(xctx->inst[i].node && xctx->inst[i].node[p]) {
-        ientry = int_hash_lookup(xctx->node_redraw_table, xctx->inst[i].node[p], 0, XLOOKUP);
-        if(ientry) {
-          /* dbg(0, "find_inst_to_be_redrawn(): inst to be redrawn: %d\n", i); */
-          symbol_bbox(i, &xctx->inst[i].x1, &xctx->inst[i].y1, &xctx->inst[i].x2, &xctx->inst[i].y2 );
+  int s_pnetname = tclgetboolvar("show_pin_net_names");
+
+  dbg(1,"find_inst_to_be_redrawn(): what=%d\n", what);
+  if(what & 16) {
+    my_free(1202, &xctx->inst_redraw_table);
+    xctx->inst_redraw_table_size = 0;
+    if((s_pnetname || xctx->hilight_nets)) int_hash_free(xctx->node_redraw_table);
+    return;
+  }
+  if((s_pnetname || xctx->hilight_nets)) {
+    if(what & 32) prepare_netlist_structs(0);
+    if(!(what & 8)) {
+      for(i=0;i<xctx->lastsel;i++)
+      {
+        n = xctx->sel_array[i].n;
+        if( xctx->sel_array[i].type == ELEMENT) {
+          int p;
+          char *type=xctx->sym[xctx->inst[n].ptr].type;
+          /* collect all nodes connected to instances that set node names */
+          if(type && IS_LABEL_OR_PIN(type)) {
+            for(p = 0;  p < (inst[n].ptr + xctx->sym)->rects[PINLAYER]; p++) {
+              if( inst[n].node && inst[n].node[p]) {
+                dbg(1,"find_inst_to_be_redrawn(): hashing inst %s, node %s\n", inst[n].instname, inst[n].node[p]);
+                int_hash_lookup(xctx->node_redraw_table, xctx->inst[n].node[p], 0, XINSERT_NOREPLACE);
+              }
+            }
+          }
+        }
+        /* collect all nodes connected to selected wires (node names will change if wire deleted/moved) */
+        if(xctx->sel_array[i].type == WIRE) {
+          int_hash_lookup(xctx->node_redraw_table,  xctx->wire[n].node, 0, XINSERT_NOREPLACE);
+        }
+      }
+    } /* if(!(what & 8)) */
+  
+    if(!xctx->inst_redraw_table || xctx->instances > xctx->inst_redraw_table_size) {
+      my_realloc(1203, &xctx->inst_redraw_table, xctx->instances * sizeof(unsigned char));
+      xctx->inst_redraw_table_size = xctx->instances;
+    }
+    for(i=0; i < xctx->instances; i++) {
+      sym = xctx->inst[i].ptr + xctx->sym;
+      rects = sym->rects[PINLAYER];
+      if(what & 2 && xctx->inst_redraw_table[i]) {
+        dbg(1, "find_inst_to_be_redrawn(): 1 bboxing inst %s\n", xctx->inst[i].instname);
+        if(what & 1) bbox(ADD, xctx->inst[i].x1, xctx->inst[i].y1, xctx->inst[i].x2, xctx->inst[i].y2 );
+        if(what & 4) {
+          symbol_bbox(i, &inst[i].x1, &inst[i].y1, &inst[i].x2, &inst[i].y2 );
           bbox(ADD, xctx->inst[i].x1, xctx->inst[i].y1, xctx->inst[i].x2, xctx->inst[i].y2 );
-          break;
+        }
+        continue;
+      }
+      for(p = 0; p < rects; p++) {
+        if(xctx->inst[i].node && xctx->inst[i].node[p]) {
+          nentry = int_hash_lookup(xctx->node_redraw_table, xctx->inst[i].node[p], 0, XLOOKUP);
+          if(nentry) {
+            dbg(1, "find_inst_to_be_redrawn(): 2 bboxing inst %s\n", xctx->inst[i].instname);
+            if(what & 1) bbox(ADD, xctx->inst[i].x1, xctx->inst[i].y1, xctx->inst[i].x2, xctx->inst[i].y2);
+            if(what & 4) {
+              symbol_bbox(i, &inst[i].x1, &inst[i].y1, &inst[i].x2, &inst[i].y2);
+              bbox(ADD, xctx->inst[i].x1, xctx->inst[i].y1, xctx->inst[i].x2, xctx->inst[i].y2);
+            }
+            xctx->inst_redraw_table[i] = 1;
+            break;
+          }
+        }
+      }
+    }
+  
+    if(what & 5) for(i=0;i < xctx->wires; i++) {
+      if(xctx->wire[i].node) {
+        nentry = int_hash_lookup(xctx->node_redraw_table, xctx->wire[i].node, 0, XLOOKUP);
+        if(nentry) {
+          if(xctx->wire[i].bus){
+            int ov, y1, y2;
+            ov = INT_BUS_WIDTH(xctx->lw)> cadhalfdotsize ? INT_BUS_WIDTH(xctx->lw) : CADHALFDOTSIZE;
+            if(xctx->wire[i].y1 < xctx->wire[i].y2) { y1 = xctx->wire[i].y1-ov; y2 = xctx->wire[i].y2+ov; }
+            else                        { y1 = xctx->wire[i].y1+ov; y2 = xctx->wire[i].y2-ov; }
+            dbg(1, "find_inst_to_be_redrawn(): 3 bboxing wire %d\n", i);
+            bbox(ADD, xctx->wire[i].x1-ov, y1 , xctx->wire[i].x2+ov , y2 );
+          } else {
+            int ov, y1, y2;
+            ov = cadhalfdotsize;
+            if(xctx->wire[i].y1 < xctx->wire[i].y2) { y1 = xctx->wire[i].y1-ov; y2 = xctx->wire[i].y2+ov; }
+            else                        { y1 = xctx->wire[i].y1+ov; y2 = xctx->wire[i].y2-ov; }
+            dbg(1, "find_inst_to_be_redrawn(): 4 bboxing wire %d\n", i);
+            bbox(ADD, xctx->wire[i].x1-ov, y1 , xctx->wire[i].x2+ov , y2 );
+          }
+        }
+      }
+    }
+  } /* if((s_pnetname || xctx->hilight_nets)) */
+  if(!(what & 8) ) {
+    if(what & 5) for(i=0;i<xctx->lastsel;i++) { /* add bboxes of selected objects */
+      n = xctx->sel_array[i].n;
+      if( xctx->sel_array[i].type == ELEMENT) {
+        dbg(1, "find_inst_to_be_redrawn(): 5 bboxing inst %s\n", xctx->inst[n].instname);
+        if(what & 1) bbox(ADD, inst[n].x1, inst[n].y1, inst[n].x2, inst[n].y2 );
+        if(what & 4) {
+          symbol_bbox(n, &inst[n].x1, &inst[n].y1, &inst[n].x2, &inst[n].y2);
+          bbox(ADD, inst[n].x1, inst[n].y1, inst[n].x2, inst[n].y2);
         }
       }
     }
   }
-  for(i=0;i < xctx->wires; i++) {
-    if(xctx->wire[i].node) {
-      ientry = int_hash_lookup(xctx->node_redraw_table, xctx->wire[i].node, 0, XLOOKUP);
-      if(ientry) {
-        if(xctx->wire[i].bus){
-          int ov, y1, y2;
-          ov = INT_BUS_WIDTH(xctx->lw)> cadhalfdotsize ? INT_BUS_WIDTH(xctx->lw) : CADHALFDOTSIZE;
-          if(xctx->wire[i].y1 < xctx->wire[i].y2) { y1 = xctx->wire[i].y1-ov; y2 = xctx->wire[i].y2+ov; }
-          else                        { y1 = xctx->wire[i].y1+ov; y2 = xctx->wire[i].y2-ov; }
-          bbox(ADD, xctx->wire[i].x1-ov, y1 , xctx->wire[i].x2+ov , y2 );
-        } else {
-          int ov, y1, y2;
-          ov = cadhalfdotsize;
-          if(xctx->wire[i].y1 < xctx->wire[i].y2) { y1 = xctx->wire[i].y1-ov; y2 = xctx->wire[i].y2+ov; }
-          else                        { y1 = xctx->wire[i].y1+ov; y2 = xctx->wire[i].y2-ov; }
-          bbox(ADD, xctx->wire[i].x1-ov, y1 , xctx->wire[i].x2+ov , y2 );
-        }
-      }
-    }
-  }
-  free_int_hash(xctx->node_redraw_table);
 }
 
 void copy_objects(int what)
@@ -558,7 +637,7 @@ void copy_objects(int what)
    xctx->x2=xctx->mousex_snap;xctx->y_2=xctx->mousey_snap;
    draw_selection(xctx->gctiled,0);
    xctx->deltax = xctx->x2-xctx->x1; xctx->deltay = xctx->y_2 - xctx->y_1;
-   draw_selection(gc[SELLAYER],1);
+   draw_selection(xctx->gc[SELLAYER],1);
   }
   if(what & ROTATELOCAL ) {
    xctx->rotatelocal=1;
@@ -577,15 +656,16 @@ void copy_objects(int what)
   if(what & END)                                 /* copy selected objects */
   {
     int l, firstw, firsti;
-    /* if the copy operation involved xctx->move_flip or rotations the original element bboxes were changed. 
-       restore them now */
-    update_symbol_bboxes(0, 0);
-    /* draw_selection(xctx->gctiled,0); */
     bbox(START, 0.0 , 0.0 , 0.0 , 0.0);
     newpropcnt=0;
-    set_modify(1); push_undo(); /* 20150327 push_undo */
+    set_modify(1); xctx->push_undo(); /* 20150327 push_undo */
     
     firstw = firsti = 1;
+
+    draw_selection(xctx->gctiled,0);
+    update_symbol_bboxes(0, 0);
+    find_inst_to_be_redrawn(0); /* build list before copying and recalculating prepare_netlist_structs() */
+
     for(i=0;i<xctx->lastsel;i++)
     {
       n = xctx->sel_array[i].n;
@@ -790,6 +870,7 @@ void copy_objects(int what)
         RECTORDER(xctx->rx1,xctx->ry1,xctx->rx2,xctx->ry2);
         xctx->rect[c][n].sel=0;
         xctx->sel_array[i].n=xctx->rects[c];
+        /* following also clears extraptr */
         storeobject(-1, xctx->rx1+xctx->deltax, xctx->ry1+xctx->deltay,
                    xctx->rx2+xctx->deltax, xctx->ry2+xctx->deltay,xRECT, c, SELECTED, xctx->rect[c][n].prop_ptr);
         l = xctx->rects[c] - 1;
@@ -837,6 +918,8 @@ void copy_objects(int what)
         xctx->text[xctx->texts].flags |= strcmp(str, "italic")  ? 0 : TEXT_ITALIC;
         str = get_tok_value(xctx->text[xctx->texts].prop_ptr, "weight", 0);
         xctx->text[xctx->texts].flags |= strcmp(str, "bold")  ? 0 : TEXT_BOLD;
+        str = get_tok_value(xctx->text[xctx->texts].prop_ptr, "hide", 0);
+        xctx->text[xctx->texts].flags |= strcmp(str, "true")  ? 0 : HIDE_TEXT;
   
         xctx->text[xctx->texts].xscale=xctx->text[n].xscale;
         xctx->text[xctx->texts].yscale=xctx->text[n].yscale;
@@ -890,9 +973,12 @@ void copy_objects(int what)
         xctx->inst[xctx->instances].lab=NULL;
         xctx->inst[xctx->instances].node=NULL;
         xctx->inst[xctx->instances].name=NULL;
-        my_strdup(232, &xctx->inst[xctx->instances].name, xctx->inst[n].name);
+        my_strdup2(232, &xctx->inst[xctx->instances].name, xctx->inst[n].name);
         my_strdup(233, &xctx->inst[xctx->instances].prop_ptr, xctx->inst[n].prop_ptr);
-        my_strdup2(234, &xctx->inst[xctx->instances].instname, get_tok_value(xctx->inst[n].prop_ptr, "name",0));
+        /* 
+         * my_strdup2(234, &xctx->inst[xctx->instances].instname, get_tok_value(xctx->inst[n].prop_ptr, "name",0));
+         */
+        xctx->inst[xctx->instances].instname = NULL; /* will be set in new_prop_string() */
         my_strdup(312, &xctx->inst[xctx->instances].lab, xctx->inst[n].lab);
         xctx->inst[n].sel=0;
         xctx->inst[xctx->instances].flags = xctx->inst[n].flags;
@@ -906,47 +992,26 @@ void copy_objects(int what)
         /* the newpropcnt argument is zero for the 1st call and used in  */
         /* new_prop_string() for cleaning some internal caches. */
         if(!newpropcnt) hash_all_names(xctx->instances);
-        new_prop_string(xctx->instances, xctx->inst[n].prop_ptr,newpropcnt++, dis_uniq_names);
-        my_strdup2(235, &xctx->inst[xctx->instances].instname,
-                    get_tok_value(xctx->inst[xctx->instances].prop_ptr, "name", 0));
+        new_prop_string(xctx->instances, xctx->inst[n].prop_ptr,newpropcnt++, 
+          tclgetboolvar("disable_unique_names"));
         xctx->instances++;
       } /* if(xctx->sel_array[i].type == ELEMENT) */
     }  /* for(i = 0; i < xctx->lastsel; i++) */
-
     xctx->need_reb_sel_arr=1;
     rebuild_selected_array();
-    /* force these vars to 0 to trigger a prepare_netlist_structs(0) needed by symbol_bbox->translate
-     * to translate @#n:net_name texts */
     if(!firsti || !firstw) {
       xctx->prep_net_structs=0;
       xctx->prep_hi_structs=0;
     }
-    if(show_pin_net_names || xctx->hilight_nets) {
-      prepare_netlist_structs(0);
-    }
-    for(i = 0; i < xctx->lastsel; i++) {
-      n = xctx->sel_array[i].n;
-      if(xctx->sel_array[i].type == ELEMENT) {
-        int p;
-        char *type=xctx->sym[xctx->inst[n].ptr].type;
-        symbol_bbox(n, &xctx->inst[n].x1, &xctx->inst[n].y1, &xctx->inst[n].x2, &xctx->inst[n].y2 );
-        bbox(ADD, xctx->inst[n].x1, xctx->inst[n].y1, xctx->inst[n].x2, xctx->inst[n].y2 );
-        if((show_pin_net_names || xctx->hilight_nets) && type && IS_LABEL_OR_PIN(type)) {
-          for(p = 0;  p < (xctx->inst[n].ptr + xctx->sym)->rects[PINLAYER]; p++) {
-            if( xctx->inst[n].node && xctx->inst[n].node[p]) {
-               int_hash_lookup(xctx->node_redraw_table,  xctx->inst[n].node[p], 0, XINSERT_NOREPLACE);
-            }
-          }
-        }
-      }
-      if((show_pin_net_names || xctx->hilight_nets) && xctx->sel_array[i].type == WIRE) {
-        int_hash_lookup(xctx->node_redraw_table,  xctx->wire[n].node, 0, XINSERT_NOREPLACE);
-      }
-    } /* for(i = 0; i < xctx->lastsel; i++) */
-    if(show_pin_net_names || xctx->hilight_nets) find_inst_to_be_redrawn();
+    /* build after copying and after recalculating prepare_netlist_structs() */
+    find_inst_to_be_redrawn(1 + 2 + 4 + 32); /* 32: call prepare_netlist_structs(0) */
+    find_inst_to_be_redrawn(16); /* clear data */
     check_collapsing_objects();
-    if(autotrim_wires) trim_wires();
+    if(tclgetboolvar("autotrim_wires")) trim_wires();
     /* update_conn_cues(1, 1); */
+    if(xctx->hilight_nets) {
+      propagate_hilights(1, 1, XINSERT_NOREPLACE);
+    }
     xctx->ui_state &= ~STARTCOPY;
     xctx->x1=xctx->y_1=xctx->x2=xctx->y_2=xctx->move_rot=xctx->move_flip=xctx->deltax=xctx->deltay=0;
     bbox(SET , 0.0 , 0.0 , 0.0 , 0.0);
@@ -954,7 +1019,7 @@ void copy_objects(int what)
     bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
     xctx->rotatelocal=0;
   } /* if(what & END) */
-  draw_selection(gc[SELLAYER], 0);
+  draw_selection(xctx->gc[SELLAYER], 0);
 }
 
 
@@ -968,8 +1033,6 @@ void move_objects(int what, int merge, double dx, double dy)
  #if HAS_CAIRO==1
  int customfont;
  #endif
-
- xInstance * const inst = xctx->inst;
  xLine ** const line = xctx->line;
  xWire * const wire = xctx->wire;
 
@@ -978,6 +1041,8 @@ void move_objects(int what, int merge, double dx, double dy)
   xctx->rotatelocal=0;
   xctx->deltax = xctx->deltay = 0.0;
   rebuild_selected_array();
+  if(tclgetboolvar("connect_by_kissing")) xctx->kissing = connect_by_kissing();
+  else xctx->kissing = 0;
   xctx->movelastsel = xctx->lastsel;
   if(xctx->lastsel==1 && xctx->sel_array[0].type==ARC &&
           xctx->arc[c=xctx->sel_array[0].col][n=xctx->sel_array[0].n].sel!=SELECTED) {
@@ -989,18 +1054,19 @@ void move_objects(int what, int merge, double dx, double dy)
  }
  if(what & ABORT)                               /* draw objects while moving */
  {
+  if(xctx->kissing) pop_undo(0, 0);
   draw_selection(xctx->gctiled,0);
   xctx->move_rot=xctx->move_flip=xctx->deltax=xctx->deltay=0;
   xctx->ui_state &= ~STARTMOVE;
-  xctx->ui_state &= ~PLACE_SYMBOL;
   update_symbol_bboxes(0, 0);
+
  }
  if(what & RUBBER)                              /* abort operation */
  {
   xctx->x2=xctx->mousex_snap;xctx->y_2=xctx->mousey_snap;
   draw_selection(xctx->gctiled,0);
   xctx->deltax = xctx->x2-xctx->x1; xctx->deltay = xctx->y_2 - xctx->y_1;
-  draw_selection(gc[SELLAYER],1);
+  draw_selection(xctx->gc[SELLAYER],1);
  }
  if(what & ROTATELOCAL) {
   xctx->rotatelocal=1;
@@ -1020,14 +1086,15 @@ void move_objects(int what, int merge, double dx, double dy)
  {
   int firsti, firstw;
 
-  /* draw_selection(xctx->gctiled,0); */
   bbox(START, 0.0 , 0.0 , 0.0 , 0.0);
   set_modify(1);
-  if( !(xctx->ui_state & (STARTMERGE | PLACE_SYMBOL)) ) { /* no undo push for MERGE ad PLACE, already done before */
+  /* no undo push for MERGE ad PLACE, already done before */
+  if( !xctx->kissing && !(xctx->ui_state & (STARTMERGE | PLACE_SYMBOL | PLACE_TEXT)) ) {
     dbg(1, "move_objects(): push undo state\n");
-    push_undo();
+    xctx->push_undo();
   }
   xctx->ui_state &= ~PLACE_SYMBOL;
+  xctx->ui_state &= ~PLACE_TEXT;
   if(dx!=0.0 || dy!=0.0) {
     xctx->deltax = dx;
     xctx->deltay = dy;
@@ -1035,27 +1102,9 @@ void move_objects(int what, int merge, double dx, double dy)
 
   /* calculate moving symbols bboxes before actually doing the move */
   firsti = firstw = 1;
-  for(i=0;i<xctx->lastsel;i++)
-  {
-    n = xctx->sel_array[i].n;
-    if( xctx->sel_array[i].type == ELEMENT) {
-      int p;
-      char *type=xctx->sym[xctx->inst[n].ptr].type;
-      symbol_bbox(n, &inst[n].x1, &inst[n].y1, &inst[n].x2, &inst[n].y2 );
-      bbox(ADD, inst[n].x1, inst[n].y1, inst[n].x2, inst[n].y2 );
-      if((show_pin_net_names || xctx->hilight_nets) && type && IS_LABEL_OR_PIN(type)) {
-        for(p = 0;  p < (inst[n].ptr + xctx->sym)->rects[PINLAYER]; p++) {
-          if( inst[n].node && inst[n].node[p]) {
-             int_hash_lookup(xctx->node_redraw_table,  xctx->inst[n].node[p], 0, XINSERT_NOREPLACE);
-          }
-        }
-      }
-    }
-    if((show_pin_net_names || xctx->hilight_nets) && xctx->sel_array[i].type == WIRE) {
-      int_hash_lookup(xctx->node_redraw_table,  xctx->wire[n].node, 0, XINSERT_NOREPLACE);
-    }
-  }
-  if(show_pin_net_names || xctx->hilight_nets) find_inst_to_be_redrawn();
+  draw_selection(xctx->gctiled,0);
+  update_symbol_bboxes(0, 0);
+  find_inst_to_be_redrawn(0); /* build list before moving and recalculating prepare_netlist_structs() */
   for(k=0;k<cadlayers;k++)
   {
    for(i=0;i<xctx->lastsel;i++)
@@ -1282,13 +1331,13 @@ void move_objects(int what, int merge, double dx, double dy)
         if(xctx->arc[c][n].r+xctx->deltax) xctx->arc[c][n].r = fabs(xctx->arc[c][n].r+xctx->deltax);
         xctx->arc[c][n].a = angle;
       } else if(xctx->arc[c][n].sel == SELECTED2) {
-        angle = ROUND(fmod(atan2(-xctx->deltay, xctx->deltax)*180./XSCH_PI+angle, 360.));
+        angle = my_round(fmod(atan2(-xctx->deltay, xctx->deltax)*180./XSCH_PI+angle, 360.));
         if(angle<0.) angle +=360.;
         xctx->arc[c][n].x = xctx->rx1;
         xctx->arc[c][n].y = xctx->ry1;
         xctx->arc[c][n].a = angle;
       } else if(xctx->arc[c][n].sel==SELECTED3) {
-        angle = ROUND(fmod(atan2(-xctx->deltay, xctx->deltax)*180./XSCH_PI+xctx->arc[c][n].b, 360.));
+        angle = my_round(fmod(atan2(-xctx->deltay, xctx->deltax)*180./XSCH_PI+xctx->arc[c][n].b, 360.));
         if(angle<0.) angle +=360.;
         if(angle==0) angle=360.;
         xctx->arc[c][n].x = xctx->rx1;
@@ -1440,48 +1489,28 @@ void move_objects(int what, int merge, double dx, double dy)
       xctx->prep_hash_inst=0;
       firsti = 0;
       if(xctx->rotatelocal) {
-        ROTATION(xctx->move_rot, xctx->move_flip, inst[n].x0, inst[n].y0,
-           inst[n].x0, inst[n].y0, xctx->rx1,xctx->ry1);
+        ROTATION(xctx->move_rot, xctx->move_flip, xctx->inst[n].x0, xctx->inst[n].y0,
+           xctx->inst[n].x0, xctx->inst[n].y0, xctx->rx1,xctx->ry1);
       } else {
         ROTATION(xctx->move_rot, xctx->move_flip, xctx->x1, xctx->y_1,
-           inst[n].x0, inst[n].y0, xctx->rx1,xctx->ry1);
+           xctx->inst[n].x0, xctx->inst[n].y0, xctx->rx1,xctx->ry1);
       }
-      inst[n].x0 = xctx->rx1+xctx->deltax;
-      inst[n].y0 = xctx->ry1+xctx->deltay;
-      inst[n].rot = (inst[n].rot +
-       ( (xctx->move_flip && (inst[n].rot & 1) ) ? xctx->move_rot+2 : xctx->move_rot) ) & 0x3;
-      inst[n].flip = xctx->move_flip ^ inst[n].flip;
+      xctx->inst[n].x0 = xctx->rx1+xctx->deltax;
+      xctx->inst[n].y0 = xctx->ry1+xctx->deltay;
+      xctx->inst[n].rot = (xctx->inst[n].rot +
+       ( (xctx->move_flip && (xctx->inst[n].rot & 1) ) ? xctx->move_rot+2 : xctx->move_rot) ) & 0x3;
+      xctx->inst[n].flip = xctx->move_flip ^ xctx->inst[n].flip;
     } 
   }
   if(!firsti || !firstw) {
     xctx->prep_net_structs=0;
     xctx->prep_hi_structs=0;
   }
-  if(show_pin_net_names || xctx->hilight_nets) {
-    prepare_netlist_structs(0);
-  }
-  for(i = 0; i < xctx->lastsel; i++) {
-    n = xctx->sel_array[i].n;
-    if(xctx->sel_array[i].type == ELEMENT) {
-      int p;
-      char *type=xctx->sym[xctx->inst[n].ptr].type;
-      symbol_bbox(n, &inst[n].x1, &inst[n].y1, &inst[n].x2, &inst[n].y2 );
-      bbox(ADD, inst[n].x1, inst[n].y1, inst[n].x2, inst[n].y2 );
-      if((show_pin_net_names || xctx->hilight_nets)  && type && IS_LABEL_OR_PIN(type)) {
-        for(p = 0;  p < (inst[n].ptr + xctx->sym)->rects[PINLAYER]; p++) {
-          if( inst[n].node && inst[n].node[p]) {
-             int_hash_lookup(xctx->node_redraw_table,  xctx->inst[n].node[p], 0, XINSERT_NOREPLACE);
-          }
-        }
-      }
-    }
-    if((show_pin_net_names || xctx->hilight_nets) && xctx->sel_array[i].type == WIRE) {
-      int_hash_lookup(xctx->node_redraw_table,  xctx->wire[n].node, 0, XINSERT_NOREPLACE);
-    }
-  }
-  if(show_pin_net_names || xctx->hilight_nets) find_inst_to_be_redrawn();
+  /* build after copying and after recalculating prepare_netlist_structs() */
+  find_inst_to_be_redrawn(1 + 2 + 4 + 32); /* 32: call prepare_netlist_structs(0) */
+  find_inst_to_be_redrawn(16); /* clear data */
   check_collapsing_objects();
-  if(autotrim_wires) trim_wires();
+  if(tclgetboolvar("autotrim_wires")) trim_wires();
   /* update_conn_cues(1, 1); */
 
   if(xctx->hilight_nets) {
@@ -1497,5 +1526,5 @@ void move_objects(int what, int merge, double dx, double dy)
   bbox(END , 0.0 , 0.0 , 0.0 , 0.0);
   xctx->rotatelocal=0;
  }
- draw_selection(gc[SELLAYER], 0);
+ draw_selection(xctx->gc[SELLAYER], 0);
 }

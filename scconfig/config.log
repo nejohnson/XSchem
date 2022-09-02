@@ -1,0 +1,236 @@
+CLI arg 0: './configure'
+(Required node: 'sys/name')
+ (Required node: 'sys/tmp')
+  (Required node: 'sys/shell')
+###report### Looking for a shell...    finding a shell
+    testing '/bin/sh -c' as shell
+     run: ' /bin/sh -c echo hello >scc_77743 2>>scc_65933.out'
+      ========= empty stderr =================
+     run result: 0
+     stdout: '
+'
+    refused.
+    testing '/bin/sh -c' as shell
+     run: ' /bin/sh -c "echo hello" >scc_91529 2>>scc_16262.out'
+      ========= empty stderr =================
+     run result: 0
+     stdout: 'hello
+'
+    accepted.
+###report### /bin/sh -c
+   found a shell '/bin/sh -c', need quote: true
+###report### Looking for a shell escape character...    finding shell escape character...
+    run: ' echo \\\ \{\}\&\;\| >scc_75508 2>>scc_69700.out'
+     ========= empty stderr =================
+    run result: 0
+    stdout: '\ {}&;|
+'
+###report### found: '\'
+   found shell escape char '\'
+###report### Detecting temp dir...  Finding temp dir (current working directory)...
+   testing if shell eats \...
+    run: '  /bin/sh -c "echo c:\n" >scc_87256 2>>scc_49752.out'
+     ========= empty stderr =================
+    run result: 0
+    stdout: 'c:n
+'
+   shell eats \...
+    run: '  /bin/sh -c "pwd" >scc_58119 2>>scc_17256.out'
+     ========= empty stderr =================
+    run result: 0
+    stdout: '/home/mobaxterm/projects/XSchem/scconfig
+'
+   cwd is '/home/mobaxterm/projects/XSchem/scconfig/'
+    trying detected temp dir '/home/mobaxterm/projects/XSchem/scconfig/'
+     validating temp dir '/home/mobaxterm/projects/XSchem/scconfig/'
+     temp dir works!
+###report###  validated /home/mobaxterm/projects/XSchem/scconfig/
+  Detected temp dir '/home/mobaxterm/projects/XSchem/scconfig/'
+  Path sep: '/'
+###report### Checking for system type...  [find_uname] checking for sys/name
+  not set, running
+  run: '  /bin/sh -c "uname -a" >/home/mobaxterm/projects/XSchem/scconfig/scc_72843 2>>/home/mobaxterm/projects/XSchem/scconfig/scc_68351.out'
+   ========= empty stderr =================
+  run result: 0
+  stdout: 'CYGWIN_NT-10.0-WOW cesyg-cad 3.0.4(0.338/5/3) 2019-03-18 19:35 i686 GNU/Linux
+'
+  run: '  /bin/sh -c "uname -m" >/home/mobaxterm/projects/XSchem/scconfig/scc_54108 2>>/home/mobaxterm/projects/XSchem/scconfig/scc_78705.out'
+   ========= empty stderr =================
+  run result: 0
+  stdout: 'i686
+'
+  run: '  /bin/sh -c "uname -o" >/home/mobaxterm/projects/XSchem/scconfig/scc_18330 2>>/home/mobaxterm/projects/XSchem/scconfig/scc_46393.out'
+   ========= empty stderr =================
+  run result: 0
+  stdout: 'GNU/Linux
+'
+###report### OK (name: Linux; class: UNIX)
+(Required node: 'cc/fpic')
+ (Required node: 'cc/cc')
+###report### Checking for cc (target)...   find_cc: trying to find cc (target)...
+   find_cc: Detecting cc (host)
+    trying cc:try_flags with cc='gcc' cflags='' ldflags=''
+      compile: '/bin/sh -c "gcc  /home/mobaxterm/projects/XSchem/scconfig/scc_37366.c  -o /home/mobaxterm/projects/XSchem/scconfig/scc_57932 2>&1" >/home/mobaxterm/projects/XSchem/scconfig/scc_32169.out'
+       ========= empty stderr =================
+      compile result: 0
+      run: ' /home/mobaxterm/projects/XSchem/scconfig/scc_57932 >/home/mobaxterm/projects/XSchem/scconfig/scc_69847 2>>/home/mobaxterm/projects/XSchem/scconfig/scc_26917.out'
+       ========= empty stderr =================
+      run result: 0
+      stdout: 'OK
+'
+   find_cc: Detecting -pipe
+     compile: '/bin/sh -c "gcc -pipe /home/mobaxterm/projects/XSchem/scconfig/scc_37972.c  -o /home/mobaxterm/projects/XSchem/scconfig/scc_6980 2>&1" >/home/mobaxterm/projects/XSchem/scconfig/scc_32868.out'
+      ========= empty stderr =================
+     compile result: 0
+     run: ' /home/mobaxterm/projects/XSchem/scconfig/scc_6980 >/home/mobaxterm/projects/XSchem/scconfig/scc_38549 2>>/home/mobaxterm/projects/XSchem/scconfig/scc_6223.out'
+      ========= empty stderr =================
+     run result: 0
+     stdout: 'OK
+'
+   find_cc: final test on cc and all flags 
+     compile: '/bin/sh -c "gcc  -pipe /home/mobaxterm/projects/XSchem/scconfig/scc_67592.c  -o /home/mobaxterm/projects/XSchem/scconfig/scc_76169 2>&1" >/home/mobaxterm/projects/XSchem/scconfig/scc_88164.out'
+      ========= empty stderr =================
+     compile result: 0
+     run: ' /home/mobaxterm/projects/XSchem/scconfig/scc_76169 >/home/mobaxterm/projects/XSchem/scconfig/scc_50427 2>>/home/mobaxterm/projects/XSchem/scconfig/scc_26551.out'
+      ========= empty stderr =================
+     run result: 0
+     stdout: 'OK
+'
+###report### OK ('gcc', ' -pipe', '')
+   find_cc: conclusion: cc='gcc' cflags=' -pipe' ldflags=''
+###report### Checking for -fpic...  find_fpic: trying to find -fpic...
+  trying cc:try_flags with cc='gcc' cflags='' ldflags='-fPIC'
+    compile: '/bin/sh -c "gcc  -pipe /home/mobaxterm/projects/XSchem/scconfig/scc_16190.c -fPIC -o /home/mobaxterm/projects/XSchem/scconfig/scc_40635 2>&1" >/home/mobaxterm/projects/XSchem/scconfig/scc_42624.out'
+     ========= empty stderr =================
+    compile result: 0
+    run: ' /home/mobaxterm/projects/XSchem/scconfig/scc_40635 >/home/mobaxterm/projects/XSchem/scconfig/scc_27944 2>>/home/mobaxterm/projects/XSchem/scconfig/scc_4920.out'
+     ========= empty stderr =================
+    run result: 0
+    stdout: 'OK
+'
+###report### OK (-fPIC)
+(Required node: 'libs/io/popen/*')
+###report### Checking for popen(3)...  find_io_popen: trying to find popen(3)...
+  trying '#define _XOPEN_SOURCE' and '' and '', with a run
+    compile: '/bin/sh -c "gcc  -pipe -O2 /home/mobaxterm/projects/XSchem/scconfig/scc_19310.c  -o /home/mobaxterm/projects/XSchem/scconfig/scc_98484 2>&1" >/home/mobaxterm/projects/XSchem/scconfig/scc_69862.out'
+     ========= empty stderr =================
+    compile result: 0
+    run: ' /home/mobaxterm/projects/XSchem/scconfig/scc_98484 >/home/mobaxterm/projects/XSchem/scconfig/scc_43301 2>>/home/mobaxterm/projects/XSchem/scconfig/scc_37363.out'
+     ========= empty stderr =================
+    run result: 0
+    stdout: 'OK
+
+'
+###report### OK ('#define _XOPEN_SOURCE\n', '' and '')
+(Required node: 'libs/io/dup2/*')
+###report### Checking for dup2(2)...  find_io_dup2: trying to find dup2(2)...
+  trying '' and '' and '', with a run
+    compile: '/bin/sh -c "gcc  -pipe -O2 /home/mobaxterm/projects/XSchem/scconfig/scc_14710.c  -o /home/mobaxterm/projects/XSchem/scconfig/scc_51876 2>&1" >/home/mobaxterm/projects/XSchem/scconfig/scc_67236.out'
+     ========= empty stderr =================
+    compile result: 0
+    run: ' /home/mobaxterm/projects/XSchem/scconfig/scc_51876 >/home/mobaxterm/projects/XSchem/scconfig/scc_79929 2>>/home/mobaxterm/projects/XSchem/scconfig/scc_50431.out'
+     ========= empty stderr =================
+    run result: 0
+    stdout: 'OK
+'
+###report### OK ('', '' and '')
+(Required node: 'parsgen/flex/presents')
+###report### Checking for flex...  find_flex: trying to find flex...
+  run: ' flex /home/mobaxterm/projects/XSchem/scconfig/scc_60397.lex >/home/mobaxterm/projects/XSchem/scconfig/scc_70491 2>>/home/mobaxterm/projects/XSchem/scconfig/scc_675.out'
+   ========= empty stderr =================
+  run result: 0
+  stdout: ''
+###report### Found.
+(Required node: 'parsgen/bison/presents')
+###report### Checking for bison...  find_bison: trying to find bison...
+  run: ' bison /home/mobaxterm/projects/XSchem/scconfig/scc_24190.y >/home/mobaxterm/projects/XSchem/scconfig/scc_58134 2>>/home/mobaxterm/projects/XSchem/scconfig/scc_59344.out'
+   ========= empty stderr =================
+  run result: 0
+  stdout: ''
+###report### Found.
+(Required node: 'libs/script/tk/*')
+ (Required node: 'libs/gui/xopendisplay/cflags')
+###report### Checking for XOpenDisplay...   find_xopendisplay:
+   trying '' and '' and '-lX11', with no run
+    compile: '/bin/sh -c "gcc  -pipe -O2  /home/mobaxterm/projects/XSchem/scconfig/scc_68425.c -lX11 -o /home/mobaxterm/projects/XSchem/scconfig/scc_44030 2>&1" >/home/mobaxterm/projects/XSchem/scconfig/scc_41629.out'
+     ========= empty stderr =================
+    compile result: 0
+###report### OK ('', '' and '-lX11')
+###report### Checking for tk...  find_tk: trying to find tk...
+###report### 8.6...    trying '' and '' and '-ltcl86', with a run
+     compile: '/bin/sh -c "gcc  -pipe -O2 /home/mobaxterm/projects/XSchem/scconfig/scc_52727.c -ltcl86 -o /home/mobaxterm/projects/XSchem/scconfig/scc_41743 2>&1" >/home/mobaxterm/projects/XSchem/scconfig/scc_29126.out'
+      ========= output dump start ============
+      /bin/ld: cannot find -ltcl86
+      collect2: error: ld returned 1 exit status
+      ========= output dump end ==============
+     compile result: 256
+   trying '' and '' and '-ltcl8.6', with a run
+     compile: '/bin/sh -c "gcc  -pipe -O2 /home/mobaxterm/projects/XSchem/scconfig/scc_87334.c -ltcl8.6 -o /home/mobaxterm/projects/XSchem/scconfig/scc_74760 2>&1" >/home/mobaxterm/projects/XSchem/scconfig/scc_34104.out'
+      ========= empty stderr =================
+     compile result: 0
+     run: ' /home/mobaxterm/projects/XSchem/scconfig/scc_74760 >/home/mobaxterm/projects/XSchem/scconfig/scc_65620 2>>/home/mobaxterm/projects/XSchem/scconfig/scc_29749.out'
+      ========= empty stderr =================
+     run result: 0
+     stdout: 'OK
+'
+###report### OK ('', '' and '-ltcl8.6')
+  trying '' and '' and '-ltcl8.6  -ltk86', with a run
+    compile: '/bin/sh -c "gcc  -pipe -O2  /home/mobaxterm/projects/XSchem/scconfig/scc_30256.c -ltcl8.6  -ltk86 -o /home/mobaxterm/projects/XSchem/scconfig/scc_35572 2>&1" >/home/mobaxterm/projects/XSchem/scconfig/scc_70932.out'
+     ========= output dump start ============
+     /bin/ld: cannot find -ltk86
+     collect2: error: ld returned 1 exit status
+     ========= output dump end ==============
+    compile result: 256
+  trying '' and '' and '-ltcl8.6  -ltk8.6', with a run
+    compile: '/bin/sh -c "gcc  -pipe -O2  /home/mobaxterm/projects/XSchem/scconfig/scc_31613.c -ltcl8.6  -ltk8.6 -o /home/mobaxterm/projects/XSchem/scconfig/scc_54509 2>&1" >/home/mobaxterm/projects/XSchem/scconfig/scc_2490.out'
+     ========= empty stderr =================
+    compile result: 0
+    run: ' /home/mobaxterm/projects/XSchem/scconfig/scc_54509 >/home/mobaxterm/projects/XSchem/scconfig/scc_37405 2>>/home/mobaxterm/projects/XSchem/scconfig/scc_27119.out'
+     ========= empty stderr =================
+    run result: 0
+    stdout: 'OK
+'
+###report### OK ('', '' and '-ltcl8.6  -ltk8.6')
+(Required node: 'fstools/awk')
+###report### Checking for awk...  find_fstools_awk: trying to find awk...
+  trying 'awk'
+  run: '  /bin/sh -c "awk -v "t=blobb" -f /home/mobaxterm/projects/XSchem/scconfig/scc_75695.awk" >/home/mobaxterm/projects/XSchem/scconfig/scc_30327 2>>/home/mobaxterm/projects/XSchem/scconfig/scc_54049.out'
+   ========= empty stderr =================
+  run result: 0
+  stdout: 'BloBB
+'
+###report### OK (awk)
+(Required node: 'libs/gui/xpm/*')
+###report### Checking for xpm...  find_xpm:
+  trying '' and '' and '-lX11 -lXpm', with a run
+    compile: '/bin/sh -c "gcc  -pipe -O2  /home/mobaxterm/projects/XSchem/scconfig/scc_56719.c -lX11 -lXpm -o /home/mobaxterm/projects/XSchem/scconfig/scc_66824 2>&1" >/home/mobaxterm/projects/XSchem/scconfig/scc_33497.out'
+     ========= empty stderr =================
+    compile result: 0
+    run: ' /home/mobaxterm/projects/XSchem/scconfig/scc_66824 >/home/mobaxterm/projects/XSchem/scconfig/scc_18649 2>>/home/mobaxterm/projects/XSchem/scconfig/scc_92596.out'
+     ========= empty stderr =================
+    run result: 0
+    stdout: 'OK
+'
+###report### OK ('', '' and '-lX11 -lXpm')
+(Required node: 'libs/gui/cairo/*')
+###report### Checking for cairo...  find_cairo: running pkg-config...
+  run: ' pkg-config --cflags cairo >/home/mobaxterm/projects/XSchem/scconfig/scc_54184 2>>/home/mobaxterm/projects/XSchem/scconfig/scc_87356.out'
+   ========= empty stderr =================
+  run result: 0
+  stdout: '-I/usr/include/cairo -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 
+'
+  run: ' pkg-config --libs cairo >/home/mobaxterm/projects/XSchem/scconfig/scc_22245 2>>/home/mobaxterm/projects/XSchem/scconfig/scc_23093.out'
+   ========= empty stderr =================
+  run result: 0
+  stdout: '-lcairo 
+'
+  trying '' and '-I/usr/include/cairo -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16' and '-lcairo', with a run
+    compile: '/bin/sh -c "gcc  -pipe -O2 -I/usr/include/cairo -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16 /home/mobaxterm/projects/XSchem/scconfig/scc_81007.c -lcairo -o /home/mobaxterm/projects/XSchem/scconfig/scc_26509 2>&1" >/home/mobaxterm/projects/XSchem/scconfig/scc_99306.out'
+     ========= empty stderr =================
+    compile result: 0
+    run: ' /home/mobaxterm/projects/XSchem/scconfig/scc_26509 >/home/mobaxterm/projects/XSchem/scconfig/scc_80352 2>>/home/mobaxterm/projects/XSchem/scconfig/scc_42754.out'
+     ========= empty stderr =================
+    run result: 0
+    stdout: 'OK
+'
+###report### OK ('', '-I/usr/include/cairo -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng16' and '-lcairo')

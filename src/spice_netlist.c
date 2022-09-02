@@ -22,35 +22,30 @@
 
 #include "xschem.h"
 
-static struct hashentry *model_table[HASHSIZE];
-static struct hashentry *model_entry;
-static struct hashentry *subckt_table[HASHSIZE];
-
-
-
+static Str_hashentry *model_table[HASHSIZE]; /* safe even with multiple schematics */
+static Str_hashentry *model_entry; /* safe even with multiple schematics */
+static Str_hashentry *subckt_table[HASHSIZE]; /* safe even with multiple schematics */
 
 void hier_psprint(void)  /* netlister driver */
 {
-  int i, save_ok;
+  int i;
   char *subckt_name;
-  int spice_stop;
   char filename[PATH_MAX];
   char *abs_path = NULL;
   const char *str_tmp;
   char *sch = NULL;
  
   if(!ps_draw(1)) return; /* prolog */
-  if(xctx->modified) {
-    save_ok = save_schematic(xctx->sch[xctx->currsch]);
-    if(save_ok == -1) return;
-  }
-  free_hash(subckt_table);
+  xctx->push_undo();
+  str_hash_free(subckt_table);
   zoom_full(0, 0, 1, 0.97);
   ps_draw(2); /* page */
   dbg(1,"--> %s\n", skip_dir( xctx->sch[xctx->currsch]) );
   unselect_all();
-  remove_symbols(); /* 20161205 ensure all unused symbols purged before descending hierarchy */
-  load_schematic(1, xctx->sch[xctx->currsch], 0);
+  remove_symbols(); /* ensure all unused symbols purged before descending hierarchy */
+  /* reload data without popping undo stack, this populates embedded symbols if any */
+  xctx->pop_undo(2, 0);
+  /* link_symbols_to_instances(-1); */ /* done in xctx->pop_undo() */
   my_strdup(1224, &xctx->sch_path[xctx->currsch+1], xctx->sch_path[xctx->currsch]);
   my_strcat(1227, &xctx->sch_path[xctx->currsch+1], "->netlisting");
   xctx->sch_path_hash[xctx->currsch+1] = 0;
@@ -58,49 +53,139 @@ void hier_psprint(void)  /* netlister driver */
   subckt_name=NULL;
   for(i=0;i<xctx->symbols;i++)
   {
-   if( strcmp(get_tok_value(xctx->sym[i].prop_ptr,"spice_ignore",0),"true")==0 ) continue;
-   if(!xctx->sym[i].type) continue;
-   my_strdup(1230, &abs_path, abs_sym_path(xctx->sym[i].name, ""));
-   if(strcmp(xctx->sym[i].type,"subcircuit")==0 && check_lib(2, abs_path))
-   {
-     /* xctx->sym can be SCH or SYM, use hash to avoid writing duplicate subckt */
-     my_strdup(1228, &subckt_name, get_cell(xctx->sym[i].name, 0));
-     if (str_hash_lookup(subckt_table, subckt_name, "", XLOOKUP)==NULL)
-     {
-       str_hash_lookup(subckt_table, subckt_name, "", XINSERT);
-       if(!strcmp( get_tok_value(xctx->sym[i].prop_ptr,"spice_stop",0),"true") )
-          spice_stop=1;
-       else
-          spice_stop=0;
-       if((str_tmp = get_tok_value(xctx->sym[i].prop_ptr, "schematic",0 ))[0]) {
-         my_strdup2(1252, &sch, str_tmp);
-         tcl_hook(&sch);
-         my_strncpy(filename, abs_sym_path(sch, ""), S(filename));
-         my_free(1253, &sch);
-       } else {
-         my_strncpy(filename, add_ext(abs_sym_path(xctx->sym[i].name, ""), ".sch"), S(filename));
-       }
-       spice_stop ? load_schematic(0,filename, 0) : load_schematic(1,filename, 0);
-       zoom_full(0, 0, 1, 0.97);
-       ps_draw(2); /* page */
-       dbg(1,"--> %s\n", skip_dir( xctx->sch[xctx->currsch]) );
-     }
-   }
-   my_free(1231, &abs_path);
+    /* for printing we process also symbols that have *_ignore attribute */
+    if(!xctx->sym[i].type || !xctx->sym[i].name || !xctx->sym[i].name[0]) continue; /* can not descend into */
+    my_strdup2(1230, &abs_path, abs_sym_path(xctx->sym[i].name, ""));
+    if(strcmp(xctx->sym[i].type,"subcircuit")==0 && check_lib(2, abs_path))
+    {
+      /* xctx->sym can be SCH or SYM, use hash to avoid writing duplicate subckt */
+      my_strdup(1228, &subckt_name, get_cell(xctx->sym[i].name, 0));
+      if (str_hash_lookup(subckt_table, subckt_name, "", XLOOKUP)==NULL)
+      {
+        str_hash_lookup(subckt_table, subckt_name, "", XINSERT);
+        if((str_tmp = get_tok_value(xctx->sym[i].prop_ptr, "schematic",0 ))[0]) {
+          my_strdup2(1252, &sch, str_tmp);
+          my_strncpy(filename, abs_sym_path(sch, ""), S(filename));
+          my_free(1253, &sch);
+        } else {
+          my_strncpy(filename, add_ext(abs_sym_path(xctx->sym[i].name, ""), ".sch"), S(filename));
+        }
+        /* for printing we go down to bottom regardless of spice_stop attribute */
+        load_schematic(1,filename, 0);
+        zoom_full(0, 0, 1, 0.97);
+        ps_draw(2); /* page */
+        dbg(1,"--> %s\n", skip_dir( xctx->sch[xctx->currsch]) );
+      }
+    }
   }
-  free_hash(subckt_table);
+  my_free(1231, &abs_path);
+  str_hash_free(subckt_table);
   my_free(1229, &subckt_name);
   my_strncpy(xctx->sch[xctx->currsch] , "", S(xctx->sch[xctx->currsch]));
   xctx->currsch--;
   unselect_all();
-  load_schematic(1, xctx->sch[xctx->currsch], 0);
+  xctx->pop_undo(0, 0);
+  my_strncpy(xctx->current_name, rel_sym_path(xctx->sch[xctx->currsch]), S(xctx->current_name));
   ps_draw(4); /* trailer */
   zoom_full(0, 0, 1, 0.97);
   draw();
 }
 
+static char *model_name_result = NULL; /* safe even with multiple schematics */
 
+static char *model_name(const char *m)
+{
+  char *m_lower = NULL;
+  char *modelname = NULL;
+  int n;
+  int l = strlen(m) + 1;
+  my_strdup(255, &m_lower, m);
+  strtolower(m_lower);
+  my_realloc(256, &modelname, l);
+  my_realloc(257, &model_name_result, l);
+  n = sscanf(m_lower, " %s %s", model_name_result, modelname);
+  if(n<2) my_strncpy(model_name_result, m_lower, l);
+  else {
+    /* build a hash key value with no spaces to make device_model attributes with different spaces equivalent*/
+    my_strcat(296, &model_name_result, modelname);
+  }
+  my_free(948, &modelname);
+  my_free(949, &m_lower);
+  return model_name_result;
+}
 
+static void spice_netlist(FILE *fd, int spice_stop )
+{
+  int i, flag = 0;
+  char *type=NULL;
+  int top_sub;
+ 
+  top_sub = tclgetboolvar("top_subckt");
+  if(!spice_stop) {
+    xctx->prep_net_structs = 0;
+    prepare_netlist_structs(1);
+    traverse_node_hash();  /* print all warnings about unconnected floatings etc */
+    for(i=0;i<xctx->instances;i++) /* print first ipin/opin defs ... */
+    {
+     if( strcmp(get_tok_value(xctx->inst[i].prop_ptr,"spice_ignore",0),"true")==0 ) continue;
+     if(xctx->inst[i].ptr<0) continue;
+     if(!strcmp(get_tok_value( (xctx->inst[i].ptr+ xctx->sym)->prop_ptr, "spice_ignore",0 ), "true") ) {
+       continue;
+     }
+     my_strdup(388, &type,(xctx->inst[i].ptr+ xctx->sym)->type);
+     if( type && IS_PIN(type) ) {
+       if(top_sub && !flag) {
+         fprintf(fd, "*.PININFO ");
+         flag = 1;
+       }
+       if(top_sub) {
+         int d = 'X';
+         if(!strcmp(type, "ipin")) d = 'I';
+         if(!strcmp(type, "opin")) d = 'O';
+         if(!strcmp(type, "iopin")) d = 'B';
+         fprintf(fd, "%s:%c ",get_tok_value(xctx->inst[i].prop_ptr, "lab",0), d);
+       } else {
+         print_spice_element(fd, i) ;  /* this is the element line  */
+       }
+     }
+    }
+    if(top_sub) fprintf(fd, "\n");
+    for(i=0;i<xctx->instances;i++) /* ... then print other lines */
+    {
+     if( strcmp(get_tok_value(xctx->inst[i].prop_ptr,"spice_ignore",0),"true")==0 ) continue;
+     if(xctx->inst[i].ptr<0) continue;
+     if(!strcmp(get_tok_value( (xctx->inst[i].ptr+ xctx->sym)->prop_ptr, "spice_ignore",0 ), "true") ) {
+       continue;
+     }
+     my_strdup(390, &type,(xctx->inst[i].ptr+ xctx->sym)->type);
+ 
+     if( type && !IS_LABEL_OR_PIN(type) ) {
+       /* already done in global_spice_netlist */
+       if(!strcmp(type,"netlist_commands") && xctx->netlist_count==0) continue;
+       if(xctx->netlist_count &&
+          !strcmp(get_tok_value(xctx->inst[i].prop_ptr, "only_toplevel", 0), "true")) continue;
+       if(!strcmp(type,"netlist_commands")) {
+         fprintf(fd,"**** begin user architecture code\n");
+         print_spice_element(fd, i) ;  /* this is the element line  */
+         fprintf(fd,"**** end user architecture code\n");
+       } else {
+         const char *m;
+         if(print_spice_element(fd, i)) fprintf(fd, "**** end_element\n");
+         /* hash device_model attribute if any */
+         m = get_tok_value(xctx->inst[i].prop_ptr, "device_model", 0);
+         if(m[0]) str_hash_lookup(model_table, model_name(m), m, XINSERT);
+         else {
+           m = get_tok_value( (xctx->inst[i].ptr+ xctx->sym)->prop_ptr, "device_model", 0);
+           if(m[0]) str_hash_lookup(model_table, model_name(m), m, XINSERT);
+         }
+         my_free(951, &model_name_result);
+       }
+     }
+    }
+    my_free(952, &type);
+  }
+  if(!spice_stop && !xctx->netlist_count) redraw_hilights(0); /* draw_hilight_net(1); */
+}
 
 void global_spice_netlist(int global)  /* netlister driver */
 {
@@ -109,7 +194,7 @@ void global_spice_netlist(int global)  /* netlister driver */
  const char *str_tmp;
  int multip;
  unsigned int *stored_flags;
- int i, save_ok;
+ int i;
  char *type=NULL;
  char *place=NULL;
  char netl_filename[PATH_MAX]; /* overflow safe 20161122 */
@@ -117,41 +202,65 @@ void global_spice_netlist(int global)  /* netlister driver */
  char cellname[PATH_MAX]; /* 20081211 overflow safe 20161122 */
  char *subckt_name;
  char *abs_path = NULL;
+ int top_sub;
+ int split_f;
 
+ split_f = tclgetboolvar("split_files");
+ top_sub = tclgetboolvar("top_subckt");
+ xctx->push_undo();
  xctx->netlist_unconn_cnt=0; /* unique count of unconnected pins while netlisting */
  statusmsg("",2);  /* clear infowindow */
- if(xctx->modified) {
-   save_ok = save_schematic(xctx->sch[xctx->currsch]);
-   if(save_ok == -1) return;
- }
- free_hash(subckt_table);
- free_hash(model_table);
+ str_hash_free(subckt_table);
+ str_hash_free(model_table);
  record_global_node(2, NULL, NULL); /* delete list of global nodes */
- top_subckt = 0;
- spiceprefix=1;
+ top_sub = 0;
+ tclsetvar("spiceprefix", "1");
  bus_char[0] = bus_char[1] = '\0';
- hiersep[0]='.'; hiersep[1]='\0';
+ xctx->hiersep[0]='.'; xctx->hiersep[1]='\0';
  str_tmp = tclgetvar("bus_replacement_char");
  if(str_tmp && str_tmp[0] && str_tmp[1]) {
    bus_char[0] = str_tmp[0];
    bus_char[1] = str_tmp[1];
  }
- netlist_count=0;
+ xctx->netlist_count=0;
  my_snprintf(netl_filename, S(netl_filename), "%s/.%s_%d", 
-   netlist_dir, skip_dir(xctx->sch[xctx->currsch]), getpid());
+   tclgetvar("netlist_dir"), skip_dir(xctx->sch[xctx->currsch]), getpid());
  dbg(1, "global_spice_netlist(): opening %s for writing\n",netl_filename);
  fd=fopen(netl_filename, "w");
+ fprintf(fd, "** sch_path: %s\n", xctx->sch[xctx->currsch]);
 
  if(xctx->netlist_name[0]) {
    my_snprintf(cellname, S(cellname), "%s", get_cell_w_ext(xctx->netlist_name, 0));
  } else {
    my_snprintf(cellname, S(cellname), "%s.spice", skip_dir(xctx->sch[xctx->currsch]));
  }
-
  if(fd==NULL) {
    dbg(0, "global_spice_netlist(): problems opening netlist file\n");
    return;
  }
+ first = 0;
+ for(i=0;i<xctx->instances;i++) /* print netlist_commands of top level cell with 'place=header' property */
+ {
+  if( strcmp(get_tok_value(xctx->inst[i].prop_ptr,"spice_ignore",0),"true")==0 ) continue;
+  if(xctx->inst[i].ptr<0) continue;
+  if(!strcmp(get_tok_value( (xctx->inst[i].ptr+ xctx->sym)->prop_ptr, "spice_ignore",0 ), "true") ) {
+    continue;
+  }
+  my_strdup(1264, &type,(xctx->inst[i].ptr+ xctx->sym)->type);
+  my_strdup(1265, &place,get_tok_value((xctx->inst[i].ptr+ xctx->sym)->prop_ptr,"place",0));
+  if( type && !strcmp(type,"netlist_commands") ) {
+   if(!place) {
+     my_strdup(1266, &place,get_tok_value(xctx->inst[i].prop_ptr,"place",0));
+   }
+   if(place && !strcmp(place, "header" )) {
+     if(first == 0) fprintf(fd,"**** begin user header code\n");
+     first++;
+     print_spice_element(fd, i) ;  /* this is the element line  */
+   }
+  }
+ }
+ if(first) fprintf(fd,"**** end user header code\n");
+
  /* netlist_options */
  for(i=0;i<xctx->instances;i++) {
    if(!(xctx->inst[i].ptr+ xctx->sym)->type) continue;
@@ -159,10 +268,8 @@ void global_spice_netlist(int global)  /* netlister driver */
      netlist_options(i);
    }
  }
- if(!strcmp(tclgetvar("top_subckt"), "1")) top_subckt = 1;
- if(!strcmp(tclgetvar("spiceprefix"), "0")) spiceprefix = 0;
-
- if(!top_subckt) fprintf(fd,"**");
+ top_sub = tclgetboolvar("top_subckt");
+ if(!top_sub) fprintf(fd,"**");
  fprintf(fd,".subckt %s", skip_dir( xctx->sch[xctx->currsch]) );
 
  /* print top subckt ipin/opins */
@@ -188,7 +295,8 @@ void global_spice_netlist(int global)  /* netlister driver */
  spice_netlist(fd, 0);
 
  first = 0;
- for(i=0;i<xctx->instances;i++) /* print netlist_commands of top level cell with no 'place=end' property */
+ for(i=0;i<xctx->instances;i++) /* print netlist_commands of top level cell with no 'place=end' property
+                                   and no place=header */
  {
   if( strcmp(get_tok_value(xctx->inst[i].prop_ptr,"spice_ignore",0),"true")==0 ) continue;
   if(xctx->inst[i].ptr<0) continue;
@@ -198,18 +306,18 @@ void global_spice_netlist(int global)  /* netlister driver */
   my_strdup(381, &type,(xctx->inst[i].ptr+ xctx->sym)->type);
   my_strdup(382, &place,get_tok_value((xctx->inst[i].ptr+ xctx->sym)->prop_ptr,"place",0));
   if( type && !strcmp(type,"netlist_commands") ) {
-   if(!place || strcmp(place, "end" )) {
+   if(!place) {
      my_strdup(383, &place,get_tok_value(xctx->inst[i].prop_ptr,"place",0));
-     if(!place || strcmp(place, "end" )) {
-       if(first == 0) fprintf(fd,"**** begin user architecture code\n");
-       first++;
-       print_spice_element(fd, i) ;  /* this is the element line  */
-     }
+   }
+   if(!place || (strcmp(place, "end") && strcmp(place, "header")) ) {
+     if(first == 0) fprintf(fd,"**** begin user architecture code\n");
+     first++;
+     print_spice_element(fd, i) ;  /* this is the element line  */
    }
   }
  }
 
- netlist_count++;
+ xctx->netlist_count++;
 
  if(xctx->schprop && xctx->schprop[0]) {
    if(first == 0) fprintf(fd,"**** begin user architecture code\n");
@@ -219,16 +327,21 @@ void global_spice_netlist(int global)  /* netlister driver */
  if(first) fprintf(fd,"**** end user architecture code\n");
  /* /20100217 */
 
- if(!top_subckt) fprintf(fd,"**");
+ if(!top_sub) fprintf(fd,"**");
  fprintf(fd, ".ends\n");
 
 
- if(split_files) {
+ if(split_f) {
+   int save;
    fclose(fd);
    my_snprintf(tcl_cmd_netlist, S(tcl_cmd_netlist), "netlist {%s} noshow {%s}", netl_filename, cellname);
-   override_netlist_type(CAD_SPICE_NETLIST);
+   save = xctx->netlist_type;
+   xctx->netlist_type = CAD_SPICE_NETLIST;
+   set_tcl_netlist_type();
    tcleval(tcl_cmd_netlist);
-   override_netlist_type(-1); /* restore to netlist_type default */
+   xctx->netlist_type = save;
+   set_tcl_netlist_type();
+
    if(debug_var==0) xunlink(netl_filename);
  }
 
@@ -241,8 +354,9 @@ void global_spice_netlist(int global)  /* netlister driver */
    int saved_hilight_nets = xctx->hilight_nets;
    unselect_all();
    remove_symbols(); /* 20161205 ensure all unused symbols purged before descending hierarchy */
-   load_schematic(1, xctx->sch[xctx->currsch], 0);
-
+   /* reload data without popping undo stack, this populates embedded symbols if any */
+   xctx->pop_undo(2, 0);
+   /* link_symbols_to_instances(-1); */ /* done in xctx->pop_undo() */
    my_strdup(469, &xctx->sch_path[xctx->currsch+1], xctx->sch_path[xctx->currsch]);
    my_strcat(481, &xctx->sch_path[xctx->currsch+1], "->netlisting");
    xctx->sch_path_hash[xctx->currsch+1] = 0;
@@ -262,9 +376,9 @@ void global_spice_netlist(int global)  /* netlister driver */
       if (str_hash_lookup(subckt_table, subckt_name, "", XLOOKUP)==NULL)
       {
         str_hash_lookup(subckt_table, subckt_name, "", XINSERT);
-        if( split_files && strcmp(get_tok_value(xctx->sym[i].prop_ptr,"vhdl_netlist",0),"true")==0 )
+        if( split_f && strcmp(get_tok_value(xctx->sym[i].prop_ptr,"vhdl_netlist",0),"true")==0 )
           vhdl_block_netlist(fd, i);
-        else if(split_files && strcmp(get_tok_value(xctx->sym[i].prop_ptr,"verilog_netlist",0),"true")==0 )
+        else if(split_f && strcmp(get_tok_value(xctx->sym[i].prop_ptr,"verilog_netlist",0),"true")==0 )
           verilog_block_netlist(fd, i);
         else
           if( strcmp(get_tok_value(xctx->sym[i].prop_ptr,"spice_primitive",0),"true") )
@@ -273,14 +387,14 @@ void global_spice_netlist(int global)  /* netlister driver */
     }
     my_free(1233, &abs_path);
    }
-   free_hash(subckt_table);
+   str_hash_free(subckt_table);
    my_free(944, &subckt_name);
    /*clear_drawing(); */
    my_strncpy(xctx->sch[xctx->currsch] , "", S(xctx->sch[xctx->currsch]));
    xctx->currsch--;
    unselect_all();
-   /* remove_symbols(); */
-   load_schematic(1, xctx->sch[xctx->currsch], 0);
+   xctx->pop_undo(0, 0);
+   my_strncpy(xctx->current_name, rel_sym_path(xctx->sch[xctx->currsch]), S(xctx->current_name));
    prepare_netlist_structs(1); /* so 'lab=...' attributes for unnamed nets are set */
    /* symbol vs schematic pin check, we do it here since now we have ALL symbols loaded */
    sym_vs_sch_pins();
@@ -293,11 +407,11 @@ void global_spice_netlist(int global)  /* netlister driver */
  my_free(945, &stored_flags);
 
  /* print globals nodes found in netlist 28032003 */
- record_global_node(0,fd,NULL);
+ if(!split_f) record_global_node(0,fd,NULL);
 
  /* =================================== 20121223 */
  first = 0;
- if(!split_files) {
+ if(!split_f) {
    for(i=0;i<xctx->instances;i++) /* print netlist_commands of top level cell with 'place=end' property */
    {
     if( strcmp(get_tok_value(xctx->inst[i].prop_ptr,"spice_ignore",0),"true")==0 ) continue;
@@ -334,19 +448,19 @@ void global_spice_netlist(int global)  /* netlister driver */
      model_entry = model_entry->next;
    }
  }
- free_hash(model_table);
+ str_hash_free(model_table);
  if(first) fprintf(fd,"**** end user architecture code\n");
 
 
  /* 20150922 added split_files check */
- if(!split_files) fprintf(fd, ".end\n");
+ if(!split_f) fprintf(fd, ".end\n");
 
  dbg(1, "global_spice_netlist(): starting awk on netlist!\n");
 
 
- if(!split_files) {
+ if(!split_f) {
    fclose(fd);
-   if(netlist_show) {
+   if(tclgetboolvar("netlist_show")) {
     my_snprintf(tcl_cmd_netlist, S(tcl_cmd_netlist), "netlist {%s} show {%s}", netl_filename, cellname);
     tcleval(tcl_cmd_netlist);
    }
@@ -358,30 +472,7 @@ void global_spice_netlist(int global)  /* netlister driver */
  }
  my_free(946, &type);
  my_free(947, &place);
- netlist_count = 0;
-}
-
-static char *model_name_result = NULL;
-
-static char *model_name(const char *m)
-{
-  char *m_lower = NULL;
-  char *modelname = NULL;
-  int n;
-  int l = strlen(m) + 1;
-  my_strdup(255, &m_lower, m);
-  strtolower(m_lower);
-  my_realloc(256, &modelname, l);
-  my_realloc(257, &model_name_result, l);
-  n = sscanf(m_lower, " %s %s", model_name_result, modelname);
-  if(n<2) my_strncpy(model_name_result, m_lower, l);
-  else {
-    /* build a hash key value with no spaces to make device_model attributes with different spaces equivalent*/
-    my_strcat(296, &model_name_result, modelname);
-  }
-  my_free(948, &modelname);
-  my_free(949, &m_lower);
-  return model_name_result;
+ xctx->netlist_count = 0;
 }
 
 void spice_block_netlist(FILE *fd, int i)
@@ -396,6 +487,9 @@ void spice_block_netlist(FILE *fd, int i)
   /* int multip; */
   char *extra=NULL;
   char *sch = NULL;
+  int split_f;
+
+  split_f = tclgetboolvar("split_files");
 
   if(!strcmp( get_tok_value(xctx->sym[i].prop_ptr,"spice_stop",0),"true") )
      spice_stop=1;
@@ -403,22 +497,22 @@ void spice_block_netlist(FILE *fd, int i)
      spice_stop=0;
   if((str_tmp = get_tok_value(xctx->sym[i].prop_ptr, "schematic",0 ))[0]) {
     my_strdup2(1254, &sch, str_tmp);
-    tcl_hook(&sch);
     my_strncpy(filename, abs_sym_path(sch, ""), S(filename));
     my_free(1255, &sch);
   } else {
     my_strncpy(filename, add_ext(abs_sym_path(xctx->sym[i].name, ""), ".sch"), S(filename));
   }
-  if(split_files) {
-    my_snprintf(netl_filename, S(netl_filename), "%s/.%s_%d", netlist_dir, skip_dir(xctx->sym[i].name), getpid());
+  if(split_f) {
+    my_snprintf(netl_filename, S(netl_filename), "%s/.%s_%d",
+         tclgetvar("netlist_dir"), skip_dir(xctx->sym[i].name), getpid());
     dbg(1, "spice_block_netlist(): split_files: netl_filename=%s\n", netl_filename);
     fd=fopen(netl_filename, "w");
     my_snprintf(cellname, S(cellname), "%s.spice", skip_dir(xctx->sym[i].name));
   }
   fprintf(fd, "\n* expanding   symbol:  %s # of pins=%d\n",
         xctx->sym[i].name,xctx->sym[i].rects[PINLAYER] );
-  fprintf(fd, "* sym_path: %s\n", abs_sym_path(xctx->sym[i].name, ""));
-  fprintf(fd, "* sch_path: %s\n", filename);
+  fprintf(fd, "** sym_path: %s\n", abs_sym_path(xctx->sym[i].name, ""));
+  fprintf(fd, "** sch_path: %s\n", filename);
   fprintf(fd, ".subckt %s ",skip_dir(xctx->sym[i].name));
   print_spice_subckt(fd, i);
 
@@ -435,7 +529,7 @@ void spice_block_netlist(FILE *fd, int i)
 
   spice_stop ? load_schematic(0,filename, 0) : load_schematic(1,filename, 0);
   spice_netlist(fd, spice_stop);  /* 20111113 added spice_stop */
-  netlist_count++;
+  xctx->netlist_count++;
 
   if(xctx->schprop && xctx->schprop[0]) {
     fprintf(fd,"**** begin user architecture code\n");
@@ -443,99 +537,19 @@ void spice_block_netlist(FILE *fd, int i)
     fprintf(fd,"**** end user architecture code\n");
   }
   fprintf(fd, ".ends\n\n");
-  if(split_files) {
+  if(split_f) {
+    int save;
     fclose(fd);
     my_snprintf(tcl_cmd_netlist, S(tcl_cmd_netlist), "netlist {%s} noshow {%s}", netl_filename, cellname);
-    override_netlist_type(CAD_SPICE_NETLIST);
+    save = xctx->netlist_type;
+    xctx->netlist_type = CAD_SPICE_NETLIST;
+    set_tcl_netlist_type();
     tcleval(tcl_cmd_netlist);
-    override_netlist_type(-1); /* restore to netlist_type default */
+    xctx->netlist_type = save;
+    set_tcl_netlist_type();
     if(debug_var==0) xunlink(netl_filename);
   }
 }
-
-void spice_netlist(FILE *fd, int spice_stop )
-{
-  int i, flag = 0;
-  char *type=NULL;
- 
-  if(!spice_stop) {
-    xctx->prep_net_structs = 0;
-    prepare_netlist_structs(1);
-    traverse_node_hash();  /* print all warnings about unconnected floatings etc */
-    for(i=0;i<xctx->instances;i++) /* print first ipin/opin defs ... */
-    {
-     if( strcmp(get_tok_value(xctx->inst[i].prop_ptr,"spice_ignore",0),"true")==0 ) continue;
-     if(xctx->inst[i].ptr<0) continue;
-     if(!strcmp(get_tok_value( (xctx->inst[i].ptr+ xctx->sym)->prop_ptr, "spice_ignore",0 ), "true") ) {
-       continue;
-     }
-     my_strdup(388, &type,(xctx->inst[i].ptr+ xctx->sym)->type);
-     if( type && IS_PIN(type) ) {
-       if(top_subckt && !flag) {
-         fprintf(fd, "*.PININFO ");
-         flag = 1;
-       }
-       if(top_subckt) {
-         int d = '?';
-         if(!strcmp(type, "ipin")) d = 'I';
-         if(!strcmp(type, "opin")) d = 'O';
-         if(!strcmp(type, "iopin")) d = 'B';
-         fprintf(fd, "%s:%c ",get_tok_value(xctx->inst[i].prop_ptr, "lab",0), d);
-       } else {
-         print_spice_element(fd, i) ;  /* this is the element line  */
-       }
-     }
-    }
-    if(top_subckt) fprintf(fd, "\n");
-    for(i=0;i<xctx->instances;i++) /* ... then print other lines */
-    {
-     if( strcmp(get_tok_value(xctx->inst[i].prop_ptr,"spice_ignore",0),"true")==0 ) continue;
-     if(xctx->inst[i].ptr<0) continue;
-     if(!strcmp(get_tok_value( (xctx->inst[i].ptr+ xctx->sym)->prop_ptr, "spice_ignore",0 ), "true") ) {
-       continue;
-     }
-     my_strdup(390, &type,(xctx->inst[i].ptr+ xctx->sym)->type);
- 
-     if( type && !IS_LABEL_OR_PIN(type) ) {
-       /* already done in global_spice_netlist */
-       if(!strcmp(type,"netlist_commands") && netlist_count==0) continue;
-       if(netlist_count &&
-          !strcmp(get_tok_value(xctx->inst[i].prop_ptr, "only_toplevel", 0), "true")) continue;
-       if(!strcmp(type,"netlist_commands")) {
-         fprintf(fd,"**** begin user architecture code\n");
-         print_spice_element(fd, i) ;  /* this is the element line  */
-         fprintf(fd,"**** end user architecture code\n");
-       } else {
-         const char *m;
-         print_spice_element(fd, i) ;  /* this is the element line  */
-         fprintf(fd, "**** end_element\n");
-         /* hash device_model attribute if any */
-         m = get_tok_value(xctx->inst[i].prop_ptr, "device_model", 0);
-         if(m[0]) str_hash_lookup(model_table, model_name(m), m, XINSERT);
-         else {
-           m = get_tok_value( (xctx->inst[i].ptr+ xctx->sym)->prop_ptr, "device_model", 0);
-           if(m[0]) str_hash_lookup(model_table, model_name(m), m, XINSERT);
-         }
-         my_free(951, &model_name_result);
-       }
-     }
-    }
-    my_free(952, &type);
-  }
-  if(!spice_stop && !netlist_count) redraw_hilights(0); /* draw_hilight_net(1); */
-}
-
-/* calculate the hash function relative to string s */
-static unsigned int str_hash(const char *tok)
-{
-  unsigned int hash = 0;
-  int c;
-
-  while ( (c = *tok++) )
-      hash = c + (hash << 6) + (hash << 16) - hash;
-  return hash;
-}
-
 
 /* GENERIC PURPOSE HASH TABLE */
 
@@ -551,10 +565,10 @@ static unsigned int str_hash(const char *tok)
  *                                      return NULL if not found
  * "whatever"    "whatever"  XDELETE     delete entry if found,return NULL
  */
-struct hashentry *str_hash_lookup(struct hashentry **table, const char *token, const char *value, int what)
+Str_hashentry *str_hash_lookup(Str_hashentry **table, const char *token, const char *value, int what)
 {
   unsigned int hashcode, idx;
-  struct hashentry *entry, *saveptr, **preventry;
+  Str_hashentry *entry, *saveptr, **preventry;
   int s ;
 
   if(token==NULL) return NULL;
@@ -568,8 +582,8 @@ struct hashentry *str_hash_lookup(struct hashentry **table, const char *token, c
     {
       if(what==XINSERT || what == XINSERT_NOREPLACE)            /* insert data */
       {
-        s=sizeof( struct hashentry );
-        entry=(struct hashentry *)my_malloc(313, s);
+        s=sizeof( Str_hashentry );
+        entry=(Str_hashentry *)my_malloc(313, s);
         entry->next=NULL;
         entry->token=NULL;
         entry->value=NULL;
@@ -600,9 +614,9 @@ struct hashentry *str_hash_lookup(struct hashentry **table, const char *token, c
   }
 }
 
-static struct hashentry *str_free_hash_entry(struct hashentry *entry)
+static void str_hash_free_entry(Str_hashentry *entry)
 {
-  struct hashentry *tmp;
+  Str_hashentry *tmp;
   while( entry ) {
     tmp = entry -> next;
     my_free(956, &(entry->token));
@@ -610,17 +624,17 @@ static struct hashentry *str_free_hash_entry(struct hashentry *entry)
     my_free(958, &entry);
     entry = tmp;
   }
-  return NULL;
 }
 
 
-void free_hash(struct hashentry **table)
+void str_hash_free(Str_hashentry **table)
 {
   int i;
 
   for(i=0;i<HASHSIZE;i++)
   {
-    table[i] = str_free_hash_entry( table[i] );
+    str_hash_free_entry( table[i] );
+    table[i] = NULL;
   }
 }
 
@@ -638,10 +652,10 @@ void free_hash(struct hashentry **table)
  *                                       return NULL if not found
  * "whatever"    "whatever"  XDELETE     delete entry if found,return NULL
  */
-struct int_hashentry *int_hash_lookup(struct int_hashentry **table, const char *token, const int value, int what)
+Int_hashentry *int_hash_lookup(Int_hashentry **table, const char *token, const int value, int what)
 {
   unsigned int hashcode, idx;
-  struct int_hashentry *entry, *saveptr, **preventry;
+  Int_hashentry *entry, *saveptr, **preventry;
   int s ;
 
   if(token==NULL) return NULL;
@@ -655,8 +669,8 @@ struct int_hashentry *int_hash_lookup(struct int_hashentry **table, const char *
     {
       if(what==XINSERT || what == XINSERT_NOREPLACE)            /* insert data */
       {
-        s=sizeof( struct int_hashentry );
-        entry=(struct int_hashentry *)my_malloc(659, s);
+        s=sizeof( Int_hashentry );
+        entry=(Int_hashentry *)my_malloc(659, s);
         entry->next=NULL;
         entry->token=NULL;
         my_strdup(658, &entry->token, token);
@@ -685,26 +699,26 @@ struct int_hashentry *int_hash_lookup(struct int_hashentry **table, const char *
   }
 }
 
-static struct int_hashentry *free_int_hash_entry(struct int_hashentry *entry)
+static void int_hash_free_entry(Int_hashentry *entry)
 {
-  struct int_hashentry *tmp;
+  Int_hashentry *tmp;
   while( entry ) {
     tmp = entry -> next;
     my_free(1171, &(entry->token));
     my_free(1172, &entry);
     entry = tmp;
   }
-  return NULL;
 }
 
 
-void free_int_hash(struct int_hashentry **table)
+void int_hash_free(Int_hashentry **table)
 {
   int i;
 
   for(i=0;i<HASHSIZE;i++)
   {
-    table[i] = free_int_hash_entry( table[i] );
+    int_hash_free_entry( table[i] );
+    table[i] = NULL;
   }
 }
 

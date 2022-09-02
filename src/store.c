@@ -102,12 +102,17 @@ void check_symbol_storage(void)
 
 }
 
+#undef ZERO_REALLOC
+
 void check_inst_storage(void)
 {
  if(xctx->instances >= xctx->maxi)
  {
   xctx->maxi=(1 + xctx->instances / ELEMINST) * ELEMINST;
   my_realloc(402, &xctx->inst, sizeof(xInstance)*xctx->maxi);
+  #ifdef ZERO_REALLOC
+  memset(xctx->inst + xctx->instances, 0, sizeof(xInstance) * (xctx->maxi - xctx->instances));
+  #endif
  }
 }
 
@@ -117,6 +122,9 @@ void check_arc_storage(int c)
  {
   xctx->maxa[c]=(1 + xctx->arcs[c] / CADMAXOBJECTS) * CADMAXOBJECTS;
   my_realloc(403, &xctx->arc[c], sizeof(xArc)*xctx->maxa[c]);
+  #ifdef ZERO_REALLOC
+  memset(xctx->arc[c] + xctx->arcs[c], 0, sizeof(xArc) * (xctx->maxa[c] - xctx->arcs[c]));
+  #endif
  }
 }
 
@@ -126,6 +134,9 @@ void check_box_storage(int c)
  {
   xctx->maxr[c]=(1 + xctx->rects[c] / CADMAXOBJECTS) * CADMAXOBJECTS;
   my_realloc(404, &xctx->rect[c], sizeof(xRect)*xctx->maxr[c]);
+  #ifdef ZERO_REALLOC
+  memset(xctx->rect[c] + xctx->rects[c], 0, sizeof(xRect) * (xctx->maxr[c] - xctx->rects[c]));
+  #endif
  }
 }
 
@@ -135,6 +146,9 @@ void check_line_storage(int c)
  {
   xctx->maxl[c]=(1 + xctx->lines[c] / CADMAXOBJECTS) * CADMAXOBJECTS;
   my_realloc(405, &xctx->line[c], sizeof(xLine)*xctx->maxl[c]);
+  #ifdef ZERO_REALLOC
+  memset(xctx->line[c] + xctx->lines[c], 0, sizeof(xLine) * (xctx->maxl[c] - xctx->lines[c]));
+  #endif
  }
 }
 
@@ -144,6 +158,9 @@ void check_polygon_storage(int c)
  {
   xctx->maxp[c]=(1 + xctx->polygons[c] / CADMAXOBJECTS) * CADMAXOBJECTS;
   my_realloc(406, &xctx->poly[c], sizeof(xPoly)*xctx->maxp[c]);
+  #ifdef ZERO_REALLOC
+  memset(xctx->poly[c] + xctx->polygons[c], 0, sizeof(xPoly) * (xctx->maxp[c] - xctx->polygons[c]));
+  #endif
  }
 }
 
@@ -239,7 +256,7 @@ void storeobject(int pos, double x1,double y1,double x2,double y2,
                  unsigned short sel, const char *prop_ptr)
 {
  int n, j;
- const char * dash;
+ const char *dash;
     if(type == LINE)
     {
      check_line_storage(rectc);
@@ -291,6 +308,7 @@ void storeobject(int pos, double x1,double y1,double x2,double y2,
      xctx->rect[rectc][n].y1=y1;
      xctx->rect[rectc][n].y2=y2;
      xctx->rect[rectc][n].prop_ptr=NULL;
+     xctx->rect[rectc][n].extraptr=NULL;
      my_strdup(413, &xctx->rect[rectc][n].prop_ptr, prop_ptr);
      xctx->rect[rectc][n].sel=sel;
      if(prop_ptr && (dash = get_tok_value(prop_ptr,"dash",0))[0]) {
@@ -298,6 +316,11 @@ void storeobject(int pos, double x1,double y1,double x2,double y2,
        xctx->rect[rectc][n].dash = d >= 0 ? d : 0;
      } else
        xctx->rect[rectc][n].dash = 0;
+     set_rect_flags(&xctx->rect[rectc][n]); /* set cached .flags bitmask from on attributes */
+     if(rectc == GRIDLAYER && (xctx->rect[rectc][n].flags & 1024)) {
+        xRect *r = &xctx->rect[GRIDLAYER][n];
+        draw_image(0, r, &r->x1, &r->y1, &r->x2, &r->y2, 0, 0);
+     }
      xctx->rects[rectc]++;
      set_modify(1);
     }
@@ -330,18 +353,3 @@ void storeobject(int pos, double x1,double y1,double x2,double y2,
      set_modify(1);
     }
 }
-
-void freenet_nocheck(int i)
-{
- int j;
-  my_free(959, &xctx->wire[i].prop_ptr);
-  my_free(960, &xctx->wire[i].node);
-  for(j=i+1;j<xctx->wires;j++)
-  {
-    xctx->wire[j-1] = xctx->wire[j];
-    xctx->wire[j].prop_ptr=NULL;
-    xctx->wire[j].node=NULL;
-  } /*end for j */
-  xctx->wires--;
-}
-

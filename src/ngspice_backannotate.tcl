@@ -28,8 +28,8 @@ namespace eval ngspice {
 
 proc ngspice::read_ngspice_raw {arr fp} {
   upvar $arr var
-  unset -nocomplain var
 
+  unset -nocomplain var
   set variables 0
   while {[gets $fp line] >= 0} {
     if {$line eq "Binary:"} break
@@ -165,7 +165,7 @@ proc ngspice::resetdata {} {
 
 proc ngspice::annotate {} {
   upvar ::ngspice::ngspice_data arr
-  set rawfile "[xschem get netlist_dir]/[file rootname [file tail [xschem get schname 0]]].raw"
+  set rawfile "$::netlist_dir/[file rootname [file tail [xschem get schname 0]]].raw"
   if { ![file exists $rawfile] } {
     puts "no raw file found: $rawfile"
     return
@@ -173,6 +173,8 @@ proc ngspice::annotate {} {
   set fp [open $rawfile r]
   fconfigure $fp -translation binary
   set op_point_read 0 
+  ## not needed: done in ngspice::read_ngspice_raw
+  # array unset ::ngspice::ngspice_data
   while 1 {
     ngspice::read_ngspice_raw arr $fp
     if { [info exists arr(n\ points)] } {
@@ -196,19 +198,19 @@ proc ngspice::annotate {} {
       set type [xschem getprop instance $i cell::type]
       if { $type eq {probe} } {
         set net $path[xschem instance_net $i p]
-        if {[catch {xschem setprop $i voltage [ngspice::get_voltage_probe arr $net] fast} err]} {
+        if {[catch {xschem setprop instance $i voltage [ngspice::get_voltage_probe arr $net] fast} err]} {
           puts "Warning 1: ${err}, net: $net"
         }
       }
       if { $type eq {current_probe} } {
-        if {[catch {xschem setprop $i current [ngspice::get_curr_probe arr $path$name] fast} err]} {
+        if {[catch {xschem setprop $i instance current [ngspice::get_curr_probe arr $path$name] fast} err]} {
           puts "Warning 2: $err"
         }
       }
       if { $type eq {differential_probe} } {
         set netp $path[xschem instance_net $i p]
         set netm $path[xschem instance_net $i m]
-        if {[catch {xschem setprop $i voltage [ngspice::get_diff_probe arr $netp $netm] fast} err]} {
+        if {[catch {xschem setprop instance $i voltage [ngspice::get_diff_probe arr $netp $netm] fast} err]} {
           puts "Warning 3: $err"
         }
       }

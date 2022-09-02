@@ -15,140 +15,88 @@ p{padding: 15px  30px 10px;}
 <!-- start of slide -->
 <div class="content">   
 <!-- navigation buttons -->
-<a href="compiling_xschem.html" class="prev">PREV</a>
+<a href="what_is_xschem.html" class="prev">PREV</a>
 <a href="xschem_man.html" class="home">UP</a>
 <a href="run_xschem.html" class="next">NEXT</a>
 
  <!-- slide title -->
  <h1> INSTALL XSCHEM </h1><br>
  <p>
- in order to install the program run the following command (execute as root if you plan to do a system-wide
- installation, for example in /usr/local): 
+ in order to install the program run the following command:
+ </p>
+ <pre class="code">
+  user:~$ cd xschem-&lt;version&gt;; ./configure
+ </pre>
+ <p>
+  This will make all the necessary checks for required libraries and system tools. 
+ </p>
+ <p>
+ for Debian and Ubuntu systems these are the packages you should check to be installed.
+ Tck/Tk versions may vary on different systems, 8.4, 8.5, 8.6 versions are all good.
+ </p>
+ <pre class="code">
+  libX11-6              libx11-dev
+  libxrender1           libxrender-dev
+  libxcb1               libx11-xcb-dev        
+  libcairo2             libcairo2-dev
+  tcl8.6                tcl8.6-dev
+  tk8.6                 tk8.6-dev
+  flex                  bison
+  libxpm4               libxpm-dev
+            gawk or mawk
+</pre>
+
+ <p>If configure ends with no errors we are ready to compile:
+ </p>
+ <pre class="code">
+  user:~$ make
+ </pre>
+ <p>If we want to install xschem and its required files (execute as root if you plan to do a system-wide
+ installation, for example in /usr/local):
  </p>
  <pre class="code">
   user:~$ make install
  </pre>
  <p>
-  This will install all the runtime needed files into the locations defined in the <kbd>Makefile</kbd>.
-  It is possible to setup a configuration file, <kbd><b>.xschem/xschemrc</b></kbd>, into your 
-  home directory. This file will tell XSCHEM where to look for schematic and component libraries.
-  this is neded if you decide to add or change the library locations specified at compile time.
-  XSCHEM will look for this file in the current directory or in the user's <kbd>${HOME}/.xschem/</kbd> directory
-  or in any other location specified at compile time in the Makefile.
-
+  This will install all the runtime needed files into the locations previously configured
+  (can be found in Makefile.conf). To change the default installation prefix
+  (/usr/local), please replace the configure step shown above with:
  </p>
- <pre class="code" style="height: 400px;">
-# xschemrc system configuration file
-# values may be overridden by user's ~/.xschem/xschemrc configuration file
-# or by project-local ./xschemrc
-
-###########################################################################
-# xschem installation directory XSCHEM_SHAREDIR
-###########################################################################
-
-# normally there is no reason to set this variable if using standard
-# installation. Location of files is set at compile time but may be overridden
-# with following line:
-#
-# set XSCHEM_SHAREDIR $env(HOME)/share/xschem
-
-###########################################################################
-# xschem system-wide design library paths XSCHEM_LIBRARY_PATH
-###########################################################################
-
-# If unset xschem starts with the default set compile time, typically:
-# XSCHEM_LIBRARY_PATH .:~/.xschem/xschem_library:${XSCHEM_SHAREDIR}/xschem_library/devices
-
-# For testing in build src directory
-#
-# set XSCHEM_LIBRARY_PATH .:../xschem_library/devices
-
-# for testing after installation:
-#
-# set XSCHEM_LIBRARY_PATH .:~/.xschem/xschem_library
-# append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/examples
-# append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/../doc/xschem/pcb
-# append XSCHEM_LIBRARY_PATH :${XSCHEM_SHAREDIR}/xschem_library/devices
-
-
-###########################################################################
-# Window to open on startup XSCHEM_START_WINDOW
-###########################################################################
-
-# Start without a design:
-#
-# set XSCHEM_START_WINDOW {}
-
-# Start with a design
-# To avoid absolute paths, use a path that is relative to one of the
-# XSCHEM_LIBRARY_PATH directories.
-#
-# set XSCHEM_START_WINDOW {0_examples_top}
-
-
-###########################################################################
-# Directory where simulations, netlist and simulator outputs are placed
-###########################################################################
-# If unset xschem asks user to choose one when doing a netlist
-#
-# set netlist_dir $env(HOME)/xschem_library/simulations
-
-###########################################################################
-# some default behavior
-###########################################################################
-
-set netlist_type spice ;# allowed : spice, verilog, vhdl, tedax
-set hspice_netlist 1
-set verilog_2001 1
-# set line_width 2
-set change_lw 1
-set color_ps 1
-set initial_geometry {800x600}
-# set unzoom_nodrift 0
-
- </pre><br>
+ <pre class="code">
+   ./configure --prefix=new/prefix/path
+ </pre>
+ <p>
+  DESTDIR is supported.
+ </p>
  <p class="important">
   For testing purposes <kbd>xschem</kbd> can be run and invoked from the build directory
-  <kbd>xschem-&lt;version&gt;/src/</kbd> without
-  any xschemrc definitions.<br>
- </p>
+  <kbd>xschem-&lt;version&gt;/src/</kbd> without installation.
+ </p><br>
+ <pre class="code">
+  user:~$ cd xschem-2.7.0/src && ./xschem
+ </pre>
  <p>
   When xschem is running, type <kbd>puts $XSCHEM_LIBRARY_PATH</kbd> in the xschem tcl prompt to 
   know the library search path.<br>
   Type <kbd>puts $XSCHEM_SHAREDIR</kbd> to see the installation path.
  </p>
-
  <p>
-  Note that the <kbd>xschemrc</kbd> is a TCL file, so use the TCL syntax for setting
-  variables and accessing environment variables.
-  The <kbd>XSCHEM_LIBRARY_PATH</kbd> contains a list of library directories separated by colons.
-  These directories are prepended to xschem symbol references to obtain the absolute path in the filesystem.
-  All system-wide definitions can be overridden in user's 
-  <kbd>xschemrc</kbd> file, which is read after the system xschemrc if existing.
-  A sample user design library is provided and installed in the path 
-  specified by the <kbd>Makefile</kbd>'s variable <kbd>user_library_prefix</kbd>, you can use it 
-  as a starting point.<br>
-  XSCHEM installation creates also a sample system-wide symbol library by default at: 
-  <kbd>${prefix}/share/xschem/xschem_library</kbd>, where <kbd>prefix</kbd> is specified in the <kbd>Makefile</kbd>.<br>
+  Sample user design libraries are provided and installed systemwide under 
+  <kbd>${XSCHEM_SHAREDIR/xschem_library/</kbd>.
   The XSCHEM_START_WINDOW specifies a schematic to preload at startup, to avoid absolute paths use a path that
   is relative to one of the <kbd>XSCHEM_LIBRARY_PATH</kbd> directories. XSCHEM will figure out the actual location.
   You may comment the definition if you don't want any schematic on startup.
-  
-  
   <br><br>
-  If you need a <kbd>.xschem/xschemrc</kbd> file in your <kbd>$HOME</kbd> directory you may start from 
-  a sample <kbd>xschemrc</kbd> file that is provided in the distribution sources.
-  Change it to fit your needs.
+  If you need to override system settings, create a
+  <kbd>~/.xschem/xschemrc</kbd>. The easiest way is to copy the system
+  installed version from ${prefix}/share/xschem/xschemrc and then
+  make the necessary changes
  </p> 
  <pre class="code">
-  user:xschem-&lt;version&gt;/src$ cp xschemrc ~/.xschem/xschemrc
+  user:$ mkdir ~/.xschem
+  user:$ cp &lt;install root&gt;/share/xschem/xschemrc ~/.xschem/xschemrc
  </pre><br>
- <p class="important">
-   When setting up a <kbd>.xschem/xschemrc</kbd> in the home directory (or in the location specified in the Makefile) 
-   or a <kbd>xschemrc</kbd> in the current directory, xschem will *NOT* read the system configuration file, 
-   so the best approach is to copy the system <kbd>xschemrc</kbd> (located usually in <kbd>(prefix)/share/xschem</kbd>) 
-   into the user directory and make the necessary changes.
- </p><br><br>
+ <br><br>
 
  <h2> -Technical information - Detailed XSCHEM startup sequence </h2>
  <p class="important"> Information here under is not meant to be executed by the user </p><br>
@@ -157,7 +105,7 @@ set initial_geometry {800x600}
  <li>If <kbd>../src/xchem.tcl</kbd> with respect to current dir is existing and
      <kbd>../xschem_library</kbd> is also existing then we are starting
      from a build directory, set <kbd>XSCHEM_SHAREDIR</kbd> to <kbd>&lt;current dir&gt;</kbd> and
-     also set <br><kbd>XSCHEM_LIBRARY_PATH</kbd> to <kbd>.:/../xschem_library/devices</kbd>.</li>
+     also set <br><kbd>XSCHEM_LIBRARY_PATH</kbd> to <kbd>../xschem_library/devices</kbd>.</li>
  <li>Else use compile-time (generated from configure script) provided <kbd>XSCHEM_SHAREDIR</kbd>.
  <li>Source system-wide xschemrc if existing: <kbd>XSCHEM_SHAREDIR/xschemrc</kbd></li>
  <li>If in current dir there is a <kbd>xschemrc</kbd> file source it.</li>

@@ -101,6 +101,7 @@
             </td>
           </tr>
 
+
           <tr>
             <td >20200217<br>
             </td>
@@ -110,17 +111,24 @@
             </td>
           </tr>
 
-
-
-
           <tr>
-            <td ><br>
+            <td >20210211<br>
             </td>
-            <td ><br>
+            <td >2.9.9<br>
             </td>
-            <td ><br>
+            <td >2.9.9 release, skywater 130nm pdk integration<br>
             </td>
           </tr>
+
+          <tr>
+            <td >20210911<br>
+            </td>
+            <td >3.0.0<br>
+            </td>
+            <td >3.0.0 release, now including windows binary distribution<br>
+            </td>
+          </tr>
+
           <tr>
             <td ><br>
             </td>
@@ -138,13 +146,26 @@
     <div style="text-align: center;">
       <a href="xschem_man/xschem_man.html" target="_blank">XSCHEM manual</a>
       <br>
-      <a href="xschem_man/XSCHEM_2.9.2_Manual_Tutorials.pdf" target="_blank">XSCHEM PDF manual</a>
     </div>
-    <h2 style="text-align: center;">Download</h2>
+    <h2 style="text-align: center;">Download Source code</h2>
     <div style="text-align: center;">
-      <a href="https://sourceforge.net/projects/xschem/" target="_blank">XSCHEM on Sourceforge</a>
+      <a href="http://repo.hu/projects/xschem/releases">Current release</a>
+      <br>
+      <a href="https://sourceforge.net/projects/xschem/" target="_blank">XSCHEM releases on Sourceforge, without automatic configure</a>
+      <br>
+    SVN: svn checkout svn://repo.hu/xschem/trunk<br> 
       <br>
     </div>
+
+
+
+    <h2 style="text-align: center;">Download Windows Binary</h2>
+    <div style="text-align: center;">
+      <a href="http://repo.hu/projects/xschem/releases-bin">Current release</a>
+      <br>
+    </div>
+
+
     <h2 style="text-align: center;">License</h2>
     <div style="text-align: center;">The software is released under
       the GNU GPL, General Public License<br>
@@ -158,11 +179,11 @@
     <h2 style="text-align: center;">Software requirements:</h2>
     - X11<br>
     - tcl-tk libs and developent files<br>
-    - gcc compiler<br>
+    - c99 compiler<br>
     - bison (only for compiling the grammar parser)<br>
     - flex (only for compiling the lexical analyzer<br>
     - Xpm library and -dev header files<br>
-    - gawk or mawk<br>
+    - awk (tested with gawk and mawk)<br>
     <div style="text-align: center;">
       <h2>Systems tested:</h2>
     </div>

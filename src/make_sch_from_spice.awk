@@ -115,7 +115,7 @@ function insert_symbol(sym, lib,          n,cellname, name, dir, tmp)
     sub(/.*=/,"",name)
     dir=$0
     sub(/.*dir[ \t]*=/,"",dir)
-    sub(/[ \t]*\}.*/,"",dir)
+    sub(/[ \t]+.*\}.*/,"",dir)
     dir= dir=="in" ? "I" : (dir=="out" ? "O" : "B")
     pin_ar[cellname, ++n] = name
     pin_x[cellname,name]=($3+$5)/2
@@ -694,7 +694,7 @@ function print_sym(sym, template, format, subckt_name, sym_type, extra, dir, pin
 
 
  print "start print symbol: " sym
- print "v {xschem version=2.9.9 file_version=1.2}"
+ print "v {xschem version=3.0.0 file_version=1.2}"
  print "K {type=" sym_type > sym
  # print "format=\"@name @pinlist @symname " format_translate(template)  "\"" > sym
  iii = format_translate(template, extra)

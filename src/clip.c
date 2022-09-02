@@ -28,13 +28,13 @@
 #define DOWN 4
 #define RIGHT 2
 #define LEFT 1
-static int outcode(double x,double y)
+static int outcode(double x,double y, double sx1, double sy1, double sx2, double sy2)
 {
  register int code=0;
- if(y > xctx->xschem_h) code = UP;
- else if(y < 0) code = DOWN;
- if(x > xctx->xschem_w) code |= RIGHT;
- else if(x < 0) code |= LEFT;
+ if(y > sy2) code = UP;
+ else if(y < sy1) code = DOWN;
+ if(x > sx2) code |= RIGHT;
+ else if(x < sx1) code |= LEFT;
  return code;
 }
 
@@ -42,9 +42,14 @@ int clip( double *xa,double *ya,double *xb,double *yb)
 {
  int outa, outb,outpoint;
  double x,y;
+ double sx1, sy1, sx2, sy2;
 
- outa=outcode(*xa, *ya);
- outb=outcode(*xb, *yb);
+ sx1 = xctx->xrect[0].x;
+ sy1 = xctx->xrect[0].y;
+ sx2 = sx1 + xctx->xrect[0].width;
+ sy2 = sy1 + xctx->xrect[0].height;
+ outa=outcode(*xa, *ya, sx1, sy1, sx2, sy2);
+ outb=outcode(*xb, *yb, sx1, sy1, sx2, sy2);
  while(1)
  {
   if(!(outa | outb)) return 1;  /* line is all inside! */
@@ -53,18 +58,18 @@ int clip( double *xa,double *ya,double *xb,double *yb)
   {
    outpoint=outa? outa:outb;
    if(UP & outpoint)
-     {x= *xa + (*xb-*xa) * (xctx->xschem_h - *ya) / (*yb - *ya); y = xctx->xschem_h;}
+     {x= *xa + (*xb-*xa) * (sy2 - *ya) / (*yb - *ya); y = sy2;}
    else if(DOWN & outpoint)
-     {x= *xa + (*xb-*xa) * (0 - *ya) / (*yb - *ya); y = 0;}
+     {x= *xa + (*xb-*xa) * (sy1 - *ya) / (*yb - *ya); y = sy1;}
    else if(RIGHT & outpoint)
-     {y= *ya + (*yb-*ya) * (xctx->xschem_w - *xa) / (*xb - *xa); x = xctx->xschem_w;}
+     {y= *ya + (*yb-*ya) * (sx2 - *xa) / (*xb - *xa); x = sx2;}
    /* else if(LEFT & outpoint) */
    else
-     {y= *ya + (*yb-*ya) * (0 - *xa) / (*xb - *xa); x = 0;}
+     {y= *ya + (*yb-*ya) * (sx1 - *xa) / (*xb - *xa); x = sx1;}
    if(outpoint == outa)
-     {*xa=x; *ya=y; outa=outcode(*xa, *ya);}
+     {*xa=x; *ya=y; outa=outcode(*xa, *ya, sx1, sy1, sx2, sy2);}
    else
-     {*xb=x; *yb=y; outb=outcode(*xb, *yb);}
+     {*xb=x; *yb=y; outb=outcode(*xb, *yb, sx1, sy1, sx2, sy2);}
   }
  }
 }
@@ -97,11 +102,12 @@ void clip_xy_to_short(double x, double y, short *sx, short *sy)
   *sy = y * r;
 }
 
-short clip_to_short(double n)
-{
-  return n > SHRT_MAX ? SHRT_MAX : n < SHRT_MIN ? SHRT_MIN : n;
-}
-
+/* 
+ *static short clip_to_short(double n)
+ *{
+ *  return n > SHRT_MAX ? SHRT_MAX : n < SHRT_MIN ? SHRT_MIN : n;
+ *}
+ */
 int rectclip(int x1,int y1,int x2,int y2,
           double *xa,double *ya,double *xb,double *yb)
 /* coordinates should be ordered, x1<x2,ya<yb and so on... */
@@ -189,26 +195,6 @@ double dist(double x1,double y1,double x2,double y2,double xa,double ya)
  }
     /* debug ... */
     if(debug_var>=0) {fprintf(errfp, "dist(): Internal error, \n");exit(1);}
-}
-
-/*obsolete, will be removed */
-double rectdist(double x1,double y1,double x2,double y2,double xa,double ya)
-{
- double distance,dist;
- double xa1,ya1;
- xa1 = xa - x1; xa1*=xa1;
- ya1 = ya - y1; ya1*=ya1;
- distance = xa1 + ya1;
- xa1 = xa - x1; xa1*=xa1;
- ya1 = ya - y2; ya1*=ya1;
- if((dist = xa1 + ya1) < distance) distance = dist;
- xa1 = xa - x2; xa1*=xa1;
- ya1 = ya - y1; ya1*=ya1;
- if((dist = xa1 + ya1) < distance) distance = dist;
- xa1 = xa - x2; xa1*=xa1;
- ya1 = ya - y2; ya1*=ya1;
- if((dist = xa1 + ya1) < distance) distance = dist;
- return distance;
 }
 
 int touch(double x1,double y1,double x2,double y2,double xa,double ya)
